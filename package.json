@@ -18,7 +18,7 @@
     "@react-navigation/native-stack": "^7.1.10",
     "@reduxjs/toolkit": "^2.4.0",
     "@shopify/flash-list": "^1.7.2",
-    "@synonymdev/react-native-pubky": "0.9.3",
+    "@synonymdev/react-native-pubky": "0.9.4",
     "@synonymdev/result": "^0.0.2",
     "buffer": "^6.0.3",
     "jdenticon": "^3.3.0",

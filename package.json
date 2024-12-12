@@ -7,8 +7,7 @@
     "ios": "react-native run-ios",
     "lint": "eslint . --fix",
     "start": "react-native start",
-    "test": "jest",
-    "postinstall": "cd ios && pod install && cd ../"
+    "test": "jest"
   },
   "dependencies": {
     "@dr.pogodin/react-native-fs": "^2.30.0",

@@ -132,7 +132,7 @@ const styles = StyleSheet.create({
   },
   keysImageContainer: {
     position: 'absolute',
-    top: 40, // Posiziona l'immagine sopra le scritte
+    top: 40,
     left: 0,
     right: 30,
     alignItems: 'center',
@@ -143,9 +143,9 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   contentBlock: {
-    flex: 1, // Usa lo spazio restante
-    justifyContent: 'flex-end', // Spinge il contenuto verso il basso
-    paddingBottom: 35, // Un po' di margine dal fondo
+    flex: 1,
+    justifyContent: 'flex-end',
+    paddingBottom: 35,
     width: '100%',
   },
   textContainer: {

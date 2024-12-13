@@ -110,7 +110,7 @@ const PubkyBox = ({
             {pubkyData.name || `pubky #${index + 1}`}
           </Text>
           <SessionText style={styles.pubkyText}>
-            pk:{truncatePubky(pubky)} {sessionsCount}
+            pk:{truncatePubky(pubky)} ({sessionsCount})
           </SessionText>
         </ForegroundView>
 

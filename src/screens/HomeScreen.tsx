@@ -134,6 +134,7 @@ const styles = StyleSheet.create({
     position: 'absolute',
     backgroundColor: 'black',
     bottom: 0,
+    borderBottomWidth: 0,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.20)',
     paddingVertical: 15,

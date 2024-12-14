@@ -1,7 +1,6 @@
 export interface SettingsState {
-    settings: {
-        theme: ETheme | undefined;
-    }
+    theme: ETheme | undefined;
+    showOnboarding: boolean;
 }
 
 export enum ETheme {

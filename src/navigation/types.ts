@@ -1,4 +1,4 @@
-import {Pubky} from '../types/pubky.ts';
+import { Pubky } from '../types/pubky.ts';
 
 export interface PubkyData extends Pubky {
   pubky: string;

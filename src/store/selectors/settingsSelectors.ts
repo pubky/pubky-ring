@@ -1,5 +1,5 @@
-import {ETheme} from '../../types/settings.ts';
-import {RootState} from '../../types';
+import { ETheme } from '../../types/settings.ts';
+import { RootState } from '../../types';
 
 /**
  * Get the current theme.

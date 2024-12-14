@@ -1,5 +1,4 @@
 import React, {useCallback} from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import {useNavigation} from '@react-navigation/native';
 import {createNewPubky} from '../utils/pubky';
 import {NativeStackNavigationProp} from '@react-navigation/native-stack';
@@ -15,6 +14,7 @@ import {
 import {RootStackParamList} from '../navigation/types';
 import {useDispatch} from 'react-redux';
 import {importFile} from '../utils/rnfs';
+import {updateShowOnboarding} from '../store/slices/settingsSlice.ts';
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -27,7 +27,7 @@ const OnboardingScreen = () => {
 
   const createPubky = useCallback(async () => {
     await createNewPubky(dispatch);
-    await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+    dispatch(updateShowOnboarding({ showOnboarding: false }));
     navigation.replace('ConfirmPubky');
   }, [dispatch]);
 
@@ -39,7 +39,7 @@ const OnboardingScreen = () => {
       }
     } else {
       Alert.alert('Success', 'Pubky imported successfully');
-      await AsyncStorage.setItem('hasSeenOnboarding', 'true');
+      dispatch(updateShowOnboarding({ showOnboarding: false }));
       navigation.replace('ConfirmPubky');
     }
   }, [dispatch]);

@@ -1,11 +1,11 @@
 import styled from 'styled-components/native';
 import {
-  QrCode as _QrCode,
-  Clipboard as _Clipboard,
-  ChevronLeft as _ChevronLeft,
-  Eye as _Eye,
-  EyeOff as _EyeOff,
-  ArrowRight as _ArrowRight,
+	QrCode as _QrCode,
+	Clipboard as _Clipboard,
+	ChevronLeft as _ChevronLeft,
+	Eye as _Eye,
+	EyeOff as _EyeOff,
+	ArrowRight as _ArrowRight,
 } from 'lucide-react-native';
 import ActionSheet from 'react-native-actions-sheet';
 
@@ -14,13 +14,13 @@ interface ActionSheetContainerProps {
 }
 
 export const ActionSheetContainer = styled(
-  ActionSheet,
+	ActionSheet,
 ).attrs<ActionSheetContainerProps>(props => ({
-  containerStyle: {
-    backgroundColor: props.backgroundColor || props.theme.colors.background,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-  },
+	containerStyle: {
+		backgroundColor: props.backgroundColor || props.theme.colors.background,
+		borderTopLeftRadius: 20,
+		borderTopRightRadius: 20,
+	},
 }))``;
 
 export const TextInput = styled.TextInput`

@@ -20,6 +20,7 @@ import {
 	Save,
 	Trash2,
 } from '../../theme/components.ts';
+import Button from '../Button.tsx';
 interface PubkyListHeaderProps {
     svg: string;
     pubky: string;
@@ -68,12 +69,7 @@ export const PubkyListHeader = memo(({
 	}, [onQRPress]);
 
 	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky : `pk:${pubky}`, [pubky]);
-	const homeserver = useMemo(() => {
-		if (!pubkyData?.homeserver) {
-			return 'Scan or copy homeserver to sign in/up.';
-		}
-		return pubkyData.homeserver;
-	}, [pubkyData.homeserver]);
+	const copyStyle = useMemo(() => [isClipboardLoading && styles.actionButtonDisabled], [isClipboardLoading]);
 	return (
 		<View style={styles.container}>
 			<Card style={styles.profileSection}>
@@ -105,39 +101,23 @@ export const PubkyListHeader = memo(({
 			</ActionButton>
 
 			<View style={styles.actionButtonRow}>
-				<ActionButton
-					style={[styles.actionButton, isClipboardLoading && styles.actionButtonDisabled]}
-					onPressIn={handleOnCopyClipboard}
-					activeOpacity={0.7}
-					disabled={isClipboardLoading}
-				>
-					{isClipboardLoading ? (<ActivityIndicator size="small" />) : (
-						<>
-							<Clipboard size={16} />
-							<Text style={styles.actionButtonText}>Copy</Text>
-						</>
-					)}
-				</ActionButton>
-				<ActionButton
-					style={styles.actionButton}
+				<Button
+					text={'Copy'}
+					style={copyStyle}
+					icon={<Clipboard size={16} />}
+					onPress={handleOnCopyClipboard}
+					loading={isClipboardLoading}
+				/>
+				<Button
+					text={'Backup'}
+					icon={<Save size={16} />}
 					onPress={onBackup}
-					activeOpacity={0.7}
-				>
-					<>
-						<Save size={16} />
-						<Text style={styles.actionButtonText}>Backup</Text>
-					</>
-				</ActionButton>
-				<ActionButton
-					style={styles.actionButton}
+				/>
+				<Button
+					text={'Delete'}
+					icon={<Trash2 size={16} />}
 					onPress={onDelete}
-					activeOpacity={0.7}
-				>
-					<>
-						<Trash2 size={16} />
-						<Text style={styles.actionButtonText}>Delete</Text>
-					</>
-				</ActionButton>
+				/>
 			</View>
 		</View>
 	);
@@ -148,24 +128,11 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: 'center',
 	},
-	actionButtonInner: {
-		flexDirection: 'row',
-	},
-	actionButton: {
-		flexDirection: 'row',
-		width: 110,
-		height: 48,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		margin: 8,
-		alignContent: 'center',
-		justifyContent: 'center',
-	},
 	actionButtonRow: {
-		flex: 1,
 		flexDirection: 'row',
 		marginTop: 24,
+		width: '90%',
+		justifyContent: 'space-between',
 	},
 	authorizeButton: {
 		width: '90%',

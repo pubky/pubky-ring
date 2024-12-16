@@ -1,5 +1,8 @@
 import React, {
-	memo, ReactElement, useEffect, useMemo, useState,
+	memo,
+	ReactElement,
+	useMemo,
+	useState,
 } from 'react';
 import {
 	StyleSheet,
@@ -29,7 +32,6 @@ const BackupPrompt = ({ payload }: {
         onClose: () => void;
     };
 }): ReactElement => {
-	const [keyboardVisible, setKeyboardVisible] = useState(false);
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string>('');
@@ -49,26 +51,6 @@ const BackupPrompt = ({ payload }: {
 			setError('');
 		}
 	};
-
-	useEffect(() => {
-		const keyboardDidShowListener = Keyboard.addListener(
-			'keyboardDidShow',
-			() => {
-				setKeyboardVisible(true);
-			}
-		);
-		const keyboardDidHideListener = Keyboard.addListener(
-			'keyboardDidHide',
-			() => {
-				setKeyboardVisible(false);
-			}
-		);
-
-		return (): void => {
-			keyboardDidHideListener.remove();
-			keyboardDidShowListener.remove();
-		};
-	}, []);
 
 	const title = useMemo(() => {
 		switch (viewId) {
@@ -103,19 +85,6 @@ const BackupPrompt = ({ payload }: {
 		}
 	}, [viewId]);
 
-	//TODO: Really need to fix the Android keyboard issue: https://github.com/ammarahm-ed/react-native-actions-sheet/issues/398
-	const platform = useMemo(() => Platform.OS, []);
-	const contentStyle = useMemo(() => {
-		return {
-			bottom: keyboardVisible && platform === 'android' ? -150 : null,
-		};
-	}, [keyboardVisible, platform]);
-
-	// const snapPoints = useMemo(() => {
-	// 	const snapPoint = Platform.OS === 'ios' ? 60 : 30;
-	// 	return [snapPoint];
-	// }, []);
-
 	return (
 		<ActionSheetContainer
 			id="backup-prompt"
@@ -132,7 +101,7 @@ const BackupPrompt = ({ payload }: {
 			springOffset={50}
 			keyboardHandlerEnabled={Platform.OS === 'ios'}
 		>
-			<View style={[styles.content, contentStyle]}>
+			<View style={styles.content}>
 				<Text style={styles.title}>{title}</Text>
 				<SessionText style={styles.message}>
 					{message}
@@ -188,10 +157,6 @@ const BackupPrompt = ({ payload }: {
 
 const styles = StyleSheet.create({
 	content: {
-		height: Platform.select({
-			ios: '70%',
-			android: 'auto',
-		}),
 		maxHeight: '80%',
 		padding: 24,
 	},

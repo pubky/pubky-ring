@@ -9,7 +9,6 @@ import {
 	Alert,
 	BackHandler,
 	StyleSheet,
-	Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -22,21 +21,17 @@ import { createNewPubky } from '../utils/pubky';
 import { showQRScanner, handleClipboardData } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import {
-	ActionButton,
 	SafeAreaView,
 	ScrollView,
 	View,
-	Text,
 	Plus,
-	Footer,
-	TouchableOpacity,
 } from '../theme/components.ts';
 import { RootState } from '../store';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
-import { updateShowOnboarding, updateTheme } from '../store/slices/settingsSlice.ts';
+import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
-import CreatePubkyButton from "../components/CreatePubkyButton.tsx";
-import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
+import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
+import Button from '../components/Button.tsx';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -111,7 +106,12 @@ const HomeScreen = (): ReactElement => {
 							onPress={handlePubkyPress}
 						/>
 					))}
-					<CreatePubkyButton />
+					<Button
+						style={styles.button}
+						text={'Create another pubky'}
+						onPress={createPubky}
+						icon={<Plus size={16} />}
+					/>
 				</ScrollView>
 			) : (
 				<View style={styles.emptyContainer}>
@@ -153,6 +153,14 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		marginBottom: 20,
 	},
+	button: {
+		width: '90%',
+		borderRadius: 64,
+		paddingVertical: 20,
+		paddingHorizontal: 24,
+		alignItems: 'center',
+		alignSelf: 'center',
+	},
 	buttonSecondary: {
 		borderRadius: 64,
 		paddingVertical: 20,
@@ -184,7 +192,7 @@ const styles = StyleSheet.create({
 	},
 	scrollViewContent: {
 		paddingBottom: '100%',
-	}
+	},
 });
 
 export default memo(HomeScreen);

@@ -1,20 +1,20 @@
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, Suspense, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { createNewPubky } from '../utils/pubky';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
 	Alert,
 	SafeAreaView,
-	View,
-	Text,
 	StyleSheet,
-	TouchableOpacity,
-	Image,
 } from 'react-native';
 import { RootStackParamList } from '../navigation/types';
 import { useDispatch } from 'react-redux';
 import { importFile } from '../utils/rnfs';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
+import LoadingScreen from './LoadingScreen.tsx';
+const OnboardingContent = React.lazy(() =>
+	Promise.resolve(require('../components/OnboardingContent'))
+);
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -46,51 +46,12 @@ const OnboardingScreen = (): ReactElement => {
 
 	return (
 		<SafeAreaView style={styles.container}>
-			{/* Background image */}
-			<Image
-				source={require('../images/circle.png')}
-				style={styles.backgroundImage}
-			/>
-
-			{/* Logo */}
-			<View style={styles.logoContainer}>
-				<Image
-					source={require('../images/pubky-ring-logo.png')}
-					style={styles.logo}
+			<Suspense fallback={<LoadingScreen />}>
+				<OnboardingContent
+					importPubky={importPubky}
+					createPubky={createPubky}
 				/>
-			</View>
-
-			{/* Keys Image */}
-			<View style={styles.keysImageContainer}>
-				<Image
-					source={require('../images/keyring.png')}
-					style={styles.keysImage}
-				/>
-			</View>
-
-			{/* Content Block: Text and Buttons */}
-			<View style={styles.contentBlock}>
-				{/* Text */}
-				<View style={styles.textContainer}>
-					<Text style={styles.title}>Keychain for the next web.</Text>
-					<Text style={styles.subtitle}>
-						Pubky Ring enables you to securely authorize services and manage
-						your pubkys, devices, and sessions.
-					</Text>
-				</View>
-
-				{/* Buttons */}
-				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.buttonSecondary}
-						onPress={importPubky}>
-						<Text style={styles.buttonText}>Import pubky</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.buttonPrimary} onPress={createPubky}>
-						<Text style={styles.buttonText}>New pubky</Text>
-					</TouchableOpacity>
-				</View>
-			</View>
+			</Suspense>
 		</SafeAreaView>
 	);
 };

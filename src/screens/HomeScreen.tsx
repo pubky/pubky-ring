@@ -9,8 +9,6 @@ import {
 	Alert,
 	BackHandler,
 	StyleSheet,
-	TouchableOpacity,
-	Text,
 	Image,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -23,15 +21,29 @@ import { PubkyState } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
 import { showQRScanner, handleClipboardData } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
-import { SafeAreaView, ScrollView, View } from '../theme/components.ts';
+import {
+	ActionButton,
+	SafeAreaView,
+	ScrollView,
+	View,
+	Text,
+	Plus,
+	Footer,
+	TouchableOpacity,
+} from '../theme/components.ts';
 import { RootState } from '../store';
-import { Plus } from 'lucide-react-native';
+import { getTheme } from '../store/selectors/settingsSelectors.ts';
+import { updateShowOnboarding, updateTheme } from '../store/slices/settingsSlice.ts';
+import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
+import CreatePubkyButton from "../components/CreatePubkyButton.tsx";
+import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const HomeScreen = (): ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
 	const dispatch = useDispatch();
+	const theme = useSelector(getTheme);
 	const { pubkys = {} } = useSelector(
 		(state: RootState): PubkyState => state.pubky,
 	);
@@ -68,45 +80,42 @@ const HomeScreen = (): ReactElement => {
 		}
 	}, [dispatch]);
 
+	const toggleTheme = useCallback(() => {
+		_toggleTheme({ dispatch, theme });
+	}, [theme, dispatch]);
+
+	const showOnboarding = useCallback(() => {
+		if (__DEV__) {
+			dispatch(updateShowOnboarding({ showOnboarding: true }));
+		}
+	},[dispatch]);
+
 	return (
 		<SafeAreaView style={styles.container}>
 			{hasPubkys ? (
 				<ScrollView
-        	contentInsetAdjustmentBehavior="automatic"
-        	style={styles.scrollView}>
-					<Image
-        		source={require('../images/pubky-ring-logo.png')}
-        		style={styles.logo}
-        	/>
+					contentInsetAdjustmentBehavior="automatic"
+					style={styles.scrollView}
+					contentContainerStyle={styles.scrollViewContent}
+				>
+					<PubkyRingHeader />
 					{Object.keys(pubkys).map((pubky, index) => (
 						<PubkyBox
-        			key={index}
-        			index={index}
-        			pubky={pubky}
-        			pubkyData={pubkys[pubky]}
-        			sessionsCount={pubkys[pubky].sessions.length}
-        			onQRPress={showQRScanner}
-        			onCopyClipboard={handleClipboardData}
-        			onPress={handlePubkyPress}
-        		/>
-        	))}
+							key={index}
+							index={index}
+							pubky={pubky}
+							pubkyData={pubkys[pubky]}
+							sessionsCount={pubkys[pubky].sessions.length}
+							onQRPress={showQRScanner}
+							onCopyClipboard={handleClipboardData}
+							onPress={handlePubkyPress}
+						/>
+					))}
+					<CreatePubkyButton />
 				</ScrollView>
-      ) : (
-	<View style={styles.emptyContainer}>
-		<EmptyState />
-	</View>
-      )}
-			{hasPubkys && (
-				<View style={styles.absoluteButton}>
-					<TouchableOpacity
-						style={styles.buttonSecondary}
-						onPress={importPubky}>
-						<Text style={styles.buttonText}>Import pubky</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.buttonPrimary} onPress={createPubky}>
-						<Plus size={16} color="white" />
-						<Text style={styles.buttonText}>New pubky</Text>
-					</TouchableOpacity>
+			) : (
+				<View style={styles.emptyContainer}>
+					<EmptyState />
 				</View>
 			)}
 		</SafeAreaView>
@@ -121,6 +130,20 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: 'white',
 	},
+	header: {
+		width: '100%',
+	},
+	logoWrapper: {
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'black',
+		borderRadius: 40,
+		width: '60%',
+		height: 50,
+		marginTop: 5,
+		marginBottom: 15,
+	},
 	logo: {
 		width: 171,
 		height: 36,
@@ -130,24 +153,7 @@ const styles = StyleSheet.create({
 		marginTop: 20,
 		marginBottom: 20,
 	},
-	absoluteButton: {
-		position: 'absolute',
-		backgroundColor: 'black',
-		bottom: 0,
-		borderBottomWidth: 0,
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.20)',
-		paddingVertical: 15,
-		borderTopLeftRadius: 50,
-		borderTopRightRadius: 50,
-		width: '100%',
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 12,
-		justifyContent: 'center',
-	},
 	buttonSecondary: {
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
 		borderRadius: 64,
 		paddingVertical: 20,
 		paddingHorizontal: 24,
@@ -157,7 +163,6 @@ const styles = StyleSheet.create({
 		gap: 4,
 	},
 	buttonPrimary: {
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
 		borderColor: 'white',
 		borderWidth: 1,
 		borderRadius: 64,
@@ -169,7 +174,6 @@ const styles = StyleSheet.create({
 		gap: 4,
 	},
 	buttonText: {
-		color: 'white',
 		fontSize: 15,
 		fontWeight: 600,
 		lineHeight: 18,
@@ -177,9 +181,10 @@ const styles = StyleSheet.create({
 	},
 	scrollView: {
 		flex: 1,
-		paddingVertical: 8,
-		backgroundColor: 'black',
 	},
+	scrollViewContent: {
+		paddingBottom: '100%',
+	}
 });
 
 export default memo(HomeScreen);

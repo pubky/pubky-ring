@@ -3,12 +3,14 @@ import { DefaultTheme } from 'styled-components/native';
 export interface Theme extends DefaultTheme {
     colors: {
         background: string;
-        sessionBackground: string;
+		cardBackground: string;
+		cardButton: string;
         sessionBorder: string;
         foreground: string;
         text: string;
         sessionText: string;
         border: string;
+		buttonBorder: string;
         avatarRing: string;
         actionButton: string;
         navButton: string;
@@ -18,12 +20,14 @@ export interface Theme extends DefaultTheme {
 export const lightTheme: Theme = {
 	colors: {
 		background: '#fff',
-		sessionBackground: '#f8f8f8',
+		cardBackground: '#f8f8f8',
+		cardButton: '#fff',
 		foreground: '#f0f0f0',
 		text: '#333',
 		sessionText: '#666',
 		sessionBorder: '#eee',
 		border: '#ddd',
+		buttonBorder: '#ddd',
 		avatarRing: '#f5f5f5',
 		actionButton: '#f5f5f5',
 		navButton: '#fff',
@@ -33,14 +37,16 @@ export const lightTheme: Theme = {
 export const darkTheme: Theme = {
 	colors: {
 		background: '#000',
-		sessionBackground: '#1a1a1a',
+		cardBackground: '#333333',
+		cardButton: '#333333',
 		sessionBorder: '#333333',
 		foreground: '#202020',
 		text: '#fff',
 		sessionText: '#ccc',
 		border: '#444',
+		buttonBorder: '#fff',
 		avatarRing: '#303030',
-		actionButton: '#303030',
+		actionButton: '#1A1A1A',
 		navButton: '#202020',
 	},
 };

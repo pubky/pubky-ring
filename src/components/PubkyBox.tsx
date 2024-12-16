@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import jdenticon, { JdenticonConfig } from 'jdenticon';
 import { Pubky } from '../types/pubky.ts';
@@ -14,8 +14,14 @@ import {
 	QrCode,
 	Clipboard,
 	NavView,
+	Card,
+	View,
+	Text,
+	CardButton,
+	AuthorizeButton,
+	ArrowRight,
+	CardView,
 } from '../theme/components.ts';
-import { ArrowRight } from 'lucide-react-native';
 
 const Jdenticon = ({
 	value,
@@ -97,58 +103,63 @@ const PubkyBox = ({
 	);
 
 	return (
-		<View style={styles.container}>
+		<Card style={styles.container}>
 			<Box onPress={handleOnPress} style={styles.box} activeOpacity={0.7}>
 				<ForegroundView style={styles.profileImageContainer}>
 					<NavView style={styles.profileImage}>
-						<Jdenticon value={publicKey} size={60} />
+						<Jdenticon value={publicKey} size={38} />
 					</NavView>
 				</ForegroundView>
 
-				<ForegroundView style={styles.contentContainer}>
+				<View style={styles.contentContainer}>
 					<Text style={styles.nameText} numberOfLines={1}>
 						{pubkyData.name || `pubky #${index + 1}`}
 					</Text>
-					<SessionText style={styles.pubkyText}>
-						pk:{truncatePubky(pubky)} ({sessionsCount})
-					</SessionText>
-				</ForegroundView>
+					<Card style={styles.row}>
+						<SessionText style={styles.pubkyText}>
+							pk:{truncatePubky(pubky)}
+						</SessionText>
+						{sessionsCount > 0 && (<CardView style={styles.sessionsButton}>
+							<SessionText style={styles.buttonText}>{sessionsCount}</SessionText>
+						</CardView>)}
+					</Card>
+				</View>
 
 				<ForegroundView style={styles.buttonArrow}>
-					<ArrowRight size={24} color={'white'} />
+					<ArrowRight size={24} />
 				</ForegroundView>
 			</Box>
 			<ForegroundView style={styles.buttonsContainer}>
-				<TouchableOpacity
+				<CardButton
 					style={[
 						styles.actionButton2,
 						isClipboardLoading && styles.actionButtonDisabled,
 					]}
-					onPressIn={handleCopyClipboard}
+					onPress={handleCopyClipboard}
 					disabled={isClipboardLoading}>
 					{isClipboardLoading ? (
 						<ActivityIndicator size="small" />
-          ) : (
-	<Clipboard size={16} color={'white'} />
-          )}
+					) : (
+						<Clipboard size={16} />
+					)}
 					<Text style={styles.buttonText}>Copy</Text>
-				</TouchableOpacity>
-				<TouchableOpacity
+				</CardButton>
+				<AuthorizeButton
 					style={[
 						styles.actionButton,
 						isQRLoading && styles.actionButtonDisabled,
 					]}
-					onPressIn={handleQRPress}
+					onPress={handleQRPress}
 					disabled={isQRLoading}>
 					{isQRLoading ? (
 						<ActivityIndicator size="small" />
-          ) : (
-	<QrCode size={16} color={'white'} />
-          )}
+					) : (
+						<QrCode size={16} />
+					)}
 					<Text style={styles.buttonText}>Authorize</Text>
-				</TouchableOpacity>
+				</AuthorizeButton>
 			</ForegroundView>
-		</View>
+		</Card>
 	);
 };
 
@@ -158,7 +169,6 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		alignSelf: 'center',
 		padding: 24,
-		backgroundColor: 'rgba(255, 255, 255, 0.20)',
 		shadowColor: '#000',
 		shadowOffset: {
 			width: 0,
@@ -182,8 +192,6 @@ const styles = StyleSheet.create({
 		width: 48,
 		height: 48,
 		borderRadius: 30,
-		borderWidth: 1,
-		borderColor: '#ccc',
 		overflow: 'hidden',
 		justifyContent: 'center',
 		alignItems: 'center',
@@ -194,7 +202,6 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	nameText: {
-		color: 'white',
 		fontSize: 26,
 		fontWeight: 300,
 		lineHeight: 26,
@@ -206,7 +213,6 @@ const styles = StyleSheet.create({
 		marginLeft: 'auto',
 	},
 	pubkyText: {
-		color: 'white',
 		fontSize: 15,
 		fontWeight: 600,
 		lineHeight: 20,
@@ -221,9 +227,18 @@ const styles = StyleSheet.create({
 		gap: 12,
 		width: '100%',
 	},
+	sessionsButton: {
+		borderRadius: 100,
+		height: 20,
+		width: 20,
+		alignContent: 'center',
+		justifyContent: 'center',
+		marginLeft: 4
+	},
+	row: {
+		flexDirection: 'row',
+	},
 	actionButton: {
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
-		borderColor: 'white',
 		borderWidth: 1,
 		borderRadius: 64,
 		paddingVertical: 15,
@@ -234,7 +249,6 @@ const styles = StyleSheet.create({
 		gap: 4,
 	},
 	actionButton2: {
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
 		borderRadius: 64,
 		paddingVertical: 15,
 		paddingHorizontal: 24,
@@ -244,11 +258,11 @@ const styles = StyleSheet.create({
 		gap: 4,
 	},
 	buttonText: {
-		color: 'white',
 		fontSize: 15,
 		fontWeight: 600,
 		lineHeight: 18,
 		letterSpacing: 0.2,
+		alignSelf: 'center',
 	},
 	actionButtonDisabled: {
 		opacity: 0.7,

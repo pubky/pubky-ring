@@ -9,7 +9,7 @@ import {
 	SessionText,
 	TouchableOpacity,
 	View,
-	ForegroundTouchableOpacity,
+	ForegroundTouchableOpacity, Trash2, ActionButton,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { getPubkySecretKey, signInToHomeserver } from '../utils/pubky';
@@ -136,28 +136,31 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				<View style={styles.buttonContainer}>
 					{!isAuthorized ? (
 						<>
-							<ForegroundTouchableOpacity
-            		style={styles.button}
-            		onPress={handleClose}
-            		disabled={authorizing}
-            	>
-								<Text style={styles.buttonText}>{authorizing ? 'Close' : 'Deny'}</Text>
-							</ForegroundTouchableOpacity>
-							<ForegroundTouchableOpacity
-            		style={[styles.button, styles.authorizeButton, authorizing && styles.buttonDisabled]}
-            		onPress={handleAuth}
-            		disabled={authorizing}
-            	>
-								<Text style={[styles.buttonText, styles.authorizeButtonText]}>
-									{authorizing ? 'Authorizing...' : 'Authorize'}
-								</Text>
-							</ForegroundTouchableOpacity>
+
+							<ActionButton
+								style={styles.actionButton}
+								onPress={handleClose}
+								activeOpacity={0.7}
+							>
+								<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+
+							</ActionButton>
+
+							<ActionButton
+								style={[styles.actionButton, authorizing && styles.buttonDisabled]}
+								onPress={handleAuth}
+								disabled={authorizing}
+								activeOpacity={0.7}
+							>
+								<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
+
+							</ActionButton>
 						</>
-          ) : (
-	<TouchableOpacity style={[styles.button, styles.doneButton]} onPress={handleClose}>
-		<Text style={[styles.buttonText, styles.authorizeButtonText]}>Done</Text>
-	</TouchableOpacity>
-          )}
+					) : (
+						<TouchableOpacity style={[styles.button, styles.doneButton]} onPress={handleClose}>
+							<Text style={[styles.buttonText, styles.authorizeButtonText]}>Done</Text>
+						</TouchableOpacity>
+					)}
 				</View>
 			</View>
 		</ActionSheetContainer>
@@ -167,6 +170,21 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 const styles = StyleSheet.create({
 	container: {
 		height: '50%',
+	},
+	actionButton: {
+		width: '45%',
+		height: 48,
+		borderRadius: 48,
+		paddingVertical: 15,
+		paddingHorizontal: 24,
+		margin: 8,
+	},
+	actionButtonText: {
+		fontSize: 15,
+		fontWeight: 600,
+		lineHeight: 18,
+		letterSpacing: 0.2,
+		alignSelf: 'center',
 	},
 	indicator: {
 		width: 40,
@@ -217,7 +235,7 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		justifyContent: 'flex-end',
+		justifyContent: 'space-evenly',
 		gap: 12,
 		marginTop: 'auto',
 	},

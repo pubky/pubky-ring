@@ -1,38 +1,42 @@
 import React, { ReactElement, useCallback } from 'react';
-import { StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { View, Text } from '../theme/components.ts';
-import { ArrowRight, Plus } from 'lucide-react-native';
+import { StyleSheet, Image } from 'react-native';
+import { View, Text, ArrowRight, Plus, Button, TouchableOpacity } from '../theme/components.ts';
 import { createNewPubky } from '../utils/pubky.ts';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
+import { getTheme } from '../store/selectors/settingsSelectors.ts';
+import PubkyRingHeader from './PubkyRingHeader..tsx';
 
 const EmptyState = (): ReactElement => {
 	const dispatch = useDispatch();
+	const theme = useSelector(getTheme);
 
 	const createPubky = useCallback(async () => {
 		await createNewPubky(dispatch);
 	}, [dispatch]);
 
+	const toggleTheme = useCallback(() => {
+		_toggleTheme({ dispatch, theme });
+	}, [theme, dispatch]);
+
 	return (
 		<View style={styles.container}>
-			<Image
-				source={require('../images/pubky-ring-logo.png')}
-				style={styles.logo}
-			/>
+			<PubkyRingHeader />
 			<View style={styles.cardEmpty}>
 				<View style={styles.emptyUser}>
 					<View style={styles.image} />
-					<View style={styles.textContainer}>
+					<View>
 						<Text style={styles.name}>pubky</Text>
 						<Text style={styles.pubky}>pk:xxxxx..xxxxx</Text>
 					</View>
 					<View style={styles.buttonArrow}>
-						<ArrowRight size={24} color={'white'} />
+						<ArrowRight size={24} />
 					</View>
 				</View>
-				<TouchableOpacity style={styles.buttonSecondary} onPress={createPubky}>
-					<Plus size={16} color={'white'} />
+				<Button style={styles.buttonSecondary} onPress={createPubky}>
+					<Plus size={16} />
 					<Text style={styles.buttonText}>Create pubky</Text>
-				</TouchableOpacity>
+				</Button>
 			</View>
 		</View>
 	);
@@ -41,28 +45,18 @@ const EmptyState = (): ReactElement => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: 'black',
 		alignItems: 'center',
-	},
-	logo: {
-		width: 171,
-		height: 36,
-		resizeMode: 'contain',
-		marginTop: 20,
 	},
 	cardEmpty: {
 		display: 'flex',
 		padding: 24,
-		marginTop: 40,
 		marginHorizontal: 20,
 		flexDirection: 'column',
 		alignItems: 'flex-start',
-		backgroundColor: 'black',
 		gap: '24',
 		alignSelf: 'stretch',
 		borderRadius: 16,
 		borderWidth: 1,
-		borderColor: '#FFF',
 		borderStyle: 'dashed',
 	},
 	emptyUser: {
@@ -70,42 +64,32 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		gap: 18,
 		alignSelf: 'stretch',
-		backgroundColor: 'black',
 	},
 	image: {
 		width: 48,
 		height: 48,
-		backgroundColor: 'black',
 		borderRadius: '100%',
 		borderWidth: 1,
-		borderColor: '#FFF',
 		borderStyle: 'dashed',
 	},
-	textContainer: {
-		backgroundColor: 'black',
-	},
 	name: {
-		color: '#fff',
 		fontSize: 26,
 		fontWeight: 300,
 		lineHeight: 26,
 	},
 	pubky: {
-		color: '#fff',
 		fontSize: 15,
 		fontWeight: 600,
 		lineHeight: 20,
 		letterSpacing: 0.4,
 	},
 	buttonArrow: {
-		backgroundColor: 'black',
 		display: 'flex',
 		justifyContent: 'center',
 		marginLeft: 'auto',
 	},
 	buttonSecondary: {
 		width: '100%',
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
 		borderRadius: 64,
 		paddingVertical: 16,
 		paddingHorizontal: 24,
@@ -116,7 +100,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	buttonText: {
-		color: 'white',
 		fontSize: 15,
 		fontWeight: 600,
 		lineHeight: 18,

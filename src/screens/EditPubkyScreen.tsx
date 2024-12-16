@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useState } from 'react';
+import React, {memo, ReactElement, useCallback, useState} from 'react';
 import {
 	StyleSheet,
 	TextInput,
@@ -6,7 +6,6 @@ import {
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { Check } from 'lucide-react-native';
 import { useDispatch } from 'react-redux';
 import {
 	setName,
@@ -17,8 +16,11 @@ import {
 	View,
 	Text,
 	ChevronLeft,
+	Check,
 	NavButton,
+	SafeAreaView,
 } from '../theme/components.ts';
+import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
@@ -83,28 +85,35 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 		}
 	};
 
-	return (
-		<View style={styles.container}>
-			<View style={styles.header}>
-				<NavButton
-					style={styles.backButton}
-					onPressIn={navigation.goBack}
-				>
-					<ChevronLeft size={24} />
-				</NavButton>
+	const leftButton = useCallback(() => (
+		<NavButton
+			style={styles.navButton}
+			onPressIn={navigation.goBack}
+		>
+			<ChevronLeft size={16} />
+		</NavButton>
+	), [navigation]);
 
-				<NavButton
-					style={[styles.saveButton, isValidating && styles.saveButtonDisabled]}
-					onPressIn={handleSave}
-					disabled={isValidating}
-				>
-					{isValidating ? (
-						<ActivityIndicator size="small" color="#38a169" />
-          ) : (
-	<Check size={24} color="#38a169" />
-          )}
-				</NavButton>
-			</View>
+	const rightButton = useCallback(() => (
+		<NavButton
+			style={[styles.navButton, isValidating && styles.saveButtonDisabled]}
+			onPressIn={handleSave}
+			disabled={isValidating}
+		>
+			{isValidating ? (
+				<ActivityIndicator size="small" color="#38a169" />
+			) : (
+				<Check size={16} color="#38a169" />
+			)}
+		</NavButton>
+	), [isValidating, handleSave]);
+
+	return (
+		<SafeAreaView style={styles.container}>
+			<PubkyRingHeader
+				leftButton={leftButton()}
+				rightButton={rightButton()}
+			/>
 
 			<View style={styles.form}>
 				<View style={styles.inputContainer}>
@@ -133,7 +142,7 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 					{errors.homeserver ? <Text style={styles.errorText}>{errors.homeserver}</Text> : null}
 				</View>
 			</View>
-		</View>
+		</SafeAreaView>
 	);
 };
 
@@ -151,27 +160,13 @@ const styles = StyleSheet.create({
 		paddingTop: 40,
 		paddingHorizontal: 16,
 	},
-	backButton: {
-		width: 40,
-		height: 40,
+	navButton: {
+		width: 32,
+		height: 32,
 		borderRadius: 20,
 		justifyContent: 'center',
 		alignItems: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
-	},
-	saveButton: {
-		width: 40,
-		height: 40,
-		borderRadius: 20,
-		justifyContent: 'center',
-		alignItems: 'center',
+		alignSelf: 'center',
 		shadowColor: '#000',
 		shadowOffset: {
 			width: 0,

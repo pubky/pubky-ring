@@ -10,6 +10,8 @@ const Button = ({
 	text,
 	loading = false,
 	onPress = () => null,
+	onPressIn = () => null,
+	onLongPress = () => null,
 	icon = undefined,
 	style = {},
 	textStyle = {},
@@ -18,6 +20,8 @@ const Button = ({
     text: string;
     loading?: boolean;
     onPress?: () => void;
+	onPressIn?: () => void;
+	onLongPress?: () => void;
     icon?: React.ReactElement;
     style?: object;
     textStyle?: object;
@@ -26,7 +30,9 @@ const Button = ({
 	return (
 		<ActionButton
 			style={[styles.actionButton, style]}
-			onPressIn={onPress}
+			onPress={onPress}
+			onPressIn={onPressIn}
+			onLongPress={onLongPress}
 			disabled={loading}
 			activeOpacity={activeOpacity}
 		>

@@ -44,21 +44,27 @@ export const handleScannedData = async (
 };
 
 export const handleAuth = async (pubky: string, pubkyData: Pubky, authUrl: string): Promise<void> => {
-	const authDetails = await parseAuthUrl(authUrl);
-	if (authDetails.isErr()) {
-		console.error('Error parsing auth details:', authDetails.error);
-		Alert.alert('Error', authDetails?.error?.message ?? 'Failed to parse auth details');
-		return;
+	try {
+		const authDetails = await parseAuthUrl(authUrl);
+		if (authDetails.isErr()) {
+			console.error('Error parsing auth details:', authDetails.error);
+			Alert.alert('Error', authDetails?.error?.message ?? 'Failed to parse auth details');
+			return;
+		}
+		SheetManager.show('confirm-auth', {
+			payload: {
+				pubky,
+				pubkyData,
+				authUrl,
+				authDetails: authDetails.value,
+				onComplete: async (): Promise<void> => {
+				},
+			},
+		}).then();
+	} catch (error) {
+		Alert.alert('Error', 'Failed to parse auth details');
+		console.log('Error parsing auth details:', error);
 	}
-	SheetManager.show('confirm-auth', {
-		payload: {
-			pubky,
-			pubkyData,
-			authUrl,
-			authDetails: authDetails.value,
-			onComplete: async (): Promise<void> => {},
-		},
-	});
 };
 
 export const showQRScanner = (pubky: string, pubkyData: Pubky, dispatch: Dispatch, onComplete?: () => void): Promise<string> => {

@@ -21,15 +21,12 @@ import { createNewPubky } from '../utils/pubky';
 import { showQRScanner, handleClipboardData } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import {
-	SafeAreaView,
 	ScrollView,
 	View,
 	Plus,
 } from '../theme/components.ts';
 import { RootState } from '../store';
-import { getTheme } from '../store/selectors/settingsSelectors.ts';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
-import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 import Button from '../components/Button.tsx';
 
@@ -38,7 +35,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 const HomeScreen = (): ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
 	const dispatch = useDispatch();
-	const theme = useSelector(getTheme);
 	const { pubkys = {} } = useSelector(
 		(state: RootState): PubkyState => state.pubky,
 	);
@@ -75,10 +71,6 @@ const HomeScreen = (): ReactElement => {
 		}
 	}, [dispatch]);
 
-	const toggleTheme = useCallback(() => {
-		_toggleTheme({ dispatch, theme });
-	}, [theme, dispatch]);
-
 	const showOnboarding = useCallback(() => {
 		if (__DEV__) {
 			dispatch(updateShowOnboarding({ showOnboarding: true }));
@@ -86,7 +78,7 @@ const HomeScreen = (): ReactElement => {
 	},[dispatch]);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<View style={styles.container}>
 			{hasPubkys ? (
 				<ScrollView
 					contentInsetAdjustmentBehavior="automatic"
@@ -110,6 +102,7 @@ const HomeScreen = (): ReactElement => {
 						style={styles.button}
 						text={'Create another pubky'}
 						onPress={createPubky}
+						onLongPress={importPubky}
 						icon={<Plus size={16} />}
 					/>
 				</ScrollView>
@@ -118,7 +111,7 @@ const HomeScreen = (): ReactElement => {
 					<EmptyState />
 				</View>
 			)}
-		</SafeAreaView>
+		</View>
 	);
 };
 

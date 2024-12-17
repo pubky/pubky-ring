@@ -12,6 +12,6 @@ export type RootStackParamList = {
     pubky: string;
   };
   EditPubky: {
-    data: PubkyData;
+    pubkyData: PubkyData;
   };
 };

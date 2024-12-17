@@ -7,7 +7,7 @@ import {
 
 const ScanningOverlay = ({
 	size = 250,
-	message = "Auth-URL's & Homeservers are supported",
+	message = "",
 }: {
     size?: number;
     message?: string;

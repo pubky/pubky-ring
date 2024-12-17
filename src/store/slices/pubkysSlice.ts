@@ -1,20 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
-	PubkyState,
 	PubkySession,
-	Pubky,
 } from '../../types/pubky';
-
-const initialState: PubkyState = {
-	pubkys: {},
-};
-
-export const defaultPubkyState: Pubky = {
-	name: '',
-	homeserver: 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy',
-	image: '',
-	sessions: [],
-};
+import { initialState, defaultPubkyState } from '../shapes/pubky.ts';
 
 const pubkysSlice = createSlice({
 	name: 'pubky',
@@ -43,6 +31,13 @@ const pubkysSlice = createSlice({
 			const { pubky, homeserver } = action.payload;
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].homeserver = homeserver;
+				state.pubkys[pubky].signedUp = false;
+			}
+		},
+		setSignedUp: (state, action: PayloadAction<{ pubky: string; signedUp: boolean }>) => {
+			const { pubky, signedUp } = action.payload;
+			if (state.pubkys[pubky]) {
+				state.pubkys[pubky].signedUp = signedUp;
 			}
 		},
 		addSession: (state, action: PayloadAction<{ pubky: string; session: PubkySession }>) => {
@@ -78,6 +73,7 @@ export const {
 	setImage,
 	setName,
 	setHomeserver,
+	setSignedUp,
 	addSession,
 	removeSession,
 	removePubky,

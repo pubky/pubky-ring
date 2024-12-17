@@ -8,6 +8,7 @@ import { useColorScheme } from 'react-native';
 import { ETheme } from './src/types/settings.ts';
 import { useSelector } from 'react-redux';
 import { getTheme } from './src/store/selectors/settingsSelectors.ts';
+import { SafeAreaView } from './src/theme/components.ts';
 
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
@@ -28,9 +29,11 @@ function App(): React.JSX.Element {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<SheetProvider>
-				<RootNavigator />
-			</SheetProvider>
+			<SafeAreaView>
+				<SheetProvider>
+					<RootNavigator />
+				</SheetProvider>
+			</SafeAreaView>
 		</ThemeProvider>
 	);
 }

@@ -4,7 +4,7 @@ import { createNewPubky } from '../utils/pubky';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
 	Alert,
-	SafeAreaView,
+	View,
 	StyleSheet,
 } from 'react-native';
 import { RootStackParamList } from '../navigation/types';
@@ -45,14 +45,14 @@ const OnboardingScreen = (): ReactElement => {
 	}, [dispatch, navigation]);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<View style={styles.container}>
 			<Suspense fallback={<LoadingScreen />}>
 				<OnboardingContent
 					importPubky={importPubky}
 					createPubky={createPubky}
 				/>
 			</Suspense>
-		</SafeAreaView>
+		</View>
 	);
 };
 

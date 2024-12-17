@@ -18,14 +18,13 @@ import {
 	ChevronLeft,
 	Check,
 	NavButton,
-	SafeAreaView,
 } from '../theme/components.ts';
 import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
 const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
-	const { data: pubkyData } = route.params;
+	const { pubkyData } = route.params;
 	const dispatch = useDispatch();
 
 	const [name, setNameState] = useState(pubkyData.name || '');
@@ -109,7 +108,7 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 	), [isValidating, handleSave]);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<View style={styles.container}>
 			<PubkyRingHeader
 				leftButton={leftButton()}
 				rightButton={rightButton()}
@@ -142,7 +141,7 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 					{errors.homeserver ? <Text style={styles.errorText}>{errors.homeserver}</Text> : null}
 				</View>
 			</View>
-		</SafeAreaView>
+		</View>
 	);
 };
 

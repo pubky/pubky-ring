@@ -7,7 +7,6 @@ import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
 import {
 	SessionText,
-	TouchableOpacity,
 	Box,
 	ForegroundView,
 	ActivityIndicator,

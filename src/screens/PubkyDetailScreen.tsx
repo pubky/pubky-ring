@@ -15,8 +15,8 @@ import { RootState } from '../store';
 import {
 	ChevronLeft,
 	NavButton,
-	SafeAreaView,
-	Edit2
+	Edit2,
+	View
 } from '../theme/components.ts';
 import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
 
@@ -29,7 +29,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 		return { ...data, pubky };
 	}, [data, pubky]);
 	const handleEdit = useCallback(() => {
-		navigation.navigate('EditPubky', { data: pubkyData });
+		navigation.navigate('EditPubky', { pubkyData });
 	}, [navigation, pubkyData]);
 
 	const leftButton = useCallback(() => (
@@ -59,7 +59,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 	), [handleEdit]);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<View style={styles.container}>
 			<PubkyRingHeader
 				leftButton={leftButton()}
 				rightButton={rightButton()}
@@ -70,7 +70,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 				onCopyClipboard={handleClipboardData}
 				onClose={navigation.goBack}
 			/>
-		</SafeAreaView>
+		</View>
 	);
 };
 

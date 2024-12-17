@@ -9,13 +9,14 @@ import {
 	SessionText,
 	TouchableOpacity,
 	View,
-	ForegroundTouchableOpacity, Trash2, ActionButton,
+	ActionButton,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
-import { getPubkySecretKey, signInToHomeserver } from '../utils/pubky';
+import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver } from '../utils/pubky';
 import { Pubky } from '../types/pubky.ts';
 import { useDispatch } from 'react-redux';
 import { Check } from 'lucide-react-native';
+import { Dispatch } from 'redux';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -52,42 +53,79 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 	);
 });
 
+const TIMEOUT_MS = 20000; // 20-second timeout
+const timeout = (ms: number) =>
+	new Promise((_, reject) => setTimeout(() => reject(new Error('Authentication request timed out')), ms));
+
 const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const { pubky, pubkyData, authUrl, authDetails, onComplete } = payload;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
 
+	const performAuth = async ({
+		pubky,
+		pubkyData,
+		homeserver,
+		authUrl,
+		dispatch,
+	}: {
+		pubky: string;
+		pubkyData: Pubky;
+		homeserver: string;
+		authUrl: string;
+		dispatch: Dispatch;
+	}) => {
+		const secretKeyRes = await getPubkySecretKey(pubky);
+		if (secretKeyRes.isErr()) {
+			throw new Error('Failed to get secret key');
+		}
+
+		if (!pubkyData.signedUp) {
+			const signUpRes = await signUpToHomeserver({
+				pubky,
+				secretKey: secretKeyRes.value,
+				homeserver,
+				dispatch,
+			});
+			if (signUpRes.isErr()) {
+				console.error('Error signing up:', signUpRes.error);
+				throw new Error(signUpRes.error.message || 'Failed to sign up');
+			}
+		}
+
+		const authRes = await auth(authUrl, secretKeyRes.value);
+		if (authRes.isErr()) {
+			console.error('Error processing auth:', authRes.error);
+			throw new Error(authRes.error.message || 'Failed to process QR code data');
+		}
+	};
+
 	const handleAuth = useCallback(async () => {
+		setAuthorizing(true);
+
 		try {
-			setAuthorizing(true);
-			const secretKeyRes = await getPubkySecretKey(pubky);
-			if (secretKeyRes.isErr()) {
-				Alert.alert('Error', 'Failed to get secret key');
-				setAuthorizing(false);
-				return;
-			}
+			await Promise.race([
+				performAuth({
+					pubky,
+					pubkyData,
+					homeserver: pubkyData?.homeserver,
+					authUrl,
+					dispatch,
+				}),
+				timeout(TIMEOUT_MS),
+			]);
 
-			const signInRes = await signInToHomeserver(pubky, pubkyData?.homeserver, dispatch);
-			if (signInRes.isErr()) {
-				console.error('Error signing in:', signInRes.error);
-				Alert.alert('Error', signInRes?.error?.message ?? 'Failed to sign in');
-				return;
-			}
-
-			const authRes = await auth(authUrl, secretKeyRes.value);
-			if (authRes.isErr()) {
-				console.error('Error processing auth:', authRes.error);
-				Alert.alert('Error', authRes?.error?.message ?? 'Failed to process QR code data');
-				setAuthorizing(false);
-				return;
-			}
-
-			//Alert.alert('Success', `Auth for ${pubky} was successful`);
-			setIsAuthorized(true); // Set authorization success
+			setIsAuthorized(true);
 			onComplete?.();
-		} catch (error) {
-			Alert.alert('Error', 'An error occurred during authorization');
+		} catch (e: unknown) {
+			const error = e as Error;
+			Alert.alert(
+				'Error',
+				error.message === 'Authentication request timed out'
+					? 'The authentication process took too long. Please try again.'
+					: error.message || 'An error occurred during authorization'
+			);
 			console.error('Auth error:', error);
 		} finally {
 			setAuthorizing(false);
@@ -139,7 +177,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 
 							<ActionButton
 								style={styles.actionButton}
-								onPress={handleClose}
+								onPressIn={handleClose}
 								activeOpacity={0.7}
 							>
 								<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
@@ -148,7 +186,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 
 							<ActionButton
 								style={[styles.actionButton, authorizing && styles.buttonDisabled]}
-								onPress={handleAuth}
+								onPressIn={handleAuth}
 								disabled={authorizing}
 								activeOpacity={0.7}
 							>
@@ -157,7 +195,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 							</ActionButton>
 						</>
 					) : (
-						<TouchableOpacity style={[styles.button, styles.doneButton]} onPress={handleClose}>
+						<TouchableOpacity style={[styles.button, styles.doneButton]} onPressIn={handleClose}>
 							<Text style={[styles.buttonText, styles.authorizeButtonText]}>Done</Text>
 						</TouchableOpacity>
 					)}

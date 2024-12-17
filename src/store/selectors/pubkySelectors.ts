@@ -9,6 +9,13 @@ export const getPubky = (state: RootState, pubky: string): Pubky => {
 };
 
 /**
+ * Returns if a pubky is signed up to the set homeserver
+ */
+export const isPubkySignedUp = (state: RootState, pubky: string): boolean => {
+	return state.pubky.pubkys[pubky]?.signedUp || false;
+}
+
+/**
  * Get all pubkys
  */
 export const getAllPubkys = (state: RootState): { [key: string]: Pubky } => {

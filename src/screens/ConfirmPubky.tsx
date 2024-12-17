@@ -2,7 +2,6 @@ import React, { ReactElement, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-	SafeAreaView,
 	View,
 	Text,
 	StyleSheet,
@@ -48,7 +47,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 	}, [navigation]);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<View style={styles.container}>
 			{/* Background image */}
 			<Image
 				source={require('../images/circle.png')}
@@ -98,7 +97,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 					</TouchableOpacity>
 				</View>
 			</View>
-		</SafeAreaView>
+		</View>
 	);
 };
 

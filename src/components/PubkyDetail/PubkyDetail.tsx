@@ -12,7 +12,7 @@ import { getKeychainValue } from '../../utils/keychain.ts';
 import { showBackupPrompt } from '../../utils/helpers.ts';
 import { Dispatch } from 'redux';
 import { Result } from '@synonymdev/result';
-import { SafeAreaView } from '../../theme/components.ts';
+import { View } from '../../theme/components.ts';
 
 export interface PubkyDetailProps {
     pubkyData: PubkyData;
@@ -111,7 +111,7 @@ export const PubkyDetail = ({
 	const sessionsLength = useMemo(() => sessions.length > 0 ? sessions.length : 1, [sessions]);
 
 	return (
-		<SafeAreaView style={styles.container}>
+		<View style={styles.container}>
 			<FlashList
 				ListHeaderComponent={ListHeader}
 				keyExtractor={keyExtractor}
@@ -124,7 +124,7 @@ export const PubkyDetail = ({
 				bounces={false}
 				nestedScrollEnabled={true}
 			/>
-		</SafeAreaView>
+		</View>
 	);
 };
 

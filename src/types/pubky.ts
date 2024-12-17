@@ -7,6 +7,7 @@ export interface PubkySession {
 export interface Pubky {
 	name: string;
 	homeserver: string;
+	signedUp: boolean;
 	image: string;
 	sessions: PubkySession[];
 }

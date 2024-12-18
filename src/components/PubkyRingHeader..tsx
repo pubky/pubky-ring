@@ -1,7 +1,7 @@
 import { Image, StyleSheet } from 'react-native';
 import React, { memo, ReactElement, useCallback } from 'react';
 import { TouchableOpacity, View } from '../theme/components.ts';
-import { toggleTheme as _toggleTheme, toggleTheme } from '../theme/helpers.ts';
+import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
 
@@ -52,7 +52,7 @@ const styles = StyleSheet.create({
 		width: '60%',
 		height: 50,
 		marginTop: 13,
-        marginBottom: 15,
+		marginBottom: 15,
 	},
 	logo: {
 		width: 171,

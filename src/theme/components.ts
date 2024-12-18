@@ -38,11 +38,6 @@ export const View = styled.View`
 	border-color: ${(props): string => props.theme.colors.text};
 `;
 
-export const Footer = styled.View`
-	background-color: ${(props): string => props.theme.colors.background};
-	border-color: ${(props): string => props.theme.colors.border};
-`;
-
 export const TouchableOpacity = styled.TouchableOpacity`
   background-color: ${(props): string => props.theme.colors.background};
 `;
@@ -111,10 +106,6 @@ export const Box = styled.TouchableOpacity`
 `;
 
 export const ForegroundView = styled.View`
-  background-color: ${(props): string => props.theme.colors.foreground};
-`;
-
-export const ForegroundTouchableOpacity = styled.TouchableOpacity`
   background-color: ${(props): string => props.theme.colors.foreground};
 `;
 

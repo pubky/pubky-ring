@@ -3,8 +3,8 @@ import { ETheme } from '../types/settings.ts';
 import { updateTheme } from '../store/slices/settingsSlice.ts';
 
 export const toggleTheme = ({
-    dispatch,
-    theme
+	dispatch,
+	theme,
 }: {
     dispatch: Dispatch,
     theme: ETheme

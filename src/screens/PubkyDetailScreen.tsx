@@ -16,9 +16,9 @@ import {
 	ChevronLeft,
 	NavButton,
 	Edit2,
-	View
+	View,
 } from '../theme/components.ts';
-import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
+import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PubkyDetail'>;
 
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.25,
 		shadowRadius: 3.84,
 		elevation: 5,
-	}
+	},
 });
 
 export default memo(PubkyDetailScreen);

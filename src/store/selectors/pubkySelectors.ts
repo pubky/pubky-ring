@@ -13,7 +13,7 @@ export const getPubky = (state: RootState, pubky: string): Pubky => {
  */
 export const isPubkySignedUp = (state: RootState, pubky: string): boolean => {
 	return state.pubky.pubkys[pubky]?.signedUp || false;
-}
+};
 
 /**
  * Get all pubkys

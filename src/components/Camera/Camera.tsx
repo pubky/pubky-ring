@@ -68,7 +68,7 @@ const Camera = ({
 			}
 		};
 
-		initializeCamera();
+		initializeCamera().then();
 
 		return (): void => {
 			mounted = false;

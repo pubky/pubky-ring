@@ -102,7 +102,7 @@ export const PubkyListHeader = memo(({
 
 			<View style={styles.actionButtonRow}>
 				<Button
-					text={'Copy'}
+					text={'Paste'}
 					style={copyStyle}
 					icon={<Clipboard size={16} />}
 					onPress={handleOnCopyClipboard}
@@ -154,7 +154,7 @@ const styles = StyleSheet.create({
 		fontWeight: 600,
 		lineHeight: 18,
 		letterSpacing: 0.2,
-		marginLeft: 5
+		marginLeft: 5,
 	},
 	buttonText: {
 		fontSize: 15,

@@ -9,9 +9,9 @@ import {
 const Button = ({
 	text,
 	loading = false,
-	onPress = () => null,
-	onPressIn = () => null,
-	onLongPress = () => null,
+	onPress = (): null => null,
+	onPressIn = (): null => null,
+	onLongPress = (): null => null,
 	icon = undefined,
 	style = {},
 	textStyle = {},

@@ -26,7 +26,6 @@ import {
 	Plus,
 } from '../theme/components.ts';
 import { RootState } from '../store';
-import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 import Button from '../components/Button.tsx';
 
@@ -71,11 +70,11 @@ const HomeScreen = (): ReactElement => {
 		}
 	}, [dispatch]);
 
-	const showOnboarding = useCallback(() => {
-		if (__DEV__) {
-			dispatch(updateShowOnboarding({ showOnboarding: true }));
-		}
-	},[dispatch]);
+	// const showOnboarding = useCallback(() => {
+	// 	if (__DEV__) {
+	// 		dispatch(updateShowOnboarding({ showOnboarding: true }));
+	// 	}
+	// },[dispatch]);
 
 	return (
 		<View style={styles.container}>
@@ -123,29 +122,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: 'white',
 	},
-	header: {
-		width: '100%',
-	},
-	logoWrapper: {
-		alignSelf: 'center',
-		alignItems: 'center',
-		justifyContent: 'center',
-		backgroundColor: 'black',
-		borderRadius: 40,
-		width: '60%',
-		height: 50,
-		marginTop: 5,
-		marginBottom: 15,
-	},
-	logo: {
-		width: 171,
-		height: 36,
-		resizeMode: 'contain',
-		display: 'flex',
-		alignSelf: 'center',
-		marginTop: 20,
-		marginBottom: 20,
-	},
 	button: {
 		width: '90%',
 		borderRadius: 64,
@@ -153,32 +129,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		alignItems: 'center',
 		alignSelf: 'center',
-	},
-	buttonSecondary: {
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center',
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 4,
-	},
-	buttonPrimary: {
-		borderColor: 'white',
-		borderWidth: 1,
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center',
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 4,
-	},
-	buttonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
 	},
 	scrollView: {
 		flex: 1,

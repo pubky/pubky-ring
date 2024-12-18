@@ -16,7 +16,7 @@ import { View } from '../../theme/components.ts';
 
 export interface PubkyDetailProps {
     pubkyData: PubkyData;
-    onClose: () => void;
+    onClose?: () => void;
     onQRPress: (pubky: string, pubkyData: Pubky, dispatch: Dispatch, onComplete?: () => void) => Promise<string>
     onCopyClipboard: (pubky: string, pubkyData: Pubky, dispatch: Dispatch) => Promise<Result<string>>
 }
@@ -33,8 +33,8 @@ export const PubkyDetail = ({
 	const dispatch = useDispatch();
 
 	const handleQRPress = useCallback(() => {
-		return onQRPress(pubky, pubkyData, dispatch, onClose);
-	}, [dispatch, onClose, onQRPress, pubky, pubkyData]);
+		return onQRPress(pubky, pubkyData, dispatch);
+	}, [dispatch, onQRPress, pubky, pubkyData]);
 
 	const handleCopyClipboard = useCallback(async () => {
 		return onCopyClipboard(pubky, pubkyData, dispatch);
@@ -64,7 +64,7 @@ export const PubkyDetail = ({
 					text: 'Delete',
 					onPress: (): void => {
 						onDelete?.();
-						onClose();
+						onClose?.();
 					},
 					style: 'destructive',
 				},

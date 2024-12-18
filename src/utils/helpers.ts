@@ -137,7 +137,7 @@ export const showBackupPrompt = (
 							`Backup saved as ${fileName}.pkarr`
 						);
 					}
-					SheetManager.hide('backup-prompt');
+					SheetManager.hide('backup-prompt').then();
 					onComplete?.();
 				} catch (error) {
 					console.error('Backup creation error:', error);

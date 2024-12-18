@@ -149,7 +149,7 @@ export const showImportPrompt = ({ content, dispatch }: { content: string; dispa
 						}
 
 						resolve(ok(pubky.value));
-						SheetManager.hide('backup-prompt');
+						SheetManager.hide('backup-prompt').then();
 					} catch (error) {
 						console.error('Import error:', error);
 						resolve(err('Failed to import pubky'));

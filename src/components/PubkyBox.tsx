@@ -103,7 +103,7 @@ const PubkyBox = ({
 
 	return (
 		<Card style={styles.container}>
-			<Box onPress={handleOnPress} style={styles.box} activeOpacity={0.7}>
+			<Box onPress={handleOnPress} hitSlop={40} style={styles.box} activeOpacity={0.7}>
 				<ForegroundView style={styles.profileImageContainer}>
 					<NavView style={styles.profileImage}>
 						<Jdenticon value={publicKey} size={38} />
@@ -141,7 +141,7 @@ const PubkyBox = ({
 					) : (
 						<Clipboard size={16} />
 					)}
-					<Text style={styles.buttonText}>Copy</Text>
+					<Text style={styles.buttonText}>Paste</Text>
 				</CardButton>
 				<AuthorizeButton
 					style={[
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
 		width: 20,
 		alignContent: 'center',
 		justifyContent: 'center',
-		marginLeft: 4
+		marginLeft: 4,
 	},
 	row: {
 		flexDirection: 'row',

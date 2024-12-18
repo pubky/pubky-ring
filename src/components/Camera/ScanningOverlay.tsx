@@ -7,7 +7,7 @@ import {
 
 const ScanningOverlay = ({
 	size = 250,
-	message = "",
+	message = '',
 }: {
     size?: number;
     message?: string;

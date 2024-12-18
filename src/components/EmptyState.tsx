@@ -1,23 +1,28 @@
 import React, { ReactElement, useCallback } from 'react';
-import { StyleSheet, Image } from 'react-native';
-import { View, Text, ArrowRight, Plus, Button, TouchableOpacity } from '../theme/components.ts';
+import { StyleSheet, Alert } from 'react-native';
+import { View, Text, ArrowRight, Plus, Button } from '../theme/components.ts';
 import { createNewPubky } from '../utils/pubky.ts';
-import { useDispatch, useSelector } from 'react-redux';
-import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
-import { getTheme } from '../store/selectors/settingsSelectors.ts';
+import { useDispatch } from 'react-redux';
 import PubkyRingHeader from './PubkyRingHeader..tsx';
+import { importFile } from '../utils/rnfs.ts';
 
 const EmptyState = (): ReactElement => {
 	const dispatch = useDispatch();
-	const theme = useSelector(getTheme);
 
 	const createPubky = useCallback(async () => {
 		await createNewPubky(dispatch);
 	}, [dispatch]);
 
-	const toggleTheme = useCallback(() => {
-		_toggleTheme({ dispatch, theme });
-	}, [theme, dispatch]);
+	const importPubky = useCallback(async () => {
+		const res = await importFile(dispatch);
+		if (res.isErr()) {
+			if (res.error?.message) {
+				Alert.alert('Error', res.error.message);
+			}
+		} else {
+			Alert.alert('Success', 'Pubky imported successfully');
+		}
+	}, [dispatch]);
 
 	return (
 		<View style={styles.container}>
@@ -33,7 +38,11 @@ const EmptyState = (): ReactElement => {
 						<ArrowRight size={24} />
 					</View>
 				</View>
-				<Button style={styles.buttonSecondary} onPress={createPubky}>
+				<Button
+					style={styles.buttonSecondary}
+					onPress={createPubky}
+					onLongPress={importPubky}
+				>
 					<Plus size={16} />
 					<Text style={styles.buttonText}>Create pubky</Text>
 				</Button>

@@ -1,4 +1,4 @@
-import React, {memo, ReactElement, useCallback, useState} from 'react';
+import React, { memo, ReactElement, useCallback, useState } from 'react';
 import {
 	StyleSheet,
 	TextInput,
@@ -19,7 +19,7 @@ import {
 	Check,
 	NavButton,
 } from '../theme/components.ts';
-import PubkyRingHeader from "../components/PubkyRingHeader..tsx";
+import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
@@ -35,7 +35,7 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 	});
 	const [isValidating, setIsValidating] = useState(false);
 
-	const validateForm = async (): Promise<boolean> => {
+	const validateForm = useCallback(async () => {
 		const newErrors = { name: '',
 			homeserver: '' };
 		let isValid = true;
@@ -65,9 +65,9 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 
 		setErrors(newErrors);
 		return isValid;
-	};
+	}, [dispatch, homeserver, pubkyData.homeserver, pubkyData.pubky]);
 
-	const handleSave = async (): Promise<void> => {
+	const handleSave = useCallback(async () => {
 		const validateRes = await validateForm();
 		if (validateRes) {
 			dispatch(setName({
@@ -82,7 +82,7 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 
 			navigation.goBack();
 		}
-	};
+	}, [dispatch, homeserver, name, navigation, pubkyData.pubky, validateForm]);
 
 	const leftButton = useCallback(() => (
 		<NavButton
@@ -151,13 +151,6 @@ const styles = StyleSheet.create({
 	},
 	saveButtonDisabled: {
 		opacity: 0.5,
-	},
-	header: {
-		height: 100,
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		paddingTop: 40,
-		paddingHorizontal: 16,
 	},
 	navButton: {
 		width: 32,

@@ -83,6 +83,8 @@ const HomeScreen = (): ReactElement => {
 					contentInsetAdjustmentBehavior="automatic"
 					style={styles.scrollView}
 					contentContainerStyle={styles.scrollViewContent}
+					showsVerticalScrollIndicator={false}
+					showsHorizontalScrollIndicator={false}
 				>
 					<PubkyRingHeader />
 					{Object.keys(pubkys).map((pubky, index) => (

@@ -13,20 +13,35 @@ import {
 	View,
 	Text,
 	TouchableOpacity,
-	SessionText,
 	ActionSheetContainer,
 	TextInput,
 	Eye,
 	EyeOff,
+	KeyRound, SessionText,
 } from '../theme/components.ts';
+import Button from '../components/Button.tsx';
+import { truncatePubky } from '../utils/pubky.ts';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
     import = 'import',
 }
 
+const formatDate = (date: Date): string => {
+	const day = date.getDate().toString().padStart(2, '0');
+	const month = (date.getMonth() + 1).toString().padStart(2, '0'); // getMonth() is 0-based
+	const year = date.getFullYear();
+	const hours = date.getHours().toString().padStart(2, '0');
+	const minutes = date.getMinutes().toString().padStart(2, '0');
+
+	return `${day}/${month}/${year} at ${hours}:${minutes}`;
+};
+
 const BackupPrompt = ({ payload }: {
     payload: {
+		pubky?: string;
+		fileName?: string;
+		fileDate?: Date;
         viewId: EBackupPromptViewId;
         onSubmit: (password: string) => void;
         onClose: () => void;
@@ -35,7 +50,15 @@ const BackupPrompt = ({ payload }: {
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string>('');
-	const { onSubmit, onClose, viewId } = payload;
+	const { onSubmit, onClose, viewId } = useMemo(() => payload, [payload]);
+	const fileName = useMemo(() => payload?.fileName ?? '', [payload]);
+	const fileDate = useMemo(() => payload?.fileDate ? formatDate(payload.fileDate) : '', [payload]);
+	const pubky = useMemo(() => payload?.pubky ?? '', [payload]);
+
+	const truncatedPubky = useMemo(() => {
+		const res = truncatePubky(pubky);
+		return res.startsWith('pk:') ? res.slice(3) : res;
+	}, [pubky]);
 
 	const handleSubmit = (): void => {
 		// Only validate password length for backup creation
@@ -55,9 +78,9 @@ const BackupPrompt = ({ payload }: {
 	const title = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return 'Create Backup';
+				return 'Backup Pubky';
 			case EBackupPromptViewId.import:
-				return 'Import Backup';
+				return 'Import Pubky';
 			default:
 				return 'Backup';
 		}
@@ -66,9 +89,9 @@ const BackupPrompt = ({ payload }: {
 	const message = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return 'Enter a passphrase to encrypt your backup (minimum 6 characters). Keep this safe - you\'ll need it to restore your Pubky.';
+				return 'Enter a password or passphrase to encrypt and secure your backup. Keep it safe, you’ll need it to restore your pubky.';
 			case EBackupPromptViewId.import:
-				return 'Enter the passphrase to decrypt the backup file.';
+				return 'Enter your password or passphrase to decrypt your pubky backup.';
 			default:
 				return '';
 		}
@@ -84,6 +107,33 @@ const BackupPrompt = ({ payload }: {
 				return 'Submit';
 		}
 	}, [viewId]);
+
+	const content = useMemo(() => {
+		switch (viewId) {
+			case EBackupPromptViewId.backup:
+				return (
+					<Text style={styles.message}>
+						Passphrase for <Text style={styles.boldText}>pk:{truncatedPubky}</Text>
+					</Text>
+				);
+			case EBackupPromptViewId.import:
+				return (
+					<View style={styles.row}>
+						<View style={styles.keyContainer}>
+							<KeyRound size={24} />
+						</View>
+						<View>
+							<Text style={styles.fileText}>
+								{fileName}
+							</Text>
+							<SessionText style={styles.dateText}>
+								{fileDate.toUpperCase()}
+							</SessionText>
+						</View>
+					</View>
+				);
+		}
+	}, [fileDate, fileName, truncatedPubky, viewId]);
 
 	return (
 		<ActionSheetContainer
@@ -103,9 +153,12 @@ const BackupPrompt = ({ payload }: {
 		>
 			<View style={styles.content}>
 				<Text style={styles.title}>{title}</Text>
-				<SessionText style={styles.message}>
-					{message}
-				</SessionText>
+				<View style={styles.messageContainer}>
+					<Text style={styles.message}>
+						{message}
+					</Text>
+				</View>
+				{content}
 				<View style={styles.inputContainer}>
 					<TextInput
 						style={[styles.input, error ? styles.inputError : null]}
@@ -123,32 +176,24 @@ const BackupPrompt = ({ payload }: {
 						onPress={() => setShowPassword(!showPassword)}
 						activeOpacity={0.7}
 					>
-						{showPassword ? (<EyeOff size={20} />) : (<Eye size={20} />)}
+						{showPassword ? (<Eye size={20} />) : (<EyeOff size={20} />)}
 					</TouchableOpacity>
 				</View>
 				{error ? (
 					<Text style={styles.errorText}>{error}</Text>
 				) : null}
 				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={[styles.button, styles.cancelButton]}
+					<Button
+						text={'Cancel'}
+						style={styles.button}
 						onPress={onClose}
-					>
-						<Text style={styles.buttonText}>Cancel</Text>
-					</TouchableOpacity>
-					<TouchableOpacity
-						style={[
-							styles.button,
-							styles.submitButton,
-							(!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)) && styles.submitButtonDisabled,
-						]}
+					/>
+					<Button
+						text={submitButtonText}
+						style={[styles.button, styles.submitButton]}
 						onPress={handleSubmit}
 						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
-					>
-						<Text style={[styles.buttonText, styles.submitButtonText]}>
-							{submitButtonText}
-						</Text>
-					</TouchableOpacity>
+					/>
 				</View>
 			</View>
 		</ActionSheetContainer>
@@ -158,37 +203,48 @@ const BackupPrompt = ({ payload }: {
 const styles = StyleSheet.create({
 	content: {
 		maxHeight: '80%',
-		padding: 24,
+		paddingHorizontal: 24,
+		paddingBottom: 24,
 	},
 	indicator: {
-		width: 40,
+		width: 32,
 		height: 4,
 		backgroundColor: '#ccc',
 		borderRadius: 2,
-		marginTop: 8,
-		marginBottom: 8,
+		marginTop: 12,
+		marginBottom: 20,
 	},
 	title: {
-		fontSize: 18,
-		fontWeight: '600',
-		marginBottom: 12,
+		fontSize: 17,
+		fontWeight: '700',
+		lineHeight: 22,
+		marginBottom: 24,
+		alignSelf: 'center',
+	},
+	messageContainer: {
+		marginBottom: 16,
 	},
 	message: {
-		fontSize: 14,
-		marginBottom: 16,
+		fontSize: 17,
+		lineHeight: 22,
+		alignItems: 'center',
 	},
 	inputContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		borderWidth: 1,
-		borderColor: '#ddd',
-		borderRadius: 8,
+		borderColor: '#5D5D5D',
+		borderRadius: 16,
+		marginTop: 16,
 		marginBottom: 8,
+		borderStyle: 'dashed',
+		minHeight: 74,
 	},
 	input: {
 		flex: 1,
 		padding: 8,
-		fontSize: 16,
+		fontSize: 26,
+		fontWeight: '300',
 		left: Platform.select({
 			android: 4,
 			ios: 0,
@@ -209,32 +265,43 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		justifyContent: 'flex-end',
-		gap: 12,
+		marginTop: 24,
+		width: '100%',
+		justifyContent: 'space-around',
+		alignItems: 'center',
+		alignSelf: 'center',
 	},
 	button: {
-		paddingVertical: 8,
-		paddingHorizontal: 16,
-		borderRadius: 8,
-		minWidth: 80,
-	},
-	cancelButton: {
-		backgroundColor: '#f5f5f5',
+		width: '45%',
 	},
 	submitButton: {
-		backgroundColor: '#0066cc',
+		borderWidth: 1,
 	},
-	submitButtonDisabled: {
-		backgroundColor: '#99ccff',
+	row: {
+		flexDirection: 'row',
+		alignItems: 'center',
 	},
-	buttonText: {
-		fontSize: 14,
-		textAlign: 'center',
-		color: '#666',
+	keyContainer: {
+		borderWidth: 1,
+		borderRadius: 8,
+		height: 48,
+		width: 48,
+		marginRight: 12,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
-	submitButtonText: {
-		color: 'white',
-		fontWeight: '500',
+	boldText: {
+		fontWeight: 'bold',
+	},
+	fileText: {
+		fontSize: 17,
+		fontWeight: 600,
+		lineHeight: 22,
+	},
+	dateText: {
+		fontSize: 13,
+		fontWeight: 500,
+		lineHeight: 18,
 	},
 });
 

@@ -21,6 +21,7 @@ import {
 	ArrowRight,
 	CardView,
 } from '../theme/components.ts';
+import { truncatePubky } from '../utils/pubky.ts';
 
 const Jdenticon = ({
 	value,
@@ -53,13 +54,6 @@ interface PubkyBoxProps {
   onPress: (data: string) => void;
   index: number;
 }
-
-const truncatePubky = (pubky: string): string => {
-	if (pubky.length <= 16) {
-		return pubky;
-	}
-	return `${pubky.substring(0, 5)}...${pubky.substring(pubky.length - 5)}`;
-};
 
 const PubkyBox = ({
 	pubky,

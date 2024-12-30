@@ -79,8 +79,7 @@ export const PubkyDetail = ({
 				Alert.alert('Error', 'Could not retrieve secret key for backup');
 				return;
 			}
-
-			showBackupPrompt(secretKeyResponse.value);
+			showBackupPrompt({ secretKey: secretKeyResponse.value, pubky });
 
 		} catch (error) {
 			console.error('Backup process error:', error);

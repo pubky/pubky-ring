@@ -201,3 +201,10 @@ export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, d
 	dispatch(setSignedUp({ pubky, signedUp: false }));
 	dispatch(removeSession({ pubky, sessionPubky }));
 };
+
+export const truncatePubky = (pubky: string): string => {
+	if (pubky.length <= 16) {
+		return pubky;
+	}
+	return `${pubky.substring(0, 5)}...${pubky.substring(pubky.length - 5)}`;
+};

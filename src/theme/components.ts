@@ -11,6 +11,7 @@ import {
 	Edit2 as _Edit2,
 	Trash2 as _Trash2,
 	Save as _Save,
+	KeyRound as _KeyRound,
 } from 'lucide-react-native';
 import ActionSheet from 'react-native-actions-sheet';
 
@@ -164,5 +165,9 @@ export const Eye = styled(_Eye)`
 `;
 
 export const EyeOff = styled(_EyeOff)`
+  color: ${(props): string => props.theme.colors.sessionText};
+`;
+
+export const KeyRound = styled(_KeyRound)`
   color: ${(props): string => props.theme.colors.sessionText};
 `;

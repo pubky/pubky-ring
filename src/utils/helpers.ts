@@ -107,13 +107,19 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 };
 
 
-export const showBackupPrompt = (
+export const showBackupPrompt = ({
+	secretKey,
+	pubky,
+	onComplete,
+}: {
 	secretKey: string,
+	pubky: string,
 	onComplete?: () => void
-): void => {
+}): void => {
 	SheetManager.show('backup-prompt', {
 		payload: {
 			viewId: EBackupPromptViewId.backup,
+			pubky,
 			onSubmit: async (passphrase: string) => {
 				try {
 					const createRecoveryFileRes = await createRecoveryFile(

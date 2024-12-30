@@ -36,6 +36,7 @@ export const PubkyListHeader = memo(({
 	svg,
 	pubky,
 	pubkyData,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	sessionsCount,
 	onQRPress,
 	onCopyClipboard,

@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import {
 	Text,
@@ -16,6 +16,7 @@ const Button = ({
 	style = {},
 	textStyle = {},
 	activeOpacity = 0.7,
+	disabled = false,
 }: {
     text: string;
     loading?: boolean;
@@ -26,14 +27,16 @@ const Button = ({
     style?: object;
     textStyle?: object;
 	activeOpacity?: number;
+	disabled?: boolean;
 }): React.ReactElement => {
+	const disabledStyle = useMemo(() => (disabled || loading ? styles.disabled : null), [disabled, loading]);
 	return (
 		<ActionButton
-			style={[styles.actionButton, style]}
+			style={[styles.actionButton, disabledStyle, style]}
 			onPress={onPress}
 			onPressIn={onPressIn}
 			onLongPress={onLongPress}
-			disabled={loading}
+			disabled={loading || disabled}
 			activeOpacity={activeOpacity}
 		>
 			{loading ? (<ActivityIndicator size="small" />) : (
@@ -56,6 +59,9 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		alignContent: 'center',
 		justifyContent: 'center',
+	},
+	disabled: {
+		opacity: 0.5,
 	},
 	actionButtonText: {
 		fontSize: 15,

@@ -110,9 +110,15 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 			return err('Please select a .pkarr file');
 		}
 
+		const fileName = file.name;
+
 		const base64Content = await RNFS.readFile(filePath, 'base64');
+		const fileStats = await RNFS.stat(filePath);
+
 
 		return showImportPrompt({
+			fileName: fileName ?? '',
+			fileDate: fileStats.mtime,
 			content: base64Content,
 			dispatch,
 		});
@@ -126,10 +132,22 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 	}
 }
 
-export const showImportPrompt = ({ content, dispatch }: { content: string; dispatch: Dispatch }): Promise<Result<string>> => {
+export const showImportPrompt = ({
+	fileName,
+	fileDate,
+	content,
+	dispatch,
+}: {
+	fileName: string;
+	fileDate: Date;
+	content: string;
+	dispatch: Dispatch
+}): Promise<Result<string>> => {
 	return new Promise((resolve) => {
 		SheetManager.show('backup-prompt', {
 			payload: {
+				fileName,
+				fileDate,
 				viewId: EBackupPromptViewId.import,
 				onSubmit: async (passphrase: string) => {
 					try {

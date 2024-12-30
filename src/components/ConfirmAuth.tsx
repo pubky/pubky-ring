@@ -222,15 +222,15 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 	},
 	indicator: {
-		width: 40,
+		width: 32,
 		height: 4,
 		backgroundColor: '#ccc',
 		borderRadius: 2,
-		marginTop: 8,
-		marginBottom: 8,
+		marginVertical: 12,
 	},
 	content: {
-		padding: 24,
+		paddingHorizontal: 24,
+		paddingBottom: 24,
 	},
 	section: {
 		marginBottom: 24,

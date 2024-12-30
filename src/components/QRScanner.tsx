@@ -52,17 +52,16 @@ const styles = StyleSheet.create({
 		height: '98%',
 	},
 	cameraContainer: {
-		height: '98%',
+		height: '96%',
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 	},
 	indicator: {
-		width: 40,
+		width: 32,
 		height: 4,
 		backgroundColor: '#ccc',
 		borderRadius: 2,
-		marginTop: 8,
-		marginBottom: 8,
+		marginVertical: 12,
 	},
 });
 

@@ -13,11 +13,10 @@ import {
 	Text,
 	ActionSheetContainer,
 	SessionText,
-	Card,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
-import Jdenticon from './Jdenticon.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
+import PubkyCard from './PubkyCard.tsx';
 
 const DeletePubky = ({ payload }: {
 	payload: {
@@ -49,18 +48,7 @@ const DeletePubky = ({ payload }: {
 				<SessionText style={styles.message}>
 					Are you sure you want to delete this pubky?
 				</SessionText>
-				<Card style={styles.pubkyCard}>
-					<Card style={styles.pubkyRow}>
-						<Card style={styles.iconContainer}>
-							<Jdenticon value={publicKey} size={38} />
-						</Card>
-						<Card style={styles.pubkyTextContainer}>
-							<SessionText style={styles.pubkyText} numberOfLines={2}>
-								pk:{publicKey}
-							</SessionText>
-						</Card>
-					</Card>
-				</Card>
+				<PubkyCard publicKey={publicKey} />
 				<View style={styles.buttonContainer}>
 					<Button
 						text="Cancel"
@@ -105,28 +93,6 @@ const styles = StyleSheet.create({
 		lineHeight: 22,
 		marginBottom: 16,
 		alignSelf: 'center',
-	},
-	pubkyCard: {
-		borderRadius: 16,
-		padding: 16,
-		marginBottom: 24,
-	},
-	pubkyRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-	iconContainer: {
-		width: 38,
-		height: 38,
-		marginRight: 12,
-	},
-	pubkyTextContainer: {
-		flex: 1,
-	},
-	pubkyText: {
-		fontWeight: '600',
-		fontSize: 15,
-		lineHeight: 20,
 	},
 	buttonContainer: {
 		flexDirection: 'row',

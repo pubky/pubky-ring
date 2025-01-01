@@ -68,7 +68,6 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 				pubkyData={pubkyData}
 				onQRPress={showQRScanner}
 				onCopyClipboard={handleClipboardData}
-				onClose={navigation.goBack}
 			/>
 		</View>
 	);

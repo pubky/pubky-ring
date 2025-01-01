@@ -1,7 +1,7 @@
 import React, {
 	memo, ReactElement, useCallback, useState,
 } from 'react';
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { PubkyAuthDetails, auth } from '@synonymdev/react-native-pubky';
 import {
 	ActionSheetContainer,
@@ -17,6 +17,7 @@ import { Pubky } from '../types/pubky.ts';
 import { useDispatch } from 'react-redux';
 import { Check } from 'lucide-react-native';
 import { Dispatch } from 'redux';
+import { showToast } from '../utils/helpers.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -117,12 +118,14 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			onComplete?.();
 		} catch (e: unknown) {
 			const error = e as Error;
-			Alert.alert(
-				'Error',
-				error.message === 'Authentication request timed out'
-					? 'The authentication process took too long. Please try again.'
-					: error.message || 'An error occurred during authorization'
-			);
+			const errorMsg = error.message === 'Authentication request timed out'
+				? 'The authentication process took too long. Please try again.'
+				: error.message || 'An error occurred during authorization';
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: errorMsg,
+			});
 			console.error('Auth error:', error);
 		} finally {
 			setAuthorizing(false);

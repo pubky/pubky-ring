@@ -9,6 +9,8 @@ import { ETheme } from './src/types/settings.ts';
 import { useSelector } from 'react-redux';
 import { getTheme } from './src/store/selectors/settingsSelectors.ts';
 import { SafeAreaView } from './src/theme/components.ts';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from './src/theme/toastConfig.tsx';
 
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
@@ -33,6 +35,7 @@ function App(): React.JSX.Element {
 				<SheetProvider>
 					<RootNavigator />
 				</SheetProvider>
+				<Toast config={toastConfig} />
 			</SafeAreaView>
 		</ThemeProvider>
 	);

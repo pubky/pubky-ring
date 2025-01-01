@@ -20,9 +20,9 @@ import {
 	setHomeserver,
 	setSignedUp,
 } from '../store/slices/pubkysSlice';
-import { Alert } from 'react-native';
 import { Result, err, ok } from '@synonymdev/result';
 import { defaultPubkyState } from '../store/shapes/pubky';
+import { showToast } from './helpers.ts';
 
 export const createNewPubky = async (
 	dispatch: Dispatch
@@ -30,7 +30,11 @@ export const createNewPubky = async (
 	try {
 		const genKeyRes = await generateSecretKey();
 		if (genKeyRes.isErr()) {
-			Alert.alert('Failed to generate secret key');
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: 'Failed to generate secret key',
+			});
 			console.error('Failed to generate secret key');
 			return err('Failed to generate secret key');
 		}
@@ -46,7 +50,11 @@ export const createNewPubky = async (
 		return await savePubky(secretKey, pubky, dispatch);
 	} catch (error) {
 		console.error('Error creating pubky:', error);
-		Alert.alert('Failed to create pubky');
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: 'Failed to create pubky',
+		});
 		return err('Failed to create pubky');
 	}
 };
@@ -195,7 +203,11 @@ export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, d
 	}
 	const signOutRes = await signOut(secretKeyRes.value);
 	if (signOutRes.isErr()) {
-		Alert.alert('Failed to sign out of homeserver', signOutRes.error.message);
+		showToast({
+			type: 'error',
+			title: 'Failed to sign out of homeserver',
+			description: signOutRes.error.message,
+		});
 		return;
 	}
 	dispatch(setSignedUp({ pubky, signedUp: false }));

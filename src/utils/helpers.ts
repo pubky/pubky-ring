@@ -1,4 +1,3 @@
-import { Alert } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from './clipboard';
 import {
@@ -15,6 +14,9 @@ import {
 	Result,
 } from '@synonymdev/result';
 import { parseAuthUrl } from '@synonymdev/react-native-pubky';
+import Toast from 'react-native-toast-message';
+import { ToastType } from 'react-native-toast-message/lib/src/types';
+import { Platform } from 'react-native';
 
 export const handleScannedData = async (
 	pubky: string,
@@ -31,14 +33,26 @@ export const handleScannedData = async (
 
 		const signInRes = await signInToHomeserver(pubky, data, dispatch);
 		if (signInRes.isOk()) {
-			Alert.alert('Success', `Signed in to ${data} successfully`);
+			showToast({
+				type: 'success',
+				title: 'Success',
+				description: `Signed in to ${data} successfully`,
+			});
 			return ok('sign-in');
 		}
-		Alert.alert('Error', authResult?.error?.message ?? 'Failed to parse QR code data');
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: authResult?.error?.message ?? 'Failed to parse QR code data',
+		});
 		return err('Failed to parse QR code data');
 	} catch (error) {
 		console.error('Error processing QR data:', error);
-		Alert.alert('Error', 'Failed to process QR code data');
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: 'Failed to process QR code data',
+		});
 		return err('Failed to process QR code data');
 	}
 };
@@ -48,7 +62,11 @@ export const handleAuth = async (pubky: string, pubkyData: Pubky, authUrl: strin
 		const authDetails = await parseAuthUrl(authUrl);
 		if (authDetails.isErr()) {
 			console.error('Error parsing auth details:', authDetails.error);
-			Alert.alert('Error', authDetails?.error?.message ?? 'Failed to parse auth details');
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: authDetails?.error?.message ?? 'Failed to parse auth details',
+			});
 			return;
 		}
 		SheetManager.show('confirm-auth', {
@@ -62,7 +80,11 @@ export const handleAuth = async (pubky: string, pubkyData: Pubky, authUrl: strin
 			},
 		}).then();
 	} catch (error) {
-		Alert.alert('Error', 'Failed to parse auth details');
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: 'Failed to parse auth details',
+		});
 		console.log('Error parsing auth details:', error);
 	}
 };
@@ -128,7 +150,11 @@ export const showBackupPrompt = ({
 					);
 
 					if (createRecoveryFileRes.isErr()) {
-						Alert.alert('Error', createRecoveryFileRes.error.message);
+						showToast({
+							type: 'error',
+							title: 'Error',
+							description: createRecoveryFileRes.error.message,
+						});
 						return;
 					}
 
@@ -136,18 +162,27 @@ export const showBackupPrompt = ({
 					const backupRes = await backupPubky(createRecoveryFileRes.value, fileName);
 
 					if (backupRes.isErr()) {
-						Alert.alert('Error', backupRes.error.message);
+						showToast({
+							type: 'error',
+							title: 'Error',
+							description: backupRes.error.message,
+						});
 					} else {
-						Alert.alert(
-							'Backup Created',
-							`Backup saved as ${fileName}.pkarr`
-						);
+						showToast({
+							type: 'success',
+							title: 'Backup Created',
+							description: `${fileName}.pkarr`,
+						});
 					}
 					SheetManager.hide('backup-prompt').then();
 					onComplete?.();
 				} catch (error) {
 					console.error('Backup creation error:', error);
-					Alert.alert('Error', 'Failed to create backup file');
+					showToast({
+						type: 'error',
+						title: 'Error',
+						description: 'Failed to create backup file',
+					});
 				}
 			},
 			onClose: () => SheetManager.hide('backup-prompt'),
@@ -158,4 +193,37 @@ export const showBackupPrompt = ({
 export const handleClipboardData = async (pubky: string, pubkyData: Pubky, dispatch: Dispatch): Promise<Result<string>> => {
 	const clipboardContents = await readFromClipboard();
 	return handleScannedData(pubky, pubkyData, clipboardContents, dispatch);
+};
+
+export type ToastOptions = {
+	type: ToastType;
+	title: string;
+	description: string;
+	autoHide?: boolean;
+	visibilityTime?: number;
+};
+
+const defaultOptions = {
+	autoHide: true,
+	visibilityTime: 4000,
+	topOffset: Platform.OS === 'ios' ? 40 : 0,
+	//bottomOffset: 120,
+};
+
+export const showToast = ({
+	type,
+	title,
+	description,
+	autoHide,
+	visibilityTime,
+}: ToastOptions): void => {
+	Toast.show({
+		...defaultOptions,
+		type,
+		text1: title,
+		text2: description,
+		position: 'top',
+		autoHide,
+		visibilityTime,
+	});
 };

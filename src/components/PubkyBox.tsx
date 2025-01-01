@@ -1,7 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { StyleSheet } from 'react-native';
-import { SvgXml } from 'react-native-svg';
-import jdenticon, { JdenticonConfig } from 'jdenticon';
 import { Pubky } from '../types/pubky.ts';
 import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
@@ -22,19 +20,7 @@ import {
 	CardView,
 } from '../theme/components.ts';
 import { truncatePubky } from '../utils/pubky.ts';
-
-const Jdenticon = ({
-	value,
-	size = 32,
-	config,
-}: {
-  value: string;
-  size?: number;
-  config?: JdenticonConfig;
-}): ReactElement => {
-	const svg = jdenticon.toSvg(value, size, config);
-	return <SvgXml xml={svg} />;
-};
+import Jdenticon from './Jdenticon.tsx';
 
 interface PubkyBoxProps {
   pubky: string;

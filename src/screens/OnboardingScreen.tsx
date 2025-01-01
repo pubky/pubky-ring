@@ -3,7 +3,6 @@ import { useNavigation } from '@react-navigation/native';
 import { createNewPubky } from '../utils/pubky';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
-	Alert,
 	View,
 	StyleSheet,
 } from 'react-native';
@@ -12,6 +11,7 @@ import { useDispatch } from 'react-redux';
 import { importFile } from '../utils/rnfs';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import LoadingScreen from './LoadingScreen.tsx';
+import { showToast } from '../utils/helpers.ts';
 const OnboardingContent = React.lazy(() =>
 	Promise.resolve(require('../components/OnboardingContent'))
 );
@@ -35,10 +35,18 @@ const OnboardingScreen = (): ReactElement => {
 		const res = await importFile(dispatch);
 		if (res.isErr()) {
 			if (res.error?.message) {
-				Alert.alert('Error', res.error.message);
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: res.error.message,
+				});
 			}
 		} else {
-			Alert.alert('Success', 'Pubky imported successfully');
+			showToast({
+				type: 'success',
+				title: 'Success',
+				description: 'Pubky imported successfully',
+			});
 			dispatch(updateShowOnboarding({ showOnboarding: false }));
 			navigation.replace('ConfirmPubky');
 		}

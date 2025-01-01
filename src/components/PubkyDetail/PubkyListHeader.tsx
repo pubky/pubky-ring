@@ -4,7 +4,7 @@ import React, {
 	useMemo,
 	useState,
 } from 'react';
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { copyToClipboard } from '../../utils/clipboard.ts';
 import { PubkyData } from '../../navigation/types.ts';
@@ -21,6 +21,7 @@ import {
 	Trash2,
 } from '../../theme/components.ts';
 import Button from '../Button.tsx';
+import { showToast } from '../../utils/helpers.ts';
 interface PubkyListHeaderProps {
     svg: string;
     pubky: string;
@@ -48,7 +49,11 @@ export const PubkyListHeader = memo(({
 
 	const handleCopyPubky = useCallback(() => {
 		copyToClipboard(pubky);
-		Alert.alert('Pubky copied', 'Your Pubky has been copied to the clipboard');
+		showToast({
+			type: 'info',
+			title: 'Pubky copied',
+			description: 'Your Pubky has been copied to the clipboard',
+		});
 	}, [pubky]);
 
 	const handleOnCopyClipboard = useCallback(async () => {

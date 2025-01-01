@@ -1,10 +1,11 @@
 import React, { ReactElement, useCallback } from 'react';
-import { StyleSheet, Alert } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { View, Text, ArrowRight, Plus, Button } from '../theme/components.ts';
 import { createNewPubky } from '../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
 import PubkyRingHeader from './PubkyRingHeader..tsx';
 import { importFile } from '../utils/rnfs.ts';
+import { showToast } from '../utils/helpers.ts';
 
 const EmptyState = (): ReactElement => {
 	const dispatch = useDispatch();
@@ -17,10 +18,18 @@ const EmptyState = (): ReactElement => {
 		const res = await importFile(dispatch);
 		if (res.isErr()) {
 			if (res.error?.message) {
-				Alert.alert('Error', res.error.message);
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: res.error.message,
+				});
 			}
 		} else {
-			Alert.alert('Success', 'Pubky imported successfully');
+			showToast({
+				type: 'success',
+				title: 'Success',
+				description: 'Pubky imported successfully',
+			});
 		}
 	}, [dispatch]);
 

@@ -6,7 +6,6 @@ import React, {
 	useMemo,
 } from 'react';
 import {
-	Alert,
 	BackHandler,
 	StyleSheet,
 } from 'react-native';
@@ -18,7 +17,7 @@ import PubkyBox from '../components/PubkyBox';
 import EmptyState from '../components/EmptyState';
 import { PubkyState } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { showQRScanner, handleClipboardData } from '../utils/helpers';
+import { showQRScanner, handleClipboardData, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import {
 	ScrollView,
@@ -63,10 +62,18 @@ const HomeScreen = (): ReactElement => {
 		const res = await importFile(dispatch);
 		if (res.isErr()) {
 			if (res.error?.message) {
-				Alert.alert('Error', res.error.message);
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: res.error.message,
+				});
 			}
 		} else {
-			Alert.alert('Success', 'Pubky imported successfully');
+			showToast({
+				type: 'success',
+				title: 'Success',
+				description: 'Pubky imported successfully',
+			});
 		}
 	}, [dispatch]);
 

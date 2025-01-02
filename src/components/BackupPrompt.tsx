@@ -17,7 +17,8 @@ import {
 	TextInput,
 	Eye,
 	EyeOff,
-	KeyRound, SessionText,
+	KeyRound,
+	SessionText,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncatePubky } from '../utils/pubky.ts';
@@ -122,8 +123,8 @@ const BackupPrompt = ({ payload }: {
 						<View style={styles.keyContainer}>
 							<KeyRound size={24} />
 						</View>
-						<View>
-							<Text style={styles.fileText}>
+						<View style={styles.fileInfoContainer}>
+							<Text numberOfLines={1} ellipsizeMode="middle" style={styles.fileText}>
 								{fileName}
 							</Text>
 							<SessionText style={styles.dateText}>
@@ -289,6 +290,10 @@ const styles = StyleSheet.create({
 		marginRight: 12,
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	fileInfoContainer: {
+		flex: 1,
+		marginRight: 8,
 	},
 	boldText: {
 		fontWeight: 'bold',

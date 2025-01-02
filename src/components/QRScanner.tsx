@@ -48,7 +48,6 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		backgroundColor: '#fff',
 		height: '98%',
 	},
 	cameraContainer: {

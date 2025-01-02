@@ -1,5 +1,5 @@
 import { StyleSheet } from 'react-native';
-import { Card, SessionText } from '../theme/components.ts';
+import { Card, Text } from '../theme/components.ts';
 import Jdenticon from './Jdenticon.tsx';
 import React, { memo, ReactElement } from 'react';
 
@@ -11,9 +11,9 @@ const PubkyCard = ({ publicKey }: { publicKey: string }): ReactElement => {
 					<Jdenticon value={publicKey} size={38} />
 				</Card>
 				<Card style={styles.pubkyTextContainer}>
-					<SessionText style={styles.pubkyText} numberOfLines={2}>
+					<Text style={styles.pubkyText} numberOfLines={2}>
 						pk:{publicKey}
-					</SessionText>
+					</Text>
 				</Card>
 			</Card>
 		</Card>
@@ -24,12 +24,15 @@ const styles = StyleSheet.create({
 	pubkyCard: {
 		borderRadius: 16,
 		paddingHorizontal: 16,
-		paddingVertical: 20,
 		marginBottom: 24,
+		minHeight: 88,
 	},
 	pubkyRow: {
+		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
+		alignSelf: 'center',
+		justifyContent: 'center',
 	},
 	iconContainer: {
 		width: 38,

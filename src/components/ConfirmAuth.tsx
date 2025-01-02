@@ -1,23 +1,30 @@
 import React, {
-	memo, ReactElement, useCallback, useState,
+	memo, ReactElement, useCallback, useState, useEffect,
 } from 'react';
-import { StyleSheet } from 'react-native';
+import { Alert, Image, StyleSheet } from 'react-native';
 import { PubkyAuthDetails, auth } from '@synonymdev/react-native-pubky';
 import {
 	ActionSheetContainer,
 	Text,
 	SessionText,
-	TouchableOpacity,
 	View,
 	ActionButton,
+	Folder,
+	AnimatedView,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { getPubkySecretKey, signUpToHomeserver } from '../utils/pubky';
 import { Pubky } from '../types/pubky.ts';
 import { useDispatch } from 'react-redux';
-import { Check } from 'lucide-react-native';
 import { Dispatch } from 'redux';
 import { showToast } from '../utils/helpers.ts';
+import PubkyCard from './PubkyCard.tsx';
+import {
+	withTiming,
+	useAnimatedStyle,
+	useSharedValue,
+} from 'react-native-reanimated';
+import { copyToClipboard } from '../utils/clipboard.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -33,30 +40,31 @@ interface Capability {
 }
 
 const Permission = memo(({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
+	const hasReadPermission = capability.permission.includes('r');
+	const hasWritePermission = capability.permission.includes('w');
 	return (
 		<View style={styles.permissionRow}>
+			<Folder size={13} />
 			<View style={styles.pathContainer}>
-				<SessionText style={styles.pathText}>{capability.path}</SessionText>
+				<Text style={styles.pathText}>{capability.path}</Text>
 			</View>
 			<View style={styles.permissionsContainer}>
-				{capability.permission.includes('r') && (
-					<View style={[styles.permissionChip, isAuthorized ? styles.authorizedChip : styles.unauthorizedChip]}>
-						<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>Read</SessionText>
-					</View>
+				{hasReadPermission && (
+					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>Read{hasWritePermission ? ',' : ''}</SessionText>
 				)}
-				{capability.permission.includes('w') && (
-					<View style={[styles.permissionChip, isAuthorized ? styles.authorizedChip : styles.unauthorizedChip]}>
-						<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>Write</SessionText>
-					</View>
+				{hasWritePermission && (
+					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>Write</SessionText>
 				)}
 			</View>
 		</View>
 	);
 });
 
-const TIMEOUT_MS = 20000; // 20-second timeout
+const TIMEOUT_MS = 20000;
+const FADE_DURATION = 200;
 const timeout = (ms: number): Promise<void> =>
 	new Promise((_, reject): void => {setTimeout(() => reject(new Error('Authentication request timed out')), ms);});
+
 const performAuth = async ({
 	pubky,
 	pubkyData,
@@ -100,6 +108,23 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
 
+	const checkOpacity = useSharedValue(0);
+
+	const checkStyle = useAnimatedStyle(() => ({
+		opacity: checkOpacity.value,
+		position: 'absolute',
+	}));
+
+	useEffect(() => {
+		if (authorizing) {
+			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
+		} else if (isAuthorized) {
+			checkOpacity.value = withTiming(1, { duration: FADE_DURATION });
+		} else {
+			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
+		}
+	}, [authorizing, checkOpacity, isAuthorized]);
+
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
 		try {
@@ -125,6 +150,12 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				type: 'error',
 				title: 'Error',
 				description: errorMsg,
+				autoHide: true,
+				visibilityTime: 20000,
+				onPress: () => {
+					copyToClipboard(errorMsg);
+					Alert.alert('Error copied to clipboard', errorMsg);
+				},
 			});
 			console.error('Auth error:', error);
 		} finally {
@@ -140,23 +171,22 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		<ActionSheetContainer
 			id="confirm-auth"
 			containerStyle={styles.container}
-			gestureEnabled={true}
+			gestureEnabled
 			indicatorStyle={styles.indicator}
-			//onClose={handleClose}
 			defaultOverlayOpacity={0.3}
 			statusBarTranslucent
-			drawUnderStatusBar={false}
-		>
+			drawUnderStatusBar={false}>
 			<View style={styles.content}>
 				<View style={styles.titleContainer}>
-					<Text style={[styles.title, isAuthorized && styles.authorizedTitle]}>
-						{isAuthorized ? 'Authorized' : 'Authorize Access'}
+					<Text style={styles.title}>
+						{isAuthorized ? 'Authorized' : 'Authorize'}
 					</Text>
-					{isAuthorized && (
-						<View style={styles.checkmarkContainer}>
-							<Check size={24} color="#2e7d32" />
-						</View>
-					)}
+				</View>
+
+				<View style={styles.section}>
+					<SessionText style={styles.warningText}>
+						{isAuthorized ? 'Successfully granted permission to manage your data.' : 'Make sure you trust this service, browser, or device before granting permission to manage your data.'}
+					</SessionText>
 				</View>
 
 				<View style={styles.section}>
@@ -164,41 +194,51 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 					<Text style={styles.relayText}>{authDetails.relay}</Text>
 				</View>
 
-				<View style={styles.section}>
-					<SessionText style={styles.sectionTitle}>Requested Permissions</SessionText>
+				<View style={styles.permissionsSection}>
+					<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
 					{authDetails.capabilities.map((capability, index) => (
 						<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
 					))}
 				</View>
 
-				<View style={styles.buttonContainer}>
-					{!isAuthorized ? (
-						<>
+				<View style={styles.imageContainer}>
+					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+						<Image
+							source={require('../images/check.png')}
+							style={styles.keyImage}
+						/>
+					</AnimatedView>
+				</View>
 
-							<ActionButton
-								style={styles.actionButton}
-								onPressIn={handleClose}
-								activeOpacity={0.7}
-							>
-								<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+				<View style={styles.footerContainer}>
+					<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Authorized with Pubky' : 'Authorize With Pubky'}</SessionText>
+					<PubkyCard publicKey={pubky} />
+					<View style={styles.buttonContainer}>
+						{!isAuthorized ? (
+							<>
+								<ActionButton
+									style={styles.denyButton}
+									onPressIn={handleClose}
+									activeOpacity={0.7}
+								>
+									<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+								</ActionButton>
 
+								<ActionButton
+									style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
+									onPressIn={handleAuth}
+									disabled={authorizing}
+									activeOpacity={0.7}
+								>
+									<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
+								</ActionButton>
+							</>
+						) : (
+							<ActionButton style={styles.okButton} onPressIn={handleClose}>
+								<Text style={styles.buttonText}>OK</Text>
 							</ActionButton>
-
-							<ActionButton
-								style={[styles.actionButton, authorizing && styles.buttonDisabled]}
-								onPressIn={handleAuth}
-								disabled={authorizing}
-								activeOpacity={0.7}
-							>
-								<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
-
-							</ActionButton>
-						</>
-					) : (
-						<TouchableOpacity style={[styles.button, styles.doneButton]} onPressIn={handleClose}>
-							<Text style={[styles.buttonText, styles.authorizeButtonText]}>Done</Text>
-						</TouchableOpacity>
-					)}
+						)}
+					</View>
 				</View>
 			</View>
 		</ActionSheetContainer>
@@ -207,7 +247,10 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 
 const styles = StyleSheet.create({
 	container: {
-		height: '50%',
+	},
+	content: {
+		paddingHorizontal: 12,
+		paddingTop: 20,
 	},
 	actionButton: {
 		width: '45%',
@@ -231,20 +274,20 @@ const styles = StyleSheet.create({
 		borderRadius: 2,
 		marginVertical: 12,
 	},
-	content: {
-		paddingHorizontal: 24,
-		paddingBottom: 24,
-	},
 	section: {
 		marginBottom: 24,
 	},
-	sectionTitle: {
-		fontSize: 14,
-		textTransform: 'uppercase',
-		marginBottom: 8,
+	permissionsSection: {
+		marginBottom: 10,
 	},
 	relayText: {
 		fontSize: 16,
+		marginBottom: 8,
+	},
+	warningText: {
+		fontWeight: '400',
+		fontSize: 17,
+		lineHeight: 22,
 		marginBottom: 8,
 	},
 	permissionRow: {
@@ -255,9 +298,13 @@ const styles = StyleSheet.create({
 	},
 	pathContainer: {
 		flex: 2,
+		marginLeft: 5,
+		justifyContent: 'center',
 	},
 	pathText: {
-		fontSize: 14,
+		fontSize: 13,
+		fontWeight: '600',
+		lineHeight: 18,
 	},
 	permissionsContainer: {
 		flex: 1,
@@ -275,7 +322,26 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-evenly',
 		gap: 12,
-		marginTop: 'auto',
+		zIndex: 3,
+	},
+	footerContainer: {
+		marginBottom: 10,
+	},
+	imageContainer: {
+		justifyContent: 'center',
+		alignItems: 'center',
+		height: 200,
+		width: '100%',
+		position: 'relative',
+	},
+	imageWrapper: {
+		justifyContent: 'center',
+		alignItems: 'center',
+	},
+	keyImage: {
+		width: 200,
+		height: 200,
+		resizeMode: 'contain',
 	},
 	button: {
 		paddingVertical: 12,
@@ -283,14 +349,42 @@ const styles = StyleSheet.create({
 		borderRadius: 8,
 		minWidth: 100,
 	},
+	denyButton: {
+		width: '45%',
+		height: 58,
+		borderRadius: 48,
+		paddingVertical: 15,
+		paddingHorizontal: 24,
+		margin: 8,
+		justifyContent: 'center',
+	},
 	authorizeButton: {
-		backgroundColor: '#0066cc',
+		width: '45%',
+		height: 58,
+		borderRadius: 48,
+		paddingVertical: 15,
+		paddingHorizontal: 24,
+		margin: 8,
+		borderWidth: 1,
+		justifyContent: 'center',
+	},
+	okButton: {
+		width: '100%',
+		height: 58,
+		borderRadius: 48,
+		paddingVertical: 15,
+		paddingHorizontal: 24,
+		margin: 8,
+		borderWidth: 1,
+		justifyContent: 'center',
 	},
 	buttonDisabled: {
 		opacity: 0.7,
 	},
 	buttonText: {
-		fontSize: 16,
+		fontWeight: '600',
+		fontSize: 15,
+		lineHeight: 18,
 		textAlign: 'center',
 	},
 	authorizeButtonText: {
@@ -302,27 +396,35 @@ const styles = StyleSheet.create({
 	authorizedChip: {
 		backgroundColor: '#e8f5e9',
 	},
+	sectionTitle: {
+		fontSize: 13,
+		fontWeight: '500',
+		lineHeight: 18,
+		textTransform: 'uppercase',
+		marginBottom: 8,
+	},
 	unauthorizedText: {
-		color: '#c62828',
+		fontSize: 13,
+		fontWeight: '500',
+		lineHeight: 18,
+		textTransform: 'uppercase',
 	},
 	authorizedText: {
-		color: '#2e7d32',
-	},
-	doneButton: {
-		backgroundColor: '#2e7d32',
-		flex: 1,
+		fontSize: 13,
+		fontWeight: '500',
+		lineHeight: 18,
+		textTransform: 'uppercase',
 	},
 	titleContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
+		justifyContent: 'center',
 		marginBottom: 24,
+		zIndex: 3,
 	},
 	title: {
 		fontSize: 24,
 		fontWeight: '600',
-	},
-	authorizedTitle: {
-		color: '#2e7d32',
 	},
 	checkmarkContainer: {
 		marginLeft: 8,

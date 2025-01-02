@@ -40,10 +40,11 @@ export const handleScannedData = async (
 			});
 			return ok('sign-in');
 		}
+		const description = authResult?.error?.message ?? 'Failed to parse QR code data';
 		showToast({
 			type: 'error',
 			title: 'Error',
-			description: authResult?.error?.message ?? 'Failed to parse QR code data',
+			description,
 		});
 		return err('Failed to parse QR code data');
 	} catch (error) {
@@ -201,6 +202,7 @@ export type ToastOptions = {
 	description: string;
 	autoHide?: boolean;
 	visibilityTime?: number;
+	onPress?: () => void;
 };
 
 const defaultOptions = {
@@ -216,6 +218,7 @@ export const showToast = ({
 	description,
 	autoHide,
 	visibilityTime,
+	onPress,
 }: ToastOptions): void => {
 	Toast.show({
 		...defaultOptions,
@@ -225,5 +228,6 @@ export const showToast = ({
 		position: 'top',
 		autoHide,
 		visibilityTime,
+		onPress,
 	});
 };

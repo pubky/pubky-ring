@@ -12,8 +12,10 @@ import {
 	Trash2 as _Trash2,
 	Save as _Save,
 	KeyRound as _KeyRound,
+	Folder as _Folder,
 } from 'lucide-react-native';
 import ActionSheet from 'react-native-actions-sheet';
+import Animated from 'react-native-reanimated';
 
 interface ActionSheetContainerProps {
   backgroundColor?: string;
@@ -35,6 +37,11 @@ export const TextInput = styled.TextInput`
 `;
 
 export const View = styled.View`
+	background-color: ${(props): string => props.theme.colors.background};
+	border-color: ${(props): string => props.theme.colors.text};
+`;
+
+export const AnimatedView = styled(Animated.View)`
 	background-color: ${(props): string => props.theme.colors.background};
 	border-color: ${(props): string => props.theme.colors.text};
 `;
@@ -170,4 +177,8 @@ export const EyeOff = styled(_EyeOff)`
 
 export const KeyRound = styled(_KeyRound)`
   color: ${(props): string => props.theme.colors.sessionText};
+`;
+
+export const Folder = styled(_Folder)`
+	  color: ${(props): string => props.theme.colors.text};
 `;

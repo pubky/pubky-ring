@@ -21,22 +21,28 @@ import {
 } from '../theme/components.ts';
 import { truncatePubky } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
+import { Result } from '@synonymdev/result';
 
 interface PubkyBoxProps {
   pubky: string;
   pubkyData: Pubky;
   sessionsCount?: number;
-  onQRPress: (
-    pubky: string,
-    pubkyData: Pubky,
-    dispatch: Dispatch,
-    onComplete?: () => void,
-  ) => Promise<string>;
-  onCopyClipboard: (
-    pubky: string,
-    pubkyData: Pubky,
-    dispatch: Dispatch,
-  ) => void;
+  onQRPress: ({
+	  pubky,
+	  dispatch,
+	  onComplete,
+  }: {
+	  pubky: string,
+	  dispatch: Dispatch,
+	  onComplete?: () => void,
+  }) => Promise<string>;
+  onCopyClipboard: ({
+	  pubky,
+	  dispatch,
+  }: {
+	  pubky: string,
+	  dispatch: Dispatch,
+  }) => Promise<Result<string>>;
   onPress: (data: string) => void;
   index: number;
 }
@@ -57,20 +63,23 @@ const PubkyBox = ({
 	const handleQRPress = useCallback(async () => {
 		setIsQRLoading(true);
 		try {
-			await onQRPress(pubky, pubkyData, dispatch);
+			await onQRPress({
+				pubky,
+				dispatch,
+			});
 		} finally {
 			setIsQRLoading(false);
 		}
-	}, [dispatch, onQRPress, pubky, pubkyData]);
+	}, [dispatch, onQRPress, pubky]);
 
 	const handleCopyClipboard = useCallback(async () => {
 		setIsClipboardLoading(true);
 		try {
-			onCopyClipboard(pubky, pubkyData, dispatch);
+			await onCopyClipboard({ pubky, dispatch });
 		} finally {
 			setIsClipboardLoading(false);
 		}
-	}, [dispatch, onCopyClipboard, pubky, pubkyData]);
+	}, [dispatch, onCopyClipboard, pubky]);
 
 	const handleOnPress = useCallback(() => {
 		onPress(pubky);

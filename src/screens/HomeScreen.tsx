@@ -24,7 +24,7 @@ import {
 	View,
 	Plus,
 } from '../theme/components.ts';
-import { RootState } from '../store';
+import { RootState } from '../types';
 import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 import Button from '../components/Button.tsx';
 

@@ -23,6 +23,8 @@ import {
 import { Result, err, ok } from '@synonymdev/result';
 import { defaultPubkyState } from '../store/shapes/pubky';
 import { showToast } from './helpers.ts';
+import { auth } from '@synonymdev/react-native-pubky';
+import { getPubkyDataFromStore } from './store-helpers.ts';
 
 export const createNewPubky = async (
 	dispatch: Dispatch
@@ -219,4 +221,62 @@ export const truncatePubky = (pubky: string): string => {
 		return pubky;
 	}
 	return `${pubky.substring(0, 5)}...${pubky.substring(pubky.length - 5)}`;
+};
+
+const TIMEOUT_MS = 20000;
+const timeout = (ms: number): Promise<void> =>
+	new Promise((_, reject): void => {
+		setTimeout(() => reject(new Error('Authentication request timed out')), ms);
+	});
+
+export const performAuth = async ({
+	pubky,
+	authUrl,
+	dispatch,
+}: {
+	pubky: string;
+	authUrl: string;
+	dispatch: Dispatch;
+}): Promise<Result<string>> => {
+	try {
+		const authPromise = (async (): Promise<Result<string>> => {
+			const secretKeyRes = await getPubkySecretKey(pubky);
+			if (secretKeyRes.isErr()) {
+				return err('Failed to get secret key');
+			}
+			const pubkyData = getPubkyDataFromStore(pubky);
+			const { signedUp, homeserver } = pubkyData;
+			if (!signedUp) {
+				const signUpRes = await signUpToHomeserver({
+					pubky,
+					secretKey: secretKeyRes.value,
+					homeserver,
+					dispatch,
+				});
+				if (signUpRes.isErr()) {
+					console.error('Error signing up:', signUpRes.error);
+					return err(signUpRes.error?.message || 'Failed to sign up');
+				}
+			}
+
+			const authRes = await auth(authUrl, secretKeyRes.value);
+			if (authRes.isErr()) {
+				console.error('Error processing auth:', authRes.error);
+				return err(authRes.error?.message || 'Failed to process auth');
+			}
+			return ok('success');
+		})();
+
+		const timeoutPromise = timeout(TIMEOUT_MS).then(
+			(): Result<string> => err('Authentication request timed out')
+		);
+
+		return await Promise.race([authPromise, timeoutPromise]);
+	} catch (error: unknown) {
+		console.error('Auth Error:', error);
+		const errorMessage = error instanceof Error
+			? error.message
+			: 'An error occurred during authorization';
+		return err(`Auth Error: ${errorMessage}`);
+	}
 };

@@ -1,8 +1,12 @@
 import React, {
-	memo, ReactElement, useCallback, useState, useEffect,
+	memo,
+	ReactElement,
+	useCallback,
+	useState,
+	useEffect,
 } from 'react';
 import { Alert, Image, StyleSheet } from 'react-native';
-import { PubkyAuthDetails, auth } from '@synonymdev/react-native-pubky';
+import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionSheetContainer,
 	Text,
@@ -13,10 +17,8 @@ import {
 	AnimatedView,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
-import { getPubkySecretKey, signUpToHomeserver } from '../utils/pubky';
-import { Pubky } from '../types/pubky.ts';
+import { performAuth } from '../utils/pubky';
 import { useDispatch } from 'react-redux';
-import { Dispatch } from 'redux';
 import { showToast } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import {
@@ -28,7 +30,6 @@ import { copyToClipboard } from '../utils/clipboard.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
-	pubkyData: Pubky;
 	authUrl: string;
 	authDetails: PubkyAuthDetails;
 	onComplete: () => void;
@@ -60,50 +61,9 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 	);
 });
 
-const TIMEOUT_MS = 20000;
 const FADE_DURATION = 200;
-const timeout = (ms: number): Promise<void> =>
-	new Promise((_, reject): void => {setTimeout(() => reject(new Error('Authentication request timed out')), ms);});
-
-const performAuth = async ({
-	pubky,
-	pubkyData,
-	homeserver,
-	authUrl,
-	dispatch,
-}: {
-	pubky: string;
-	pubkyData: Pubky;
-	homeserver: string;
-	authUrl: string;
-	dispatch: Dispatch;
-}): Promise<void> => {
-	const secretKeyRes = await getPubkySecretKey(pubky);
-	if (secretKeyRes.isErr()) {
-		throw new Error('Failed to get secret key');
-	}
-	if (!pubkyData.signedUp) {
-		const signUpRes = await signUpToHomeserver({
-			pubky,
-			secretKey: secretKeyRes.value,
-			homeserver,
-			dispatch,
-		});
-		if (signUpRes.isErr()) {
-			console.error('Error signing up:', signUpRes.error);
-			throw new Error(signUpRes.error.message || 'Failed to sign up');
-		}
-	}
-
-	const authRes = await auth(authUrl, secretKeyRes.value);
-	if (authRes.isErr()) {
-		console.error('Error processing auth:', authRes.error);
-		throw new Error(authRes.error.message || 'Failed to process QR code data');
-	}
-};
-
 const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
-	const { pubky, pubkyData, authUrl, authDetails, onComplete } = payload;
+	const { pubky, authUrl, authDetails, onComplete } = payload;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
@@ -128,17 +88,18 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
 		try {
-			await Promise.race([
-				performAuth({
-					pubky,
-					pubkyData,
-					homeserver: pubkyData?.homeserver,
-					authUrl,
-					dispatch,
-				}),
-				timeout(TIMEOUT_MS),
-			]);
-
+			const res = await performAuth({
+				pubky,
+				authUrl,
+				dispatch,
+			});
+			if (res.isErr()) {
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: res.error.message,
+				});
+			}
 			setIsAuthorized(true);
 			onComplete?.();
 		} catch (e: unknown) {
@@ -161,7 +122,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, dispatch, onComplete, pubky, pubkyData]);
+	}, [authUrl, dispatch, onComplete, pubky]);
 
 	const handleClose = useCallback(() => {
 		SheetManager.hide('confirm-auth');

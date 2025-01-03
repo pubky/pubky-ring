@@ -18,8 +18,26 @@ import { useNavigation } from '@react-navigation/native';
 
 export interface PubkyDetailProps {
     pubkyData: PubkyData;
-    onQRPress: (pubky: string, pubkyData: Pubky, dispatch: Dispatch, onComplete?: () => void) => Promise<string>
-    onCopyClipboard: (pubky: string, pubkyData: Pubky, dispatch: Dispatch) => Promise<Result<string>>
+	onQRPress: ({
+		pubky,
+		pubkyData,
+		dispatch,
+		onComplete,
+	}: {
+		pubky: string,
+		pubkyData: Pubky,
+		dispatch: Dispatch,
+		onComplete?: () => void,
+	}) => Promise<string>;
+    onCopyClipboard: ({
+    	pubky,
+    	pubkyData,
+    	dispatch,
+    }: {
+		pubky: string;
+		pubkyData: Pubky;
+		dispatch: Dispatch;
+	}) => Promise<Result<string>>
 }
 
 export const PubkyDetail = ({
@@ -34,11 +52,11 @@ export const PubkyDetail = ({
 	const navigation = useNavigation();
 
 	const handleQRPress = useCallback(() => {
-		return onQRPress(pubky, pubkyData, dispatch);
+		return onQRPress({ pubky, pubkyData, dispatch });
 	}, [dispatch, onQRPress, pubky, pubkyData]);
 
 	const handleCopyClipboard = useCallback(async () => {
-		return onCopyClipboard(pubky, pubkyData, dispatch);
+		return onCopyClipboard({ pubky, pubkyData, dispatch });
 	}, [dispatch, onCopyClipboard, pubky, pubkyData]);
 
 	const onDelete = useCallback(async () => {

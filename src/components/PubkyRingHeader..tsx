@@ -1,9 +1,14 @@
 import { Image, StyleSheet } from 'react-native';
-import React, { memo, ReactElement, useCallback } from 'react';
+import React, { memo, ReactElement, useCallback, useRef } from 'react';
 import { TouchableOpacity, View } from '../theme/components.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+
+type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 const PubkyRingHeader = ({
 	leftButton = undefined,
@@ -14,10 +19,22 @@ const PubkyRingHeader = ({
 }): ReactElement => {
 	const dispatch = useDispatch();
 	const theme = useSelector(getTheme);
+	const navigation = useNavigation<NavigationProp>();
+	const lastTapRef = useRef(0);
 
 	const toggleTheme = useCallback(() => {
 		_toggleTheme({ dispatch, theme });
 	}, [theme, dispatch]);
+
+	const handleDoubleTap = useCallback((): void => {
+		const now = Date.now();
+		const DOUBLE_TAP_DELAY = 300;
+
+		if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
+			navigation.navigate('Settings');
+		}
+		lastTapRef.current = now;
+	}, [navigation]);
 
 	return (
 		<View style={styles.container}>
@@ -25,6 +42,7 @@ const PubkyRingHeader = ({
 			<TouchableOpacity
 				activeOpacity={1}
 				onLongPress={toggleTheme}
+				onPress={handleDoubleTap}
 				style={styles.logoWrapper}
 			>
 				<Image

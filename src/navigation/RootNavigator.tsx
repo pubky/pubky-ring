@@ -12,6 +12,7 @@ import { useSelector } from 'react-redux';
 import {
 	getShowOnboarding,
 } from '../store/selectors/settingsSelectors.ts';
+import SettingsScreen from '../screens/SettingsScreen.tsx';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -54,6 +55,14 @@ const RootNavigator = (): ReactElement => {
 						title: 'Pubky Ring',
 						gestureEnabled: false,
 						headerBackVisible: false,
+					}}
+				/>
+				<Stack.Screen
+					name="Settings"
+					component={SettingsScreen}
+					options={{
+						title: 'Settings',
+						gestureEnabled: true,
 					}}
 				/>
 				<Stack.Screen

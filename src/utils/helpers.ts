@@ -1,11 +1,11 @@
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from './clipboard';
 import {
+	performAuth,
 	signInToHomeserver,
 } from './pubky.ts';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
 import { backupPubky } from './rnfs.ts';
-import { Pubky } from '../types/pubky.ts';
 import { Dispatch } from 'redux';
 import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
 import {
@@ -17,18 +17,46 @@ import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Platform } from 'react-native';
+import { getAutoAuthFromStore } from './store-helpers.ts';
 
-export const handleScannedData = async (
+export const handleScannedData = async ({
+	pubky,
+	data,
+	dispatch,
+}: {
 	pubky: string,
-	pubkyData: Pubky,
 	data: string,
 	dispatch: Dispatch
-): Promise<Result<string>> => {
+}): Promise<Result<string>> => {
 	try {
 		const authResult = await parseAuthUrl(data);
 		if (authResult.isOk()) {
-			await handleAuth(pubky, pubkyData, data);
-			return ok('auth');
+			const autoAuth = getAutoAuthFromStore();
+			if (!autoAuth) {
+				return await handleAuth(pubky, data);
+			}
+
+			// Auto-auth flow
+			const res = await performAuth({
+				pubky,
+				authUrl: data,
+				dispatch,
+			});
+			// If auth was successful, show a success toast since they will have no indication in the autoAuth flow otherwise.
+			if (res.isOk()) {
+				showToast({
+					type: 'success',
+					title: 'Success',
+					description: `Authorized with: pk:${pubky}`,
+				});
+			} else {
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: res.error.message,
+				});
+			}
+			return res;
 		}
 
 		const signInRes = await signInToHomeserver(pubky, data, dispatch);
@@ -58,49 +86,62 @@ export const handleScannedData = async (
 	}
 };
 
-export const handleAuth = async (pubky: string, pubkyData: Pubky, authUrl: string): Promise<void> => {
+export const handleAuth = async (pubky: string, authUrl: string): Promise<Result<string>> => {
 	try {
 		const authDetails = await parseAuthUrl(authUrl);
 		if (authDetails.isErr()) {
 			console.error('Error parsing auth details:', authDetails.error);
+			const description = authDetails?.error?.message ?? 'Failed to parse auth details';
 			showToast({
 				type: 'error',
 				title: 'Error',
-				description: authDetails?.error?.message ?? 'Failed to parse auth details',
+				description,
 			});
-			return;
+			return err(description);
 		}
 		SheetManager.show('confirm-auth', {
 			payload: {
 				pubky,
-				pubkyData,
 				authUrl,
 				authDetails: authDetails.value,
 				onComplete: async (): Promise<void> => {
 				},
 			},
 		}).then();
+		return ok('success');
 	} catch (error) {
+		const description = 'Failed to parse auth details';
 		showToast({
 			type: 'error',
 			title: 'Error',
-			description: 'Failed to parse auth details',
+			description,
 		});
-		console.log('Error parsing auth details:', error);
+		console.log(`${description}:`, error);
+		return err(description);
 	}
 };
 
-export const showQRScanner = (pubky: string, pubkyData: Pubky, dispatch: Dispatch, onComplete?: () => void): Promise<string> => {
+export const showQRScanner = ({
+	pubky,
+	dispatch,
+	onComplete,
+}: {
+	pubky: string;
+	dispatch: Dispatch;
+	onComplete?: () => void;
+}): Promise<string> => {
 	return new Promise<string>((resolve) => {
 		SheetManager.show('camera', {
 			payload: {
 				onScan: async (data: string) => {
 					await SheetManager.hide('camera');
-					handleScannedData(pubky, pubkyData, data, dispatch)
-						.then(() => {
-							resolve(data);
-						});
+					await handleScannedData({
+						pubky,
+						data,
+						dispatch,
+					});
 					onComplete?.();
+					resolve(data);
 				},
 				onClose: () => {
 					SheetManager.hide('camera');
@@ -191,9 +232,19 @@ export const showBackupPrompt = ({
 	});
 };
 
-export const handleClipboardData = async (pubky: string, pubkyData: Pubky, dispatch: Dispatch): Promise<Result<string>> => {
+export const handleClipboardData = async ({
+	pubky,
+	dispatch,
+}: {
+	pubky: string;
+	dispatch: Dispatch;
+}): Promise<Result<string>> => {
 	const clipboardContents = await readFromClipboard();
-	return handleScannedData(pubky, pubkyData, clipboardContents, dispatch);
+	return await handleScannedData({
+		pubky,
+		data: clipboardContents,
+		dispatch,
+	});
 };
 
 export type ToastOptions = {

@@ -11,3 +11,7 @@ export const getTheme = (state: RootState): ETheme => {
 export const getShowOnboarding = (state: RootState): boolean => {
 	return state?.settings?.showOnboarding ?? true;
 };
+
+export const getAutoAuth = (state: RootState): boolean => {
+	return state?.settings?.autoAuth ?? false;
+};

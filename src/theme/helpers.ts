@@ -24,3 +24,13 @@ export const toggleTheme = ({
 			break;
 	}
 };
+
+export const setTheme = ({
+	dispatch,
+	theme,
+}: {
+	dispatch: Dispatch,
+	theme: ETheme
+}): void => {
+	dispatch(updateTheme({ theme }));
+};

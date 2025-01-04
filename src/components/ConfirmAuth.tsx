@@ -99,6 +99,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 					title: 'Error',
 					description: res.error.message,
 				});
+				return;
 			}
 			setIsAuthorized(true);
 			onComplete?.();

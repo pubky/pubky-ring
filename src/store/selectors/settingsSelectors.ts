@@ -1,4 +1,4 @@
-import { ETheme } from '../../types/settings.ts';
+import { ENavigationAnimation, ETheme } from '../../types/settings.ts';
 import { RootState } from '../../types';
 
 /**
@@ -14,4 +14,8 @@ export const getShowOnboarding = (state: RootState): boolean => {
 
 export const getAutoAuth = (state: RootState): boolean => {
 	return state?.settings?.autoAuth ?? false;
+};
+
+export const getNavigationAnimation = (state: RootState): ENavigationAnimation => {
+	return state?.settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight;
 };

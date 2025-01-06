@@ -10,6 +10,7 @@ import { RootStackParamList } from './types';
 import ConfirmPubkyScreen from '../screens/ConfirmPubky';
 import { useSelector } from 'react-redux';
 import {
+	getNavigationAnimation,
 	getShowOnboarding,
 } from '../store/selectors/settingsSelectors.ts';
 import SettingsScreen from '../screens/SettingsScreen.tsx';
@@ -18,6 +19,7 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = (): ReactElement => {
 	const showOnboarding = useSelector(getShowOnboarding);
+	const navigationAnimation = useSelector(getNavigationAnimation);
 	const theme = useTheme();
 	const initialRoute = useMemo(() => {
 		return showOnboarding ? 'Onboarding' : 'Home';
@@ -29,7 +31,7 @@ const RootNavigator = (): ReactElement => {
 				initialRouteName={initialRoute}
 				screenOptions={{
 					headerShown: false,
-					animation: 'slide_from_right',
+					animation: navigationAnimation,
 					animationDuration: 200,
 				}}>
 				<Stack.Screen

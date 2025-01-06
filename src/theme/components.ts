@@ -29,6 +29,18 @@ export const ActionSheetContainer = styled(
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 	},
+	indicatorStyle: {
+		width: 32,
+		height: 4,
+		backgroundColor: '#ccc',
+		borderRadius: 2,
+		marginVertical: 12,
+	},
+	gestureEnabled: true,
+	defaultOverlayOpacity: 0.3,
+	statusBarTranslucent: true,
+	drawUnderStatusBar: false,
+	springOffset: 50,
 }))``;
 
 export const TextInput = styled.TextInput`

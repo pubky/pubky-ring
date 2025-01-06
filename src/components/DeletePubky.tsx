@@ -6,7 +6,6 @@ import React, {
 } from 'react';
 import {
 	StyleSheet,
-	Platform,
 } from 'react-native';
 import {
 	View,
@@ -17,6 +16,9 @@ import {
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
 import PubkyCard from './PubkyCard.tsx';
+import { useSelector } from 'react-redux';
+import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
+import { ENavigationAnimation } from '../types/settings.ts';
 
 const DeletePubky = ({ payload }: {
 	payload: {
@@ -24,6 +26,7 @@ const DeletePubky = ({ payload }: {
 		onDelete: () => void;
 	};
 }): ReactElement => {
+	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { onDelete } = useMemo(() => payload, [payload]);
 	const publicKey = useMemo(() => payload?.publicKey ?? '', [payload]);
 
@@ -31,17 +34,14 @@ const DeletePubky = ({ payload }: {
 		SheetManager.hide('delete-pubky').then();
 	}, []);
 
+	const animated = useMemo(() => navigationAnimation !== ENavigationAnimation.fade, [navigationAnimation]);
+
 	return (
 		<ActionSheetContainer
 			id="delete-pubky"
-			gestureEnabled={true}
-			indicatorStyle={styles.indicator}
 			onClose={closeSheet}
-			defaultOverlayOpacity={0.3}
-			statusBarTranslucent
-			drawUnderStatusBar={false}
-			springOffset={50}
-			keyboardHandlerEnabled={Platform.OS === 'ios'}
+			keyboardHandlerEnabled={false}
+			animated={animated}
 		>
 			<View style={styles.content}>
 				<Text style={styles.title}>Delete Pubky</Text>
@@ -72,14 +72,7 @@ const styles = StyleSheet.create({
 	content: {
 		paddingHorizontal: 20,
 		paddingBottom: 34,
-	},
-	indicator: {
-		width: 32,
-		height: 4,
-		backgroundColor: '#ccc',
-		borderRadius: 2,
-		marginTop: 12,
-		marginBottom: 20,
+		marginTop: 20,
 	},
 	title: {
 		fontSize: 20,

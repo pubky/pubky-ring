@@ -1,27 +1,21 @@
-import React, {
-	memo,
-	ReactElement,
-	useMemo,
-	useState,
-} from 'react';
+import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
+import { Keyboard, Platform, StyleSheet } from 'react-native';
 import {
-	StyleSheet,
-	Platform,
-	Keyboard,
-} from 'react-native';
-import {
-	View,
-	Text,
-	TouchableOpacity,
 	ActionSheetContainer,
-	TextInput,
 	Eye,
 	EyeOff,
 	KeyRound,
 	SessionText,
+	Text,
+	TextInput,
+	TouchableOpacity,
+	View,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncatePubky } from '../utils/pubky.ts';
+import { useSelector } from 'react-redux';
+import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
+import { ENavigationAnimation } from '../types/settings.ts';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -48,6 +42,7 @@ const BackupPrompt = ({ payload }: {
         onClose: () => void;
     };
 }): ReactElement => {
+	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string>('');
@@ -61,7 +56,7 @@ const BackupPrompt = ({ payload }: {
 		return res.startsWith('pk:') ? res.slice(3) : res;
 	}, [pubky]);
 
-	const handleSubmit = (): void => {
+	const handleSubmit = useCallback(() => {
 		// Only validate password length for backup creation
 		if (viewId === EBackupPromptViewId.backup && password.length < 6) {
 			setError('Password must be at least 6 characters long');
@@ -74,7 +69,7 @@ const BackupPrompt = ({ payload }: {
 			setPassword('');
 			setError('');
 		}
-	};
+	}, [onSubmit, password, viewId]);
 
 	const title = useMemo(() => {
 		switch (viewId) {
@@ -136,20 +131,17 @@ const BackupPrompt = ({ payload }: {
 		}
 	}, [fileDate, fileName, truncatedPubky, viewId]);
 
+	const animated = useMemo(() => navigationAnimation !== ENavigationAnimation.fade, [navigationAnimation]);
+
 	return (
 		<ActionSheetContainer
 			id="backup-prompt"
-			gestureEnabled={true}
-			indicatorStyle={styles.indicator}
+			animated={animated}
 			onClose={() => {
 				onClose();
 				setPassword('');
 				setError('');
 			}}
-			defaultOverlayOpacity={0.3}
-			statusBarTranslucent
-			drawUnderStatusBar={false}
-			springOffset={50}
 			keyboardHandlerEnabled={Platform.OS === 'ios'}
 		>
 			<View style={styles.content}>
@@ -206,14 +198,7 @@ const styles = StyleSheet.create({
 		maxHeight: '80%',
 		paddingHorizontal: 24,
 		paddingBottom: 24,
-	},
-	indicator: {
-		width: 32,
-		height: 4,
-		backgroundColor: '#ccc',
-		borderRadius: 2,
-		marginTop: 12,
-		marginBottom: 20,
+		marginTop: 20,
 	},
 	title: {
 		fontSize: 17,

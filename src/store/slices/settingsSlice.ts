@@ -1,11 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { ETheme, SettingsState } from '../../types/settings.ts';
-
-const initialState: SettingsState = {
-	theme: ETheme.system,
-	showOnboarding: true,
-	autoAuth: false,
-};
+import { ENavigationAnimation, ETheme } from '../../types/settings.ts';
+import { initialState } from '../shapes/settings.ts';
 
 const settingsSlice = createSlice({
 	name: 'settings',
@@ -20,6 +15,9 @@ const settingsSlice = createSlice({
 		updateAutoAuth: (state, action: PayloadAction<{ autoAuth: boolean }>) => {
 			state.autoAuth = action.payload.autoAuth;
 		},
+		updateNavigationAnimation: (state, action: PayloadAction<{ navigationAnimation: ENavigationAnimation }>) => {
+			state.navigationAnimation = action.payload.navigationAnimation;
+		},
 	},
 });
 
@@ -27,6 +25,7 @@ export const {
 	updateTheme,
 	updateShowOnboarding,
 	updateAutoAuth,
+	updateNavigationAnimation,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

@@ -29,13 +29,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 		<ActionSheetContainer
 			id="camera"
 			animated={true}
-			containerStyle={styles.container}
-			gestureEnabled={true}
-			indicatorStyle={styles.indicator}
 			onClose={onClose}
-			defaultOverlayOpacity={0.3}
-			statusBarTranslucent
-			drawUnderStatusBar={false}
 			openAnimationConfig={openAnimationConfig}
 		>
 			<View style={styles.cameraContainer}>
@@ -47,20 +41,10 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 });
 
 const styles = StyleSheet.create({
-	container: {
-		height: '98%',
-	},
 	cameraContainer: {
 		height: '96%',
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
-	},
-	indicator: {
-		width: 32,
-		height: 4,
-		backgroundColor: '#ccc',
-		borderRadius: 2,
-		marginVertical: 12,
 	},
 });
 

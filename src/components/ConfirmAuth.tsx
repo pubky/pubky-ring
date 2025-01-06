@@ -1,32 +1,16 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useState,
-	useEffect,
-} from 'react';
-import { Alert, Image, StyleSheet } from 'react-native';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Dimensions, Image, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import {
-	ActionSheetContainer,
-	Text,
-	SessionText,
-	View,
-	ActionButton,
-	Folder,
-	AnimatedView,
-} from '../theme/components';
+import { ActionButton, ActionSheetContainer, AnimatedView, Folder, SessionText, Text, View } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { showToast } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
-import {
-	withTiming,
-	useAnimatedStyle,
-	useSharedValue,
-} from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
+import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
+import { ENavigationAnimation } from '../types/settings.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -39,6 +23,8 @@ interface Capability {
 	path: string;
 	permission: string;
 }
+
+const { height } = Dimensions.get('window');
 
 const Permission = memo(({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
 	const hasReadPermission = capability.permission.includes('r');
@@ -63,6 +49,7 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 
 const FADE_DURATION = 200;
 const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
+	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete } = payload;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
@@ -129,15 +116,16 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		SheetManager.hide('confirm-auth');
 	}, []);
 
+	const showImage = useMemo(() => {
+		return height >= 700;
+	}, []);
+
+	const animated = useMemo(() => navigationAnimation !== ENavigationAnimation.fade, [navigationAnimation]);
+
 	return (
 		<ActionSheetContainer
 			id="confirm-auth"
-			containerStyle={styles.container}
-			gestureEnabled
-			indicatorStyle={styles.indicator}
-			defaultOverlayOpacity={0.3}
-			statusBarTranslucent
-			drawUnderStatusBar={false}>
+			animated={animated}>
 			<View style={styles.content}>
 				<View style={styles.titleContainer}>
 					<Text style={styles.title}>
@@ -163,14 +151,16 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 					))}
 				</View>
 
-				<View style={styles.imageContainer}>
-					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-						<Image
-							source={require('../images/check.png')}
-							style={styles.keyImage}
-						/>
-					</AnimatedView>
-				</View>
+				{showImage && (
+					<View style={styles.imageContainer}>
+						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+							<Image
+								source={require('../images/check.png')}
+								style={styles.keyImage}
+							/>
+						</AnimatedView>
+					</View>
+				)}
 
 				<View style={styles.footerContainer}>
 					<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Authorized with Pubky' : 'Authorize With Pubky'}</SessionText>
@@ -208,8 +198,6 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 });
 
 const styles = StyleSheet.create({
-	container: {
-	},
 	content: {
 		paddingHorizontal: 12,
 		paddingTop: 20,
@@ -228,13 +216,6 @@ const styles = StyleSheet.create({
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		alignSelf: 'center',
-	},
-	indicator: {
-		width: 32,
-		height: 4,
-		backgroundColor: '#ccc',
-		borderRadius: 2,
-		marginVertical: 12,
 	},
 	section: {
 		marginBottom: 24,
@@ -292,7 +273,7 @@ const styles = StyleSheet.create({
 	imageContainer: {
 		justifyContent: 'center',
 		alignItems: 'center',
-		height: 200,
+		height: 150,
 		width: '100%',
 		position: 'relative',
 	},
@@ -301,8 +282,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	keyImage: {
-		width: 200,
-		height: 200,
+		width: 150,
+		height: 150,
 		resizeMode: 'contain',
 	},
 	button: {

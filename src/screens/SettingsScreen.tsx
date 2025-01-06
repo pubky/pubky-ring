@@ -13,10 +13,10 @@ import {
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAutoAuth, getTheme } from '../store/selectors/settingsSelectors.ts';
+import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
 import { setTheme } from '../theme/helpers.ts';
-import { ETheme } from '../types/settings.ts';
-import { updateAutoAuth } from '../store/slices/settingsSlice.ts';
+import { ENavigationAnimation, ETheme } from '../types/settings.ts';
+import { updateAutoAuth, updateNavigationAnimation } from '../store/slices/settingsSlice.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
@@ -24,6 +24,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 	const dispatch = useDispatch();
 	const currentTheme = useSelector(getTheme);
 	const autoAuth = useSelector(getAutoAuth);
+	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 
 	const leftButton = useCallback(() => (
@@ -50,6 +51,14 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 
 	const themeDisplayText = useMemo(() => getThemeDisplayText(currentTheme), [currentTheme, getThemeDisplayText]);
 
+	const navigationAnimationText = useMemo(() => {
+		const animationText = {
+			[ENavigationAnimation.slideFromRight]: 'Slide From Right',
+			[ENavigationAnimation.fade]: 'Fade',
+		};
+		return animationText[navigationAnimation] || 'Slide From Right';
+	}, [navigationAnimation]);
+
 	const handleThemePress = useCallback(() => {
 		switch (currentTheme) {
 			case ETheme.system:
@@ -63,6 +72,17 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 				break;
 		}
 	}, [currentTheme, dispatch]);
+
+	const handleNavigationAnimationPress = useCallback(() => {
+		switch (navigationAnimation) {
+			case ENavigationAnimation.slideFromRight:
+				dispatch(updateNavigationAnimation({ navigationAnimation: ENavigationAnimation.fade }));
+				break;
+			case ENavigationAnimation.fade:
+				dispatch(updateNavigationAnimation({ navigationAnimation: ENavigationAnimation.slideFromRight }));
+				break;
+		}
+	}, [dispatch, navigationAnimation]);
 
 	const handleAutoAuthToggle = useCallback(() => {
 		dispatch(updateAutoAuth({ autoAuth: !enableAutoAuth }));
@@ -84,6 +104,18 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						<Text style={styles.settingTitle}>Theme</Text>
 						<SessionText style={styles.themeValue}>
 							{themeDisplayText}
+						</SessionText>
+					</ActionButton>
+				</Card>
+
+				<Card style={styles.section}>
+					<ActionButton
+						onPress={handleNavigationAnimationPress}
+						style={styles.navigationAnimationButton}
+					>
+						<Text style={styles.settingTitle}>Navigation Animation</Text>
+						<SessionText style={styles.themeValue}>
+							{navigationAnimationText}
 						</SessionText>
 					</ActionButton>
 				</Card>
@@ -155,6 +187,13 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 	},
 	themeButton: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		padding: 16,
+		width: '100%',
+	},
+	navigationAnimationButton: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',

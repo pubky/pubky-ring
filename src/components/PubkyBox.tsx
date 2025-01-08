@@ -18,33 +18,36 @@ import {
 	AuthorizeButton,
 	ArrowRight,
 	CardView,
+	Button,
 } from '../theme/components.ts';
 import { truncatePubky } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
 import { Result } from '@synonymdev/result';
 
 interface PubkyBoxProps {
-  pubky: string;
-  pubkyData: Pubky;
-  sessionsCount?: number;
-  onQRPress: ({
-	  pubky,
-	  dispatch,
-	  onComplete,
-  }: {
-	  pubky: string,
-	  dispatch: Dispatch,
-	  onComplete?: () => void,
-  }) => Promise<string>;
-  onCopyClipboard: ({
-	  pubky,
-	  dispatch,
-  }: {
-	  pubky: string,
-	  dispatch: Dispatch,
-  }) => Promise<Result<string>>;
-  onPress: (data: string) => void;
-  index: number;
+	pubky: string;
+	pubkyData: Pubky;
+	sessionsCount?: number;
+	onQRPress: ({
+		pubky,
+		dispatch,
+		onComplete,
+	}: {
+		pubky: string;
+		dispatch: Dispatch;
+		onComplete?: () => void;
+	}) => Promise<string>;
+	onCopyClipboard: ({
+		pubky,
+		dispatch,
+	}: {
+		pubky: string;
+		dispatch: Dispatch;
+	}) => Promise<Result<string>>;
+	onPress: (data: string) => void;
+	index?: number;
+	onLongPress?: () => void;
+	disabled?: boolean;
 }
 
 const PubkyBox = ({
@@ -55,6 +58,8 @@ const PubkyBox = ({
 	onCopyClipboard,
 	onPress,
 	index,
+	onLongPress,
+	disabled,
 }: PubkyBoxProps): ReactElement => {
 	const [isQRLoading, setIsQRLoading] = useState(false);
 	const [isClipboardLoading, setIsClipboardLoading] = useState(false);
@@ -92,61 +97,81 @@ const PubkyBox = ({
 
 	return (
 		<Card style={styles.container}>
-			<Box onPress={handleOnPress} hitSlop={40} style={styles.box} activeOpacity={0.7}>
-				<ForegroundView style={styles.profileImageContainer}>
-					<NavView style={styles.profileImage}>
-						<Jdenticon value={publicKey} size={38} />
-					</NavView>
-				</ForegroundView>
+			<Button
+				activeOpacity={0.7}
+				onPress={handleOnPress}
+				onLongPress={onLongPress}
+				style={styles.wrapper}>
+				<Box
+					onPress={handleOnPress}
+					onLongPress={onLongPress}
+					disabled={disabled}
+					hitSlop={40}
+					style={styles.box}
+					activeOpacity={0.7}
+				>
+					<ForegroundView style={styles.profileImageContainer}>
+						<NavView style={styles.profileImage}>
+							<Jdenticon value={publicKey} size={38} />
+						</NavView>
+					</ForegroundView>
 
-				<View style={styles.contentContainer}>
-					<Text style={styles.nameText} numberOfLines={1}>
-						{pubkyData.name || `pubky #${index + 1}`}
-					</Text>
-					<Card style={styles.row}>
-						<SessionText style={styles.pubkyText}>
-							pk:{truncatePubky(pubky)}
-						</SessionText>
-						{sessionsCount > 0 && (<CardView style={styles.sessionsButton}>
-							<SessionText style={styles.buttonText}>{sessionsCount}</SessionText>
-						</CardView>)}
-					</Card>
-				</View>
+					<View style={styles.contentContainer}>
+						<Text style={styles.nameText} numberOfLines={1}>
+							{pubkyData.name || `pubky #${index ? index + 1 : 1}`}
+						</Text>
+						<Card style={styles.row}>
+							<SessionText style={styles.pubkyText}>
+								pk:{truncatePubky(pubky)}
+							</SessionText>
+							{sessionsCount > 0 && (
+								<CardView style={styles.sessionsButton}>
+									<SessionText style={styles.buttonText}>{sessionsCount}</SessionText>
+								</CardView>
+							)}
+						</Card>
+					</View>
 
-				<ForegroundView style={styles.buttonArrow}>
-					<ArrowRight size={24} />
+					<ForegroundView style={styles.buttonArrow}>
+						<ArrowRight size={24} />
+					</ForegroundView>
+				</Box>
+
+				<ForegroundView style={styles.buttonsContainer}>
+					<CardButton
+						style={[
+							styles.actionButton2,
+							isClipboardLoading && styles.actionButtonDisabled,
+						]}
+						onPress={handleCopyClipboard}
+						onLongPress={onLongPress}
+						disabled={isClipboardLoading}
+					>
+						{isClipboardLoading ? (
+							<ActivityIndicator size="small" />
+						) : (
+							<Clipboard size={16} />
+						)}
+						<Text style={styles.buttonText}>Paste</Text>
+					</CardButton>
+
+					<AuthorizeButton
+						style={[
+							styles.actionButton,
+							isQRLoading && styles.actionButtonDisabled,
+						]}
+						onPress={handleQRPress}
+						onLongPress={onLongPress}
+						disabled={isQRLoading}>
+						{isQRLoading ? (
+							<ActivityIndicator size="small" />
+						) : (
+							<QrCode size={16} />
+						)}
+						<Text style={styles.buttonText}>Authorize</Text>
+					</AuthorizeButton>
 				</ForegroundView>
-			</Box>
-			<ForegroundView style={styles.buttonsContainer}>
-				<CardButton
-					style={[
-						styles.actionButton2,
-						isClipboardLoading && styles.actionButtonDisabled,
-					]}
-					onPress={handleCopyClipboard}
-					disabled={isClipboardLoading}>
-					{isClipboardLoading ? (
-						<ActivityIndicator size="small" />
-					) : (
-						<Clipboard size={16} />
-					)}
-					<Text style={styles.buttonText}>Paste</Text>
-				</CardButton>
-				<AuthorizeButton
-					style={[
-						styles.actionButton,
-						isQRLoading && styles.actionButtonDisabled,
-					]}
-					onPress={handleQRPress}
-					disabled={isQRLoading}>
-					{isQRLoading ? (
-						<ActivityIndicator size="small" />
-					) : (
-						<QrCode size={16} />
-					)}
-					<Text style={styles.buttonText}>Authorize</Text>
-				</AuthorizeButton>
-			</ForegroundView>
+			</Button>
 		</Card>
 	);
 };
@@ -156,7 +181,6 @@ const styles = StyleSheet.create({
 		width: '90%',
 		borderRadius: 16,
 		alignSelf: 'center',
-		padding: 24,
 		shadowColor: '#000',
 		shadowOffset: {
 			width: 0,
@@ -166,6 +190,10 @@ const styles = StyleSheet.create({
 		shadowRadius: 2,
 		elevation: 2,
 		marginBottom: 20,
+	},
+	wrapper: {
+		borderRadius: 16,
+		padding: 20,
 	},
 	box: {
 		backgroundColor: 'transparent',
@@ -185,8 +213,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	contentContainer: {
-		flex: 1,
 		justifyContent: 'center',
+		alignItems: 'flex-start',
 		backgroundColor: 'transparent',
 	},
 	nameText: {
@@ -208,11 +236,10 @@ const styles = StyleSheet.create({
 	},
 	buttonsContainer: {
 		marginTop: 20,
-		justifyContent: 'center',
+		justifyContent: 'space-evenly',
 		backgroundColor: 'transparent',
 		display: 'flex',
 		flexDirection: 'row',
-		gap: 12,
 		width: '100%',
 	},
 	sessionsButton: {

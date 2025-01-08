@@ -32,7 +32,7 @@ function App(): React.JSX.Element {
 	return (
 		<ThemeProvider theme={theme}>
 			<SafeAreaView>
-				<SheetProvider context="global">
+				<SheetProvider>
 					<RootNavigator />
 					<Toast config={toastConfig} />
 				</SheetProvider>

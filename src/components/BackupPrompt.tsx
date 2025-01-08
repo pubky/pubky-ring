@@ -15,7 +15,6 @@ import Button from '../components/Button.tsx';
 import { truncatePubky } from '../utils/pubky.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { ENavigationAnimation } from '../types/settings.ts';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -131,69 +130,78 @@ const BackupPrompt = ({ payload }: {
 		}
 	}, [fileDate, fileName, truncatedPubky, viewId]);
 
-	const animated = useMemo(() => navigationAnimation !== ENavigationAnimation.fade, [navigationAnimation]);
-
 	return (
-		<ActionSheetContainer
-			id="backup-prompt"
-			animated={animated}
-			onClose={() => {
-				onClose();
-				setPassword('');
-				setError('');
-			}}
-			keyboardHandlerEnabled={Platform.OS === 'ios'}
-		>
-			<View style={styles.content}>
-				<Text style={styles.title}>{title}</Text>
-				<View style={styles.messageContainer}>
-					<Text style={styles.message}>
-						{message}
-					</Text>
-				</View>
-				{content}
-				<View style={styles.inputContainer}>
-					<TextInput
-						style={[styles.input, error ? styles.inputError : null]}
-						secureTextEntry={!showPassword}
-						value={password}
-						onChangeText={setPassword}
-						placeholder="Enter passphrase"
-						placeholderTextColor="#999"
-						autoFocus
-						onSubmitEditing={handleSubmit}
-						autoCapitalize="none"
-					/>
-					<TouchableOpacity
-						style={styles.eyeButton}
-						onPress={() => setShowPassword(!showPassword)}
-						activeOpacity={0.7}
-					>
-						{showPassword ? (<Eye size={20} />) : (<EyeOff size={20} />)}
-					</TouchableOpacity>
-				</View>
-				{error ? (
-					<Text style={styles.errorText}>{error}</Text>
+		<View style={styles.container}>
+			<ActionSheetContainer
+				id="backup-prompt"
+				navigationAnimation={navigationAnimation}
+				onClose={() => {
+					onClose();
+					setPassword('');
+					setError('');
+				}}
+				keyboardHandlerEnabled={Platform.OS === 'ios'}
+			>
+				<View style={styles.content}>
+					<Text style={styles.title}>{title}</Text>
+					<View style={styles.messageContainer}>
+						<Text style={styles.message}>
+							{message}
+						</Text>
+					</View>
+					{content}
+					<View style={styles.inputContainer}>
+						<TextInput
+							style={[styles.input, error ? styles.inputError : null]}
+							secureTextEntry={!showPassword}
+							value={password}
+							onChangeText={setPassword}
+							placeholder="Enter passphrase"
+							placeholderTextColor="#999"
+							autoFocus
+							onSubmitEditing={handleSubmit}
+							autoCapitalize="none"
+						/>
+						<TouchableOpacity
+							style={styles.eyeButton}
+							onPress={() => setShowPassword(!showPassword)}
+							activeOpacity={0.7}
+						>
+							{showPassword ? (<Eye size={20} />) : (<EyeOff size={20} />)}
+						</TouchableOpacity>
+					</View>
+					{error ? (
+						<Text style={styles.errorText}>{error}</Text>
 				) : null}
-				<View style={styles.buttonContainer}>
-					<Button
-						text={'Cancel'}
-						style={styles.button}
-						onPress={onClose}
-					/>
-					<Button
-						text={submitButtonText}
-						style={[styles.button, styles.submitButton]}
-						onPress={handleSubmit}
-						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
-					/>
+					<View style={styles.buttonContainer}>
+						<Button
+							text={'Cancel'}
+							style={styles.button}
+							onPress={onClose}
+						/>
+						<Button
+							text={submitButtonText}
+							style={[styles.button, styles.submitButton]}
+							onPress={handleSubmit}
+							disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
+						/>
+					</View>
 				</View>
-			</View>
-		</ActionSheetContainer>
+			</ActionSheetContainer>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
+	// TODO: Eventially remove the absolute positioned container View.
+	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
+	container: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'transparent',
+		height: '100%',
+		width: '100%',
+		zIndex: 100,
+	},
 	content: {
 		maxHeight: '80%',
 		paddingHorizontal: 24,
@@ -258,7 +266,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 	},
 	button: {
-		width: '45%',
+		width: '47%',
 	},
 	submitButton: {
 		borderWidth: 1,

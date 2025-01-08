@@ -10,7 +10,6 @@ import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { ENavigationAnimation } from '../types/settings.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -120,84 +119,93 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		return height >= 700;
 	}, []);
 
-	const animated = useMemo(() => navigationAnimation !== ENavigationAnimation.fade, [navigationAnimation]);
-
 	return (
-		<ActionSheetContainer
-			id="confirm-auth"
-			animated={animated}>
-			<View style={styles.content}>
-				<View style={styles.titleContainer}>
-					<Text style={styles.title}>
-						{isAuthorized ? 'Authorized' : 'Authorize'}
-					</Text>
-				</View>
-
-				<View style={styles.section}>
-					<SessionText style={styles.warningText}>
-						{isAuthorized ? 'Successfully granted permission to manage your data.' : 'Make sure you trust this service, browser, or device before granting permission to manage your data.'}
-					</SessionText>
-				</View>
-
-				<View style={styles.section}>
-					<SessionText style={styles.sectionTitle}>Relay</SessionText>
-					<Text style={styles.relayText}>{authDetails.relay}</Text>
-				</View>
-
-				<View style={styles.permissionsSection}>
-					<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
-					{authDetails.capabilities.map((capability, index) => (
-						<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
-					))}
-				</View>
-
-				{showImage && (
-					<View style={styles.imageContainer}>
-						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-							<Image
-								source={require('../images/check.png')}
-								style={styles.keyImage}
-							/>
-						</AnimatedView>
+		<View style={styles.container}>
+			<ActionSheetContainer
+				id="confirm-auth"
+				navigationAnimation={navigationAnimation}>
+				<View style={styles.content}>
+					<View style={styles.titleContainer}>
+						<Text style={styles.title}>
+							{isAuthorized ? 'Authorized' : 'Authorize'}
+						</Text>
 					</View>
-				)}
 
-				<View style={styles.footerContainer}>
-					<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Authorized with Pubky' : 'Authorize With Pubky'}</SessionText>
-					<PubkyCard publicKey={pubky} />
-					<View style={styles.buttonContainer}>
-						{!isAuthorized ? (
-							<>
-								<ActionButton
-									style={styles.denyButton}
-									onPressIn={handleClose}
-									activeOpacity={0.7}
-								>
-									<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
-								</ActionButton>
+					<View style={styles.section}>
+						<SessionText style={styles.warningText}>
+							{isAuthorized ? 'Successfully granted permission to manage your data.' : 'Make sure you trust this service, browser, or device before granting permission to manage your data.'}
+						</SessionText>
+					</View>
 
-								<ActionButton
-									style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
-									onPressIn={handleAuth}
-									disabled={authorizing}
-									activeOpacity={0.7}
-								>
-									<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
-								</ActionButton>
-							</>
+					<View style={styles.section}>
+						<SessionText style={styles.sectionTitle}>Relay</SessionText>
+						<Text style={styles.relayText}>{authDetails.relay}</Text>
+					</View>
+
+					<View style={styles.permissionsSection}>
+						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
+						{authDetails.capabilities.map((capability, index) => (
+							<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
+						))}
+					</View>
+
+					{showImage && (
+						<View style={styles.imageContainer}>
+							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+								<Image
+									source={require('../images/check.png')}
+									style={styles.keyImage}
+								/>
+							</AnimatedView>
+						</View>
+					)}
+
+					<View style={styles.footerContainer}>
+						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Authorized with Pubky' : 'Authorize With Pubky'}</SessionText>
+						<PubkyCard publicKey={pubky} />
+						<View style={styles.buttonContainer}>
+							{!isAuthorized ? (
+								<>
+									<ActionButton
+										style={styles.denyButton}
+										onPressIn={handleClose}
+										activeOpacity={0.7}
+									>
+										<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+									</ActionButton>
+
+									<ActionButton
+										style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
+										onPressIn={handleAuth}
+										disabled={authorizing}
+										activeOpacity={0.7}
+									>
+										<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
+									</ActionButton>
+								</>
 						) : (
 							<ActionButton style={styles.okButton} onPressIn={handleClose}>
 								<Text style={styles.buttonText}>OK</Text>
 							</ActionButton>
 						)}
+						</View>
 					</View>
 				</View>
-			</View>
-		</ActionSheetContainer>
+			</ActionSheetContainer>
+		</View>
 	);
 });
 
 const styles = StyleSheet.create({
+	// TODO: Eventially remove the absolute positioned container View.
+	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
+	container: {
+		...StyleSheet.absoluteFillObject,
+		backgroundColor: 'transparent',
+		height: '100%',
+		width: '100%',
+		zIndex: 100,
+	},
 	content: {
 		paddingHorizontal: 12,
 		paddingTop: 20,

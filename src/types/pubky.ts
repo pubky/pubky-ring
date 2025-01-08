@@ -13,7 +13,9 @@ export interface Pubky {
 }
 
 export interface PubkyState {
-	pubkys: {
-		[key: string]: Pubky
-	}
+	pubkys: TPubkys
 }
+
+export type TPubkys = {
+	[key: string]: Pubky
+};

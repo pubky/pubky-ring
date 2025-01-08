@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
+	Pubky,
 	PubkySession,
 } from '../../types/pubky';
 import { initialState, defaultPubkyState } from '../shapes/pubky.ts';
@@ -65,6 +66,9 @@ const pubkysSlice = createSlice({
 		removePubky: (state, action: PayloadAction<string>) => {
 			delete state.pubkys[action.payload];
 		},
+		reorderPubkys: (state, action: PayloadAction<{ [key: string]: Pubky }>) => {
+			state.pubkys = action.payload;
+		},
 	},
 });
 
@@ -77,6 +81,7 @@ export const {
 	addSession,
 	removeSession,
 	removePubky,
+	reorderPubkys,
 } = pubkysSlice.actions;
 
 export default pubkysSlice.reducer;

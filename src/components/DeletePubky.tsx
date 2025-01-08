@@ -18,7 +18,7 @@ import { SheetManager } from 'react-native-actions-sheet';
 import PubkyCard from './PubkyCard.tsx';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { ENavigationAnimation } from '../types/settings.ts';
+import absoluteFillObject = StyleSheet.absoluteFillObject;
 
 const DeletePubky = ({ payload }: {
 	payload: {
@@ -34,41 +34,50 @@ const DeletePubky = ({ payload }: {
 		SheetManager.hide('delete-pubky').then();
 	}, []);
 
-	const animated = useMemo(() => navigationAnimation !== ENavigationAnimation.fade, [navigationAnimation]);
-
 	return (
-		<ActionSheetContainer
-			id="delete-pubky"
-			onClose={closeSheet}
-			keyboardHandlerEnabled={false}
-			animated={animated}
-		>
-			<View style={styles.content}>
-				<Text style={styles.title}>Delete Pubky</Text>
-				<SessionText style={styles.message}>
-					Are you sure you want to delete this pubky?
-				</SessionText>
-				<PubkyCard publicKey={publicKey} />
-				<View style={styles.buttonContainer}>
-					<Button
-						text="Cancel"
-						style={[styles.button, styles.cancelButton]}
-						textStyle={styles.buttonText}
-						onPress={closeSheet}
-					/>
-					<Button
-						text="Delete"
-						style={[styles.button, styles.deleteButton]}
-						textStyle={styles.buttonText}
-						onPress={onDelete}
-					/>
+		<View style={styles.container}>
+			<ActionSheetContainer
+				id="delete-pubky"
+				onClose={closeSheet}
+				keyboardHandlerEnabled={false}
+				navigationAnimation={navigationAnimation}
+			>
+				<View style={styles.content}>
+					<Text style={styles.title}>Delete Pubky</Text>
+					<SessionText style={styles.message}>
+						Are you sure you want to delete this pubky?
+					</SessionText>
+					<PubkyCard publicKey={publicKey} />
+					<View style={styles.buttonContainer}>
+						<Button
+							text="Cancel"
+							style={[styles.button, styles.cancelButton]}
+							textStyle={styles.buttonText}
+							onPress={closeSheet}
+						/>
+						<Button
+							text="Delete"
+							style={[styles.button, styles.deleteButton]}
+							textStyle={styles.buttonText}
+							onPress={onDelete}
+						/>
+					</View>
 				</View>
-			</View>
-		</ActionSheetContainer>
+			</ActionSheetContainer>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
+	// TODO: Eventially remove the absolute positioned container View.
+	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
+	container: {
+		...absoluteFillObject,
+		backgroundColor: 'transparent',
+		height: '100%',
+		width: '100%',
+		zIndex: 100,
+	},
 	content: {
 		paddingHorizontal: 20,
 		paddingBottom: 34,

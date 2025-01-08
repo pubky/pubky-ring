@@ -53,10 +53,10 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 
 	const navigationAnimationText = useMemo(() => {
 		const animationText = {
-			[ENavigationAnimation.slideFromRight]: 'Slide From Right',
+			[ENavigationAnimation.slideFromRight]: 'Slide',
 			[ENavigationAnimation.fade]: 'Fade',
 		};
-		return animationText[navigationAnimation] || 'Slide From Right';
+		return animationText[navigationAnimation] || 'Slide';
 	}, [navigationAnimation]);
 
 	const handleThemePress = useCallback(() => {

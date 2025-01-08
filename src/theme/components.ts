@@ -16,11 +16,20 @@ import {
 } from 'lucide-react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import Animated from 'react-native-reanimated';
+import { ENavigationAnimation } from '../types/settings.ts';
 
 interface ActionSheetContainerProps {
   backgroundColor?: string;
 }
 
+const fadeAnimationConfig = {
+	speed: 2000,
+};
+const openAnimationConfig = {
+	tension: 500,
+	friction: 50,
+	velocity: 0,
+};
 export const ActionSheetContainer = styled(
 	ActionSheet,
 ).attrs<ActionSheetContainerProps>(props => ({
@@ -41,6 +50,9 @@ export const ActionSheetContainer = styled(
 	statusBarTranslucent: true,
 	drawUnderStatusBar: false,
 	springOffset: 50,
+	animated: true,
+	openAnimationConfig: props?.navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : openAnimationConfig,
+	closeAnimationConfig: props?.navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : undefined,
 }))``;
 
 export const TextInput = styled.TextInput`

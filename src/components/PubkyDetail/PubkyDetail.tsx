@@ -83,6 +83,9 @@ export const PubkyDetail = ({
 				publicKey,
 				onDelete,
 			},
+			onClose: () => {
+				SheetManager.hide('delete-pubky');
+			},
 		});
 	}, [onDelete, publicKey]);
 

@@ -107,7 +107,10 @@ export const handleAuth = async (pubky: string, authUrl: string): Promise<Result
 				onComplete: async (): Promise<void> => {
 				},
 			},
-		}).then();
+			onClose: () => {
+				SheetManager.hide('confirm-auth');
+			},
+		});
 		return ok('success');
 	} catch (error) {
 		const description = 'Failed to parse auth details';

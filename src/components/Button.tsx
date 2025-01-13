@@ -59,6 +59,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		alignContent: 'center',
 		justifyContent: 'center',
+		gap: 8,
 	},
 	disabled: {
 		opacity: 0.5,
@@ -68,7 +69,7 @@ const styles = StyleSheet.create({
 		fontWeight: 600,
 		lineHeight: 18,
 		letterSpacing: 0.2,
-		marginLeft: 5,
+		alignSelf: 'center',
 	},
 });
 

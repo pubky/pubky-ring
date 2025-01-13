@@ -121,9 +121,9 @@ const PubkyBox = ({
 							{pubkyData.name || `pubky #${index ? index + 1 : 1}`}
 						</Text>
 						<Card style={styles.row}>
-							<SessionText style={styles.pubkyText}>
+							<Text style={styles.pubkyText}>
 								pk:{truncatePubky(pubky)}
-							</SessionText>
+							</Text>
 							{sessionsCount > 0 && (
 								<CardView style={styles.sessionsButton}>
 									<SessionText style={styles.buttonText}>{sessionsCount}</SessionText>
@@ -261,16 +261,20 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		display: 'flex',
 		flexDirection: 'row',
-		gap: 4,
+		justifyContent: 'center',
+		gap: 8,
+		width: '45%',
 	},
 	actionButton2: {
 		borderRadius: 64,
 		paddingVertical: 15,
 		paddingHorizontal: 24,
 		alignItems: 'center',
+		justifyContent: 'center',
 		display: 'flex',
 		flexDirection: 'row',
-		gap: 4,
+		gap: 8,
+		width: '45%',
 	},
 	buttonText: {
 		fontSize: 15,

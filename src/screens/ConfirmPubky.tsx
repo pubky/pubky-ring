@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
 		fontSize: 48,
 		fontWeight: 700,
 		lineHeight: 48,
+		fontFamily: 'InterTight-VariableFont_wght',
 	},
 	subtitle: {
 		color: 'rgba(255, 255, 255, 0.80)',
@@ -162,6 +163,7 @@ const styles = StyleSheet.create({
 		fontWeight: 400,
 		lineHeight: 22,
 		letterSpacing: 0.4,
+		fontFamily: 'InterTight-VariableFont_wght',
 	},
 	cardPubky: {
 		padding: 24,
@@ -195,6 +197,7 @@ const styles = StyleSheet.create({
 		lineHeight: 20,
 		letterSpacing: 0.4,
 		paddingRight: 32,
+		fontFamily: 'InterTight-VariableFont_wght',
 	},
 	buttonContainer: {
 		flexDirection: 'row',
@@ -220,6 +223,7 @@ const styles = StyleSheet.create({
 		fontWeight: 600,
 		lineHeight: 18,
 		letterSpacing: 0.2,
+		fontFamily: 'InterTight-VariableFont_wght',
 	},
 });
 

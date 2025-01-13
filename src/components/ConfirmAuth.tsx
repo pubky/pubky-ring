@@ -123,6 +123,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		<View style={styles.container}>
 			<ActionSheetContainer
 				id="confirm-auth"
+				onClose={handleClose}
 				navigationAnimation={navigationAnimation}>
 				<View style={styles.content}>
 					<View style={styles.titleContainer}>

@@ -6,7 +6,6 @@ import { ActionSheetContainer } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
-import { SheetManager } from 'react-native-actions-sheet';
 
 interface QRScannerProps {
 	onScan: (data: string) => void;
@@ -21,17 +20,12 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 		onScan(data);
 	}, [onScan]);
 
-	const handleClose = useCallback(() => {
-		SheetManager.hide('camera');
-		onClose();
-	}, [onClose]);
-
 	return (
 		<View style={styles.container}>
 			<ActionSheetContainer
 				id="camera"
 				animated={true}
-				onClose={handleClose}
+				onClose={onClose}
 				navigationAnimation={navigationAnimation}
 			>
 				<View style={styles.cameraContainer}>

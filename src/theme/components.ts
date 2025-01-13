@@ -56,8 +56,9 @@ export const ActionSheetContainer = styled(
 }))``;
 
 export const TextInput = styled.TextInput`
-  background-color: ${(props): string => props.theme.colors.background};
-  color: ${(props): string => props.theme.colors.text};
+	background-color: ${(props): string => props.theme.colors.background};
+	color: ${(props): string => props.theme.colors.text};
+	font-family: 'InterTight-VariableFont_wght';
 `;
 
 export const View = styled.View`
@@ -92,7 +93,8 @@ export const ScrollView = styled.ScrollView`
 `;
 
 export const Text = styled.Text`
-  color: ${(props): string => props.theme.colors.text};
+	color: ${(props): string => props.theme.colors.text};
+	font-family: 'InterTight-VariableFont_wght';
 `;
 
 export const SessionBox = styled.View`
@@ -129,7 +131,8 @@ export const SessionView = styled.View`
 `;
 
 export const SessionText = styled.Text`
-  color: ${(props): string => props.theme.colors.sessionText};
+	color: ${(props): string => props.theme.colors.sessionText};
+	font-family: 'InterTight-VariableFont_wght';
 `;
 
 export const Box = styled.TouchableOpacity`

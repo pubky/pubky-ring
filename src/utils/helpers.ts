@@ -33,6 +33,10 @@ export const handleScannedData = async ({
 		if (authResult.isOk()) {
 			const autoAuth = getAutoAuthFromStore();
 			if (!autoAuth) {
+				// Ensure the camera sheet is closed on iOS
+				if (Platform.OS === 'ios') {
+					await SheetManager.hide('camera');
+				}
 				return await handleAuth(pubky, data);
 			}
 

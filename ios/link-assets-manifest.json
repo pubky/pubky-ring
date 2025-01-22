@@ -1,0 +1,13 @@
+{
+  "migIndex": 1,
+  "data": [
+    {
+      "path": "assets/fonts/InterTight-Italic-VariableFont_wght.ttf",
+      "sha1": "5f313456e4a34f1453bd1800b7fc179e28746f66"
+    },
+    {
+      "path": "assets/fonts/InterTight-VariableFont_wght.ttf",
+      "sha1": "bca8b03ebdc033a5c1f7050eb217efdbc79a7639"
+    }
+  ]
+}

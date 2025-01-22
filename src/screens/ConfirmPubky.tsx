@@ -40,7 +40,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 	const { pubkys = {} } = useSelector(
 		(state: RootState): PubkyState => state.pubky,
 	);
-	const pubky = Object.values(pubkys)[0];
+	const pubky = Object.keys(pubkys)[0];
 
 	const completeOnboarding = useCallback(async () => {
 		navigation.replace('Home');
@@ -82,9 +82,9 @@ const ConfirmPubkyScreen = (): ReactElement => {
 				<View style={styles.cardPubky}>
 					<View style={styles.detailsPubkyContainer}>
 						<NavView style={styles.profileImage}>
-							<Jdenticon value={pubky.homeserver} size={60} />
+							<Jdenticon value={pubky} size={60} />
 						</NavView>
-						<Text style={styles.textPubky}>pk:{pubky.homeserver}</Text>
+						<Text style={styles.textPubky}>pk:{pubky}</Text>
 					</View>
 				</View>
 

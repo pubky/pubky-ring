@@ -91,15 +91,22 @@ export const savePubky = async (
 	dispatch: Dispatch
 ): Promise<Result<string>> => {
 	try {
-		const response = await setKeychainValue({
+		dispatch(addPubky({ pubky }));
+		// Don't await this, we don't want to block the UI for devices with slower Keychains.
+		setKeychainValue({
 			key: pubky,
 			value: secretKey,
+		}).then((response) => {
+			if (response.isErr()) {
+				console.error('Failed to save keychain value');
+				showToast({
+					type: 'error',
+					title: 'Failed to save pubky to keychain',
+					description: response.error.message,
+				});
+				deletePubky(pubky, dispatch).then();
+			}
 		});
-		if (response.isErr()) {
-			console.error('Failed to save keychain value');
-			return err('Failed to save keychain value');
-		}
-		dispatch(addPubky({ pubky }));
 		return ok(pubky);
 	} catch (e) {
 		console.error('Error saving pubky:', e);
@@ -112,13 +119,18 @@ export const deletePubky = async (
 	dispatch: Dispatch
 ): Promise<Result<string>> => {
 	try {
-		const response = await resetKeychainValue({ key: pubky });
-		if (response.isErr()) {
-			console.error('Failed to delete pubky from keychain');
-			return err('Failed to delete pubky from keychain');
-		}
-
 		dispatch(removePubky(pubky));
+		// Don't await this, we don't want to block the UI for devices with slower Keychains.
+		resetKeychainValue({ key: pubky }).then((response) => {
+			if (response.isErr()) {
+				showToast({
+					type: 'error',
+					title: 'Failed to delete pubky from keychain',
+					description: response.error.message,
+				});
+				console.error('Failed to delete pubky from keychain');
+			}
+		});
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);
@@ -216,11 +228,13 @@ export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, d
 	dispatch(removeSession({ pubky, sessionPubky }));
 };
 
-export const truncatePubky = (pubky: string): string => {
-	if (pubky.length <= 16) {
-		return pubky;
+export const truncateStr = (str: string, displayLength: number = 5): string => {
+	const minLength = displayLength * 2;
+
+	if (str.length <= minLength) {
+		return str;
 	}
-	return `${pubky.substring(0, 5)}...${pubky.substring(pubky.length - 5)}`;
+	return `${str.substring(0, displayLength)}...${str.substring(str.length - displayLength)}`;
 };
 
 const TIMEOUT_MS = 20000;

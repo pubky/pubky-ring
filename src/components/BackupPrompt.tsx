@@ -12,9 +12,10 @@ import {
 	View,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
-import { truncatePubky } from '../utils/pubky.ts';
+import { truncateStr } from '../utils/pubky.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
+import { Result } from "@synonymdev/result";
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -37,7 +38,7 @@ const BackupPrompt = ({ payload }: {
 		fileName?: string;
 		fileDate?: Date;
         viewId: EBackupPromptViewId;
-        onSubmit: (password: string) => void;
+        onSubmit: (password: string) => Promise<Result<any>>;
         onClose: () => void;
     };
 }): ReactElement => {
@@ -51,11 +52,11 @@ const BackupPrompt = ({ payload }: {
 	const pubky = useMemo(() => payload?.pubky ?? '', [payload]);
 
 	const truncatedPubky = useMemo(() => {
-		const res = truncatePubky(pubky);
+		const res = truncateStr(pubky);
 		return res.startsWith('pk:') ? res.slice(3) : res;
 	}, [pubky]);
 
-	const handleSubmit = useCallback(() => {
+	const handleSubmit = useCallback(async () => {
 		// Only validate password length for backup creation
 		if (viewId === EBackupPromptViewId.backup && password.length < 6) {
 			setError('Password must be at least 6 characters long');
@@ -64,7 +65,11 @@ const BackupPrompt = ({ payload }: {
 
 		if (password.trim()) {
 			Keyboard.dismiss();
-			onSubmit(password);
+			const res = await onSubmit(password);
+			if (res.isErr()) {
+				setError(res.error.message);
+				return;
+			}
 			setPassword('');
 			setError('');
 		}

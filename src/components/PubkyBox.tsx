@@ -20,7 +20,7 @@ import {
 	CardView,
 	Button,
 } from '../theme/components.ts';
-import { truncatePubky } from '../utils/pubky.ts';
+import { truncateStr } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
 import { Result } from '@synonymdev/result';
 
@@ -95,6 +95,10 @@ const PubkyBox = ({
 		[pubky],
 	);
 
+	const pubkyName = useMemo(() => {
+		return truncateStr(pubkyData.name, 8) || `pubky #${index ? index + 1 : 1}`;
+	}, [index, pubkyData.name]);
+
 	return (
 		<Card style={styles.container}>
 			<Button
@@ -118,11 +122,11 @@ const PubkyBox = ({
 
 					<View style={styles.contentContainer}>
 						<Text style={styles.nameText} numberOfLines={1}>
-							{pubkyData.name || `pubky #${index ? index + 1 : 1}`}
+							{pubkyName}
 						</Text>
 						<Card style={styles.row}>
 							<Text style={styles.pubkyText}>
-								pk:{truncatePubky(pubky)}
+								pk:{truncateStr(pubky)}
 							</Text>
 							{sessionsCount > 0 && (
 								<CardView style={styles.sessionsButton}>

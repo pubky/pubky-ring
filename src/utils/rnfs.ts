@@ -149,29 +149,25 @@ export const showImportPrompt = ({
 				fileName,
 				fileDate,
 				viewId: EBackupPromptViewId.import,
-				onSubmit: async (passphrase: string) => {
+				onSubmit: async (passphrase: string): Promise<Result<string>> => {
 					try {
 						const decryptRes = await decryptRecoveryFile(content, passphrase);
 						if (decryptRes.isErr()) {
-							resolve(err(`${decryptRes.error.message}`));
-							//SheetManager.hide('backup-prompt');
-							return;
+							return err(decryptRes.error.message);
 						}
 
 						const secretKey = decryptRes.value;
 						const pubky = await importPubky(secretKey, dispatch);
 						if (pubky.isErr()) {
-							resolve(err(pubky.error.message));
-							//SheetManager.hide('backup-prompt');
-							return;
+							return err(pubky.error.message);
 						}
 
 						resolve(ok(pubky.value));
 						SheetManager.hide('backup-prompt').then();
+						return ok(pubky.value);
 					} catch (error) {
 						console.error('Import error:', error);
-						resolve(err('Failed to import pubky'));
-						//SheetManager.hide('backup-prompt');
+						return err('Failed to import pubky');
 					}
 				},
 				onClose: () => {

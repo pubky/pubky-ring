@@ -1,5 +1,4 @@
 import { SheetManager } from 'react-native-actions-sheet';
-import { readFromClipboard } from './clipboard';
 import {
 	performAuth,
 	signInToHomeserver,
@@ -18,6 +17,7 @@ import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Platform } from 'react-native';
 import { getAutoAuthFromStore } from './store-helpers.ts';
+import { getKeychainValue } from './keychain.ts';
 
 export const handleScannedData = async ({
 	pubky,
@@ -35,7 +35,7 @@ export const handleScannedData = async ({
 			if (!autoAuth) {
 				// Ensure the camera sheet is closed on iOS
 				if (Platform.OS === 'ios') {
-					await SheetManager.hide('camera');
+					SheetManager.hide('camera');
 				}
 				return await handleAuth(pubky, data);
 			}
@@ -179,11 +179,9 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 
 
 export const showBackupPrompt = ({
-	secretKey,
 	pubky,
 	onComplete,
 }: {
-	secretKey: string,
 	pubky: string,
 	onComplete?: () => void
 }): void => {
@@ -193,8 +191,17 @@ export const showBackupPrompt = ({
 			pubky,
 			onSubmit: async (passphrase: string) => {
 				try {
+					const secretKeyResponse = await getKeychainValue({ key: pubky });
+					if (secretKeyResponse.isErr()) {
+						showToast({
+							type: 'error',
+							title: 'Error',
+							description: 'Could not retrieve secret key for backup',
+						});
+						return;
+					}
 					const createRecoveryFileRes = await createRecoveryFile(
-						secretKey,
+						secretKeyResponse.value,
 						passphrase
 					);
 
@@ -246,10 +253,10 @@ export const handleClipboardData = async ({
 	pubky: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
-	const clipboardContents = await readFromClipboard();
+	//const clipboardContents = await readFromClipboard();
 	return await handleScannedData({
 		pubky,
-		data: clipboardContents,
+		data: 'pubkyauth:///?caps=/pub/pubky.app/:rw,/pub/example.com/nested:rw&secret=71b6HaSQYQOPdPCebFBjXdcBjkK7ITMBQ_IgJjvnHKY&relay=https://httprelay.staging.pubky.app/link',
 		dispatch,
 	});
 };

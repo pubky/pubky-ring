@@ -1,7 +1,15 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
 import { Alert, Dimensions, Image, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import { ActionButton, ActionSheetContainer, AnimatedView, Folder, SessionText, Text, View } from '../theme/components';
+import {
+	ActionButton,
+	ActionSheetContainer,
+	AnimatedView,
+	Folder,
+	SessionText,
+	Text,
+	View,
+} from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
@@ -10,6 +18,8 @@ import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
+import Toast from 'react-native-toast-message';
+import { toastConfig } from '../theme/toastConfig.tsx';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -24,6 +34,8 @@ interface Capability {
 }
 
 const { height } = Dimensions.get('window');
+const isSmallScreen = height < 700;
+const toastStyle = { top: isSmallScreen ? -120 : -140 };
 
 const Permission = memo(({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
 	const hasReadPermission = capability.permission.includes('r');
@@ -115,10 +127,6 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		SheetManager.hide('confirm-auth');
 	}, []);
 
-	const showImage = useMemo(() => {
-		return height >= 700;
-	}, []);
-
 	return (
 		<View style={styles.container}>
 			<ActionSheetContainer
@@ -149,7 +157,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 						))}
 					</View>
 
-					{showImage && (
+					{!isSmallScreen && (
 						<View style={styles.imageContainer}>
 							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
 								<Image
@@ -191,6 +199,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 						</View>
 					</View>
 				</View>
+				<Toast config={toastConfig({ style: toastStyle })} />
 			</ActionSheetContainer>
 		</View>
 	);
@@ -371,7 +380,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		marginBottom: 24,
-		zIndex: 3,
 	},
 	title: {
 		fontSize: 24,

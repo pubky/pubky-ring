@@ -8,7 +8,6 @@ import { FlashList } from '@shopify/flash-list';
 import SessionItem from './SessionItem.tsx';
 import PubkyListHeader from './PubkyListHeader.tsx';
 import { PubkyData } from '../../navigation/types.ts';
-import { getKeychainValue } from '../../utils/keychain.ts';
 import { showBackupPrompt, showToast } from '../../utils/helpers.ts';
 import { Dispatch } from 'redux';
 import { Result } from '@synonymdev/result';
@@ -91,17 +90,7 @@ export const PubkyDetail = ({
 
 	const handleBackup = useCallback(async () => {
 		try {
-			const secretKeyResponse = await getKeychainValue({ key: pubky });
-			if (secretKeyResponse.isErr()) {
-				showToast({
-					type: 'error',
-					title: 'Error',
-					description: 'Could not retrieve secret key for backup',
-				});
-				return;
-			}
-			showBackupPrompt({ secretKey: secretKeyResponse.value, pubky });
-
+			showBackupPrompt({ pubky });
 		} catch (error) {
 			console.error('Backup process error:', error);
 			showToast({

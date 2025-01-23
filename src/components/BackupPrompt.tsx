@@ -15,7 +15,7 @@ import Button from '../components/Button.tsx';
 import { truncateStr } from '../utils/pubky.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { Result } from "@synonymdev/result";
+import { Result } from '@synonymdev/result';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -47,6 +47,7 @@ const BackupPrompt = ({ payload }: {
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string>('');
 	const { onSubmit, onClose, viewId } = useMemo(() => payload, [payload]);
+	const [loading, setLoading] = useState(false);
 	const fileName = useMemo(() => payload?.fileName ?? '', [payload]);
 	const fileDate = useMemo(() => payload?.fileDate ? formatDate(payload.fileDate) : '', [payload]);
 	const pubky = useMemo(() => payload?.pubky ?? '', [payload]);
@@ -57,21 +58,26 @@ const BackupPrompt = ({ payload }: {
 	}, [pubky]);
 
 	const handleSubmit = useCallback(async () => {
-		// Only validate password length for backup creation
-		if (viewId === EBackupPromptViewId.backup && password.length < 6) {
-			setError('Password must be at least 6 characters long');
-			return;
-		}
-
-		if (password.trim()) {
-			Keyboard.dismiss();
-			const res = await onSubmit(password);
-			if (res.isErr()) {
-				setError(res.error.message);
+		try {
+			setLoading(true);
+			// Only validate password length for backup creation
+			if (viewId === EBackupPromptViewId.backup && password.length < 6) {
+				setError('Password must be at least 6 characters long');
 				return;
 			}
-			setPassword('');
-			setError('');
+
+			if (password.trim()) {
+				const res = await onSubmit(password);
+				if (res.isErr()) {
+					setError(res.error.message);
+					return;
+				}
+				Keyboard.dismiss();
+				setPassword('');
+				setError('');
+			}
+		} finally {
+			setLoading(false);
 		}
 	}, [onSubmit, password, viewId]);
 
@@ -180,12 +186,13 @@ const BackupPrompt = ({ payload }: {
 				) : null}
 					<View style={styles.buttonContainer}>
 						<Button
-							text={'Cancel'}
+							text={loading ? 'Close' : 'Cancel'}
 							style={styles.button}
 							onPress={onClose}
 						/>
 						<Button
 							text={submitButtonText}
+							loading={loading}
 							style={[styles.button, styles.submitButton]}
 							onPress={handleSubmit}
 							disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}

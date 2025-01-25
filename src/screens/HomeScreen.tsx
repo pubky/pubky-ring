@@ -2,11 +2,9 @@ import React, {
 	memo,
 	ReactElement,
 	useCallback,
-	useEffect,
 	useMemo,
 } from 'react';
 import {
-	BackHandler,
 	StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -16,7 +14,7 @@ import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { showQRScanner, handleClipboardData, showToast } from '../utils/helpers';
+import { showQRScanner, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
@@ -33,15 +31,6 @@ const HomeScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
 	const hasPubkys = useMemo(() => Object.keys(pubkys).length > 0, [pubkys]);
-
-	useEffect(() => {
-		const backAction = (): boolean => true;
-		const backHandler = BackHandler.addEventListener(
-			'hardwareBackPress',
-			backAction,
-		);
-		return (): void => backHandler.remove();
-	}, []);
 
 	const handlePubkyPress = useCallback(
 		(pubky: string) => {
@@ -114,7 +103,6 @@ const HomeScreen = (): ReactElement => {
 									pubky={item.key}
 									pubkyData={item.value}
 									onQRPress={showQRScanner}
-									onCopyClipboard={handleClipboardData}
 									onPress={handlePubkyPress}
 									index={index ?? 0}
 									onLongPress={drag}

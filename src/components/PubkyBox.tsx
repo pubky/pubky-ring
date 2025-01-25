@@ -9,12 +9,10 @@ import {
 	ForegroundView,
 	ActivityIndicator,
 	QrCode,
-	Clipboard,
 	NavView,
 	Card,
 	View,
 	Text,
-	CardButton,
 	AuthorizeButton,
 	ArrowRight,
 	CardView,
@@ -22,7 +20,6 @@ import {
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
-import { Result } from '@synonymdev/result';
 
 interface PubkyBoxProps {
 	pubky: string;
@@ -37,13 +34,6 @@ interface PubkyBoxProps {
 		dispatch: Dispatch;
 		onComplete?: () => void;
 	}) => Promise<string>;
-	onCopyClipboard: ({
-		pubky,
-		dispatch,
-	}: {
-		pubky: string;
-		dispatch: Dispatch;
-	}) => Promise<Result<string>>;
 	onPress: (data: string) => void;
 	index?: number;
 	onLongPress?: () => void;
@@ -55,14 +45,12 @@ const PubkyBox = ({
 	pubkyData,
 	sessionsCount = 0,
 	onQRPress,
-	onCopyClipboard,
 	onPress,
 	index,
 	onLongPress,
 	disabled,
 }: PubkyBoxProps): ReactElement => {
 	const [isQRLoading, setIsQRLoading] = useState(false);
-	const [isClipboardLoading, setIsClipboardLoading] = useState(false);
 	const dispatch = useDispatch();
 
 	const handleQRPress = useCallback(async () => {
@@ -76,15 +64,6 @@ const PubkyBox = ({
 			setIsQRLoading(false);
 		}
 	}, [dispatch, onQRPress, pubky]);
-
-	const handleCopyClipboard = useCallback(async () => {
-		setIsClipboardLoading(true);
-		try {
-			await onCopyClipboard({ pubky, dispatch });
-		} finally {
-			setIsClipboardLoading(false);
-		}
-	}, [dispatch, onCopyClipboard, pubky]);
 
 	const handleOnPress = useCallback(() => {
 		onPress(pubky);
@@ -142,23 +121,6 @@ const PubkyBox = ({
 				</Box>
 
 				<ForegroundView style={styles.buttonsContainer}>
-					<CardButton
-						style={[
-							styles.actionButton2,
-							isClipboardLoading && styles.actionButtonDisabled,
-						]}
-						onPress={handleCopyClipboard}
-						onLongPress={onLongPress}
-						disabled={isClipboardLoading}
-					>
-						{isClipboardLoading ? (
-							<ActivityIndicator size="small" />
-						) : (
-							<Clipboard size={16} />
-						)}
-						<Text style={styles.buttonText}>Paste</Text>
-					</CardButton>
-
 					<AuthorizeButton
 						style={[
 							styles.actionButton,
@@ -267,18 +229,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		gap: 8,
-		width: '45%',
-	},
-	actionButton2: {
-		borderRadius: 64,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		alignItems: 'center',
-		justifyContent: 'center',
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 8,
-		width: '45%',
+		width: '80%',
 	},
 	buttonText: {
 		fontSize: 15,

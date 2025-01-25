@@ -15,9 +15,10 @@ import {
 import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
-import { Platform } from 'react-native';
+import { Platform, Share } from 'react-native';
 import { getAutoAuthFromStore } from './store-helpers.ts';
 import { getKeychainValue } from './keychain.ts';
+import { readFromClipboard } from './clipboard.ts';
 
 export const handleScannedData = async ({
 	pubky,
@@ -150,6 +151,11 @@ export const showQRScanner = ({
 					onComplete?.();
 					resolve(data);
 				},
+				onCopyClipboard: async (): Promise<void> => {
+					await SheetManager.hide('camera');
+					const res = await handleClipboardData({ pubky, dispatch });
+					resolve(res.isOk() ? res.value : res.error.message);
+				},
 				onClose: () => {
 					SheetManager.hide('camera');
 					resolve('');
@@ -253,10 +259,10 @@ export const handleClipboardData = async ({
 	pubky: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
-	//const clipboardContents = await readFromClipboard();
+	const clipboardContents = await readFromClipboard();
 	return await handleScannedData({
 		pubky,
-		data: 'pubkyauth:///?caps=/pub/pubky.app/:rw,/pub/example.com/nested:rw&secret=71b6HaSQYQOPdPCebFBjXdcBjkK7ITMBQ_IgJjvnHKY&relay=https://httprelay.staging.pubky.app/link',
+		data: clipboardContents,
 		dispatch,
 	});
 };
@@ -295,4 +301,19 @@ export const showToast = ({
 		visibilityTime,
 		onPress,
 	});
+};
+
+export const shareData = async (data: string): Promise<void> => {
+	try {
+		await Share.share({
+			message: data,
+		});
+	} catch (error) {
+		console.error('Error sharing data:', error);
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: 'Failed to share data',
+		});
+	}
 };

@@ -2,6 +2,7 @@ import styled from 'styled-components/native';
 import {
 	Scan as _Scan,
 	Clipboard as _Clipboard,
+	Share as _Share,
 	ChevronLeft as _ChevronLeft,
 	Eye as _Eye,
 	EyeOff as _EyeOff,
@@ -171,6 +172,10 @@ export const Plus = styled(_Plus)`
 `;
 
 export const Clipboard = styled(_Clipboard)`
+	color: ${(props): string => props.theme.colors.sessionText};
+`;
+
+export const Share = styled(_Share)`
 	color: ${(props): string => props.theme.colors.sessionText};
 `;
 

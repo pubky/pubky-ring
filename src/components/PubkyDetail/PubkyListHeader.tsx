@@ -8,27 +8,25 @@ import { StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { copyToClipboard } from '../../utils/clipboard.ts';
 import { PubkyData } from '../../navigation/types.ts';
-import { Result } from '@synonymdev/result';
 import {
 	View,
 	Text,
 	ActionButton,
 	ActivityIndicator,
 	QrCode,
-	Clipboard,
 	Card,
 	Save,
 	Trash2,
+	Share,
 } from '../../theme/components.ts';
 import Button from '../Button.tsx';
-import { showToast } from '../../utils/helpers.ts';
+import { shareData, showToast } from '../../utils/helpers.ts';
 interface PubkyListHeaderProps {
     svg: string;
     pubky: string;
     pubkyData: PubkyData;
     sessionsCount: number;
     onQRPress: () => Promise<string>;
-    onCopyClipboard: () => Promise<Result<string>>;
     onDelete: () => void;
     onBackup: () => void;
 }
@@ -40,12 +38,10 @@ export const PubkyListHeader = memo(({
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	sessionsCount,
 	onQRPress,
-	onCopyClipboard,
 	onDelete,
 	onBackup,
 }: PubkyListHeaderProps) => {
 	const [isQRLoading, setIsQRLoading] = useState(false);
-	const [isClipboardLoading, setIsClipboardLoading] = useState(false);
 
 	const handleCopyPubky = useCallback(() => {
 		copyToClipboard(pubky);
@@ -55,15 +51,6 @@ export const PubkyListHeader = memo(({
 			description: 'Your Pubky has been copied to the clipboard',
 		});
 	}, [pubky]);
-
-	const handleOnCopyClipboard = useCallback(async () => {
-		setIsClipboardLoading(true);
-		try {
-			await onCopyClipboard();
-		} finally {
-			setIsClipboardLoading(false);
-		}
-	}, [onCopyClipboard]);
 
 	const handleOnQRPress = useCallback(async () => {
 		setIsQRLoading(true);
@@ -75,7 +62,10 @@ export const PubkyListHeader = memo(({
 	}, [onQRPress]);
 
 	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky : `pk:${pubky}`, [pubky]);
-	const copyStyle = useMemo(() => [isClipboardLoading && styles.actionButtonDisabled], [isClipboardLoading]);
+	const onSharePress = useCallback(() => {
+		shareData(pubkyUri).then();
+	}, [pubkyUri]);
+
 	return (
 		<View style={styles.container}>
 			<Card style={styles.profileSection}>
@@ -108,11 +98,9 @@ export const PubkyListHeader = memo(({
 
 			<View style={styles.actionButtonRow}>
 				<Button
-					text={'Paste'}
-					style={copyStyle}
-					icon={<Clipboard size={16} />}
-					onPress={handleOnCopyClipboard}
-					loading={isClipboardLoading}
+					text={'Share'}
+					icon={<Share size={16} />}
+					onPress={onSharePress}
 				/>
 				<Button
 					text={'Backup'}

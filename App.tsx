@@ -12,6 +12,8 @@ import { SafeAreaView } from './src/theme/components.ts';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/theme/toastConfig.tsx';
 
+const _toastConfig = toastConfig();
+
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
 	const currentTheme = useSelector(getTheme);
@@ -34,7 +36,7 @@ function App(): React.JSX.Element {
 			<SafeAreaView>
 				<SheetProvider>
 					<RootNavigator />
-					<Toast config={toastConfig} />
+					<Toast config={_toastConfig} />
 				</SheetProvider>
 			</SafeAreaView>
 		</ThemeProvider>

@@ -84,7 +84,7 @@ type ToastConfigReturn = {
 	[key in 'success' | 'error' | 'info' | 'any']: (props: ToastProps) => React.ReactElement;
 };
 
-export const toastConfig = ({ style }: ToastConfigStyle = {}): ToastConfigReturn => ({
+export const toastConfig = ({ style = {} }: ToastConfigStyle = {}): ToastConfigReturn => ({
 	success: (props: ToastProps): React.ReactElement => (
 		<ThemedSuccessToast {...props} style={style} />
 	),

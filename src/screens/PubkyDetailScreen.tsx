@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PubkyData, RootStackParamList } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
-import { handleClipboardData, showQRScanner } from '../utils/helpers.ts';
+import { handleClipboardData, showNamePubkyPrompt, showQRScanner } from '../utils/helpers.ts';
 import { useSelector } from 'react-redux';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
@@ -28,9 +28,13 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 	const pubkyData: PubkyData = useMemo(() => {
 		return { ...data, pubky };
 	}, [data, pubky]);
-	const handleEdit = useCallback(() => {
-		navigation.navigate('EditPubky', { pubkyData });
-	}, [navigation, pubkyData]);
+
+	const onRightButtonPress = useCallback(() => {
+		showNamePubkyPrompt({
+			pubky,
+			pubkyName: pubkyData?.name,
+		});
+	}, [pubky, pubkyData?.name]);
 
 	const leftButton = useCallback(() => (
 		<NavButton
@@ -48,7 +52,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 	const rightButton = useCallback(() => (
 		<NavButton
 			style={styles.navButton}
-			onPressIn={handleEdit}
+			onPressIn={onRightButtonPress}
 			hitSlop={{ top: 10,
 				bottom: 10,
 				left: 10,
@@ -56,7 +60,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 		>
 			<Edit2 size={16} />
 		</NavButton>
-	), [handleEdit]);
+	), [onRightButtonPress]);
 
 	return (
 		<View style={styles.container}>

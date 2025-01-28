@@ -38,7 +38,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 							onPress={onCopyClipboard}
 						>
 							<Clipboard size={16} />
-							<Text style={styles.buttonText}>Paste</Text>
+							<Text style={styles.buttonText}>Paste Link</Text>
 						</CardButton>
 					</View>
 				</View>
@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
 		display: 'flex',
 		flexDirection: 'row',
 		gap: 8,
-		width: 160,
+		maxWidth: '80%',
 	},
 	buttonText: {
 		fontSize: 15,

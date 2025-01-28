@@ -163,6 +163,7 @@ const BackupPrompt = ({ payload }: {
 					{content}
 					<View style={styles.inputContainer}>
 						<TextInput
+							autoComplete={'current-password'}
 							style={[styles.input, error ? styles.inputError : null]}
 							secureTextEntry={!showPassword}
 							value={password}
@@ -219,6 +220,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		paddingBottom: 24,
 		marginTop: 20,
+		minHeight: '40%',
 	},
 	title: {
 		fontSize: 17,

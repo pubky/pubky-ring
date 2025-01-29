@@ -1,6 +1,6 @@
 import React, { ReactElement, Suspense, useCallback } from 'react';
 import { useNavigation } from '@react-navigation/native';
-import { createNewPubky } from '../utils/pubky';
+import { createNewPubky, restorePubkys } from '../utils/pubky';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
 	View,
@@ -26,7 +26,10 @@ const OnboardingScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 
 	const createPubky = useCallback(async () => {
-		await createNewPubky(dispatch);
+		await Promise.all([
+			restorePubkys(dispatch), // Check if there are already pubky's in the keychain and restore them
+			createNewPubky(dispatch),
+		]);
 		dispatch(updateShowOnboarding({ showOnboarding: false }));
 		navigation.replace('ConfirmPubky');
 	}, [dispatch, navigation]);

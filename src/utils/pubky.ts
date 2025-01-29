@@ -10,6 +10,7 @@ import {
 	setKeychainValue,
 	resetKeychainValue,
 	getKeychainValue,
+	getAllKeychainKeys,
 } from './keychain';
 import { Dispatch } from 'redux';
 import {
@@ -59,6 +60,30 @@ export const createNewPubky = async (
 		});
 		return err('Failed to create pubky');
 	}
+};
+
+/**
+ * Restores all pubkys from the keychain and signs up to the homeserver.
+ * @param {Dispatch} dispatch
+ * @returns {Promise<string[]>}
+ */
+export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
+	const allKeys = await getAllKeychainKeys();
+	if (allKeys?.length > 0) {
+		for (const pubky of allKeys) {
+			const secretKey = await getKeychainValue({ key: pubky });
+			if (secretKey.isOk()) {
+				signUpToHomeserver({
+					pubky,
+					secretKey: secretKey.value,
+					homeserver: defaultPubkyState.homeserver,
+					dispatch,
+				}).then();
+				await savePubky(secretKey.value, pubky, dispatch);
+			}
+		}
+	}
+	return allKeys;
 };
 
 export const importPubky = async (

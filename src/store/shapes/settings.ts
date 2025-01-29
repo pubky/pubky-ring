@@ -5,7 +5,7 @@ import {
 } from '../../types/settings.ts';
 
 export const initialState: SettingsState = {
-	theme: ETheme.system,
+	theme: ETheme.dark,
 	showOnboarding: true,
 	autoAuth: false,
 	navigationAnimation: ENavigationAnimation.slideFromRight,

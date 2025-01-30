@@ -44,6 +44,7 @@ const PubkyItem = memo(({
 }) => (
 	<ScaleDecorator>
 		<PubkyBox
+			key={item.key}
 			pubky={item.key}
 			pubkyData={item.value}
 			onQRPress={onQRPress}
@@ -152,7 +153,7 @@ const HomeScreen = (): ReactElement => {
 				<DraggableFlatList
 					data={pubkyArray}
 					onDragEnd={handleDragEnd}
-					keyExtractor={(item) => item.key}
+					keyExtractor={(item, index) => `${item.key}${index}`}
 					renderItem={renderItem}
 					ListHeaderComponent={PubkyRingHeader}
 					ListFooterComponent={ListFooter}

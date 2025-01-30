@@ -104,18 +104,21 @@ export const handleAuth = async (pubky: string, authUrl: string): Promise<Result
 			});
 			return err(description);
 		}
-		SheetManager.show('confirm-auth', {
-			payload: {
-				pubky,
-				authUrl,
-				authDetails: authDetails.value,
-				onComplete: async (): Promise<void> => {
+		// Small timeout allows the sheet time to properly display and not get stuck.
+		setTimeout(() => {
+			SheetManager.show('confirm-auth', {
+				payload: {
+					pubky,
+					authUrl,
+					authDetails: authDetails.value,
+					onComplete: async (): Promise<void> => {
+					},
 				},
-			},
-			onClose: () => {
-				SheetManager.hide('confirm-auth');
-			},
-		});
+				onClose: () => {
+					SheetManager.hide('confirm-auth');
+				},
+			});
+		}, 50);
 		return ok('success');
 	} catch (error) {
 		const description = 'Failed to parse auth details';

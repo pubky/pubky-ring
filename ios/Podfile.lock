@@ -1,7 +1,7 @@
 PODS:
   - boost (1.84.0)
   - DoubleConversion (1.1.6)
-  - dr-pogodin-react-native-fs (2.30.3):
+  - dr-pogodin-react-native-fs (2.31.0):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2231,7 +2231,7 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   boost: 7e761d76ca2ce687f7cc98e698152abd03a18f90
   DoubleConversion: cb417026b2400c8f53ae97020b2be961b59470cb
-  dr-pogodin-react-native-fs: 0e8dcf16e79b0d91745ceccd0354ca4a39f22a54
+  dr-pogodin-react-native-fs: 9f3dc64c20b946c9ea6b600570e38c5ea992640b
   fast_float: 06eeec4fe712a76acc9376682e4808b05ce978b6
   FBLazyVector: 2bc03a5cf64e29c611bbc5d7eb9d9f7431f37ee6
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd

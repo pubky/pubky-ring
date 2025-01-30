@@ -1044,10 +1044,10 @@
   resolved "https://registry.yarnpkg.com/@bcoe/v8-coverage/-/v8-coverage-0.2.3.tgz#75a2e8b51cb758a7553d6804a5932d7aace75c39"
   integrity sha512-0hYQ8SB4Db5zvZB4axdMHGwEaQjkZzFjQiN9LVYvIFB2nSUHW9tYpxWriPrWDASIxiaXax83REcLxuSdnGPZtw==
 
-"@dr.pogodin/react-native-fs@^2.30.2":
-  version "2.30.3"
-  resolved "https://registry.yarnpkg.com/@dr.pogodin/react-native-fs/-/react-native-fs-2.30.3.tgz#9b02f603642159ec50412fc176f6a9dde59ac51d"
-  integrity sha512-EphKBv07CFwyJubP5xLm39TUB2g1BXkyGAf8HtRbXM7WQLKqMsU6CLgQojQJNQPH1cWOnkHYiGnw6flf0PXHWA==
+"@dr.pogodin/react-native-fs@2.31.0":
+  version "2.31.0"
+  resolved "https://registry.yarnpkg.com/@dr.pogodin/react-native-fs/-/react-native-fs-2.31.0.tgz#2965e8fdb5bb1316ffe9f39e988726c5234d9476"
+  integrity sha512-C6T0muKf6WhJqauiN6yh34W8u5n4wQoOBBVod/OCZ1iVswJmywFDwtNSATgif74nhCIPB9LZlSFCKWPOS6y5fg==
   dependencies:
     buffer "^6.0.3"
     http-status-codes "^2.3.0"
@@ -5886,10 +5886,9 @@ react-native-actions-sheet@^0.9.7:
   resolved "https://registry.yarnpkg.com/react-native-actions-sheet/-/react-native-actions-sheet-0.9.7.tgz#43ff2d9252f7af2da6dc051be5a5c375a844cdfb"
   integrity sha512-rjUwxUr5dxbdSLDtLDUFAdSlFxpNSpJsbXLhHkBzEBMxEMPUhRT3zqbvKqsPj0JUkjwuRligxrhbIJZkg/6ZDw==
 
-react-native-camera-kit@^14.1.0:
+"react-native-camera-kit@github:lukailun/react-native-camera-kit#fix/support_rn_0.77":
   version "14.1.0"
-  resolved "https://registry.yarnpkg.com/react-native-camera-kit/-/react-native-camera-kit-14.1.0.tgz#1e05039cc4b2c8db30320cfb6e9f4348e20f4e0d"
-  integrity sha512-idkg+Sa2KbGvF6SUqmuAr2U12qBELdiuUJ6fxgB4whUC2AyYHi5jBxiGv6whY/eTB3is7nW1S+TjyM9pEBzNzw==
+  resolved "https://codeload.github.com/lukailun/react-native-camera-kit/tar.gz/7e94541bbfa34f3a74756d7a1a1a7e3468e6a25c"
 
 react-native-document-picker@^9.3.1:
   version "9.3.1"

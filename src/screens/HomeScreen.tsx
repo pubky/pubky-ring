@@ -21,10 +21,39 @@ import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
-import DraggableFlatList, { ScaleDecorator } from 'react-native-draggable-flatlist';
+import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
+import { SheetManager } from 'react-native-actions-sheet';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
+
+const PubkyItem = memo(({
+	item,
+	drag,
+	isActive,
+	index,
+	onPress,
+	onQRPress,
+}: {
+	item: { key: string; value: Pubky };
+	drag: () => void;
+	isActive: boolean;
+	index: number;
+	onPress: (pubky: string) => void;
+	onQRPress: typeof showQRScanner;
+}) => (
+	<ScaleDecorator>
+		<PubkyBox
+			pubky={item.key}
+			pubkyData={item.value}
+			onQRPress={onQRPress}
+			onPress={onPress}
+			index={index}
+			onLongPress={drag}
+			disabled={isActive}
+		/>
+	</ScaleDecorator>
+));
 
 const HomeScreen = (): ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
@@ -62,10 +91,10 @@ const HomeScreen = (): ReactElement => {
 		}
 	}, [dispatch]);
 
-	const handleDragEnd = useCallback(({ data }: { data: { key: string; value: Pubky }[]}) => {
+	const handleDragEnd = useCallback(({ data }: { data: { key: string; value: Pubky }[] }) => {
 		if (!data) {return;}
 		const newPubkys: TPubkys = {};
-		data.map(({ key, value }: { key: string; value: Pubky }) => {
+		data.forEach(({ key, value }) => {
 			newPubkys[key] = value;
 		});
 		dispatch(reorderPubkys(newPubkys));
@@ -78,15 +107,44 @@ const HomeScreen = (): ReactElement => {
 		}));
 	}, [pubkys]);
 
+	const renderItem = useCallback(({
+		item,
+		drag,
+		getIndex,
+		isActive,
+	}: RenderItemParams<{ key: string; value: Pubky }>) => {
+		const index = getIndex() ?? 0;
+		return (
+			<PubkyItem
+				item={item}
+				drag={drag}
+				isActive={isActive}
+				index={index}
+				onPress={handlePubkyPress}
+				onQRPress={showQRScanner}
+			/>
+		);
+	}, [handlePubkyPress]);
+
 	const ListFooter = useCallback(() => (
 		<Button
 			style={styles.button}
-			text={'Create another pubky'}
-			onPress={createPubky}
-			onLongPress={importPubky}
+			text={'Add pubky'}
+			onPress={() => {
+				SheetManager.show('add-pubky', {
+					payload: {
+						createPubky,
+						importPubky,
+					},
+					onClose: () => {
+						SheetManager.hide('add-pubky');
+					},
+				});
+			}}
 			icon={<Plus size={16} />}
 		/>
-	), [createPubky, importPubky]);
+	// eslint-disable-next-line react-hooks/exhaustive-deps
+	), []);
 
 	return (
 		<View style={styles.container}>
@@ -94,23 +152,8 @@ const HomeScreen = (): ReactElement => {
 				<DraggableFlatList
 					data={pubkyArray}
 					onDragEnd={handleDragEnd}
-					keyExtractor={(item, index) => `${item.key}${index}`}
-					renderItem={({ item, drag, getIndex, isActive }) => {
-						const index = getIndex();
-						return (
-							<ScaleDecorator>
-								<PubkyBox
-									pubky={item.key}
-									pubkyData={item.value}
-									onQRPress={showQRScanner}
-									onPress={handlePubkyPress}
-									index={index ?? 0}
-									onLongPress={drag}
-									disabled={isActive}
-								/>
-							</ScaleDecorator>
-						);
-					}}
+					keyExtractor={(item) => item.key}
+					renderItem={renderItem}
 					ListHeaderComponent={PubkyRingHeader}
 					ListFooterComponent={ListFooter}
 					contentContainerStyle={styles.listContent}

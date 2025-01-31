@@ -14,6 +14,7 @@ export interface Theme extends DefaultTheme {
         avatarRing: string;
         actionButton: string;
         navButton: string;
+		gradient: string[];
     }
 }
 
@@ -31,6 +32,7 @@ export const lightTheme: Theme = {
 		avatarRing: '#f5f5f5',
 		actionButton: '#f5f5f5',
 		navButton: '#fff',
+		gradient: ['#f8f8f8', '#f8f8f8'],
 	},
 };
 
@@ -48,5 +50,6 @@ export const darkTheme: Theme = {
 		avatarRing: '#303030',
 		actionButton: '#1A1A1A',
 		navButton: '#202020',
+		gradient: ['#202020', '#1A1A1A'],
 	},
 };

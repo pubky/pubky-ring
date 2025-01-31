@@ -1,11 +1,11 @@
 import { StyleSheet } from 'react-native';
-import { Card, Text } from '../theme/components.ts';
+import { Card, LinearGradient, Text } from '../theme/components.ts';
 import Jdenticon from './Jdenticon.tsx';
 import React, { memo, ReactElement } from 'react';
 
 const PubkyCard = ({ publicKey }: { publicKey: string }): ReactElement => {
 	return (
-		<Card style={styles.pubkyCard}>
+		<LinearGradient style={styles.pubkyCard}>
 			<Card style={styles.pubkyRow}>
 				<Card style={styles.iconContainer}>
 					<Jdenticon value={publicKey} size={38} />
@@ -16,14 +16,13 @@ const PubkyCard = ({ publicKey }: { publicKey: string }): ReactElement => {
 					</Text>
 				</Card>
 			</Card>
-		</Card>
+		</LinearGradient>
 	);
 };
 
 const styles = StyleSheet.create({
 	pubkyCard: {
 		borderRadius: 16,
-		paddingHorizontal: 16,
 		marginBottom: 24,
 		minHeight: 88,
 	},
@@ -33,6 +32,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		alignSelf: 'center',
 		justifyContent: 'center',
+		paddingHorizontal: 16,
+		backgroundColor: 'transparent',
 	},
 	iconContainer: {
 		width: 38,
@@ -41,6 +42,7 @@ const styles = StyleSheet.create({
 	},
 	pubkyTextContainer: {
 		flex: 1,
+		backgroundColor: 'transparent',
 	},
 	pubkyText: {
 		fontWeight: '600',

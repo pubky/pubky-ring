@@ -17,6 +17,7 @@ import {
 	ArrowRight,
 	CardView,
 	Button,
+	LinearGradient,
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
@@ -79,7 +80,7 @@ const PubkyBox = ({
 	}, [index, pubkyData.name]);
 
 	return (
-		<Card style={styles.container}>
+		<LinearGradient style={styles.container}>
 			<Button
 				activeOpacity={0.7}
 				onPress={handleOnPress}
@@ -138,7 +139,7 @@ const PubkyBox = ({
 					</AuthorizeButton>
 				</ForegroundView>
 			</Button>
-		</Card>
+		</LinearGradient>
 	);
 };
 
@@ -160,6 +161,7 @@ const styles = StyleSheet.create({
 	wrapper: {
 		borderRadius: 16,
 		padding: 20,
+		backgroundColor: 'transparent',
 	},
 	box: {
 		backgroundColor: 'transparent',
@@ -199,6 +201,7 @@ const styles = StyleSheet.create({
 		fontWeight: 600,
 		lineHeight: 20,
 		letterSpacing: 0.4,
+		backgroundColor: 'transparent',
 	},
 	buttonsContainer: {
 		marginTop: 20,
@@ -218,6 +221,7 @@ const styles = StyleSheet.create({
 	},
 	row: {
 		flexDirection: 'row',
+		backgroundColor: 'transparent',
 	},
 	actionButton: {
 		borderWidth: 1,

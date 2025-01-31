@@ -18,9 +18,12 @@ import {
 	Save,
 	Trash2,
 	Share,
+	LinearGradient,
+	AuthorizeButton,
 } from '../../theme/components.ts';
 import Button from '../Button.tsx';
 import { shareData, showToast } from '../../utils/helpers.ts';
+
 interface PubkyListHeaderProps {
     svg: string;
     pubky: string;
@@ -68,7 +71,7 @@ export const PubkyListHeader = memo(({
 
 	return (
 		<View style={styles.container}>
-			<Card style={styles.profileSection}>
+			<LinearGradient style={styles.profileSection}>
 				<Card style={styles.profile}>
 					<View style={styles.avatarContainer}>
 						<SvgXml xml={svg} height={86} width={86} />
@@ -78,23 +81,22 @@ export const PubkyListHeader = memo(({
 						<Text style={styles.nameText}>{pubkyData.name}</Text>
 					) : null}
 
-					<ActionButton onPress={handleCopyPubky} activeOpacity={0.7}>
+					<ActionButton style={styles.pubkyButton} onPress={handleCopyPubky} activeOpacity={0.7}>
 						<Text style={styles.pubkyText}>{pubkyUri}</Text>
 					</ActionButton>
 				</Card>
-			</Card>
-
-			<ActionButton
-				style={styles.authorizeButton}
-				onPressIn={handleOnQRPress}
-			>
-				{isQRLoading ? (<ActivityIndicator size="small" />) : (
-					<>
-						<QrCode size={16} />
-						<Text style={styles.buttonText}>Authorize</Text>
-					</>
-				)}
-			</ActionButton>
+				<AuthorizeButton
+					style={styles.authorizeButton}
+					onPressIn={handleOnQRPress}
+				>
+					{isQRLoading ? (<ActivityIndicator size="small" />) : (
+						<>
+							<QrCode size={16} />
+							<Text style={styles.buttonText}>Authorize</Text>
+						</>
+					)}
+				</AuthorizeButton>
+			</LinearGradient>
 
 			<View style={styles.actionButtonRow}>
 				<Button
@@ -129,7 +131,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 	authorizeButton: {
-		width: '90%',
+		width: '75%',
 		borderRadius: 64,
 		paddingVertical: 20,
 		paddingHorizontal: 24,
@@ -140,7 +142,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		alignContent: 'center',
 		justifyContent: 'center',
-		marginTop: 24,
+		marginBottom: 24,
 		borderWidth: 1,
 	},
 	actionButtonText: {
@@ -159,14 +161,16 @@ const styles = StyleSheet.create({
 	},
 	profileSection: {
 		alignItems: 'center',
-		padding: 24,
 		marginHorizontal: 24,
 		borderRadius: 16,
 		width: '90%',
 	},
 	profile: {
 		alignItems: 'center',
-		width: '75%',
+		width: '90%',
+		backgroundColor: 'transparent',
+		paddingTop: 24,
+		paddingBottom: 16,
 	},
 	avatarContainer: {
 		width: 96,
@@ -175,6 +179,7 @@ const styles = StyleSheet.create({
 		overflow: 'hidden',
 		justifyContent: 'center',
 		alignItems: 'center',
+		alignSelf: 'center',
 		backgroundColor: 'transparent',
 		marginBottom: 8,
 	},
@@ -183,6 +188,7 @@ const styles = StyleSheet.create({
 		fontWeight: '300',
 		marginBottom: 8,
 		textAlign: 'center',
+		backgroundColor: 'transparent',
 	},
 	pubkyText: {
 		fontSize: 17,
@@ -196,6 +202,9 @@ const styles = StyleSheet.create({
 	},
 	actionButtonDisabled: {
 		opacity: 0.7,
+	},
+	pubkyButton: {
+		backgroundColor: 'transparent',
 	},
 });
 

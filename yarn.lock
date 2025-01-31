@@ -5918,6 +5918,11 @@ react-native-keychain@^9.2.2:
   resolved "https://registry.yarnpkg.com/react-native-keychain/-/react-native-keychain-9.2.2.tgz#45449fadfbe96b35a2e1470f8a9c40a0c22edbe5"
   integrity sha512-sATwVC76fEl4fsdBsgzG6lwhUhKduK0yqPBKHQRrJlv/2/HFBLXc4yLk9SKnZdgVHCpBxIEX4obMyMcu3HBh9w==
 
+react-native-linear-gradient@^2.8.3:
+  version "2.8.3"
+  resolved "https://registry.yarnpkg.com/react-native-linear-gradient/-/react-native-linear-gradient-2.8.3.tgz#9a116649f86d74747304ee13db325e20b21e564f"
+  integrity sha512-KflAXZcEg54PXkLyflaSZQ3PJp4uC4whM7nT/Uot9m0e/qxFV3p6uor1983D1YOBJbJN7rrWdqIjq0T42jOJyA==
+
 react-native-mmkv@^3.2.0:
   version "3.2.0"
   resolved "https://registry.yarnpkg.com/react-native-mmkv/-/react-native-mmkv-3.2.0.tgz#460723eb23b9cc92c65b0416eae9874a6ddf5b82"

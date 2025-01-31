@@ -18,6 +18,7 @@ import {
 import ActionSheet from 'react-native-actions-sheet';
 import Animated from 'react-native-reanimated';
 import { ENavigationAnimation } from '../types/settings.ts';
+import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
 
 interface ActionSheetContainerProps {
   backgroundColor?: string;
@@ -214,3 +215,14 @@ export const KeyRound = styled(_KeyRound)`
 export const Folder = styled(_Folder)`
 	  color: ${(props): string => props.theme.colors.text};
 `;
+
+export const LinearGradient = styled(_LinearGradient).attrs<{ colors: string[] }>((props: {
+	colors: string[];
+	theme: {
+		colors: {
+			gradient: string[];
+		};
+	};
+}) => ({
+	colors: props.colors || props.theme.colors.gradient,
+}))``;

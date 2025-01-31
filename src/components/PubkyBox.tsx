@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { Pubky } from '../types/pubky.ts';
 import { Dispatch } from 'redux';
 import { useDispatch } from 'react-redux';
@@ -189,6 +189,11 @@ const styles = StyleSheet.create({
 		fontSize: 26,
 		fontWeight: 300,
 		lineHeight: 26,
+		...Platform.select({
+			android: {
+				paddingBottom: 4,
+			},
+		}),
 	},
 	buttonArrow: {
 		backgroundColor: 'transparent',

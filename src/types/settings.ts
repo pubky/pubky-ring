@@ -3,6 +3,7 @@ export interface SettingsState {
     showOnboarding: boolean;
     autoAuth: boolean;
     navigationAnimation: ENavigationAnimation;
+    isOnline: boolean;
 }
 
 export enum ETheme {

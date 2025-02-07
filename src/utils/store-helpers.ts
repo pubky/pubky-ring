@@ -17,3 +17,7 @@ export const getPubkyDataFromStore = (pubky: string): Pubky => {
 export const getIsPubkySignedUpFromStore = (pubky: string): boolean => {
 	return isPubkySignedUp(getStore(), pubky);
 };
+
+export const getIsOnline = (): boolean => {
+	return getStore().settings.isOnline ?? true;
+};

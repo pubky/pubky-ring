@@ -10,7 +10,6 @@ import PubkyListHeader from './PubkyListHeader.tsx';
 import { PubkyData } from '../../navigation/types.ts';
 import { showBackupPrompt, showToast } from '../../utils/helpers.ts';
 import { Dispatch } from 'redux';
-import { Result } from '@synonymdev/result';
 import { View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useNavigation } from '@react-navigation/native';
@@ -28,21 +27,11 @@ export interface PubkyDetailProps {
 		dispatch: Dispatch,
 		onComplete?: () => void,
 	}) => Promise<string>;
-    onCopyClipboard: ({
-    	pubky,
-    	pubkyData,
-    	dispatch,
-    }: {
-		pubky: string;
-		pubkyData: Pubky;
-		dispatch: Dispatch;
-	}) => Promise<Result<string>>
 }
 
 export const PubkyDetail = ({
 	pubkyData,
 	onQRPress,
-	onCopyClipboard,
 }: PubkyDetailProps): ReactElement => {
 	const { pubky, sessions } = pubkyData;
 	const publicKey = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
@@ -53,10 +42,6 @@ export const PubkyDetail = ({
 	const handleQRPress = useCallback(() => {
 		return onQRPress({ pubky, pubkyData, dispatch });
 	}, [dispatch, onQRPress, pubky, pubkyData]);
-
-	const handleCopyClipboard = useCallback(async () => {
-		return onCopyClipboard({ pubky, pubkyData, dispatch });
-	}, [dispatch, onCopyClipboard, pubky, pubkyData]);
 
 	const onDelete = useCallback(async () => {
 		const deleteRes = await deletePubky(pubky, dispatch);
@@ -117,11 +102,10 @@ export const PubkyDetail = ({
 			pubkyData={pubkyData}
 			sessionsCount={sessionsLength}
 			onQRPress={handleQRPress}
-			onCopyClipboard={handleCopyClipboard}
 			onDelete={handleDelete}
 			onBackup={handleBackup}
 		/>
-	), [svg, pubky, pubkyData, sessionsLength, handleQRPress, handleCopyClipboard, handleDelete, handleBackup]);
+	), [svg, pubky, pubkyData, sessionsLength, handleQRPress, handleDelete, handleBackup]);
 
 	return (
 		<View style={styles.container}>

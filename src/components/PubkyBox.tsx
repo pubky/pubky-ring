@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react
 import { Platform, StyleSheet } from 'react-native';
 import { Pubky } from '../types/pubky.ts';
 import { Dispatch } from 'redux';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
 	SessionText,
 	Box,
@@ -21,6 +21,7 @@ import {
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
+import { getIsOnline } from '../store/selectors/settingsSelectors.ts';
 
 interface PubkyBoxProps {
 	pubky: string;
@@ -30,10 +31,12 @@ interface PubkyBoxProps {
 		pubky,
 		dispatch,
 		onComplete,
+		isOnline,
 	}: {
 		pubky: string;
 		dispatch: Dispatch;
 		onComplete?: () => void;
+		isOnline: boolean;
 	}) => Promise<string>;
 	onPress: (data: string) => void;
 	index?: number;
@@ -53,6 +56,7 @@ const PubkyBox = ({
 }: PubkyBoxProps): ReactElement => {
 	const [isQRLoading, setIsQRLoading] = useState(false);
 	const dispatch = useDispatch();
+	const isOnline = useSelector(getIsOnline);
 
 	const handleQRPress = useCallback(async () => {
 		setIsQRLoading(true);
@@ -60,11 +64,12 @@ const PubkyBox = ({
 			await onQRPress({
 				pubky,
 				dispatch,
+				isOnline,
 			});
 		} finally {
 			setIsQRLoading(false);
 		}
-	}, [dispatch, onQRPress, pubky]);
+	}, [dispatch, isOnline, onQRPress, pubky]);
 
 	const handleOnPress = useCallback(() => {
 		onPress(pubky);

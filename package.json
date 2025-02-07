@@ -13,6 +13,7 @@
     "@dr.pogodin/react-native-fs": "2.31.0",
     "@react-native-async-storage/async-storage": "^2.1.0",
     "@react-native-clipboard/clipboard": "^1.15.0",
+    "@react-native-community/netinfo": "^11.4.1",
     "@react-navigation/native": "^7.0.14",
     "@react-navigation/native-stack": "^7.2.0",
     "@reduxjs/toolkit": "^2.5.0",

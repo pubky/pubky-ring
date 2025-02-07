@@ -18,6 +18,9 @@ const settingsSlice = createSlice({
 		updateNavigationAnimation: (state, action: PayloadAction<{ navigationAnimation: ENavigationAnimation }>) => {
 			state.navigationAnimation = action.payload.navigationAnimation;
 		},
+		updateIsOnline: (state, action: PayloadAction<{ isOnline: boolean }>) => {
+			state.isOnline = action.payload.isOnline;
+		},
 	},
 });
 
@@ -26,6 +29,7 @@ export const {
 	updateShowOnboarding,
 	updateAutoAuth,
 	updateNavigationAnimation,
+	updateIsOnline,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

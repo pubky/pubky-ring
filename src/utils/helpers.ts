@@ -16,9 +16,11 @@ import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Platform, Share } from 'react-native';
-import { getAutoAuthFromStore } from './store-helpers.ts';
+import { getAutoAuthFromStore, getIsOnline } from './store-helpers.ts';
 import { getKeychainValue } from './keychain.ts';
 import { readFromClipboard } from './clipboard.ts';
+import NetInfo from '@react-native-community/netinfo';
+import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 
 export const handleScannedData = async ({
 	pubky,
@@ -132,7 +134,7 @@ export const handleAuth = async (pubky: string, authUrl: string): Promise<Result
 	}
 };
 
-export const showQRScanner = ({
+export const showQRScanner = async ({
 	pubky,
 	dispatch,
 	onComplete,
@@ -141,6 +143,24 @@ export const showQRScanner = ({
 	dispatch: Dispatch;
 	onComplete?: () => void;
 }): Promise<string> => {
+	const isOnline = getIsOnline();
+	if (!isOnline) {
+		// Double check network connection in case it came back.
+		const res = await checkNetworkConnection({
+			prevNetworkState: isOnline,
+			dispatch,
+			displayToast: false,
+		});
+		if (!res) {
+			showToast({
+				type: 'error',
+				title: 'Currently Offline',
+				description: 'You need to be online to authorize with Pubky Ring',
+				autoHide: false,
+			});
+			return Promise.resolve('');
+		}
+	}
 	return new Promise<string>((resolve) => {
 		SheetManager.show('camera', {
 			payload: {
@@ -335,4 +355,46 @@ export const shareData = async (data: string): Promise<void> => {
 			description: 'Failed to share data',
 		});
 	}
+};
+
+/**
+ * Checks the network connection and updates the store if the connection state has changed.
+ * @param {boolean} [prevNetworkState] - The previous network state.
+ * @param {Dispatch} [dispatch] - The Redux dispatch function.
+ * @param {boolean} [displayToast] - Whether to display a toast message.
+ */
+export const checkNetworkConnection = async ({
+	prevNetworkState,
+	dispatch,
+	displayToast = true,
+}: {
+	prevNetworkState?: boolean;
+	dispatch?: Dispatch;
+	displayToast?: boolean;
+}): Promise<boolean> => {
+	if (!prevNetworkState) {
+		prevNetworkState = getIsOnline();
+	}
+	const state = await NetInfo.fetch();
+	const isConnected = state?.isConnected ?? false;
+	if (prevNetworkState !== isConnected) {
+		if (dispatch) {
+			dispatch(updateIsOnline({ isOnline: isConnected }));
+		}
+		if (isConnected && displayToast) {
+			showToast({
+				type: 'success',
+				title: "You're Back Online!",
+				description: 'You can now authorize with Pubky Ring',
+			});
+		} else if (!isConnected && displayToast) {
+			showToast({
+				type: 'error',
+				title: 'Currently Offline',
+				description: 'You need to be online to authorize with Pubky Ring',
+				autoHide: false,
+			});
+		}
+	}
+	return isConnected;
 };

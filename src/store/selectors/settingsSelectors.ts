@@ -19,3 +19,7 @@ export const getAutoAuth = (state: RootState): boolean => {
 export const getNavigationAnimation = (state: RootState): ENavigationAnimation => {
 	return state?.settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight;
 };
+
+export const getIsOnline = (state: RootState): boolean => {
+	return state?.settings?.isOnline ?? true;
+};

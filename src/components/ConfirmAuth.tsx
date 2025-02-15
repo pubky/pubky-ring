@@ -23,7 +23,7 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
-import { AUTHORIZE_KEY_GRADIENT, ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
+import { AUTHORIZE_KEY_GRADIENT } from '../utils/constants.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -149,6 +149,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		SheetManager.hide('confirm-auth');
 	}, []);
 
+	// eslint-disable-next-line react/no-unused-prop-types
 	const GradientView = useCallback(({ children }: { children: React.ReactNode }): JSX.Element => {
 		if (isAuthorized)  {
 			return (

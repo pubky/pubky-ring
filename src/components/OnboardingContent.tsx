@@ -18,7 +18,7 @@ const OnboardingContent = ({ importPubky, createPubky }: OnboardingContentProps)
 	return (
 		<View style={styles.container}>
 			<RadialGradient
-				style={{ height: '100%' }}
+				style={styles.onboardingGradient}
 				colors={ONBOARDING_KEY_RADIAL_GRADIENT}
 				center={{ x: 1, y: 0.5 }}
 			>
@@ -168,6 +168,9 @@ const styles = StyleSheet.create({
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		fontFamily: 'InterTight-VariableFont_wght',
+	},
+	onboardingGradient: {
+		height: '100%',
 	},
 });
 

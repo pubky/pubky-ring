@@ -12,7 +12,7 @@ import { truncateStr } from '../utils/pubky.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { setName } from '../store/slices/pubkysSlice.ts';
-import ModalIndicator from "./ModalIndicator.tsx";
+import ModalIndicator from './ModalIndicator.tsx';
 
 const MAX_NAME_LENGTH = 50;
 

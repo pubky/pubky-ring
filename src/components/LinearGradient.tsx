@@ -65,7 +65,7 @@ const LinearGradient: React.FC<LinearGradientProps> = memo(({
 			startVec: vec(start.x * layout.width, start.y * layout.height),
 			endVec: vec(end.x * layout.width, end.y * layout.height),
 			gradientPositions: positions || colors.map((_, index) => index / (colors.length - 1)),
-			dimensions: { width: layout.width, height: layout.height }
+			dimensions: { width: layout.width, height: layout.height },
 		};
 	}, [colors, end.x, end.y, layout.height, layout.width, positions, start.x, start.y]);
 
@@ -126,7 +126,7 @@ const RadialGradient: React.FC<RadialGradientProps> = memo(({
 			centerVec: vec(center.x * layout.width, center.y * layout.height),
 			radiusValue: radius * (maxDimension / 2),
 			gradientPositions: positions || colors.map((_, index) => index / (colors.length - 1)),
-			dimensions: { width: layout.width, height: layout.height }
+			dimensions: { width: layout.width, height: layout.height },
 		};
 	}, [center.x, center.y, colors, layout.height, layout.width, positions, radius]);
 

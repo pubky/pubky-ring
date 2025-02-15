@@ -21,7 +21,7 @@ import { copyToClipboard } from '../utils/clipboard.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
-import ModalIndicator from "./ModalIndicator.tsx";
+import ModalIndicator from './ModalIndicator.tsx';
 
 interface ConfirmAuthProps {
 	pubky: string;

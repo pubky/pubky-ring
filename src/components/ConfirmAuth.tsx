@@ -10,18 +10,20 @@ import {
 	Text,
 	View,
 	SkiaGradient,
+	RadialGradient,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
-import { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue, withSpring, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
+import { AUTHORIZE_KEY_GRADIENT, ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -69,21 +71,39 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 	const dispatch = useDispatch();
 
 	const checkOpacity = useSharedValue(0);
+	const checkScale = useSharedValue(0.2); // Start very small
 
 	const checkStyle = useAnimatedStyle(() => ({
 		opacity: checkOpacity.value,
+		transform: [{ scale: checkScale.value }],
 		position: 'absolute',
 	}));
 
 	useEffect(() => {
 		if (authorizing) {
 			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
+			checkScale.value = withTiming(0.2);
 		} else if (isAuthorized) {
 			checkOpacity.value = withTiming(1, { duration: FADE_DURATION });
+			checkScale.value = withSequence(
+				// Start small
+				withTiming(0.2, { duration: 0 }),
+				// Overshoot slightly with spring
+				withSpring(1.2, {
+					damping: 12,
+					stiffness: 100,
+				}),
+				// Settle back to normal size with spring
+				withSpring(1, {
+					damping: 15,
+					stiffness: 100,
+				})
+			);
 		} else {
 			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
+			checkScale.value = withTiming(0.2);
 		}
-	}, [authorizing, checkOpacity, isAuthorized]);
+	}, [authorizing, checkOpacity, checkScale, isAuthorized]);
 
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
@@ -129,13 +149,33 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		SheetManager.hide('confirm-auth');
 	}, []);
 
+	const GradientView = useCallback(({ children }: { children: React.ReactNode }): JSX.Element => {
+		if (isAuthorized)  {
+			return (
+				<RadialGradient
+					style={styles.content}
+					colors={AUTHORIZE_KEY_GRADIENT}
+					center={{ x: 0.5, y: 0.5 }}
+				>
+					{children}
+				</RadialGradient>
+			);
+		} else {
+			return (
+				<SkiaGradient modal={true} style={styles.content}>
+					{children}
+				</SkiaGradient>
+			);
+		}
+	}, [isAuthorized]);
+
 	return (
 		<View style={styles.container}>
 			<ActionSheetContainer
 				id="confirm-auth"
 				navigationAnimation={navigationAnimation}
 				CustomHeaderComponent={<></>}>
-				<SkiaGradient modal={true} style={styles.content}>
+				<GradientView>
 					<ModalIndicator />
 					<View style={styles.titleContainer}>
 						<Text style={styles.title}>
@@ -195,14 +235,14 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 										<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
 									</ActionButton>
 								</>
-						) : (
-							<ActionButton style={styles.okButton} onPressIn={handleClose}>
-								<Text style={styles.buttonText}>OK</Text>
-							</ActionButton>
-						)}
+							) : (
+								<ActionButton style={styles.okButton} onPressIn={handleClose}>
+									<Text style={styles.buttonText}>OK</Text>
+								</ActionButton>
+							)}
 						</View>
 					</View>
-				</SkiaGradient>
+				</GradientView>
 				<Toast config={toastConfig({ style: toastStyle })} />
 			</ActionSheetContainer>
 		</View>

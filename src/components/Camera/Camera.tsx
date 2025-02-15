@@ -88,6 +88,7 @@ const Camera = ({
 	const cameraKitProps = React.useMemo(() => ({
 		style: styles.camera,
 		scanBarcode: true,
+		showFrame: false,
 		onReadCode: handleCodeRead,
 		cameraType: CameraType.Back,
 	}), [handleCodeRead]);

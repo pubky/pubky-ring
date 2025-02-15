@@ -6,6 +6,7 @@ import React, {
 } from 'react';
 import {
 	Image,
+	Platform,
 	StyleSheet,
 } from 'react-native';
 import {
@@ -13,12 +14,14 @@ import {
 	Text,
 	ActionSheetContainer,
 	SessionText,
+	SkiaGradient,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
+import ModalIndicator from './ModalIndicator.tsx';
 
 const AddPubky = ({ payload }: {
     payload: {
@@ -51,33 +54,41 @@ const AddPubky = ({ payload }: {
 			<ActionSheetContainer
 				id="add-pubky"
 				onClose={closeSheet}
-				keyboardHandlerEnabled={false}
+				keyboardHandlerEnabled={true}
 				navigationAnimation={navigationAnimation}
+				modal={Platform.OS === 'ios'}
+				CustomHeaderComponent={<></>}
+				height={'85%'}
 			>
-				<View style={styles.content}>
+				<SkiaGradient modal={true} style={styles.content}>
+					<ModalIndicator />
 					<Text style={styles.title}>Add Pubky</Text>
 					<SessionText style={styles.message}>
 						Do you want to create a new pubky or import an existing one?
 					</SessionText>
-					<Image
-						source={require('../images/add-pubky-key.png')}
-						style={styles.keyImage}
-					/>
-					<View style={styles.buttonContainer}>
-						<Button
-							text="Import pubky"
-							style={[styles.button, styles.importButton]}
-							textStyle={styles.buttonText}
-							onPress={onImportPubky}
-						/>
-						<Button
-							text="Create pubky"
-							style={[styles.button, styles.createButton]}
-							textStyle={styles.buttonText}
-							onPress={onCreatePubky}
+					<View style={styles.keyContainer}>
+						<Image
+							source={require('../images/add-pubky-key.png')}
+							style={styles.keyImage}
 						/>
 					</View>
-				</View>
+					<View style={styles.buttonWrapper}>
+						<View style={styles.buttonContainer}>
+							<Button
+								text="Import pubky"
+								style={[styles.button, styles.importButton]}
+								textStyle={styles.buttonText}
+								onPress={onImportPubky}
+							/>
+							<Button
+								text="Create pubky"
+								style={[styles.button, styles.createButton]}
+								textStyle={styles.buttonText}
+								onPress={onCreatePubky}
+							/>
+						</View>
+					</View>
+				</SkiaGradient>
 			</ActionSheetContainer>
 		</View>
 	);
@@ -95,8 +106,19 @@ const styles = StyleSheet.create({
 	},
 	content: {
 		paddingHorizontal: 20,
-		paddingBottom: 34,
-		marginTop: 20,
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
+		height: '98%',
+	},
+	buttonWrapper: {
+		flex: 0.3,
+		backgroundColor: 'transparent',
+		justifyContent: 'flex-end',
+	},
+	keyContainer: {
+		flex: 1,
+		backgroundColor: 'transparent',
+		justifyContent: 'center',
 	},
 	title: {
 		fontSize: 20,
@@ -118,6 +140,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		gap: 12,
 		paddingVertical: 12,
+		backgroundColor: 'transparent',
 	},
 	button: {
 		width: '45%',

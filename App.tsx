@@ -27,7 +27,8 @@ function App(): React.JSX.Element {
 		checkNetworkConnection({
 			prevNetworkState: isOnline,
 			dispatch,
-			displayToast: true,
+			displayToastIfOnline: false,
+			displayToastIfOffline: true,
 		});
 
 		const unsubscribe = NetInfo.addEventListener(state => {

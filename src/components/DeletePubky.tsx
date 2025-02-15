@@ -12,6 +12,7 @@ import {
 	Text,
 	ActionSheetContainer,
 	SessionText,
+	SkiaGradient,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -19,6 +20,7 @@ import PubkyCard from './PubkyCard.tsx';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
+import ModalIndicator from './ModalIndicator.tsx';
 
 const DeletePubky = ({ payload }: {
 	payload: {
@@ -41,8 +43,10 @@ const DeletePubky = ({ payload }: {
 				onClose={closeSheet}
 				keyboardHandlerEnabled={false}
 				navigationAnimation={navigationAnimation}
+				CustomHeaderComponent={<></>}
 			>
-				<View style={styles.content}>
+				<SkiaGradient modal={true} style={styles.content}>
+					<ModalIndicator />
 					<Text style={styles.title}>Delete Pubky</Text>
 					<SessionText style={styles.message}>
 						Are you sure you want to delete this pubky?
@@ -62,7 +66,7 @@ const DeletePubky = ({ payload }: {
 							onPress={onDelete}
 						/>
 					</View>
-				</View>
+				</SkiaGradient>
 			</ActionSheetContainer>
 		</View>
 	);
@@ -81,7 +85,8 @@ const styles = StyleSheet.create({
 	content: {
 		paddingHorizontal: 20,
 		paddingBottom: 34,
-		marginTop: 20,
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
 	},
 	title: {
 		fontSize: 20,
@@ -104,6 +109,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		gap: 12,
 		paddingVertical: 12,
+		backgroundColor: 'transparent',
 	},
 	button: {
 		width: '45%',

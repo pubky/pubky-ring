@@ -8,5 +8,6 @@ export const initialState: SettingsState = {
 	theme: ETheme.dark,
 	showOnboarding: true,
 	autoAuth: false,
+	isOnline: true,
 	navigationAnimation: ENavigationAnimation.slideFromRight,
 };

@@ -16,6 +16,11 @@ import { JdenticonConfig } from 'jdenticon';
 import jdenticon from 'jdenticon/standalone';
 import { SvgXml } from 'react-native-svg';
 import { NavView } from '../theme/components';
+import { RadialGradient } from '../theme/components.ts';
+import {
+	ONBOARDING_KEY_RADIAL_GRADIENT,
+	ONBOARDING_PUBKY_RADIAL_GRADIENT,
+} from '../utils/constants.ts';
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -48,55 +53,65 @@ const ConfirmPubkyScreen = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
-			{/* Background image */}
-			<Image
-				source={require('../images/circle.png')}
-				style={styles.backgroundImage}
-			/>
-
-			{/* Logo */}
-			<View style={styles.logoContainer}>
+			<RadialGradient
+				style={styles.onBoardingRadialGradient}
+				colors={ONBOARDING_KEY_RADIAL_GRADIENT}
+				center={{ x: 1, y: 0.5 }}
+			>
+				{/* Background image */}
 				<Image
-					source={require('../images/pubky-ring-logo.png')}
-					style={styles.logo}
+					source={require('../images/circle.png')}
+					style={styles.backgroundImage}
 				/>
-			</View>
 
-			{/* Keys Image */}
-			<View style={styles.keysImageContainer}>
-				<Image source={require('../images/key.png')} style={styles.keysImage} />
-			</View>
-
-			{/* Content Block: Text and Buttons */}
-			<View style={styles.contentBlock}>
-				{/* Text */}
-				<View style={styles.textContainer}>
-					<Text style={styles.title}>Your pubky.</Text>
-					<Text style={styles.subtitle}>
-						This is your first unique identifier, your pubky. Create as many as
-						you need for different purposes. You are your keys.
-					</Text>
+				{/* Logo */}
+				<View style={styles.logoContainer}>
+					<Image
+						source={require('../images/pubky-ring-logo.png')}
+						style={styles.logo}
+					/>
 				</View>
 
-				{/* Show created Pubky */}
-				<View style={styles.cardPubky}>
-					<View style={styles.detailsPubkyContainer}>
-						<NavView style={styles.profileImage}>
-							<Jdenticon value={pubky} size={60} />
-						</NavView>
-						<Text style={styles.textPubky}>pk:{pubky}</Text>
+				{/* Keys Image */}
+				<View style={styles.keysImageContainer}>
+					<Image source={require('../images/key.png')} style={styles.keysImage} />
+				</View>
+
+				{/* Content Block: Text and Buttons */}
+				<View style={styles.contentBlock}>
+					{/* Text */}
+					<View style={styles.textContainer}>
+						<Text style={styles.title}>Your pubky.</Text>
+						<Text style={styles.subtitle}>
+							This is your first unique identifier, your pubky. Create as many as
+							you need for different purposes. You are your keys.
+						</Text>
+					</View>
+
+					{/* Show created Pubky */}
+					<RadialGradient
+						center={{ x: 0.9, y: 0 }}
+						colors={ONBOARDING_PUBKY_RADIAL_GRADIENT}
+						style={styles.cardPubky}
+					>
+						<View style={styles.detailsPubkyContainer}>
+							<NavView style={styles.profileImage}>
+								<Jdenticon value={pubky} size={60} />
+							</NavView>
+							<Text style={styles.textPubky}>pk:{pubky}</Text>
+						</View>
+					</RadialGradient>
+
+					{/* Buttons */}
+					<View style={styles.buttonContainer}>
+						<TouchableOpacity
+							style={styles.buttonPrimary}
+							onPress={completeOnboarding}>
+							<Text style={styles.buttonText}>Get started</Text>
+						</TouchableOpacity>
 					</View>
 				</View>
-
-				{/* Buttons */}
-				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.buttonPrimary}
-						onPress={completeOnboarding}>
-						<Text style={styles.buttonText}>Get started</Text>
-					</TouchableOpacity>
-				</View>
-			</View>
+			</RadialGradient>
 		</View>
 	);
 };
@@ -145,7 +160,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		justifyContent: 'flex-end',
 		paddingBottom: 35,
-		width: '100%',
 	},
 	textContainer: {
 		paddingHorizontal: 32,
@@ -166,11 +180,10 @@ const styles = StyleSheet.create({
 		fontFamily: 'InterTight-VariableFont_wght',
 	},
 	cardPubky: {
-		padding: 24,
+		paddingHorizontal: 24,
 		justifyContent: 'center',
 		alignItems: 'flex-start',
 		borderRadius: 16,
-		backgroundColor: '#262626',
 		marginTop: 20,
 		marginHorizontal: 32,
 	},
@@ -202,10 +215,10 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		marginTop: 20,
-		justifyContent: 'space-between',
-		width: '100%',
+		alignSelf: 'center',
+		justifyContent: 'center',
 		gap: 12,
-		paddingHorizontal: 32,
+		paddingHorizontal: 12,
 	},
 	buttonPrimary: {
 		flex: 1,
@@ -213,8 +226,7 @@ const styles = StyleSheet.create({
 		borderColor: 'white',
 		borderWidth: 1,
 		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
+		paddingVertical: 24,
 		alignItems: 'center',
 	},
 	buttonText: {
@@ -224,6 +236,10 @@ const styles = StyleSheet.create({
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		fontFamily: 'InterTight-VariableFont_wght',
+	},
+	onBoardingRadialGradient: {
+		height: '100%',
+		alignItems: 'center',
 	},
 });
 

@@ -6,6 +6,8 @@ import {
 	TouchableOpacity,
 	Image,
 } from 'react-native';
+import { RadialGradient } from '../theme/components.ts';
+import { ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
 
 type OnboardingContentProps = {
     importPubky: () => void;
@@ -15,51 +17,57 @@ type OnboardingContentProps = {
 const OnboardingContent = ({ importPubky, createPubky }: OnboardingContentProps): ReactElement => {
 	return (
 		<View style={styles.container}>
-			{/* Background image */}
-			<Image
-				source={require('../images/circle.png')}
-				style={styles.backgroundImage}
-			/>
-
-			{/* Logo */}
-			<View style={styles.logoContainer}>
+			<RadialGradient
+				style={{ height: '100%' }}
+				colors={ONBOARDING_KEY_RADIAL_GRADIENT}
+				center={{ x: 1, y: 0.5 }}
+			>
+				{/* Background image */}
 				<Image
-					source={require('../images/pubky-ring-logo.png')}
-					style={styles.logo}
+					source={require('../images/circle.png')}
+					style={styles.backgroundImage}
 				/>
-			</View>
 
-			{/* Keys Image */}
-			<View style={styles.keysImageContainer}>
-				<Image
-					source={require('../images/keyring.png')}
-					style={styles.keysImage}
-				/>
-			</View>
-
-			{/* Content Block: Text and Buttons */}
-			<View style={styles.contentBlock}>
-				{/* Text */}
-				<View style={styles.textContainer}>
-					<Text style={styles.title}>Keychain for the next web.</Text>
-					<Text style={styles.subtitle}>
-						Pubky Ring enables you to securely authorize services and manage
-						your pubkys, devices, and sessions.
-					</Text>
+				{/* Logo */}
+				<View style={styles.logoContainer}>
+					<Image
+						source={require('../images/pubky-ring-logo.png')}
+						style={styles.logo}
+					/>
 				</View>
 
-				{/* Buttons */}
-				<View style={styles.buttonContainer}>
-					<TouchableOpacity
-						style={styles.buttonSecondary}
-						onPress={importPubky}>
-						<Text style={styles.buttonText}>Import pubky</Text>
-					</TouchableOpacity>
-					<TouchableOpacity style={styles.buttonPrimary} onPress={createPubky}>
-						<Text style={styles.buttonText}>New pubky</Text>
-					</TouchableOpacity>
+				{/* Keys Image */}
+				<View style={styles.keysImageContainer}>
+					<Image
+						source={require('../images/keyring.png')}
+						style={styles.keysImage}
+					/>
 				</View>
-			</View>
+
+				{/* Content Block: Text and Buttons */}
+				<View style={styles.contentBlock}>
+					{/* Text */}
+					<View style={styles.textContainer}>
+						<Text style={styles.title}>Keychain for the next web.</Text>
+						<Text style={styles.subtitle}>
+							Pubky Ring enables you to securely authorize services and manage
+							your pubkys, devices, and sessions.
+						</Text>
+					</View>
+
+					{/* Buttons */}
+					<View style={styles.buttonContainer}>
+						<TouchableOpacity
+							style={styles.buttonSecondary}
+							onPress={importPubky}>
+							<Text style={styles.buttonText}>Import pubky</Text>
+						</TouchableOpacity>
+						<TouchableOpacity style={styles.buttonPrimary} onPress={createPubky}>
+							<Text style={styles.buttonText}>New pubky</Text>
+						</TouchableOpacity>
+					</View>
+				</View>
+			</RadialGradient>
 		</View>
 	);
 };

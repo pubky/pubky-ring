@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PubkyData, RootStackParamList } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
-import { handleClipboardData, showNamePubkyPrompt, showQRScanner } from '../utils/helpers.ts';
+import { showNamePubkyPrompt, showQRScanner } from '../utils/helpers.ts';
 import { useSelector } from 'react-redux';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
@@ -18,12 +18,12 @@ import {
 	Edit2,
 	View,
 } from '../theme/components.ts';
-import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
+import PubkyRingHeader from '../components/PubkyRingHeader';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PubkyDetail'>;
 
 const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
-	const { pubky } = route.params;
+	const { pubky, index } = route.params;
 	const data = useSelector((state: RootState) => getPubky(state, pubky));
 	const pubkyData: PubkyData = useMemo(() => {
 		return { ...data, pubky };
@@ -69,9 +69,9 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 				rightButton={rightButton()}
 			/>
 			<PubkyDetail
+				index={index}
 				pubkyData={pubkyData}
 				onQRPress={showQRScanner}
-				onCopyClipboard={handleClipboardData}
 			/>
 		</View>
 	);

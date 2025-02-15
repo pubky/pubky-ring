@@ -9,6 +9,7 @@ import {
 	SessionText,
 	Text,
 	View,
+	SkiaGradient,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
@@ -20,6 +21,7 @@ import { copyToClipboard } from '../utils/clipboard.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
+import ModalIndicator from "./ModalIndicator.tsx";
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -131,8 +133,10 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		<View style={styles.container}>
 			<ActionSheetContainer
 				id="confirm-auth"
-				navigationAnimation={navigationAnimation}>
-				<View style={styles.content}>
+				navigationAnimation={navigationAnimation}
+				CustomHeaderComponent={<></>}>
+				<SkiaGradient modal={true} style={styles.content}>
+					<ModalIndicator />
 					<View style={styles.titleContainer}>
 						<Text style={styles.title}>
 							{isAuthorized ? 'Authorized' : 'Authorize'}
@@ -198,7 +202,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 						)}
 						</View>
 					</View>
-				</View>
+				</SkiaGradient>
 				<Toast config={toastConfig({ style: toastStyle })} />
 			</ActionSheetContainer>
 		</View>
@@ -217,7 +221,9 @@ const styles = StyleSheet.create({
 	},
 	content: {
 		paddingHorizontal: 12,
-		paddingTop: 20,
+		backgroundColor: 'transparent',
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
 	},
 	actionButton: {
 		width: '45%',
@@ -236,9 +242,11 @@ const styles = StyleSheet.create({
 	},
 	section: {
 		marginBottom: 24,
+		backgroundColor: 'transparent',
 	},
 	permissionsSection: {
 		marginBottom: 10,
+		backgroundColor: 'transparent',
 	},
 	relayText: {
 		fontSize: 16,
@@ -255,22 +263,26 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		marginBottom: 12,
+		backgroundColor: 'transparent',
 	},
 	pathContainer: {
 		flex: 2,
 		marginLeft: 5,
 		justifyContent: 'center',
+		backgroundColor: 'transparent',
 	},
 	pathText: {
 		fontSize: 13,
 		fontWeight: '600',
 		lineHeight: 18,
+		backgroundColor: 'transparent',
 	},
 	permissionsContainer: {
 		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		gap: 8,
+		backgroundColor: 'transparent',
 	},
 	permissionChip: {
 		paddingHorizontal: 12,
@@ -283,9 +295,11 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-evenly',
 		gap: 12,
 		zIndex: 3,
+		backgroundColor: 'transparent',
 	},
 	footerContainer: {
 		marginBottom: 10,
+		backgroundColor: 'transparent',
 	},
 	imageContainer: {
 		justifyContent: 'center',
@@ -293,10 +307,12 @@ const styles = StyleSheet.create({
 		height: 150,
 		width: '100%',
 		position: 'relative',
+		backgroundColor: 'transparent',
 	},
 	imageWrapper: {
 		justifyContent: 'center',
 		alignItems: 'center',
+		backgroundColor: 'transparent',
 	},
 	keyImage: {
 		width: 150,
@@ -350,44 +366,44 @@ const styles = StyleSheet.create({
 	authorizeButtonText: {
 		color: 'white',
 	},
-	unauthorizedChip: {
-		backgroundColor: '#ffebee',
-	},
-	authorizedChip: {
-		backgroundColor: '#e8f5e9',
-	},
 	sectionTitle: {
 		fontSize: 13,
 		fontWeight: '500',
 		lineHeight: 18,
 		textTransform: 'uppercase',
 		marginBottom: 8,
+		backgroundColor: 'transparent',
 	},
 	unauthorizedText: {
 		fontSize: 13,
 		fontWeight: '500',
 		lineHeight: 18,
 		textTransform: 'uppercase',
+		backgroundColor: 'transparent',
 	},
 	authorizedText: {
 		fontSize: 13,
 		fontWeight: '500',
 		lineHeight: 18,
 		textTransform: 'uppercase',
+		backgroundColor: 'transparent',
 	},
 	titleContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
 		marginBottom: 24,
+		backgroundColor: 'transparent',
 	},
 	title: {
 		fontSize: 24,
 		fontWeight: '600',
+		backgroundColor: 'transparent',
 	},
 	checkmarkContainer: {
 		marginLeft: 8,
 		justifyContent: 'center',
+		backgroundColor: 'transparent',
 	},
 });
 

@@ -11,6 +11,7 @@ export type RootStackParamList = {
   Settings: undefined;
   PubkyDetail: {
     pubky: string;
+    index: number;
   };
   EditPubky: {
     pubkyData: PubkyData;

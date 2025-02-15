@@ -5,12 +5,14 @@ import {
 	Text,
 	TextInput,
 	View,
+	SkiaGradient,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncateStr } from '../utils/pubky.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { setName } from '../store/slices/pubkysSlice.ts';
+import ModalIndicator from "./ModalIndicator.tsx";
 
 const MAX_NAME_LENGTH = 50;
 
@@ -64,68 +66,60 @@ const NamePubkyPrompt = ({ payload }: {
 	}, []);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="name-pubky-prompt"
-				navigationAnimation={navigationAnimation}
-				keyboardHandlerEnabled={Platform.OS === 'ios'}
-			>
-				<View style={styles.content}>
-					<Text style={styles.title}>Name Pubky</Text>
-					<Text style={styles.message}>
-						Enter a name for <Text style={styles.boldText}>pk:{truncatedPubky}</Text>
-					</Text>
-					<View style={styles.inputContainer}>
-						<TextInput
-							style={[styles.input, error ? styles.inputError : null]}
-							value={newPubkyName}
-							onChangeText={handleChangeText}
-							placeholder="Pubky Name"
-							placeholderTextColor="#999"
-							autoFocus
-							onSubmitEditing={handleSubmit}
-							autoCapitalize="none"
-						/>
-					</View>
-					{error ? (
-						<Text style={styles.errorText}>{error}</Text>
-                    ) : null}
-					<View style={styles.buttonContainer}>
-						<Button
-							text={'Cancel'}
-							style={styles.button}
-							onPress={onClose}
-						/>
-						<Button
-							text={'Save'}
-							loading={loading}
-							style={[styles.button, styles.submitButton]}
-							onPress={handleSubmit}
-							disabled={newPubkyName === pubkyName}
-						/>
-					</View>
+		<ActionSheetContainer
+			id="name-pubky-prompt"
+			navigationAnimation={navigationAnimation}
+			keyboardHandlerEnabled={true}
+			isModal={Platform.OS === 'ios'}
+			CustomHeaderComponent={<></>}
+		>
+			<SkiaGradient modal={true} style={styles.content}>
+				<ModalIndicator />
+				<Text style={styles.title}>Name Pubky</Text>
+				<Text style={styles.message}>
+					Enter a name for <Text style={styles.boldText}>pk:{truncatedPubky}</Text>
+				</Text>
+				<View style={styles.inputContainer}>
+					<TextInput
+						style={[styles.input, error ? styles.inputError : null]}
+						value={newPubkyName}
+						onChangeText={handleChangeText}
+						placeholder="Pubky Name"
+						placeholderTextColor="#999"
+						autoFocus
+						onSubmitEditing={handleSubmit}
+						autoCapitalize="none"
+					/>
 				</View>
-			</ActionSheetContainer>
-		</View>
+				{error ? (
+					<Text style={styles.errorText}>{error}</Text>
+				) : null}
+				<View style={styles.buttonContainer}>
+					<Button
+						text={'Cancel'}
+						style={styles.button}
+						onPress={onClose}
+					/>
+					<Button
+						text={'Save'}
+						loading={loading}
+						style={[styles.button, styles.submitButton]}
+						onPress={handleSubmit}
+						disabled={newPubkyName === pubkyName}
+					/>
+				</View>
+			</SkiaGradient>
+		</ActionSheetContainer>
 	);
 };
 
 const styles = StyleSheet.create({
-	// TODO: Eventially remove the absolute positioned container View.
-	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
-	container: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	content: {
-		maxHeight: '80%',
 		paddingHorizontal: 24,
 		paddingBottom: 24,
-		marginTop: 20,
 		minHeight: '40%',
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
 	},
 	title: {
 		fontSize: 17,
@@ -176,6 +170,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		alignItems: 'center',
 		alignSelf: 'center',
+		backgroundColor: 'transparent',
 	},
 	button: {
 		width: '47%',

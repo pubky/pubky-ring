@@ -25,6 +25,7 @@ import Button from '../Button.tsx';
 import { shareData, showToast } from '../../utils/helpers.ts';
 
 interface PubkyListHeaderProps {
+	index: number;
     svg: string;
     pubky: string;
     pubkyData: PubkyData;
@@ -35,6 +36,7 @@ interface PubkyListHeaderProps {
 }
 
 export const PubkyListHeader = memo(({
+	index,
 	svg,
 	pubky,
 	pubkyData,
@@ -69,33 +71,42 @@ export const PubkyListHeader = memo(({
 		shareData(pubkyUri).then();
 	}, [pubkyUri]);
 
+	const pubkyName = useMemo(() => {
+		if (pubkyData?.name) {
+			return pubkyData.name;
+		}
+		return `pubky #${index + 1}`;
+	}, [index, pubkyData.name]);
+
 	return (
 		<View style={styles.container}>
 			<LinearGradient style={styles.profileSection}>
-				<Card style={styles.profile}>
-					<View style={styles.avatarContainer}>
-						<SvgXml xml={svg} height={86} width={86} />
+				<View style={styles.profileContainer}>
+					<Card style={styles.profile}>
+						<View style={styles.avatarContainer}>
+							<SvgXml xml={svg} height={86} width={86} />
+						</View>
+
+						<Text style={styles.nameText}>{pubkyName}</Text>
+
+						<ActionButton style={styles.pubkyButton} onPress={handleCopyPubky} activeOpacity={0.7}>
+							<Text style={styles.pubkyText}>{pubkyUri}</Text>
+						</ActionButton>
+					</Card>
+					<View style={styles.authorizeButtonContainer}>
+						<AuthorizeButton
+							style={styles.authorizeButton}
+							onPressIn={handleOnQRPress}
+						>
+							{isQRLoading ? (<ActivityIndicator size="small" />) : (
+								<>
+									<QrCode size={16} />
+									<Text style={styles.buttonText}>Authorize</Text>
+								</>
+							)}
+						</AuthorizeButton>
 					</View>
-
-					{pubkyData?.name ? (
-						<Text style={styles.nameText}>{pubkyData.name}</Text>
-					) : null}
-
-					<ActionButton style={styles.pubkyButton} onPress={handleCopyPubky} activeOpacity={0.7}>
-						<Text style={styles.pubkyText}>{pubkyUri}</Text>
-					</ActionButton>
-				</Card>
-				<AuthorizeButton
-					style={styles.authorizeButton}
-					onPressIn={handleOnQRPress}
-				>
-					{isQRLoading ? (<ActivityIndicator size="small" />) : (
-						<>
-							<QrCode size={16} />
-							<Text style={styles.buttonText}>Authorize</Text>
-						</>
-					)}
-				</AuthorizeButton>
+				</View>
 			</LinearGradient>
 
 			<View style={styles.actionButtonRow}>
@@ -123,27 +134,44 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		alignItems: 'center',
+		marginHorizontal: 20,
 	},
-	actionButtonRow: {
-		flexDirection: 'row',
-		marginTop: 24,
-		width: '90%',
-		justifyContent: 'space-between',
+	profileSection: {
+		alignItems: 'center',
+		borderRadius: 16,
+		width: '100%',
+	},
+	profileContainer: {
+		padding: 24,
+		backgroundColor: 'transparent',
+	},
+	profile: {
+		alignItems: 'center',
+		width: '100%',
+		backgroundColor: 'transparent',
+		paddingBottom: 16,
+	},
+	authorizeButtonContainer: {
+		backgroundColor: 'trasparent',
 	},
 	authorizeButton: {
-		width: '75%',
+		width: '100%',
 		borderRadius: 64,
 		paddingVertical: 20,
-		paddingHorizontal: 24,
 		alignItems: 'center',
 		display: 'flex',
 		flexDirection: 'row',
 		gap: 4,
+		borderWidth: 1,
 		alignSelf: 'center',
 		alignContent: 'center',
 		justifyContent: 'center',
-		marginBottom: 24,
-		borderWidth: 1,
+	},
+	actionButtonRow: {
+		flexDirection: 'row',
+		marginTop: 24,
+		width: '100%',
+		justifyContent: 'space-between',
 	},
 	actionButtonText: {
 		fontSize: 15,
@@ -158,19 +186,6 @@ const styles = StyleSheet.create({
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		marginLeft: 5,
-	},
-	profileSection: {
-		alignItems: 'center',
-		marginHorizontal: 24,
-		borderRadius: 16,
-		width: '90%',
-	},
-	profile: {
-		alignItems: 'center',
-		width: '90%',
-		backgroundColor: 'transparent',
-		paddingTop: 24,
-		paddingBottom: 16,
 	},
 	avatarContainer: {
 		width: 96,
@@ -194,7 +209,6 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		fontFamily: 'monospace',
 		textAlign: 'center',
-		paddingHorizontal: 16,
 		marginBottom: 8,
 		fontWeight: 600,
 		lineHeight: 22,

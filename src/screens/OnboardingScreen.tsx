@@ -26,10 +26,8 @@ const OnboardingScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 
 	const createPubky = useCallback(async () => {
-		await Promise.all([
-			restorePubkys(dispatch), // Check if there are already pubky's in the keychain and restore them
-			createNewPubky(dispatch),
-		]);
+		createNewPubky(dispatch).then();
+		restorePubkys(dispatch).then(); // Check if there are already pubky's in the keychain and restore them
 		dispatch(updateShowOnboarding({ showOnboarding: false }));
 		navigation.replace('ConfirmPubky');
 	}, [dispatch, navigation]);
@@ -50,7 +48,7 @@ const OnboardingScreen = (): ReactElement => {
 				title: 'Success',
 				description: 'Pubky imported successfully',
 			});
-			restorePubkys(dispatch); // Check if there are already pubky's in the keychain and restore them
+			restorePubkys(dispatch).then(); // Check if there are already pubky's in the keychain and restore them
 			dispatch(updateShowOnboarding({ showOnboarding: false }));
 			navigation.replace('ConfirmPubky');
 		}

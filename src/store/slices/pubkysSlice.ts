@@ -69,6 +69,9 @@ const pubkysSlice = createSlice({
 		reorderPubkys: (state, action: PayloadAction<{ [key: string]: Pubky }>) => {
 			state.pubkys = action.payload;
 		},
+		resetPubkys: () => {
+			return { ...initialState };
+		},
 	},
 });
 
@@ -82,6 +85,7 @@ export const {
 	removeSession,
 	removePubky,
 	reorderPubkys,
+	resetPubkys,
 } = pubkysSlice.actions;
 
 export default pubkysSlice.reducer;

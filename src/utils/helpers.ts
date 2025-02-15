@@ -149,7 +149,8 @@ export const showQRScanner = async ({
 		const res = await checkNetworkConnection({
 			prevNetworkState: isOnline,
 			dispatch,
-			displayToast: false,
+			displayToastIfOnline: false,
+			displayToastIfOffline: false,
 		});
 		if (!res) {
 			showToast({
@@ -366,11 +367,13 @@ export const shareData = async (data: string): Promise<void> => {
 export const checkNetworkConnection = async ({
 	prevNetworkState,
 	dispatch,
-	displayToast = true,
+	displayToastIfOnline = true,
+	displayToastIfOffline = true,
 }: {
 	prevNetworkState?: boolean;
 	dispatch?: Dispatch;
-	displayToast?: boolean;
+	displayToastIfOnline?: boolean;
+	displayToastIfOffline?: boolean;
 }): Promise<boolean> => {
 	if (!prevNetworkState) {
 		prevNetworkState = getIsOnline();
@@ -381,13 +384,13 @@ export const checkNetworkConnection = async ({
 		if (dispatch) {
 			dispatch(updateIsOnline({ isOnline: isConnected }));
 		}
-		if (isConnected && displayToast) {
+		if (isConnected && displayToastIfOnline) {
 			showToast({
 				type: 'success',
 				title: "You're Back Online!",
 				description: 'You can now authorize with Pubky Ring',
 			});
-		} else if (!isConnected && displayToast) {
+		} else if (!isConnected && displayToastIfOffline) {
 			showToast({
 				type: 'error',
 				title: 'Currently Offline',

@@ -6,6 +6,7 @@ import {
 	EyeOff,
 	KeyRound,
 	SessionText,
+	SkiaGradient,
 	Text,
 	TextInput,
 	TouchableOpacity,
@@ -16,6 +17,7 @@ import { truncateStr } from '../utils/pubky.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { Result } from '@synonymdev/result';
+import ModalIndicator from './ModalIndicator.tsx';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -142,85 +144,77 @@ const BackupPrompt = ({ payload }: {
 	}, [fileDate, fileName, truncatedPubky, viewId]);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="backup-prompt"
-				navigationAnimation={navigationAnimation}
-				onClose={() => {
-					onClose();
-					setPassword('');
-					setError('');
-				}}
-				keyboardHandlerEnabled={Platform.OS === 'ios'}
-			>
-				<View style={styles.content}>
-					<Text style={styles.title}>{title}</Text>
-					<View style={styles.messageContainer}>
-						<Text style={styles.message}>
-							{message}
-						</Text>
-					</View>
-					{content}
-					<View style={styles.inputContainer}>
-						<TextInput
-							autoComplete={'current-password'}
-							style={[styles.input, error ? styles.inputError : null]}
-							secureTextEntry={!showPassword}
-							value={password}
-							onChangeText={setPassword}
-							placeholder="Enter passphrase"
-							placeholderTextColor="#999"
-							autoFocus
-							onSubmitEditing={handleSubmit}
-							autoCapitalize="none"
-						/>
-						<TouchableOpacity
-							style={styles.eyeButton}
-							onPress={() => setShowPassword(!showPassword)}
-							activeOpacity={0.7}
-						>
-							{showPassword ? (<Eye size={20} />) : (<EyeOff size={20} />)}
-						</TouchableOpacity>
-					</View>
-					{error ? (
-						<Text style={styles.errorText}>{error}</Text>
-				) : null}
-					<View style={styles.buttonContainer}>
-						<Button
-							text={loading ? 'Close' : 'Cancel'}
-							style={styles.button}
-							onPress={onClose}
-						/>
-						<Button
-							text={submitButtonText}
-							loading={loading}
-							style={[styles.button, styles.submitButton]}
-							onPress={handleSubmit}
-							disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
-						/>
-					</View>
+		<ActionSheetContainer
+			id="backup-prompt"
+			navigationAnimation={navigationAnimation}
+			onClose={() => {
+				onClose();
+				setPassword('');
+				setError('');
+			}}
+			keyboardHandlerEnabled={true}
+			isModal={Platform.OS === 'ios'}
+			CustomHeaderComponent={<></>}
+		>
+			<SkiaGradient modal={true} style={styles.content}>
+				<ModalIndicator />
+				<Text style={styles.title}>{title}</Text>
+				<View style={styles.messageContainer}>
+					<Text style={styles.message}>
+						{message}
+					</Text>
 				</View>
-			</ActionSheetContainer>
-		</View>
+				{content}
+				<View style={styles.inputContainer}>
+					<TextInput
+						autoComplete={'current-password'}
+						style={[styles.input, error ? styles.inputError : null]}
+						secureTextEntry={!showPassword}
+						value={password}
+						onChangeText={setPassword}
+						placeholder="Enter passphrase"
+						placeholderTextColor="#999"
+						autoFocus
+						onSubmitEditing={handleSubmit}
+						autoCapitalize="none"
+					/>
+					<TouchableOpacity
+						style={styles.eyeButton}
+						onPress={() => setShowPassword(!showPassword)}
+						activeOpacity={0.7}
+					>
+						{showPassword ? (<Eye size={20} />) : (<EyeOff size={20} />)}
+					</TouchableOpacity>
+				</View>
+				{error ? (
+					<Text style={styles.errorText}>{error}</Text>
+				) : null}
+				<View style={styles.buttonContainer}>
+					<Button
+						text={loading ? 'Close' : 'Cancel'}
+						style={styles.button}
+						onPress={onClose}
+					/>
+					<Button
+						text={submitButtonText}
+						loading={loading}
+						style={[styles.button, styles.submitButton]}
+						onPress={handleSubmit}
+						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
+					/>
+				</View>
+			</SkiaGradient>
+		</ActionSheetContainer>
 	);
 };
 
 const styles = StyleSheet.create({
-	// TODO: Eventially remove the absolute positioned container View.
-	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
-	container: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	content: {
-		maxHeight: '80%',
-		paddingHorizontal: 24,
-		paddingBottom: 24,
-		marginTop: 20,
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
 		minHeight: '40%',
+		paddingHorizontal: 24,
+		paddingBottom: 34,
 	},
 	title: {
 		fontSize: 17,
@@ -231,6 +225,7 @@ const styles = StyleSheet.create({
 	},
 	messageContainer: {
 		marginBottom: 16,
+		backgroundColor: 'transparent',
 	},
 	message: {
 		fontSize: 17,
@@ -278,6 +273,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		alignItems: 'center',
 		alignSelf: 'center',
+		backgroundColor: 'transparent',
 	},
 	button: {
 		width: '47%',
@@ -288,6 +284,7 @@ const styles = StyleSheet.create({
 	row: {
 		flexDirection: 'row',
 		alignItems: 'center',
+		backgroundColor: 'transparent',
 	},
 	keyContainer: {
 		borderWidth: 1,
@@ -297,10 +294,12 @@ const styles = StyleSheet.create({
 		marginRight: 12,
 		alignItems: 'center',
 		justifyContent: 'center',
+		backgroundColor: 'transparent',
 	},
 	fileInfoContainer: {
 		flex: 1,
 		marginRight: 8,
+		backgroundColor: 'transparent',
 	},
 	boldText: {
 		fontWeight: 'bold',

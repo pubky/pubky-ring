@@ -18,6 +18,10 @@ import {
 import ActionSheet from 'react-native-actions-sheet';
 import Animated from 'react-native-reanimated';
 import { ENavigationAnimation } from '../types/settings.ts';
+import {
+	LinearGradient as _SkiaGradient,
+	RadialGradient as _RadialGradient,
+} from '../components/LinearGradient.tsx';
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
 
 interface ActionSheetContainerProps {
@@ -39,6 +43,7 @@ export const ActionSheetContainer = styled(
 		backgroundColor: props.backgroundColor || props.theme.colors.background,
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
+		height: props?.height || undefined,
 	},
 	indicatorStyle: {
 		width: 32,
@@ -48,7 +53,7 @@ export const ActionSheetContainer = styled(
 		marginVertical: 12,
 	},
 	gestureEnabled: true,
-	defaultOverlayOpacity: 0.3,
+	defaultOverlayOpacity: 0.7,
 	statusBarTranslucent: true,
 	drawUnderStatusBar: false,
 	springOffset: 50,
@@ -216,13 +221,53 @@ export const Folder = styled(_Folder)`
 	  color: ${(props): string => props.theme.colors.text};
 `;
 
-export const LinearGradient = styled(_LinearGradient).attrs<{ colors: string[] }>((props: {
-	colors: string[];
+interface LinearGradientProps {
+	colors?: string[];
+	modal?: boolean;
 	theme: {
 		colors: {
 			gradient: string[];
+			modalGradient: string[];
 		};
 	};
-}) => ({
-	colors: props.colors || props.theme.colors.gradient,
+}
+
+export const LinearGradient = styled(_LinearGradient).attrs<LinearGradientProps>((props) => ({
+	colors: props.colors || (props.modal ? props.theme.colors.modalGradient : props.theme.colors.gradient),
+}))``;
+
+interface SkiaGradientProps {
+	colors?: string[];
+	modal?: boolean;
+	theme: {
+		colors: {
+			gradient: string[];
+			modalGradient: string[];
+		};
+	};
+}
+
+export const SkiaGradient = styled(_SkiaGradient).attrs<SkiaGradientProps>((props) => ({
+	colors: props.colors || (props.modal ? props.theme.colors.modalGradient : props.theme.colors.gradient),
+}))``;
+
+interface RadialGradientProps {
+	colors?: string[];
+	center?: { x: number; y: number };
+	radius?: number;
+	modal?: boolean;
+	positions?: number[];
+	theme: {
+		colors: {
+			gradient: string[];
+			modalGradient: string[];
+		};
+	};
+}
+
+export const RadialGradient = styled(_RadialGradient).attrs<RadialGradientProps>((props) => ({
+	colors: props.colors || (props.modal ? props.theme.colors.modalGradient : props.theme.colors.gradient),
+	center: props.center || { x: 0.5, y: 0.5 },
+	radius: props.radius || 1,
+	positions: props.positions || props.colors?.map((_: any, index: number) => index / (props.colors.length - 1)),
 }))``;

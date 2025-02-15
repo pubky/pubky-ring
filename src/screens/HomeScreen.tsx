@@ -17,7 +17,7 @@ import { createNewPubky } from '../utils/pubky';
 import { showQRScanner, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus } from '../theme/components';
-import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
+import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
@@ -39,12 +39,11 @@ const PubkyItem = memo(({
 	drag: () => void;
 	isActive: boolean;
 	index: number;
-	onPress: (pubky: string) => void;
+	onPress: (pubky: string, index: number) => void;
 	onQRPress: typeof showQRScanner;
 }) => (
 	<ScaleDecorator>
 		<PubkyBox
-			key={item.key}
 			pubky={item.key}
 			pubkyData={item.value}
 			onQRPress={onQRPress}
@@ -63,8 +62,8 @@ const HomeScreen = (): ReactElement => {
 	const hasPubkys = useMemo(() => Object.keys(pubkys).length > 0, [pubkys]);
 
 	const handlePubkyPress = useCallback(
-		(pubky: string) => {
-			navigation.navigate('PubkyDetail', { pubky });
+		(pubky: string, index: number) => {
+			navigation.navigate('PubkyDetail', { pubky, index });
 		},
 		[navigation],
 	);

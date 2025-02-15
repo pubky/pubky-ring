@@ -21,6 +21,9 @@ const settingsSlice = createSlice({
 		updateIsOnline: (state, action: PayloadAction<{ isOnline: boolean }>) => {
 			state.isOnline = action.payload.isOnline;
 		},
+		resetSettings: () => {
+			return initialState;
+		},
 	},
 });
 
@@ -30,6 +33,7 @@ export const {
 	updateAutoAuth,
 	updateNavigationAnimation,
 	updateIsOnline,
+	resetSettings,
 } = settingsSlice.actions;
 
 export default settingsSlice.reducer;

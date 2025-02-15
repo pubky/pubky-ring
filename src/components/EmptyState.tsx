@@ -3,7 +3,7 @@ import { StyleSheet } from 'react-native';
 import { View, Text, ArrowRight, Plus, Button } from '../theme/components.ts';
 import { createNewPubky } from '../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
-import PubkyRingHeader from './PubkyRingHeader..tsx';
+import PubkyRingHeader from './PubkyRingHeader';
 import { importFile } from '../utils/rnfs.ts';
 import { showToast } from '../utils/helpers.ts';
 

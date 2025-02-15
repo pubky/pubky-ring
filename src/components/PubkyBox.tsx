@@ -38,7 +38,7 @@ interface PubkyBoxProps {
 		onComplete?: () => void;
 		isOnline: boolean;
 	}) => Promise<string>;
-	onPress: (data: string) => void;
+	onPress: (data: string, index: number) => void;
 	index?: number;
 	onLongPress?: () => void;
 	disabled?: boolean;
@@ -72,8 +72,8 @@ const PubkyBox = ({
 	}, [dispatch, isOnline, onQRPress, pubky]);
 
 	const handleOnPress = useCallback(() => {
-		onPress(pubky);
-	}, [onPress, pubky]);
+		onPress(pubky, index ?? 0);
+	}, [index, onPress, pubky]);
 
 	const publicKey = useMemo(
 		() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky),
@@ -150,7 +150,6 @@ const PubkyBox = ({
 
 const styles = StyleSheet.create({
 	container: {
-		width: '90%',
 		borderRadius: 16,
 		alignSelf: 'center',
 		shadowColor: '#000',
@@ -162,10 +161,11 @@ const styles = StyleSheet.create({
 		shadowRadius: 2,
 		elevation: 2,
 		marginBottom: 20,
+		marginHorizontal: 24,
 	},
 	wrapper: {
 		borderRadius: 16,
-		padding: 20,
+		padding: 24,
 		backgroundColor: 'transparent',
 	},
 	box: {
@@ -243,7 +243,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		gap: 8,
-		width: '80%',
+		width: '100%',
 	},
 	buttonText: {
 		fontSize: 15,

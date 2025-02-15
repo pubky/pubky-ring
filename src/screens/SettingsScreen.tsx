@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Switch } from 'react-native';
+import { Alert, StyleSheet, Switch } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import {
@@ -11,12 +11,18 @@ import {
 	ActionButton,
 	SessionText,
 } from '../theme/components.ts';
-import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
+import PubkyRingHeader from '../components/PubkyRingHeader';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
 import { setTheme } from '../theme/helpers.ts';
 import { ENavigationAnimation, ETheme } from '../types/settings.ts';
-import { updateAutoAuth, updateNavigationAnimation } from '../store/slices/settingsSlice.ts';
+import {
+	resetSettings,
+	updateAutoAuth,
+	updateNavigationAnimation,
+} from '../store/slices/settingsSlice.ts';
+import { wipeKeychain } from '../utils/keychain.ts';
+import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
@@ -84,6 +90,39 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 		}
 	}, [dispatch, navigationAnimation]);
 
+	const handleWipePubkyRing = useCallback(() => {
+		Alert.alert(
+			'Are you sure?',
+			'This action will erase all Pubky Ring data and cannot be undone.',
+			[
+				{
+					text: 'No',
+					style: 'cancel',
+				},
+				{
+					text: 'Yes',
+					onPress: (): void => {
+						wipeKeychain().then();
+						dispatch(resetSettings());
+						dispatch(resetPubkys());
+						navigation.reset({
+							index: 0,
+							routes: [{ name: 'Onboarding' }],
+						});
+					},
+					style: 'destructive',
+				},
+			]
+		);
+	}, [dispatch, navigation]);
+
+	const handleShowOnboarding = useCallback(() => {
+		navigation.reset({
+			index: 0,
+			routes: [{ name: 'Onboarding' }],
+		});
+	}, [navigation]);
+
 	const handleAutoAuthToggle = useCallback(() => {
 		dispatch(updateAutoAuth({ autoAuth: !enableAutoAuth }));
 		setEnableAutoAuth(prev => !prev);
@@ -128,6 +167,24 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 							onValueChange={handleAutoAuthToggle}
 						/>
 					</View>
+				</Card>
+
+				<Card style={styles.section}>
+					<ActionButton
+						onPress={handleShowOnboarding}
+						style={styles.navigationAnimationButton}
+					>
+						<Text style={styles.settingTitle}>Show Onboarding</Text>
+					</ActionButton>
+				</Card>
+
+				<Card style={styles.section}>
+					<ActionButton
+						onPress={handleWipePubkyRing}
+						style={styles.navigationAnimationButton}
+					>
+						<Text style={styles.settingTitle}>Wipe Pubky Ring</Text>
+					</ActionButton>
 				</Card>
 
 				{/* Backup all pubkys */}

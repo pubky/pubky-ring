@@ -8,9 +8,30 @@ import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 
+const PubkyRingLogo = require('../images/pubky-ring-logo.png');
+
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
-const PubkyRingHeader = ({
+const LogoButton = memo(({ onLongPress, onPress }: {
+	onLongPress: () => void;
+	onPress: () => void;
+}) => (
+	<TouchableOpacity
+		activeOpacity={1}
+		onLongPress={onLongPress}
+		onPress={onPress}
+		style={styles.logoWrapper}
+	>
+		<Image
+			source={PubkyRingLogo}
+			style={styles.logo}
+		/>
+	</TouchableOpacity>
+));
+
+const DOUBLE_TAP_DELAY = 300;
+
+const PubkyRingHeader = memo(({
 	leftButton = undefined,
 	rightButton = undefined,
 }: {
@@ -18,7 +39,7 @@ const PubkyRingHeader = ({
 	rightButton?: ReactElement;
 }): ReactElement => {
 	const dispatch = useDispatch();
-	const theme = useSelector(getTheme);
+	const theme = useSelector(getTheme, (prev, next) => prev === next);
 	const navigation = useNavigation<NavigationProp>();
 	const lastTapRef = useRef(0);
 
@@ -28,7 +49,6 @@ const PubkyRingHeader = ({
 
 	const handleDoubleTap = useCallback((): void => {
 		const now = Date.now();
-		const DOUBLE_TAP_DELAY = 300;
 
 		if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
 			navigation.navigate('Settings');
@@ -39,21 +59,14 @@ const PubkyRingHeader = ({
 	return (
 		<View style={styles.container}>
 			{leftButton}
-			<TouchableOpacity
-				activeOpacity={1}
+			<LogoButton
 				onLongPress={toggleTheme}
 				onPress={handleDoubleTap}
-				style={styles.logoWrapper}
-			>
-				<Image
-					source={require('../images/pubky-ring-logo.png')}
-					style={styles.logo}
-				/>
-			</TouchableOpacity>
+			/>
 			{rightButton}
 		</View>
 	);
-};
+});
 
 const styles = StyleSheet.create({
 	container: {
@@ -80,5 +93,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 });
+
+PubkyRingHeader.displayName = 'PubkyRingHeader';
 
 export default memo(PubkyRingHeader);

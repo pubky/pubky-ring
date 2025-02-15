@@ -15,6 +15,7 @@ import { SheetManager } from 'react-native-actions-sheet';
 import { useNavigation } from '@react-navigation/native';
 
 export interface PubkyDetailProps {
+	index: number;
     pubkyData: PubkyData;
 	onQRPress: ({
 		pubky,
@@ -30,6 +31,7 @@ export interface PubkyDetailProps {
 }
 
 export const PubkyDetail = ({
+	index,
 	pubkyData,
 	onQRPress,
 }: PubkyDetailProps): ReactElement => {
@@ -86,8 +88,8 @@ export const PubkyDetail = ({
 		}
 	}, [pubky]);
 
-	const keyExtractor = useCallback((item: PubkySession, index: number) =>
-		`${item.created_at}-${index}`, []);
+	const keyExtractor = useCallback((item: PubkySession, i: number) =>
+		`${item.created_at}-${i}`, []);
 
 	// eslint-disable-next-line react/no-unused-prop-types
 	const renderItem = useCallback(({ item }: { item: PubkySession }) =>
@@ -97,6 +99,7 @@ export const PubkyDetail = ({
 
 	const ListHeader = useCallback(() => (
 		<PubkyListHeader
+			index={index}
 			svg={svg}
 			pubky={pubky}
 			pubkyData={pubkyData}
@@ -105,7 +108,7 @@ export const PubkyDetail = ({
 			onDelete={handleDelete}
 			onBackup={handleBackup}
 		/>
-	), [svg, pubky, pubkyData, sessionsLength, handleQRPress, handleDelete, handleBackup]);
+	), [index, svg, pubky, pubkyData, sessionsLength, handleQRPress, handleDelete, handleBackup]);
 
 	return (
 		<View style={styles.container}>

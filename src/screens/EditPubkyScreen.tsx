@@ -19,7 +19,7 @@ import {
 	Check,
 	NavButton,
 } from '../theme/components.ts';
-import PubkyRingHeader from '../components/PubkyRingHeader..tsx';
+import PubkyRingHeader from '../components/PubkyRingHeader';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 

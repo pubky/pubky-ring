@@ -22,6 +22,10 @@ export const getAllPubkys = (state: RootState): { [key: string]: Pubky } => {
 	return state.pubky.pubkys;
 };
 
+export const getDeepLink = (state: RootState): string => {
+	return state.pubky.deepLink;
+};
+
 /**
  * Get pubky sessions
  */

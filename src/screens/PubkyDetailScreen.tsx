@@ -8,9 +8,13 @@ import { StyleSheet } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PubkyData, RootStackParamList } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
-import { showNamePubkyPrompt, showQRScanner } from '../utils/helpers.ts';
-import { useSelector } from 'react-redux';
-import { getPubky } from '../store/selectors/pubkySelectors.ts';
+import {
+	handleDeepLink,
+	showNamePubkyPrompt,
+	showQRScanner,
+} from '../utils/helpers.ts';
+import { useDispatch, useSelector } from 'react-redux';
+import { getDeepLink, getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
 import {
 	ChevronLeft,
@@ -19,12 +23,16 @@ import {
 	View,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
+import { Dispatch } from 'redux';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PubkyDetail'>;
 
 const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 	const { pubky, index } = route.params;
 	const data = useSelector((state: RootState) => getPubky(state, pubky));
+	const deepLink = useSelector(getDeepLink);
+	const dispatch = useDispatch();
+
 	const pubkyData: PubkyData = useMemo(() => {
 		return { ...data, pubky };
 	}, [data, pubky]);
@@ -62,6 +70,22 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 		</NavButton>
 	), [onRightButtonPress]);
 
+	const handleQRPress = useCallback(async (qrData: {
+		pubky: string;
+		dispatch: Dispatch;
+		onComplete?: () => void;
+	}) => {
+		if (deepLink) {
+			return handleDeepLink({
+				pubky: pubky,
+				url: deepLink,
+				dispatch,
+			});
+		} else {
+			return showQRScanner(qrData);
+		}
+	}, [deepLink, dispatch, pubky]);
+
 	return (
 		<View style={styles.container}>
 			<PubkyRingHeader
@@ -71,7 +95,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 			<PubkyDetail
 				index={index}
 				pubkyData={pubkyData}
-				onQRPress={showQRScanner}
+				onQRPress={handleQRPress}
 			/>
 		</View>
 	);

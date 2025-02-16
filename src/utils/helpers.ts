@@ -21,6 +21,7 @@ import { getKeychainValue } from './keychain.ts';
 import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
+import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 
 export const handleScannedData = async ({
 	pubky,
@@ -400,4 +401,32 @@ export const checkNetworkConnection = async ({
 		}
 	}
 	return isConnected;
+};
+
+export const parseDeepLink = (url: string): string => {
+	if (url.startsWith('pubkyring://')) {
+		url = url.replace('pubkyring://', '');
+		if (url.startsWith('pubkyauth///')) {
+			url = url.replace('pubkyauth///', 'pubkyauth:///');
+		}
+	}
+	return url;
+};
+
+export const handleDeepLink = ({
+	pubky,
+	url,
+	dispatch,
+}: {
+	pubky: string;
+	url: string;
+	dispatch: Dispatch;
+}): string => {
+	handleScannedData({
+		pubky,
+		data: url,
+		dispatch,
+	});
+	dispatch(setDeepLink('')); // Reset deep link once used.
+	return '';
 };

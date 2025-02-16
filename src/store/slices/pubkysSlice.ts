@@ -3,7 +3,7 @@ import {
 	Pubky,
 	PubkySession,
 } from '../../types/pubky';
-import { initialState, defaultPubkyState } from '../shapes/pubky.ts';
+import { initialState, defaultPubkyState } from '../shapes/pubky';
 
 const pubkysSlice = createSlice({
 	name: 'pubky',
@@ -27,6 +27,9 @@ const pubkysSlice = createSlice({
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].name = name;
 			}
+		},
+		setDeepLink: (state, action: PayloadAction<string>) => {
+			state.deepLink = action.payload;
 		},
 		setHomeserver: (state, action: PayloadAction<{ pubky: string; homeserver: string }>) => {
 			const { pubky, homeserver } = action.payload;
@@ -79,6 +82,7 @@ export const {
 	addPubky,
 	setImage,
 	setName,
+	setDeepLink,
 	setHomeserver,
 	setSignedUp,
 	addSession,

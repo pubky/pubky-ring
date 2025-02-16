@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	profileContainer: {
-		padding: 24,
+		padding: 36,
 		backgroundColor: 'transparent',
 	},
 	profile: {

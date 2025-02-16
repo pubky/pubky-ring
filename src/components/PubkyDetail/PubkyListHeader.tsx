@@ -4,7 +4,7 @@ import React, {
 	useMemo,
 	useState,
 } from 'react';
-import { StyleSheet } from 'react-native';
+import { PixelRatio, StyleSheet } from 'react-native';
 import { SvgXml } from 'react-native-svg';
 import { copyToClipboard } from '../../utils/clipboard.ts';
 import { PubkyData } from '../../navigation/types.ts';
@@ -46,6 +46,8 @@ export const PubkyListHeader = memo(({
 	onDelete,
 	onBackup,
 }: PubkyListHeaderProps) => {
+	const [fontScale] = useState(PixelRatio.getFontScale());
+
 	const [isQRLoading, setIsQRLoading] = useState(false);
 
 	const handleCopyPubky = useCallback(() => {
@@ -77,6 +79,21 @@ export const PubkyListHeader = memo(({
 		}
 		return `pubky #${index + 1}`;
 	}, [index, pubkyData.name]);
+
+	const ShareIcon = useMemo(() =>
+			fontScale <= 1 ? <Share size={16} /> : <></>,
+	[fontScale]
+	);
+
+	const BackupIcon = useMemo(() =>
+			fontScale <= 1 ? <Save size={16} /> : <></>,
+	[fontScale]
+	);
+
+	const DeleteIcon = useMemo(() =>
+			fontScale <= 1 ? <Trash2 size={16} /> : <></>,
+	[fontScale]
+	);
 
 	return (
 		<View style={styles.container}>
@@ -112,17 +129,17 @@ export const PubkyListHeader = memo(({
 			<View style={styles.actionButtonRow}>
 				<Button
 					text={'Share'}
-					icon={<Share size={16} />}
+					icon={ShareIcon}
 					onPress={onSharePress}
 				/>
 				<Button
 					text={'Backup'}
-					icon={<Save size={16} />}
+					icon={BackupIcon}
 					onPress={onBackup}
 				/>
 				<Button
 					text={'Delete'}
-					icon={<Trash2 size={16} />}
+					icon={DeleteIcon}
 					onPress={onDelete}
 				/>
 			</View>

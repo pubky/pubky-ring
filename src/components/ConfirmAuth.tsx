@@ -337,6 +337,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 		zIndex: 3,
 		backgroundColor: 'transparent',
+		paddingBottom: 20,
 	},
 	footerContainer: {
 		marginBottom: 10,

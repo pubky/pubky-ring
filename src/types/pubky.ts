@@ -14,6 +14,7 @@ export interface Pubky {
 
 export interface PubkyState {
 	pubkys: TPubkys
+	deepLink: string;
 }
 
 export type TPubkys = {

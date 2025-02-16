@@ -2,6 +2,7 @@ import { Pubky, PubkyState } from '../../types/pubky.ts';
 
 export const initialState: PubkyState = {
 	pubkys: {},
+	deepLink: '',
 };
 
 export const defaultPubkyState: Pubky = {

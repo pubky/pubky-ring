@@ -1,5 +1,6 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import {
+	createMigrate,
 	FLUSH,
 	PAUSE,
 	PERSIST,
@@ -12,11 +13,14 @@ import {
 import { reduxStorage } from './mmkv-storage';
 import pubkyReducer from './slices/pubkysSlice.ts';
 import settingsReducer from './slices/settingsSlice.ts';
+import migrations from './migrations';
 
 const persistConfig = {
 	key: 'root',
 	storage: reduxStorage,
 	whitelist: ['pubky', 'settings'],
+	migrate: createMigrate(migrations),
+	version: 1,
 };
 
 const rootReducer = combineReducers({

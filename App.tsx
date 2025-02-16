@@ -4,7 +4,7 @@ import { ThemeProvider } from 'styled-components/native';
 import { darkTheme, lightTheme } from './src/theme';
 import RootNavigator from './src/navigation/RootNavigator.tsx';
 import { SheetProvider } from 'react-native-actions-sheet';
-import { useColorScheme } from 'react-native';
+import { Linking, useColorScheme } from 'react-native';
 import { ETheme } from './src/types/settings.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsOnline, getTheme } from './src/store/selectors/settingsSelectors.ts';
@@ -13,7 +13,8 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/theme/toastConfig.tsx';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
-import { checkNetworkConnection, showToast } from './src/utils/helpers.ts';
+import { checkNetworkConnection, parseDeepLink, showToast } from './src/utils/helpers.ts';
+import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 
 const _toastConfig = toastConfig();
 
@@ -22,6 +23,41 @@ function App(): React.JSX.Element {
 	const currentTheme = useSelector(getTheme);
 	const isOnline = useSelector(getIsOnline);
 	const dispatch = useDispatch();
+
+	// Handle deep linking
+	useEffect(() => {
+		// Handle deep link when app is opened from a background state
+		const getInitialURL = async (): Promise<void> => {
+			try {
+				let url = await Linking.getInitialURL();
+				if (url) {
+					// Handle the deep link URL here
+					handleDeepLink(url);
+				}
+			} catch (err) {
+				console.error('Error getting initial URL:', err);
+			}
+		};
+
+		// Handle the deep link
+		const handleDeepLink = (url: string): void => {
+			const parsedUrl = parseDeepLink(url);
+			dispatch(setDeepLink(parsedUrl));
+		};
+
+		// Set up deep link listeners
+		const subscription = Linking.addEventListener('url', ({ url }) => {
+			handleDeepLink(url);
+		});
+
+		// Check for initial URL on mount
+		getInitialURL();
+
+		// Cleanup subscription
+		return (): void => {
+			subscription.remove();
+		};
+	}, [dispatch]);
 
 	useEffect(() => {
 		checkNetworkConnection({

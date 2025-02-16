@@ -160,13 +160,16 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 				</Card>
 
 				<Card style={styles.section}>
-					<View style={styles.toggleRow}>
+					<ActionButton
+						onPress={handleAutoAuthToggle}
+						style={styles.toggleRow}
+					>
 						<Text style={styles.settingTitle}>Auto Auth</Text>
 						<Switch
 							value={enableAutoAuth}
 							onValueChange={handleAutoAuthToggle}
 						/>
-					</View>
+					</ActionButton>
 				</Card>
 
 				<Card style={styles.section}>
@@ -248,13 +251,16 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		padding: 16,
+		paddingHorizontal: 16,
+		height: 60,
 		width: '100%',
 	},
 	navigationAnimationButton: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		padding: 16,
+		paddingHorizontal: 16,
+		height: 60,
 		width: '100%',
 	},
 	themeValue: {
@@ -264,7 +270,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		padding: 16,
+		paddingHorizontal: 16,
+		height: 60,
+		width: '100%',
 	},
 });
 

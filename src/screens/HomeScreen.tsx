@@ -14,7 +14,7 @@ import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { showQRScanner, showToast } from '../utils/helpers';
+import { handleDeepLink, showQRScanner, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
@@ -22,13 +22,15 @@ import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getDeepLink } from '../store/selectors/pubkySelectors.ts';
 import { SheetManager } from 'react-native-actions-sheet';
+import { Dispatch } from 'redux';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const PubkyItem = memo(({
 	item,
+	deepLink,
 	drag,
 	isActive,
 	index,
@@ -36,6 +38,7 @@ const PubkyItem = memo(({
 	onQRPress,
 }: {
 	item: { key: string; value: Pubky };
+	deepLink: string;
 	drag: () => void;
 	isActive: boolean;
 	index: number;
@@ -46,6 +49,7 @@ const PubkyItem = memo(({
 		<PubkyBox
 			pubky={item.key}
 			pubkyData={item.value}
+			deepLink={deepLink}
 			onQRPress={onQRPress}
 			onPress={onPress}
 			index={index}
@@ -59,14 +63,39 @@ const HomeScreen = (): ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
+	const deepLink = useSelector(getDeepLink);
 	const hasPubkys = useMemo(() => Object.keys(pubkys).length > 0, [pubkys]);
 
 	const handlePubkyPress = useCallback(
 		(pubky: string, index: number) => {
-			navigation.navigate('PubkyDetail', { pubky, index });
+			if (deepLink) {
+				handleDeepLink({
+					pubky: pubky,
+					url: deepLink,
+					dispatch,
+				});
+			} else {
+				navigation.navigate('PubkyDetail', { pubky, index });
+			}
 		},
-		[navigation],
+		[deepLink, dispatch, navigation],
 	);
+
+	const handleQRPress = useCallback(async (data: {
+		pubky: string;
+		dispatch: Dispatch;
+		onComplete?: () => void;
+	}) => {
+		if (deepLink) {
+			return handleDeepLink({
+				pubky: data.pubky,
+				url: deepLink,
+				dispatch,
+			});
+		} else {
+			return showQRScanner(data);
+		}
+	}, [deepLink, dispatch]);
 
 	const createPubky = useCallback(async () => {
 		await createNewPubky(dispatch);
@@ -117,14 +146,15 @@ const HomeScreen = (): ReactElement => {
 		return (
 			<PubkyItem
 				item={item}
+				deepLink={deepLink}
 				drag={drag}
 				isActive={isActive}
 				index={index}
 				onPress={handlePubkyPress}
-				onQRPress={showQRScanner}
+				onQRPress={handleQRPress}
 			/>
 		);
-	}, [handlePubkyPress]);
+	}, [deepLink, handlePubkyPress, handleQRPress]);
 
 	const ListFooter = useCallback(() => (
 		<Button

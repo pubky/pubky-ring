@@ -52,7 +52,7 @@ const Button = ({
 const styles = StyleSheet.create({
 	actionButton: {
 		flexDirection: 'row',
-		width: 110,
+		minWidth: 110,
 		minHeight: 48,
 		borderRadius: 48,
 		paddingVertical: 15,

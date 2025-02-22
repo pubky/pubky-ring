@@ -44,12 +44,18 @@ export const createNewPubky = async (
 
 		const secretKey = genKeyRes.value.secret_key;
 		const pubky = genKeyRes.value.public_key;
+		const homeserver = defaultPubkyState.homeserver;
+		dispatch(setSignedUp({ pubky, signedUp: true }));
 		signUpToHomeserver({
 			pubky,
 			secretKey,
-			homeserver: defaultPubkyState.homeserver,
+			homeserver,
 			dispatch,
-		}).then();
+		}).then((res) => {
+			if (res.isErr()) {
+				dispatch(setSignedUp({ pubky, signedUp: false }));
+			}
+		});
 		return await savePubky(secretKey, pubky, dispatch);
 	} catch (error) {
 		console.error('Error creating pubky:', error);
@@ -97,12 +103,13 @@ export const importPubky = async (
 			return err('Failed to get public key from secret key');
 		}
 		const pubky = pubkyRes.value.public_key;
-		signUpToHomeserver({
-			pubky,
-			secretKey,
-			homeserver: defaultPubkyState.homeserver,
-			dispatch,
-		}).then();
+		const homeserver = defaultPubkyState.homeserver;
+		dispatch(setSignedUp({ pubky, signedUp: true }));
+		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then((res) => {
+			if (res.isErr()) {
+				dispatch(setSignedUp({ pubky, signedUp: false }));
+			}
+		});
 		return await savePubky(secretKey, pubky, dispatch);
 	} catch (error) {
 		console.error('Error saving pubky:', error);
@@ -198,41 +205,59 @@ export const signUpToHomeserver = async ({
 	if (signUpRes.isErr()) {
 		return err(signUpRes.error.message);
 	}
+	dispatch(setHomeserver({ pubky, homeserver }));
+	dispatch(addSession({
+		pubky,
+		session: {
+			...signUpRes.value,
+			created_at: Date.now(),
+		},
+	}));
 	dispatch(setSignedUp({ pubky, signedUp: true }));
 	return ok(signUpRes.value);
 };
 
-export const signInToHomeserver = async (pubky: string, homeserver: string, dispatch: Dispatch): Promise<Result<SessionInfo>> => {
-	const secretKeyRes = await getPubkySecretKey(pubky);
-	if (secretKeyRes.isErr()) {
-		return err(secretKeyRes.error.message);
-	}
-
-	const signUpRes = await signUpToHomeserver({
-		pubky,
-		secretKey: secretKeyRes.value,
-		homeserver,
-		dispatch,
-	});
-	if (signUpRes.isOk()) {
-		dispatch(setHomeserver({ pubky, homeserver }));
-		const signInRes = await signIn(secretKeyRes.value);
-		if (signInRes.isOk()) {
-			dispatch(addSession({
-				pubky,
-				session: { ...signInRes.value,
-					created_at: Date.now() },
-			}));
-			return ok(signInRes.value);
+export const signInToHomeserver = async ({
+	pubky,
+	homeserver,
+	dispatch,
+	secretKey,
+}: {
+	pubky: string;
+	homeserver: string;
+	dispatch: Dispatch;
+	secretKey?: string;
+}): Promise<Result<SessionInfo>> => {
+	if (!secretKey) {
+		const secretKeyRes = await getPubkySecretKey(pubky);
+		if (secretKeyRes.isErr()) {
+			return err(secretKeyRes.error.message);
 		}
-		dispatch(addSession({
-			pubky,
-			session: { ...signUpRes.value,
-				created_at: Date.now() },
-		}));
-		return ok(signUpRes.value);
+		secretKey = secretKeyRes.value;
 	}
-	return err(signUpRes.error.message);
+	const signInRes = await signIn(secretKey);
+	if (signInRes.isErr()) {
+		const signUpResponse = await signUpToHomeserver({
+			pubky,
+			secretKey,
+			homeserver,
+			dispatch,
+		});
+		if (signUpResponse.isErr()) {
+			// If we also get an error from signUp, return the initial signIn response error.
+			return signInRes;
+		}
+		return signUpResponse;
+	}
+	dispatch(addSession({
+		pubky,
+		session: {
+			...signInRes.value,
+			created_at: Date.now(),
+		},
+	}));
+	dispatch(setSignedUp({ pubky, signedUp: true }));
+	return ok(signInRes.value);
 };
 
 export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, dispatch: Dispatch): Promise<void> => {
@@ -286,16 +311,12 @@ export const performAuth = async ({
 			const pubkyData = getPubkyDataFromStore(pubky);
 			const { signedUp, homeserver } = pubkyData;
 			if (!signedUp) {
-				const signUpRes = await signUpToHomeserver({
+				await signUpToHomeserver({
 					pubky,
 					secretKey: secretKeyRes.value,
 					homeserver,
 					dispatch,
 				});
-				if (signUpRes.isErr()) {
-					console.error('Error signing up:', signUpRes.error);
-					return err(signUpRes.error?.message || 'Failed to sign up');
-				}
 			}
 
 			const authRes = await auth(authUrl, secretKeyRes.value);

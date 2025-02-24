@@ -321,8 +321,20 @@ export const performAuth = async ({
 
 			const authRes = await auth(authUrl, secretKeyRes.value);
 			if (authRes.isErr()) {
-				console.error('Error processing auth:', authRes.error);
-				return err(authRes.error?.message || 'Failed to process auth');
+				const signInRes = await signInToHomeserver({
+					pubky,
+					homeserver,
+					dispatch,
+					secretKey: secretKeyRes.value,
+				});
+				if (signInRes.isErr()) {
+					return err(signInRes.error.message);
+				}
+				const authRetryRes = await auth(authUrl, secretKeyRes.value);
+				if (authRetryRes.isErr()) {
+					console.error('Error processing auth:', authRes.error);
+					return err(authRes.error?.message || 'Failed to process auth');
+				}
 			}
 			return ok('success');
 		})();

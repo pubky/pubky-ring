@@ -2,6 +2,7 @@ import React, {
 	memo,
 	ReactElement,
 	useCallback,
+	useEffect,
 	useMemo,
 } from 'react';
 import {
@@ -14,7 +15,7 @@ import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { handleDeepLink, showQRScanner, showToast } from '../utils/helpers';
+import { showQRScanner, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
@@ -30,7 +31,6 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
 const PubkyItem = memo(({
 	item,
-	deepLink,
 	drag,
 	isActive,
 	index,
@@ -38,7 +38,6 @@ const PubkyItem = memo(({
 	onQRPress,
 }: {
 	item: { key: string; value: Pubky };
-	deepLink: string;
 	drag: () => void;
 	isActive: boolean;
 	index: number;
@@ -49,7 +48,6 @@ const PubkyItem = memo(({
 		<PubkyBox
 			pubky={item.key}
 			pubkyData={item.value}
-			deepLink={deepLink}
 			onQRPress={onQRPress}
 			onPress={onPress}
 			index={index}
@@ -66,19 +64,24 @@ const HomeScreen = (): ReactElement => {
 	const deepLink = useSelector(getDeepLink);
 	const hasPubkys = useMemo(() => Object.keys(pubkys).length > 0, [pubkys]);
 
+	useEffect(() => {
+		if (deepLink) {
+			SheetManager.show('select-pubky', {
+				payload: {
+					deepLink,
+				},
+				onClose: () => {
+					SheetManager.hide('select-pubky');
+				},
+			});
+		}
+	}, [deepLink]);
+
 	const handlePubkyPress = useCallback(
 		(pubky: string, index: number) => {
-			if (deepLink) {
-				handleDeepLink({
-					pubky: pubky,
-					url: deepLink,
-					dispatch,
-				});
-			} else {
-				navigation.navigate('PubkyDetail', { pubky, index });
-			}
+			navigation.navigate('PubkyDetail', { pubky, index });
 		},
-		[deepLink, dispatch, navigation],
+		[navigation],
 	);
 
 	const handleQRPress = useCallback(async (data: {
@@ -86,16 +89,8 @@ const HomeScreen = (): ReactElement => {
 		dispatch: Dispatch;
 		onComplete?: () => void;
 	}) => {
-		if (deepLink) {
-			return handleDeepLink({
-				pubky: data.pubky,
-				url: deepLink,
-				dispatch,
-			});
-		} else {
-			return showQRScanner(data);
-		}
-	}, [deepLink, dispatch]);
+		return showQRScanner(data);
+	}, []);
 
 	const createPubky = useCallback(async () => {
 		await createNewPubky(dispatch);
@@ -146,7 +141,6 @@ const HomeScreen = (): ReactElement => {
 		return (
 			<PubkyItem
 				item={item}
-				deepLink={deepLink}
 				drag={drag}
 				isActive={isActive}
 				index={index}
@@ -154,7 +148,7 @@ const HomeScreen = (): ReactElement => {
 				onQRPress={handleQRPress}
 			/>
 		);
-	}, [deepLink, handlePubkyPress, handleQRPress]);
+	}, [handlePubkyPress, handleQRPress]);
 
 	const ListFooter = useCallback(() => (
 		<Button

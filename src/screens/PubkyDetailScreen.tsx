@@ -9,12 +9,11 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PubkyData, RootStackParamList } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import {
-	handleDeepLink,
 	showNamePubkyPrompt,
 	showQRScanner,
 } from '../utils/helpers.ts';
-import { useDispatch, useSelector } from 'react-redux';
-import { getDeepLink, getPubky } from '../store/selectors/pubkySelectors.ts';
+import { useSelector } from 'react-redux';
+import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
 import {
 	ChevronLeft,
@@ -30,8 +29,6 @@ type Props = NativeStackScreenProps<RootStackParamList, 'PubkyDetail'>;
 const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 	const { pubky, index } = route.params;
 	const data = useSelector((state: RootState) => getPubky(state, pubky));
-	const deepLink = useSelector(getDeepLink);
-	const dispatch = useDispatch();
 
 	const pubkyData: PubkyData = useMemo(() => {
 		return { ...data, pubky };
@@ -75,16 +72,8 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 		dispatch: Dispatch;
 		onComplete?: () => void;
 	}) => {
-		if (deepLink) {
-			return handleDeepLink({
-				pubky: pubky,
-				url: deepLink,
-				dispatch,
-			});
-		} else {
-			return showQRScanner(qrData);
-		}
-	}, [deepLink, dispatch, pubky]);
+		return showQRScanner(qrData);
+	}, []);
 
 	return (
 		<View style={styles.container}>

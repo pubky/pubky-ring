@@ -3,7 +3,7 @@ import { Card, LinearGradient, Text } from '../theme/components.ts';
 import Jdenticon from './Jdenticon.tsx';
 import React, { memo, ReactElement } from 'react';
 
-const PubkyCard = ({ publicKey }: { publicKey: string }): ReactElement => {
+const PubkyCard = ({ name, publicKey }: { name?: string; publicKey: string }): ReactElement => {
 	return (
 		<LinearGradient style={styles.pubkyCard}>
 			<Card style={styles.pubkyRow}>
@@ -11,6 +11,10 @@ const PubkyCard = ({ publicKey }: { publicKey: string }): ReactElement => {
 					<Jdenticon value={publicKey} size={38} />
 				</Card>
 				<Card style={styles.pubkyTextContainer}>
+					{name &&
+					<Text style={styles.pubkyName}>
+						{name}
+					</Text>}
 					<Text style={styles.pubkyText} numberOfLines={2}>
 						pk:{publicKey}
 					</Text>
@@ -43,6 +47,10 @@ const styles = StyleSheet.create({
 	pubkyTextContainer: {
 		flex: 1,
 		backgroundColor: 'transparent',
+	},
+	pubkyName: {
+		fontSize: 16,
+		fontWeight: 'bold',
 	},
 	pubkyText: {
 		fontWeight: '600',

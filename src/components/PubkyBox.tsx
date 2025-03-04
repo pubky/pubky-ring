@@ -26,7 +26,6 @@ import { getIsOnline } from '../store/selectors/settingsSelectors.ts';
 interface PubkyBoxProps {
 	pubky: string;
 	pubkyData: Pubky;
-	deepLink: string;
 	sessionsCount?: number;
 	onQRPress: ({
 		pubky,
@@ -48,7 +47,6 @@ interface PubkyBoxProps {
 const PubkyBox = ({
 	pubky,
 	pubkyData,
-	deepLink,
 	sessionsCount = 0,
 	onQRPress,
 	onPress,
@@ -140,7 +138,7 @@ const PubkyBox = ({
 						{isQRLoading ? (
 							<ActivityIndicator size="small" />
 						) : (
-							!deepLink ? <QrCode size={16} /> : <></>
+							<QrCode size={16} />
 						)}
 						<Text style={styles.buttonText}>Authorize</Text>
 					</AuthorizeButton>

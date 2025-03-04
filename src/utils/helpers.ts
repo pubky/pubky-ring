@@ -67,7 +67,10 @@ export const handleScannedData = async ({
 			return res;
 		}
 
-		const signInRes = await signInToHomeserver(pubky, data, dispatch);
+		const signInRes = await signInToHomeserver({
+			pubky,
+			dispatch,
+		});
 		if (signInRes.isOk()) {
 			showToast({
 				type: 'success',
@@ -422,6 +425,9 @@ export const handleDeepLink = ({
 	url: string;
 	dispatch: Dispatch;
 }): string => {
+	try {
+		url = decodeURIComponent(decodeURIComponent(url));
+	} catch {}
 	handleScannedData({
 		pubky,
 		data: url,

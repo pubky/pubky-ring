@@ -224,10 +224,14 @@ export const signInToHomeserver = async ({
 	secretKey,
 }: {
 	pubky: string;
-	homeserver: string;
+	homeserver?: string;
 	dispatch: Dispatch;
 	secretKey?: string;
 }): Promise<Result<SessionInfo>> => {
+	if (!homeserver) {
+		const pubkyData = getPubkyDataFromStore(pubky);
+		homeserver = pubkyData.homeserver;
+	}
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {

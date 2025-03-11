@@ -5,13 +5,27 @@ import { createNewPubky } from '../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
 import PubkyRingHeader from './PubkyRingHeader';
 import { importFile } from '../utils/rnfs.ts';
-import { showToast } from '../utils/helpers.ts';
+import { showEditPubkyPrompt, showToast } from '../utils/helpers.ts';
+import { SheetManager } from 'react-native-actions-sheet';
 
 const EmptyState = (): ReactElement => {
 	const dispatch = useDispatch();
-
 	const createPubky = useCallback(async () => {
-		await createNewPubky(dispatch);
+		const pubky = await createNewPubky(dispatch);
+		if (pubky.isErr()) {
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: 'An error occurred while creating the Pubky',
+			});
+			return;
+		}
+		setTimeout( () => {
+			showEditPubkyPrompt({
+				title: 'Setup',
+				pubky: pubky.value,
+			});
+		}, 200);
 	}, [dispatch]);
 
 	const importPubky = useCallback(async () => {
@@ -25,6 +39,12 @@ const EmptyState = (): ReactElement => {
 				});
 			}
 		} else {
+			setTimeout( () => {
+				showEditPubkyPrompt({
+					title: 'Setup',
+					pubky: res.value,
+				});
+			}, 200);
 			showToast({
 				type: 'success',
 				title: 'Success',
@@ -32,6 +52,18 @@ const EmptyState = (): ReactElement => {
 			});
 		}
 	}, [dispatch]);
+
+	const onPress = useCallback(() => {
+		SheetManager.show('add-pubky', {
+			payload: {
+				createPubky,
+				importPubky,
+			},
+			onClose: () => {
+				SheetManager.hide('add-pubky');
+			},
+		});
+	}, [createPubky, importPubky]);
 
 	return (
 		<View style={styles.container}>
@@ -49,11 +81,10 @@ const EmptyState = (): ReactElement => {
 				</View>
 				<Button
 					style={styles.buttonSecondary}
-					onPress={createPubky}
-					onLongPress={importPubky}
+					onPressIn={onPress}
 				>
 					<Plus size={16} />
-					<Text style={styles.buttonText}>Create pubky</Text>
+					<Text style={styles.buttonText}>Add pubky</Text>
 				</Button>
 			</View>
 		</View>

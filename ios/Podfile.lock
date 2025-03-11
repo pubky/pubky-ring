@@ -1277,7 +1277,7 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-pubky (0.9.5):
+  - react-native-pubky (0.10.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2306,7 +2306,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: da64a39fd71a84a9d3f7f58c8b0623c393e9991c
   react-native-mmkv: 55e8a074ae9cb919609755d7271c16b242c2603f
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
-  react-native-pubky: 9c622843df40afbf4fa338bf834770105d7cd067
+  react-native-pubky: 8cff3d2acfeff6b5401962e07b53db4dcb9e748e
   react-native-safe-area-context: 9c33120e9eac7741a5364cc2d9f74665049b76b3
   react-native-skia: dae5651931948427e866ff9c83d670cda2f526b4
   React-nativeconfig: cb207ebba7cafce30657c7ad9f1587a8f32e4564

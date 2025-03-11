@@ -5,6 +5,8 @@ import {
 	signOut,
 	getPublicKeyFromSecretKey,
 	SessionInfo,
+	getSignupToken as _getSignupToken,
+	republishHomeserver as _republishHomeserver,
 } from '@synonymdev/react-native-pubky';
 import {
 	setKeychainValue,
@@ -27,6 +29,43 @@ import { showToast } from './helpers.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
 
+export const getSignupToken = ({
+	homeserver,
+	adminPassword,
+}: {
+	homeserver: string;
+	adminPassword: string;
+}): Promise<Result<string>> => {
+	return _getSignupToken(homeserver, adminPassword);
+};
+
+export const republishHomeserver = async ({
+	pubky,
+	secretKey,
+	homeserver,
+	dispatch,
+}: {
+	pubky: string;
+	secretKey?: string;
+	homeserver: string;
+	dispatch: Dispatch;
+}): Promise<Result<string>> => {
+	if (!secretKey) {
+		const secretKeyRes = await getPubkySecretKey(pubky);
+		if (secretKeyRes.isErr()) {
+			return err(secretKeyRes.error.message);
+		}
+		secretKey = secretKeyRes.value;
+	}
+	const res = await _republishHomeserver(secretKey, homeserver);
+	if (res.isErr()) {
+		return err(res.error.message);
+	}
+	dispatch(setHomeserver({ pubky, homeserver }));
+	dispatch(setSignedUp({ pubky, signedUp: true }));
+	return ok(res.value);
+};
+
 export const createNewPubky = async (
 	dispatch: Dispatch
 ): Promise<Result<string>> => {
@@ -44,18 +83,6 @@ export const createNewPubky = async (
 
 		const secretKey = genKeyRes.value.secret_key;
 		const pubky = genKeyRes.value.public_key;
-		const homeserver = defaultPubkyState.homeserver;
-		dispatch(setSignedUp({ pubky, signedUp: true }));
-		signUpToHomeserver({
-			pubky,
-			secretKey,
-			homeserver,
-			dispatch,
-		}).then((res) => {
-			if (res.isErr()) {
-				dispatch(setSignedUp({ pubky, signedUp: false }));
-			}
-		});
 		return await savePubky(secretKey, pubky, dispatch);
 	} catch (error) {
 		console.error('Error creating pubky:', error);
@@ -79,12 +106,6 @@ export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
 		for (const pubky of allKeys) {
 			const secretKey = await getKeychainValue({ key: pubky });
 			if (secretKey.isOk()) {
-				signUpToHomeserver({
-					pubky,
-					secretKey: secretKey.value,
-					homeserver: defaultPubkyState.homeserver,
-					dispatch,
-				}).then();
 				await savePubky(secretKey.value, pubky, dispatch);
 			}
 		}
@@ -187,11 +208,13 @@ export const signUpToHomeserver = async ({
 	pubky,
 	secretKey,
 	homeserver,
+	signupToken = '',
 	dispatch,
 }: {
 	pubky: string;
 	secretKey?: string;
 	homeserver: string;
+	signupToken?: string;
 	dispatch: Dispatch;
 }): Promise<Result<SessionInfo>> => {
 	if (!secretKey) {
@@ -201,10 +224,16 @@ export const signUpToHomeserver = async ({
 		}
 		secretKey = secretKeyRes.value;
 	}
-	const signUpRes = await signUp(secretKey, homeserver);
+	const signUpRes = await signUp(secretKey, homeserver, signupToken);
 	if (signUpRes.isErr()) {
 		return err(signUpRes.error.message);
 	}
+	republishHomeserver({
+		pubky,
+		secretKey,
+		homeserver,
+		dispatch,
+	});
 	dispatch(setHomeserver({ pubky, homeserver }));
 	dispatch(addSession({
 		pubky,
@@ -239,29 +268,37 @@ export const signInToHomeserver = async ({
 		}
 		secretKey = secretKeyRes.value;
 	}
+	let response: SessionInfo;
 	const signInRes = await signIn(secretKey);
 	if (signInRes.isErr()) {
-		const signUpResponse = await signUpToHomeserver({
+		const republishRes = await republishHomeserver({
 			pubky,
 			secretKey,
 			homeserver,
 			dispatch,
 		});
-		if (signUpResponse.isErr()) {
+		if (republishRes.isErr()) {
 			// If we also get an error from signUp, return the initial signIn response error.
 			return signInRes;
 		}
-		return signUpResponse;
+		// Attempt to signin now
+		const signInResTwo = await signIn(secretKey);
+		if (signInResTwo.isErr()) {
+			return signInResTwo;
+		}
+		response = signInResTwo.value;
+	} else {
+		response = signInRes.value;
 	}
 	dispatch(addSession({
 		pubky,
 		session: {
-			...signInRes.value,
+			...response,
 			created_at: Date.now(),
 		},
 	}));
 	dispatch(setSignedUp({ pubky, signedUp: true }));
-	return ok(signInRes.value);
+	return ok(response);
 };
 
 export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, dispatch: Dispatch): Promise<void> => {
@@ -289,6 +326,11 @@ export const truncateStr = (str: string, displayLength: number = 5): string => {
 		return str;
 	}
 	return `${str.substring(0, displayLength)}...${str.substring(str.length - displayLength)}`;
+};
+
+export const truncatePubky = (pubky: string): string => {
+	const res = truncateStr(pubky);
+	return res.startsWith('pk:') ? res.slice(3) : res;
 };
 
 const TIMEOUT_MS = 20000;

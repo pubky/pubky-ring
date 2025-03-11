@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
+	ISetPubkyData,
 	Pubky,
 	PubkySession,
 } from '../../types/pubky';
@@ -26,6 +27,15 @@ const pubkysSlice = createSlice({
 			const { pubky, name } = action.payload;
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].name = name;
+			}
+		},
+		setPubkyData: (state, action: PayloadAction<{ pubky: string; data: ISetPubkyData }>) => {
+			const { pubky, data } = action.payload;
+			if (state.pubkys[pubky]) {
+				state.pubkys[pubky] = {
+					...state.pubkys[pubky],
+					...data,
+				};
 			}
 		},
 		setDeepLink: (state, action: PayloadAction<string>) => {
@@ -82,6 +92,7 @@ export const {
 	addPubky,
 	setImage,
 	setName,
+	setPubkyData,
 	setDeepLink,
 	setHomeserver,
 	setSignedUp,

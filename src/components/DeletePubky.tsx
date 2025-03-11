@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		width: '45%',
+		minHeight: 64,
 	},
 	cancelButton: {
 	},

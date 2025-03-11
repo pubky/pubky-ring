@@ -143,7 +143,8 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	button: {
-		width: '45%',
+		width: '47%',
+		minHeight: 64,
 	},
 	importButton: {
 	},

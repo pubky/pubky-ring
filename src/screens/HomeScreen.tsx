@@ -6,6 +6,8 @@ import React, {
 	useMemo,
 } from 'react';
 import {
+	Image,
+	Linking,
 	StyleSheet,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
@@ -15,9 +17,9 @@ import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { showQRScanner, showToast } from '../utils/helpers';
+import { showEditPubkyPrompt, showQRScanner, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
-import { View, Plus } from '../theme/components';
+import { View, Plus, TouchableOpacity } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
@@ -26,6 +28,13 @@ import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-nativ
 import { getAllPubkys, getDeepLink } from '../store/selectors/pubkySelectors.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
+import {
+	Text,
+} from '../theme/components.ts';
+// @ts-ignore
+import PubkyRingLogo from '../images/pubky-ring.png';
+// @ts-ignore
+import DeviceMobileLogo from '../images/device-mobile.png';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -93,7 +102,21 @@ const HomeScreen = (): ReactElement => {
 	}, []);
 
 	const createPubky = useCallback(async () => {
-		await createNewPubky(dispatch);
+		const pubky = await createNewPubky(dispatch);
+		if (pubky.isErr()) {
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: 'An error occurred while creating the Pubky',
+			});
+			return;
+		}
+		setTimeout( () => {
+			showEditPubkyPrompt({
+				title: 'Setup',
+				pubky: pubky.value,
+			});
+		}, 200);
 	}, [dispatch]);
 
 	const importPubky = useCallback(async () => {
@@ -107,6 +130,12 @@ const HomeScreen = (): ReactElement => {
 				});
 			}
 		} else {
+			setTimeout( () => {
+				showEditPubkyPrompt({
+					title: 'Setup',
+					pubky: res.value,
+				});
+			}, 200);
 			showToast({
 				type: 'success',
 				title: 'Success',
@@ -170,6 +199,19 @@ const HomeScreen = (): ReactElement => {
 	// eslint-disable-next-line react-hooks/exhaustive-deps
 	), []);
 
+	const onFooterPress = useCallback( () => {
+		try {
+			const url = 'https://staging.pubky.app';
+			Linking.openURL(url).then();
+		} catch {
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: 'Unable to open URL',
+			});
+		}
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			{hasPubkys ? (
@@ -189,6 +231,35 @@ const HomeScreen = (): ReactElement => {
 					<EmptyState />
 				</View>
 			)}
+
+			<TouchableOpacity
+				onPress={onFooterPress}
+				activeOpacity={0.8}
+				style={styles.footer}
+			>
+				<View style={styles.footerContent}>
+					<View style={styles.footerWrapper}>
+						<View style={styles.divider} />
+						<View style={styles.footerRow}>
+							<View style={styles.phoneIconContainer}>
+								<Image
+									source={DeviceMobileLogo}
+									style={styles.deviceLogo}
+								/>
+								<Text style={styles.footerText}>
+									Try Pubky Ring with
+								</Text>
+							</View>
+							<View style={styles.pubkyLogoContainer}>
+								<Image
+									source={PubkyRingLogo}
+									style={styles.pubkyLogo}
+								/>
+							</View>
+						</View>
+					</View>
+				</View>
+			</TouchableOpacity>
 		</View>
 	);
 };
@@ -211,6 +282,69 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		alignItems: 'center',
 		alignSelf: 'center',
+	},
+	footer: {
+		position: 'absolute',
+		left: 0,
+		right: 0,
+		bottom: 0,
+		width: '100%',
+	},
+	divider: {
+		borderTopWidth: 1,
+		borderTopColor: '#2A2A2A',
+		width: '100%',
+		alignSelf: 'center',
+	},
+	footerContent: {
+		flex: 1,
+		backgroundColor: 'black',
+		alignItems: 'center',
+	},
+	footerWrapper: {
+		width: '89%',
+	},
+	footerRow: {
+		flexDirection: 'row',
+		flex: 1,
+		paddingTop: 20,
+		paddingBottom: 10,
+		backgroundColor: 'black',
+		alignItems: 'center',
+	},
+	phoneIconContainer: {
+		flex: 1,
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'flex-start',
+		backgroundColor: 'black',
+	},
+	footerText: {
+		color: '#808080',
+		fontSize: 15,
+		fontWeight: '600',
+		lineHeight: 18,
+		marginLeft: 8,
+		backgroundColor: 'black',
+	},
+	pubkyLogoContainer: {
+		flex: 1,
+		alignItems: 'flex-end',
+		justifyContent: 'flex-end',
+		backgroundColor: 'black',
+	},
+	deviceLogo: {
+		height: 36,
+		resizeMode: 'contain',
+		alignSelf: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'black',
+	},
+	pubkyLogo: {
+		height: 28,
+		resizeMode: 'contain',
+		backgroundColor: 'black',
+		marginRight: -28,
 	},
 });
 

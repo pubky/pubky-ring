@@ -22,6 +22,7 @@ import {
 import { truncateStr } from '../utils/pubky.ts';
 import Jdenticon from './Jdenticon.tsx';
 import { getIsOnline } from '../store/selectors/settingsSelectors.ts';
+import { showEditPubkyPrompt } from '../utils/helpers.ts';
 
 interface PubkyBoxProps {
 	pubky: string;
@@ -84,6 +85,19 @@ const PubkyBox = ({
 		return truncateStr(pubkyData.name, 8) || `pubky #${index ? index + 1 : 1}`;
 	}, [index, pubkyData.name]);
 
+	const qrPress = useCallback(() => {
+		if (pubkyData.signedUp) {
+			handleQRPress();
+		} else {
+			showEditPubkyPrompt({
+				title: 'Setup',
+				description: '',
+				pubky: pubky,
+				data: pubkyData,
+			});
+		}
+	}, [handleQRPress, pubky, pubkyData]);
+
 	return (
 		<LinearGradient style={styles.container}>
 			<Button
@@ -132,15 +146,15 @@ const PubkyBox = ({
 							styles.actionButton,
 							isQRLoading && styles.actionButtonDisabled,
 						]}
-						onPress={handleQRPress}
+						onPress={qrPress}
 						onLongPress={onLongPress}
 						disabled={isQRLoading}>
 						{isQRLoading ? (
 							<ActivityIndicator size="small" />
 						) : (
-							<QrCode size={16} />
+							pubkyData.signedUp ? <QrCode size={16} /> : null
 						)}
-						<Text style={styles.buttonText}>Authorize</Text>
+						<Text style={styles.buttonText}>{pubkyData.signedUp ? 'Authorize' : 'Setup'}</Text>
 					</AuthorizeButton>
 				</ForegroundView>
 			</Button>

@@ -9,7 +9,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { PubkyData, RootStackParamList } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import {
-	showNamePubkyPrompt,
+	showEditPubkyPrompt,
 	showQRScanner,
 } from '../utils/helpers.ts';
 import { useSelector } from 'react-redux';
@@ -35,11 +35,11 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 	}, [data, pubky]);
 
 	const onRightButtonPress = useCallback(() => {
-		showNamePubkyPrompt({
+		showEditPubkyPrompt({
+			title: data.signedUp ? 'Edit' : 'Setup',
 			pubky,
-			pubkyName: pubkyData?.name,
 		});
-	}, [pubky, pubkyData?.name]);
+	}, [data, pubky]);
 
 	const leftButton = useCallback(() => (
 		<NavButton

@@ -4,14 +4,14 @@ import BackupPrompt from '../components/BackupPrompt.tsx';
 import ConfirmAuth from '../components/ConfirmAuth.tsx';
 import DeletePubky from '../components/DeletePubky.tsx';
 import AddPubky from '../components/AddPubky.tsx';
-import NamePubkyPrompt from '../components/NamePubkyPrompt.tsx';
+import EditPubky from '../components/EditPubky.tsx';
 import SelectPubky from '../components/SelectPubky.tsx';
 
 registerSheet('camera', QRScanner);
 registerSheet('backup-prompt', BackupPrompt);
 registerSheet('confirm-auth', ConfirmAuth);
 registerSheet('delete-pubky', DeletePubky);
-registerSheet('name-pubky-prompt', NamePubkyPrompt);
+registerSheet('edit-pubky', EditPubky);
 registerSheet('add-pubky', AddPubky);
 registerSheet('select-pubky', SelectPubky);
 
@@ -21,7 +21,7 @@ declare module 'react-native-actions-sheet' {
         'backup-prompt': SheetDefinition;
         'confirm-auth': SheetDefinition;
         'delete-pubky': SheetDefinition;
-        'name-pubky-prompt': SheetDefinition;
+        'edit-pubky': SheetDefinition;
         'add-pubky': SheetDefinition;
         'select-pubky': SheetDefinition;
     }

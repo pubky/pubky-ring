@@ -150,6 +150,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 20,
 		paddingHorizontal: 24,
 		alignItems: 'center',
+		minHeight: 64,
 	},
 	buttonPrimary: {
 		flex: 1,
@@ -160,6 +161,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 20,
 		paddingHorizontal: 24,
 		alignItems: 'center',
+		minHeight: 64,
 	},
 	buttonText: {
 		color: 'white',

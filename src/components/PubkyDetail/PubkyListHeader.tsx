@@ -22,7 +22,7 @@ import {
 	AuthorizeButton,
 } from '../../theme/components.ts';
 import Button from '../Button.tsx';
-import { shareData, showToast } from '../../utils/helpers.ts';
+import { shareData, showEditPubkyPrompt, showToast } from '../../utils/helpers.ts';
 
 interface PubkyListHeaderProps {
 	index: number;
@@ -60,13 +60,21 @@ export const PubkyListHeader = memo(({
 	}, [pubky]);
 
 	const handleOnQRPress = useCallback(async () => {
-		setIsQRLoading(true);
-		try {
-			await onQRPress();
-		} finally {
-			setIsQRLoading(false);
+		if (!pubkyData.signedUp) {
+			showEditPubkyPrompt({
+				title: 'Setup',
+				pubky,
+				data: pubkyData,
+			});
+		} else {
+			setIsQRLoading(true);
+			try {
+				await onQRPress();
+			} finally {
+				setIsQRLoading(false);
+			}
 		}
-	}, [onQRPress]);
+	}, [onQRPress, pubky, pubkyData]);
 
 	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky : `pk:${pubky}`, [pubky]);
 	const onSharePress = useCallback(() => {
@@ -117,8 +125,8 @@ export const PubkyListHeader = memo(({
 						>
 							{isQRLoading ? (<ActivityIndicator size="small" />) : (
 								<>
-									<QrCode size={16} />
-									<Text style={styles.buttonText}>Authorize</Text>
+									{pubkyData.signedUp ? <QrCode size={16} /> : null}
+									<Text style={styles.buttonText}>{pubkyData.signedUp ? 'Authorize' : 'Setup'}</Text>
 								</>
 							)}
 						</AuthorizeButton>

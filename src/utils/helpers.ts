@@ -22,6 +22,8 @@ import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
+import { defaultPubkyState } from '../store/shapes/pubky.ts';
+import { Pubky } from '../types/pubky.ts';
 
 export const handleScannedData = async ({
 	pubky,
@@ -435,4 +437,26 @@ export const handleDeepLink = ({
 	});
 	dispatch(setDeepLink('')); // Reset deep link once used.
 	return '';
+};
+
+export const showEditPubkyPrompt = ({
+	title = 'Edit',
+	description = '',
+	pubky,
+	data = { ...defaultPubkyState },
+}: {
+	title?: string;
+	description?: string;
+	pubky: string;
+	data?: Pubky;
+}): void => {
+	SheetManager.show('edit-pubky', {
+		payload: {
+			title,
+			description,
+			pubky,
+			data,
+		},
+		onClose: () => SheetManager.hide('edit-pubky'),
+	});
 };

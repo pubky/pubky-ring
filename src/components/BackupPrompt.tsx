@@ -242,16 +242,18 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 		borderStyle: 'dashed',
 		minHeight: 74,
+		backgroundColor: 'transparent',
 	},
 	input: {
 		flex: 1,
-		padding: 8,
+		paddingLeft: 16,
 		fontSize: 26,
 		fontWeight: '300',
 		left: Platform.select({
 			android: 4,
 			ios: 0,
 		}),
+		backgroundColor: 'transparent',
 	},
 	inputError: {
 		borderColor: '#dc2626',
@@ -277,6 +279,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		width: '47%',
+		minHeight: 64,
 	},
 	submitButton: {
 		borderWidth: 1,

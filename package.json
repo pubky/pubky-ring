@@ -19,7 +19,7 @@
     "@reduxjs/toolkit": "^2.5.1",
     "@shopify/flash-list": "^1.7.3",
     "@shopify/react-native-skia": "^1.11.7",
-    "@synonymdev/react-native-pubky": "0.9.5",
+    "@synonymdev/react-native-pubky": "0.10.1",
     "@synonymdev/result": "^0.0.2",
     "buffer": "^6.0.3",
     "jdenticon": "^3.3.0",

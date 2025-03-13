@@ -33,8 +33,6 @@
             <category android:name="android.intent.category.DEFAULT" />
             <category android:name="android.intent.category.BROWSABLE" />
             <data android:scheme="pubkyring" />
-            <data android:scheme="https"/>
-            <data android:host="staging.pubky.app"/>
         </intent-filter>
       </activity>
     </application>

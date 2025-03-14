@@ -201,7 +201,7 @@ const HomeScreen = (): ReactElement => {
 
 	const onFooterPress = useCallback( () => {
 		try {
-			const url = 'https://staging.pubky.app';
+			const url = 'https://beta.pubky.app';
 			Linking.openURL(url).then();
 		} catch {
 			showToast({

@@ -49,7 +49,7 @@ const DeletePubky = ({ payload }: {
 					<ModalIndicator />
 					<Text style={styles.title}>Delete Pubky</Text>
 					<SessionText style={styles.message}>
-						Are you sure you want to delete this pubky?
+						Are you sure you want to delete pubky:
 					</SessionText>
 					<PubkyCard publicKey={publicKey} />
 					<View style={styles.buttonContainer}>

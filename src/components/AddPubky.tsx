@@ -14,7 +14,7 @@ import {
 	Text,
 	ActionSheetContainer,
 	SessionText,
-	SkiaGradient,
+	RadialGradient,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -22,6 +22,7 @@ import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import ModalIndicator from './ModalIndicator.tsx';
+import { AUTHORIZE_KEY_GRADIENT } from '../utils/constants.ts';
 
 const AddPubky = ({ payload }: {
     payload: {
@@ -60,7 +61,11 @@ const AddPubky = ({ payload }: {
 				CustomHeaderComponent={<></>}
 				height={'85%'}
 			>
-				<SkiaGradient modal={true} style={styles.content}>
+				<RadialGradient
+					style={styles.content}
+					colors={AUTHORIZE_KEY_GRADIENT}
+					center={{ x: 0.5, y: 0.5 }}
+				>
 					<ModalIndicator />
 					<Text style={styles.title}>Add Pubky</Text>
 					<SessionText style={styles.message}>
@@ -88,7 +93,7 @@ const AddPubky = ({ payload }: {
 							/>
 						</View>
 					</View>
-				</SkiaGradient>
+				</RadialGradient>
 			</ActionSheetContainer>
 		</View>
 	);

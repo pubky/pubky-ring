@@ -324,9 +324,13 @@ const EditPubky = ({ payload }: {
 		);
 	}, [title]);
 
+	const footerTop = useMemo(() => {
+		return isSignupTokenEditable ? null : -100;
+	}, [isSignupTokenEditable]);
+
 	const renderListFooter = useCallback(() => {
 		return (
-			<View style={styles.footerContainer}>
+			<View style={[styles.footerContainer, { top: footerTop }]}>
 				{error ? (
 					<Text style={styles.errorText}>{error}</Text>
 				) : null}
@@ -345,7 +349,7 @@ const EditPubky = ({ payload }: {
 				</View>
 			</View>
 		);
-	}, [error, checkStyle, checkMarkGradient, checkMarkImage]);
+	}, [error, checkStyle, checkMarkGradient, checkMarkImage, footerTop]);
 
 	// eslint-disable-next-line react/no-unused-prop-types
 	const renderInputItem = useCallback(({ item }: { item: InputDataItem }) => {

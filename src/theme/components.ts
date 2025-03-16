@@ -56,7 +56,7 @@ export const ActionSheetContainer = styled(
 	defaultOverlayOpacity: 0.7,
 	statusBarTranslucent: true,
 	drawUnderStatusBar: false,
-	springOffset: props?.springOffset ?? 100,
+	springOffset: props?.springOffset ?? 80,
 	animated: true,
 	openAnimationConfig: props?.navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : openAnimationConfig,
 	closeAnimationConfig: props?.navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : undefined,

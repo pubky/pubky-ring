@@ -138,10 +138,10 @@ export const showImportPrompt = ({
 	content,
 	dispatch,
 }: {
-	fileName: string;
-	fileDate: Date;
-	content: string;
-	dispatch: Dispatch
+    fileName: string;
+    fileDate: Date;
+    content: string;
+    dispatch: Dispatch
 }): Promise<Result<string>> => {
 	return new Promise((resolve) => {
 		SheetManager.show('backup-prompt', {
@@ -159,15 +159,17 @@ export const showImportPrompt = ({
 						const secretKey = decryptRes.value;
 						const pubky = await importPubky(secretKey, dispatch);
 						if (pubky.isErr()) {
+							resolve(err(pubky.error.message));
 							return err(pubky.error.message);
 						}
 
-						resolve(ok(pubky.value));
 						SheetManager.hide('backup-prompt').then();
+						resolve(ok(pubky.value));
 						return ok(pubky.value);
 					} catch (error) {
 						console.error('Import error:', error);
-						return err('Failed to import pubky');
+						resolve(err('Failed to import submitted pubky'));
+						return err('Failed to import submitted pubky');
 					}
 				},
 				onClose: () => {

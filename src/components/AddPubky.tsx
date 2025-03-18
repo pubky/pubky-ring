@@ -130,6 +130,7 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		textAlign: 'center',
 		marginBottom: 24,
+		backgroundColor: 'transparent',
 	},
 	message: {
 		fontWeight: '400',

@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
 	indicator: {
 		width: 32,
 		height: 4,
-		backgroundColor: '#ccc', // Or your desired color
+		backgroundColor: '#ccc',
 		borderRadius: 2,
 	},
 });

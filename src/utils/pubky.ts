@@ -62,7 +62,6 @@ export const republishHomeserver = async ({
 		return err(res.error.message);
 	}
 	dispatch(setHomeserver({ pubky, homeserver }));
-	dispatch(setSignedUp({ pubky, signedUp: true }));
 	return ok(res.value);
 };
 
@@ -125,7 +124,6 @@ export const importPubky = async (
 		}
 		const pubky = pubkyRes.value.public_key;
 		const homeserver = defaultPubkyState.homeserver;
-		dispatch(setSignedUp({ pubky, signedUp: true }));
 		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then((res) => {
 			if (res.isErr()) {
 				dispatch(setSignedUp({ pubky, signedUp: false }));

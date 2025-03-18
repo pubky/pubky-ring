@@ -110,9 +110,9 @@ const EditPubky = ({ payload }: {
 	const { pubky } = useMemo(() => payload, [payload]);
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const [loading, setLoading] = useState(false);
-	const [newPubkyName, setNewPubkyName] = useState(storedPubkyData.name || '');
-	const [homeServer, setHomeServer] = useState(storedPubkyData.homeserver || DEFAULT_HOMESERVER || '');
-	const [signupToken, setSignupToken] = useState(storedPubkyData.signupToken || '');
+	const [newPubkyName, setNewPubkyName] = useState(storedPubkyData?.name || '');
+	const [homeServer, setHomeServer] = useState(storedPubkyData?.homeserver || DEFAULT_HOMESERVER || '');
+	const [signupToken, setSignupToken] = useState(storedPubkyData?.signupToken || '');
 	const pubkyNameLength = useMemo(() => newPubkyName.length, [newPubkyName.length]);
 	const [nameError, setNameError] = useState<string>(pubkyNameLength > 20 ? `${MAX_NAME_LENGTH - pubkyNameLength} / ${MAX_NAME_LENGTH}` : '');
 	const dispatch = useDispatch();
@@ -126,11 +126,15 @@ const EditPubky = ({ payload }: {
 		storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
 	);
 
+	const isSignupTokenInputVisible = useMemo(() => {
+		return storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
+	}, [storedPubkyData.signedUp, storedPubkyData.homeserver, homeServer]);
+
+
 	// Whether signupToken TextInput should be visible
 	useEffect(() => {
-		const shouldBeVisible = storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
-		signupTokenOpacity.value = withTiming(shouldBeVisible ? 1 : 0, { duration: 300 });
-	}, [storedPubkyData.signedUp, storedPubkyData.homeserver, homeServer, signupTokenOpacity]);
+		signupTokenOpacity.value = withTiming(isSignupTokenInputVisible ? 1 : 0, { duration: 300 });
+	}, [isSignupTokenInputVisible, signupTokenOpacity]);
 
 	const showCheckAnimation = useCallback(({ success }: { success: boolean }) => {
 		// Show both check and gradient
@@ -203,10 +207,10 @@ const EditPubky = ({ payload }: {
 			let newData = {
 				name: newPubkyName.trim(),
 				homeserver: homeServer.trim(),
-				signupToken: storedPubkyData.signupToken,
+				signupToken: storedPubkyData?.signupToken ?? '',
 			};
 
-			if (!storedPubkyData.signedUp || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData.signupToken !== signupToken.trim()) {
+			if (!storedPubkyData.signedUp || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim()) {
 				let signedIn = false;
 				if (!storedPubkyData.signedUp || storedPubkyData.homeserver !== homeServer.trim()) {
 					//Attempt sign-up
@@ -272,7 +276,7 @@ const EditPubky = ({ payload }: {
 		} finally {
 			setLoading(false);
 		}
-	}, [pubky, newPubkyName, homeServer, storedPubkyData.signupToken, storedPubkyData.signedUp, storedPubkyData.homeserver, signupToken, dispatch, showCheckAnimation, updateName]);
+	}, [pubky, newPubkyName, homeServer, storedPubkyData?.signupToken, storedPubkyData.signedUp, storedPubkyData.homeserver, signupToken, dispatch, showCheckAnimation, updateName]);
 
 	const handleChangeText = useCallback((text: string) => {
 		if (text.length > MAX_NAME_LENGTH) {
@@ -344,8 +348,8 @@ const EditPubky = ({ payload }: {
 	}, [title]);
 
 	const footerTop = useMemo(() => {
-		return isSignupTokenEditable ? null : -100;
-	}, [isSignupTokenEditable]);
+		return isSignupTokenInputVisible ? null : -100;
+	}, [isSignupTokenInputVisible]);
 
 	const renderListFooter = useCallback(() => {
 		return (
@@ -370,7 +374,7 @@ const EditPubky = ({ payload }: {
 		if (item.id === 'signuptoken') {
 			return (
 				<AnimatedView style={signupTokenStyle}>
-					<Text style={styles.textInputTitle}>{textInputTitleText.signuptoken}</Text>
+					<Text style={styles.textInputTitle}>{textInputTitleText?.signuptoken}</Text>
 					<InputItemComponent
 						style={styles.signupTokenInput}
 						value={item.value}
@@ -403,31 +407,37 @@ const EditPubky = ({ payload }: {
 
 	const onReset = useCallback(() => {
 		try {
-			checkOpacity.value = withTiming(0, { duration: 0 });
-			gradientOpacity.value = withTiming(0, { duration: 0 });
-			checkScale.value = withSpring(0, {
-				duration: 0,
-			});
+			if (checkOpacity?.value) {
+				checkOpacity.value = withTiming(0, { duration: 0 });
+			}
+			if (gradientOpacity?.value) {
+				gradientOpacity.value = withTiming(0, { duration: 0 });
+			}
+			if (checkScale?.value) {
+				checkScale.value = withSpring(0, { duration: 0 });
+			}
+
 			setError('');
 			setHomeServer(storedPubkyData?.homeserver ?? '');
 			setNewPubkyName(storedPubkyData?.name ?? '');
 			setSignupToken(storedPubkyData?.signupToken ?? '');
-		} catch {}
-	}, [checkOpacity, checkScale, gradientOpacity, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
-
+		} catch (e) {
+			console.log('Reset error:', e);
+		}
+	}, [checkOpacity, checkScale, gradientOpacity, storedPubkyData]);
 	const leftButtonText = useMemo(() => {
-		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData.signupToken !== signupToken.trim())) {
+		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim())) {
 			return loading ? 'Close' : 'Reset';
 		}
 		return 'Close';
-	}, [homeServer, loading, newPubkyName, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
+	}, [homeServer, loading, newPubkyName, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData?.signupToken]);
 
 	const leftButtonOnPress = useCallback(() => {
-		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData.signupToken !== signupToken.trim())) {
+		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim())) {
 			return loading ? onClose() : onReset();
 		}
 		return onClose();
-	}, [homeServer, loading, newPubkyName, onClose, onReset, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
+	}, [homeServer, loading, newPubkyName, onClose, onReset, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData?.signupToken]);
 
 	return (
 		<ActionSheetContainer
@@ -472,7 +482,7 @@ const EditPubky = ({ payload }: {
 								loading={loading}
 								style={[styles.button, styles.submitButton]}
 								onPress={handleSubmit}
-								disabled={storedPubkyData.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData.signupToken}
+								disabled={storedPubkyData.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData?.signupToken}
 							/>
 						</View>
 					</View>

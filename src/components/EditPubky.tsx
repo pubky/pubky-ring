@@ -389,14 +389,16 @@ const EditPubky = ({ payload }: {
 	}, [signupTokenStyle, isSignupTokenEditable, handleSubmit]);
 
 	const onReset = useCallback(() => {
-		checkOpacity.value = withTiming(0, { duration: 0 });
-		checkScale.value = withSpring(0, {
-			duration: 0,
-		});
-		setError('');
-		setHomeServer(storedPubkyData.homeserver);
-		setNewPubkyName(storedPubkyData.name);
-		setSignupToken(storedPubkyData.signupToken);
+		try {
+			checkOpacity.value = withTiming(0, { duration: 0 });
+			checkScale.value = withSpring(0, {
+				duration: 0,
+			});
+			setError('');
+			setHomeServer(storedPubkyData?.homeserver ?? '');
+			setNewPubkyName(storedPubkyData?.name ?? '');
+			setSignupToken(storedPubkyData?.signupToken ?? '');
+		} catch {}
 	}, [checkOpacity, checkScale, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
 
 	const leftButtonText = useMemo(() => {

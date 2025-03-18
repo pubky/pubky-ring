@@ -446,7 +446,7 @@ const EditPubky = ({ payload }: {
 						loading={loading}
 						style={[styles.button, styles.submitButton]}
 						onPress={handleSubmit}
-						disabled={newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData.signupToken}
+						disabled={storedPubkyData.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData.signupToken}
 					/>
 				</View>
 			</SkiaGradient>

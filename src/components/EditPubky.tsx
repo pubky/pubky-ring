@@ -120,6 +120,8 @@ const EditPubky = ({ payload }: {
 	const checkScale = useSharedValue(0.2);
 	const [error, setError] = useState('');
 
+	const gradientOpacity = useSharedValue(0);
+
 	const signupTokenOpacity = useSharedValue(
 		storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
 	);
@@ -129,6 +131,27 @@ const EditPubky = ({ payload }: {
 		const shouldBeVisible = storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
 		signupTokenOpacity.value = withTiming(shouldBeVisible ? 1 : 0, { duration: 300 });
 	}, [storedPubkyData.signedUp, storedPubkyData.homeserver, homeServer, signupTokenOpacity]);
+
+	const showCheckAnimation = useCallback(({ success }: { success: boolean }) => {
+		// Show both check and gradient
+		checkOpacity.value = withTiming(1, { duration: 500 });
+		gradientOpacity.value = withTiming(1, { duration: 500 });
+		checkScale.value = withSpring(1, {
+			damping: 10,
+			stiffness: 100,
+		});
+
+		if (success) {
+			setTimeout(() => {
+				// Hide both check and gradient
+				checkOpacity.value = withTiming(0, { duration: 3000 });
+				gradientOpacity.value = withTiming(0, { duration: 3000 });
+				setTimeout(() => {
+					checkScale.value = 0;
+				}, 3005);
+			}, 1800);
+		}
+	}, [checkOpacity, checkScale, gradientOpacity]);
 
 	const checkStyle = useAnimatedStyle(() => ({
 		opacity: checkOpacity.value,
@@ -141,21 +164,17 @@ const EditPubky = ({ payload }: {
 		backgroundColor: 'transparent',
 	}));
 
-	const showCheckAnimation = useCallback(({ success }: { success: boolean }) => {
-		checkOpacity.value = withTiming(1, { duration: 500 });
-		checkScale.value = withSpring(1, {
-			damping: 10,
-			stiffness: 100,
-		});
-		if (success) {
-			setTimeout(() => {
-				checkOpacity.value = withTiming(0, { duration: 3000 });
-				setTimeout(() => {
-					checkScale.value = 0;
-				}, 3005);
-			}, 1800);
-		}
-	}, [checkOpacity, checkScale]);
+	const gradientStyle = useAnimatedStyle(() => ({
+		opacity: gradientOpacity.value,
+		position: 'absolute',
+		top: 0,
+		left: 0,
+		right: 0,
+		bottom: 0,
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
+		pointerEvents: 'none',
+	}));
 
 	const updateName = useCallback(() => {
 		if (storedPubkyData.name !== newPubkyName.trim()) {
@@ -336,24 +355,18 @@ const EditPubky = ({ payload }: {
 				) : null}
 				<View style={styles.imageContainer}>
 					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-						<RadialGradient
-							colors={checkMarkGradient}
-							center={{ x: 0.5, y: 0.5 }}
-						>
-							<Image
-								source={checkMarkImage}
-								style={styles.checkImage}
-							/>
-						</RadialGradient>
+						<Image
+							source={checkMarkImage}
+							style={styles.checkImage}
+						/>
 					</AnimatedView>
 				</View>
 			</View>
 		);
-	}, [error, checkStyle, checkMarkGradient, checkMarkImage, footerTop]);
+	}, [error, checkStyle, checkMarkImage, footerTop]);
 
 	// eslint-disable-next-line react/no-unused-prop-types
 	const renderInputItem = useCallback(({ item }: { item: InputDataItem }) => {
-		// For the signup token input, apply the animated style
 		if (item.id === 'signuptoken') {
 			return (
 				<AnimatedView style={signupTokenStyle}>
@@ -391,6 +404,7 @@ const EditPubky = ({ payload }: {
 	const onReset = useCallback(() => {
 		try {
 			checkOpacity.value = withTiming(0, { duration: 0 });
+			gradientOpacity.value = withTiming(0, { duration: 0 });
 			checkScale.value = withSpring(0, {
 				duration: 0,
 			});
@@ -399,7 +413,7 @@ const EditPubky = ({ payload }: {
 			setNewPubkyName(storedPubkyData?.name ?? '');
 			setSignupToken(storedPubkyData?.signupToken ?? '');
 		} catch {}
-	}, [checkOpacity, checkScale, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
+	}, [checkOpacity, checkScale, gradientOpacity, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
 
 	const leftButtonText = useMemo(() => {
 		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData.signupToken !== signupToken.trim())) {
@@ -415,7 +429,6 @@ const EditPubky = ({ payload }: {
 		return onClose();
 	}, [homeServer, loading, newPubkyName, onClose, onReset, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData.signupToken]);
 
-
 	return (
 		<ActionSheetContainer
 			id="edit-pubky"
@@ -426,30 +439,43 @@ const EditPubky = ({ payload }: {
 			height={ACTION_SHEET_HEIGHT}
 		>
 			<SkiaGradient modal={true} style={styles.content}>
-				<FlashList
-					data={inputData}
-					renderItem={renderInputItem}
-					estimatedItemSize={120}
-					keyExtractor={(item) => item.id}
-					showsVerticalScrollIndicator={false}
-					ListHeaderComponent={renderListHeader}
-					ListFooterComponent={renderListFooter}
-					ListFooterComponentStyle={styles.listFooter}
-				/>
+				<View style={[styles.content, styles.container]}>
+					<AnimatedView style={gradientStyle}>
+						<RadialGradient
+							style={styles.radialGradient}
+							colors={checkMarkGradient}
+							center={{ x: 0.5, y: 0.5 }}
+							stops={[0.2, 1]}
+						/>
+					</AnimatedView>
 
-				<View style={styles.buttonContainer}>
-					<Button
-						text={leftButtonText}
-						style={styles.button}
-						onPress={leftButtonOnPress}
-					/>
-					<Button
-						text={'Save'}
-						loading={loading}
-						style={[styles.button, styles.submitButton]}
-						onPress={handleSubmit}
-						disabled={storedPubkyData.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData.signupToken}
-					/>
+					<View style={styles.flatListWrapper}>
+						<FlashList
+							data={inputData}
+							renderItem={renderInputItem}
+							estimatedItemSize={120}
+							keyExtractor={(item) => item.id}
+							showsVerticalScrollIndicator={false}
+							ListHeaderComponent={renderListHeader}
+							ListFooterComponent={renderListFooter}
+							ListFooterComponentStyle={styles.listFooter}
+						/>
+
+						<View style={styles.buttonContainer}>
+							<Button
+								text={leftButtonText}
+								style={styles.button}
+								onPress={leftButtonOnPress}
+							/>
+							<Button
+								text={'Save'}
+								loading={loading}
+								style={[styles.button, styles.submitButton]}
+								onPress={handleSubmit}
+								disabled={storedPubkyData.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData.signupToken}
+							/>
+						</View>
+					</View>
 				</View>
 			</SkiaGradient>
 		</ActionSheetContainer>
@@ -458,7 +484,6 @@ const EditPubky = ({ payload }: {
 
 const styles = StyleSheet.create({
 	content: {
-		paddingHorizontal: 24,
 		paddingBottom: 24,
 		minHeight: '40%',
 		borderTopRightRadius: 20,
@@ -466,6 +491,22 @@ const styles = StyleSheet.create({
 		height: '100%',
 		flexDirection: 'column',
 		backgroundColor: 'transparent',
+	},
+	container: {
+		backgroundColor: 'transparent',
+	},
+	flatListWrapper: {
+		height: '100%',
+		backgroundColor: 'transparent',
+		paddingHorizontal: 24,
+		zIndex: 1,
+		position: 'relative',
+	},
+	radialGradient: {
+		width: '100%',
+		height: '100%',
+		borderTopRightRadius: 20,
+		borderTopLeftRadius: 20,
 	},
 	title: {
 		fontSize: 17,

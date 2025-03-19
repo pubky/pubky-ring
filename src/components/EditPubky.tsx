@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { Image, Keyboard, Platform, StyleSheet } from 'react-native';
 import {
 	ActionSheetContainer,
@@ -119,6 +119,7 @@ const EditPubky = ({ payload }: {
 	const checkOpacity = useSharedValue(0);
 	const checkScale = useSharedValue(0.2);
 	const [error, setError] = useState('');
+	const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null);
 
 	const gradientOpacity = useSharedValue(0);
 
@@ -137,6 +138,12 @@ const EditPubky = ({ payload }: {
 	}, [isSignupTokenInputVisible, signupTokenOpacity]);
 
 	const showCheckAnimation = useCallback(({ success }: { success: boolean }) => {
+		// Clear any existing timers to prevent conflicting animations
+		if (fadeOutTimerRef.current) {
+			clearTimeout(fadeOutTimerRef.current);
+			fadeOutTimerRef.current = null;
+		}
+
 		// Show both check and gradient
 		checkOpacity.value = withTiming(1, { duration: 500 });
 		gradientOpacity.value = withTiming(1, { duration: 500 });
@@ -146,12 +153,16 @@ const EditPubky = ({ payload }: {
 		});
 
 		if (success) {
-			setTimeout(() => {
+			// Set a new timer for fade out
+			fadeOutTimerRef.current = setTimeout(() => {
 				// Hide both check and gradient
 				checkOpacity.value = withTiming(0, { duration: 3000 });
 				gradientOpacity.value = withTiming(0, { duration: 3000 });
-				setTimeout(() => {
+
+				// Store reference to reset the scale after opacity animation
+				fadeOutTimerRef.current = setTimeout(() => {
 					checkScale.value = 0;
+					fadeOutTimerRef.current = null;
 				}, 3005);
 			}, 1800);
 		}
@@ -311,6 +322,42 @@ const EditPubky = ({ payload }: {
 		return error ? require('../images/cross.png') : require('../images/check.png');
 	}, [error]);
 
+	const onReset = useCallback(() => {
+		try {
+			// Clear any active timers
+			if (fadeOutTimerRef.current) {
+				clearTimeout(fadeOutTimerRef.current);
+				fadeOutTimerRef.current = null;
+			}
+
+			if (checkOpacity?.value) {
+				checkOpacity.value = withTiming(0, { duration: 0 });
+			}
+			if (gradientOpacity?.value) {
+				gradientOpacity.value = withTiming(0, { duration: 0 });
+			}
+			if (checkScale?.value) {
+				checkScale.value = withSpring(0, { duration: 0 });
+			}
+
+			setError('');
+			setHomeServer(storedPubkyData?.homeserver ?? '');
+			setNewPubkyName(storedPubkyData?.name ?? '');
+			setSignupToken(storedPubkyData?.signupToken ?? '');
+		} catch (e) {
+			console.log('Reset error:', e);
+		}
+	}, [checkOpacity, checkScale, gradientOpacity, storedPubkyData]);
+
+	// Add a cleanup effect to clear timers when component unmounts
+	useEffect(() => {
+		return (): void => {
+			if (fadeOutTimerRef.current) {
+				clearTimeout(fadeOutTimerRef.current);
+			}
+		};
+	}, []);
+
 	const inputData = useMemo(() => [
 		{
 			id: 'name' as const,
@@ -369,6 +416,20 @@ const EditPubky = ({ payload }: {
 		);
 	}, [error, checkStyle, checkMarkImage, footerTop]);
 
+	const leftButtonText = useMemo(() => {
+		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim())) {
+			return loading ? 'Close' : 'Reset';
+		}
+		return 'Close';
+	}, [homeServer, loading, newPubkyName, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData?.signupToken]);
+
+	const leftButtonOnPress = useCallback(() => {
+		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim())) {
+			return loading ? onClose() : onReset();
+		}
+		return onClose();
+	}, [homeServer, loading, newPubkyName, onClose, onReset, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData?.signupToken]);
+
 	// eslint-disable-next-line react/no-unused-prop-types
 	const renderInputItem = useCallback(({ item }: { item: InputDataItem }) => {
 		if (item.id === 'signuptoken') {
@@ -404,40 +465,6 @@ const EditPubky = ({ payload }: {
 			</>
 		);
 	}, [signupTokenStyle, isSignupTokenEditable, handleSubmit]);
-
-	const onReset = useCallback(() => {
-		try {
-			if (checkOpacity?.value) {
-				checkOpacity.value = withTiming(0, { duration: 0 });
-			}
-			if (gradientOpacity?.value) {
-				gradientOpacity.value = withTiming(0, { duration: 0 });
-			}
-			if (checkScale?.value) {
-				checkScale.value = withSpring(0, { duration: 0 });
-			}
-
-			setError('');
-			setHomeServer(storedPubkyData?.homeserver ?? '');
-			setNewPubkyName(storedPubkyData?.name ?? '');
-			setSignupToken(storedPubkyData?.signupToken ?? '');
-		} catch (e) {
-			console.log('Reset error:', e);
-		}
-	}, [checkOpacity, checkScale, gradientOpacity, storedPubkyData]);
-	const leftButtonText = useMemo(() => {
-		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim())) {
-			return loading ? 'Close' : 'Reset';
-		}
-		return 'Close';
-	}, [homeServer, loading, newPubkyName, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData?.signupToken]);
-
-	const leftButtonOnPress = useCallback(() => {
-		if (storedPubkyData.homeserver && (storedPubkyData.name !== newPubkyName.trim() || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim())) {
-			return loading ? onClose() : onReset();
-		}
-		return onClose();
-	}, [homeServer, loading, newPubkyName, onClose, onReset, signupToken, storedPubkyData.homeserver, storedPubkyData.name, storedPubkyData?.signupToken]);
 
 	return (
 		<ActionSheetContainer

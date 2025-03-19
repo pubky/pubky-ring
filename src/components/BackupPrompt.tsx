@@ -134,9 +134,11 @@ const BackupPrompt = ({ payload }: {
 							<Text numberOfLines={1} ellipsizeMode="middle" style={styles.fileText}>
 								{fileName}
 							</Text>
-							<SessionText style={styles.dateText}>
-								{fileDate.toUpperCase()}
-							</SessionText>
+							{fileDate && (
+								<SessionText style={styles.dateText}>
+									{fileDate.toUpperCase()}
+								</SessionText>
+							)}
 						</View>
 					</View>
 				);

@@ -113,12 +113,17 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		const fileName = file.name;
 
 		const base64Content = await RNFS.readFile(filePath, 'base64');
-		const fileStats = await RNFS.stat(filePath);
-
+		let fileDate: Date | undefined;
+		try {
+			const fileStats = await RNFS.stat(filePath);
+			fileDate = fileStats.mtime;
+		} catch (statError) {
+			console.warn('Could not get file stats, using current date:', statError);
+		}
 
 		return showImportPrompt({
 			fileName: fileName ?? '',
-			fileDate: fileStats.mtime,
+			fileDate,
 			content: base64Content,
 			dispatch,
 		});
@@ -139,7 +144,7 @@ export const showImportPrompt = ({
 	dispatch,
 }: {
     fileName: string;
-    fileDate: Date;
+    fileDate?: Date;
     content: string;
     dispatch: Dispatch
 }): Promise<Result<string>> => {

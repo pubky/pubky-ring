@@ -16,10 +16,10 @@ import { useSelector } from 'react-redux';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
 import {
-	ChevronLeft,
 	NavButton,
-	Edit2,
 	View,
+	ArrowLeft,
+	Pencil,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { Dispatch } from 'redux';
@@ -45,12 +45,12 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 		<NavButton
 			style={styles.navButton}
 			onPressIn={navigation.goBack}
-			hitSlop={{ top: 10,
-				bottom: 10,
-				left: 10,
-				right: 10 }}
+			hitSlop={{ top: 20,
+				bottom: 20,
+				left: 20,
+				right: 20 }}
 		>
-			<ChevronLeft size={16} />
+			<ArrowLeft size={24} />
 		</NavButton>
 	), [navigation]);
 
@@ -63,7 +63,7 @@ const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
 				left: 10,
 				right: 10 }}
 		>
-			<Edit2 size={16} />
+			<Pencil size={18.44} />
 		</NavButton>
 	), [onRightButtonPress]);
 
@@ -96,20 +96,11 @@ const styles = StyleSheet.create({
 	},
 	navButton: {
 		zIndex: 1,
-		width: 32,
-		height: 32,
-		borderRadius: 20,
+		height: 40,
+		width: 40,
 		alignSelf: 'center',
 		alignItems: 'center',
 		justifyContent: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
 	},
 });
 

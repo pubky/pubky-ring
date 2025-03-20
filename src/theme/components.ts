@@ -3,6 +3,7 @@ import {
 	Scan as _Scan,
 	Clipboard as _Clipboard,
 	Share as _Share,
+	ArrowLeft as _ArrowLeft,
 	ChevronLeft as _ChevronLeft,
 	Eye as _Eye,
 	EyeOff as _EyeOff,
@@ -10,6 +11,7 @@ import {
 	ChevronRight as _ChevronRight,
 	Check as _Check,
 	Edit2 as _Edit2,
+	Pencil as _Pencil,
 	Trash2 as _Trash2,
 	Save as _Save,
 	KeyRound as _KeyRound,
@@ -83,7 +85,7 @@ export const TouchableOpacity = styled.TouchableOpacity`
 `;
 
 export const NavButton = styled.TouchableOpacity`
-  background-color: ${(props): string => props.theme.colors.navButton};
+  background-color: ${(props): string => props.theme.colors.background};
 `;
 
 export const NavView = styled.View`
@@ -193,12 +195,20 @@ export const Save = styled(_Save)`
 	color: ${(props): string => props.theme.colors.sessionText};
 `;
 
+export const ArrowLeft = styled(_ArrowLeft)`
+  color: ${(props): string => props.theme.colors.sessionText};
+`;
+
 export const ChevronLeft = styled(_ChevronLeft)`
   color: ${(props): string => props.theme.colors.sessionText};
 `;
 
 export const Check = styled(_Check)`
 	  color: ${(props): string => props.theme.colors.sessionText};
+`;
+
+export const Pencil = styled(_Pencil)`
+		  color: ${(props): string => props.theme.colors.sessionText};
 `;
 
 export const Edit2 = styled(_Edit2)`

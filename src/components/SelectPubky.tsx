@@ -26,6 +26,7 @@ import { handleDeepLink } from '../utils/helpers.ts';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import Button from './Button.tsx';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
+import { Pubky } from '../types/pubky.ts';
 
 const ListItemComponent = ({ name, pubky, onPress }: { name?: string; pubky: string; onPress: () => void }): ReactElement => {
 	return (
@@ -53,11 +54,16 @@ const SelectPubky = ({ payload }: {
 		return payload?.deepLink;
 	}, [payload?.deepLink]);
 
-	const pubkyArray = useMemo(() => {
-		return Object.entries(pubkys).map(([key, value]) => ({
-			key,
-			value,
-		}));
+	const pubkyArray: {
+		key: string;
+		value: Pubky;
+	}[] = useMemo(() => {
+		return Object.entries(pubkys)
+			.filter(([_, value]) => value.signedUp)
+			.map(([key, value]) => ({
+				key,
+				value,
+			}));
 	}, [pubkys]);
 
 	const onPubkyPress = useCallback(async (pubky: string) => {
@@ -70,6 +76,12 @@ const SelectPubky = ({ payload }: {
 			});
 		}, 100);
 	}, [deepLink, dispatch]);
+
+	const message = useMemo(() => {
+		return pubkyArray.length > 0
+			? 'Select which pubky you want to use to authorize this service, browser or device.'
+			: "You do not have any pubky's that are setup and available. Please create and setup a pubky first.";
+	}, [pubkyArray.length]);
 
 
 	return (
@@ -87,7 +99,7 @@ const SelectPubky = ({ payload }: {
 					<ModalIndicator />
 					<Text style={styles.title}>Select Pubky</Text>
 					<SessionText style={styles.message}>
-						Select which pubky you want to use to authorize this service, browser or device.
+						{message}
 					</SessionText>
 					<View style={styles.listContainer}>
 						<FlashList

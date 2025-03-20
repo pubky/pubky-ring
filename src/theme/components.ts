@@ -25,6 +25,7 @@ import {
 	RadialGradient as _RadialGradient,
 } from '../components/LinearGradient.tsx';
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
+import { SafeAreaView as _SafeAreaView } from 'react-native-safe-area-context';
 
 interface ActionSheetContainerProps {
   backgroundColor?: string;
@@ -92,7 +93,7 @@ export const NavView = styled.View`
   background-color: ${(props): string => props.theme.colors.navButton};
 `;
 
-export const SafeAreaView = styled.SafeAreaView`
+export const SafeAreaView = styled(_SafeAreaView)`
   flex: 1;
   background-color: ${(props): string => props.theme.colors.background};
 `;
@@ -196,7 +197,7 @@ export const Save = styled(_Save)`
 `;
 
 export const ArrowLeft = styled(_ArrowLeft)`
-  color: ${(props): string => props.theme.colors.sessionText};
+  color: ${(props): string => props.theme.colors.text};
 `;
 
 export const ChevronLeft = styled(_ChevronLeft)`
@@ -204,11 +205,11 @@ export const ChevronLeft = styled(_ChevronLeft)`
 `;
 
 export const Check = styled(_Check)`
-	  color: ${(props): string => props.theme.colors.sessionText};
+	  color: ${(props): string => props.theme.colors.text};
 `;
 
 export const Pencil = styled(_Pencil)`
-		  color: ${(props): string => props.theme.colors.sessionText};
+		  color: ${(props): string => props.theme.colors.text};
 `;
 
 export const Edit2 = styled(_Edit2)`

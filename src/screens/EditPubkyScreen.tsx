@@ -15,9 +15,9 @@ import { signInToHomeserver } from '../utils/pubky.ts';
 import {
 	View,
 	Text,
-	ChevronLeft,
 	Check,
 	NavButton,
+	ArrowLeft,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 
@@ -43,7 +43,11 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 		if (homeserver.trim() && homeserver.trim() !== pubkyData.homeserver) {
 			setIsValidating(true);
 			try {
-				const signInRes = await signInToHomeserver(pubkyData.pubky, homeserver.trim(), dispatch);
+				const signInRes = await signInToHomeserver({
+					pubky: pubkyData.pubky,
+					homeserver: homeserver.trim(),
+					dispatch,
+				});
 				if (signInRes.isErr()) {
 					newErrors.homeserver = signInRes.error.message;
 					isValid = false;
@@ -88,8 +92,12 @@ const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
 		<NavButton
 			style={styles.navButton}
 			onPressIn={navigation.goBack}
+			hitSlop={{ top: 20,
+				bottom: 20,
+				left: 20,
+				right: 20 }}
 		>
-			<ChevronLeft size={16} />
+			<ArrowLeft size={24} />
 		</NavButton>
 	), [navigation]);
 
@@ -153,20 +161,12 @@ const styles = StyleSheet.create({
 		opacity: 0.5,
 	},
 	navButton: {
-		width: 32,
-		height: 32,
-		borderRadius: 20,
-		justifyContent: 'center',
-		alignItems: 'center',
+		zIndex: 1,
+		height: 40,
+		width: 40,
 		alignSelf: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	form: {
 		padding: 20,

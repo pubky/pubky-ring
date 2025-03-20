@@ -5,11 +5,11 @@ import { RootStackParamList } from '../navigation/types';
 import {
 	View,
 	Text,
-	ChevronLeft,
 	NavButton,
 	Card,
 	ActionButton,
 	SessionText,
+	ArrowLeft,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { useDispatch, useSelector } from 'react-redux';
@@ -37,8 +37,12 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 		<NavButton
 			style={styles.navButton}
 			onPressIn={navigation.goBack}
+			hitSlop={{ top: 20,
+				bottom: 20,
+				left: 20,
+				right: 20 }}
 		>
-			<ChevronLeft size={16} />
+			<ArrowLeft size={24} />
 		</NavButton>
 	), [navigation]);
 
@@ -222,20 +226,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	navButton: {
-		width: 32,
-		height: 32,
-		borderRadius: 20,
-		justifyContent: 'center',
-		alignItems: 'center',
+		zIndex: 1,
+		height: 40,
+		width: 40,
 		alignSelf: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 2,
-		},
-		shadowOpacity: 0.25,
-		shadowRadius: 3.84,
-		elevation: 5,
+		alignItems: 'center',
+		justifyContent: 'center',
 	},
 	section: {
 		marginBottom: 16,

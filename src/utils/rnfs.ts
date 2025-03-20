@@ -14,7 +14,7 @@ import {
 	ok,
 	Result,
 } from '@synonymdev/result';
-import DocumentPicker from 'react-native-document-picker';
+import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import { SheetManager } from 'react-native-actions-sheet';
 import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
 const Buffer = require('buffer').Buffer;
@@ -91,47 +91,57 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 	}
 
 	try {
-		const file = await DocumentPicker.pickSingle({
-			type: [DocumentPicker.types.allFiles],
-			copyTo: 'documentDirectory',
-		});
-
+		const [file] = await pick();
 		if (!file) {
 			return err('No file selected');
 		}
+		const { name, uri } = file;
 
-		const filePath = file.fileCopyUri || file.uri;
+		if (!name?.toLowerCase().endsWith('.pkarr')) {
+			return err('Please select a .pkarr file');
+		}
 
+		const sanitizedName = name.replace(/\s+/g, '_');
+
+		const [copyResult] = await keepLocalCopy({
+			files: [
+				{
+					uri,
+					fileName: sanitizedName,
+				},
+			],
+			destination: 'documentDirectory',
+		});
+
+		if (copyResult.status !== 'success') {
+			return err('Failed to create local copy');
+		}
+
+		const filePath = copyResult.localUri;
 		if (!filePath) {
 			return err('Invalid file path');
 		}
 
-		if (!filePath.toLowerCase().endsWith('.pkarr')) {
-			return err('Please select a .pkarr file');
-		}
+		const encodedPath = encodeURI(filePath);
 
-		const fileName = file.name;
+		const base64Content = await RNFS.readFile(encodedPath, 'base64');
 
-		const base64Content = await RNFS.readFile(filePath, 'base64');
 		let fileDate: Date | undefined;
 		try {
-			const fileStats = await RNFS.stat(filePath);
+			const fileStats = await RNFS.stat(encodedPath);
 			fileDate = fileStats.mtime;
 		} catch (statError) {
 			console.warn('Could not get file stats, using current date:', statError);
 		}
 
 		return showImportPrompt({
-			fileName: fileName ?? '',
+			fileName: name,
 			fileDate,
 			content: base64Content,
 			dispatch,
 		});
 
 	} catch (error) {
-		if (DocumentPicker.isCancel(error)) {
-			return err('');
-		}
 		console.error('Import error:', error);
 		return err('Failed to import pubky');
 	}

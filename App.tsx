@@ -15,6 +15,7 @@ import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection, parseDeepLink, showToast } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const _toastConfig = toastConfig();
 
@@ -107,12 +108,14 @@ function App(): React.JSX.Element {
 
 	return (
 		<ThemeProvider theme={theme}>
-			<SafeAreaView>
-				<SheetProvider>
-					<RootNavigator />
-					<Toast config={_toastConfig} />
-				</SheetProvider>
-			</SafeAreaView>
+			<SafeAreaProvider>
+				<SafeAreaView>
+					<SheetProvider>
+						<RootNavigator />
+						<Toast config={_toastConfig} />
+					</SheetProvider>
+				</SafeAreaView>
+			</SafeAreaProvider>
 		</ThemeProvider>
 	);
 }

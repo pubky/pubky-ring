@@ -1,49 +1,51 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
+import { StyleSheet, StyleProp, ViewStyle, TextStyle, Platform } from 'react-native';
 import styled from 'styled-components/native';
 import { BaseToast, ErrorToast, InfoToast, SuccessToast, ToastProps } from 'react-native-toast-message';
 import { useTheme } from 'styled-components/native';
 import { Theme } from './';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 type ToastConfigStyle = {
-    style?: StyleProp<ViewStyle>;
+	style?: StyleProp<ViewStyle>;
 };
 
 interface ThemedProps {
-    theme: Theme;
+	theme: Theme;
 }
 
 const StyledBaseToast = styled(BaseToast)<ThemedProps>`
-    background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
-    border-left-color: ${(props: ThemedProps): string => props.theme.colors.border};
+	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	border-left-color: ${(props: ThemedProps): string => props.theme.colors.border};
 `;
 
 const StyledErrorToast = styled(ErrorToast)<ThemedProps>`
-    background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
-    border-left-color: #dc2626;
+	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	border-left-color: #dc2626;
 `;
 
 const StyledSuccessToast = styled(SuccessToast)<ThemedProps>`
-    background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
-    border-left-color: #16a34a;
+	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	border-left-color: #16a34a;
 `;
 
 const StyledInfoToast = styled(InfoToast)<ThemedProps>`
-    background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
-    border-left-color: #2563eb;
+	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	border-left-color: #2563eb;
 `;
 
 interface ToastComponentProps extends ToastProps {
-    contentContainerStyle?: StyleProp<ViewStyle>;
-    text1Style?: StyleProp<TextStyle>;
-    text2Style?: StyleProp<TextStyle>;
-    style?: StyleProp<ViewStyle>;
+	contentContainerStyle?: StyleProp<ViewStyle>;
+	text1Style?: StyleProp<TextStyle>;
+	text2Style?: StyleProp<TextStyle>;
+	style?: StyleProp<ViewStyle>;
 }
 
 const createThemedToast = (
 	ToastComponent: React.ComponentType<ToastComponentProps>
 ): React.FC<ToastComponentProps> => {
 	return React.memo((props: ToastComponentProps): React.ReactElement => {
+		const insets = useSafeAreaInsets();
 		const theme = useTheme() as Theme;
 		const styles = useMemo(() => StyleSheet.create({
 			// eslint-disable-next-line react-native/no-unused-styles
@@ -62,7 +64,14 @@ const createThemedToast = (
 			contentContainer: {
 				paddingHorizontal: 15,
 			},
-		}), [theme.colors.text, theme.colors.sessionText]);
+			// eslint-disable-next-line react-native/no-unused-styles
+			toastContainer: {
+				marginTop: Platform.select({
+					ios: insets.top - 50,
+					android: insets.top,
+				}),
+			},
+		}), [theme.colors.text, theme.colors.sessionText, insets]);
 
 		return (
 			<ToastComponent
@@ -70,6 +79,7 @@ const createThemedToast = (
 				contentContainerStyle={styles.contentContainer}
 				text1Style={styles.text1}
 				text2Style={styles.text2}
+				style={[styles.toastContainer, props.style]}
 			/>
 		);
 	});

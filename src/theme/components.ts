@@ -26,6 +26,7 @@ import {
 } from '../components/LinearGradient.tsx';
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
 import { SafeAreaView as _SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
 
 interface ActionSheetContainerProps {
   backgroundColor?: string;
@@ -94,6 +95,11 @@ export const NavView = styled.View`
 `;
 
 export const SafeAreaView = styled(_SafeAreaView)`
+  flex: 1;
+  background-color: ${(props): string => props.theme.colors.background};
+`;
+
+export const SafeAreaProvider = styled(_SafeAreaProvider)`
   flex: 1;
   background-color: ${(props): string => props.theme.colors.background};
 `;

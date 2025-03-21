@@ -142,14 +142,17 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 			<PubkyRingHeader leftButton={leftButton()} rightButton={rightButton()} />
 
 			<View style={styles.content}>
-				<Card style={styles.section}>
-					<ActionButton onPress={handleThemePress} style={styles.themeButton}>
-						<Text style={styles.settingTitle}>Theme</Text>
-						<SessionText style={styles.themeValue}>
-							{themeDisplayText}
-						</SessionText>
-					</ActionButton>
-				</Card>
+				{/**
+				 TODO: Adjust light-mode gradient colors.
+				 <Card style={styles.section}>
+				 <ActionButton onPress={handleThemePress} style={styles.themeButton}>
+				 <Text style={styles.settingTitle}>Theme</Text>
+				 <SessionText style={styles.themeValue}>
+				 {themeDisplayText}
+				 </SessionText>
+				 </ActionButton>
+				 </Card>
+				 **/}
 
 				<Card style={styles.section}>
 					<ActionButton

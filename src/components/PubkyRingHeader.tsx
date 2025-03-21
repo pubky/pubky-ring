@@ -18,7 +18,8 @@ const LogoButton = memo(({ onLongPress, onPress }: {
 }) => (
 	<TouchableOpacity
 		activeOpacity={1}
-		onLongPress={onLongPress}
+		// TODO: Adjust light-mode gradient colors.
+		//onLongPress={onLongPress}
 		onPress={onPress}
 		style={styles.logoWrapper}
 	>

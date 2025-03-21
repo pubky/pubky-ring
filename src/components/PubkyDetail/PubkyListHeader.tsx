@@ -118,19 +118,19 @@ export const PubkyListHeader = memo(({
 							<Text style={styles.pubkyText}>{pubkyUri}</Text>
 						</ActionButton>
 					</Card>
-					<View style={styles.authorizeButtonContainer}>
-						<AuthorizeButton
-							style={styles.authorizeButton}
-							onPressIn={handleOnQRPress}
-						>
+					<AuthorizeButton
+						style={styles.authorizeButton}
+						onPressIn={handleOnQRPress}
+					>
+						<View style={styles.row}>
 							{isQRLoading ? (<ActivityIndicator size="small" />) : (
 								<>
 									{pubkyData.signedUp ? <QrCode size={16} /> : null}
 									<Text style={styles.buttonText}>{pubkyData.signedUp ? 'Authorize' : 'Setup'}</Text>
 								</>
 							)}
-						</AuthorizeButton>
-					</View>
+						</View>
+					</AuthorizeButton>
 				</View>
 			</LinearGradient>
 
@@ -177,7 +177,6 @@ const styles = StyleSheet.create({
 		paddingBottom: 16,
 	},
 	authorizeButtonContainer: {
-		backgroundColor: 'trasparent',
 	},
 	authorizeButton: {
 		width: '100%',
@@ -190,6 +189,13 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		alignSelf: 'center',
 		alignContent: 'center',
+		justifyContent: 'center',
+	},
+	row: {
+		flex: 1,
+		backgroundColor: 'transparent',
+		flexDirection: 'row',
+		alignItems: 'center',
 		justifyContent: 'center',
 	},
 	actionButtonRow: {

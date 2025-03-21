@@ -1,5 +1,5 @@
-import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
-import { Alert, Dimensions, Image, StyleSheet } from 'react-native';
+import React, { JSX, memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Dimensions, Image, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -39,7 +39,22 @@ interface Capability {
 
 const { height } = Dimensions.get('window');
 const isSmallScreen = height < 700;
-const toastStyle = { top: isSmallScreen ? -120 : -140 };
+const toastStyle = {
+	top: Platform.select({
+		ios: isSmallScreen ? -9 : -50,
+		android: isSmallScreen ? -9 : -50,
+	}),
+};
+
+const CapabilitiesList = memo(({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
+	return (
+		<>
+			{capabilities.map((capability, index) => (
+				<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
+			))}
+		</>
+	);
+});
 
 const Permission = memo(({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
 	const hasReadPermission = capability.permission.includes('r');
@@ -170,6 +185,10 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		}
 	}, [isAuthorized]);
 
+	const authDetailCapabilities = useMemo(() => {
+		return authDetails?.capabilities ?? [];
+	}, [authDetails?.capabilities]);
+
 	return (
 		<View style={styles.container}>
 			<ActionSheetContainer
@@ -197,9 +216,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 
 					<View style={styles.permissionsSection}>
 						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
-						{authDetails.capabilities.map((capability, index) => (
-							<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
-						))}
+						<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
 					</View>
 
 					{!isSmallScreen && (

@@ -7,6 +7,7 @@ import {
 	SessionInfo,
 	getSignupToken as _getSignupToken,
 	republishHomeserver as _republishHomeserver,
+	getHomeserver,
 } from '@synonymdev/react-native-pubky';
 import {
 	setKeychainValue,
@@ -123,13 +124,19 @@ export const importPubky = async (
 			return err('Failed to get public key from secret key');
 		}
 		const pubky = pubkyRes.value.public_key;
-		const homeserver = defaultPubkyState.homeserver;
+		let homeserver = defaultPubkyState.homeserver;
+		const getHomeserverRes = await getHomeserver(pubky);
+		if (getHomeserverRes.isOk() && getHomeserverRes.value) {
+			homeserver = getHomeserverRes.value;
+		}
 		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then((res) => {
 			if (res.isErr()) {
 				dispatch(setSignedUp({ pubky, signedUp: false }));
 			}
 		});
-		return await savePubky(secretKey, pubky, dispatch);
+		const savePubkyRes = await savePubky(secretKey, pubky, dispatch);
+		dispatch(setHomeserver({ pubky, homeserver }));
+		return savePubkyRes;
 	} catch (error) {
 		console.error('Error saving pubky:', error);
 		return err('Error saving pubky');

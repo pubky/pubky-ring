@@ -1914,10 +1914,10 @@
   dependencies:
     "@sinonjs/commons" "^3.0.0"
 
-"@synonymdev/react-native-pubky@0.10.1":
-  version "0.10.1"
-  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.10.1.tgz#7cd00ff765f5751114c6ed8c5f19bdfea2f56976"
-  integrity sha512-YGw+zMgps6qX0dQPL6uPan9vEKsd+xQDCGJvpe1ZtM6NhD8JZUS+SbUWPbNvPU89hRACnyMy3BjqBSrp3coX/w==
+"@synonymdev/react-native-pubky@0.10.2":
+  version "0.10.2"
+  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.10.2.tgz#b5a8be0c91e1075491d752937844b9057de5ed06"
+  integrity sha512-YBeQan50HJ5edlwEaKQ2BEx0psxzxPRWH1SvavPTgazQIHaTav3bs6/+kqKHGfoTtaRcBExybuVzFdCvjMqlog==
   dependencies:
     "@synonymdev/result" "^0.0.2"
 

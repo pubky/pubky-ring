@@ -96,7 +96,7 @@ const textInputTitleText: {
 } = {
 	name: 'Pubky name (label)',
 	homeserver: 'Homeserver',
-	signuptoken: 'Signup token (optional)',
+	signuptoken: 'Invite code (optional)',
 };
 
 const EditPubky = ({ payload }: {
@@ -244,14 +244,14 @@ const EditPubky = ({ payload }: {
 							});
 							if (signinRes.isErr()) {
 								updateName(); // No need to prevent updating the name if we can.
-								setError('Unable to sign up with the homeserver. Please update the homeserver and/or signup token and try again.');
+								setError('Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.');
 								showCheckAnimation({ success: false });
 								return;
 							}
 							signedIn = true;
 						} else {
 							updateName(); // No need to prevent updating the name if we can.
-							setError('Unable to sign up with the homeserver. Please update the homeserver and/or signup token and try again.');
+							setError('Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.');
 							showCheckAnimation({ success: false });
 							return;
 						}
@@ -379,7 +379,7 @@ const EditPubky = ({ payload }: {
 			id: 'signuptoken' as const,
 			value: signupToken,
 			onChange: setSignupToken,
-			placeholder: 'Signup Token (Optional)',
+			placeholder: 'Invite Code (Optional)',
 			error: '',
 			autoFocus: false,
 		},

@@ -1,4 +1,4 @@
-package com.pubkyring
+package to.pubkyring
 
 import android.app.Application
 import com.facebook.react.PackageList

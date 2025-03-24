@@ -1,4 +1,4 @@
-package com.pubkyring
+package to.pubkyring
 
 import android.os.Bundle
 import com.facebook.react.ReactActivity

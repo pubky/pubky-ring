@@ -25,7 +25,7 @@ import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import { getAllPubkys, getDeepLink } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getDeepLink, hasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
 import {
@@ -71,7 +71,7 @@ const HomeScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
 	const deepLink = useSelector(getDeepLink);
-	const hasPubkys = useMemo(() => Object.keys(pubkys).length > 0, [pubkys]);
+	const _hasPubkys = useSelector(hasPubkys);
 
 	useEffect(() => {
 		if (deepLink) {
@@ -214,7 +214,7 @@ const HomeScreen = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
-			{hasPubkys ? (
+			{_hasPubkys ? (
 				<DraggableFlatList
 					data={pubkyArray}
 					onDragEnd={handleDragEnd}

@@ -22,6 +22,10 @@ export const getAllPubkys = (state: RootState): { [key: string]: Pubky } => {
 	return state.pubky.pubkys;
 };
 
+export const hasPubkys = (state: RootState): boolean => {
+	return Object.keys(state.pubky.pubkys).length > 0;
+};
+
 export const getDeepLink = (state: RootState): string => {
 	return state.pubky.deepLink;
 };

@@ -4,6 +4,7 @@ export interface SettingsState {
     autoAuth: boolean;
     navigationAnimation: ENavigationAnimation;
     isOnline: boolean;
+    signedTermsOfUse: boolean;
 }
 
 export enum ETheme {

@@ -20,6 +20,7 @@ import {
 	resetSettings,
 	updateAutoAuth,
 	updateNavigationAnimation,
+	updateShowOnboarding,
 } from '../store/slices/settingsSlice.ts';
 import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
@@ -121,11 +122,12 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 	}, [dispatch, navigation]);
 
 	const handleShowOnboarding = useCallback(() => {
+		dispatch(updateShowOnboarding({ showOnboarding: true }));
 		navigation.reset({
 			index: 0,
-			routes: [{ name: 'Onboarding' }],
+			routes: [{ name: 'TermsOfUse' }],
 		});
-	}, [navigation]);
+	}, [dispatch, navigation]);
 
 	const handleAutoAuthToggle = useCallback(() => {
 		dispatch(updateAutoAuth({ autoAuth: !enableAutoAuth }));

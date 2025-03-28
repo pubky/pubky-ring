@@ -9,6 +9,7 @@ export type RootStackParamList = {
   Onboarding: undefined;
   ConfirmPubky: undefined;
   Home: undefined;
+  About: undefined;
   Settings: undefined;
   PubkyDetail: {
     pubky: string;

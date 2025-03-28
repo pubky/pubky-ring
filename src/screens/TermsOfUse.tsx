@@ -8,7 +8,7 @@ import {
 } from '../theme/components.ts';
 import LinearGradient from 'react-native-linear-gradient';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
-import { ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
+import { ONBOARDING_KEY_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types.ts';
@@ -18,13 +18,6 @@ import { hasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { getShowOnboarding } from '../store/selectors/settingsSelectors.ts';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'TermsOfUse'>;
-
-const onPrivacyFormPress = (): void => {
-	try {
-		Linking.openURL('https://docs.google.com/document/d/1nVT03MDSY635xDyVP41leIroR1iwmTDr/edit#heading=h.rqj4bs5k3v1l').then(() => setPrivacyChecked(!privacyChecked));
-	} catch {}
-};
-
 
 const TermsOfUse = (): React.ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
@@ -43,6 +36,13 @@ const TermsOfUse = (): React.ReactElement => {
 			navigation.replace(showOnboarding ? 'Onboarding' : (_hasPubkys ? 'Home' : 'Onboarding'));
 		}
 	}, [_hasPubkys, canContinue, dispatch, navigation, showOnboarding]);
+
+	const onPrivacyFormPress = (): void => {
+		try {
+			Linking.openURL(TERMS_OF_USE).then(() => setPrivacyChecked(!privacyChecked));
+		} catch {}
+	};
+
 
 	return (
 		<View style={styles.container}>

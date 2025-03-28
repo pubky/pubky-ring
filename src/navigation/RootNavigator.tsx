@@ -16,6 +16,7 @@ import {
 } from '../store/selectors/settingsSelectors.ts';
 import SettingsScreen from '../screens/SettingsScreen.tsx';
 import TermsOfUse from '../screens/TermsOfUse.tsx';
+import About from '../screens/About.tsx';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -68,6 +69,14 @@ const RootNavigator = (): ReactElement => {
 						title: 'Pubky Ring',
 						gestureEnabled: false,
 						headerBackVisible: false,
+					}}
+				/>
+				<Stack.Screen
+					name="About"
+					component={About}
+					options={{
+						title: 'About',
+						gestureEnabled: true,
 					}}
 				/>
 				<Stack.Screen

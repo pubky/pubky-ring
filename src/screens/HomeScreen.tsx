@@ -19,7 +19,7 @@ import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
 import { showEditPubkyPrompt, showQRScanner, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
-import { View, Plus, TouchableOpacity } from '../theme/components';
+import { View, Plus, TouchableOpacity, CircleAlert, NavButton } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
@@ -35,6 +35,7 @@ import {
 import PubkyRingLogo from '../images/pubky-ring.png';
 // @ts-ignore
 import DeviceMobileLogo from '../images/device-mobile.png';
+import { PUBKY_APP_URL } from '../utils/constants.ts';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -201,8 +202,7 @@ const HomeScreen = (): ReactElement => {
 
 	const onFooterPress = useCallback( () => {
 		try {
-			const url = 'https://beta.pubky.app';
-			Linking.openURL(url).then();
+			Linking.openURL(PUBKY_APP_URL).then();
 		} catch {
 			showToast({
 				type: 'error',
@@ -212,6 +212,24 @@ const HomeScreen = (): ReactElement => {
 		}
 	}, []);
 
+	const LeftButton = useMemo(() => (
+		<NavButton
+			style={styles.navButton}
+			onPressIn={() => navigation.navigate('About')}
+			hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+		>
+			<CircleAlert size={24} />
+		</NavButton>
+	), [navigation]);
+
+	const RightButton = useMemo(() => (
+		<NavButton style={styles.rightNavButton} />
+	), []);
+
+	const HeaderComponent = useMemo(() => (
+		<PubkyRingHeader leftButton={LeftButton} rightButton={RightButton} />
+	), [LeftButton, RightButton]);
+
 	return (
 		<View style={styles.container}>
 			{_hasPubkys ? (
@@ -220,7 +238,7 @@ const HomeScreen = (): ReactElement => {
 					onDragEnd={handleDragEnd}
 					keyExtractor={(item, index) => `${item.key}${index}`}
 					renderItem={renderItem}
-					ListHeaderComponent={PubkyRingHeader}
+					ListHeaderComponent={HeaderComponent}
 					ListFooterComponent={ListFooter}
 					contentContainerStyle={styles.listContent}
 					showsVerticalScrollIndicator={false}
@@ -345,6 +363,23 @@ const styles = StyleSheet.create({
 		resizeMode: 'contain',
 		backgroundColor: 'black',
 		marginRight: -28,
+	},
+	navButton: {
+		zIndex: 1,
+		height: 40,
+		width: 40,
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'center',
+		right: -5,
+	},
+	rightNavButton: {
+		width: 40,
+		height: 40,
+		justifyContent: 'center',
+		alignItems: 'center',
+		alignSelf: 'center',
+		backgroundColor: 'transparent',
 	},
 });
 

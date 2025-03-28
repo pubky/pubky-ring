@@ -5,6 +5,7 @@ import {
 	Share as _Share,
 	ArrowLeft as _ArrowLeft,
 	ChevronLeft as _ChevronLeft,
+	CircleAlert as _CircleAlert,
 	Eye as _Eye,
 	EyeOff as _EyeOff,
 	Plus as _Plus,
@@ -203,6 +204,10 @@ export const Save = styled(_Save)`
 `;
 
 export const ArrowLeft = styled(_ArrowLeft)`
+  color: ${(props): string => props.theme.colors.text};
+`;
+
+export const CircleAlert = styled(_CircleAlert)`
   color: ${(props): string => props.theme.colors.text};
 `;
 

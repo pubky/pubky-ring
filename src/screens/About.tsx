@@ -1,0 +1,232 @@
+import React, { memo, ReactElement, useMemo } from 'react';
+import { Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
+import {
+	View,
+	Text,
+	NavButton,
+	ArrowLeft,
+	ArrowRight,
+	CardView,
+	ScrollView,
+	LinearGradient,
+} from '../theme/components.ts';
+import PubkyRingHeader from '../components/PubkyRingHeader';
+import { version } from '../../package.json';
+import PubkyRingLogo from '../images/pubky-ring.png';
+import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
+import { shareData, showToast } from '../utils/helpers.ts';
+import { copyToClipboard } from '../utils/clipboard.ts';
+
+type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
+
+const onFooterPress = (): void => {
+	try {
+		Linking.openURL(PUBKY_APP_URL).then();
+	} catch {
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: 'Unable to open URL',
+		});
+	}
+};
+
+const onSharePress = (): void => {
+	shareData(PUBKY_APP_URL).then();
+};
+
+const onLegalPress = (): void => {
+	try {
+		Linking.openURL(TERMS_OF_USE).then();
+	} catch {}
+};
+
+const onCopyPress = (): void => {
+	copyToClipboard(version);
+	showToast({
+		type: 'info',
+		title: 'Copied version number to clipboard',
+		description: `Version: ${version}`,
+	});
+};
+
+const About = ({ navigation }: Props): ReactElement => {
+	const LeftButton = useMemo(() => (
+		<NavButton
+			style={styles.navButton}
+			onPressIn={navigation.goBack}
+			hitSlop={{ top: 20,
+				bottom: 20,
+				left: 20,
+				right: 20 }}
+		>
+			<ArrowLeft size={24} />
+		</NavButton>
+	), [navigation]);
+
+	const RightButton = useMemo(() => (
+		<NavButton style={styles.rightNavButton} />
+	),[]);
+
+	return (
+		<View style={styles.container}>
+			<PubkyRingHeader
+				leftButton={LeftButton}
+				rightButton={RightButton}
+			/>
+
+			<ScrollView style={styles.content}>
+				<Text style={styles.title}>Keychain for</Text>
+				<Text style={styles.lowerTitle}>the next web.</Text>
+				<Text style={styles.subtitle}>Pubky Ring enables you to securely authorize services and manage your pubkys, devices, and sessions.</Text>
+				<Text style={styles.subtitle}>Pubky Ring was crafted by Synonym Software Ltd. You are your keys.</Text>
+
+				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
+					<Text style={styles.rowTitle}>Legal</Text>
+					<ArrowRight />
+				</TouchableOpacity>
+
+				<CardView style={styles.divider} />
+
+				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
+					<Text style={styles.rowTitle}>Share</Text>
+					<ArrowRight />
+				</TouchableOpacity>
+
+				<CardView style={styles.divider} />
+
+				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
+					<Text style={styles.rowTitle}>Version</Text>
+					<Text style={styles.rowTitle}>{version}</Text>
+				</TouchableOpacity>
+
+				<CardView style={styles.divider} />
+
+				<TouchableOpacity activeOpacity={0.8} onPress={onFooterPress}>
+					<LinearGradient style={styles.footer}>
+						<View style={styles.footerContent}>
+							<Text style={styles.footerText1}>Discover the next web</Text>
+							<Text style={styles.footerText2}>Your keys, your content, your rules.</Text>
+							<View style={styles.row}>
+								<Image
+									source={PubkyRingLogo}
+									style={styles.pubkyLogo}
+								/>
+								<ArrowRight />
+							</View>
+						</View>
+					</LinearGradient>
+				</TouchableOpacity>
+
+			</ScrollView>
+		</View>
+	);
+};
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
+	content: {
+		padding: 16,
+	},
+	title: {
+		fontSize: 48,
+		fontWeight: 700,
+		lineHeight: 48,
+		textAlign: 'left',
+	},
+	lowerTitle: {
+		fontSize: 48,
+		fontWeight: 700,
+		lineHeight: 48,
+		textAlign: 'left',
+		marginBottom: 16,
+	},
+	subtitle: {
+		fontSize: 17,
+		fontWeight: 400,
+		lineHeight: 22,
+		letterSpacing: 0.4,
+		marginBottom: 16,
+		opacity: 0.8,
+	},
+	row: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		width: '100%',
+		height: 60,
+		backgroundColor: 'transparent',
+	},
+	rowTitle: {
+		fontSize: 17,
+		fontWeight: 400,
+		lineHeight: 22,
+		letterSpacing: 0.4,
+	},
+	divider: {
+		height: 1,
+		width: '100%',
+		marginVertical: 5,
+	},
+	footer: {
+		marginTop: 40,
+		borderRadius: 16,
+		alignSelf: 'center',
+		shadowColor: '#000',
+		shadowOffset: {
+			width: 0,
+			height: 1,
+		},
+		shadowOpacity: 0.1,
+		shadowRadius: 2,
+		elevation: 2,
+		marginBottom: 20,
+		marginHorizontal: 24,
+		width: '100%',
+	},
+	footerContent: {
+		margin: 25,
+		backgroundColor: 'transparent',
+	},
+	footerText1: {
+		fontSize: 26,
+		fontWeight: 300,
+		lineHeight: 26,
+		letterSpacing: 0,
+	},
+	footerText2: {
+		fontSize: 15,
+		fontWeight: 600,
+		lineHeight: 20,
+		letterSpacing: 0.4,
+		marginBottom: 16,
+	},
+	pubkyLogo: {
+		height: 48,
+		resizeMode: 'contain',
+		backgroundColor: 'transparent',
+	},
+
+	rightNavButton: {
+		width: 40,
+		height: 40,
+		justifyContent: 'center',
+		alignItems: 'center',
+		alignSelf: 'center',
+		backgroundColor: 'transparent',
+	},
+	navButton: {
+		zIndex: 1,
+		height: 40,
+		width: 40,
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+});
+
+export default memo(About);

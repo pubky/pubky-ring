@@ -10,4 +10,5 @@ export const initialState: SettingsState = {
 	autoAuth: false,
 	isOnline: true,
 	navigationAnimation: ENavigationAnimation.slideFromRight,
+	signedTermsOfUse: false,
 };

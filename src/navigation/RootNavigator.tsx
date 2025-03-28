@@ -12,18 +12,21 @@ import { useSelector } from 'react-redux';
 import {
 	getNavigationAnimation,
 	getShowOnboarding,
+	getSignedTermsOfUse,
 } from '../store/selectors/settingsSelectors.ts';
 import SettingsScreen from '../screens/SettingsScreen.tsx';
+import TermsOfUse from '../screens/TermsOfUse.tsx';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = (): ReactElement => {
 	const showOnboarding = useSelector(getShowOnboarding);
+	const signedTermsOfUse = useSelector(getSignedTermsOfUse);
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const theme = useTheme();
 	const initialRoute = useMemo(() => {
-		return showOnboarding ? 'Onboarding' : 'Home';
-	}, [showOnboarding]);
+		return !signedTermsOfUse ? 'TermsOfUse' : showOnboarding ? 'Onboarding' : 'Home';
+	}, [showOnboarding, signedTermsOfUse]);
 
 	return (
 		<NavigationContainer theme={{ ...DefaultTheme, ...theme }}>
@@ -34,6 +37,14 @@ const RootNavigator = (): ReactElement => {
 					animation: navigationAnimation,
 					animationDuration: 200,
 				}}>
+				<Stack.Screen
+					name="TermsOfUse"
+					component={TermsOfUse}
+					options={{
+						title: 'Terms of Use',
+						gestureEnabled: false,
+					}}
+				/>
 				<Stack.Screen
 					name="Onboarding"
 					component={OnboardingScreen}

@@ -20,7 +20,7 @@ const persistConfig = {
 	storage: reduxStorage,
 	whitelist: ['pubky', 'settings'],
 	migrate: createMigrate(migrations),
-	version: 1,
+	version: 2,
 };
 
 const rootReducer = combineReducers({

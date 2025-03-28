@@ -23,3 +23,7 @@ export const getNavigationAnimation = (state: RootState): ENavigationAnimation =
 export const getIsOnline = (state: RootState): boolean => {
 	return state?.settings?.isOnline ?? true;
 };
+
+export const getSignedTermsOfUse = (state: RootState): boolean => {
+	return state?.settings?.signedTermsOfUse ?? false;
+};

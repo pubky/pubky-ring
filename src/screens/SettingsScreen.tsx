@@ -223,8 +223,8 @@ const styles = StyleSheet.create({
 		padding: 16,
 	},
 	rightNavButton: {
-		width: 32,
-		height: 32,
+		width: 40,
+		height: 40,
 		justifyContent: 'center',
 		alignItems: 'center',
 		alignSelf: 'center',

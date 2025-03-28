@@ -1,5 +1,15 @@
 # Pubky Ring
 
+### Your keychain for the Pubky ecosystem. Manage your pubkys, authorize services, and stay in control—no accounts, no passwords.
+
+Pubky Ring is the key manager for your identity in the Pubky ecosystem. It lets you securely manage your pubkys—the public keys that power your presence across decentralized apps.
+
+# What You Can Do
+- Authorize or revoke access to services
+- Organize and sync your pubkys across devices
+- View and control active sessions
+- Stay fully self-custodial, with no accounts or tracking
+
 # Getting Started
 
 >**Note**: Make sure you have completed the [React Native - Environment Setup](https://reactnative.dev/docs/environment-setup) instructions till "Creating a new application" step, before proceeding.

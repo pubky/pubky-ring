@@ -112,7 +112,7 @@ const EditPubky = ({ payload }: {
 	const [loading, setLoading] = useState(false);
 	const [newPubkyName, setNewPubkyName] = useState(storedPubkyData?.name || '');
 	const [homeServer, setHomeServer] = useState(storedPubkyData?.homeserver || DEFAULT_HOMESERVER || '');
-	const [signupToken, setSignupToken] = useState(storedPubkyData?.signupToken || '');
+	const [signupToken, setSignupToken] = useState('');
 	const pubkyNameLength = useMemo(() => newPubkyName.length, [newPubkyName.length]);
 	const [nameError, setNameError] = useState<string>(pubkyNameLength > 20 ? `${MAX_NAME_LENGTH - pubkyNameLength} / ${MAX_NAME_LENGTH}` : '');
 	const dispatch = useDispatch();
@@ -343,7 +343,7 @@ const EditPubky = ({ payload }: {
 			setError('');
 			setHomeServer(storedPubkyData?.homeserver ?? '');
 			setNewPubkyName(storedPubkyData?.name ?? '');
-			setSignupToken(storedPubkyData?.signupToken ?? '');
+			setSignupToken('');
 		} catch (e) {
 			console.log('Reset error:', e);
 		}

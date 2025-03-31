@@ -1,5 +1,5 @@
 import React, { JSX, memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Dimensions, Image, Platform, StyleSheet } from 'react-native';
+import { Alert, Dimensions, Image, Linking, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -15,7 +15,7 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { showToast } from '../utils/helpers.ts';
+import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withSpring, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
@@ -23,13 +23,14 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
-import { AUTHORIZE_KEY_GRADIENT } from '../utils/constants.ts';
+import { AUTHORIZE_KEY_GRADIENT, PUBKY_APP_URL } from '../utils/constants.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
 	authUrl: string;
 	authDetails: PubkyAuthDetails;
 	onComplete: () => void;
+	deepLink?: boolean;
 }
 
 interface Capability {
@@ -81,6 +82,7 @@ const FADE_DURATION = 200;
 const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete } = payload;
+	const deepLink = payload?.deepLink;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
@@ -120,6 +122,10 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		}
 	}, [authorizing, checkOpacity, checkScale, isAuthorized]);
 
+	const handleClose = useCallback(() => {
+		SheetManager.hide('confirm-auth');
+	}, []);
+
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
 		try {
@@ -138,6 +144,20 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			}
 			setIsAuthorized(true);
 			onComplete?.();
+			if (deepLink) {
+				if (Platform.OS === 'android') {
+					await sleep(FADE_DURATION + 50);
+					handleClose();
+					Linking.openURL(PUBKY_APP_URL);
+				} else {
+					showToast({
+						type: 'info',
+						title: 'Successfully Signed In!',
+						description: 'Please navigate back to your browser.',
+						visibilityTime: 8000,
+					});
+				}
+			}
 		} catch (e: unknown) {
 			const error = e as Error;
 			const errorMsg = error.message === 'Authentication request timed out'
@@ -158,11 +178,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, dispatch, onComplete, pubky]);
-
-	const handleClose = useCallback(() => {
-		SheetManager.hide('confirm-auth');
-	}, []);
+	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky]);
 
 	// eslint-disable-next-line react/no-unused-prop-types
 	const GradientView = useCallback(({ children }: { children: React.ReactNode }): JSX.Element => {

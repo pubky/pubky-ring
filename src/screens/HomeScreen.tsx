@@ -17,7 +17,7 @@ import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { showEditPubkyPrompt, showQRScanner, showToast } from '../utils/helpers';
+import { showEditPubkyPrompt, showQRScanner, showToast, sleep } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus, TouchableOpacity, CircleAlert, NavButton } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
@@ -74,8 +74,10 @@ const HomeScreen = (): ReactElement => {
 	const deepLink = useSelector(getDeepLink);
 	const _hasPubkys = useSelector(hasPubkys);
 
-	useEffect(() => {
+	const handleDeepLink = useCallback(async () => {
 		if (deepLink) {
+			SheetManager.hideAll();
+			await sleep(150);
 			SheetManager.show('select-pubky', {
 				payload: {
 					deepLink,
@@ -86,6 +88,10 @@ const HomeScreen = (): ReactElement => {
 			});
 		}
 	}, [deepLink]);
+
+	useEffect(() => {
+		handleDeepLink().then();
+	}, [handleDeepLink]);
 
 	const handlePubkyPress = useCallback(
 		(pubky: string, index: number) => {

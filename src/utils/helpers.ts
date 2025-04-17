@@ -15,7 +15,7 @@ import {
 import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
-import { Platform, Share } from 'react-native';
+import { Linking, Platform, Share } from 'react-native';
 import { getAutoAuthFromStore, getIsOnline, getStore } from './store-helpers.ts';
 import { getKeychainValue } from './keychain.ts';
 import { readFromClipboard } from './clipboard.ts';
@@ -24,15 +24,18 @@ import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { Pubky } from '../types/pubky.ts';
+import { PUBKY_APP_URL } from './constants.ts';
 
 export const handleScannedData = async ({
 	pubky,
 	data,
 	dispatch,
+	deepLink = false,
 }: {
 	pubky: string,
 	data: string,
 	dispatch: Dispatch
+	deepLink?: boolean;
 }): Promise<Result<string>> => {
 	try {
 		const authResult = await parseAuthUrl(data);
@@ -43,7 +46,7 @@ export const handleScannedData = async ({
 				if (Platform.OS === 'ios') {
 					SheetManager.hide('camera');
 				}
-				return await handleAuth(pubky, data);
+				return await handleAuth(pubky, data, deepLink);
 			}
 
 			// Auto-auth flow
@@ -66,6 +69,19 @@ export const handleScannedData = async ({
 					description: res.error.message,
 				});
 			}
+			if (deepLink && res.isOk()) {
+				if (Platform.OS === 'android') {
+					await sleep(250);
+					Linking.openURL(PUBKY_APP_URL);
+				} else {
+					showToast({
+						type: 'info',
+						title: 'Successfully Signed In!',
+						description: 'Please navigate back to your browser',
+						visibilityTime: 8000,
+					});
+				}
+			}
 			return res;
 		}
 
@@ -79,6 +95,19 @@ export const handleScannedData = async ({
 				title: 'Success',
 				description: `Signed in to ${data} successfully`,
 			});
+			if (deepLink && signInRes.isOk()) {
+				if (Platform.OS === 'android') {
+					await sleep(250);
+					Linking.openURL(PUBKY_APP_URL);
+				} else {
+					showToast({
+						type: 'info',
+						title: 'Successfully Signed In!',
+						description: 'Please navigate back to your browser.',
+						visibilityTime: 8000,
+					});
+				}
+			}
 			return ok('sign-in');
 		}
 		const description = authResult?.error?.message ?? 'Failed to parse QR code data';
@@ -99,7 +128,7 @@ export const handleScannedData = async ({
 	}
 };
 
-export const handleAuth = async (pubky: string, authUrl: string): Promise<Result<string>> => {
+export const handleAuth = async (pubky: string, authUrl: string, deepLink?: boolean): Promise<Result<string>> => {
 	try {
 		const authDetails = await parseAuthUrl(authUrl);
 		if (authDetails.isErr()) {
@@ -121,6 +150,7 @@ export const handleAuth = async (pubky: string, authUrl: string): Promise<Result
 					authDetails: authDetails.value,
 					onComplete: async (): Promise<void> => {
 					},
+					deepLink,
 				},
 				onClose: () => {
 					SheetManager.hide('confirm-auth');
@@ -442,6 +472,7 @@ export const handleDeepLink = ({
 		pubky,
 		data: url,
 		dispatch,
+		deepLink: true,
 	});
 	dispatch(setDeepLink('')); // Reset deep link once used.
 	return '';
@@ -466,5 +497,16 @@ export const showEditPubkyPrompt = ({
 			data,
 		},
 		onClose: () => SheetManager.hide('edit-pubky'),
+	});
+};
+
+/**
+ * Pauses execution of a function.
+ * @param {number} ms The time to wait in milliseconds.
+ * @returns {Promise<void>}
+ */
+export const sleep = (ms = 1000): Promise<void> => {
+	return new Promise((resolve) => {
+		setTimeout(resolve, ms);
 	});
 };

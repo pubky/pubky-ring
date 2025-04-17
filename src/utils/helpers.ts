@@ -16,7 +16,7 @@ import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Platform, Share } from 'react-native';
-import { getAutoAuthFromStore, getIsOnline } from './store-helpers.ts';
+import { getAutoAuthFromStore, getIsOnline, getStore } from './store-helpers.ts';
 import { getKeychainValue } from './keychain.ts';
 import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
@@ -250,7 +250,15 @@ export const showBackupPrompt = ({
 						return;
 					}
 
-					const fileName = generateBackupFileName();
+					let pubkyName;
+					try {
+						const name = getStore().pubky.pubkys[pubky]?.name;
+						if (typeof name === 'string' && name.trim()) {
+							pubkyName = name.toLowerCase().replace(/\s+/g, '-') + '-backup';
+						}
+					} catch {}
+
+					const fileName = generateBackupFileName(pubkyName);
 					const backupRes = await backupPubky(createRecoveryFileRes.value, fileName);
 
 					if (backupRes.isErr()) {

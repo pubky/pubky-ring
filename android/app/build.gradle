@@ -79,10 +79,10 @@ android {
 
     namespace "to.pubkyring"
     defaultConfig {
-        applicationId "to.pubkyring"
+        applicationId "to.pubky.ring"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
+        versionCode 1
         versionName "1.0"
     }
 

@@ -81,7 +81,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 					>
 						<View style={styles.detailsPubkyContainer}>
 							<NavView style={styles.profileImage}>
-								<ProfileAvatar pubky={pubky} size={38} />
+								<ProfileAvatar pubky={pubky} size={60} />
 							</NavView>
 							<Text style={styles.textPubky}>pk:{pubky}</Text>
 						</View>

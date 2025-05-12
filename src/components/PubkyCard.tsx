@@ -1,14 +1,14 @@
 import { StyleSheet } from 'react-native';
 import { Card, LinearGradient, Text } from '../theme/components.ts';
-import Jdenticon from './Jdenticon.tsx';
 import React, { memo, ReactElement } from 'react';
+import ProfileAvatar from './ProfileAvatar.tsx';
 
 const PubkyCard = ({ name, publicKey }: { name?: string; publicKey: string }): ReactElement => {
 	return (
 		<LinearGradient style={styles.pubkyCard}>
 			<Card style={styles.pubkyRow}>
 				<Card style={styles.iconContainer}>
-					<Jdenticon value={publicKey} size={38} />
+					<ProfileAvatar pubky={publicKey} size={38} />
 				</Card>
 				<Card style={styles.pubkyTextContainer}>
 					{name &&

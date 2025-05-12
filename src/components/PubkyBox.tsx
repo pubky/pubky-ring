@@ -20,9 +20,9 @@ import {
 	LinearGradient,
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
-import Jdenticon from './Jdenticon.tsx';
 import { getIsOnline } from '../store/selectors/settingsSelectors.ts';
 import { showEditPubkyPrompt } from '../utils/helpers.ts';
+import ProfileAvatar from './ProfileAvatar.tsx';
 
 interface PubkyBoxProps {
 	pubky: string;
@@ -115,7 +115,7 @@ const PubkyBox = ({
 				>
 					<ForegroundView style={styles.profileImageContainer}>
 						<NavView style={styles.profileImage}>
-							<Jdenticon value={publicKey} size={38} />
+							<ProfileAvatar pubky={publicKey} size={38} />
 						</NavView>
 					</ForegroundView>
 

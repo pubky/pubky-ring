@@ -5,7 +5,6 @@ import React, {
 	useState,
 } from 'react';
 import { PixelRatio, StyleSheet } from 'react-native';
-import { SvgXml } from 'react-native-svg';
 import { copyToClipboard } from '../../utils/clipboard.ts';
 import { PubkyData } from '../../navigation/types.ts';
 import {
@@ -23,10 +22,10 @@ import {
 } from '../../theme/components.ts';
 import Button from '../Button.tsx';
 import { shareData, showEditPubkyPrompt, showToast } from '../../utils/helpers.ts';
+import ProfileAvatar from '../ProfileAvatar.tsx';
 
 interface PubkyListHeaderProps {
 	index: number;
-    svg: string;
     pubky: string;
     pubkyData: PubkyData;
     sessionsCount: number;
@@ -37,7 +36,6 @@ interface PubkyListHeaderProps {
 
 export const PubkyListHeader = memo(({
 	index,
-	svg,
 	pubky,
 	pubkyData,
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -109,7 +107,7 @@ export const PubkyListHeader = memo(({
 				<View style={styles.profileContainer}>
 					<Card style={styles.profile}>
 						<View style={styles.avatarContainer}>
-							<SvgXml xml={svg} height={86} width={86} />
+							<ProfileAvatar pubky={pubky} size={86} />
 						</View>
 
 						<Text style={styles.nameText}>{pubkyName}</Text>

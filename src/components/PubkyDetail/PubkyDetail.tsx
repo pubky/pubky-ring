@@ -1,6 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import jdenticon from 'jdenticon';
 import { Pubky, PubkySession } from '../../types/pubky.ts';
 import { deletePubky, signOutOfHomeserver } from '../../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
@@ -37,7 +36,6 @@ export const PubkyDetail = ({
 }: PubkyDetailProps): ReactElement => {
 	const { pubky, sessions } = pubkyData;
 	const publicKey = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
-	const svg = useMemo(() => jdenticon.toSvg(publicKey, 120), [publicKey]);
 	const dispatch = useDispatch();
 	const navigation = useNavigation();
 
@@ -100,7 +98,6 @@ export const PubkyDetail = ({
 	const ListHeader = useCallback(() => (
 		<PubkyListHeader
 			index={index}
-			svg={svg}
 			pubky={pubky}
 			pubkyData={pubkyData}
 			sessionsCount={sessionsLength}
@@ -108,7 +105,7 @@ export const PubkyDetail = ({
 			onDelete={handleDelete}
 			onBackup={handleBackup}
 		/>
-	), [index, svg, pubky, pubkyData, sessionsLength, handleQRPress, handleDelete, handleBackup]);
+	), [index, pubky, pubkyData, sessionsLength, handleQRPress, handleDelete, handleBackup]);
 
 	return (
 		<View style={styles.container}>

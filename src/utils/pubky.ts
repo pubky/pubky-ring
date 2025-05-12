@@ -8,6 +8,7 @@ import {
 	getSignupToken as _getSignupToken,
 	republishHomeserver as _republishHomeserver,
 	getHomeserver,
+	get,
 } from '@synonymdev/react-native-pubky';
 import {
 	setKeychainValue,
@@ -111,6 +112,38 @@ export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
 		}
 	}
 	return allKeys;
+};
+
+export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app'): Promise<Result<string>> => {
+	try {
+		const profileUrl = `pubky://${pubky}/pub/${app}/profile.json`;
+		let profile = await get(profileUrl);
+		if (profile.isErr()) {
+			return err(profile.error.message);
+		}
+		const profileData = JSON.parse(profile.value);
+
+		const imageSrc = await get(profileData.image);
+		if (imageSrc.isErr()) {
+			return err(imageSrc.error.message);
+		}
+		const imageSrcData = JSON.parse(imageSrc.value);
+
+		const image = await get(imageSrcData.src);
+		if (image.isErr()) {
+			return err(image.error.message);
+		}
+
+		if (image.value.startsWith('base64:')) {
+			// Handle binary data (image)
+			const base64Data = image.value.substring(7); // Remove "base64:" prefix
+			const dataUri = `data:image/jpeg;base64,${base64Data}`;
+			return ok(dataUri);
+		}
+		return err('Expected image data but received text');
+	} catch (e) {
+		return err(JSON.stringify(e));
+	}
 };
 
 export const importPubky = async (

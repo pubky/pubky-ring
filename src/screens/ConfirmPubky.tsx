@@ -12,33 +12,18 @@ import { RootStackParamList } from '../navigation/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { PubkyState } from '../types/pubky';
-import { JdenticonConfig } from 'jdenticon';
-import jdenticon from 'jdenticon/standalone';
-import { SvgXml } from 'react-native-svg';
 import { NavView } from '../theme/components';
 import { RadialGradient } from '../theme/components.ts';
 import {
 	ONBOARDING_KEY_RADIAL_GRADIENT,
 	ONBOARDING_PUBKY_RADIAL_GRADIENT,
 } from '../utils/constants.ts';
+import ProfileAvatar from '../components/ProfileAvatar.tsx';
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   'ConfirmPubky'
 >;
-
-const Jdenticon = ({
-	value,
-	size = 32,
-	config,
-}: {
-  value: string;
-  size?: number;
-  config?: JdenticonConfig;
-}): ReactElement => {
-	const svg = jdenticon.toSvg(value, size, config);
-	return <SvgXml xml={svg} />;
-};
 
 const ConfirmPubkyScreen = (): ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
@@ -96,7 +81,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 					>
 						<View style={styles.detailsPubkyContainer}>
 							<NavView style={styles.profileImage}>
-								<Jdenticon value={pubky} size={60} />
+								<ProfileAvatar pubky={pubky} size={38} />
 							</NavView>
 							<Text style={styles.textPubky}>pk:{pubky}</Text>
 						</View>

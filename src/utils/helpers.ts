@@ -292,6 +292,9 @@ export const showBackupPrompt = ({
 					const backupRes = await backupPubky(createRecoveryFileRes.value, fileName);
 
 					if (backupRes.isErr()) {
+						if (backupRes.error.message.includes('User canceled backup')) {
+							return;
+						}
 						showToast({
 							type: 'error',
 							title: 'Error',

@@ -15,6 +15,7 @@ import {
 	Result,
 } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
+import Share from 'react-native-share';
 import { SheetManager } from 'react-native-actions-sheet';
 import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
 const Buffer = require('buffer').Buffer;
@@ -197,35 +198,74 @@ export const showImportPrompt = ({
 };
 
 export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
+	// Ensure filename ends with .pkarr
+	const fullFilename = filename.endsWith('.pkarr')
+		? filename
+		: `${filename}.pkarr`;
+
 	try {
-		// For Android, we need storage permission
-		if (Platform.OS === 'android') {
+		if (Platform.OS === 'ios') {
+			// iOS: Use share sheet approach
+			// Build a temp path
+			const tempPath = `${RNFS.TemporaryDirectoryPath}/${fullFilename}`;
+			const fileUrl = `file://${tempPath}`;
+
+			// Write the file to temp location
+			await RNFS.writeFile(tempPath, content, 'base64');
+
+			// Prepare share options for iOS
+			// @ts-ignore
+			const shareOptions: Share.OpenOptions = {
+				url: fileUrl,
+				type: 'application/octet-stream',
+				filename: fullFilename,
+				subject: 'Pubky Backup',
+				title: 'Save Pubky Backup',
+				failOnCancel: false,
+			};
+
+			// Show the native share sheet
+			const shareResult = await Share.open(shareOptions);
+
+			// Clean up the temp file
+			await RNFS.unlink(tempPath);
+
+			// Check if user dismissed the share modal
+			if (!shareResult.success) {
+				return err('User canceled backup');
+			}
+
+			return ok(tempPath);
+		} else if (Platform.OS === 'android') {
+			// Check for storage permission
 			const hasPermission = await requestStoragePermission();
 			if (!hasPermission) {
 				return err('Storage permission denied');
 			}
-		}
 
-		// Ensure backup directory exists
-		const dirResult = await ensureBackupDirectory();
-		if (dirResult.isErr()) {
-			return err(dirResult.error.message);
-		}
+			// Ensure backup directory exists
+			const dirResult = await ensureBackupDirectory();
+			if (dirResult.isErr()) {
+				return err(dirResult.error.message);
+			}
 
-		const fullFilename = filename.endsWith('.pkarr') ? filename : `${filename}.pkarr`;
-		const filepath = `${dirResult.value}/${fullFilename}`;
+			const filepath = `${dirResult.value}/${fullFilename}`;
 
-		await RNFS.writeFile(filepath, Buffer.from(content, 'base64'));
-
-		if (Platform.OS === 'android') {
+			await RNFS.writeFile(filepath, Buffer.from(content, 'base64'));
 			await RNFS.scanFile(filepath);
-		}
 
-		return ok(filepath);
+			return ok(filepath);
+		} else {
+			return err('Unsupported platform');
+		}
 	} catch (error) {
 		if (error instanceof Error) {
+			if (error.message?.includes('User did not share')) {
+				return err('User canceled backup');
+			}
 			return err(`Failed to backup pubky file: ${error.message}`);
 		}
+
 		return err('Failed to backup pubky file');
 	}
 }

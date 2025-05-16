@@ -98,11 +98,14 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		}
 		const { name, uri } = file;
 
-		if (!name?.toLowerCase().endsWith('.pkarr')) {
+		// Get filename from name or extract from URI as fallback
+		const fileName = name || decodeURIComponent(uri.split('/').pop() || '');
+
+		if (!fileName.toLowerCase().endsWith('.pkarr')) {
 			return err('Please select a .pkarr file');
 		}
 
-		const sanitizedName = name.replace(/\s+/g, '_');
+		const sanitizedName = fileName.replace(/\s+/g, '_');
 
 		const [copyResult] = await keepLocalCopy({
 			files: [
@@ -136,7 +139,7 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		}
 
 		return showImportPrompt({
-			fileName: name,
+			fileName,
 			fileDate,
 			content: base64Content,
 			dispatch,

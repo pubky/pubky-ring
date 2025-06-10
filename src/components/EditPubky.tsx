@@ -124,12 +124,12 @@ const EditPubky = ({ payload }: {
 	const gradientOpacity = useSharedValue(0);
 
 	const signupTokenOpacity = useSharedValue(
-		storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
+		storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
 	);
 
 	const isSignupTokenInputVisible = useMemo(() => {
-		return storedPubkyData.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
-	}, [storedPubkyData.signedUp, storedPubkyData.homeserver, homeServer]);
+		return storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
+	}, [storedPubkyData?.signedUp, storedPubkyData.homeserver, homeServer]);
 
 
 	// Whether signupToken TextInput should be visible
@@ -221,9 +221,9 @@ const EditPubky = ({ payload }: {
 				signupToken: storedPubkyData?.signupToken ?? '',
 			};
 
-			if (!storedPubkyData.signedUp || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim()) {
+			if (!storedPubkyData?.signedUp || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken.trim()) {
 				let signedIn = false;
-				if (!storedPubkyData.signedUp || storedPubkyData.homeserver !== homeServer.trim()) {
+				if (!storedPubkyData?.signedUp || storedPubkyData.homeserver !== homeServer.trim()) {
 					//Attempt sign-up
 					const signupRes = await signUpToHomeserver({
 						pubky,
@@ -287,7 +287,7 @@ const EditPubky = ({ payload }: {
 		} finally {
 			setLoading(false);
 		}
-	}, [pubky, newPubkyName, homeServer, storedPubkyData?.signupToken, storedPubkyData.signedUp, storedPubkyData.homeserver, signupToken, dispatch, showCheckAnimation, updateName]);
+	}, [pubky, newPubkyName, homeServer, storedPubkyData?.signupToken, storedPubkyData?.signedUp, storedPubkyData.homeserver, signupToken, dispatch, showCheckAnimation, updateName]);
 
 	const handleChangeText = useCallback((text: string) => {
 		if (text.length > MAX_NAME_LENGTH) {
@@ -303,8 +303,8 @@ const EditPubky = ({ payload }: {
 
 	const isSignupTokenEditable = useMemo(() => {
 		// Not editable when loading or when already signed up with the same homeserver
-		return !(loading || (storedPubkyData.signedUp && storedPubkyData.homeserver === homeServer.trim()));
-	}, [loading, homeServer, storedPubkyData.homeserver, storedPubkyData.signedUp]);
+		return !(loading || (storedPubkyData?.signedUp && storedPubkyData.homeserver === homeServer.trim()));
+	}, [loading, homeServer, storedPubkyData.homeserver, storedPubkyData?.signedUp]);
 
 	const title = useMemo(() => {
 		return `${payload?.title} pk:${truncatePubky(pubky)}` ?? TITLE;
@@ -509,7 +509,7 @@ const EditPubky = ({ payload }: {
 								loading={loading}
 								style={[styles.button, styles.submitButton]}
 								onPress={handleSubmit}
-								disabled={storedPubkyData.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData?.signupToken}
+								disabled={storedPubkyData?.signedUp && newPubkyName.trim() === storedPubkyData.name && homeServer.trim() === storedPubkyData.homeserver && signupToken.trim() === storedPubkyData?.signupToken}
 							/>
 						</View>
 					</View>

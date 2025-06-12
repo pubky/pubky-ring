@@ -22,10 +22,10 @@ import { importFile } from '../utils/rnfs';
 import { View, Plus, TouchableOpacity, CircleAlert, NavButton } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
 import Button from '../components/Button';
-import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
+import { reorderPubkys, setDeepLink } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import { getAllPubkys, getDeepLink, hasPubkys } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getDeepLink, getSignedUpPubkys, hasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
 import {
@@ -72,20 +72,57 @@ const HomeScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
 	const deepLink = useSelector(getDeepLink);
+	const signedUpPubkys = useSelector(getSignedUpPubkys);
 	const _hasPubkys = useSelector(hasPubkys);
 
 	const handleDeepLink = useCallback(async () => {
 		if (deepLink) {
-			SheetManager.hideAll();
-			await sleep(150);
-			SheetManager.show('select-pubky', {
-				payload: {
-					deepLink,
-				},
-				onClose: () => {
-					SheetManager.hide('select-pubky');
-				},
-			});
+			// Ensure we have at least one pubky that's setup/signed-in
+			if (Object.keys(signedUpPubkys).length) {
+				SheetManager.hideAll();
+				await sleep(150);
+				SheetManager.show('select-pubky', {
+					payload: {
+						deepLink,
+					},
+					onClose: () => {
+						SheetManager.hide('select-pubky');
+					},
+				});
+				return;
+			}
+
+			dispatch(setDeepLink(''));
+
+			// No Pubky's are setup/signed-in yet. Notify the user of this.
+			if (Object.keys(pubkys).length) {
+				// Pubky's exist, but are not yet setup/signed-in
+				showToast({
+					type: 'info',
+					title: "No Pubkys are setup",
+					description: "Please setup any of your existing Pubkys to proceed." ,
+					visibilityTime: 5000
+				});
+			} else {
+				// No Pubky's exist and need to be created
+				showToast({
+					type: 'info',
+					title: "No Pubkys exist",
+					description: 'Please add and setup a Pubky to proceed.',
+					visibilityTime: 5000,
+					onPress: () => {
+						SheetManager.show('add-pubky', {
+							payload: {
+								createPubky,
+								importPubky,
+							},
+							onClose: () => {
+								SheetManager.hide('add-pubky');
+							},
+						});
+					}
+				});
+			}
 		}
 	}, [deepLink]);
 

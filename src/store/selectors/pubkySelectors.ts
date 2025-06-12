@@ -9,6 +9,23 @@ export const getPubky = (state: RootState, pubky: string): Pubky => {
 };
 
 /**
+ * Returns all signed up pubkys
+ * @param state
+ */
+export const getSignedUpPubkys = (state: RootState): { [key: string]: Pubky } => {
+	const allPubkys = state.pubky.pubkys;
+	const signedUpPubkys: { [key: string]: Pubky } = {};
+
+	Object.keys(allPubkys).forEach(key => {
+		if (allPubkys[key].signedUp) {
+			signedUpPubkys[key] = allPubkys[key];
+		}
+	});
+
+	return signedUpPubkys;
+};
+
+/**
  * Returns if a pubky is signed up to the set homeserver
  */
 export const isPubkySignedUp = (state: RootState, pubky: string): boolean => {

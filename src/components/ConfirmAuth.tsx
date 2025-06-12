@@ -145,18 +145,11 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			setIsAuthorized(true);
 			onComplete?.();
 			if (deepLink) {
-				if (Platform.OS === 'android') {
-					await sleep(FADE_DURATION + 50);
-					handleClose();
-					Linking.openURL(PUBKY_APP_URL);
-				} else {
-					showToast({
-						type: 'info',
-						title: 'Successfully Signed In!',
-						description: 'Please navigate back to your browser.',
-						visibilityTime: 8000,
-					});
-				}
+				setAuthorizing(false);
+				// Give a partial glimpse of the success animation and some time for the site to detect us as logged in.
+				await sleep(FADE_DURATION + 300);
+				handleClose();
+				Linking.openURL(PUBKY_APP_URL);
 			}
 		} catch (e: unknown) {
 			const error = e as Error;

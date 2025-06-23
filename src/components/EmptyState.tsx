@@ -1,15 +1,18 @@
-import React, { ReactElement, useCallback } from 'react';
+import React, { ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { View, Text, ArrowRight, Plus, Button } from '../theme/components.ts';
+import { View, Text, ArrowRight, Plus, Button, NavButton, CircleAlert } from '../theme/components.ts';
 import { createNewPubky } from '../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
 import PubkyRingHeader from './PubkyRingHeader';
 import { importFile } from '../utils/rnfs.ts';
 import { showEditPubkyPrompt, showToast } from '../utils/helpers.ts';
 import { SheetManager } from 'react-native-actions-sheet';
+import { useNavigation } from '@react-navigation/native';
 
 const EmptyState = (): ReactElement => {
 	const dispatch = useDispatch();
+	const navigation = useNavigation();
+
 	const createPubky = useCallback(async () => {
 		const pubky = await createNewPubky(dispatch);
 		if (pubky.isErr()) {
@@ -65,9 +68,23 @@ const EmptyState = (): ReactElement => {
 		});
 	}, [createPubky, importPubky]);
 
+	const LeftButton = useMemo(() => (
+		<NavButton
+			style={styles.navButton}
+			onPressIn={() => navigation.navigate('About')}
+			hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+		>
+			<CircleAlert size={24} />
+		</NavButton>
+	), [navigation]);
+
+	const RightButton = useMemo(() => (
+		<NavButton style={styles.rightNavButton} />
+	), []);
+
 	return (
 		<View style={styles.container}>
-			<PubkyRingHeader />
+			<PubkyRingHeader leftButton={LeftButton} rightButton={RightButton} />
 			<View style={styles.cardEmpty}>
 				<View style={styles.emptyUser}>
 					<View style={styles.image} />
@@ -94,7 +111,6 @@ const EmptyState = (): ReactElement => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		alignItems: 'center',
 	},
 	cardEmpty: {
 		display: 'flex',
@@ -153,6 +169,23 @@ const styles = StyleSheet.create({
 		fontWeight: 600,
 		lineHeight: 18,
 		letterSpacing: 0.2,
+	},
+	rightNavButton: {
+		width: 40,
+		height: 40,
+		justifyContent: 'center',
+		alignItems: 'center',
+		alignSelf: 'center',
+		backgroundColor: 'transparent',
+	},
+	navButton: {
+		zIndex: 1,
+		height: 40,
+		width: 40,
+		alignSelf: 'center',
+		alignItems: 'center',
+		justifyContent: 'center',
+		right: -5,
 	},
 });
 

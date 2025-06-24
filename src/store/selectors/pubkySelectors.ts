@@ -39,7 +39,7 @@ export const getAllPubkys = (state: RootState): { [key: string]: Pubky } => {
 	return state.pubky.pubkys;
 };
 
-export const hasPubkys = (state: RootState): boolean => {
+export const getHasPubkys = (state: RootState): boolean => {
 	return Object.keys(state.pubky.pubkys).length > 0;
 };
 

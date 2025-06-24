@@ -17,7 +17,7 @@ import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import { createNewPubky } from '../utils/pubky';
-import { showEditPubkyPrompt, showQRScanner, showToast, sleep } from '../utils/helpers';
+import { handleDeepLink, showEditPubkyPrompt, showQRScanner, showToast, sleep } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus, TouchableOpacity, CircleAlert, NavButton } from '../theme/components';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
@@ -25,7 +25,12 @@ import Button from '../components/Button';
 import { reorderPubkys, setDeepLink } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import { getAllPubkys, getDeepLink, getSignedUpPubkys, hasPubkys } from '../store/selectors/pubkySelectors.ts';
+import {
+	getAllPubkys,
+	getDeepLink,
+	getSignedUpPubkys,
+	getHasPubkys,
+} from '../store/selectors/pubkySelectors.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
 import {
@@ -73,77 +78,7 @@ const HomeScreen = (): ReactElement => {
 	const pubkys = useSelector(getAllPubkys);
 	const deepLink = useSelector(getDeepLink);
 	const signedUpPubkys = useSelector(getSignedUpPubkys);
-	const _hasPubkys = useSelector(hasPubkys);
-
-	const handleDeepLink = useCallback(async () => {
-		if (deepLink) {
-			// Ensure we have at least one pubky that's setup/signed-in
-			if (Object.keys(signedUpPubkys).length) {
-				SheetManager.hideAll();
-				await sleep(150);
-				SheetManager.show('select-pubky', {
-					payload: {
-						deepLink,
-					},
-					onClose: () => {
-						SheetManager.hide('select-pubky');
-					},
-				});
-				return;
-			}
-
-			dispatch(setDeepLink(''));
-
-			// No Pubky's are setup/signed-in yet. Notify the user of this.
-			if (Object.keys(pubkys).length) {
-				// Pubky's exist, but are not yet setup/signed-in
-				showToast({
-					type: 'info',
-					title: "No Pubkys are setup",
-					description: "Please setup any of your existing Pubkys to proceed." ,
-					visibilityTime: 5000
-				});
-			} else {
-				// No Pubky's exist and need to be created
-				showToast({
-					type: 'info',
-					title: "No Pubkys exist",
-					description: 'Please add and setup a Pubky to proceed.',
-					visibilityTime: 5000,
-					onPress: () => {
-						SheetManager.show('add-pubky', {
-							payload: {
-								createPubky,
-								importPubky,
-							},
-							onClose: () => {
-								SheetManager.hide('add-pubky');
-							},
-						});
-					}
-				});
-			}
-		}
-	}, [deepLink]);
-
-	useEffect(() => {
-		handleDeepLink().then();
-	}, [handleDeepLink]);
-
-	const handlePubkyPress = useCallback(
-		(pubky: string, index: number) => {
-			navigation.navigate('PubkyDetail', { pubky, index });
-		},
-		[navigation],
-	);
-
-	const handleQRPress = useCallback(async (data: {
-		pubky: string;
-		dispatch: Dispatch;
-		onComplete?: () => void;
-	}) => {
-		return showQRScanner(data);
-	}, []);
+	const hasPubkys = useSelector(getHasPubkys);
 
 	const createPubky = useCallback(async () => {
 		const pubky = await createNewPubky(dispatch);
@@ -187,6 +122,90 @@ const HomeScreen = (): ReactElement => {
 			});
 		}
 	}, [dispatch]);
+
+	const _handleDeepLink = useCallback(async () => {
+		if (deepLink) {
+			const signedUpPubkysLength = Object.keys(signedUpPubkys).length;
+			// Ensure we have at least one pubky that's setup/signed-in
+			if (signedUpPubkysLength) {
+				SheetManager.hideAll();
+				await sleep(150);
+				// Display the select pubky list if more than one signed up pubky exists.
+				if (signedUpPubkysLength > 1) {
+					SheetManager.show('select-pubky', {
+						payload: {
+							deepLink,
+						},
+						onClose: () => {
+							SheetManager.hide('select-pubky');
+						},
+					});
+				} else {
+					// Forward immediately to the auth confirmation screen if only 1 signed up pubky exists.
+					const pubky = Object.keys(signedUpPubkys)[0];
+					setTimeout(() => {
+						handleDeepLink({
+							pubky,
+							url: deepLink,
+							dispatch,
+						});
+					}, 100);
+				}
+				return;
+			}
+
+			dispatch(setDeepLink(''));
+
+			// No Pubky's are setup/signed-in yet. Notify the user of this.
+			if (Object.keys(pubkys).length) {
+				// Pubky's exist, but are not yet setup/signed-in
+				showToast({
+					type: 'info',
+					title: 'No Pubkys are setup',
+					description: 'Please setup any of your existing Pubkys to proceed.' ,
+					visibilityTime: 5000,
+				});
+			} else {
+				// No Pubky's exist and need to be created
+				showToast({
+					type: 'info',
+					title: 'No Pubkys exist',
+					description: 'Please add and setup a Pubky to proceed.',
+					visibilityTime: 5000,
+					onPress: () => {
+						SheetManager.show('add-pubky', {
+							payload: {
+								createPubky,
+								importPubky,
+							},
+							onClose: () => {
+								SheetManager.hide('add-pubky');
+							},
+						});
+					},
+				});
+			}
+		}
+	}, [createPubky, deepLink, dispatch, importPubky, pubkys, signedUpPubkys]);
+
+	useEffect(() => {
+		_handleDeepLink().then();
+	}, [_handleDeepLink]);
+
+	const handlePubkyPress = useCallback(
+		(pubky: string, index: number) => {
+			navigation.navigate('PubkyDetail', { pubky, index });
+		},
+		[navigation],
+	);
+
+	const handleQRPress = useCallback(async (data: {
+		pubky: string;
+		dispatch: Dispatch;
+		onComplete?: () => void;
+	}) => {
+		return showQRScanner(data);
+	}, []);
 
 	const handleDragEnd = useCallback(({ data }: { data: { key: string; value: Pubky }[] }) => {
 		if (!data) {return;}
@@ -275,7 +294,7 @@ const HomeScreen = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
-			{_hasPubkys ? (
+			{hasPubkys ? (
 				<DraggableFlatList
 					data={pubkyArray}
 					onDragEnd={handleDragEnd}

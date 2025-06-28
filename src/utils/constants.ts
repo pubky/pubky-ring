@@ -5,7 +5,7 @@ export const ONBOARDING_PUBKY_RADIAL_GRADIENT = ['#2A333E', '#282B2F'];
 
 export const AUTHORIZE_KEY_GRADIENT = ['#101F30', '#131C25', '#14181D', '#171818', '#191919', '#121212'];
 
-//export const DEFAULT_HOMESERVER = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 export const DEFAULT_HOMESERVER = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
+export const STAGING_HOMESERVER = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 export const PUBKY_APP_URL = 'https://pubky.app';
 export const TERMS_OF_USE = 'https://synonym.to/pubky-ring-privacy-policy';

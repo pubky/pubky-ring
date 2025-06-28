@@ -1,3 +1,4 @@
+import { createSelector } from '@reduxjs/toolkit';
 import { Pubky, PubkySession } from '../../types/pubky';
 import { RootState } from '../../types';
 
@@ -8,22 +9,27 @@ export const getPubky = (state: RootState, pubky: string): Pubky => {
 	return state.pubky.pubkys[pubky];
 };
 
+const selectAllPubkys = (state: RootState): { [key: string]: Pubky } => state.pubky.pubkys;
+
 /**
  * Returns all signed up pubkys
  * @param state
  */
-export const getSignedUpPubkys = (state: RootState): { [key: string]: Pubky } => {
-	const allPubkys = state.pubky.pubkys;
-	const signedUpPubkys: { [key: string]: Pubky } = {};
+export const getSignedUpPubkys = createSelector(
+	[selectAllPubkys],
+	(allPubkys): { [key: string]: Pubky } => {
+		const signedUpPubkys: { [key: string]: Pubky } = {};
 
-	Object.keys(allPubkys).forEach(key => {
-		if (allPubkys[key].signedUp) {
-			signedUpPubkys[key] = allPubkys[key];
+		for (const key in allPubkys) {
+			const pubky = allPubkys[key];
+			if (pubky?.signedUp) {
+				signedUpPubkys[key] = pubky;
+			}
 		}
-	});
 
-	return signedUpPubkys;
-};
+		return signedUpPubkys;
+	}
+);
 
 /**
  * Returns if a pubky is signed up to the set homeserver

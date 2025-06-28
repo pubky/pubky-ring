@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { Image, Platform, StyleSheet, KeyboardAvoidingView } from 'react-native';
+import { Image, Platform, StyleSheet, KeyboardAvoidingView, Keyboard } from 'react-native';
 import {
 	ActionSheetContainer,
 	Text,
@@ -278,6 +278,7 @@ const EditPubky = ({ payload }: {
 
 	const handleSubmit = useCallback(async () => {
 		try {
+			Keyboard.dismiss();
 			setLoading(true);
 
 			const secretKeyRes = await getPubkySecretKey(pubky);

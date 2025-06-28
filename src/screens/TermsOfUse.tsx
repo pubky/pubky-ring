@@ -14,7 +14,7 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
-import { hasPubkys } from '../store/selectors/pubkySelectors.ts';
+import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { getShowOnboarding } from '../store/selectors/settingsSelectors.ts';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'TermsOfUse'>;
@@ -22,7 +22,7 @@ type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'TermsOfUse'
 const TermsOfUse = (): React.ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
 	const dispatch = useDispatch();
-	const _hasPubkys = useSelector(hasPubkys);
+	const _hasPubkys = useSelector(getHasPubkys);
 	const showOnboarding = useSelector(getShowOnboarding);
 
 	const [checked, setChecked] = useState(false);

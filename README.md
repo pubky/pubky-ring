@@ -59,3 +59,26 @@ This is one way to run your app — you can also run it directly from within And
 # Troubleshooting
 
 If you can't get this to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
+
+# 🔐 Verifying Releases
+
+Ensure your `app-release.apk` is authentic and untampered by verifying its **GPG signature** and **SHA256 checksum**.
+
+### 1. Import the Maintainer's GPG Key
+
+```bash
+gpg --import public-key.asc
+```
+
+### 2. Verify the APK Signature
+
+```bash
+gpg --verify app-release.apk.asc app-release.apk
+```
+
+### 3. Verify the Checksum
+
+```bash
+gpg --verify SHA256SUMS.asc
+sha256sum -c SHA256SUMS
+```

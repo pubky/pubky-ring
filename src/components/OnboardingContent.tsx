@@ -11,6 +11,8 @@ import { ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types.ts';
+import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
+import { useDispatch } from 'react-redux';
 
 type NavigationProp = NativeStackNavigationProp<
 	RootStackParamList,
@@ -19,10 +21,12 @@ type NavigationProp = NativeStackNavigationProp<
 
 const OnboardingContent = (): ReactElement => {
 	const navigation = useNavigation<NavigationProp>();
+	const dispatch = useDispatch();
 
 	const navigateHome = useCallback(() => {
+		dispatch(updateShowOnboarding({ showOnboarding: false }));
 		navigation.replace('Home');
-	}, [navigation]);
+	}, [dispatch, navigation]);
 
 	return (
 		<View style={styles.container}>

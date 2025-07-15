@@ -1240,6 +1240,27 @@ PODS:
     - React-jsiexecutor
     - React-RCTFBReactNativeSpec
     - ReactCommon/turbomodule/core
+  - react-native-blur (4.4.1):
+    - DoubleConversion
+    - glog
+    - hermes-engine
+    - RCT-Folly (= 2024.11.18.00)
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - Yoga
   - react-native-document-picker (10.1.3):
     - DoubleConversion
     - glog
@@ -1284,7 +1305,7 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-pubky (0.10.4):
+  - react-native-pubky (0.10.6):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1305,7 +1326,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context (5.5.0):
+  - react-native-safe-area-context (5.5.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1318,8 +1339,8 @@ PODS:
     - React-featureflags
     - React-graphics
     - React-ImageManager
-    - react-native-safe-area-context/common (= 5.5.0)
-    - react-native-safe-area-context/fabric (= 5.5.0)
+    - react-native-safe-area-context/common (= 5.5.2)
+    - react-native-safe-area-context/fabric (= 5.5.2)
     - React-NativeModulesApple
     - React-RCTFabric
     - React-rendererdebug
@@ -1328,7 +1349,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/common (5.5.0):
+  - react-native-safe-area-context/common (5.5.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1349,7 +1370,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - react-native-safe-area-context/fabric (5.5.0):
+  - react-native-safe-area-context/fabric (5.5.2):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -1786,7 +1807,7 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - Yoga
-  - RNGestureHandler (2.26.0):
+  - RNGestureHandler (2.27.1):
     - DoubleConversion
     - glog
     - hermes-engine
@@ -2121,6 +2142,7 @@ DEPENDENCIES:
   - React-logger (from `../node_modules/react-native/ReactCommon/logger`)
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
+  - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
   - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
@@ -2251,6 +2273,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   React-microtasksnativemodule:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
+  react-native-blur:
+    :path: "../node_modules/@react-native-community/blur"
   react-native-document-picker:
     :path: "../node_modules/@react-native-documents/picker"
   react-native-mmkv:
@@ -2385,11 +2409,12 @@ SPEC CHECKSUMS:
   React-logger: 304814ae37503c8eb54359851cc55bd4f936b39c
   React-Mapbuffer: b588d1ca18d2ce626f868f04ab12d8b1f004f12c
   React-microtasksnativemodule: 11831d070aa47755bb5739069eb04ec621fec548
+  react-native-blur: b37343d4df1af48a17444156b674b26d5aec2425
   react-native-document-picker: ead1d62b121e66ab5edbf6fcfdbfb58e81662b55
   react-native-mmkv: a578df102150a1742d11e741b581bc63edef9771
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
-  react-native-pubky: 7ed7c2b66335489b757d57ac807a06b2bb10c003
-  react-native-safe-area-context: 2b8212f37e4186b9b7f9c25122477a229f42b032
+  react-native-pubky: 18f80c1f462076438efb7b4f3775303001a93966
+  react-native-safe-area-context: 63e27bb3aeb2c0ef652f8913d731573932080ff9
   react-native-skia: 699af6a76ab9d85c8a5ffb93944ff8aca4628e2f
   React-NativeModulesApple: 79a4404ac301b40bec3b367879c5e9a9ce81683c
   React-perflogger: 0ea25c109dba33d47dec36b2634bf7ea67c1a555
@@ -2424,7 +2449,7 @@ SPEC CHECKSUMS:
   RNCAsyncStorage: efa02b644121f4e1f7f33e712f4f82c30aa4ff4a
   RNCClipboard: 41b301766fd5ec1d91b4cd7130607a2e99518bb2
   RNFlashList: 31c774f49d75ecc2309bdfc19008fc3bed5111a7
-  RNGestureHandler: 5fca159e221d84c26a24d249ef5552c0393776e2
+  RNGestureHandler: 968f5e8c975d81bbe98233677444894b1e8bb2fa
   RNKeychain: 8854726dc7c45dbcc0db9a0444ae58a8b7b07266
   RNPermissions: 8e00aa666b05a79f1aa5940849e2c059b0f0d921
   RNReanimated: c021f620a8a8494147399ed4e02fdc09fb60ac35

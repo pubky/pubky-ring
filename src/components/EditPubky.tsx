@@ -286,7 +286,7 @@ const EditPubky = ({ payload }: {
 				updateName(); // No need to prevent updating the name if we can.
 				return err(secretKeyRes.error.message);
 			}
-			const secretKey = secretKeyRes.value;
+			const secretKey = secretKeyRes.value.secretKey;
 
 			let newData = {
 				name: newPubkyName.trim(),

@@ -1,5 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import {
+	EBackupPreference,
 	ISetPubkyData,
 	Pubky,
 	PubkySession,
@@ -10,11 +11,14 @@ const pubkysSlice = createSlice({
 	name: 'pubky',
 	initialState,
 	reducers: {
-		addPubky: (state, action: PayloadAction<{ pubky: string }>) => {
+		addPubky: (state, action: PayloadAction<{ pubky: string, backupPreference?: EBackupPreference }>) => {
 			state.pubkys = state?.pubkys || {};
 			const { pubky } = action.payload;
 			if (!state.pubkys[pubky]) {
-				state.pubkys[pubky] = defaultPubkyState;
+				state.pubkys[pubky] = {
+					...defaultPubkyState,
+					backupPreference: action.payload?.backupPreference ?? defaultPubkyState.backupPreference,
+				};
 			}
 		},
 		setImage: (state, action: PayloadAction<{ pubky: string; image: string }>) => {

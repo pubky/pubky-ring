@@ -1,5 +1,6 @@
 import { SheetManager } from 'react-native-actions-sheet';
 import {
+	getPubkySecretKey,
 	performAuth,
 	signInToHomeserver,
 } from './pubky.ts';
@@ -16,14 +17,13 @@ import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Linking, Platform, Share } from 'react-native';
-import { getAutoAuthFromStore, getIsOnline, getStore } from './store-helpers.ts';
-import { getKeychainValue } from './keychain.ts';
+import { getAutoAuthFromStore, getBackupPreference, getIsOnline, getStore } from './store-helpers.ts';
 import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
-import { Pubky } from '../types/pubky.ts';
+import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { PUBKY_APP_URL } from './constants.ts';
 
 export const handleScannedData = async ({
@@ -243,31 +243,51 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 	return `${prefix}-${date}_${time}`;
 };
 
-
-export const showBackupPrompt = ({
+export const showBackupPrompt = async ({
 	pubky,
+	backupPreference,
 	onComplete,
 }: {
 	pubky: string,
+	backupPreference?: EBackupPreference;
 	onComplete?: () => void
-}): void => {
+}): Promise<void> => {
+	const secretKeyResponse = await getPubkySecretKey(pubky);
+	if (secretKeyResponse.isErr()) {
+		showToast({
+			type: 'error',
+			title: 'Error',
+			description: 'Could not retrieve secret key for backup',
+		});
+		return;
+	}
+
+	if (!backupPreference) {
+		backupPreference = getBackupPreference(pubky);
+	}
+
+	if (
+		backupPreference === EBackupPreference.recoveryPhrase &&
+		secretKeyResponse.value?.mnemonic
+	) {
+		SheetManager.show('recovery-phrase-prompt', {
+			payload: {
+				pubky,
+				mnemonic: secretKeyResponse.value.mnemonic,
+				onClose: () => SheetManager.hide('recovery-phrase-prompt'),
+			},
+		});
+		return;
+	}
+
 	SheetManager.show('backup-prompt', {
 		payload: {
 			viewId: EBackupPromptViewId.backup,
 			pubky,
 			onSubmit: async (passphrase: string) => {
 				try {
-					const secretKeyResponse = await getKeychainValue({ key: pubky });
-					if (secretKeyResponse.isErr()) {
-						showToast({
-							type: 'error',
-							title: 'Error',
-							description: 'Could not retrieve secret key for backup',
-						});
-						return;
-					}
 					const createRecoveryFileRes = await createRecoveryFile(
-						secretKeyResponse.value,
+						secretKeyResponse.value.secretKey,
 						passphrase
 					);
 

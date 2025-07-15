@@ -2,7 +2,7 @@ import { store } from '../store';
 import { getAutoAuth } from '../store/selectors/settingsSelectors';
 import { RootState } from '../types';
 import { getPubky, isPubkySignedUp } from '../store/selectors/pubkySelectors.ts';
-import { Pubky } from '../types/pubky.ts';
+import { EBackupPreference, Pubky } from '../types/pubky.ts';
 
 export const getStore = (): RootState => store.getState();
 
@@ -20,4 +20,8 @@ export const getIsPubkySignedUpFromStore = (pubky: string): boolean => {
 
 export const getIsOnline = (): boolean => {
 	return getStore().settings.isOnline ?? true;
+};
+
+export const getBackupPreference = (pubky: string): EBackupPreference => {
+	return getStore().pubky.pubkys[pubky]?.backupPreference ?? EBackupPreference.encryptedFile;
 };

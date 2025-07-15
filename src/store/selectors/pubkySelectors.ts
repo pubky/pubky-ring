@@ -89,6 +89,13 @@ export const getPubkyImage = (state: RootState, pubky: string): string => {
 };
 
 /**
+ * Get pubky name
+ */
+export const getPubkyName = (state: RootState, pubky: string): string => {
+	return state.pubky.pubkys[pubky]?.name || '';
+};
+
+/**
  * Get pubky homeserver
  */
 export const getPubkyHomeserver = (state: RootState, pubky: string): string => {

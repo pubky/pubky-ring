@@ -1,5 +1,4 @@
 import {
-	generateSecretKey,
 	signUp,
 	signIn,
 	signOut,
@@ -9,6 +8,8 @@ import {
 	republishHomeserver as _republishHomeserver,
 	getHomeserver,
 	get,
+	generateMnemonicPhraseAndKeypair,
+	mnemonicPhraseToKeypair,
 } from '@synonymdev/react-native-pubky';
 import {
 	setKeychainValue,
@@ -30,6 +31,7 @@ import { defaultPubkyState } from '../store/shapes/pubky';
 import { showToast } from './helpers.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
+import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 
 export const getSignupToken = ({
 	homeserver,
@@ -57,7 +59,7 @@ export const republishHomeserver = async ({
 		if (secretKeyRes.isErr()) {
 			return err(secretKeyRes.error.message);
 		}
-		secretKey = secretKeyRes.value;
+		secretKey = secretKeyRes.value.secretKey;
 	}
 	const res = await _republishHomeserver(secretKey, homeserver);
 	if (res.isErr()) {
@@ -71,7 +73,7 @@ export const createNewPubky = async (
 	dispatch: Dispatch
 ): Promise<Result<string>> => {
 	try {
-		const genKeyRes = await generateSecretKey();
+		const genKeyRes = await generateMnemonicPhraseAndKeypair();
 		if (genKeyRes.isErr()) {
 			showToast({
 				type: 'error',
@@ -82,9 +84,15 @@ export const createNewPubky = async (
 			return err('Failed to generate secret key');
 		}
 
+		const mnemonic = genKeyRes.value.mnemonic;
 		const secretKey = genKeyRes.value.secret_key;
 		const pubky = genKeyRes.value.public_key;
-		return await savePubky(secretKey, pubky, dispatch);
+		return await savePubky({
+			mnemonic,
+			secretKey,
+			pubky,
+			dispatch,
+		});
 	} catch (error) {
 		console.error('Error creating pubky:', error);
 		showToast({
@@ -105,10 +113,26 @@ export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
 	const allKeys = await getAllKeychainKeys();
 	if (allKeys?.length > 0) {
 		for (const pubky of allKeys) {
-			const secretKey = await getKeychainValue({ key: pubky });
-			if (secretKey.isOk()) {
-				await savePubky(secretKey.value, pubky, dispatch);
-			}
+			try {
+				const secretKeyRes = await getKeychainValue({ key: pubky });
+				if (secretKeyRes.isOk()) {
+					const isMigrated = isNewFormat(pubky);
+					if (isMigrated) {
+						const { secretKey, mnemonic } = JSON.parse(secretKeyRes.value) as IKeychainData;
+						await savePubky({ secretKey, pubky, dispatch, mnemonic });
+					} else {
+						const migrationRes = await migrateKeychainEntry(pubky, secretKeyRes.value);
+						if (migrationRes.isOk()) {
+							await savePubky({
+								secretKey: migrationRes.value.secretKey,
+								pubky,
+								dispatch,
+								mnemonic: migrationRes.value.mnemonic,
+							});
+						}
+					}
+				}
+			} catch {}
 		}
 	}
 	return allKeys;
@@ -146,10 +170,15 @@ export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app')
 	}
 };
 
-export const importPubky = async (
-	secretKey: string,
-	dispatch: Dispatch
-): Promise<Result<string>> => {
+export const importPubky = async ({
+	secretKey,
+	dispatch,
+	mnemonic = '',
+}: {
+	secretKey: string;
+	dispatch: Dispatch;
+	mnemonic?: string;
+}): Promise<Result<string>> => {
 	try {
 		const pubkyRes = await getPublicKeyFromSecretKey(secretKey);
 		if (pubkyRes.isErr()) {
@@ -167,8 +196,11 @@ export const importPubky = async (
 				dispatch(setSignedUp({ pubky, signedUp: false }));
 			}
 		});
-		const savePubkyRes = await savePubky(secretKey, pubky, dispatch);
-		dispatch(setHomeserver({ pubky, homeserver }));
+		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
+		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference });
+		if (savePubkyRes.isOk()) {
+			dispatch(setHomeserver({ pubky, homeserver }));
+		}
 		return savePubkyRes;
 	} catch (error) {
 		console.error('Error saving pubky:', error);
@@ -176,17 +208,46 @@ export const importPubky = async (
 	}
 };
 
-export const savePubky = async (
+export const savePubky = async ({
+	secretKey,
+	pubky,
+	dispatch,
+	mnemonic = '',
+	backupPreference = EBackupPreference.encryptedFile,
+}: {
 	secretKey: string,
 	pubky: string,
-	dispatch: Dispatch
-): Promise<Result<string>> => {
+	dispatch: Dispatch,
+	mnemonic?: string,
+	backupPreference?: EBackupPreference;
+}): Promise<Result<string>> => {
 	try {
-		dispatch(addPubky({ pubky }));
+		// Ensure the mnemonic phrase generates the expected secretKey
+		if (mnemonic) {
+			const res = await mnemonicPhraseToKeypair(mnemonic);
+			if (res.isErr()) {
+				return err(res.error.message);
+			}
+			if (res.value.secret_key !== secretKey) {
+				return err('The provided mnemonic phrase does not generate the expected secret key.');
+			}
+			if (res.value.public_key !== pubky) {
+				return err('The provided mnemonic phrase does not generate the expected pubky.');
+			}
+		}
+		// If recovery phrase is preferred ensure we have a mnemonic phrase to support that preference.
+		if (backupPreference === EBackupPreference.recoveryPhrase && !mnemonic) {
+			backupPreference = EBackupPreference.encryptedFile;
+		}
+		dispatch(addPubky({ pubky, backupPreference }));
+		const keychainData: IKeychainData = {
+			secretKey,
+			mnemonic,
+		};
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
 		setKeychainValue({
 			key: pubky,
-			value: secretKey,
+			value: JSON.stringify(keychainData),
 		}).then((response) => {
 			if (response.isErr()) {
 				console.error('Failed to save keychain value');
@@ -202,6 +263,20 @@ export const savePubky = async (
 	} catch (e) {
 		console.error('Error saving pubky:', e);
 		return err('Error saving pubky');
+	}
+};
+
+/**
+ * Checks if a keychain value is in the new JSON format for mnemonic phrases
+ */
+const isNewFormat = (value: string): boolean => {
+	try {
+		const parsed = JSON.parse(value);
+		return typeof parsed === 'object' &&
+			'secretKey' in parsed &&
+			typeof parsed.secretKey === 'string';
+	} catch {
+		return false;
 	}
 };
 
@@ -229,17 +304,56 @@ export const deletePubky = async (
 	}
 };
 
-export const getPubkySecretKey = async (pubky: string): Promise<Result<string>> => {
-	const res = await getKeychainValue({ key: pubky });
-	if (res.isErr()) {
-		console.error('Failed to get secret key from keychain');
-		return err('Failed to get secret key from keychain');
+/**
+ * Migrates a single keychain entry from old format to new format
+ */
+const migrateKeychainEntry = async (
+	pubky: string,
+	oldSecretKey: string
+): Promise<Result<IKeychainData>> => {
+	try {
+		// Create new format data
+		const keychainData: IKeychainData = {
+			secretKey: oldSecretKey,
+			mnemonic: '', // Empty mnemonic for migrated entries
+		};
+
+		// Save in new format
+		const saveRes = await setKeychainValue({
+			key: pubky,
+			value: JSON.stringify(keychainData),
+		});
+
+		if (saveRes.isErr()) {
+			return err(`Failed to migrate keychain entry for ${pubky}: ${saveRes.error.message}`);
+		}
+
+		return ok(keychainData);
+	} catch (error) {
+		return err(`Error migrating keychain entry: ${error}`);
 	}
-	if (!res?.value) {
-		console.error('Secret key not found in keychain');
-		return err('Secret key not found in keychain');
+};
+
+export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychainData>> => {
+	try {
+		const res = await getKeychainValue({ key: pubky });
+		if (res.isErr()) {
+			console.error('Failed to get secret key from keychain');
+			return err('Failed to get secret key from keychain');
+		}
+		if (!res?.value) {
+			console.error('Secret key not found in keychain');
+			return err('Secret key not found in keychain');
+		}
+		const isMigrated = isNewFormat(res.value);
+		if (isMigrated) {
+			return ok(JSON.parse(res.value));
+		}
+
+		return await migrateKeychainEntry(pubky, res.value);
+	} catch {
+		return err('Unable to get pubky secret key.');
 	}
-	return ok(res.value);
 };
 
 export const signUpToHomeserver = async ({
@@ -260,7 +374,7 @@ export const signUpToHomeserver = async ({
 		if (secretKeyRes.isErr()) {
 			return err(secretKeyRes.error.message);
 		}
-		secretKey = secretKeyRes.value;
+		secretKey = secretKeyRes.value.secretKey;
 	}
 	const signUpRes = await signUp(secretKey, homeserver, signupToken);
 	if (signUpRes.isErr()) {
@@ -304,7 +418,7 @@ export const signInToHomeserver = async ({
 		if (secretKeyRes.isErr()) {
 			return err(secretKeyRes.error.message);
 		}
-		secretKey = secretKeyRes.value;
+		secretKey = secretKeyRes.value.secretKey;
 	}
 	let response: SessionInfo;
 	const signInRes = await signIn(secretKey);
@@ -344,7 +458,7 @@ export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, d
 	if (secretKeyRes.isErr()) {
 		return;
 	}
-	const signOutRes = await signOut(secretKeyRes.value);
+	const signOutRes = await signOut(secretKeyRes.value.secretKey);
 	if (signOutRes.isErr()) {
 		showToast({
 			type: 'error',
@@ -397,24 +511,24 @@ export const performAuth = async ({
 			if (!signedUp) {
 				await signUpToHomeserver({
 					pubky,
-					secretKey: secretKeyRes.value,
+					secretKey: secretKeyRes.value.secretKey,
 					homeserver,
 					dispatch,
 				});
 			}
-
-			const authRes = await auth(authUrl, secretKeyRes.value);
+			const secretKey = secretKeyRes.value.secretKey;
+			const authRes = await auth(authUrl, secretKey);
 			if (authRes.isErr()) {
 				const signInRes = await signInToHomeserver({
 					pubky,
 					homeserver,
 					dispatch,
-					secretKey: secretKeyRes.value,
+					secretKey,
 				});
 				if (signInRes.isErr()) {
 					return err(signInRes.error.message);
 				}
-				const authRetryRes = await auth(authUrl, secretKeyRes.value);
+				const authRetryRes = await auth(authUrl, secretKey);
 				if (authRetryRes.isErr()) {
 					console.error('Error processing auth:', authRes.error);
 					return err(authRes.error?.message || 'Failed to process auth');

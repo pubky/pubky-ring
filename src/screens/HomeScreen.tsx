@@ -16,7 +16,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootStackParamList } from '../navigation/types';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
-import { createNewPubky } from '../utils/pubky';
+import {
+	createNewPubky,
+	importPubky as importPubkyUtil,
+} from '../utils/pubky';
 import { handleDeepLink, showEditPubkyPrompt, showQRScanner, showToast, sleep } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
 import { View, Plus, TouchableOpacity, CircleAlert, NavButton } from '../theme/components';
@@ -41,6 +44,8 @@ import PubkyRingLogo from '../images/pubky-ring.png';
 // @ts-ignore
 import DeviceMobileLogo from '../images/device-mobile.png';
 import { PUBKY_APP_URL } from '../utils/constants.ts';
+import { Result } from '@synonymdev/result';
+import { mnemonicPhraseToKeypair, IGenerateSecretKey } from '@synonymdev/react-native-pubky';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
 
@@ -98,7 +103,36 @@ const HomeScreen = (): ReactElement => {
 		}, 200);
 	}, [dispatch]);
 
-	const importPubky = useCallback(async () => {
+	const importPubky = useCallback(async (mnemonic = ''): Promise<void> => {
+		if (mnemonic) {
+			const secretKeyRes: Result<IGenerateSecretKey> = await mnemonicPhraseToKeypair(mnemonic);
+			if (secretKeyRes.isErr()) {
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: 'An error occurred while creating the Pubky',
+				});
+				return;
+			}
+
+			const secretKey: string = secretKeyRes.value.secret_key;
+			const pubky = await importPubkyUtil({ secretKey, dispatch, mnemonic });
+			if (pubky.isErr()) {
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: pubky.error.message,
+				});
+				return;
+			}
+			setTimeout( () => {
+				showEditPubkyPrompt({
+					title: 'Setup',
+					pubky: pubky.value,
+				});
+			}, 200);
+			return;
+		}
 		const res = await importFile(dispatch);
 		if (res.isErr()) {
 			if (res.error?.message) {

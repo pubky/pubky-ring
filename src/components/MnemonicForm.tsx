@@ -27,11 +27,12 @@ import {
 import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
+import { Result } from '@synonymdev/result';
 
 interface MnemonicFormProps {
 	onBack: () => void;
 	onCancel: () => void;
-	onImport: (mnemonicPhrase: string) => void;
+	onImport: (mnemonicPhrase: string) => Promise<Result<string>>
 }
 
 const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactElement => {

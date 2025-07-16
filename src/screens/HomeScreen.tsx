@@ -44,7 +44,7 @@ import PubkyRingLogo from '../images/pubky-ring.png';
 // @ts-ignore
 import DeviceMobileLogo from '../images/device-mobile.png';
 import { PUBKY_APP_URL } from '../utils/constants.ts';
-import { Result } from '@synonymdev/result';
+import { err, ok, Result } from '@synonymdev/result';
 import { mnemonicPhraseToKeypair, IGenerateSecretKey } from '@synonymdev/react-native-pubky';
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'Home'>;
@@ -103,58 +103,62 @@ const HomeScreen = (): ReactElement => {
 		}, 200);
 	}, [dispatch]);
 
-	const importPubky = useCallback(async (mnemonic = ''): Promise<void> => {
+	const importPubky = useCallback(async (mnemonic = ''): Promise<Result<string>> => {
 		if (mnemonic) {
 			const secretKeyRes: Result<IGenerateSecretKey> = await mnemonicPhraseToKeypair(mnemonic);
 			if (secretKeyRes.isErr()) {
+				const msg = secretKeyRes.error.message;
 				showToast({
 					type: 'error',
 					title: 'Error',
-					description: 'An error occurred while creating the Pubky',
+					description: msg,
 				});
-				return;
+				return err(msg);
 			}
 
 			const secretKey: string = secretKeyRes.value.secret_key;
 			const pubky = await importPubkyUtil({ secretKey, dispatch, mnemonic });
 			if (pubky.isErr()) {
+				const msg = pubky.error.message;
 				showToast({
 					type: 'error',
 					title: 'Error',
-					description: pubky.error.message,
+					description: msg,
 				});
-				return;
+				return err(msg);
 			}
+			await SheetManager.hide('add-pubky');
 			setTimeout( () => {
 				showEditPubkyPrompt({
 					title: 'Setup',
 					pubky: pubky.value,
 				});
 			}, 200);
-			return;
+			return ok('Successfully created pubky.');
 		}
 		const res = await importFile(dispatch);
 		if (res.isErr()) {
-			if (res.error?.message) {
-				showToast({
-					type: 'error',
-					title: 'Error',
-					description: res.error.message,
-				});
-			}
-		} else {
-			setTimeout( () => {
-				showEditPubkyPrompt({
-					title: 'Setup',
-					pubky: res.value,
-				});
-			}, 200);
+			const msg = res.error?.message ?? 'Unable to import file.';
 			showToast({
-				type: 'success',
-				title: 'Success',
-				description: 'Pubky imported successfully',
+				type: 'error',
+				title: 'Error',
+				description: msg,
 			});
+			return err(msg);
 		}
+		setTimeout( () => {
+			showEditPubkyPrompt({
+				title: 'Setup',
+				pubky: res.value,
+			});
+		}, 200);
+		const msg = 'Pubky imported successfully';
+		showToast({
+			type: 'success',
+			title: 'Success',
+			description: msg,
+		});
+		return ok(msg);
 	}, [dispatch]);
 
 	const _handleDeepLink = useCallback(async () => {

@@ -272,9 +272,7 @@ export const savePubky = async ({
 const isNewFormat = (value: string): boolean => {
 	try {
 		const parsed = JSON.parse(value);
-		return typeof parsed === 'object' &&
-			'secretKey' in parsed &&
-			typeof parsed.secretKey === 'string';
+		return 'secretKey' in parsed && 'mnemonic' in parsed;
 	} catch {
 		return false;
 	}

@@ -6,6 +6,7 @@ import React, {
 	useState,
 } from 'react';
 import {
+	Dimensions,
 	Image,
 	Platform,
 	StyleSheet,
@@ -27,13 +28,25 @@ import ModalIndicator from './ModalIndicator.tsx';
 import MnemonicForm from './MnemonicForm.tsx';
 import { AUTHORIZE_KEY_GRADIENT } from '../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
+import { Result } from '@synonymdev/result';
+import { toastConfig } from '../theme/toastConfig.tsx';
+import Toast from 'react-native-toast-message';
 
 const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
+const { height } = Dimensions.get('window');
+const isSmallScreen = height < 700;
+const toastStyle = {
+	top: Platform.select({
+		ios: isSmallScreen ? -9 : -50,
+		android: isSmallScreen ? -9 : -50,
+	}),
+};
+
 
 const AddPubky = ({ payload }: {
 	payload: {
 		createPubky: () => void;
-		importPubky: (mnemonic?: string) => Promise<void>;
+		importPubky: (mnemonic?: string) => Promise<Result<string>>;
 	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -69,11 +82,6 @@ const AddPubky = ({ payload }: {
 	const onMnemonicCancel = useCallback(() => {
 		setCurrentScreen('import-options');
 	}, []);
-
-	const onMnemonicImport = useCallback(async (mnemonicPhrase: string) => {
-		await importPubky(mnemonicPhrase);
-		closeSheet();
-	}, [closeSheet, importPubky]);
 
 	const onMnemonicBack = useCallback(() => {
 		setCurrentScreen('import-options');
@@ -183,7 +191,7 @@ const AddPubky = ({ payload }: {
 				<MnemonicForm
 					onBack={onMnemonicBack}
 					onCancel={onMnemonicCancel}
-					onImport={onMnemonicImport}
+					onImport={importPubky}
 				/>
 			);
 		}
@@ -215,7 +223,7 @@ const AddPubky = ({ payload }: {
 				</View>
 			</>
 		);
-	}, [currentScreen, getButtonConfig, getHeaderText, getImage, messageText, onMnemonicBack, onMnemonicCancel, onMnemonicImport, renderBackButton, shouldShowBackButton, titleText]);
+	}, [currentScreen, getButtonConfig, getHeaderText, getImage, importPubky, messageText, onMnemonicBack, onMnemonicCancel, renderBackButton, shouldShowBackButton, titleText]);
 
 	return (
 		<View style={styles.container}>
@@ -235,6 +243,7 @@ const AddPubky = ({ payload }: {
 				>
 					{getContent()}
 				</RadialGradient>
+				<Toast config={toastConfig({ style: toastStyle })} />
 			</ActionSheetContainer>
 		</View>
 	);

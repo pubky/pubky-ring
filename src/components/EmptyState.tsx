@@ -1,13 +1,18 @@
 import React, { ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { View, Text, ArrowRight, Plus, Button, NavButton, CircleAlert } from '../theme/components.ts';
-import { createNewPubky } from '../utils/pubky.ts';
+import {
+	createNewPubky,
+	importPubky as importPubkyUtil,
+} from '../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
 import PubkyRingHeader from './PubkyRingHeader';
 import { importFile } from '../utils/rnfs.ts';
 import { showEditPubkyPrompt, showToast } from '../utils/helpers.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useNavigation } from '@react-navigation/native';
+import { err, ok, Result } from '@synonymdev/result';
+import { IGenerateSecretKey, mnemonicPhraseToKeypair } from '@synonymdev/react-native-pubky';
 
 const EmptyState = (): ReactElement => {
 	const dispatch = useDispatch();
@@ -31,29 +36,62 @@ const EmptyState = (): ReactElement => {
 		}, 200);
 	}, [dispatch]);
 
-	const importPubky = useCallback(async () => {
-		const res = await importFile(dispatch);
-		if (res.isErr()) {
-			if (res.error?.message) {
+	const importPubky = useCallback(async (mnemonic = ''): Promise<Result<string>> => {
+		if (mnemonic) {
+			const secretKeyRes: Result<IGenerateSecretKey> = await mnemonicPhraseToKeypair(mnemonic);
+			if (secretKeyRes.isErr()) {
+				const msg = secretKeyRes.error.message;
 				showToast({
 					type: 'error',
 					title: 'Error',
-					description: res.error.message,
+					description: msg,
 				});
+				return err(msg);
 			}
-		} else {
+
+			const secretKey: string = secretKeyRes.value.secret_key;
+			const pubky = await importPubkyUtil({ secretKey, dispatch, mnemonic });
+			if (pubky.isErr()) {
+				const msg = pubky.error.message;
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: msg,
+				});
+				return err(msg);
+			}
+			await SheetManager.hide('add-pubky');
 			setTimeout( () => {
 				showEditPubkyPrompt({
 					title: 'Setup',
-					pubky: res.value,
+					pubky: pubky.value,
 				});
 			}, 200);
-			showToast({
-				type: 'success',
-				title: 'Success',
-				description: 'Pubky imported successfully',
-			});
+			return ok('Successfully created pubky.');
 		}
+		const res = await importFile(dispatch);
+		if (res.isErr()) {
+			const msg = res.error?.message ?? 'Unable to import file.';
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: msg,
+			});
+			return err(msg);
+		}
+		setTimeout( () => {
+			showEditPubkyPrompt({
+				title: 'Setup',
+				pubky: res.value,
+			});
+		}, 200);
+		const msg = 'Pubky imported successfully';
+		showToast({
+			type: 'success',
+			title: 'Success',
+			description: msg,
+		});
+		return ok(msg);
 	}, [dispatch]);
 
 	const onPress = useCallback(() => {

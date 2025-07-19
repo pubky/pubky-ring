@@ -297,8 +297,7 @@ const HomeScreen = (): ReactElement => {
 			}}
 			icon={<Plus size={16} />}
 		/>
-	// eslint-disable-next-line react-hooks/exhaustive-deps
-	), []);
+	), [createPubky, importPubky]);
 
 	const onFooterPress = useCallback( () => {
 		try {

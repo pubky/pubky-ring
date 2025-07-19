@@ -75,7 +75,7 @@ export const PubkyDetail = ({
 
 	const handleBackup = useCallback(async () => {
 		try {
-			showBackupPrompt({ pubky });
+			showBackupPrompt({ pubky, backupPreference: pubkyData.backupPreference });
 		} catch (error) {
 			console.error('Backup process error:', error);
 			showToast({
@@ -84,7 +84,7 @@ export const PubkyDetail = ({
 				description: JSON.stringify(error),
 			});
 		}
-	}, [pubky]);
+	}, [pubky, pubkyData.backupPreference]);
 
 	const keyExtractor = useCallback((item: PubkySession, i: number) =>
 		`${item.created_at}-${i}`, []);

@@ -1,4 +1,4 @@
-import { Pubky, PubkyState } from '../../types/pubky.ts';
+import { EBackupPreference, Pubky, PubkyState } from '../../types/pubky.ts';
 
 export const initialState: PubkyState = {
 	pubkys: {},
@@ -12,4 +12,5 @@ export const defaultPubkyState: Pubky = {
 	signedUp: false,
 	image: '',
 	sessions: [],
+	backupPreference: EBackupPreference.encryptedFile,
 };

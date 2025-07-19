@@ -20,6 +20,7 @@ export interface Pubky {
 	signupToken: string;
 	image: string;
 	sessions: PubkySession[];
+	backupPreference: EBackupPreference;
 }
 
 export interface PubkyState {
@@ -30,3 +31,13 @@ export interface PubkyState {
 export type TPubkys = {
 	[key: string]: Pubky
 };
+
+export interface IKeychainData {
+	secretKey: string;
+	mnemonic: string;
+}
+
+export enum EBackupPreference {
+	recoveryPhrase = 'recoveryPhrase',
+	encryptedFile = 'encryptedFile',
+}

@@ -60,6 +60,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 		return themeText[theme] || 'System';
 	}, []);
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const themeDisplayText = useMemo(() => getThemeDisplayText(currentTheme), [currentTheme, getThemeDisplayText]);
 
 	const navigationAnimationText = useMemo(() => {
@@ -70,6 +71,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 		return animationText[navigationAnimation] || 'Slide';
 	}, [navigationAnimation]);
 
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleThemePress = useCallback(() => {
 		switch (currentTheme) {
 			case ETheme.system:
@@ -247,6 +249,7 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		fontWeight: '600',
 	},
+	// eslint-disable-next-line react-native/no-unused-styles
 	themeButton: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',

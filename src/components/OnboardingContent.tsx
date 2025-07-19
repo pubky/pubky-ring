@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react';
+import React, { ReactElement, useCallback } from 'react';
 import {
 	View,
 	Text,
@@ -8,13 +8,26 @@ import {
 } from 'react-native';
 import { RadialGradient } from '../theme/components.ts';
 import { ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types.ts';
+import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
+import { useDispatch } from 'react-redux';
 
-type OnboardingContentProps = {
-    importPubky: () => void;
-    createPubky: () => void;
-};
+type NavigationProp = NativeStackNavigationProp<
+	RootStackParamList,
+	'Onboarding'
+>;
 
-const OnboardingContent = ({ importPubky, createPubky }: OnboardingContentProps): ReactElement => {
+const OnboardingContent = (): ReactElement => {
+	const navigation = useNavigation<NavigationProp>();
+	const dispatch = useDispatch();
+
+	const navigateHome = useCallback(() => {
+		dispatch(updateShowOnboarding({ showOnboarding: false }));
+		navigation.replace('Home');
+	}, [dispatch, navigation]);
+
 	return (
 		<View style={styles.container}>
 			<RadialGradient
@@ -57,13 +70,8 @@ const OnboardingContent = ({ importPubky, createPubky }: OnboardingContentProps)
 
 					{/* Buttons */}
 					<View style={styles.buttonContainer}>
-						<TouchableOpacity
-							style={styles.buttonSecondary}
-							onPress={importPubky}>
-							<Text style={styles.buttonText}>Import pubky</Text>
-						</TouchableOpacity>
-						<TouchableOpacity style={styles.buttonPrimary} onPress={createPubky}>
-							<Text style={styles.buttonText}>New pubky</Text>
+						<TouchableOpacity style={styles.buttonPrimary} onPress={navigateHome}>
+							<Text style={styles.buttonText}>Get Started</Text>
 						</TouchableOpacity>
 					</View>
 				</View>
@@ -142,15 +150,6 @@ const styles = StyleSheet.create({
 		width: '100%',
 		gap: 12,
 		paddingHorizontal: 32,
-	},
-	buttonSecondary: {
-		flex: 1,
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center',
-		minHeight: 64,
 	},
 	buttonPrimary: {
 		flex: 1,

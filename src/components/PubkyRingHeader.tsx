@@ -12,6 +12,7 @@ const PubkyRingLogo = require('../images/pubky-ring-logo.png');
 
 type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LogoButton = memo(({ onLongPress, onPress }: {
 	onLongPress: () => void;
 	onPress: () => void;

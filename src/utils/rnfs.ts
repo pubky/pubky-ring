@@ -176,7 +176,7 @@ export const showImportPrompt = ({
 						}
 
 						const secretKey = decryptRes.value;
-						const pubky = await importPubky(secretKey, dispatch);
+						const pubky = await importPubky({ secretKey, dispatch });
 						if (pubky.isErr()) {
 							resolve(err(pubky.error.message));
 							return err(pubky.error.message);

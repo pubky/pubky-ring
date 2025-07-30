@@ -52,6 +52,8 @@
 	<string></string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>$(PRODUCT_NAME) requires access to the photo library to save and load files.</string>
+	<key>RCTNewArchEnabled</key>
+	<true/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>InterTight-VariableFont_wght.ttf</string>

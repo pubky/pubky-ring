@@ -4,18 +4,46 @@ import React_RCTAppDelegate
 import ReactAppDependencyProvider
 
 @main
-class AppDelegate: RCTAppDelegate {
-  override func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey : Any]? = nil) -> Bool {
-    self.moduleName = "pubkyring"
-    self.dependencyProvider = RCTAppDependencyProvider()
+class AppDelegate: UIResponder, UIApplicationDelegate {
+  var window: UIWindow?
 
-    // You can add your custom initial props in the dictionary below.
-    // They will be passed down to the ViewController used by React Native.
-    self.initialProps = [:]
+  var reactNativeDelegate: ReactNativeDelegate?
+  var reactNativeFactory: RCTReactNativeFactory?
 
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+  func application(
+    _ application: UIApplication,
+    didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
+  ) -> Bool {
+    let delegate = ReactNativeDelegate()
+    let factory = RCTReactNativeFactory(delegate: delegate)
+    delegate.dependencyProvider = RCTAppDependencyProvider()
+
+    reactNativeDelegate = delegate
+    reactNativeFactory = factory
+
+    window = UIWindow(frame: UIScreen.main.bounds)
+
+    factory.startReactNative(
+      withModuleName: "pubkyring",
+      in: window,
+      launchOptions: launchOptions
+    )
+
+    return true
   }
 
+  // This method handles deep links with custom URL schemes (e.g., pubkyring://)
+  func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
+    return RCTLinkingManager.application(app, open: url, options: options)
+  }
+
+  // This method handles Universal Links (e.g., https://pubky.app)
+  func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
+    return RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
+  }
+}
+
+class ReactNativeDelegate: RCTDefaultReactNativeFactoryDelegate {
   override func sourceURL(for bridge: RCTBridge) -> URL? {
     self.bundleURL()
   }
@@ -26,15 +54,5 @@ class AppDelegate: RCTAppDelegate {
 #else
     Bundle.main.url(forResource: "main", withExtension: "jsbundle")
 #endif
-  }
-
-  // This method handles deep links with custom URL schemes (e.g., pubkyring://)
-  override func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-    return RCTLinkingManager.application(app, open: url, options: options)
-  }
-
-  // This method handles Universal Links (e.g., https://pubky.app)
-  override func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void) -> Bool {
-    return RCTLinkingManager.application(application, continue: userActivity, restorationHandler: restorationHandler)
   }
 }

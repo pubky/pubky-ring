@@ -1,18 +1,17 @@
 import { SvgXml } from 'react-native-svg';
 import { memo, ReactElement, useMemo } from 'react';
 import { Image } from 'react-native';
-import jdenticon, { JdenticonConfig } from 'jdenticon';
+import jdenticon from 'jdenticon';
 import { useSelector } from 'react-redux';
 import { getPubkyImage } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 
 interface ProfileAvatarProps {
-    pubky: string;
-    size?: number;
-    config?: JdenticonConfig;
+	pubky: string;
+	size?: number;
 }
 
-const ProfileAvatar = ({ pubky, size = 32, config }: ProfileAvatarProps): ReactElement => {
+const ProfileAvatar = ({ pubky, size = 32 }: ProfileAvatarProps): ReactElement => {
 	const publicKey = useMemo(() => {
 		if (!pubky) {
 			return '';
@@ -37,7 +36,7 @@ const ProfileAvatar = ({ pubky, size = 32, config }: ProfileAvatarProps): ReactE
 		);
 	}
 
-	const svg = jdenticon.toSvg(pubky, size, config);
+	const svg = jdenticon.toSvg(pubky, size);
 	return <SvgXml xml={svg} />;
 };
 

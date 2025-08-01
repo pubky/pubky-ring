@@ -70,7 +70,7 @@ export const handleScannedData = async ({
 			}
 			if (deepLink && res.isOk()) {
 				if (Platform.OS === 'android') {
-					await sleep(250);
+					//await sleep(250);
 					//Linking.openURL(PUBKY_APP_URL);
 				} else {
 					showToast({
@@ -96,7 +96,7 @@ export const handleScannedData = async ({
 			});
 			if (deepLink && signInRes.isOk()) {
 				if (Platform.OS === 'android') {
-					await sleep(250);
+					//await sleep(250);
 					//Linking.openURL(PUBKY_APP_URL);
 				} else {
 					showToast({

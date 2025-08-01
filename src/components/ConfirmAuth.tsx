@@ -147,8 +147,8 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			if (deepLink) {
 				setAuthorizing(false);
 				// Give a partial glimpse of the success animation and some time for the site to detect us as logged in.
-				await sleep(FADE_DURATION + 300);
-				handleClose();
+				//await sleep(FADE_DURATION + 300);
+				//handleClose();
 				//Linking.openURL(PUBKY_APP_URL);
 			}
 		} catch (e: unknown) {

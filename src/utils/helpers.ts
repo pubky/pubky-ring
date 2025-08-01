@@ -16,7 +16,7 @@ import {
 import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
-import { Linking, Platform, Share } from 'react-native';
+import { Platform, Share } from 'react-native';
 import { getAutoAuthFromStore, getBackupPreference, getIsOnline, getStore } from './store-helpers.ts';
 import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
@@ -24,7 +24,6 @@ import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
-import { PUBKY_APP_URL } from './constants.ts';
 
 export const handleScannedData = async ({
 	pubky,
@@ -72,7 +71,7 @@ export const handleScannedData = async ({
 			if (deepLink && res.isOk()) {
 				if (Platform.OS === 'android') {
 					await sleep(250);
-					Linking.openURL(PUBKY_APP_URL);
+					//Linking.openURL(PUBKY_APP_URL);
 				} else {
 					showToast({
 						type: 'info',
@@ -98,7 +97,7 @@ export const handleScannedData = async ({
 			if (deepLink && signInRes.isOk()) {
 				if (Platform.OS === 'android') {
 					await sleep(250);
-					Linking.openURL(PUBKY_APP_URL);
+					//Linking.openURL(PUBKY_APP_URL);
 				} else {
 					showToast({
 						type: 'info',

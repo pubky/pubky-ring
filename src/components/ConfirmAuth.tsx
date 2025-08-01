@@ -149,7 +149,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				// Give a partial glimpse of the success animation and some time for the site to detect us as logged in.
 				await sleep(FADE_DURATION + 300);
 				handleClose();
-				Linking.openURL(PUBKY_APP_URL);
+				//Linking.openURL(PUBKY_APP_URL);
 			}
 		} catch (e: unknown) {
 			const error = e as Error;

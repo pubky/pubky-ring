@@ -1,8 +1,7 @@
-import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
 import { Pubky } from '../types/pubky.ts';
-import { Dispatch } from 'redux';
-import { useDispatch, useSelector } from 'react-redux';
+import { useQRScanner } from '../hooks/useQRScanner';
 import {
 	SessionText,
 	Box,
@@ -20,26 +19,73 @@ import {
 	LinearGradient,
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
-import { getIsOnline } from '../store/selectors/settingsSelectors.ts';
 import { showEditPubkyPrompt } from '../utils/helpers.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
+import { textStyles, buttonStyles, shadowStyles } from '../theme/utils';
+import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
+
+interface AuthorizeQRButtonProps {
+	isLoading: boolean;
+	isSignedUp: boolean;
+	onPress: () => void;
+	onLongPress?: () => void;
+}
+
+const AuthorizeQRButton = memo(({ 
+	isLoading, 
+	isSignedUp, 
+	onPress, 
+	onLongPress 
+}: AuthorizeQRButtonProps) => (
+	<AuthorizeButton
+		style={[
+			styles.actionButton,
+			isLoading && styles.actionButtonDisabled,
+		]}
+		onPress={onPress}
+		onLongPress={onLongPress}
+		disabled={isLoading}>
+		{isLoading ? (
+			<ActivityIndicator size="small" />
+		) : (
+			isSignedUp ? <QrCode size={16} /> : null
+		)}
+		<Text style={textStyles.button}>{isSignedUp ? 'Authorize' : 'Setup'}</Text>
+	</AuthorizeButton>
+));
+
+interface PubkyInfoProps {
+	pubkyName: string;
+	publicKey: string;
+	sessionsCount: number;
+}
+
+const PubkyInfo = memo(({ 
+	pubkyName, 
+	publicKey, 
+	sessionsCount 
+}: PubkyInfoProps) => (
+	<View style={styles.contentContainer}>
+		<Text style={[textStyles.heading, styles.nameText]} numberOfLines={1}>
+			{pubkyName}
+		</Text>
+		<Card style={styles.row}>
+			<Text style={textStyles.body}>
+				pk:{truncateStr(publicKey)}
+			</Text>
+			{sessionsCount > 0 && (
+				<CardView style={styles.sessionsButton}>
+					<SessionText style={textStyles.button}>{sessionsCount}</SessionText>
+				</CardView>
+			)}
+		</Card>
+	</View>
+));
 
 interface PubkyBoxProps {
 	pubky: string;
 	pubkyData: Pubky;
 	sessionsCount?: number;
-	onQRPress: ({
-		pubky,
-		dispatch,
-		onComplete,
-		isOnline,
-	}: {
-		pubky: string;
-		dispatch: Dispatch;
-		onComplete?: () => void;
-		isOnline: boolean;
-	}) => Promise<string>;
-	onPress: (data: string, index: number) => void;
 	index?: number;
 	onLongPress?: () => void;
 	disabled?: boolean;
@@ -49,32 +95,20 @@ const PubkyBox = ({
 	pubky,
 	pubkyData,
 	sessionsCount = 0,
-	onQRPress,
-	onPress,
 	index,
 	onLongPress,
 	disabled,
 }: PubkyBoxProps): ReactElement => {
-	const [isQRLoading, setIsQRLoading] = useState(false);
-	const dispatch = useDispatch();
-	const isOnline = useSelector(getIsOnline);
+	const { handleQRPress, isQRLoading } = useQRScanner();
+	const { onQRPress, onPubkyPress } = usePubkyHandlers();
 
-	const handleQRPress = useCallback(async () => {
-		setIsQRLoading(true);
-		try {
-			await onQRPress({
-				pubky,
-				dispatch,
-				isOnline,
-			});
-		} finally {
-			setIsQRLoading(false);
-		}
-	}, [dispatch, isOnline, onQRPress, pubky]);
+	const handleQRAction = useCallback(async () => {
+		await handleQRPress(pubky, onQRPress);
+	}, [handleQRPress, onQRPress, pubky]);
 
 	const handleOnPress = useCallback(() => {
-		onPress(pubky, index ?? 0);
-	}, [index, onPress, pubky]);
+		onPubkyPress(pubky, index ?? 0);
+	}, [index, onPubkyPress, pubky]);
 
 	const publicKey = useMemo(
 		() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky),
@@ -87,7 +121,7 @@ const PubkyBox = ({
 
 	const qrPress = useCallback(() => {
 		if (pubkyData.signedUp) {
-			handleQRPress();
+			handleQRAction();
 		} else {
 			showEditPubkyPrompt({
 				title: 'Setup',
@@ -96,7 +130,7 @@ const PubkyBox = ({
 				data: pubkyData,
 			});
 		}
-	}, [handleQRPress, pubky, pubkyData]);
+	}, [handleQRAction, pubky, pubkyData]);
 
 	return (
 		<LinearGradient style={styles.container}>
@@ -119,21 +153,11 @@ const PubkyBox = ({
 						</NavView>
 					</ForegroundView>
 
-					<View style={styles.contentContainer}>
-						<Text style={styles.nameText} numberOfLines={1}>
-							{pubkyName}
-						</Text>
-						<Card style={styles.row}>
-							<Text style={styles.pubkyText}>
-								pk:{truncateStr(pubky)}
-							</Text>
-							{sessionsCount > 0 && (
-								<CardView style={styles.sessionsButton}>
-									<SessionText style={styles.buttonText}>{sessionsCount}</SessionText>
-								</CardView>
-							)}
-						</Card>
-					</View>
+					<PubkyInfo 
+						pubkyName={pubkyName} 
+						publicKey={publicKey} 
+						sessionsCount={sessionsCount} 
+					/>
 
 					<ForegroundView style={styles.buttonArrow}>
 						<ArrowRight size={24} />
@@ -141,21 +165,12 @@ const PubkyBox = ({
 				</Box>
 
 				<ForegroundView style={styles.buttonsContainer}>
-					<AuthorizeButton
-						style={[
-							styles.actionButton,
-							isQRLoading && styles.actionButtonDisabled,
-						]}
+					<AuthorizeQRButton
+						isLoading={isQRLoading}
+						isSignedUp={pubkyData.signedUp}
 						onPress={qrPress}
 						onLongPress={onLongPress}
-						disabled={isQRLoading}>
-						{isQRLoading ? (
-							<ActivityIndicator size="small" />
-						) : (
-							pubkyData.signedUp ? <QrCode size={16} /> : null
-						)}
-						<Text style={styles.buttonText}>{pubkyData.signedUp ? 'Authorize' : 'Setup'}</Text>
-					</AuthorizeButton>
+					/>
 				</ForegroundView>
 			</Button>
 		</LinearGradient>
@@ -166,14 +181,7 @@ const styles = StyleSheet.create({
 	container: {
 		borderRadius: 16,
 		alignSelf: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 1,
-		},
-		shadowOpacity: 0.1,
-		shadowRadius: 2,
-		elevation: 2,
+		...shadowStyles.small,
 		marginBottom: 20,
 		marginHorizontal: 24,
 	},
@@ -205,9 +213,6 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	nameText: {
-		fontSize: 26,
-		fontWeight: 300,
-		lineHeight: 26,
 		...Platform.select({
 			android: {
 				paddingBottom: 4,
@@ -219,13 +224,6 @@ const styles = StyleSheet.create({
 		display: 'flex',
 		justifyContent: 'center',
 		marginLeft: 'auto',
-	},
-	pubkyText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 20,
-		letterSpacing: 0.4,
-		backgroundColor: 'transparent',
 	},
 	buttonsContainer: {
 		marginTop: 20,
@@ -248,23 +246,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	actionButton: {
-		borderWidth: 1,
-		borderRadius: 64,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		alignItems: 'center',
+		...buttonStyles.secondary,
 		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'center',
 		gap: 8,
 		width: '100%',
-	},
-	buttonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
-		alignSelf: 'center',
 	},
 	actionButtonDisabled: {
 		opacity: 0.7,

@@ -14,6 +14,7 @@ import {
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { version } from '../../package.json';
+// @ts-ignore
 import PubkyRingLogo from '../images/pubky-ring.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';

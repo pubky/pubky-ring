@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
 		borderTopLeftRadius: 20,
 		minHeight: '40%',
 		paddingHorizontal: 24,
-		paddingBottom: 34,
+		paddingBottom: 10,
 	},
 	title: {
 		fontSize: 17,
@@ -251,6 +251,8 @@ const styles = StyleSheet.create({
 		paddingLeft: 16,
 		fontSize: 26,
 		fontWeight: '300',
+		lineHeight: 32,
+		textAlignVertical: 'center',
 		left: Platform.select({
 			android: 4,
 			ios: 0,

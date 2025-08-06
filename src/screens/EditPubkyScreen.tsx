@@ -4,8 +4,6 @@ import {
 	TextInput,
 	ActivityIndicator,
 } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
 import { useDispatch } from 'react-redux';
 import {
 	setName,
@@ -20,10 +18,11 @@ import {
 	ArrowLeft,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
+import { useTypedNavigation, useTypedRoute } from '../navigation/hooks';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
-
-const EditPubkyScreen = ({ route, navigation }: Props): ReactElement => {
+const EditPubkyScreen = (): ReactElement => {
+	const navigation = useTypedNavigation();
+	const route = useTypedRoute<'EditPubky'>();
 	const { pubkyData } = route.params;
 	const dispatch = useDispatch();
 

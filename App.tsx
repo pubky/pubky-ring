@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo } from 'react';
-import './src/sheets/sheets';
 import { ThemeProvider } from 'styled-components/native';
 import { darkTheme, lightTheme } from './src/theme';
 import RootNavigator from './src/navigation/RootNavigator.tsx';
@@ -16,6 +15,7 @@ import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection, parseDeepLink, showToast } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { initializeSheets } from './src/sheets/LazySheets';
 
 const _toastConfig = toastConfig();
 
@@ -24,6 +24,14 @@ function App(): React.JSX.Element {
 	const currentTheme = useSelector(getTheme);
 	const isOnline = useSelector(getIsOnline);
 	const dispatch = useDispatch();
+
+	// Initialize sheets lazily after mount
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			initializeSheets();
+		}, 100);
+		return (): void => clearTimeout(timer);
+	}, []);
 
 	// Handle deep linking
 	useEffect(() => {
@@ -61,12 +69,15 @@ function App(): React.JSX.Element {
 	}, [dispatch]);
 
 	useEffect(() => {
-		checkNetworkConnection({
-			prevNetworkState: isOnline,
-			dispatch,
-			displayToastIfOnline: false,
-			displayToastIfOffline: true,
-		});
+		// Defer network check to avoid blocking initial render
+		const timer = setTimeout(() => {
+			checkNetworkConnection({
+				prevNetworkState: isOnline,
+				dispatch,
+				displayToastIfOnline: false,
+				displayToastIfOffline: true,
+			});
+		}, 500);
 
 		const unsubscribe = NetInfo.addEventListener(state => {
 			const isConnected = state?.isConnected ?? false;
@@ -90,7 +101,10 @@ function App(): React.JSX.Element {
 		});
 
 		// Cleanup subscription on unmount
-		return (): void => unsubscribe();
+		return (): void => {
+			clearTimeout(timer);
+			unsubscribe();
+		};
 	}, [dispatch, isOnline]);
 
 	const theme = useMemo(() => {

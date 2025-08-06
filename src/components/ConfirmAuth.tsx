@@ -24,6 +24,7 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
 import { AUTHORIZE_KEY_GRADIENT, PUBKY_APP_URL } from '../utils/constants.ts';
+import { buttonStyles } from '../theme/utils';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -95,6 +96,14 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		transform: [{ scale: checkScale.value }],
 		position: 'absolute',
 	}));
+
+	// Reset state and animations when pubky changes
+	useEffect(() => {
+		setAuthorizing(false);
+		setIsAuthorized(false);
+		checkOpacity.value = 0;
+		checkScale.value = 0.2;
+	}, [pubky, checkOpacity, checkScale]);
 
 	useEffect(() => {
 		if (authorizing) {
@@ -293,11 +302,8 @@ const styles = StyleSheet.create({
 		borderTopLeftRadius: 20,
 	},
 	actionButton: {
+		...buttonStyles.compact,
 		width: '45%',
-		height: 48,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
 		margin: 8,
 	},
 	actionButtonText: {
@@ -394,32 +400,21 @@ const styles = StyleSheet.create({
 		minWidth: 100,
 	},
 	denyButton: {
+		...buttonStyles.compactOutline,
 		width: '45%',
-		height: 58,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
 		margin: 8,
 		justifyContent: 'center',
 	},
 	authorizeButton: {
+		...buttonStyles.compactOutline,
 		width: '45%',
-		height: 58,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
 		margin: 8,
-		borderWidth: 1,
 		justifyContent: 'center',
 	},
 	okButton: {
+		...buttonStyles.compactOutline,
 		width: '100%',
-		height: 58,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
 		margin: 8,
-		borderWidth: 1,
 		justifyContent: 'center',
 	},
 	buttonDisabled: {

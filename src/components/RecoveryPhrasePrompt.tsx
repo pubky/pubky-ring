@@ -47,7 +47,6 @@ const RecoveryPhrasePrompt = ({ payload }: {
 	return (
 		<ActionSheetContainer
 			id="recovery-phrase-prompt"
-			// @ts-ignore
 			navigationAnimation={navigationAnimation}
 			onClose={() => {
 				onClose();
@@ -100,7 +99,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 
 				{error ? (
 					<Text style={styles.errorText}>{error}</Text>
-                ) : null}
+				) : null}
 
 				<View style={styles.buttonContainer}>
 					<Button

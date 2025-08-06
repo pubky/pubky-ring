@@ -4,13 +4,9 @@ import { TouchableOpacity, View } from '../theme/components.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
+import { useTypedNavigation } from '../navigation/hooks';
 
 const PubkyRingLogo = require('../images/pubky-ring-logo.png');
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList>;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LogoButton = memo(({ onLongPress, onPress }: {
@@ -37,12 +33,12 @@ const PubkyRingHeader = memo(({
 	leftButton = undefined,
 	rightButton = undefined,
 }: {
-	leftButton?: ReactElement;
-	rightButton?: ReactElement;
+	leftButton?: ReactElement | null;
+	rightButton?: ReactElement | null;
 }): ReactElement => {
 	const dispatch = useDispatch();
 	const theme = useSelector(getTheme, (prev, next) => prev === next);
-	const navigation = useNavigation<NavigationProp>();
+	const navigation = useTypedNavigation();
 	const lastTapRef = useRef(0);
 
 	const toggleTheme = useCallback(() => {

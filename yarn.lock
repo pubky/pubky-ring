@@ -5904,11 +5904,6 @@ react-native-reanimated@^4.0.1:
     react-native-is-edge-to-edge "^1.2.1"
     semver "7.7.2"
 
-react-native-reorderable-list@^0.16.2:
-  version "0.16.2"
-  resolved "https://registry.yarnpkg.com/react-native-reorderable-list/-/react-native-reorderable-list-0.16.2.tgz#732063edd51097494613d53a03a3229dddb97f4b"
-  integrity sha512-+MwIpFj9HZQl/oko/hgqolvMUIYrRyFWu88YTNnmzguEsTS2C+MslUu3rN9tKe+BlHfqSlgRYSbHZeBlnsSYBw==
-
 react-native-safe-area-context@^5.5.2:
   version "5.5.2"
   resolved "https://registry.yarnpkg.com/react-native-safe-area-context/-/react-native-safe-area-context-5.5.2.tgz#a3c0e99385a45e31ef24d24358aa622cc9e1a069"

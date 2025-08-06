@@ -45,9 +45,33 @@ export const getAllPubkys = (state: RootState): { [key: string]: Pubky } => {
 	return state.pubky.pubkys;
 };
 
+/**
+ * Get all pubkys as an array
+ */
+export const getAllPubkysArray = createSelector(
+	[selectAllPubkys],
+	(pubkys): Array<{ key: string; value: Pubky }> => {
+		return Object.entries(pubkys).map(([key, value]) => ({
+			key,
+			value,
+		}));
+	}
+);
+
 export const getHasPubkys = (state: RootState): boolean => {
 	return Object.keys(state.pubky.pubkys).length > 0;
 };
+
+/**
+ * Combined selector for HomeScreen to reduce re-renders
+ */
+export const getHomeScreenData = createSelector(
+	[getAllPubkysArray, getHasPubkys],
+	(pubkyArray, hasPubkys) => ({
+		pubkyArray,
+		hasPubkys,
+	})
+);
 
 export const getDeepLink = (state: RootState): string => {
 	return state.pubky.deepLink;

@@ -76,6 +76,7 @@ const InputItemComponent = ({
 		<View style={[styles.inputWrapper, style]}>
 			<View style={[styles.inputContainer, error ? styles.inputError : null]}>
 				<TextInput
+					// @ts-ignore
 					ref={inputRef}
 					style={styles.input}
 					value={value}
@@ -637,7 +638,7 @@ const EditPubky = ({ payload }: {
 							style={styles.radialGradient}
 							colors={checkMarkGradient}
 							center={{ x: 0.5, y: 0.5 }}
-							stops={[0.2, 1]}
+							positions={[0, 0.2, 0.4, 0.6, 0.8, 1]}
 						/>
 					</AnimatedView>
 
@@ -737,6 +738,8 @@ const styles = StyleSheet.create({
 		paddingLeft: 16,
 		fontSize: 26,
 		fontWeight: '300',
+		lineHeight: 32,
+		textAlignVertical: 'center',
 		left: Platform.select({
 			android: 4,
 			ios: 0,

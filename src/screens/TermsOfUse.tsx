@@ -9,18 +9,14 @@ import {
 import LinearGradient from 'react-native-linear-gradient';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
 import { ONBOARDING_KEY_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
 import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { getShowOnboarding } from '../store/selectors/settingsSelectors.ts';
-
-type NavigationProp = NativeStackNavigationProp<RootStackParamList, 'TermsOfUse'>;
+import { useTypedNavigation } from '../navigation/hooks';
 
 const TermsOfUse = (): React.ReactElement => {
-	const navigation = useNavigation<NavigationProp>();
+	const navigation = useTypedNavigation();
 	const dispatch = useDispatch();
 	const _hasPubkys = useSelector(getHasPubkys);
 	const showOnboarding = useSelector(getShowOnboarding);

@@ -4,7 +4,6 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/store';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens, enableFreeze } from 'react-native-screens';
-import './src/sheets/sheets';
 import App from './App';
 
 enableScreens(true);
@@ -14,7 +13,8 @@ function Root(): ReactElement {
 	return (
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
-				<GestureHandlerRootView>
+				{/* eslint-disable-next-line react-native/no-inline-styles */}
+				<GestureHandlerRootView style={{ flex: 1 }}>
 					<App />
 				</GestureHandlerRootView>
 			</PersistGate>

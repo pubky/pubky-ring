@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
-import './src/sheets/sheets';
+import './src/sheets';
 import { ThemeProvider } from 'styled-components/native';
 import { darkTheme, lightTheme } from './src/theme';
 import RootNavigator from './src/navigation/RootNavigator.tsx';
@@ -61,12 +61,15 @@ function App(): React.JSX.Element {
 	}, [dispatch]);
 
 	useEffect(() => {
-		checkNetworkConnection({
-			prevNetworkState: isOnline,
-			dispatch,
-			displayToastIfOnline: false,
-			displayToastIfOffline: true,
-		});
+		// Defer network check to avoid blocking initial render
+		const timer = setTimeout(() => {
+			checkNetworkConnection({
+				prevNetworkState: isOnline,
+				dispatch,
+				displayToastIfOnline: false,
+				displayToastIfOffline: true,
+			});
+		}, 500);
 
 		const unsubscribe = NetInfo.addEventListener(state => {
 			const isConnected = state?.isConnected ?? false;
@@ -90,7 +93,10 @@ function App(): React.JSX.Element {
 		});
 
 		// Cleanup subscription on unmount
-		return (): void => unsubscribe();
+		return (): void => {
+			clearTimeout(timer);
+			unsubscribe();
+		};
 	}, [dispatch, isOnline]);
 
 	const theme = useMemo(() => {

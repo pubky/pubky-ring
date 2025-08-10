@@ -11,7 +11,7 @@ import { showBackupPrompt, showToast } from '../../utils/helpers.ts';
 import { Dispatch } from 'redux';
 import { View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useNavigation } from '@react-navigation/native';
+import { useTypedNavigation } from '../../navigation/hooks';
 
 export interface PubkyDetailProps {
 	index: number;
@@ -37,7 +37,7 @@ export const PubkyDetail = ({
 	const { pubky, sessions } = pubkyData;
 	const publicKey = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
 	const dispatch = useDispatch();
-	const navigation = useNavigation();
+	const navigation = useTypedNavigation();
 
 	const handleQRPress = useCallback(() => {
 		return onQRPress({ pubky, pubkyData, dispatch });

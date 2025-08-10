@@ -8,19 +8,13 @@ import {
 } from 'react-native';
 import { RadialGradient } from '../theme/components.ts';
 import { ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types.ts';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { useDispatch } from 'react-redux';
-
-type NavigationProp = NativeStackNavigationProp<
-	RootStackParamList,
-	'Onboarding'
->;
+import { buttonStyles } from '../theme/utils';
+import { useTypedNavigation } from '../navigation/hooks';
 
 const OnboardingContent = (): ReactElement => {
-	const navigation = useNavigation<NavigationProp>();
+	const navigation = useTypedNavigation();
 	const dispatch = useDispatch();
 
 	const navigateHome = useCallback(() => {
@@ -152,14 +146,9 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 32,
 	},
 	buttonPrimary: {
+		...buttonStyles.primaryOutline,
 		flex: 1,
 		backgroundColor: 'rgba(255, 255, 255, 0.10)',
-		borderColor: 'white',
-		borderWidth: 1,
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center',
 		minHeight: 64,
 	},
 	buttonText: {

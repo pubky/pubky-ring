@@ -229,7 +229,6 @@ const AddPubky = ({ payload }: {
 		<View style={styles.container}>
 			<ActionSheetContainer
 				id="add-pubky"
-				// @ts-ignore
 				navigationAnimation={navigationAnimation}
 				keyboardHandlerEnabled={Platform.OS === 'ios'}
 				//isModal={Platform.OS === 'ios'}

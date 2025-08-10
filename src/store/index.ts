@@ -30,22 +30,15 @@ const rootReducer = combineReducers({
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-const logger = __DEV__
-  ? require('redux-logger').createLogger({
-  	collapsed: true,
-  })
-  : null;
 
 export const store = configureStore({
 	reducer: persistedReducer,
-	middleware: (getDefaultMiddleware) => {
-		const middleware = getDefaultMiddleware({
+	middleware: (getDefaultMiddleware) => 
+		getDefaultMiddleware({
 			serializableCheck: {
 				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
 			},
-		});
-		return __DEV__ ? middleware.concat(logger) : middleware;
-	},
+		}),
 	devTools: {
 		name: 'pubkyring',
 		trace: true,

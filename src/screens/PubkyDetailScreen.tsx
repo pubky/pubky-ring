@@ -5,8 +5,7 @@ import React, {
 	useMemo,
 } from 'react';
 import { StyleSheet } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { PubkyData, RootStackParamList } from '../navigation/types';
+import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import {
 	showEditPubkyPrompt,
@@ -23,10 +22,11 @@ import {
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { Dispatch } from 'redux';
+import { useTypedNavigation, useTypedRoute } from '../navigation/hooks';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'PubkyDetail'>;
-
-const PubkyDetailScreen = ({ route, navigation }: Props): ReactElement => {
+const PubkyDetailScreen = (): ReactElement => {
+	const navigation = useTypedNavigation();
+	const route = useTypedRoute<'PubkyDetail'>();
 	const { pubky, index } = route.params;
 	const data = useSelector((state: RootState) => getPubky(state, pubky));
 

@@ -1,6 +1,4 @@
 import React, { ReactElement, useCallback } from 'react';
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
 	View,
 	Text,
@@ -8,7 +6,6 @@ import {
 	TouchableOpacity,
 	Image,
 } from 'react-native';
-import { RootStackParamList } from '../navigation/types';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { PubkyState } from '../types/pubky';
@@ -19,14 +16,10 @@ import {
 	ONBOARDING_PUBKY_RADIAL_GRADIENT,
 } from '../utils/constants.ts';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
-
-type NavigationProp = NativeStackNavigationProp<
-  RootStackParamList,
-  'ConfirmPubky'
->;
+import { useTypedNavigation } from '../navigation/hooks';
 
 const ConfirmPubkyScreen = (): ReactElement => {
-	const navigation = useNavigation<NavigationProp>();
+	const navigation = useTypedNavigation();
 	const { pubkys = {} } = useSelector(
 		(state: RootState): PubkyState => state.pubky,
 	);

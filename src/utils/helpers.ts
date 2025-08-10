@@ -343,22 +343,6 @@ export const showBackupPrompt = async ({
 	});
 };
 
-export const showNamePubkyPrompt = ({
-	pubky,
-	pubkyName,
-}: {
-	pubky: string;
-	pubkyName: string;
-}): void => {
-	SheetManager.show('name-pubky-prompt', {
-		payload: {
-			pubky,
-			pubkyName,
-			onClose: () => SheetManager.hide('name-pubky-prompt'),
-		},
-	});
-};
-
 export const handleClipboardData = async ({
 	pubky,
 	dispatch,

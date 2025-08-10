@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo } from 'react';
+import './src/sheets';
 import { ThemeProvider } from 'styled-components/native';
 import { darkTheme, lightTheme } from './src/theme';
 import RootNavigator from './src/navigation/RootNavigator.tsx';
@@ -15,7 +16,6 @@ import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection, parseDeepLink, showToast } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { initializeSheets } from './src/sheets/LazySheets';
 
 const _toastConfig = toastConfig();
 
@@ -24,14 +24,6 @@ function App(): React.JSX.Element {
 	const currentTheme = useSelector(getTheme);
 	const isOnline = useSelector(getIsOnline);
 	const dispatch = useDispatch();
-
-	// Initialize sheets lazily after mount
-	useEffect(() => {
-		const timer = setTimeout(() => {
-			initializeSheets();
-		}, 100);
-		return (): void => clearTimeout(timer);
-	}, []);
 
 	// Handle deep linking
 	useEffect(() => {

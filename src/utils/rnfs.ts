@@ -101,10 +101,6 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		// Get filename from name or extract from URI as fallback
 		const fileName = name || decodeURIComponent(uri.split('/').pop() || '');
 
-		if (!fileName.toLowerCase().endsWith('.pkarr')) {
-			return err('Please select a .pkarr file');
-		}
-
 		const sanitizedName = fileName.replace(/\s+/g, '_');
 
 		const [copyResult] = await keepLocalCopy({
@@ -118,16 +114,21 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		});
 
 		if (copyResult.status !== 'success') {
-			return err('Failed to create local copy');
+			const errorMsg = `Failed to create local copy of file: ${copyResult.status}`;
+			console.error(errorMsg, copyResult);
+			return err(errorMsg);
 		}
 
 		const filePath = copyResult.localUri;
 		if (!filePath) {
-			return err('Invalid file path');
+			const errorMsg = 'Failed to get local file path after copy';
+			console.error(errorMsg, { copyResult });
+			return err(errorMsg);
 		}
 
 		const encodedPath = encodeURI(filePath);
 
+		// Read the file and let decryptRecoveryFile handle format validation
 		const base64Content = await RNFS.readFile(encodedPath, 'base64');
 
 		let fileDate: Date | undefined;
@@ -147,7 +148,7 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 
 	} catch (error) {
 		console.error('Import error:', error);
-		return err('Failed to import pubky');
+		return err(`Failed to import pubky: ${JSON.stringify(error)}`);
 	}
 }
 
@@ -172,23 +173,29 @@ export const showImportPrompt = ({
 					try {
 						const decryptRes = await decryptRecoveryFile(content, passphrase);
 						if (decryptRes.isErr()) {
-							return err(decryptRes.error.message);
+							const errorMsg = `Failed to decrypt file: ${decryptRes.error.message}. Please check your passphrase and try again.`;
+							console.error(errorMsg);
+							return err(errorMsg);
 						}
 
 						const secretKey = decryptRes.value;
+						console.log('File decrypted successfully, importing pubky...');
 						const pubky = await importPubky({ secretKey, dispatch });
 						if (pubky.isErr()) {
-							resolve(err(pubky.error.message));
-							return err(pubky.error.message);
+							const errorMsg = `Failed to import pubky after decryption: ${pubky.error.message}`;
+							console.error(errorMsg);
+							resolve(err(errorMsg));
+							return err(errorMsg);
 						}
 
+						console.log('Successfully imported pubky from encrypted file');
 						SheetManager.hide('backup-prompt').then();
 						resolve(ok(pubky.value));
 						return ok(pubky.value);
 					} catch (error) {
-						console.error('Import error:', error);
-						resolve(err('Failed to import submitted pubky'));
-						return err('Failed to import submitted pubky');
+						const errorMsg = `Unexpected error during import: ${JSON.stringify(error)}`;
+						resolve(err(errorMsg));
+						return err(errorMsg);
 					}
 				},
 				onClose: () => {

@@ -26,25 +26,3 @@ exports.config = {
     }
   ]
 };
-
-const shared = require('./wdio.shared.conf');
-const path = require('path');
-
-const apkPath = process.env.ANDROID_APP || path.resolve(__dirname, '../android/app/build/outputs/apk/debug/app-debug.apk');
-const avdName = process.env.AVD_NAME || 'Pixel_7_Pro_API_35';
-
-module.exports = {
-  ...shared,
-  capabilities: [
-    {
-      platformName: 'Android',
-      'appium:automationName': 'UiAutomator2',
-      'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
-      'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '14',
-      'appium:avd': avdName,
-      'appium:app': apkPath,
-      'appium:autoGrantPermissions': true,
-      'appium:newCommandTimeout': 120,
-    },
-  ],
-};

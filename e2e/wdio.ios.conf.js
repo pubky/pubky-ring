@@ -23,23 +23,3 @@ exports.config = {
     }
   ]
 };
-
-const shared = require('./wdio.shared.conf');
-const path = require('path');
-
-const iosAppPath = process.env.IOS_APP || path.resolve(__dirname, '../ios/build/Build/Products/Debug-iphonesimulator/pubkyring.app');
-
-module.exports = {
-  ...shared,
-  capabilities: [
-    {
-      platformName: 'iOS',
-      'appium:automationName': 'XCUITest',
-      'appium:deviceName': process.env.IOS_DEVICE_NAME || 'iPhone 15',
-      'appium:platformVersion': process.env.IOS_PLATFORM_VERSION || '17.5',
-      'appium:app': iosAppPath,
-      'appium:newCommandTimeout': 120,
-      'appium:autoAcceptAlerts': true,
-    },
-  ],
-};

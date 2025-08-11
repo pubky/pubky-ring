@@ -9,8 +9,8 @@ const OnboardingContent = React.lazy(() =>
 );
 
 const OnboardingScreen = (): ReactElement => {
-	return (
-		<View style={styles.container}>
+    return (
+        <View style={styles.container} testID="OnboardingScreen" accessibilityLabel="OnboardingScreen">
 			<Suspense fallback={<LoadingScreen />}>
 				<OnboardingContent />
 			</Suspense>

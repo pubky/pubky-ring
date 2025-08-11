@@ -67,7 +67,6 @@ const OnboardingContent = (): ReactElement => {
                         <TouchableOpacity
                             style={styles.buttonPrimary}
                             onPress={navigateHome}
-                            testID="OnboardingGetStartedButton"
                             accessibilityLabel="OnboardingGetStartedButton"
                         >
 							<Text style={styles.buttonText}>Get Started</Text>

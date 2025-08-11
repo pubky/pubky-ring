@@ -28,7 +28,6 @@ const EmptyState = (): ReactElement => {
                 <Button
                     style={[buttonStyles.primary, styles.buttonSecondary]}
                     onPressIn={onPress}
-                    accessibilityLabel="EmptyStateAddButton"
                 >
 					<Plus size={16} />
 					<Text style={textStyles.button}>Add pubky</Text>

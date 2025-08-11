@@ -17,7 +17,7 @@ exports.config = {
         : {
             // If no app is provided, attach to installed app by bundle id
             'appium:bundleId': process.env.IOS_BUNDLE_ID || 'app.pubkyring',
-            'appium:noReset': true,
+            'appium:noReset': false,
             'appium:fullReset': false
           })
     }

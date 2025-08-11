@@ -12,6 +12,10 @@ Pubky Ring is the key manager for your identity in the Pubky ecosystem. It lets 
 
 # Getting Started
 
+## Environment requirements
+- Node.js >= 20
+- Yarn 1.x
+
 ## Installation
 
 ### Clone the repository:
@@ -79,7 +83,7 @@ Prerequisites:
 Install drivers (one-time):
 
 ```bash
-npm run e2e:drivers
+yarn e2e:drivers
 ```
 
 Build the apps:
@@ -95,11 +99,11 @@ xcodebuild -workspace ios/pubkyring.xcworkspace -scheme pubkyring -configuration
 Run tests:
 - Android:
 ```bash
-npm run e2e:android
+yarn e2e:android
 ```
 - iOS:
 ```bash
-npm run e2e:ios
+yarn e2e:ios
 ```
 
 Environment overrides:
@@ -115,14 +119,14 @@ Examples:
 
 ```bash
 # Android (provide APK)
-ANDROID_APP=/absolute/path/app-debug.apk npm run e2e:android
+ANDROID_APP=/absolute/path/app-debug.apk yarn e2e:android
 
 # Android (attach to installed app on an emulator)
-AVD=Pixel_6_API_34 npm run e2e:android
+AVD=Pixel_6_API_34 yarn e2e:android
 
 # iOS (provide .app)
-IOS_APP=/absolute/path/pubkyring.app npm run e2e:ios
+IOS_APP=/absolute/path/pubkyring.app yarn e2e:ios
 
 # iOS (attach to installed app on a simulator)
-IOS_SIM="iPhone 15" npm run e2e:ios
+IOS_SIM="iPhone 15" yarn e2e:ios
 ```

@@ -20,7 +20,7 @@ exports.config = {
             // If no app is provided, connect to an already running RN app
             'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
             'appium:appActivity': process.env.APP_ACTIVITY || '.MainActivity',
-            'appium:noReset': true,
+            'appium:noReset': false,
             'appium:fullReset': false
           })
     }

@@ -25,10 +25,11 @@ const EmptyState = (): ReactElement => {
 						<ArrowRight size={24} />
 					</View>
 				</View>
-				<Button
-					style={[buttonStyles.primary, styles.buttonSecondary]}
-					onPressIn={onPress}
-				>
+                <Button
+                    style={[buttonStyles.primary, styles.buttonSecondary]}
+                    onPressIn={onPress}
+                    accessibilityLabel="EmptyStateAddButton"
+                >
 					<Plus size={16} />
 					<Text style={textStyles.button}>Add pubky</Text>
 				</Button>

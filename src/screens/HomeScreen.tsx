@@ -110,8 +110,8 @@ const HomeScreen = (): ReactElement => {
 
 	const hasPubkys = pubkyArray.length > 0;
 
-	return (
-		<View style={styles.container}>
+    return (
+        <View style={styles.container} accessibilityLabel="HomeScreen">
 			<DraggableFlatList
 				data={pubkyArray}
 				onDragEnd={handleDragEnd}

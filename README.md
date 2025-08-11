@@ -21,11 +21,7 @@ First, you will need to start **Metro**, the JavaScript _bundler_ that ships _wi
 To start Metro, run the following command from the _root_ of your React Native project:
 
 ```bash
-# using npm
 npm start
-
-# OR using Yarn
-yarn start
 ```
 
 ## Step 2: Start your Application
@@ -35,21 +31,13 @@ Let Metro Bundler run in its _own_ terminal. Open a _new_ terminal from the _roo
 ### For Android
 
 ```bash
-# using npm
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
 ### For iOS
 
 ```bash
-# using npm
 npm run ios
-
-# OR using Yarn
-yarn ios
 ```
 
 If everything is set up _correctly_, you should see your new app running in your _Android Emulator_ or _iOS Simulator_ shortly provided you have set up your emulator/simulator correctly.
@@ -81,4 +69,64 @@ gpg --verify app-release.apk.asc app-release.apk
 ```bash
 gpg --verify SHA256SUMS.asc
 sha256sum -c SHA256SUMS
+```
+
+## E2E testing (Appium + WebdriverIO)
+
+This project includes Appium/WebdriverIO E2E tests for Android emulators and iOS simulators.
+
+Prerequisites:
+- Xcode with an iOS Simulator (e.g., "iPhone 15").
+- Android SDK with an AVD (e.g., "Pixel_7_Pro_API_35").
+- Java JDK 17+ and Node.js 18+.
+
+Install drivers (one-time):
+
+```bash
+npm run e2e:drivers
+```
+
+Build the apps:
+- Android APK (Debug):
+```bash
+cd android && ./gradlew assembleDebug
+```
+- iOS app (Debug) for simulator:
+```bash
+xcodebuild -workspace ios/pubkyring.xcworkspace -scheme pubkyring -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build
+```
+
+Run tests:
+- Android:
+```bash
+npm run e2e:android
+```
+- iOS:
+```bash
+npm run e2e:ios
+```
+
+Environment overrides:
+- ANDROID_APP: absolute path to the .apk
+- AVD: Android Virtual Device name (e.g., Pixel_6_API_34)
+- ANDROID_DEVICE_NAME / ANDROID_PLATFORM_VERSION
+- APP_PACKAGE / APP_ACTIVITY (defaults: to.pubky.ring / .MainActivity)
+- IOS_APP: absolute path to the .app
+- IOS_SIM / IOS_PLATFORM_VERSION
+- IOS_BUNDLE_ID (default: app.pubkyring)
+
+Examples:
+
+```bash
+# Android (provide APK)
+ANDROID_APP=/absolute/path/app-debug.apk npm run e2e:android
+
+# Android (attach to installed app on an emulator)
+AVD=Pixel_6_API_34 npm run e2e:android
+
+# iOS (provide .app)
+IOS_APP=/absolute/path/pubkyring.app npm run e2e:ios
+
+# iOS (attach to installed app on a simulator)
+IOS_SIM="iPhone 15" npm run e2e:ios
 ```

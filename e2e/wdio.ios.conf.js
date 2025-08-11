@@ -1,0 +1,45 @@
+const shared = require('./wdio.shared.conf');
+
+const iosSimName = process.env.IOS_SIM || 'iPhone 15';
+const appPath = process.env.IOS_APP; // optional .app/.ipa path
+
+exports.config = {
+  ...shared.config,
+  capabilities: [
+    {
+      platformName: 'iOS',
+      'appium:automationName': 'XCUITest',
+      'appium:platformVersion': process.env.IOS_PLATFORM_VERSION || '17.5',
+      'appium:deviceName': iosSimName,
+      'appium:newCommandTimeout': 120,
+      ...(appPath
+        ? { 'appium:app': appPath }
+        : {
+            // If no app is provided, attach to installed app by bundle id
+            'appium:bundleId': process.env.IOS_BUNDLE_ID || 'app.pubkyring',
+            'appium:noReset': true,
+            'appium:fullReset': false
+          })
+    }
+  ]
+};
+
+const shared = require('./wdio.shared.conf');
+const path = require('path');
+
+const iosAppPath = process.env.IOS_APP || path.resolve(__dirname, '../ios/build/Build/Products/Debug-iphonesimulator/pubkyring.app');
+
+module.exports = {
+  ...shared,
+  capabilities: [
+    {
+      platformName: 'iOS',
+      'appium:automationName': 'XCUITest',
+      'appium:deviceName': process.env.IOS_DEVICE_NAME || 'iPhone 15',
+      'appium:platformVersion': process.env.IOS_PLATFORM_VERSION || '17.5',
+      'appium:app': iosAppPath,
+      'appium:newCommandTimeout': 120,
+      'appium:autoAcceptAlerts': true,
+    },
+  ],
+};

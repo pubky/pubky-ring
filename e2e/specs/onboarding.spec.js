@@ -10,8 +10,8 @@ const { expect } = require('chai');
 describe('Onboarding flow', () => {
   it('should accept terms and navigate to Home', async () => {
     // Terms screen
-    const termsScreen = await $('~TermsOfUseScreen');
-    await termsScreen.waitForDisplayed({ timeout: 60000 });
+    const termsScreen = await $('~TermsContinueButton');
+    await termsScreen.waitForDisplayed({ timeout: 10_000 });
 
     const termsRow = await $('~TermsAgreeRow');
     await termsRow.click();

@@ -1,7 +1,11 @@
 const shared = require('./wdio.shared.conf');
+const path = require('path');
+const fs = require('fs');
 
 const avdName = process.env.AVD || 'Pixel_6_API_34';
-const appPath = process.env.ANDROID_APP; // optional .apk/.aab path
+const envAppPath = process.env.ANDROID_APP; // optional .apk path
+const defaultApkPath = path.resolve(__dirname, '../android/app/build/outputs/apk/debug/app-debug.apk');
+const resolvedAppPath = envAppPath || (fs.existsSync(defaultApkPath) ? defaultApkPath : undefined);
 
 exports.config = {
   ...shared.config,
@@ -14,14 +18,19 @@ exports.config = {
       'appium:avd': avdName,
       'appium:autoGrantPermissions': true,
       'appium:newCommandTimeout': 120,
-      ...(appPath
-        ? { 'appium:app': appPath }
-        : {
-            // If no app is provided, connect to an already running RN app
-            'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-            'appium:appActivity': process.env.APP_ACTIVITY || '.MainActivity',
+      ...(resolvedAppPath
+        ? {
+            'appium:app': resolvedAppPath,
             'appium:noReset': false,
             'appium:fullReset': false
+          }
+        : {
+            'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
+            'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
+            'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
+            'appium:noReset': false,
+            'appium:fullReset': false,
+            'appium:forceAppLaunch': false
           })
     }
   ]

@@ -79,21 +79,12 @@ Prerequisites:
 - Xcode with an iOS Simulator (e.g., "iPhone 15").
 - Android SDK with an AVD (e.g., "Pixel_7_Pro_API_35").
 - Java JDK 17+ and Node.js 18+.
+- App under test has been built or is installed in test environment (iOS simulator or AVD)
 
 Install drivers (one-time):
 
 ```bash
 yarn e2e:drivers
-```
-
-Build the apps:
-- Android APK (Debug):
-```bash
-cd android && ./gradlew assembleDebug
-```
-- iOS app (Debug) for simulator:
-```bash
-xcodebuild -workspace ios/pubkyring.xcworkspace -scheme pubkyring -configuration Debug -sdk iphonesimulator -derivedDataPath ios/build
 ```
 
 Run tests:
@@ -108,9 +99,9 @@ yarn e2e:ios
 
 Environment overrides:
 - ANDROID_APP: absolute path to the .apk
-- AVD: Android Virtual Device name (e.g., Pixel_6_API_34)
+- AVD: Android Virtual Device name (e.g. Pixel_6_API_34)
 - ANDROID_DEVICE_NAME / ANDROID_PLATFORM_VERSION
-- APP_PACKAGE / APP_ACTIVITY (defaults: to.pubky.ring / .MainActivity)
+- APP_PACKAGE / APP_ACTIVITY (defaults: to.pubky.ring / to.pubkyring.MainActivity)
 - IOS_APP: absolute path to the .app
 - IOS_SIM / IOS_PLATFORM_VERSION
 - IOS_BUNDLE_ID (default: app.pubkyring)

@@ -5850,10 +5850,9 @@ react-native-actions-sheet@^0.9.7:
   resolved "https://registry.yarnpkg.com/react-native-actions-sheet/-/react-native-actions-sheet-0.9.7.tgz#43ff2d9252f7af2da6dc051be5a5c375a844cdfb"
   integrity sha512-rjUwxUr5dxbdSLDtLDUFAdSlFxpNSpJsbXLhHkBzEBMxEMPUhRT3zqbvKqsPj0JUkjwuRligxrhbIJZkg/6ZDw==
 
-react-native-camera-kit@^14.2.0:
-  version "14.2.0"
-  resolved "https://registry.npmjs.org/react-native-camera-kit/-/react-native-camera-kit-14.2.0.tgz"
-  integrity sha512-rPk/4Ux52/Kc6oIPk0x6NsrvDkeL+kd/GAUJ4xBtTlnmiWjLTgeA2Vjgg9ik03mmyf6rV+LaqaOBT7KejhuHKQ==
+"react-native-camera-kit@https://github.com/SmartArray/react-native-camera-kit#fix/rn-ios-0.80.0":
+  version "15.1.0"
+  resolved "https://github.com/SmartArray/react-native-camera-kit#c70b91e38599799b574af5a0fca7967aee99b22c"
 
 react-native-draggable-flatlist@^4.0.3:
   version "4.0.3"

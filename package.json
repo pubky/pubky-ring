@@ -31,7 +31,7 @@
     "react": "19.1.0",
     "react-native": "0.80.2",
     "react-native-actions-sheet": "^0.9.7",
-    "react-native-camera-kit": "^14.2.0",
+    "react-native-camera-kit": "https://github.com/SmartArray/react-native-camera-kit#fix/rn-ios-0.80.0",
     "react-native-draggable-flatlist": "^4.0.3",
     "react-native-gesture-handler": "^2.27.2",
     "react-native-keychain": "10.0.0",

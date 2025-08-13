@@ -2363,7 +2363,7 @@ PODS:
     - React-perflogger (= 0.80.2)
     - React-utils (= 0.80.2)
     - SocketRocket
-  - ReactNativeCameraKit (14.2.0):
+  - ReactNativeCameraKit (15.1.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -3298,7 +3298,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 6c9197c1f6643633012ab646d2bfedd1b0d25989
   ReactCodegen: 9ea66ee246511816b72e9d6e380f884b7b3b99d7
   ReactCommon: 7aca047f2f453a7d7f0adeccb63810d61829235a
-  ReactNativeCameraKit: 8d3b9a09b32f10f50d56f8da0f3055eaa1a89c59
+  ReactNativeCameraKit: d81588823aaa195cb922db814af46e9d1c1de328
   ReactNativeFs: 85ddd9627980effe04c9064361066c950a0cde4a
   RNCAsyncStorage: 767abb068db6ad28b5f59a129fbc9fab18b377e2
   RNCClipboard: acf8ae07037c21f17d9284ca56e982186ed21465

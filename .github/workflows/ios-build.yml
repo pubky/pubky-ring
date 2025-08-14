@@ -37,11 +37,11 @@ jobs:
     - name: Build iOS App
       run: |
         cd ios
-        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Debug -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -derivedDataPath ./build build
+        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -derivedDataPath ./build build
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ios-app-bundle
-        path: ios/build/Build/Products/Debug-iphonesimulator/pubkyring.app
+        name: ios-release-app
+        path: ios/build/Build/Products/Release-iphonesimulator/pubkyring.app
         retention-days: 7

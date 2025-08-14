@@ -46,13 +46,13 @@ jobs:
     - name: Build Android App
       run: |
         cd android
-        ./gradlew assembleDebug
+        ./gradlew assembleRelease
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
         
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: android-debug-apk
-        path: android/app/build/outputs/apk/debug/app-debug.apk
+        name: android-release-apk
+        path: android/app/build/outputs/apk/release/app-release.apk
         retention-days: 7

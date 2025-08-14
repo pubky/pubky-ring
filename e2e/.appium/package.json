@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "appium-uiautomator2-driver": "^4.2.8",
+    "appium-xcuitest-driver": "^9.10.4"
+  }
+}

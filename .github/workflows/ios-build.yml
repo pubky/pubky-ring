@@ -1,0 +1,47 @@
+name: iOS Build
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+      
+    - name: Install iOS dependencies
+      run: |
+        cd ios
+        pod install
+        
+    - name: Cache CocoaPods
+      uses: actions/cache@v4
+      with:
+        path: ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+          
+    - name: Build iOS App
+      run: |
+        cd ios
+        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -derivedDataPath ./build build
+        
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-release-app
+        path: ios/build/Build/Products/Release-iphonesimulator/pubkyring.app
+        retention-days: 7

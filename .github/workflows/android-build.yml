@@ -30,31 +30,36 @@ jobs:
     - name: Install dependencies
       run: yarn install --frozen-lockfile
       
-    - name: Cache Gradle packages
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.gradle/caches
-          ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-        restore-keys: |
-          ${{ runner.os }}-gradle-
+    # - name: Cache Gradle packages
+    #   uses: actions/cache@v4
+    #   with:
+    #     path: |
+    #       ~/.gradle/caches
+    #       ~/.gradle/wrapper
+    #     key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+    #     restore-keys: |
+    #       ${{ runner.os }}-gradle-
 
     # - name: Create assets directory
     #   run: mkdir -p android/app/src/main/assets
 
-    - name: Bundle JavaScript
-      run: |
-        npx react-native bundle \
-          --platform android \
-          --dev false \
-          --entry-file index.js \
-          --bundle-output android/app/src/main/assets/index.android.bundle \
-          --assets-dest android/app/src/main/res/
+    # - name: Bundle JavaScript
+    #   run: |
+    #     npx react-native bundle \
+    #       --platform android \
+    #       --dev false \
+    #       --entry-file index.js \
+    #       --bundle-output android/app/src/main/assets/index.android.bundle \
+    #       --assets-dest android/app/src/main/res/
 
     - name: Make Gradlew Executable
       run: chmod +x android/gradlew
       
+    - name: Clean gradle cache
+      run: |
+        cd android
+        ./gradlew clean
+
     - name: Build Android App
       run: |
         cd android

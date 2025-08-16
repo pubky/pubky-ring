@@ -1,28 +1,29 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { Platform, StyleSheet } from 'react-native';
-import { Pubky } from '../types/pubky.ts';
+import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { useQRScanner } from '../hooks/useQRScanner';
 import {
-	SessionText,
-	Box,
-	ForegroundView,
 	ActivityIndicator,
-	QrCode,
-	NavView,
-	Card,
-	View,
-	Text,
-	AuthorizeButton,
 	ArrowRight,
-	CardView,
+	AuthorizeButton,
+	Box,
 	Button,
+	Card,
+	CardView,
+	ForegroundView,
 	LinearGradient,
+	NavView,
+	QrCode,
+	SessionText,
+	Text,
+	TouchableOpacity,
+	View,
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
-import { showEditPubkyPrompt } from '../utils/helpers.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { textStyles, buttonStyles, shadowStyles } from '../theme/utils';
+import { buttonStyles, shadowStyles, textStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
+import { showEditPubkySheet, showBackupPrompt } from "../utils/sheetHelpers.ts";
 
 interface AuthorizeQRButtonProps {
 	isLoading: boolean;
@@ -31,11 +32,11 @@ interface AuthorizeQRButtonProps {
 	onLongPress?: () => void;
 }
 
-const AuthorizeQRButton = memo(({ 
-	isLoading, 
-	isSignedUp, 
-	onPress, 
-	onLongPress 
+const AuthorizeQRButton = memo(({
+	isLoading,
+	isSignedUp,
+	onPress,
+	onLongPress
 }: AuthorizeQRButtonProps) => (
 	<AuthorizeButton
 		style={[
@@ -58,29 +59,38 @@ interface PubkyInfoProps {
 	pubkyName: string;
 	publicKey: string;
 	sessionsCount: number;
+	isBackedUp: boolean;
 }
 
-const PubkyInfo = memo(({ 
-	pubkyName, 
-	publicKey, 
-	sessionsCount 
-}: PubkyInfoProps) => (
-	<View style={styles.contentContainer}>
-		<Text style={[textStyles.heading, styles.nameText]} numberOfLines={1}>
-			{pubkyName}
-		</Text>
-		<Card style={styles.row}>
-			<Text style={textStyles.body}>
-				pk:{truncateStr(publicKey)}
+const PubkyInfo = memo(({
+	pubkyName,
+	publicKey,
+	sessionsCount,
+	isBackedUp,
+}: PubkyInfoProps) => {
+	const handleBackupPress = useCallback(() => {
+		showBackupPrompt({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
+	}, [publicKey]);
+	return (
+		<View style={styles.contentContainer}>
+			<Text style={[textStyles.heading, styles.nameText]} numberOfLines={1}>
+				{pubkyName}
 			</Text>
-			{sessionsCount > 0 && (
-				<CardView style={styles.sessionsButton}>
-					<SessionText style={textStyles.button}>{sessionsCount}</SessionText>
-				</CardView>
-			)}
-		</Card>
-	</View>
-));
+			<Card style={styles.row}>
+				<Text style={textStyles.body}>
+					pk:{truncateStr(publicKey)}
+				</Text>
+				{!isBackedUp && <TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}><Text
+					style={textStyles.backupText}>{'backup!'}</Text></TouchableOpacity>}
+				{sessionsCount > 0 && (
+					<CardView style={styles.sessionsButton}>
+						<SessionText style={textStyles.button}>{sessionsCount}</SessionText>
+					</CardView>
+				)}
+			</Card>
+		</View>
+	);
+});
 
 interface PubkyBoxProps {
 	pubky: string;
@@ -123,7 +133,7 @@ const PubkyBox = ({
 		if (pubkyData.signedUp) {
 			handleQRAction();
 		} else {
-			showEditPubkyPrompt({
+			showEditPubkySheet({
 				title: 'Setup',
 				description: '',
 				pubky: pubky,
@@ -153,10 +163,11 @@ const PubkyBox = ({
 						</NavView>
 					</ForegroundView>
 
-					<PubkyInfo 
-						pubkyName={pubkyName} 
-						publicKey={publicKey} 
-						sessionsCount={sessionsCount} 
+					<PubkyInfo
+						pubkyName={pubkyName}
+						publicKey={publicKey}
+						isBackedUp={pubkyData.isBackedUp}
+						sessionsCount={sessionsCount}
 					/>
 
 					<ForegroundView style={styles.buttonArrow}>
@@ -256,6 +267,12 @@ const styles = StyleSheet.create({
 	actionButtonDisabled: {
 		opacity: 0.7,
 	},
+	backupContainer: {
+		padding: 4,
+		backgroundColor: textStyles.backupTextBGColor,
+		borderRadius: 80,
+		marginLeft: 5
+	}
 });
 
 export default memo(PubkyBox);

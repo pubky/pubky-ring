@@ -15,6 +15,7 @@ import {
 	signInToHomeserver,
 	signUpToHomeserver, truncatePubky,
 } from '../utils/pubky.ts';
+import { formatSignupToken } from '../utils/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { setPubkyData } from '../store/slices/pubkysSlice.ts';
@@ -143,35 +144,13 @@ const EditPubky = ({ payload }: {
 		signupTokenOpacity.value = withTiming(isSignupTokenInputVisible ? 1 : 0, { duration: 300 });
 	}, [isSignupTokenInputVisible, signupTokenOpacity]);
 
-	const formatSignupToken = useCallback((text: string) => {
+	const formatSignupTokenForHomeserver = useCallback((text: string) => {
 		// Only format if using the default or staging homeserver
 		if (homeServer.trim() !== DEFAULT_HOMESERVER && homeServer.trim() !== STAGING_HOMESERVER) {
 			return text;
 		}
 
-		// Convert to uppercase
-		text = text.toUpperCase();
-
-		// Remove all characters except alphanumeric and hyphens
-		text = text.replace(/[^A-Z0-9-]/g, '');
-
-		// Remove all hyphens first to count actual characters
-		const withoutHyphens = text.replace(/-/g, '');
-
-		// Limit to 12 alphanumeric characters
-		const limited = withoutHyphens.slice(0, 12);
-
-		// Build the formatted string with hyphens in correct positions
-		let result = '';
-		for (let i = 0; i < limited.length; i++) {
-			// Add hyphen at position 4 and 8
-			if (i === 4 || i === 8) {
-				result += '-';
-			}
-			result += limited[i];
-		}
-
-		return result;
+		return formatSignupToken(text);
 	}, [homeServer]);
 
 	const clearErrorState = useCallback(() => {
@@ -475,9 +454,9 @@ const EditPubky = ({ payload }: {
 	}, []);
 
 	const handleSignupTokenChange = useCallback((text: string) => {
-		const formatted = formatSignupToken(text);
+		const formatted = formatSignupTokenForHomeserver(text);
 		setSignupToken(formatted);
-	}, [formatSignupToken]);
+	}, [formatSignupTokenForHomeserver]);
 
 	const inputData = useMemo(() => {
 		const items: InputDataItem[] = [

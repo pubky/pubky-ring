@@ -4,15 +4,6 @@ export interface PubkySession {
 	created_at: number;
 }
 
-export interface ISetPubkyData {
-	name?: string;
-	homeserver?: string;
-	signedUp?: boolean;
-	signupToken?: string;
-	image?: string;
-	sessions?: PubkySession[];
-}
-
 export interface Pubky {
 	name: string;
 	homeserver: string;
@@ -21,7 +12,10 @@ export interface Pubky {
 	image: string;
 	sessions: PubkySession[];
 	backupPreference: EBackupPreference;
+	isBackedUp: boolean;
 }
+
+export type ISetPubkyData = Partial<Pubky>;
 
 export interface PubkyState {
 	pubkys: TPubkys
@@ -40,4 +34,5 @@ export interface IKeychainData {
 export enum EBackupPreference {
 	recoveryPhrase = 'recoveryPhrase',
 	encryptedFile = 'encryptedFile',
+	unknown = 'unknown',
 }

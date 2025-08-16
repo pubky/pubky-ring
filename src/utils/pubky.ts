@@ -92,6 +92,7 @@ export const createNewPubky = async (
 			secretKey,
 			pubky,
 			dispatch,
+			backupPreference: EBackupPreference.unknown
 		});
 	} catch (error) {
 		console.error('Error creating pubky:', error);
@@ -119,10 +120,12 @@ export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
 					const isMigrated = isNewFormat(pubky);
 					if (isMigrated) {
 						const { secretKey, mnemonic } = JSON.parse(secretKeyRes.value) as IKeychainData;
+						// Restored pubkys were already backed up
 						await savePubky({ secretKey, pubky, dispatch, mnemonic });
 					} else {
 						const migrationRes = await migrateKeychainEntry(pubky, secretKeyRes.value);
 						if (migrationRes.isOk()) {
+							// Restored pubkys were already backed up
 							await savePubky({
 								secretKey: migrationRes.value.secretKey,
 								pubky,
@@ -197,7 +200,7 @@ export const importPubky = async ({
 			}
 		});
 		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
-		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference });
+		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference, isBackedUp: true });
 		if (savePubkyRes.isOk()) {
 			dispatch(setHomeserver({ pubky, homeserver }));
 		}
@@ -214,12 +217,14 @@ export const savePubky = async ({
 	dispatch,
 	mnemonic = '',
 	backupPreference = EBackupPreference.encryptedFile,
+	isBackedUp = false,
 }: {
 	secretKey: string,
 	pubky: string,
 	dispatch: Dispatch,
 	mnemonic?: string,
 	backupPreference?: EBackupPreference;
+	isBackedUp?: boolean;
 }): Promise<Result<string>> => {
 	try {
 		// Ensure the mnemonic phrase generates the expected secretKey
@@ -234,12 +239,11 @@ export const savePubky = async ({
 			if (res.value.public_key !== pubky) {
 				return err('The provided mnemonic phrase does not generate the expected pubky.');
 			}
-		}
-		// If recovery phrase is preferred ensure we have a mnemonic phrase to support that preference.
-		if (backupPreference === EBackupPreference.recoveryPhrase && !mnemonic) {
+		} else {
+			// If no mnemonic is provided we have to default to the encrypted file.
 			backupPreference = EBackupPreference.encryptedFile;
 		}
-		dispatch(addPubky({ pubky, backupPreference }));
+		dispatch(addPubky({ pubky, backupPreference, isBackedUp }));
 		const keychainData: IKeychainData = {
 			secretKey,
 			mnemonic,

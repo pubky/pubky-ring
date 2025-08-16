@@ -1,13 +1,8 @@
-import { SheetManager } from 'react-native-actions-sheet';
 import {
-	getPubkySecretKey,
 	performAuth,
 	signInToHomeserver,
 } from './pubky.ts';
-import { createRecoveryFile } from '@synonymdev/react-native-pubky';
-import { backupPubky } from './rnfs.ts';
 import { Dispatch } from 'redux';
-import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
 import {
 	err,
 	ok,
@@ -17,14 +12,50 @@ import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Linking, Platform, Share } from 'react-native';
-import { getAutoAuthFromStore, getBackupPreference, getIsOnline, getStore } from './store-helpers.ts';
+import { getAutoAuthFromStore, getIsOnline } from './store-helpers.ts';
 import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
-import { defaultPubkyState } from '../store/shapes/pubky.ts';
-import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { PUBKY_APP_URL } from './constants.ts';
+import { SheetManager } from 'react-native-actions-sheet';
+
+/**
+ * Formats a signup/invite token to the XXXX-XXXX-XXXX pattern
+ * Used for homeserver invite codes
+ */
+export const formatSignupToken = (text: string): string => {
+	// Convert to uppercase
+	text = text.toUpperCase();
+
+	// Remove all characters except alphanumeric and hyphens
+	text = text.replace(/[^A-Z0-9-]/g, '');
+
+	// Remove all hyphens first to count actual characters
+	const withoutHyphens = text.replace(/-/g, '');
+
+	// Limit to 12 alphanumeric characters
+	const limited = withoutHyphens.slice(0, 12);
+
+	// Build the formatted string with hyphens in correct positions
+	let result = '';
+	for (let i = 0; i < limited.length; i++) {
+		// Add hyphen at position 4 and 8
+		if (i === 4 || i === 8) {
+			result += '-';
+		}
+		result += limited[i];
+	}
+
+	return result;
+};
+
+/**
+ * Validates if a signup token matches the expected format
+ */
+export const isValidSignupTokenFormat = (token: string): boolean => {
+	return /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(token);
+};
 
 export const handleScannedData = async ({
 	pubky,
@@ -243,106 +274,6 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 	return `${prefix}-${date}_${time}`;
 };
 
-export const showBackupPrompt = async ({
-	pubky,
-	backupPreference,
-	onComplete,
-}: {
-	pubky: string,
-	backupPreference?: EBackupPreference;
-	onComplete?: () => void
-}): Promise<void> => {
-	const secretKeyResponse = await getPubkySecretKey(pubky);
-	if (secretKeyResponse.isErr()) {
-		showToast({
-			type: 'error',
-			title: 'Error',
-			description: 'Could not retrieve secret key for backup',
-		});
-		return;
-	}
-
-	if (!backupPreference) {
-		backupPreference = getBackupPreference(pubky);
-	}
-
-	if (
-		backupPreference === EBackupPreference.recoveryPhrase &&
-		secretKeyResponse.value?.mnemonic
-	) {
-		SheetManager.show('recovery-phrase-prompt', {
-			payload: {
-				pubky,
-				mnemonic: secretKeyResponse.value.mnemonic,
-				onClose: () => SheetManager.hide('recovery-phrase-prompt'),
-			},
-		});
-		return;
-	}
-
-	SheetManager.show('backup-prompt', {
-		payload: {
-			viewId: EBackupPromptViewId.backup,
-			pubky,
-			onSubmit: async (passphrase: string) => {
-				try {
-					const createRecoveryFileRes = await createRecoveryFile(
-						secretKeyResponse.value.secretKey,
-						passphrase
-					);
-
-					if (createRecoveryFileRes.isErr()) {
-						showToast({
-							type: 'error',
-							title: 'Error',
-							description: createRecoveryFileRes.error.message,
-						});
-						return;
-					}
-
-					let pubkyName;
-					try {
-						const name = getStore().pubky.pubkys[pubky]?.name;
-						if (typeof name === 'string' && name.trim()) {
-							pubkyName = name.toLowerCase().replace(/\s+/g, '-') + '-backup';
-						}
-					} catch {}
-
-					const fileName = generateBackupFileName(pubkyName);
-					const backupRes = await backupPubky(createRecoveryFileRes.value, fileName);
-
-					if (backupRes.isErr()) {
-						if (backupRes.error.message.includes('User canceled backup')) {
-							return;
-						}
-						showToast({
-							type: 'error',
-							title: 'Error',
-							description: backupRes.error.message,
-						});
-					} else {
-						showToast({
-							type: 'success',
-							title: 'Backup Created',
-							description: `${fileName}.pkarr`,
-						});
-					}
-					SheetManager.hide('backup-prompt').then();
-					onComplete?.();
-				} catch (error) {
-					console.error('Backup creation error:', error);
-					showToast({
-						type: 'error',
-						title: 'Error',
-						description: 'Failed to create backup file',
-					});
-				}
-			},
-			onClose: () => SheetManager.hide('backup-prompt'),
-		},
-	});
-};
-
 export const handleClipboardData = async ({
 	pubky,
 	dispatch,
@@ -483,28 +414,6 @@ export const handleDeepLink = ({
 	});
 	dispatch(setDeepLink('')); // Reset deep link once used.
 	return '';
-};
-
-export const showEditPubkyPrompt = ({
-	title = 'Edit',
-	description = '',
-	pubky,
-	data = { ...defaultPubkyState },
-}: {
-	title?: string;
-	description?: string;
-	pubky: string;
-	data?: Pubky;
-}): void => {
-	SheetManager.show('edit-pubky', {
-		payload: {
-			title,
-			description,
-			pubky,
-			data,
-		},
-		onClose: () => SheetManager.hide('edit-pubky'),
-	});
 };
 
 /**

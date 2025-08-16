@@ -13,4 +13,5 @@ export const defaultPubkyState: Pubky = {
 	image: '',
 	sessions: [],
 	backupPreference: EBackupPreference.encryptedFile,
+	isBackedUp: false
 };

@@ -167,7 +167,7 @@ const AddPubky = ({ payload }: {
 			case 'main':
 				return [
 					{ text: 'Import pubky', onPress: onImportPubky, style: styles.importButton },
-					{ text: 'Create pubky', onPress: onCreatePubky, style: styles.createButton },
+					{ text: 'New pubky', onPress: onCreatePubky, style: styles.createButton },
 				];
 			case 'import-options':
 				return [

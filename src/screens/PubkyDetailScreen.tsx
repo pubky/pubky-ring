@@ -8,7 +8,6 @@ import { StyleSheet } from 'react-native';
 import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import {
-	showEditPubkyPrompt,
 	showQRScanner,
 } from '../utils/helpers.ts';
 import { useSelector } from 'react-redux';
@@ -23,6 +22,7 @@ import {
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { Dispatch } from 'redux';
 import { useTypedNavigation, useTypedRoute } from '../navigation/hooks';
+import { showEditPubkySheet } from "../utils/sheetHelpers.ts";
 
 const PubkyDetailScreen = (): ReactElement => {
 	const navigation = useTypedNavigation();
@@ -35,7 +35,7 @@ const PubkyDetailScreen = (): ReactElement => {
 	}, [data, pubky]);
 
 	const onRightButtonPress = useCallback(() => {
-		showEditPubkyPrompt({
+		showEditPubkySheet({
 			title: data.signedUp ? 'Edit' : 'Setup',
 			pubky,
 		});

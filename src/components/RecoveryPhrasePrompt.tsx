@@ -14,6 +14,8 @@ import BlurView from './BlurView.tsx';
 import PubkyCard from './PubkyCard.tsx';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
+import { EBackupPreference } from "../types/pubky.ts";
+import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 
 const getMarginBottom = (index: number): number => {
 	return index + 1 === 6 ? 0 : 12;
@@ -30,6 +32,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 	const [isBlurred, setIsBlurred] = useState<boolean>(true);
 	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, payload.pubky));
+	const { confirmPubkyBackup } = usePubkyManagement();
 
 	const title = useMemo(() => {
 		return 'Recovery Phrase';
@@ -43,6 +46,11 @@ const RecoveryPhrasePrompt = ({ payload }: {
 		if (!payload?.mnemonic) {return [];}
 		return payload.mnemonic.split(' ');
 	}, [payload?.mnemonic]);
+
+	const handleConfirmBackup = (): void => {
+		setIsBlurred(false);
+		confirmPubkyBackup(payload.pubky, EBackupPreference.recoveryPhrase);
+	};
 
 	return (
 		<ActionSheetContainer
@@ -83,7 +91,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 							<BlurView style={styles.blurOverlay} />
 							<TouchableOpacity
 								style={styles.revealButton}
-								onPress={() => setIsBlurred(false)}
+								onPress={handleConfirmBackup}
 							>
 								<Text style={styles.tapToRevealText}>Tap to reveal</Text>
 							</TouchableOpacity>

@@ -18,6 +18,8 @@ import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { Result } from '@synonymdev/result';
 import ModalIndicator from './ModalIndicator.tsx';
+import { EBackupPreference } from "../types/pubky.ts";
+import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -53,6 +55,7 @@ const BackupPrompt = ({ payload }: {
 	const fileName = useMemo(() => payload?.fileName ?? '', [payload]);
 	const fileDate = useMemo(() => payload?.fileDate ? formatDate(payload.fileDate) : '', [payload]);
 	const pubky = useMemo(() => payload?.pubky ?? '', [payload]);
+	const { confirmPubkyBackup } = usePubkyManagement();
 
 	const truncatedPubky = useMemo(() => {
 		const res = truncateStr(pubky);
@@ -77,11 +80,12 @@ const BackupPrompt = ({ payload }: {
 				Keyboard.dismiss();
 				setPassword('');
 				setError('');
+				confirmPubkyBackup(pubky, EBackupPreference.encryptedFile);
 			}
 		} finally {
 			setLoading(false);
 		}
-	}, [onSubmit, password, viewId]);
+	}, [onSubmit, password, viewId, confirmPubkyBackup, pubky]);
 
 	const title = useMemo(() => {
 		switch (viewId) {

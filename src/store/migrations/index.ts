@@ -44,6 +44,26 @@ const migrations = {
 			},
 		};
 	},
+	// @ts-ignore
+	4: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		// Add isBackedUp to all existing pubkys
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			updatedPubkys[pubkyKey] = {
+				...updatedPubkys[pubkyKey],
+				isBackedUp: false,
+			};
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+			},
+		};
+	},
 };
 
 export default migrations;

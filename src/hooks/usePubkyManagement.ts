@@ -7,12 +7,16 @@ import {
 	createNewPubky,
 	importPubky as importPubkyUtil,
 } from '../utils/pubky';
-import { showEditPubkyPrompt, showToast } from '../utils/helpers';
+import { showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
+import { showEditPubkySheet, showNewPubkySetupSheet } from "../utils/sheetHelpers.ts";
+import { setPubkyData } from '../store/slices/pubkysSlice';
+import { EBackupPreference } from '../types/pubky';
 
 export const usePubkyManagement = (): {
 	createPubky: () => Promise<void>;
 	importPubky: (mnemonic?: string) => Promise<Result<string>>;
+	confirmPubkyBackup: (pubky: string, backupPreference: EBackupPreference) => void;
 } => {
 	const dispatch = useDispatch();
 
@@ -27,8 +31,7 @@ export const usePubkyManagement = (): {
 			return;
 		}
 		setTimeout(() => {
-			showEditPubkyPrompt({
-				title: 'Setup',
+			showNewPubkySetupSheet({
 				pubky: pubky.value,
 			});
 		}, 200);
@@ -62,14 +65,14 @@ export const usePubkyManagement = (): {
 				}
 				await SheetManager.hide('add-pubky');
 				setTimeout(() => {
-					showEditPubkyPrompt({
+					showEditPubkySheet({
 						title: 'Setup',
 						pubky: pubky.value,
 					});
 				}, 200);
 				return ok('Successfully created pubky.');
 			}
-			
+
 			const res = await importFile(dispatch);
 			if (res.isErr()) {
 				const msg = res.error?.message ?? 'Unable to import file.';
@@ -80,14 +83,14 @@ export const usePubkyManagement = (): {
 				});
 				return err(msg);
 			}
-			
+
 			setTimeout(() => {
-				showEditPubkyPrompt({
+				showEditPubkySheet({
 					title: 'Setup',
 					pubky: res.value,
 				});
 			}, 200);
-			
+
 			const msg = 'Pubky imported successfully';
 			showToast({
 				type: 'success',
@@ -99,5 +102,18 @@ export const usePubkyManagement = (): {
 		[dispatch],
 	);
 
-	return { createPubky, importPubky };
+	const confirmPubkyBackup = useCallback(
+		(pubky: string, backupPreference: EBackupPreference) => {
+			dispatch(setPubkyData({
+				pubky,
+				data: {
+					backupPreference,
+					isBackedUp: true,
+				},
+			}));
+		},
+		[dispatch],
+	);
+
+	return { createPubky, importPubky, confirmPubkyBackup };
 };

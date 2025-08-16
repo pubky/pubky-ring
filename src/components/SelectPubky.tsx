@@ -14,12 +14,12 @@ import { handleDeepLink } from '../utils/helpers.ts';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
-import { 
-	ModalWrapper, 
-	ModalTitle, 
-	ModalMessage, 
-	ModalButton, 
-	ModalButtonContainer 
+import {
+	ModalWrapper,
+	ModalTitle,
+	ModalMessage,
+	ModalButton,
+	ModalButtonContainer
 } from './shared';
 
 const ListItemComponent = ({ name, pubky, onPress }: { name?: string; pubky: string; onPress: () => void }): ReactElement => {
@@ -82,7 +82,7 @@ const SelectPubky = ({ payload }: {
 			onClose={closeSheet}
 			height="95%"
 			showToast={false}
-			contentStyle={{ height: '100%' }}
+			contentStyle={styles.container}
 		>
 			<ModalTitle>Select Pubky</ModalTitle>
 			<ModalMessage centered>
@@ -118,6 +118,9 @@ const SelectPubky = ({ payload }: {
 };
 
 const styles = StyleSheet.create({
+	container: {
+		height: '100%'
+	},
 	listContainer: {
 		flex: 1,
 		marginBottom: 12,

@@ -39,7 +39,7 @@ const RequestInviteCode = ({ payload }: {
 	}, [closeSheet, payload]);
 
 	const handleEmailContact = useCallback(() => {
-		Linking.openURL('mailto:support@pubky.app?subject=Request%20for%20Pubky%20Invite%20Code');
+		Linking.openURL('mailto:support@synonym.to?subject=Request%20for%20Pubky%20Invite%20Code');
 	}, []);
 
 	const handleTwitterContact = useCallback(() => {

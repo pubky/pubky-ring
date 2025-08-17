@@ -1,5 +1,5 @@
-import React, { memo, useCallback, useMemo } from 'react';
-import { View, StyleSheet, ViewStyle, StyleProp, LayoutChangeEvent } from 'react-native';
+import React, { memo, useCallback, useMemo, useEffect, useState } from 'react';
+import { View, StyleSheet, ViewStyle, StyleProp, LayoutChangeEvent, AppState } from 'react-native';
 import {
 	Canvas,
 	LinearGradient as SkiaLinearGradient,
@@ -52,6 +52,19 @@ const LinearGradient: React.FC<LinearGradientProps> = memo(({
 	positions?: number[];
 }) => {
 	const [layout, setLayout] = React.useState({ width: 0, height: 0 });
+	const [forceUpdate, setForceUpdate] = useState(0);
+
+	useEffect(() => {
+		const subscription = AppState.addEventListener('change', (nextAppState) => {
+			if (nextAppState === 'active') {
+				setForceUpdate(prev => prev + 1);
+			}
+		});
+
+		return (): void => {
+			subscription.remove();
+		};
+	}, []);
 
 	const onLayout = useCallback((event: LayoutChangeEvent) => {
 		const { width, height } = event.nativeEvent.layout;
@@ -75,7 +88,7 @@ const LinearGradient: React.FC<LinearGradientProps> = memo(({
 		const { startVec, endVec, gradientPositions, dimensions } = gradientProps;
 
 		return (
-			<GradientCanvas>
+			<GradientCanvas key={forceUpdate}>
 				<Rect x={0} y={0} width={dimensions.width} height={dimensions.height}>
 					<SkiaLinearGradient
 						start={startVec}
@@ -86,7 +99,7 @@ const LinearGradient: React.FC<LinearGradientProps> = memo(({
 				</Rect>
 			</GradientCanvas>
 		);
-	}, [colors, gradientProps]);
+	}, [colors, gradientProps, forceUpdate]);
 
 	return (
 		<View style={[styles.container, style]} onLayout={onLayout}>
@@ -112,6 +125,19 @@ const RadialGradient: React.FC<RadialGradientProps> = memo(({
 	positions?: number[];
 }) => {
 	const [layout, setLayout] = React.useState({ width: 0, height: 0 });
+	const [forceUpdate, setForceUpdate] = useState(0);
+
+	useEffect(() => {
+		const subscription = AppState.addEventListener('change', (nextAppState) => {
+			if (nextAppState === 'active') {
+				setForceUpdate(prev => prev + 1);
+			}
+		});
+
+		return (): void => {
+			subscription.remove();
+		};
+	}, []);
 
 	const onLayout = useCallback((event: LayoutChangeEvent) => {
 		const { width, height } = event.nativeEvent.layout;
@@ -136,7 +162,7 @@ const RadialGradient: React.FC<RadialGradientProps> = memo(({
 		const { centerVec, radiusValue, gradientPositions, dimensions } = gradientProps;
 
 		return (
-			<GradientCanvas>
+			<GradientCanvas key={forceUpdate}>
 				<Rect x={0} y={0} width={dimensions.width} height={dimensions.height}>
 					<SkiaRadialGradient
 						c={centerVec}
@@ -147,7 +173,7 @@ const RadialGradient: React.FC<RadialGradientProps> = memo(({
 				</Rect>
 			</GradientCanvas>
 		);
-	}, [colors, gradientProps]);
+	}, [colors, gradientProps, forceUpdate]);
 
 	return (
 		<View style={[styles.container, style]} onLayout={onLayout}>

@@ -276,7 +276,7 @@ const InviteCode = ({ payload }: {
 				<RadialGradient
 					style={styles.backgroundGradient}
 					colors={INVITE_CODE_GRADIENT}
-					center={{ x: 0.5, y: 0.5 }}
+					center={{ x: 0.5, y: 0.4 }}
 				/>
 				<AnimatedView style={gradientStyle}>
 					<RadialGradient
@@ -389,7 +389,6 @@ const styles = StyleSheet.create({
 	titleContainer: {
 		flexDirection: 'row',
 		justifyContent: 'center',
-		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
 	title: {
@@ -401,10 +400,10 @@ const styles = StyleSheet.create({
 	},
 	headerText: {
 		fontSize: 48,
-		lineHeight: 56,
+		lineHeight: 48,
+		marginTop: 24,
 		marginBottom: 16,
-		fontWeight: '600',
-		color: '#FFFFFF',
+		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
 	message: {

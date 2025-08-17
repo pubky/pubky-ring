@@ -19,7 +19,6 @@ import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
 import AppHeader from '../components/AppHeader';
-import AppFooter from '../components/AppFooter';
 import { buttonStyles } from '../theme/utils';
 
 const PubkyItem = memo(({
@@ -125,7 +124,6 @@ const HomeScreen = (): ReactElement => {
 				showsHorizontalScrollIndicator={false}
 				getItemLayout={getItemLayout}
 			/>
-			<AppFooter />
 		</View>
 	);
 };

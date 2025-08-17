@@ -54,7 +54,7 @@ const RequestInviteCode = ({ payload }: {
 		<RadialGradient
 			style={styles.content}
 			colors={INVITE_CODE_GRADIENT}
-			center={{ x: 0.5, y: 0.3 }}
+			center={{ x: 0.5, y: 0.4 }}
 		>
 			<ModalIndicator />
 			<View style={styles.header}>
@@ -66,7 +66,6 @@ const RequestInviteCode = ({ payload }: {
 					<ArrowLeft color="#FFFFFF" size={24} />
 				</TouchableOpacity>
 				<Text style={styles.title}>Default Homeserver</Text>
-				<View style={styles.placeholder} />
 			</View>
 
 			<Text style={styles.headerText}>Do you need an invite?</Text>
@@ -124,10 +123,9 @@ const styles = StyleSheet.create({
 	header: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'space-between',
-		marginBottom: 12,
+		marginBottom: 0,
 		backgroundColor: 'transparent',
-		top: -10
+		position: 'relative',
 	},
 	backButton: {
 		width: 44,
@@ -135,6 +133,9 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		backgroundColor: 'transparent',
+		position: 'absolute',
+		left: -10,
+		zIndex: 1,
 	},
 	title: {
 		fontSize: 20,
@@ -142,18 +143,14 @@ const styles = StyleSheet.create({
 		textAlign: 'center',
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
-	},
-	placeholder: {
-		width: 44,
-		height: 44,
-		backgroundColor: 'transparent',
+		flex: 1,
 	},
 	headerText: {
 		fontSize: 48,
-		lineHeight: 56,
+		lineHeight: 48,
+		marginTop: 24,
 		marginBottom: 16,
-		fontWeight: '600',
-		color: '#FFFFFF',
+		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
 	message: {

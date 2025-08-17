@@ -268,10 +268,12 @@ const styles = StyleSheet.create({
 		opacity: 0.7,
 	},
 	backupContainer: {
-		padding: 4,
+		paddingHorizontal: 8,
+		paddingVertical: 2,
 		backgroundColor: textStyles.backupTextBGColor,
-		borderRadius: 80,
-		marginLeft: 5
+		borderRadius: 16,
+		marginLeft: 5,
+		alignSelf: 'center',
 	}
 });
 

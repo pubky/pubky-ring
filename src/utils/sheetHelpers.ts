@@ -57,6 +57,34 @@ export const showEditPubkySheet = ({
 	});
 };
 
+export const showImportSuccessSheet = ({
+	modalTitle = 'Pubky Imported',
+	description,
+	isNewPubky = true,
+	pubky,
+	data = { ...defaultPubkyState },
+	onContinue = (): void => {},
+}: {
+	modalTitle?: string;
+	description?: string;
+	isNewPubky?: boolean;
+	pubky: string;
+	data?: Pubky;
+	onContinue?: () => void;
+}): void => {
+	SheetManager.show('import-success', {
+		payload: {
+			modalTitle,
+			description,
+			isNewPubky,
+			pubky,
+			data,
+			onContinue
+		},
+		onClose: () => SheetManager.hide('import-success'),
+	});
+};
+
 export const showBackupPrompt = async ({
 	pubky,
 	backupPreference,

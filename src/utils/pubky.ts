@@ -24,14 +24,16 @@ import {
 	removePubky,
 	removeSession,
 	setHomeserver,
+	setPubkyData,
 	setSignedUp,
 } from '../store/slices/pubkysSlice';
 import { Result, err, ok } from '@synonymdev/result';
-import { defaultPubkyState } from '../store/shapes/pubky';
+import { defaultProfile, defaultPubkyState } from '../store/shapes/pubky';
 import { showToast } from './helpers.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
-import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
+import { EBackupPreference, IKeychainData, TProfile } from '../types/pubky.ts';
+import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from "./constants.ts";
 
 export const getSignupToken = ({
 	homeserver,
@@ -173,6 +175,23 @@ export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app')
 	}
 };
 
+export const getProfileInfo = async (pubky: string, app: string = 'pubky.app'): Promise<Result<TProfile>> => {
+	try {
+		const profileUrl = `pubky://${pubky}/pub/${app}/profile.json`;
+		let profile = await get(profileUrl);
+		if (profile.isErr()) {
+			return err(profile.error.message);
+		}
+		const profileData = JSON.parse(profile.value);
+		if (!profileData.name) {
+			return ok(defaultProfile);
+		}
+		return ok(profileData);
+	} catch (e) {
+		return err(JSON.stringify(e));
+	}
+};
+
 export const importPubky = async ({
 	secretKey,
 	dispatch,
@@ -203,6 +222,19 @@ export const importPubky = async ({
 		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference, isBackedUp: true });
 		if (savePubkyRes.isOk()) {
 			dispatch(setHomeserver({ pubky, homeserver }));
+			// If they're using Synonym's default or staging homeserver, fetch the profile name and set it accordingly.
+			if (homeserver === DEFAULT_HOMESERVER || homeserver === STAGING_HOMESERVER) {
+				const app = homeserver === DEFAULT_HOMESERVER ? 'pubky.app' : 'staging.pubky.app';
+				const profileInfo = await getProfileInfo(pubky, app);
+				if (profileInfo.isOk() && profileInfo.value.name) {
+					dispatch(setPubkyData({
+						pubky,
+						data: {
+							name: profileInfo.value.name,
+						},
+					}));
+				}
+			}
 		}
 		return savePubkyRes;
 	} catch (error) {

@@ -11,6 +11,7 @@ const SelectBackupPreference = lazy(() => import('../components/SelectBackupPref
 const EditPubky = lazy(() => import('../components/EditPubky.tsx'));
 const SelectPubky = lazy(() => import('../components/SelectPubky.tsx'));
 const RecoveryPhrasePrompt = lazy(() => import('../components/RecoveryPhrasePrompt.tsx'));
+const ImportSuccessSheet = lazy(() => import('../components/ImportSuccessSheet.tsx'));
 
 registerSheet('camera', QRScanner as any);
 registerSheet('backup-prompt', BackupPrompt as any);
@@ -22,6 +23,7 @@ registerSheet('select-backup-preference', SelectBackupPreference as any);
 registerSheet('edit-pubky', EditPubky as any);
 registerSheet('add-pubky', AddPubky as any);
 registerSheet('select-pubky', SelectPubky as any);
+registerSheet('import-success', ImportSuccessSheet as any);
 
 declare module 'react-native-actions-sheet' {
 	interface Sheets {
@@ -41,6 +43,7 @@ declare module 'react-native-actions-sheet' {
 		'edit-pubky': SheetDefinition;
 		'add-pubky': SheetDefinition;
 		'select-pubky': SheetDefinition;
+		'import-success': SheetDefinition;
 	}
 }
 

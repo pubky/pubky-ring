@@ -89,9 +89,9 @@ export const textStyles = {
 		letterSpacing: 0.4,
 	} as TextStyle,
 	backupText: {
-		color: '#377CE8',
+		color: '#0085FF',
 	},
-	backupTextBGColor: '#1C2B3D',
+	backupTextBGColor: 'rgba(0, 133, 255, 0.16)',
 	caption: {
 		fontSize: 13,
 		fontWeight: '500' as const,

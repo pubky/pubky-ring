@@ -59,8 +59,8 @@ const Content = ({
 			return (
 				<View style={styles.fullSize}>
 					<PubkyReview
-						title={title}
-						subTitle={subTitle}
+						modalTitle={title}
+						description={subTitle}
 						pubky={pubky}
 						pubkyData={pubkyData}
 						onContinue={() => setCurrentScreen(ECurrentScreen.homeserver)}

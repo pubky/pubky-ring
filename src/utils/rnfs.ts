@@ -147,8 +147,20 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		});
 
 	} catch (error) {
-		console.error('Import error:', error);
-		return err(`Failed to import pubky: ${JSON.stringify(error)}`);
+		const errMsg = `Failed to import file: ${JSON.stringify(error)}`;
+		try {
+			if (error &&
+				typeof error === 'object' &&
+				'code' in error &&
+				error?.code === 'OPERATION_CANCELED'
+			) {
+				return err(error.code);
+			}
+
+		} catch (e) {
+			return err(errMsg);
+		}
+		return err(errMsg);
 	}
 }
 

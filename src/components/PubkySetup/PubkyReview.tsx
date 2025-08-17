@@ -14,16 +14,18 @@ import PubkyProfile from '../PubkyProfile.tsx';
 import { PubkyData } from "../../navigation/types.ts";
 
 interface PubkyReviewProps {
-	title: string;
-	subTitle: string;
+	modalTitle: string;
+	headerText?: string;
+	description: string;
 	pubky: string;
 	pubkyData: PubkyData;
 	onContinue: () => void;
 }
 
 const PubkyReview = ({
-	title,
-	subTitle,
+	modalTitle,
+	headerText,
+	description,
 	pubky,
 	pubkyData,
 	onContinue
@@ -36,11 +38,13 @@ const PubkyReview = ({
 		>
 			<ModalIndicator />
 			<View style={styles.titleContainer}>
-				<Text style={styles.title}>{title}</Text>
+				<Text style={styles.title}>{modalTitle}</Text>
 			</View>
-			<Text style={styles.headerText}>Your pubky.</Text>
+			{headerText && (
+				<Text style={styles.headerText}>{headerText}</Text>
+			)}
 			<SessionText style={styles.message}>
-				{subTitle}
+				{description}
 			</SessionText>
 			<ForegroundView style={styles.profileCard}>
 				<PubkyProfile

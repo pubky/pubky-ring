@@ -9,9 +9,15 @@ import {
 } from '../utils/pubky';
 import { showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
-import { showEditPubkySheet, showNewPubkySetupSheet } from "../utils/sheetHelpers.ts";
+import { showEditPubkySheet,
+	showImportSuccessSheet,
+	showNewPubkySetupSheet
+} from "../utils/sheetHelpers.ts";
 import { setPubkyData } from '../store/slices/pubkysSlice';
 import { EBackupPreference } from '../types/pubky';
+import { getStore } from "../utils/store-helpers.ts";
+import { getPubkyKeys } from '../store/selectors/pubkySelectors';
+import { copyToClipboard } from "../utils/clipboard.ts";
 
 export const usePubkyManagement = (): {
 	createPubky: () => Promise<void>;
@@ -39,6 +45,7 @@ export const usePubkyManagement = (): {
 
 	const importPubky = useCallback(
 		async (mnemonic = ''): Promise<Result<string>> => {
+			const currentPubkys = getPubkyKeys(getStore());
 			if (mnemonic) {
 				const secretKeyRes: Result<IGenerateSecretKey> =
 					await mnemonicPhraseToKeypair(mnemonic);
@@ -63,11 +70,20 @@ export const usePubkyManagement = (): {
 					});
 					return err(msg);
 				}
+				const isNewPubky = !currentPubkys.includes(pubky.value);
 				await SheetManager.hide('add-pubky');
 				setTimeout(() => {
-					showEditPubkySheet({
-						title: 'Setup',
+					showImportSuccessSheet({
 						pubky: pubky.value,
+						isNewPubky,
+						onContinue: () => {
+							setTimeout(() => {
+								showEditPubkySheet({
+									title: 'Setup',
+									pubky: pubky.value,
+								});
+							}, 200);
+						}
 					});
 				}, 200);
 				return ok('Successfully created pubky.');
@@ -76,27 +92,39 @@ export const usePubkyManagement = (): {
 			const res = await importFile(dispatch);
 			if (res.isErr()) {
 				const msg = res.error?.message ?? 'Unable to import file.';
-				showToast({
-					type: 'error',
-					title: 'Error',
-					description: msg,
-				});
+				if (res.error?.message && res.error.message !== 'OPERATION_CANCELLED') {
+					showToast({
+						type: 'error',
+						title: 'Error',
+						description: msg,
+						onPress: () => {
+							copyToClipboard(msg);
+							// eslint-disable-next-line no-alert
+							alert('Error message copied to clipboard');
+						},
+						visibilityTime: 10000,
+					});
+				}
 				return err(msg);
 			}
 
+			const isNewPubky = !currentPubkys.includes(res.value);
 			setTimeout(() => {
-				showEditPubkySheet({
-					title: 'Setup',
+				showImportSuccessSheet({
 					pubky: res.value,
+					isNewPubky,
+					onContinue: () => {
+						setTimeout(() => {
+							showEditPubkySheet({
+								title: 'Setup',
+								pubky: res.value,
+							});
+						}, 200);
+					}
 				});
 			}, 200);
 
 			const msg = 'Pubky imported successfully';
-			showToast({
-				type: 'success',
-				title: 'Success',
-				description: msg,
-			});
 			return ok(msg);
 		},
 		[dispatch],

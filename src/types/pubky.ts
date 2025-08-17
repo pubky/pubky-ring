@@ -36,3 +36,13 @@ export enum EBackupPreference {
 	encryptedFile = 'encryptedFile',
 	unknown = 'unknown',
 }
+
+export type TProfile = {
+	name: string;
+	bio: string;
+	image: string;
+	links: {
+		title: string;
+		url: string;
+	}[];
+};

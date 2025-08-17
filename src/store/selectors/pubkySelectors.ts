@@ -63,6 +63,13 @@ export const getHasPubkys = (state: RootState): boolean => {
 };
 
 /**
+ * Get all pubky keys (pubky identifiers)
+ */
+export const getPubkyKeys = (state: RootState): string[] => {
+	return Object.keys(state.pubky.pubkys);
+};
+
+/**
  * Combined selector for HomeScreen to reduce re-renders
  */
 export const getHomeScreenData = createSelector(

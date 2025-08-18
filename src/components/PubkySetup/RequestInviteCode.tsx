@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
 	message: {
 		fontWeight: '400',
 		fontSize: 17,
-		lineHeight: 24,
+		lineHeight: 22,
 		marginBottom: 40,
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',

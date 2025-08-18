@@ -25,7 +25,6 @@ import { WELCOME_GRADIENT } from '../../utils/constants.ts';
 const Welcome = ({ payload }: {
 	payload: {
 		pubky: string;
-		inviteCode?: string;
 		onComplete?: () => void;
 	};
 }): ReactElement => {
@@ -120,9 +119,9 @@ const styles = StyleSheet.create({
 	},
 	headerText: {
 		fontSize: 48,
-		lineHeight: 56,
+		lineHeight: 48,
 		marginBottom: 16,
-		fontWeight: '600',
+		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
 	messageContainer: {
@@ -132,7 +131,7 @@ const styles = StyleSheet.create({
 	message: {
 		fontWeight: '400',
 		fontSize: 17,
-		lineHeight: 24,
+		lineHeight: 22,
 		backgroundColor: 'transparent',
 	},
 	pubkyText: {
@@ -169,7 +168,7 @@ const styles = StyleSheet.create({
 	},
 	buttonText: {
 		fontSize: 15,
-		fontWeight: 600,
+		fontWeight: '600',
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		right: -20

@@ -45,14 +45,14 @@ interface ContentProps {
 	closeSheet: () => Promise<void>;
 }
 
-const Content = ({ 
-	currentScreen, 
-	title, 
-	subTitle, 
-	pubky, 
-	pubkyData, 
-	setCurrentScreen, 
-	closeSheet 
+const Content = ({
+	currentScreen,
+	title,
+	subTitle,
+	pubky,
+	pubkyData,
+	setCurrentScreen,
+	closeSheet
 }: ContentProps): ReactElement => {
 	switch (currentScreen) {
 		case ECurrentScreen.main:
@@ -156,7 +156,7 @@ const NewPubkySetup = ({ payload }: {
 				CustomHeaderComponent={<></>}
 				height={ACTION_SHEET_HEIGHT}
 			>
-				<Content 
+				<Content
 					currentScreen={currentScreen}
 					title={title}
 					subTitle={subTitle}

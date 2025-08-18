@@ -95,11 +95,11 @@ const InviteCode = ({ payload }: {
 		isErrorAnimation.value = success ? 0 : 1;
 
 		// Show the animation
-		checkOpacity.value = withTiming(1, { duration: 500 });
-		gradientOpacity.value = withTiming(1, { duration: 500 });
+		checkOpacity.value = withTiming(1, { duration: 300 });
+		gradientOpacity.value = withTiming(1, { duration: 300 });
 		checkScale.value = withSpring(1, {
-			damping: 10,
-			stiffness: 100,
+			damping: 12,
+			stiffness: 150,
 		});
 
 		if (success) {
@@ -111,7 +111,7 @@ const InviteCode = ({ payload }: {
 				} else {
 					closeSheet();
 				}
-			}, 1800);
+			}, 600);
 		}
 	}, [checkOpacity, checkScale, gradientOpacity, isErrorAnimation, payload, closeSheet]);
 
@@ -282,7 +282,7 @@ const InviteCode = ({ payload }: {
 					<RadialGradient
 						style={styles.radialGradient}
 						colors={checkMarkGradient}
-						center={{ x: 0.5, y: 0.5 }}
+						center={{ x: 0.5, y: 0.4 }}
 						positions={[0, 0.2, 0.4, 0.6, 0.8, 1]}
 					/>
 				</AnimatedView>
@@ -409,7 +409,7 @@ const styles = StyleSheet.create({
 	message: {
 		fontWeight: '400',
 		fontSize: 17,
-		lineHeight: 24,
+		lineHeight: 22,
 		marginBottom: 40,
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',

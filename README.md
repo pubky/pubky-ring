@@ -75,19 +75,19 @@ sha256sum -c SHA256SUMS
 
 This project includes Appium/WebdriverIO E2E tests for Android emulators and iOS simulators.
 
-Prerequisites:
+### Prerequisites
 - Xcode with an iOS Simulator (e.g., "iPhone 15").
 - Android SDK with an AVD (e.g., "Pixel_7_Pro_API_35").
 - Java JDK 17+ and Node.js 18+.
 - App under test has been built or is installed in test environment (iOS simulator or AVD)
 
-Install drivers (one-time):
+### Install drivers (one-time)
 
 ```bash
 yarn e2e:drivers
 ```
 
-Run tests:
+### Run tests
 - Android:
 ```bash
 yarn e2e:android
@@ -97,7 +97,7 @@ yarn e2e:android
 yarn e2e:ios
 ```
 
-Environment overrides:
+### Environment overrides
 - ANDROID_APP: absolute path to the .apk
 - AVD: Android Virtual Device name (e.g. Pixel_6_API_34)
 - ANDROID_DEVICE_NAME / ANDROID_PLATFORM_VERSION
@@ -106,7 +106,7 @@ Environment overrides:
 - IOS_SIM / IOS_PLATFORM_VERSION
 - IOS_BUNDLE_ID (default: app.pubkyring)
 
-Examples:
+### Examples
 
 ```bash
 # Android (provide APK)

@@ -43,14 +43,14 @@ jobs:
     # - name: Create assets directory
     #   run: mkdir -p android/app/src/main/assets
 
-    - name: Bundle JavaScript
-      run: |
-        npx react-native bundle \
-          --platform android \
-          --dev false \
-          --entry-file index.js \
-          --bundle-output android/app/src/main/assets/index.android.bundle \
-          --assets-dest android/app/src/main/res/
+    # - name: Bundle JavaScript
+    #   run: |
+    #     npx react-native bundle \
+    #       --platform android \
+    #       --dev false \
+    #       --entry-file index.js \
+    #       --bundle-output android/app/src/main/assets/index.android.bundle \
+    #       --assets-dest android/app/src/main/res/
 
     # - name: Make Gradlew Executable
     #   run: chmod +x android/gradlew
@@ -60,10 +60,10 @@ jobs:
         cd android
         ./gradlew generateCodegenArtifactsFromSchema
 
-    - name: Remove signing step from build.gradle to produce unsigned APK
+    - name: Use debug key for release build
       run: |
         cd android/app
-        sed -i '/signingConfig signingConfigs.release/d' build.gradle
+        sed -i '/signingConfig signingConfigs.release/s/release/debug/' build.gradle
 
     - name: Build Android App
       run: |

@@ -1,0 +1,67 @@
+name: Android E2E Tests
+
+on:
+  workflow_run:
+    workflows: ["Android Build"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  android-e2e:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+      shell: bash
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Download Android APK
+      uses: dawidd6/action-download-artifact@v4
+      with:
+        name: android-release-apk
+        path: ./artifacts
+        workflow: android-build.yml
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Run E2E tests on Android emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      with:
+        profile: pixel_6
+        api-level: 34
+        avd-name: Pixel_6_API_34
+        arch: x86_64
+        disable-animations: true
+        emulator-build: 12325540
+        script: |
+          adb install ./artifacts/app-release.apk
+          export ANDROID_APP=./artifacts/app-release.apk
+          yarn e2e:android
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-results
+        path: ./e2e/results/
+        retention-days: 7

@@ -1,0 +1,56 @@
+name: iOS E2E Tests
+
+on:
+  workflow_run:
+    workflows: ["iOS Build"]
+    types:
+      - completed
+    branches: [ main ]
+
+jobs:
+  ios-e2e:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+        
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+      
+    - name: Download iOS App
+      uses: dawidd6/action-download-artifact@v4
+      with:
+        name: ios-release-app
+        path: ./artifacts
+        workflow: ios-build.yml
+        
+    - name: Install iOS dependencies
+      run: |
+        cd ios
+        pod install
+        
+    # - name: Start iOS Simulator
+    #   run: |
+    #     xcrun simctl list devices
+    #     xcrun simctl boot "iPhone 15"
+    #     xcrun simctl install booted ./artifacts/pubkyring.app
+        
+    - name: Run E2E Tests
+      run: |
+        export IOS_APP=./artifacts/pubkyring.app
+        yarn e2e:ios
+        
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ios-e2e-results
+        path: ./e2e/results/
+        retention-days: 7

@@ -5,10 +5,10 @@ inputs:
   workflow-name:
     description: 'Name of the workflow to wait for'
     required: true
-  branch:
-    description: 'Branch name to check (defaults to PR head ref)'
+  commit-sha:
+    description: 'Commit SHA to search for (defaults to PR head SHA or github.sha)'
     required: false
-    default: '${{ github.head_ref }}'
+    default: '${{ github.event.pull_request.head.sha || github.sha }}'
   max-attempts:
     description: 'Maximum number of attempts (default 360 = 1 hour with 10s intervals)'
     required: false
@@ -34,7 +34,7 @@ runs:
           const maxAttempts = parseInt('${{ inputs.max-attempts }}');
           const intervalSeconds = parseInt('${{ inputs.interval-seconds }}');
           const workflowName = '${{ inputs.workflow-name }}';
-          const branch = '${{ inputs.branch }}';
+          const commitSha = '${{ inputs.commit-sha }}';
 
           let attempts = 0;
 
@@ -43,13 +43,16 @@ runs:
             const runs = await github.rest.actions.listWorkflowRunsForRepo({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head_sha: context.sha,
+              head_sha: commitSha,
               per_page: 100
             });
 
-            // Find the workflow run with matching name for this commit
-            const targetRun = runs.data.workflow_runs.find(run =>
-              run.name === workflowName && run.head_sha === context.sha
+            console.log(`Found ${runs.data.workflow_runs.length} total workflow runs`);
+            console.log(`Looking for workflow: "${workflowName}" with commit: ${commitSha}`);
+
+            // Find the workflow run with matching name and commit
+            const targetRun = runs.data.workflow_runs.find(run => 
+              run.name === workflowName && run.head_sha === commitSha
             );
 
             if (targetRun) {
@@ -65,7 +68,7 @@ runs:
                 console.log(`${workflowName} status: ${targetRun.status}`);
               }
             } else {
-              console.log(`No ${workflowName} workflow run found for branch ${branch}`);
+              console.log(`No ${workflowName} workflow run found for commit ${commitSha}`);
             }
 
             attempts++;

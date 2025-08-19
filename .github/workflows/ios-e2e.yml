@@ -22,31 +22,26 @@ jobs:
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
-      
+
+    - name: Install iOS dependencies
+      run: |
+        cd ios
+        pod install
+
     - name: Wait for iOS Build
+      id: wait-ios-build
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'iOS Build'
         max-attempts: '360'  # 1 hour with 10s intervals
 
-    - name: Check iOS Build Status
-      id: check-ios-build
-      uses: ./.github/actions/check-workflow-status
-      with:
-        workflow-name: 'iOS Build'
-        
     - name: Download iOS App
       uses: dawidd6/action-download-artifact@v4
       with:
         name: ios-release-app
         path: ./artifacts
         workflow: ios-build.yml
-        run_id: ${{ steps.check-ios-build.outputs.workflow-run-id }}
-
-    - name: Install iOS dependencies
-      run: |
-        cd ios
-        pod install
+        run_id: ${{ steps.wait-ios-build.outputs.workflow-run-id }}
 
     # - name: Start iOS Simulator
     #   run: |

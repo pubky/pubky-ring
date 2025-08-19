@@ -34,17 +34,18 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
+    # - name: Set up Android SDK
+    #   uses: android-actions/setup-android@v3
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
     - name: Wait for Android Build
+      id: wait-android-build
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
         max-attempts: '360'  # 1 hour with 10s intervals
-
-    - name: Check Android Build Status
-      id: check-android-build
-      uses: ./.github/actions/check-workflow-status
-      with:
-        workflow-name: 'Android Build'
 
     - name: Download Android APK
       uses: dawidd6/action-download-artifact@v4
@@ -52,10 +53,7 @@ jobs:
         name: android-release-apk
         path: ./artifacts
         workflow: android-build.yml
-        run_id: ${{ steps.check-android-build.outputs.workflow-run-id }}
-
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
+        run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
 
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2

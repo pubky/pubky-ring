@@ -1,52 +1,62 @@
 name: iOS E2E Tests
 
 on:
-  workflow_run:
-    workflows: ["iOS Build"]
-    types:
-      - completed
+  pull_request:
     branches: [ main ]
 
 jobs:
   ios-e2e:
     runs-on: macos-latest
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'yarn'
-        
+
     - name: Install dependencies
       run: yarn install --frozen-lockfile
       
+    - name: Wait for iOS Build
+      uses: lewagon/wait-on-check-action@v1.3.1
+      with:
+        ref: ${{ github.head_ref }}
+        check-name: 'iOS Build'
+        wait-interval: 10
+
+    - name: Check iOS Build Status
+      id: check-ios-build
+      uses: ./.github/actions/check-workflow-status
+      with:
+        workflow-name: 'iOS Build'
+        
     - name: Download iOS App
       uses: dawidd6/action-download-artifact@v4
       with:
         name: ios-release-app
         path: ./artifacts
         workflow: ios-build.yml
-        
+        run_id: ${{ steps.check-ios-build.outputs.workflow-run-id }}
+
     - name: Install iOS dependencies
       run: |
         cd ios
         pod install
-        
+
     # - name: Start iOS Simulator
     #   run: |
     #     xcrun simctl list devices
     #     xcrun simctl boot "iPhone 15"
     #     xcrun simctl install booted ./artifacts/pubkyring.app
-        
+
     - name: Run E2E Tests
       run: |
         export IOS_APP=./artifacts/pubkyring.app
         yarn e2e:ios
-        
+
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()

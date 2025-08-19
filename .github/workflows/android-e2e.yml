@@ -1,10 +1,7 @@
 name: Android E2E Tests
 
 on:
-  workflow_run:
-    workflows: ["Android Build"]
-    types:
-      - completed
+  pull_request:
     branches: [ main ]
 
 jobs:
@@ -34,12 +31,26 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
+    - name: Wait for Android Build
+      uses: lewagon/wait-on-check-action@v1.3.1
+      with:
+        ref: ${{ github.head_ref }}
+        check-name: 'Android Build'
+        wait-interval: 10
+
+    - name: Check Android Build Status
+      id: check-android-build
+      uses: ./.github/actions/check-workflow-status
+      with:
+        workflow-name: 'Android Build'
+
     - name: Download Android APK
       uses: dawidd6/action-download-artifact@v4
       with:
         name: android-release-apk
         path: ./artifacts
         workflow: android-build.yml
+        run_id: ${{ steps.check-android-build.outputs.workflow-run-id }}
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile

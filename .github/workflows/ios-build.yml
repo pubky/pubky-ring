@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    concurrency:
+      group: ios-build-${{ github.head_ref }}
+      cancel-in-progress: true
     
     steps:
     - name: Checkout code

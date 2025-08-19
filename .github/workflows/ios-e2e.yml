@@ -7,6 +7,9 @@ on:
 jobs:
   ios-e2e:
     runs-on: macos-latest
+    concurrency:
+      group: ios-e2e-${{ github.head_ref }}
+      cancel-in-progress: true
 
     steps:
     - name: Checkout code
@@ -21,11 +24,10 @@ jobs:
       run: yarn install --frozen-lockfile
       
     - name: Wait for iOS Build
-      uses: lewagon/wait-on-check-action@v1.3.1
+      uses: ./.github/actions/wait-for-workflow
       with:
-        ref: ${{ github.head_ref }}
-        check-name: 'iOS Build'
-        wait-interval: 10
+        workflow-name: 'iOS Build'
+        max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Check iOS Build Status
       id: check-ios-build

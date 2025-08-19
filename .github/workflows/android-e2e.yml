@@ -7,6 +7,9 @@ on:
 jobs:
   android-e2e:
     runs-on: ubuntu-latest
+    concurrency:
+      group: android-e2e-${{ github.head_ref }}
+      cancel-in-progress: true
 
     steps:
     - name: Checkout code
@@ -32,11 +35,10 @@ jobs:
         java-version: '17'
 
     - name: Wait for Android Build
-      uses: lewagon/wait-on-check-action@v1.3.1
+      uses: ./.github/actions/wait-for-workflow
       with:
-        ref: ${{ github.head_ref }}
-        check-name: 'Android Build'
-        wait-interval: 10
+        workflow-name: 'Android Build'
+        max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Check Android Build Status
       id: check-android-build

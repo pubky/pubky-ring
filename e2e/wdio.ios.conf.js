@@ -12,6 +12,9 @@ exports.config = {
       'appium:platformVersion': process.env.IOS_PLATFORM_VERSION || '17.5',
       'appium:deviceName': iosSimName,
       'appium:newCommandTimeout': 120,
+      'appium:appWaitDuration': 120000,
+      'appium:appWaitForLaunch': true,
+      'appium:autoLaunch': true,
       ...(appPath
         ? { 'appium:app': appPath }
         : {

@@ -71,6 +71,8 @@ jobs:
         profile: pixel_6
         api-level: 34
         avd-name: Pixel_6_API_34
+        force-avd-creation: false
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         disable-animations: false
         emulator-build: 12325540
@@ -89,16 +91,18 @@ jobs:
           adb logcat > logcat.txt &
           LOGCAT_PID=$!
 
-          # Start screen recording in background
-          adb shell "screenrecord --verbose /sdcard/screenrecord.mp4" &
+          # Start screen recording (max 3 minutes)
+          adb shell "screenrecord --time-limit=180 --verbose /sdcard/screenrecord.mp4" &
           RECORD_PID=$!
 
           # Run E2E tests
           yarn e2e:android || TEST_EXIT_CODE=$?
 
-          # Stop recording and capture logs
-          adb shell "pkill -l SIGINT screenrecord" || true
+          # Stop logcat
           kill $LOGCAT_PID || true
+
+          # Wait for recording to finish (auto-stops after 3 minutes)
+          wait $RECORD_PID || true
 
           # Pull recording and logs
           adb pull /sdcard/screenrecord.mp4 ./screenrecord.mp4 || true

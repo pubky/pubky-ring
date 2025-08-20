@@ -8,9 +8,9 @@ exports.config = {
   logLevel: 'info',
   bail: 0,
   baseUrl: 'http://localhost',
-  waitforTimeout: 20000,
+  waitforTimeout: 60000,
   connectionRetryTimeout: 120000,
-  connectionRetryCount: 2,
+  connectionRetryCount: 3,
   framework: 'mocha',
   reporters: ['spec'],
   mochaOpts: {

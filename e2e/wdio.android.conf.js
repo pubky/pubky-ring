@@ -18,6 +18,9 @@ exports.config = {
       'appium:avd': avdName,
       'appium:autoGrantPermissions': true,
       'appium:newCommandTimeout': 120,
+      'appium:appWaitDuration': 120000,
+      'appium:appWaitForLaunch': true,
+      'appium:autoLaunch': true,
       ...(resolvedAppPath
         ? {
             'appium:app': resolvedAppPath,

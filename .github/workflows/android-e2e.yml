@@ -77,35 +77,57 @@ jobs:
         disable-animations: false
         emulator-build: 12325540
         script: |
+          echo "=== Starting Android E2E Test Setup ==="
+
+          # Wait for emulator to be fully booted
+          echo "Waiting for emulator to boot..."
+          adb wait-for-device
+
+          # Wait for boot to complete
+          echo "Waiting for boot to complete..."
+          adb shell 'while [[ "$(getprop sys.boot_completed)" != "1" ]]; do sleep 1; done'
+
+          # Additional wait for system to be fully ready
+          echo "Waiting for system to be fully ready..."
+          sleep 10
+
           # Debug: Check emulator status
+          echo "=== Emulator Status ==="
           adb devices
           adb shell getprop ro.build.version.release
           adb shell getprop ro.build.version.sdk
+          adb shell getprop sys.boot_completed
+
+          # Check available packages
+          echo "=== Available Packages ==="
+          adb shell pm list packages | grep pubky || echo "No pubky packages found yet"
 
           # Install APK
+          echo "=== Installing APK ==="
           adb install ./artifacts/app-release.apk
           export ANDROID_APP=./artifacts/app-release.apk
 
+          # Create artefacts directory for test recordings
+          echo "=== Creating Artefacts Directory ==="
+          mkdir -p ./e2e/artefacts
+
+          # Verify app installation
+          echo "=== Verifying App Installation ==="
+          adb shell pm list packages | grep pubky
+
           # Start logcat capture in background
+          echo "=== Starting Logcat ==="
           adb logcat -c
           adb logcat > logcat.txt &
           LOGCAT_PID=$!
 
-          # Start screen recording (max 3 minutes)
-          adb shell "screenrecord --time-limit=180 --verbose /sdcard/screenrecord.mp4" &
-          RECORD_PID=$!
-
-          # Run E2E tests
-          yarn e2e:android || TEST_EXIT_CODE=$?
+          # Run E2E tests with video recording enabled
+          echo "=== Running E2E Tests ==="
+          RECORD_VIDEO=true yarn e2e:android || TEST_EXIT_CODE=$?
 
           # Stop logcat
+          echo "=== Stopping Logcat ==="
           kill $LOGCAT_PID || true
-
-          # Wait for recording to finish (auto-stops after 3 minutes)
-          wait $RECORD_PID || true
-
-          # Pull recording and logs
-          adb pull /sdcard/screenrecord.mp4 ./screenrecord.mp4 || true
 
           # Exit with test result
           exit ${TEST_EXIT_CODE:-0}
@@ -117,6 +139,6 @@ jobs:
         name: android-e2e-results
         path: |
           ./e2e/results/
+          ./e2e/artefacts/
           ./logcat.txt
-          ./screenrecord.mp4
         retention-days: 7

@@ -53,6 +53,12 @@ jobs:
         workflow: ios-build.yml
         run_id: ${{ steps.wait-ios-build.outputs.workflow-run-id }}
 
+    - name: Extract iOS App Bundle
+      run: |
+        cd artifacts
+        unzip pubkyring.app.zip
+        ls -la
+
     # - name: Start iOS Simulator
     #   run: |
     #     xcrun simctl list devices

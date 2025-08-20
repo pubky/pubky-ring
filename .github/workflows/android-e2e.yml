@@ -72,17 +72,47 @@ jobs:
         api-level: 34
         avd-name: Pixel_6_API_34
         arch: x86_64
-        disable-animations: true
+        disable-animations: false
         emulator-build: 12325540
         script: |
+          # Debug: Check emulator status
+          adb devices
+          adb shell getprop ro.build.version.release
+          adb shell getprop ro.build.version.sdk
+
+          # Install APK
           adb install ./artifacts/app-release.apk
           export ANDROID_APP=./artifacts/app-release.apk
-          yarn e2e:android
 
-    - name: Upload Test Results
+          # Start logcat capture in background
+          adb logcat -c
+          adb logcat > logcat.txt &
+          LOGCAT_PID=$!
+
+          # Start screen recording in background
+          adb shell "screenrecord --verbose /sdcard/screenrecord.mp4" &
+          RECORD_PID=$!
+
+          # Run E2E tests
+          yarn e2e:android || TEST_EXIT_CODE=$?
+
+          # Stop recording and capture logs
+          adb shell "pkill -l SIGINT screenrecord" || true
+          kill $LOGCAT_PID || true
+
+          # Pull recording and logs
+          adb pull /sdcard/screenrecord.mp4 ./screenrecord.mp4 || true
+
+          # Exit with test result
+          exit ${TEST_EXIT_CODE:-0}
+
+    - name: Upload Test Results, Logcat, and Screen Recording
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: android-e2e-results
-        path: ./e2e/results/
+        path: |
+          ./e2e/results/
+          ./logcat.txt
+          ./screenrecord.mp4
         retention-days: 7

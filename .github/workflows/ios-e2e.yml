@@ -3,6 +3,12 @@ name: iOS E2E Tests
 on:
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      commit-sha:
+        description: 'Commit SHA to test (leave empty to use current branch head)'
+        required: false
+        type: string
 
 jobs:
   ios-e2e:
@@ -33,6 +39,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'iOS Build'
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.ref }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download iOS App

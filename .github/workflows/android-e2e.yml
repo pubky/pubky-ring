@@ -3,6 +3,12 @@ name: Android E2E Tests
 on:
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      commit-sha:
+        description: 'Commit SHA to test (leave empty to use current branch head)'
+        required: false
+        type: string
 
 jobs:
   android-e2e:
@@ -45,6 +51,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK

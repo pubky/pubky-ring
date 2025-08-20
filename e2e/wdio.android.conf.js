@@ -21,6 +21,12 @@ exports.config = {
       'appium:appWaitDuration': 120000,
       'appium:appWaitForLaunch': true,
       'appium:autoLaunch': true,
+      'appium:noReset': false,
+      'appium:fullReset': true,
+      'appium:enforceAppInstall': true,
+      'appium:skipServerInstallation': false,
+      'appium:skipDeviceInitialization': false,
+      'appium:shouldTerminateApp': true,
       ...(resolvedAppPath
         ? {
             'appium:app': resolvedAppPath,

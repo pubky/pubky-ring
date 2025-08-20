@@ -20,6 +20,7 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -42,7 +43,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'iOS Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.ref }}
+        commit-sha: 42029a047264ceff8f1f6eb92bcc153ddb07e553 # ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download iOS App
@@ -84,13 +85,25 @@ jobs:
         echo "=== Waiting for Simulator to be Fully Ready ==="
         sleep 15
 
-        # Install the app
+                # Install the app
         echo "=== Installing iOS App ==="
         xcrun simctl install booted ./artifacts/pubkyring.app
-
+        
         # Verify app installation
         echo "=== Verifying App Installation ==="
         xcrun simctl listapps booted | grep pubky || echo "No pubky apps found"
+        
+        # Grant permissions to the app
+        echo "=== Granting App Permissions ==="
+        xcrun simctl privacy booted grant camera com.pubkyring.app || true
+        xcrun simctl privacy booted grant microphone com.pubkyring.app || true
+        xcrun simctl privacy booted grant location com.pubkyring.app || true
+        xcrun simctl privacy booted grant photos com.pubkyring.app || true
+        
+        # Clear any existing app data
+        echo "=== Clearing App Data ==="
+        xcrun simctl terminate booted com.pubkyring.app || true
+        sleep 2
 
         # Set environment variable
         export IOS_APP=./artifacts/pubkyring.app
@@ -104,17 +117,64 @@ jobs:
         xcrun simctl spawn booted log stream --predicate 'process == "pubkyring"' > ios-simulator-logs.txt &
         LOG_PID=$!
 
+        # Check if Appium server is running and start if needed
+        echo "=== Checking Appium Server Status ==="
+        if ! curl -s http://127.0.0.1:4723/status > /dev/null; then
+          echo "Appium server not running, starting it..."
+          APPIUM_HOME=./e2e/.appium npx appium --base-path /wd/hub &
+          APPIUM_PID=$!
+          sleep 10
+          
+          # Wait for Appium to be ready
+          echo "=== Waiting for Appium Server ==="
+          for i in {1..30}; do
+            if curl -s http://127.0.0.1:4723/status > /dev/null; then
+              echo "Appium server is ready!"
+              break
+            fi
+            echo "Waiting for Appium server... (attempt $i/30)"
+            sleep 2
+          done
+        else
+          echo "Appium server is already running"
+        fi
+
         # Run E2E tests with video recording enabled
         echo "=== Running E2E Tests ==="
         RECORD_VIDEO=true yarn e2e:ios || TEST_EXIT_CODE=$?
 
-        # Stop log capture
+        # Stop log capture and Appium if we started it
         echo "=== Stopping Log Capture ==="
         kill $LOG_PID || true
+        if [ ! -z "$APPIUM_PID" ]; then
+          echo "=== Stopping Appium Server ==="
+          kill $APPIUM_PID || true
+        fi
 
         # Exit with test result
         exit ${TEST_EXIT_CODE:-0}
 
+    - name: Upload Video
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-e2e-video
+        path: ./e2e/artefacts/
+        retention-days: 7
+
+    - name: Upload Logcat
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-e2e-logcat
+        path: ./logcat.txt
+        retention-days: 7
+
+    - name: Upload Simulator Logs
+      uses: actions/upload-artifact@v4
+      with:
+        name: ios-e2e-simulator-logs
+        path: ./ios-simulator-logs.txt
+        retention-days: 7
+    
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()
@@ -122,6 +182,4 @@ jobs:
         name: ios-e2e-results
         path: |
           ./e2e/results/
-          ./e2e/artefacts/
-          ./ios-simulator-logs.txt
         retention-days: 7

@@ -34,6 +34,17 @@ jobs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
+    - name: Free Disk Space
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: false
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
     - name: Set up Java
       uses: actions/setup-java@v4
       with:
@@ -54,7 +65,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: 42029a047264ceff8f1f6eb92bcc153ddb07e553 # ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -91,6 +102,15 @@ jobs:
           echo "Waiting for system to be fully ready..."
           sleep 10
 
+          # Grant necessary permissions and disable animations for stability
+          echo "=== Configuring System for E2E Tests ==="
+          adb shell settings put global window_animation_scale 0
+          adb shell settings put global transition_animation_scale 0
+          adb shell settings put global animator_duration_scale 0
+          
+          # Grant all permissions to the app (will be done during install)
+          adb shell settings put global development_settings_enabled 1
+
           # Debug: Check emulator status
           echo "=== Emulator Status ==="
           adb devices
@@ -102,18 +122,35 @@ jobs:
           echo "=== Available Packages ==="
           adb shell pm list packages | grep pubky || echo "No pubky packages found yet"
 
-          # Install APK
+          # Install APK with permissions
           echo "=== Installing APK ==="
-          adb install ./artifacts/app-release.apk
+          adb install -g ./artifacts/app-release.apk
           export ANDROID_APP=./artifacts/app-release.apk
 
           # Create artefacts directory for test recordings
           echo "=== Creating Artefacts Directory ==="
           mkdir -p ./e2e/artefacts
 
-          # Verify app installation
+          # Verify app installation and grant additional permissions
           echo "=== Verifying App Installation ==="
           adb shell pm list packages | grep pubky
+          
+          # Grant additional permissions that might be needed
+          echo "=== Granting Additional Permissions ==="
+          adb shell pm grant to.pubky.ring android.permission.CAMERA || true
+          adb shell pm grant to.pubky.ring android.permission.RECORD_AUDIO || true
+          adb shell pm grant to.pubky.ring android.permission.WRITE_EXTERNAL_STORAGE || true
+          adb shell pm grant to.pubky.ring android.permission.READ_EXTERNAL_STORAGE || true
+          adb shell pm grant to.pubky.ring android.permission.ACCESS_FINE_LOCATION || true
+          adb shell pm grant to.pubky.ring android.permission.ACCESS_COARSE_LOCATION || true
+          
+          # Clear any existing app data to ensure clean state
+          echo "=== Clearing App Data ==="
+          adb shell pm clear to.pubky.ring || true
+          
+          # Force stop any existing instances
+          echo "=== Stopping Existing App Instances ==="
+          adb shell am force-stop to.pubky.ring || true
 
           # Start logcat capture in background
           echo "=== Starting Logcat ==="
@@ -121,6 +158,10 @@ jobs:
           adb logcat > logcat.txt &
           LOGCAT_PID=$!
 
+          # Wait a moment for app to be fully ready
+          echo "=== Waiting for App to be Ready ==="
+          sleep 5
+          
           # Run E2E tests with video recording enabled
           echo "=== Running E2E Tests ==="
           RECORD_VIDEO=true yarn e2e:android || TEST_EXIT_CODE=$?
@@ -132,13 +173,32 @@ jobs:
           # Exit with test result
           exit ${TEST_EXIT_CODE:-0}
 
-    - name: Upload Test Results, Logcat, and Screen Recording
+    - name: Upload Video
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-e2e-video
+        path: ./e2e/artefacts/
+        retention-days: 7
+
+    - name: Upload Logcat
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-e2e-logcat
+        path: ./logcat.txt
+        retention-days: 7
+
+    - name: Upload Screen Recording
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-e2e-screen-recording
+        path: ./screenrecord.mp4
+        retention-days: 7
+
+    - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()
       with:
         name: android-e2e-results
         path: |
           ./e2e/results/
-          ./e2e/artefacts/
-          ./logcat.txt
         retention-days: 7

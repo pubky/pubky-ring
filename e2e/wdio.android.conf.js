@@ -27,6 +27,11 @@ exports.config = {
       'appium:skipServerInstallation': false,
       'appium:skipDeviceInitialization': false,
       'appium:shouldTerminateApp': true,
+      'appium:uiautomator2ServerLaunchTimeout': 120000,
+      'appium:uiautomator2ServerInstallTimeout': 120000,
+      'appium:androidInstallTimeout': 120000,
+      'appium:adbExecTimeout': 120000,
+      'appium:uiautomator2ServerReadTimeout': 120000,
       ...(resolvedAppPath
         ? {
             'appium:app': resolvedAppPath,

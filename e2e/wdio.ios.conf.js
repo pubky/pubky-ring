@@ -5,6 +5,14 @@ const appPath = process.env.IOS_APP; // optional .app/.ipa path
 
 exports.config = {
   ...shared.config,
+  // Override services for iOS in CI - we'll start Appium manually
+  ...(process.env.CI ? {
+    services: [],
+    // Connect to manually started Appium server
+    hostname: '127.0.0.1',
+    port: 4723,
+    path: '/wd/hub',
+  } : {}),
   capabilities: [
     {
       platformName: 'iOS',
@@ -13,14 +21,26 @@ exports.config = {
       'appium:deviceName': iosSimName,
       'appium:newCommandTimeout': 120,
       'appium:appWaitDuration': 120000,
+      'appium:derivedDataPath': './e2e/derived-data',
+      'appium:useXctestrunFile': false,
+      'appium:waitForQuiescence': false,
+      'appium:shouldUseSingletonTestManager': false,
       'appium:appWaitForLaunch': true,
       'appium:autoLaunch': true,
-      'appium:noReset': false,
-      'appium:fullReset': true,
-      'appium:enforceAppInstall': true,
+      'appium:noReset': true,
+      'appium:fullReset': false,
+      'appium:enforceAppInstall': false,
       'appium:skipServerInstallation': false,
       'appium:skipDeviceInitialization': false,
       'appium:shouldTerminateApp': true,
+      'appium:preventWDAAttachments': true,
+      'appium:usePrebuiltWDA': false,
+      'appium:useNewWDA': true,
+      'appium:wdaLaunchTimeout': 300000,
+      'appium:wdaConnectionTimeout': 300000,
+      'appium:wdaStartupRetries': 2,
+      'appium:wdaStartupRetryInterval': 15000,
+
       ...(appPath
         ? { 'appium:app': appPath }
         : {

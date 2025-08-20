@@ -34,6 +34,31 @@ jobs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
+    - name: Optimize Resources
+      run: |
+        # Kill any lingering emulator processes
+        sudo killall -9 qemu-system-x86_64 || true
+        sudo killall -9 emulator || true
+        sudo pkill -f 'qemu|adb' || true
+        
+        # Free up memory
+        sudo sync && sudo sysctl -w vm.drop_caches=3 || true
+        
+        # Disable unnecessary services
+        sudo systemctl stop snapd || true
+        sudo systemctl stop systemd-timesyncd || true
+        
+        # Increase virtual memory limit
+        sudo sysctl -w vm.max_map_count=262144
+        # Increase file watch limit
+        sudo sysctl -w fs.inotify.max_user_watches=524288
+
+        # Log resource usage for debugging
+        free -h
+        df -h
+        nproc
+        cat /proc/meminfo | grep MemTotal
+
     - name: Free Disk Space
       uses: jlumbroso/free-disk-space@main
       with:
@@ -83,10 +108,12 @@ jobs:
         api-level: 34
         avd-name: Pixel_6_API_34
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 2048 -cores 2
         arch: x86_64
-        disable-animations: false
-        emulator-build: 12325540
+        disable-animations: true
+        ram-size: 1536M
+        heap-size: 128M
+        #emulator-build: 12325540
         script: |
           echo "=== Starting Android E2E Test Setup ==="
 
@@ -110,6 +137,18 @@ jobs:
           
           # Grant all permissions to the app (will be done during install)
           adb shell settings put global development_settings_enabled 1
+          
+          # Additional resource optimization
+          echo "=== Optimizing System Resources ==="
+          adb shell settings put global low_power 1 || true
+          adb shell settings put global airplane_mode_on 0 || true
+          adb shell settings put global wifi_on 0 || true
+          adb shell settings put global bluetooth_on 0 || true
+          adb shell settings put global mobile_data 0 || true
+          
+          # Reduce background processes
+          adb shell settings put global always_finish_activities 1 || true
+          adb shell settings put global background_process_limit 1 || true
 
           # Debug: Check emulator status
           echo "=== Emulator Status ==="
@@ -119,8 +158,8 @@ jobs:
           adb shell getprop sys.boot_completed
 
           # Check available packages
-          echo "=== Available Packages ==="
-          adb shell pm list packages | grep pubky || echo "No pubky packages found yet"
+          #echo "=== Available Packages ==="
+          #adb shell pm list packages | grep pubky || echo "No pubky packages found yet"
 
           # Install APK with permissions
           echo "=== Installing APK ==="
@@ -128,8 +167,8 @@ jobs:
           export ANDROID_APP=./artifacts/app-release.apk
 
           # Create artefacts directory for test recordings
-          echo "=== Creating Artefacts Directory ==="
-          mkdir -p ./e2e/artefacts
+          #echo "=== Creating Artefacts Directory ==="
+          #mkdir -p ./e2e/artefacts
 
           # Verify app installation and grant additional permissions
           echo "=== Verifying App Installation ==="
@@ -159,19 +198,34 @@ jobs:
           LOGCAT_PID=$!
 
           # Wait a moment for app to be fully ready
-          echo "=== Waiting for App to be Ready ==="
-          sleep 5
+          echo "=== Waiting 15 seconds for App to be Ready ==="
+          sleep 15
           
-          # Run E2E tests with video recording enabled
+          # Monitor system resources
+          echo "=== System Resource Status ==="
+          adb shell dumpsys meminfo | head -20 || true
+          adb shell dumpsys activity | grep "Total activities" || true
+          
+          # Clear app cache and memory
+          echo "=== Clearing App Cache ==="
+          adb shell pm clear to.pubky.ring || true
+          adb shell am force-stop to.pubky.ring || true
+          
+          # Run E2E tests
           echo "=== Running E2E Tests ==="
-          RECORD_VIDEO=true yarn e2e:android || TEST_EXIT_CODE=$?
+          yarn e2e:android
+          
+          # Cleanup any hanging UiAutomator2 processes
+          echo "=== Cleaning up UiAutomator2 processes ==="
+          adb shell "pkill -f uiautomator" || true
+          adb shell "pkill -f UiAutomator2" || true
 
           # Stop logcat
           echo "=== Stopping Logcat ==="
           kill $LOGCAT_PID || true
 
           # Exit with test result
-          exit ${TEST_EXIT_CODE:-0}
+          #exit ${TEST_EXIT_CODE:-0}
 
     - name: Upload Video
       uses: actions/upload-artifact@v4

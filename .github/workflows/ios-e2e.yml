@@ -27,6 +27,21 @@ jobs:
         node-version: '20'
         cache: 'yarn'
 
+    - name: Optimize Resources
+      run: |
+        # Kill lingering xcodebuild processes
+        sudo killall -9 xcodebuild || true
+        # Kill lingering simulator processes
+        sudo killall -9 Simulator || true
+        sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService || true
+        # Disable Spotlight indexing to reduce CPU usage
+        sudo mdutil -i off -a || true
+        # Limit background services
+        sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.metadata.mds.plist || true
+        # Log resource usage for debugging
+        top -l 1 -o mem | head -n 20
+        sysctl hw.memsize hw.ncpu
+
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
@@ -60,13 +75,21 @@ jobs:
         unzip pubkyring.app.zip
         ls -la
 
+    - name: Optimize Simulator Settings
+      run: |
+        defaults write com.apple.iphonesimulator ShowSingleTouches 1
+        defaults write com.apple.iphonesimulator SlowAnimations -bool false
+        defaults write com.apple.iphonesimulator DisableAutomaticLaunch -bool true
+        # Reduce GPU usage
+        defaults write com.apple.iphonesimulator GraphicsQualityOverride -int 1
+
     - name: Start iOS Simulator and Run E2E Tests
       run: |
         echo "=== Starting iOS E2E Test Setup ==="
 
         # List available simulators
-        echo "=== Available iOS Simulators ==="
-        xcrun simctl list devices
+        #echo "=== Available iOS Simulators ==="
+        #xcrun simctl list devices
 
         # Boot the simulator
         echo "=== Booting iOS Simulator ==="
@@ -105,54 +128,66 @@ jobs:
         xcrun simctl terminate booted com.pubkyring.app || true
         sleep 2
 
-        # Set environment variable
-        export IOS_APP=./artifacts/pubkyring.app
+        # Set environment variables
+        #export IOS_APP=./artifacts/pubkyring.app
+        #export APPIUM_HOME=./e2e/.appium
 
         # Create artifacts directory for test recordings
-        echo "=== Creating Artefacts Directory ==="
-        mkdir -p ./e2e/artefacts
+        #echo "=== Creating Artefacts Directory ==="
+        #mkdir -p ./e2e/artefacts
 
         # Start simulator log capture in background
         echo "=== Starting Simulator Log Capture ==="
         xcrun simctl spawn booted log stream --predicate 'process == "pubkyring"' > ios-simulator-logs.txt &
         LOG_PID=$!
 
-        # Check if Appium server is running and start if needed
-        echo "=== Checking Appium Server Status ==="
-        if ! curl -s http://127.0.0.1:4723/status > /dev/null; then
-          echo "Appium server not running, starting it..."
-          APPIUM_HOME=./e2e/.appium npx appium --base-path /wd/hub &
-          APPIUM_PID=$!
-          sleep 10
-          
-          # Wait for Appium to be ready
-          echo "=== Waiting for Appium Server ==="
-          for i in {1..30}; do
-            if curl -s http://127.0.0.1:4723/status > /dev/null; then
-              echo "Appium server is ready!"
-              break
-            fi
-            echo "Waiting for Appium server... (attempt $i/30)"
-            sleep 2
-          done
-        else
-          echo "Appium server is already running"
-        fi
+        # Start Appium server manually for iOS
+        echo "=== Starting Appium Server for iOS ==="
+        APPIUM_HOME=./e2e/.appium npx appium --base-path /wd/hub &
+        APPIUM_PID=$!
+        sleep 10
+        
+        # Wait for Appium to be ready
+        echo "=== Waiting for Appium Server ==="
+        for i in {1..30}; do
+          if curl -s http://127.0.0.1:4723/wd/hub/status > /dev/null; then
+            echo "Appium server is ready!"
+            break
+          fi
+          echo "Waiting for Appium server... (attempt $i/30)"
+          sleep 2
+        done
 
-        # Run E2E tests with video recording enabled
+        # Wait a moment for app to be fully ready
+        echo "=== Waiting 15 seconds for App to be Ready ==="
+        sleep 15
+        
+        # Check simulator status and available apps
+        echo "=== Simulator Status Check ==="
+        xcrun simctl list devices | grep "iPhone 15"
+        echo "=== Installed Apps ==="
+        xcrun simctl listapps booted | head -10
+        
+        # Check if WDA is already installed
+        echo "=== Checking for WDA ==="
+        xcrun simctl listapps booted | grep -i webdriver || echo "WDA not found in app list"
+
+        # Run E2E tests
         echo "=== Running E2E Tests ==="
-        RECORD_VIDEO=true yarn e2e:ios || TEST_EXIT_CODE=$?
+        echo "=== WebDriverIO Configuration Debug ==="
+        echo "APPIUM_HOME: $APPIUM_HOME"
+        echo "IOS_APP: $IOS_APP"
+        
+        yarn e2e:ios
 
-        # Stop log capture and Appium if we started it
+        # Stop log capture and Appium server
         echo "=== Stopping Log Capture ==="
         kill $LOG_PID || true
-        if [ ! -z "$APPIUM_PID" ]; then
-          echo "=== Stopping Appium Server ==="
-          kill $APPIUM_PID || true
-        fi
+        echo "=== Stopping Appium Server ==="
+        kill $APPIUM_PID || true
 
         # Exit with test result
-        exit ${TEST_EXIT_CODE:-0}
+        #exit ${TEST_EXIT_CODE:-0}
 
     - name: Upload Video
       uses: actions/upload-artifact@v4

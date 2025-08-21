@@ -21,16 +21,22 @@ exports.config = {
 			'appium:fullReset': false,
 			'appium:noReset': false,
 			'appium:adbExecTimeout': 300_000,
+			'appium:uiautomator2ServerLaunchTimeout': 300_000,
+			'appium:uiautomator2ServerInstallTimeout': 300_000,
+			'appium:androidInstallTimeout': 300_000,
+			'appium:allowTestPackages': true,
+			'appium:enforceAppInstall': true,
+			'appium:disableWindowAnimation': true,
 			...(resolvedAppPath
-        ? {
-        	'appium:app': resolvedAppPath,
-        }
-        : {
-        	'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-        	'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-        	'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
-        	'appium:forceAppLaunch': false
-        })
+				? {
+					'appium:app': resolvedAppPath,
+				}
+				: {
+					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
+					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
+					'appium:forceAppLaunch': false
+				})
 		}
 	]
 };

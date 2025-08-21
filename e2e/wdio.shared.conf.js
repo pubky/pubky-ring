@@ -19,13 +19,7 @@ exports.config = {
 	},
 	services: [
 		[
-			'appium',
-			{
-				args: {
-					log: './e2e/appium.log',
-					logLevel: 'debug'
-				}
-			}
+			'appium'
 		]
 	],
 

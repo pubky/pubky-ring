@@ -67,6 +67,7 @@ jobs:
 
     - name: Upload Video
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: ios-e2e-video
         path: ./e2e/artefacts/
@@ -74,6 +75,7 @@ jobs:
 
     - name: Upload Logcat
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: ios-e2e-logcat
         path: ./logcat.txt
@@ -81,6 +83,7 @@ jobs:
 
     - name: Upload Simulator Logs
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: ios-e2e-simulator-logs
         path: ./ios-simulator-logs.txt

@@ -54,7 +54,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: 5d333eb743a0fc30b9d3372fc603e0f9ce125ae3 #${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -69,6 +69,7 @@ jobs:
       uses: reactivecircus/android-emulator-runner@v2
       env:
         ANDROID_APP: ./artefacts/app-release.apk
+        ANDROID_DEVICE_NAME: Pixel_6
       with:
         profile: pixel_6
         api-level: 33
@@ -78,10 +79,12 @@ jobs:
         arch: x86_64
         disable-animations: false
         #emulator-build: 12325540
-        script: yarn e2e:android
+        #pre-emulator-launch-script: adb wait-for-device
+        script: yarn e2e:android # adb logcat -v threadtime *:E >> errors.txt & adb shell dmesg >> dmesg.txt & yarn e2e:android
 
     - name: Upload Video
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: android-e2e-video
         path: ./e2e/artefacts/
@@ -89,16 +92,27 @@ jobs:
 
     - name: Upload Logcat
       uses: actions/upload-artifact@v4
+      if: always()
       with:
         name: android-e2e-logcat
         path: ./logcat.txt
         retention-days: 7
 
-    - name: Upload Screen Recording
+    - name: Upload Errors
       uses: actions/upload-artifact@v4
+      if: always()
       with:
-        name: android-e2e-screen-recording
-        path: ./screenrecord.mp4
+        name: android-e2e-errors
+        path: ./errors.txt
+        retention-days: 7
+
+    - name: Upload Dmesg
+
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-dmesg
+        path: ./dmesg.txt
         retention-days: 7
 
     - name: Upload Test Results

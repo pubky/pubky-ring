@@ -2,7 +2,7 @@ const shared = require('./wdio.shared.conf');
 const path = require('path');
 const fs = require('fs');
 
-const avdName = process.env.AVD || 'Pixel_6_API_34';
+const avdName = process.env.AVD || 'Pixel_2_API_30';
 const envAppPath = process.env.ANDROID_APP; // optional .apk path
 const defaultApkPath = path.resolve(__dirname, '../android/app/build/outputs/apk/debug/app-debug.apk');
 const resolvedAppPath = envAppPath || (fs.existsSync(defaultApkPath) ? defaultApkPath : undefined);
@@ -13,7 +13,7 @@ exports.config = {
     {
       platformName: 'Android',
       'appium:automationName': 'UiAutomator2',
-      'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '14',
+      'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '11',
       'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
       'appium:avd': avdName,
       'appium:autoGrantPermissions': true,
@@ -27,6 +27,7 @@ exports.config = {
       'appium:skipServerInstallation': false,
       'appium:skipDeviceInitialization': false,
       'appium:shouldTerminateApp': true,
+      'appium:xvfbAutoInstall': true,
       'appium:uiautomator2ServerLaunchTimeout': 120000,
       'appium:uiautomator2ServerInstallTimeout': 120000,
       'appium:androidInstallTimeout': 120000,

@@ -34,7 +34,7 @@ exports.config = {
       'appium:skipDeviceInitialization': false,
       'appium:shouldTerminateApp': true,
       'appium:preventWDAAttachments': true,
-      'appium:usePrebuiltWDA': false,
+      'appium:usePrebuiltWDA': true,
       'appium:useNewWDA': false,
       'appium:showXcodeLog': true,
       'appium:wdaLaunchTimeout': 600000,

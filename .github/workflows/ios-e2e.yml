@@ -83,7 +83,7 @@ jobs:
         # Reduce GPU usage
         defaults write com.apple.iphonesimulator GraphicsQualityOverride -int 1
 
-    - name: Install WDA Manually
+    - name: Build WDA Manually
       run: |
         echo "=== Installing WebDriverAgent Manually ==="
         cd e2e/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent
@@ -106,11 +106,15 @@ jobs:
         WDA_APP_PATH=$(find ./DerivedData -name "WebDriverAgentRunner-Runner.app" -type d | head -1)
         echo "WDA app found at: $WDA_APP_PATH"
         
-        # Install WDA on simulator
-        echo "Installing WDA on simulator..."
-        xcrun simctl install booted "$WDA_APP_PATH"
+        # Convert to absolute path
+        WDA_APP_ABSOLUTE_PATH=$(cd "$(dirname "$WDA_APP_PATH")" && pwd)/$(basename "$WDA_APP_PATH")
+        echo "WDA app absolute path: $WDA_APP_ABSOLUTE_PATH"
         
-        echo "=== WDA Installation Complete ==="
+        # Build WDA (simulator not needed for build)
+        echo "WDA build complete, will install after simulator is running"
+        
+        # Store the WDA app path for later installation
+        echo "WDA_APP_PATH=$WDA_APP_ABSOLUTE_PATH" > /tmp/wda_path.txt
 
     - name: Start iOS Simulator and Run E2E Tests
       run: |
@@ -135,9 +139,25 @@ jobs:
 
         # Wait for simulator to be fully ready
         echo "=== Waiting for Simulator to be Fully Ready ==="
-        sleep 15
+        sleep 5
+        
+        # Install WDA on the booted simulator
+        echo "=== Installing WDA on Booted Simulator ==="
+        if [ -f "/tmp/wda_path.txt" ]; then
+          source /tmp/wda_path.txt
+          echo "Installing WDA from: $WDA_APP_PATH"
+          xcrun simctl install booted "$WDA_APP_PATH"
+          
+          # Verify WDA installation
+          echo "Verifying WDA installation..."
+          xcrun simctl listapps booted | grep -i webdriver || echo "WDA not found in app list"
+          echo "=== WDA Installation Complete ==="
+        else
+          echo "ERROR: WDA path file not found!"
+          exit 1
+        fi
 
-                # Install the app
+        # Install the app
         echo "=== Installing iOS App ==="
         xcrun simctl install booted ./artifacts/pubkyring.app
         
@@ -153,9 +173,9 @@ jobs:
         xcrun simctl privacy booted grant photos com.pubkyring.app || true
         
         # Clear any existing app data
-        echo "=== Clearing App Data ==="
-        xcrun simctl terminate booted com.pubkyring.app || true
-        sleep 2
+        # echo "=== Clearing App Data ==="
+        # xcrun simctl terminate booted com.pubkyring.app || true
+        # sleep 2
 
         # Set environment variables
         #export IOS_APP=./artifacts/pubkyring.app

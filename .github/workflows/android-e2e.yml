@@ -34,6 +34,15 @@ jobs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
+    - name: Install xvfb
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y xvfb x11-utils
+
+        # Start xvfb for headless display
+        # sudo Xvfb :99 -screen 0 1024x768x24 &
+        # export DISPLAY=:99
+
     - name: Optimize Resources
       run: |
         # Kill any lingering emulator processes
@@ -76,8 +85,8 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    # - name: Set up Android SDK
-    #   uses: android-actions/setup-android@v3
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
@@ -104,15 +113,15 @@ jobs:
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2
       with:
-        profile: pixel_6
-        api-level: 34
-        avd-name: Pixel_6_API_34
+        profile: pixel_2
+        api-level: 30
+        avd-name: Pixel_2_API_30
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 1536 -cores 1 -qemu -enable-kvm
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 2048 -cores 1 -qemu -enable-kvm
         arch: x86_64
         disable-animations: true
         ram-size: 1024M
-        heap-size: 64M
+        heap-size: 128M
         #emulator-build: 12325540
         script: |
           echo "=== Starting Android E2E Test Setup ==="

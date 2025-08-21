@@ -35,9 +35,10 @@ exports.config = {
       'appium:shouldTerminateApp': true,
       'appium:preventWDAAttachments': true,
       'appium:usePrebuiltWDA': false,
-      'appium:useNewWDA': true,
-      'appium:wdaLaunchTimeout': 300000,
-      'appium:wdaConnectionTimeout': 300000,
+      'appium:useNewWDA': false,
+      'appium:showXcodeLog': true,
+      'appium:wdaLaunchTimeout': 600000,
+      'appium:wdaConnectionTimeout': 600000,
       'appium:wdaStartupRetries': 2,
       'appium:wdaStartupRetryInterval': 15000,
 

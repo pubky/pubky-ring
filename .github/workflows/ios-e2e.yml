@@ -83,6 +83,35 @@ jobs:
         # Reduce GPU usage
         defaults write com.apple.iphonesimulator GraphicsQualityOverride -int 1
 
+    - name: Install WDA Manually
+      run: |
+        echo "=== Installing WebDriverAgent Manually ==="
+        cd e2e/.appium/node_modules/appium-xcuitest-driver/node_modules/appium-webdriveragent
+        
+        # Build WDA for iOS 17.5 simulator
+        echo "Building WDA..."
+        xcodebuild build-for-testing \
+          -project WebDriverAgent.xcodeproj \
+          -scheme WebDriverAgentRunner \
+          -destination 'platform=iOS Simulator,name=iPhone 15,OS=17.5' \
+          -derivedDataPath ./DerivedData \
+          CODE_SIGN_IDENTITY="" \
+          CODE_SIGNING_REQUIRED=NO \
+          CODE_SIGNING_ALLOWED=NO \
+          DEVELOPMENT_TEAM="" \
+          PRODUCT_BUNDLE_IDENTIFIER="com.facebook.WebDriverAgentRunner.xctrunner"
+        
+        # Find and install the built app
+        echo "Finding built WDA app..."
+        WDA_APP_PATH=$(find ./DerivedData -name "WebDriverAgentRunner-Runner.app" -type d | head -1)
+        echo "WDA app found at: $WDA_APP_PATH"
+        
+        # Install WDA on simulator
+        echo "Installing WDA on simulator..."
+        xcrun simctl install booted "$WDA_APP_PATH"
+        
+        echo "=== WDA Installation Complete ==="
+
     - name: Start iOS Simulator and Run E2E Tests
       run: |
         echo "=== Starting iOS E2E Test Setup ==="

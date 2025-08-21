@@ -43,7 +43,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'iOS Build'
-        commit-sha: 42029a047264ceff8f1f6eb92bcc153ddb07e553 # ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download iOS App
@@ -59,45 +59,6 @@ jobs:
         cd artifacts
         unzip pubkyring.app.zip
         ls -la
-
-    # - name: Start iOS Simulator
-    #   run: |
-    #     echo "=== Starting iOS E2E Test Setup ==="
-
-    #     # Boot the simulator
-    #     echo "=== Booting iOS Simulator ==="
-    #     xcrun simctl boot "iPhone 15" || echo "Simulator boot failed, trying to create..."
-
-    #     # Wait for simulator to be ready
-    #     echo "=== Waiting for Simulator to be Ready ==="
-    #     xcrun simctl list devices | grep "iPhone 15" | grep "Booted" || {
-    #       echo "Simulator not booted, attempting to boot again..."
-    #       xcrun simctl shutdown "iPhone 15" || true
-    #       sleep 5
-    #       xcrun simctl boot "iPhone 15"
-    #     }
-
-    #     # Wait for simulator to be fully ready
-    #     echo "=== Waiting for Simulator to be Fully Ready ==="
-    #     sleep 5
-
-    # - name: Install iOS App
-    #   run: |
-    #     # Install the app
-    #     echo "=== Installing iOS App ==="
-    #     xcrun simctl install booted ./artifacts/pubkyring.app
-        
-    #     # Verify app installation
-    #     echo "=== Verifying App Installation ==="
-    #     xcrun simctl listapps booted | grep pubky || echo "No pubky apps found"
-        
-    #     # Grant permissions to the app
-    #     echo "=== Granting App Permissions ==="
-    #     xcrun simctl privacy booted grant camera com.pubkyring.app || true
-
-    #     # Wait a moment for app to be fully ready
-    #     echo "=== Waiting 5 seconds for App to be Ready ==="
-    #     sleep 5
         
     - name: Run E2E tests
       env:

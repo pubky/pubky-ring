@@ -54,7 +54,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: 42029a047264ceff8f1f6eb92bcc153ddb07e553 # ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -64,9 +64,6 @@ jobs:
         path: ./artefacts
         workflow: android-build.yml
         run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
-
-    - name: Capture logcat
-      run: nohup adb logcat > logcat.txt &
 
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2

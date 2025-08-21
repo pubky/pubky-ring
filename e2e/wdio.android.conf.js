@@ -8,29 +8,29 @@ const defaultApkPath = path.resolve(__dirname, '../android/app/build/outputs/apk
 const resolvedAppPath = envAppPath || (fs.existsSync(defaultApkPath) ? defaultApkPath : undefined);
 
 exports.config = {
-  ...shared.config,
-  capabilities: [
-    {
-      platformName: 'Android',
-      'appium:automationName': 'UiAutomator2',
-      'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
-      'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
-      'appium:avd': avdName,
-      'appium:autoGrantPermissions': true,
-      'appium:newCommandTimeout': 300,
-      'appium:fullReset': false,
-      'appium:noReset': false,
-      'appium:adbExecTimeout': 300_000,
-      ...(resolvedAppPath
+	...shared.config,
+	capabilities: [
+		{
+			platformName: 'Android',
+			'appium:automationName': 'UiAutomator2',
+			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
+			'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
+			'appium:avd': avdName,
+			'appium:autoGrantPermissions': true,
+			'appium:newCommandTimeout': 300,
+			'appium:fullReset': false,
+			'appium:noReset': false,
+			'appium:adbExecTimeout': 300_000,
+			...(resolvedAppPath
         ? {
-            'appium:app': resolvedAppPath,
-          }
+        	'appium:app': resolvedAppPath,
+        }
         : {
-            'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-            'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-            'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
-            'appium:forceAppLaunch': false
-          })
-    }
-  ]
+        	'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
+        	'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
+        	'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
+        	'appium:forceAppLaunch': false
+        })
+		}
+	]
 };

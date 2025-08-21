@@ -10,21 +10,21 @@ const { expect } = require('chai');
 // We will also use PageObjectModel pattern for the tests, not using selectors and Appium api directly.
 
 describe('Onboarding flow', () => {
-  it('should accept terms and navigate to Home', async () => {
-    // Terms screen
-    const termsScreen = await $('~TermsContinueButton');
-    await termsScreen.waitForDisplayed({interval: 1000, timeout: 120000});
+	it('should accept terms and navigate to Home', async () => {
+		// Terms screen
+		const termsScreen = await $('~TermsContinueButton');
+		await termsScreen.waitForDisplayed({ interval: 1000, timeout: 120000 });
 
-    const termsRow = await $('~TermsAgreeRow');
-    await termsRow.click();
+		const termsRow = await $('~TermsAgreeRow');
+		await termsRow.click();
 
-    const privacyRow = await $('~PrivacyAgreeRow');
-    await privacyRow.click();
+		const privacyRow = await $('~PrivacyAgreeRow');
+		await privacyRow.click();
 
-    const continueBtn = await $('~TermsContinueButton');
-    await continueBtn.click();
+		const continueBtn = await $('~TermsContinueButton');
+		await continueBtn.click();
 
-    const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
-    expect(await onboardingGetStartedButton.isDisplayed()).to.equal(true);
-  });
+		const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
+		expect(await onboardingGetStartedButton.isDisplayed()).to.equal(true);
+	});
 });

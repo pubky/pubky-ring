@@ -13,7 +13,7 @@ describe('Onboarding flow', () => {
   it('should accept terms and navigate to Home', async () => {
     // Terms screen
     const termsScreen = await $('~TermsContinueButton');
-    await termsScreen.waitForDisplayed();
+    await termsScreen.waitForDisplayed({interval: 1000, timeout: 120000});
 
     const termsRow = await $('~TermsAgreeRow');
     await termsRow.click();

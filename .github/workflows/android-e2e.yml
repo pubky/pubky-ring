@@ -34,51 +34,6 @@ jobs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
-    - name: Install xvfb
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y xvfb x11-utils
-
-        # Start xvfb for headless display
-        # sudo Xvfb :99 -screen 0 1024x768x24 &
-        # export DISPLAY=:99
-
-    - name: Optimize Resources
-      run: |
-        # Kill any lingering emulator processes
-        sudo killall -9 qemu-system-x86_64 || true
-        sudo killall -9 emulator || true
-        sudo pkill -f 'qemu|adb' || true
-        
-        # Free up memory
-        sudo sync && sudo sysctl -w vm.drop_caches=3 || true
-        
-        # Disable unnecessary services
-        sudo systemctl stop snapd || true
-        sudo systemctl stop systemd-timesyncd || true
-        
-        # Increase virtual memory limit
-        sudo sysctl -w vm.max_map_count=262144
-        # Increase file watch limit
-        sudo sysctl -w fs.inotify.max_user_watches=524288
-
-        # Log resource usage for debugging
-        free -h
-        df -h
-        nproc
-        cat /proc/meminfo | grep MemTotal
-
-    - name: Free Disk Space
-      uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: false
-        android: false
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
-
     - name: Set up Java
       uses: actions/setup-java@v4
       with:
@@ -106,138 +61,27 @@ jobs:
       uses: dawidd6/action-download-artifact@v4
       with:
         name: android-release-apk
-        path: ./artifacts
+        path: ./artefacts
         workflow: android-build.yml
         run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
 
+    - name: Capture logcat
+      run: nohup adb logcat > logcat.txt &
+
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2
+      env:
+        ANDROID_APP: ./artefacts/app-release.apk
       with:
-        profile: pixel_2
-        api-level: 30
-        avd-name: Pixel_2_API_30
+        profile: pixel_6
+        api-level: 33
+        avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 2048 -cores 1 -qemu -enable-kvm
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 2048 -partition-size 2048
         arch: x86_64
-        disable-animations: true
-        ram-size: 1024M
-        heap-size: 128M
+        disable-animations: false
         #emulator-build: 12325540
-        script: |
-          echo "=== Starting Android E2E Test Setup ==="
-
-          # Wait for emulator to be fully booted
-          echo "Waiting for emulator to boot..."
-          adb wait-for-device
-
-          # Wait for boot to complete
-          echo "Waiting for boot to complete..."
-          adb shell 'while [[ "$(getprop sys.boot_completed)" != "1" ]]; do sleep 1; done'
-
-          # Additional wait for system to be fully ready
-          echo "Waiting for system to be fully ready..."
-          sleep 10
-
-          # Grant necessary permissions and disable animations for stability
-          echo "=== Configuring System for E2E Tests ==="
-          adb shell settings put global window_animation_scale 0
-          adb shell settings put global transition_animation_scale 0
-          adb shell settings put global animator_duration_scale 0
-          
-          # Grant all permissions to the app (will be done during install)
-          adb shell settings put global development_settings_enabled 1
-          
-          # Reduce background processes
-          adb shell settings put global always_finish_activities 1 || true
-          adb shell settings put global background_process_limit 1 || true
-
-          # Debug: Check emulator status
-          echo "=== Emulator Status ==="
-          adb devices
-          adb shell getprop ro.build.version.release
-          adb shell getprop ro.build.version.sdk
-          adb shell getprop sys.boot_completed
-
-          # Check available packages
-          #echo "=== Available Packages ==="
-          #adb shell pm list packages | grep pubky || echo "No pubky packages found yet"
-
-          # Install APK with permissions
-          echo "=== Installing APK ==="
-          adb install -g ./artifacts/app-release.apk
-          export ANDROID_APP=./artifacts/app-release.apk
-
-          # Create artefacts directory for test recordings
-          #echo "=== Creating Artefacts Directory ==="
-          #mkdir -p ./e2e/artefacts
-
-          # Verify app installation and grant additional permissions
-          echo "=== Verifying App Installation ==="
-          adb shell pm list packages | grep pubky
-          
-          # Grant additional permissions that might be needed
-          echo "=== Granting Additional Permissions ==="
-          adb shell pm grant to.pubky.ring android.permission.CAMERA || true
-          adb shell pm grant to.pubky.ring android.permission.RECORD_AUDIO || true
-          adb shell pm grant to.pubky.ring android.permission.WRITE_EXTERNAL_STORAGE || true
-          adb shell pm grant to.pubky.ring android.permission.READ_EXTERNAL_STORAGE || true
-          adb shell pm grant to.pubky.ring android.permission.ACCESS_FINE_LOCATION || true
-          adb shell pm grant to.pubky.ring android.permission.ACCESS_COARSE_LOCATION || true
-          
-          # Clear any existing app data to ensure clean state
-          echo "=== Clearing App Data ==="
-          adb shell pm clear to.pubky.ring || true
-          
-          # Force stop any existing instances
-          echo "=== Stopping Existing App Instances ==="
-          adb shell am force-stop to.pubky.ring || true
-
-          # Start logcat capture in background
-          echo "=== Starting Logcat ==="
-          adb logcat -c
-          adb logcat > logcat.txt &
-          LOGCAT_PID=$!
-
-          # Wait a moment for app to be fully ready
-          echo "=== Waiting 15 seconds for App to be Ready ==="
-          sleep 15
-          
-          # Monitor system resources
-          echo "=== System Resource Status ==="
-          adb shell dumpsys meminfo | head -20 || true
-          adb shell dumpsys activity | grep "Total activities" || true
-          
-          # Clear app cache and memory
-          echo "=== Clearing App Cache ==="
-          adb shell pm clear to.pubky.ring || true
-          adb shell am force-stop to.pubky.ring || true
-          
-          # Force garbage collection and memory cleanup
-          echo "=== Memory Cleanup ==="
-          adb shell am send-trim-memory com.android.systemui RUNNING_CRITICAL || true
-          adb shell am send-trim-memory com.android.launcher3 RUNNING_CRITICAL || true
-          
-          # Kill unnecessary system processes
-          echo "=== Killing Unnecessary Processes ==="
-          adb shell "pkill -f com.android.chrome" || true
-          adb shell "pkill -f com.google.android.gms" || true
-          adb shell "pkill -f com.android.vending" || true
-          
-          # Run E2E tests
-          echo "=== Running E2E Tests ==="
-          yarn e2e:android
-          
-          # Cleanup any hanging UiAutomator2 processes
-          # echo "=== Cleaning up UiAutomator2 processes ==="
-          # adb shell "pkill -f uiautomator" || true
-          # adb shell "pkill -f UiAutomator2" || true
-
-          # Stop logcat
-          echo "=== Stopping Logcat ==="
-          kill $LOGCAT_PID || true
-
-          # Exit with test result
-          #exit ${TEST_EXIT_CODE:-0}
+        script: yarn e2e:android
 
     - name: Upload Video
       uses: actions/upload-artifact@v4

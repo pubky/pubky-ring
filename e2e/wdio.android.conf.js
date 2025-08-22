@@ -27,18 +27,21 @@ exports.config = {
 			'appium:allowTestPackages': true,
 			'appium:enforceAppInstall': true,
 			'appium:disableWindowAnimation': true,
+			'appium:skipServerInstallation': false,
+			'appium:skipDeviceInitialization': false,
+			'appium:relaxedSecurity': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
-					// 'appium:appWaitPackage': process.env.APP_PACKAGE || 'com.bitkit',
-					// 'appium:appActivity': process.env.APP_ACTIVITY || 'com.bitkit.MainActivity',
-					// 'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'com.bitkit.MainActivity',
-					// 'appium:forceAppLaunch': false
+					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
+					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
+					'appium:forceAppLaunch': true
 				}
 				: {
-					'appium:appPackage': process.env.APP_PACKAGE || 'com.bitkit',
-					'appium:appActivity': process.env.APP_ACTIVITY || 'com.bitkit.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'com.bitkit.MainActivity',
+					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
+					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:forceAppLaunch': false
 				})
 		}

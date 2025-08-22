@@ -30,15 +30,15 @@ exports.config = {
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
-					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:forceAppLaunch': false
+					// 'appium:appWaitPackage': process.env.APP_PACKAGE || 'com.bitkit',
+					// 'appium:appActivity': process.env.APP_ACTIVITY || 'com.bitkit.MainActivity',
+					// 'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'com.bitkit.MainActivity',
+					// 'appium:forceAppLaunch': false
 				}
 				: {
-					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
+					'appium:appPackage': process.env.APP_PACKAGE || 'com.bitkit',
+					'appium:appActivity': process.env.APP_ACTIVITY || 'com.bitkit.MainActivity',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'com.bitkit.MainActivity',
 					'appium:forceAppLaunch': false
 				})
 		}

@@ -12,7 +12,7 @@ on:
 
 jobs:
   android-e2e:
-    runs-on: [self-hosted, linux] #ubuntu-latest
+    runs-on: ubuntu-latest # [self-hosted, linux]
     concurrency:
       group: android-e2e-${{ github.head_ref }}
       cancel-in-progress: true
@@ -40,8 +40,8 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+    # - name: Set up Android SDK
+    #   uses: android-actions/setup-android@v3
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
@@ -49,21 +49,26 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-    - name: Wait for Android Build
-      id: wait-android-build
-      uses: ./.github/actions/wait-for-workflow
-      with:
-        workflow-name: 'Android Build'
-        commit-sha: 5d333eb743a0fc30b9d3372fc603e0f9ce125ae3 #${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
-        max-attempts: '360'  # 1 hour with 10s intervals
+    # - name: Wait for Android Build
+    #   id: wait-android-build
+    #   uses: ./.github/actions/wait-for-workflow
+    #   with:
+    #     workflow-name: 'Android Build'
+    #     commit-sha: 5d333eb743a0fc30b9d3372fc603e0f9ce125ae3 #${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+    #     max-attempts: '360'  # 1 hour with 10s intervals
 
-    - name: Download Android APK
-      uses: dawidd6/action-download-artifact@v4
-      with:
-        name: android-release-apk
-        path: ./artefacts
-        workflow: android-build.yml
-        run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
+    # - name: Download Android APK
+    #   uses: dawidd6/action-download-artifact@v4
+    #   with:
+    #     name: android-release-apk
+    #     path: ./artefacts
+    #     workflow: android-build.yml
+    #     run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
+ 
+    - name: Download APK from URL
+      run: |
+        mkdir -p ./artefacts
+        curl -L "https://github.com/synonymdev/bitkit/releases/download/v1.1.3/app-x86_64-release.apk" -o ./artefacts/app-release.apk
 
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2
@@ -75,9 +80,11 @@ jobs:
         api-level: 33
         avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 2048 -partition-size 2048
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         disable-animations: false
+        ram-size: 12288
+        cores: 4
         #emulator-build: 12325540
         #pre-emulator-launch-script: adb wait-for-device
         script: yarn e2e:android # adb logcat -v threadtime *:E >> errors.txt & adb shell dmesg >> dmesg.txt & yarn e2e:android

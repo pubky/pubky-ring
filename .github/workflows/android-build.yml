@@ -57,6 +57,7 @@ jobs:
       run: |
         cd android
         ./gradlew assembleDebug
+        ls -Rlah android/app/build/outputs/apk/
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
 
@@ -64,5 +65,5 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: android-release-apk
-        path: android/app/build/outputs/apk/release/app-release.apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 7

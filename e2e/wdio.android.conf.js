@@ -19,19 +19,19 @@ exports.config = {
 			'appium:autoGrantPermissions': true,
 			'appium:allowTestPackages': true,
 			'appium:enforceAppInstall': false,
+			'appium:sessionOverride': true,
+			'appium:relaxedSecurity': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
 					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:forceAppLaunch': true
 				}
 				: {
 					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:forceAppLaunch': true
 				})
 		}
 	]

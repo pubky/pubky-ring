@@ -19,7 +19,8 @@ exports.config = {
 			'appium:autoGrantPermissions': true,
 			'appium:newCommandTimeout': 300,
 			'appium:fullReset': false,
-			'appium:noReset': false,
+			'appium:noReset': true,
+			'appium:dontStopAppOnReset': true,
 			'appium:adbExecTimeout': 300_000,
 			'appium:uiautomator2ServerLaunchTimeout': 300_000,
 			'appium:uiautomator2ServerInstallTimeout': 300_000,
@@ -30,6 +31,7 @@ exports.config = {
 			'appium:skipServerInstallation': false,
 			'appium:skipDeviceInitialization': false,
 			'appium:relaxedSecurity': true,
+			'appium:sessionOverride': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

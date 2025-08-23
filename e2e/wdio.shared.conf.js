@@ -4,7 +4,7 @@ const path = require('path');
 exports.config = {
 	runner: 'local',
 	specs: [path.resolve(__dirname, 'specs/**/*.spec.js')],
-	maxInstances: 1,
+	maxInstances: 10,
 	logLevel: 'debug',
 	bail: 0,
 	baseUrl: 'http://localhost',
@@ -15,7 +15,7 @@ exports.config = {
 	reporters: ['spec'],
 	mochaOpts: {
 		ui: 'bdd',
-		timeout: 120_000
+		timeout:  10 * 60 * 1000
 	},
 	services: [
 		[

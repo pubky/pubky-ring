@@ -33,7 +33,7 @@
     "lucide-react-native": "^0.534.0",
     "react": "19.1.0",
     "appium-uiautomator2-driver": "^4.2.9",
-    "appium": "^2.19.0",
+    "appium": "2.18.0",
     "react-native": "0.80.2",
     "react-native-actions-sheet": "^0.9.7",
     "react-native-camera-kit": "https://github.com/SmartArray/react-native-camera-kit#fix/rn-ios-0.80.0",
@@ -81,7 +81,7 @@
     "@wdio/spec-reporter": "^9.19.1",
     "@wdio/appium-service": "^9.19.1",
     "webdriverio": "^9.19.1",
-    "appium": "^2.19.0",
+    "appium": "2.18.0",
     "chai": "5.1.2"
   },
   "engines": {

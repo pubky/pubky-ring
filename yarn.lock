@@ -10,7 +10,7 @@
     "@jridgewell/gen-mapping" "^0.3.5"
     "@jridgewell/trace-mapping" "^0.3.24"
 
-"@appium/base-driver@^9.1.0", "@appium/base-driver@^9.18.0":
+"@appium/base-driver@^9.1.0", "@appium/base-driver@^9.17.0", "@appium/base-driver@^9.18.0":
   version "9.18.0"
   resolved "https://registry.yarnpkg.com/@appium/base-driver/-/base-driver-9.18.0.tgz#7a607b26f45e11258246a7a7ccdb699f9488f002"
   integrity sha512-rFSrxQ+honhQtWpveXIBuIjW+vfBoZWxG8i8vwS+TsDtsj2guE/1HAZ0qVc48CgTbn45sHzK7NtinX8Z2J/Wig==
@@ -38,17 +38,17 @@
   optionalDependencies:
     spdy "4.0.2"
 
-"@appium/base-plugin@^2.3.7":
+"@appium/base-plugin@^2.3.6":
   version "2.3.7"
-  resolved "https://registry.npmjs.org/@appium/base-plugin/-/base-plugin-2.3.7.tgz"
+  resolved "https://registry.yarnpkg.com/@appium/base-plugin/-/base-plugin-2.3.7.tgz#f4a9b1231de28ce6e3857e2174a432098139679b"
   integrity sha512-VukauTOq8eHsJPx6rfeG/cXFDZPoF9PEI7bb72K9LBFc21Yy6iajzZRgJFF5Mga6+/GgISwGLo9gTOyk0bmhew==
   dependencies:
     "@appium/base-driver" "^9.18.0"
     "@appium/support" "^6.1.1"
 
-"@appium/docutils@^1.1.1":
+"@appium/docutils@^1.1.0":
   version "1.1.1"
-  resolved "https://registry.npmjs.org/@appium/docutils/-/docutils-1.1.1.tgz"
+  resolved "https://registry.yarnpkg.com/@appium/docutils/-/docutils-1.1.1.tgz#aa784defa947705794402e4fe1a995bc880813a0"
   integrity sha512-n00sqMJ25Wm08Aniu2kbA+2y5uVbehP9qZgYMy2uu/nDWxNR4HggB8vKhgL7fONd2vYbx5G/Ur/yCn2C0nsxLg==
   dependencies:
     "@appium/support" "^6.1.1"
@@ -71,7 +71,7 @@
     yargs "17.7.2"
     yargs-parser "21.1.1"
 
-"@appium/logger@^1.3.0", "@appium/logger@^1.7.1":
+"@appium/logger@^1.3.0", "@appium/logger@^1.7.0", "@appium/logger@^1.7.1":
   version "1.7.1"
   resolved "https://registry.yarnpkg.com/@appium/logger/-/logger-1.7.1.tgz#bc36b81a7645376b94c25e968d69c533394ce6f1"
   integrity sha512-9C2o9X/lBEDBUnKfAi3mRo9oG7Z03nmISLwsGkWxIWjMAvBdJD0RRSJMekWVKzfXN3byrI1WlCXTITzN4LAoLw==
@@ -89,7 +89,7 @@
     json-schema "0.4.0"
     source-map-support "0.5.21"
 
-"@appium/support@^6.0.0", "@appium/support@^6.1.1":
+"@appium/support@^6.0.0", "@appium/support@^6.1.0", "@appium/support@^6.1.1":
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/@appium/support/-/support-6.1.1.tgz#7e0002a29094e63c06131b0db6cc4285341a63c0"
   integrity sha512-kdv6zOCvVT93OeokEFqFN77yhgM8+u9qM7LMLooYd10/AOvI4jtrEy5B37FiaZYP3ONvvz8ohisU8/RA5FzDVQ==
@@ -139,6 +139,16 @@
   integrity sha512-T8G5oe3is0Gn56PkeYjXracc0CS26L/obVuX7PHwEDcn1UKiJXFa2MYY73dRAWKJumAIIsJjssNUu6VttdWZWw==
   dependencies:
     "@tsconfig/node14" "14.1.3"
+
+"@appium/types@^0.25.3":
+  version "0.25.3"
+  resolved "https://registry.yarnpkg.com/@appium/types/-/types-0.25.3.tgz#e6b386d62063915e6eac643dbd2688d92a7a9166"
+  integrity sha512-hp/IOpn+eoH5woy6PrXlG8i27oqiDUZDPEaaGWmnK1fsIr4/vNKY+dKTnnHgl5H405p85ubG4pVcfGuaz5h3OQ==
+  dependencies:
+    "@appium/logger" "^1.7.0"
+    "@appium/schema" "^0.8.1"
+    "@appium/tsconfig" "^0.3.5"
+    type-fest "4.40.0"
 
 "@appium/types@^0.26.0":
   version "0.26.0"
@@ -3394,25 +3404,25 @@ appium-uiautomator2-server@^7.7.0:
   resolved "https://registry.yarnpkg.com/appium-uiautomator2-server/-/appium-uiautomator2-server-7.7.1.tgz#c7b88aae36cc1be66f604b4beff7b2e09c687d86"
   integrity sha512-ZMlOoIVRTwutreoVSCecjtQYwnVuvtSzo/NghBqHUX1EIeYFnnAQ3rnd+cPJ5YvQ9yQ8E6DY4/2vTB1rqxjKrg==
 
-appium@^2.19.0:
-  version "2.19.0"
-  resolved "https://registry.yarnpkg.com/appium/-/appium-2.19.0.tgz#0e93e10d35c3784eda66b778e430645a05eb09e5"
-  integrity sha512-Y77R0eG58/p6HJN5Qf4fDFI1Ra47HW6XdG+QB54L5KjTuG/fPPjXAi143CyyvEF4Hc5FdMILSAb+uSn8P6Ywpw==
+appium@2.18.0:
+  version "2.18.0"
+  resolved "https://registry.yarnpkg.com/appium/-/appium-2.18.0.tgz#fdc1e6d634ebc3d53cc43706469df685ec724ff1"
+  integrity sha512-jOfaQG3SSjJ7w9hcW/yycIQkgyxWri2g9+T9JaMeK0duikXoxDOv4SZu3X/AMOqgEXgQof0feX9wyrdEtXS2gg==
   dependencies:
-    "@appium/base-driver" "^9.18.0"
-    "@appium/base-plugin" "^2.3.7"
-    "@appium/docutils" "^1.1.1"
-    "@appium/logger" "^1.7.1"
+    "@appium/base-driver" "^9.17.0"
+    "@appium/base-plugin" "^2.3.6"
+    "@appium/docutils" "^1.1.0"
+    "@appium/logger" "^1.7.0"
     "@appium/schema" "^0.8.1"
-    "@appium/support" "^6.1.1"
-    "@appium/types" "^0.26.0"
+    "@appium/support" "^6.1.0"
+    "@appium/types" "^0.25.3"
     "@sidvind/better-ajv-errors" "3.0.1"
     ajv "8.17.1"
     ajv-formats "3.0.1"
     argparse "2.0.1"
     async-lock "1.4.1"
     asyncbox "3.0.0"
-    axios "1.9.0"
+    axios "1.8.4"
     bluebird "3.7.2"
     lilconfig "3.1.3"
     lodash "4.17.21"
@@ -3420,14 +3430,14 @@ appium@^2.19.0:
     ora "5.4.1"
     package-changed "3.0.0"
     resolve-from "5.0.0"
-    semver "7.7.2"
+    semver "7.7.1"
     source-map-support "0.5.21"
-    teen_process "2.3.2"
-    type-fest "4.41.0"
+    teen_process "2.3.1"
+    type-fest "4.40.0"
     winston "3.17.0"
     wrap-ansi "7.0.0"
-    ws "8.18.2"
-    yaml "2.8.0"
+    ws "8.18.1"
+    yaml "2.7.1"
 
 archiver-utils@^5.0.0, archiver-utils@^5.0.2:
   version "5.0.2"
@@ -3639,6 +3649,15 @@ available-typed-arrays@^1.0.7:
   integrity sha512-wvUjBtSGN7+7SjNpq/9M2Tg350UZD3q62IFZLbRAR1bSMlCo1ZaeW+BJ+D090e4hIIZLBcTDWe4Mh4jvUDajzQ==
   dependencies:
     possible-typed-array-names "^1.0.0"
+
+axios@1.8.4:
+  version "1.8.4"
+  resolved "https://registry.yarnpkg.com/axios/-/axios-1.8.4.tgz#78990bb4bc63d2cae072952d374835950a82f447"
+  integrity sha512-eBSYY4Y68NNlHbHBMdeDmKNtDgXWhQsJcGqzO3iLUM0GraQFSS9cVgPX5I9b3lbdFKyYoAEGAZF1DwhTaljNAw==
+  dependencies:
+    follow-redirects "^1.15.6"
+    form-data "^4.0.0"
+    proxy-from-env "^1.1.0"
 
 axios@1.9.0:
   version "1.9.0"
@@ -9456,6 +9475,11 @@ select-hose@^2.0.0:
   resolved "https://registry.npmjs.org/semver/-/semver-5.7.2.tgz"
   integrity sha512-cBznnQ9KjJqU67B52RMC65CMarK2600WFnbkcaiwWq3xy/5haFJlshgnpjovMVJ+Hff49d8GEn0b87C5pDQ10g==
 
+semver@7.7.1:
+  version "7.7.1"
+  resolved "https://registry.yarnpkg.com/semver/-/semver-7.7.1.tgz#abd5098d82b18c6c81f6074ff2647fd3e7220c9f"
+  integrity sha512-hlq8tAfn0m/61p4BVRcPzIGr6LKiMwo4VM6dGi6pt4qcRkmNzTcWq6eCEjEh+qXjkMDvPlOFFSGwQjoEa6gyMA==
+
 semver@7.7.2, semver@^7.0.0, semver@^7.1.3, semver@^7.3.5, semver@^7.3.7, semver@^7.5.2, semver@^7.5.3, semver@^7.5.4, semver@^7.6.0, semver@^7.6.3, semver@^7.7.2:
   version "7.7.2"
   resolved "https://registry.npmjs.org/semver/-/semver-7.7.2.tgz"
@@ -10142,6 +10166,16 @@ tar-stream@^3.0.0, tar-stream@^3.1.5:
     fast-fifo "^1.2.0"
     streamx "^2.15.0"
 
+teen_process@2.3.1:
+  version "2.3.1"
+  resolved "https://registry.yarnpkg.com/teen_process/-/teen_process-2.3.1.tgz#ba469a55340523bdc7ebbe249fe93fdf16d69a40"
+  integrity sha512-duT4gPj7HxEYy+AR4bJ9MNwf8GMLpJd+sNRAK2PTx53FpCcaiXVft3ePZh3hO6PY8NFWZMxTC3ZAtxyztScEsw==
+  dependencies:
+    bluebird "^3.7.2"
+    lodash "^4.17.21"
+    shell-quote "^1.8.1"
+    source-map-support "^0.x"
+
 teen_process@2.3.2:
   version "2.3.2"
   resolved "https://registry.npmjs.org/teen_process/-/teen_process-2.3.2.tgz"
@@ -10322,6 +10356,11 @@ type-fest@4.26.0:
   version "4.26.0"
   resolved "https://registry.npmjs.org/type-fest/-/type-fest-4.26.0.tgz"
   integrity sha512-OduNjVJsFbifKb57UqZ2EMP1i4u64Xwow3NYXUtBbD4vIwJdQd4+xl8YDou1dlm4DVrtwT/7Ky8z8WyCULVfxw==
+
+type-fest@4.40.0:
+  version "4.40.0"
+  resolved "https://registry.yarnpkg.com/type-fest/-/type-fest-4.40.0.tgz#62bc09caccb99a75e1ad6b9b4653e8805e5e1eee"
+  integrity sha512-ABHZ2/tS2JkvH1PEjxFDTUWC8dB5OsIGZP4IFLhR293GqT5Y5qB1WwL2kMPYhQW9DVgVD8Hd7I8gjwPIf5GFkw==
 
 type-fest@4.41.0, type-fest@^4.2.0, type-fest@^4.31.0, type-fest@^4.4.0, type-fest@^4.41.0:
   version "4.41.0"
@@ -10845,10 +10884,10 @@ write-file-atomic@^4.0.2:
     imurmurhash "^0.1.4"
     signal-exit "^3.0.7"
 
-ws@8.18.2:
-  version "8.18.2"
-  resolved "https://registry.npmjs.org/ws/-/ws-8.18.2.tgz"
-  integrity sha512-DMricUmwGZUVr++AEAe2uiVM7UoO9MAVZMDu05UQOaUII0lp+zOzLLU4Xqh/JvTqklB1T4uELaaPBKyjE1r4fQ==
+ws@8.18.1:
+  version "8.18.1"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-8.18.1.tgz#ea131d3784e1dfdff91adb0a4a116b127515e3cb"
+  integrity sha512-RKW2aJZMXeMxVpnZ6bck+RswznaxmzdULiBr6KY7XkTnW8uvt0iT9H5DkHUChXrc+uurzwa0rVI16n/Xzjdz1w==
 
 ws@^6.2.3:
   version "6.2.3"
@@ -10891,6 +10930,11 @@ yallist@^3.0.2:
   version "3.1.1"
   resolved "https://registry.yarnpkg.com/yallist/-/yallist-3.1.1.tgz#dbb7daf9bfd8bac9ab45ebf602b8cbad0d5d08fd"
   integrity sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g==
+
+yaml@2.7.1:
+  version "2.7.1"
+  resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.7.1.tgz#44a247d1b88523855679ac7fa7cda6ed7e135cf6"
+  integrity sha512-10ULxpnOCQXxJvBgxsn9ptjq6uviG/htZKk9veJGhlqn3w/DxQ631zFF+nlQXLwmImeS5amR2dl2U8sg6U9jsQ==
 
 yaml@2.8.0:
   version "2.8.0"

@@ -26,8 +26,6 @@ describe('Onboarding flow', () => {
   });
 
 	it('should accept terms and navigate to Home', async () => {
-		await driver.pause(2000); // Wait for the app to settle
-		// Terms screen
 		const termsScreen = await $('~TermsContinueButton');
 		await termsScreen.waitForDisplayed({ interval: 1000, timeout: 60_000 });
 

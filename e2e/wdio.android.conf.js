@@ -16,17 +16,7 @@ exports.config = {
 			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
 			'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
 			'appium:avd': avdName,
-			'appium:noReset': false,
-			'appium:fullReset': true,
-			'appium:relaxedSecurity': true,
-			'appium:allowTestPackages': true,
-			'appium:sessionOverride': true,
 			'appium:autoGrantPermissions': true,
-			'appium:adbExecTimeout': 300000,
-			'appium:uiautomator2ServerLaunchTimeout': 300000,
-			'appium:uiautomator2ServerInstallTimeout': 300000,
-			'appium:androidInstallTimeout': 300000,
-			'appium:relaxedSecurity': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

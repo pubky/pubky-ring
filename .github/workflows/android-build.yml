@@ -56,7 +56,7 @@ jobs:
     - name: Build Android App
       run: |
         cd android
-        ./gradlew assembleDebug
+        ./gradlew assembleAndroidTest
         ls -Rlah android/app/build/outputs/apk/
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}

@@ -40,14 +40,21 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+#    - name: Set up Android SDK
+#      uses: android-actions/setup-android@v3
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
     - name: Install Appium drivers
       run: yarn e2e:drivers
+#
+    - name: Show versions
+      run: |
+        npx appium -v
+        npx appium driver list --installed
+      shell: bash
+
 
     - name: Wait for Android Build
       id: wait-android-build

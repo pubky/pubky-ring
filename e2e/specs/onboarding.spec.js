@@ -21,10 +21,6 @@ const reinstallApp = async () => {
 };
 
 describe('Onboarding flow', () => {
-  beforeEach(async () => {
-    await reinstallApp();
-  });
-
 	it('should accept terms and navigate to Home', async () => {
 		const termsScreen = await $('~TermsContinueButton');
 		await termsScreen.waitForDisplayed({ interval: 1000, timeout: 60_000 });

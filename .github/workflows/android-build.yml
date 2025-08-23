@@ -48,10 +48,10 @@ jobs:
         cd android
         ./gradlew generateCodegenArtifactsFromSchema
 
-#    - name: Use debug key for release build
-#      run: |
-#        cd android/app
-#        sed -i '/signingConfig signingConfigs.release/s/release/debug/' build.gradle
+    - name: Use debug key for release build
+      run: |
+        cd android/app
+        sed -i '/signingConfig signingConfigs.release/s/release/debug/' build.gradle
 
     - name: Build Android App
       run: |

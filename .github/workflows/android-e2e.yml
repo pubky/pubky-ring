@@ -24,7 +24,7 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '20.19.0'
         cache: 'yarn'
 
     - name: Enable KVM
@@ -46,8 +46,8 @@ jobs:
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
-    - name: Install Appium drivers
-      run: yarn e2e:drivers
+#    - name: Install Appium drivers
+#      run: yarn e2e:drivers
 #
     - name: Show versions
       run: |
@@ -77,6 +77,9 @@ jobs:
     #   run: |
     #     mkdir -p ./artefacts
     #     curl -L "https://github.com/synonymdev/bitkit/releases/download/v1.1.3/app-x86_64-release.apk" -o ./artefacts/app-release.apk
+
+    - name: Install and Run Appium Server
+      uses: moatazeldebsy/appium-server-gitHub-action@V1.0.7
 
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2

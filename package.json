@@ -11,7 +11,7 @@
     "optimize-images": "node scripts/optimize-images.js",
     "e2e:android": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.android.conf.js",
     "e2e:ios": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.ios.conf.js",
-    "e2e:drivers": "APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install uiautomator2 && APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install xcuitest"
+    "e2e:drivers": "echo test"
   },
   "dependencies": {
     "@dr.pogodin/react-native-fs": "2.34.0",
@@ -83,9 +83,6 @@
     "webdriverio": "^9.19.1",
     "appium": "2.18.0",
     "chai": "5.1.2"
-  },
-  "engines": {
-    "node": ">=20"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

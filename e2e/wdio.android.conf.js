@@ -17,8 +17,8 @@ exports.config = {
 			'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
 			'appium:avd': avdName,
 			'appium:autoGrantPermissions': true,
-			'appium:allowTestPackages': true,
-			'appium:enforceAppInstall': false,
+			'appium:allowTestPackages': false,
+			'appium:shouldTerminateApp': true,
 			'appium:sessionOverride': true,
 			'appium:relaxedSecurity': true,
 			...(resolvedAppPath

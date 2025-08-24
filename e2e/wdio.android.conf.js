@@ -21,6 +21,7 @@ exports.config = {
 			'appium:shouldTerminateApp': true,
 			'appium:sessionOverride': true,
 			'appium:relaxedSecurity': true,
+			'appium:log_level': 'debug',
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

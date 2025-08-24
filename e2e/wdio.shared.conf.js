@@ -1,5 +1,7 @@
 /* Shared WebdriverIO config for Appium E2E */
 const path = require('path');
+const fs = require('fs');
+const logStream = fs.createWriteStream('./wdio-output.log', { flags: 'a' });
 
 exports.config = {
 	runner: 'local',
@@ -11,6 +13,7 @@ exports.config = {
 	waitforTimeout: 30000,
 	connectionRetryTimeout: 300000,
 	connectionRetryCount: 2,
+	logOutput: logStream,
 	framework: 'mocha',
 	reporters: ['spec'],
 	mochaOpts: {

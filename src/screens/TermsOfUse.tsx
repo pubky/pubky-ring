@@ -255,11 +255,13 @@ const TermsOfUse = (): React.ReactElement => {
 							<TouchableOpacity
 								onPress={() => setChecked(!checked)}
 								activeOpacity={0.7}
-								style={styles.checkboxRow}>
+								style={styles.checkboxRow}
+								accessibilityLabel="TermsAgreeRow">
 								<Text style={styles.footerText}>
 									I declare that I have read and accept the terms of use.
 								</Text>
 								<TouchableOpacity
+									accessibilityLabel="TermsAgreeCheckbox"
 									style={[styles.checkbox, checked && styles.checkboxChecked]}
 									onPress={() => setChecked(!checked)}
 									activeOpacity={0.7}
@@ -276,7 +278,8 @@ const TermsOfUse = (): React.ReactElement => {
 							<TouchableOpacity
 								onPress={() => setPrivacyChecked(!privacyChecked)}
 								activeOpacity={0.7}
-								style={styles.checkboxRow}>
+								style={styles.checkboxRow}
+								accessibilityLabel="PrivacyAgreeRow">
 								<Text style={styles.footerText}>
 									I declare that I have read and accept the{' '}
 									<Text
@@ -284,6 +287,7 @@ const TermsOfUse = (): React.ReactElement => {
 										style={styles.linkText}>privacy policy</Text>.
 								</Text>
 								<TouchableOpacity
+									accessibilityLabel="PrivacyAgreeCheckbox"
 									style={[styles.checkbox, privacyChecked && styles.checkboxChecked]}
 									onPress={() => setPrivacyChecked(!privacyChecked)}
 									activeOpacity={0.7}
@@ -297,6 +301,7 @@ const TermsOfUse = (): React.ReactElement => {
 							onPress={onContinue}
 							disabled={!canContinue}
 							style={[styles.continueButton, canContinue ? null : styles.continueButtonInactive ]}
+							accessibilityLabel="TermsContinueButton"
 						>
 							<Text style={styles.buttonText}>Continue</Text>
 						</TouchableOpacity>

@@ -12,6 +12,10 @@ Pubky Ring is the key manager for your identity in the Pubky ecosystem. It lets 
 
 # Getting Started
 
+## Environment requirements
+- Node.js >= 20
+- Yarn 1.x
+
 ## Installation
 
 ### Clone the repository:
@@ -65,4 +69,55 @@ gpg --verify app-release.apk.asc app-release.apk
 ```bash
 gpg --verify SHA256SUMS.asc
 sha256sum -c SHA256SUMS
+```
+
+## E2E testing (Appium + WebdriverIO)
+
+This project includes Appium/WebdriverIO E2E tests for Android emulators and iOS simulators.
+
+### Prerequisites
+- Xcode with an iOS Simulator (e.g., "iPhone 15").
+- Android SDK with an AVD (e.g., "Pixel_7_Pro_API_35").
+- Java JDK 17+ and Node.js 18+.
+- App under test has been built or is installed in test environment (iOS simulator or AVD)
+
+### Install drivers (one-time)
+
+```bash
+yarn e2e:drivers
+```
+
+### Run tests
+- Android:
+```bash
+yarn e2e:android
+```
+- iOS:
+```bash
+yarn e2e:ios
+```
+
+### Environment overrides
+- ANDROID_APP: absolute path to the .apk
+- AVD: Android Virtual Device name (e.g. Pixel_6_API_34)
+- ANDROID_DEVICE_NAME / ANDROID_PLATFORM_VERSION
+- APP_PACKAGE / APP_ACTIVITY (defaults: to.pubky.ring / to.pubkyring.MainActivity)
+- IOS_APP: absolute path to the .app
+- IOS_SIM / IOS_PLATFORM_VERSION
+- IOS_BUNDLE_ID (default: app.pubkyring)
+
+### Examples
+
+```bash
+# Android (provide APK)
+ANDROID_APP=/absolute/path/app-debug.apk yarn e2e:android
+
+# Android (attach to installed app on an emulator)
+AVD=Pixel_6_API_34 yarn e2e:android
+
+# iOS (provide .app)
+IOS_APP=/absolute/path/pubkyring.app yarn e2e:ios
+
+# iOS (attach to installed app on a simulator)
+IOS_SIM="iPhone 15" yarn e2e:ios
 ```

@@ -1,0 +1,83 @@
+name: 'Wait for Workflow'
+description: 'Wait for a specific workflow to complete successfully and return the run ID'
+
+inputs:
+  workflow-name:
+    description: 'Name of the workflow to wait for'
+    required: true
+  commit-sha:
+    description: 'Commit SHA to search for (defaults to PR head SHA or github.sha)'
+    required: false
+    default: '${{ github.event.pull_request.head.sha || github.sha }}'
+  max-attempts:
+    description: 'Maximum number of attempts (default 360 = 1 hour with 10s intervals)'
+    required: false
+    default: '360'
+  interval-seconds:
+    description: 'Interval between checks in seconds (default 10)'
+    required: false
+    default: '10'
+
+outputs:
+  workflow-run-id:
+    description: 'The workflow run ID if successful'
+    value: ${{ steps.wait-for-workflow.outputs.workflow-run-id }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Wait for Workflow
+      id: wait-for-workflow
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const maxAttempts = parseInt('${{ inputs.max-attempts }}');
+          const intervalSeconds = parseInt('${{ inputs.interval-seconds }}');
+          const workflowName = '${{ inputs.workflow-name }}';
+          const commitSha = '${{ inputs.commit-sha }}';
+
+          let attempts = 0;
+
+          while (attempts < maxAttempts) {
+            // Get workflow runs for the specific commit SHA
+            const runs = await github.rest.actions.listWorkflowRunsForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head_sha: commitSha,
+              per_page: 100
+            });
+
+            console.log(`Found ${runs.data.workflow_runs.length} total workflow runs`);
+            console.log(`Looking for workflow: "${workflowName}" with commit: ${commitSha}`);
+
+            // Find the workflow run with matching name and commit
+            const targetRun = runs.data.workflow_runs.find(run => 
+              run.name === workflowName && run.head_sha === commitSha
+            );
+
+            if (targetRun) {
+              if (targetRun.status === 'completed') {
+                if (targetRun.conclusion === 'success') {
+                  console.log(`${workflowName} completed successfully with run ID: ${targetRun.id}`);
+                  core.setOutput('workflow-run-id', targetRun.id.toString());
+                  break;
+                } else {
+                  core.setFailed(`${workflowName} failed with conclusion: ${targetRun.conclusion}`);
+                }
+              } else {
+                console.log(`${workflowName} status: ${targetRun.status}`);
+              }
+            } else {
+              console.log(`No ${workflowName} workflow run found for commit ${commitSha}`);
+            }
+
+            attempts++;
+            if (attempts < maxAttempts) {
+              console.log(`Waiting for ${workflowName}... (attempt ${attempts}/${maxAttempts})`);
+              await new Promise(resolve => setTimeout(resolve, intervalSeconds * 1000));
+            }
+          }
+
+          if (attempts >= maxAttempts) {
+            core.setFailed(`${workflowName} did not complete within timeout (${maxAttempts * intervalSeconds / 60} minutes)`);
+          }

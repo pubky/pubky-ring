@@ -84,7 +84,7 @@ jobs:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
-        target: "system-images;android-33;google_apis;x86_64"
+        target: "google_apis"
         profile: pixel_6
         api-level: 33
         avd-name: Pixel_6

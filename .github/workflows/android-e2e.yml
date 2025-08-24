@@ -40,9 +40,9 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-
+#    - name: Set up Android SDK
+#      uses: android-actions/setup-android@v3
+#
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
@@ -89,7 +89,7 @@ jobs:
         api-level: 33
         avd-name: Pixel_6
         force-avd-creation: false
-        disable-linux-hw-accel: true
+        disable-linux-hw-accel: false
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         #emulator-build: 12325540

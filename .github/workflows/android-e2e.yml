@@ -62,7 +62,8 @@ jobs:
       with:
         workflow-name: 'Android Build'
         #commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
-        commit-sha: 11e30840b0ca2cc0675daf3d8162e373124aa586
+        #commit-sha: 11e30840b0ca2cc0675daf3d8162e373124aa586
+        commit-sha: baec6f3f058cf5058d3748852d00e8c654ab2b36
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK

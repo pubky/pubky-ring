@@ -88,8 +88,6 @@ jobs:
         profile: pixel_6
         api-level: 33
         avd-name: Pixel_6
-        force-avd-creation: false
-        disable-linux-hw-accel: false
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         #emulator-build: 12325540

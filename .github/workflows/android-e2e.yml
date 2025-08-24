@@ -84,10 +84,12 @@ jobs:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
+        target: "system-images;android-33;google_apis;x86_64"
         profile: pixel_6
         api-level: 33
         avd-name: Pixel_6
         force-avd-creation: false
+        disable-linux-hw-accel: true
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         #emulator-build: 12325540

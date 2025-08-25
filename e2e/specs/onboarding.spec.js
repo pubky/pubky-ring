@@ -1,5 +1,4 @@
 const { expect } = require('chai');
-const { getAppId, getAppPath } = require('./constants');
 
 /**
  * Basic onboarding flow:
@@ -10,24 +9,9 @@ const { getAppId, getAppPath } = require('./constants');
 // Note: This test will be redone when we have the new onboarding flow and more tests will be added.
 // We will also use PageObjectModel pattern for the tests, not using selectors and Appium api directly.
 
-const reinstallApp = async () => {
-  console.info('→ Reinstalling app...');
-  const appId = getAppId();
-  const appPath = getAppPath();
-
-  await driver.removeApp(appId);
-  await driver.installApp(appPath);
-  await driver.activateApp(appId);
-};
-
 describe('Onboarding flow', () => {
-  beforeEach(async () => {
-    await reinstallApp();
-  });
 
 	it('should accept terms and navigate to Home', async () => {
-		// Wait for app to settle
-		await driver.pause(2000);
 		// Terms screen
 		const termsScreen = await $('~TermsContinueButton');
 		await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60_000 });

@@ -1,8 +1,9 @@
 name: Android E2E Tests
+description: 'Disabled for now due to instability - UiAutomator2 crash'
 
 on:
-  pull_request:
-    branches: [ main ]
+  # pull_request:
+  #   branches: [ main ]
   workflow_dispatch:
     inputs:
       commit-sha:
@@ -54,7 +55,7 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: f192ba7be76851b916d14ed06d7db94776893291 #${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -84,8 +85,7 @@ jobs:
         arch: x86_64
         disable-animations: true
         emulator-build: 12325540
-        #pre-emulator-launch-script: adb wait-for-device
-        script: yarn e2e:android # adb logcat -v threadtime *:E >> errors.txt & adb shell dmesg >> dmesg.txt & yarn e2e:android
+        script: yarn e2e:android
 
     - name: Upload Video
       uses: actions/upload-artifact@v4

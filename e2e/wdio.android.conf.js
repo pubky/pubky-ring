@@ -13,35 +13,29 @@ exports.config = {
 		{
 			platformName: 'Android',
 			'appium:automationName': 'UiAutomator2',
-			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '14',
+			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
 			'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
 			'appium:avd': avdName,
 			'appium:autoGrantPermissions': true,
 			'appium:newCommandTimeout': 300,
 			'appium:fullReset': false,
-			'appium:noReset': true,
+			'appium:noReset': false,
 			'appium:adbExecTimeout': 300_000,
 			'appium:uiautomator2ServerLaunchTimeout': 300_000,
 			'appium:uiautomator2ServerInstallTimeout': 300_000,
 			'appium:androidInstallTimeout': 300_000,
-			// 'appium:allowTestPackages': true,
-			// 'appium:enforceAppInstall': true,
-			// 'appium:disableWindowAnimation': true,
-			// 'appium:skipServerInstallation': false,
-			// 'appium:skipDeviceInitialization': false,
-			'appium:relaxedSecurity': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
 					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:forceAppLaunch': true
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
+					'appium:forceAppLaunch': false
 				}
 				: {
 					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
 					'appium:forceAppLaunch': false
 				})
 		}

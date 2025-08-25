@@ -1,0 +1,130 @@
+name: Android E2E Tests
+description: 'Disabled for now due to instability - UiAutomator2 crash'
+
+on:
+  # pull_request:
+  #   branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      commit-sha:
+        description: 'Commit SHA to test (leave empty to use current branch head)'
+        required: false
+        type: string
+
+jobs:
+  android-e2e:
+    runs-on: ubuntu-latest # [self-hosted, linux]
+    concurrency:
+      group: android-e2e-${{ github.head_ref }}
+      cancel-in-progress: true
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+      shell: bash
+
+    - name: Set up Java
+      uses: actions/setup-java@v4
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    # - name: Set up Android SDK
+    #   uses: android-actions/setup-android@v3
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Install Appium drivers
+      run: yarn e2e:drivers
+
+    - name: Wait for Android Build
+      id: wait-android-build
+      uses: ./.github/actions/wait-for-workflow
+      with:
+        workflow-name: 'Android Build'
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        max-attempts: '360'  # 1 hour with 10s intervals
+
+    - name: Download Android APK
+      uses: dawidd6/action-download-artifact@v4
+      with:
+        name: android-release-apk
+        path: ./artefacts
+        workflow: android-build.yml
+        run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
+
+    # - name: Download APK from URL
+    #   run: |
+    #     mkdir -p ./artefacts
+    #     curl -L "https://github.com/synonymdev/bitkit/releases/download/v1.1.3/app-x86_64-release.apk" -o ./artefacts/app-release.apk
+
+    - name: Run E2E tests on Android emulator
+      uses: reactivecircus/android-emulator-runner@v2
+      env:
+        ANDROID_APP: ./artefacts/app-release.apk
+        ANDROID_DEVICE_NAME: Pixel_6
+      with:
+        profile: pixel_6
+        api-level: 34
+        avd-name: Pixel_6
+        force-avd-creation: false
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        arch: x86_64
+        disable-animations: true
+        emulator-build: 12325540
+        script: yarn e2e:android
+
+    - name: Upload Video
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-video
+        path: ./e2e/artefacts/
+        retention-days: 7
+
+    - name: Upload Logcat
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-logcat
+        path: ./logcat.txt
+        retention-days: 7
+
+    - name: Upload Errors
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-errors
+        path: ./errors.txt
+        retention-days: 7
+
+    - name: Upload Dmesg
+
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-dmesg
+        path: ./dmesg.txt
+        retention-days: 7
+
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: android-e2e-results
+        path: |
+          ./e2e/results/
+        retention-days: 7

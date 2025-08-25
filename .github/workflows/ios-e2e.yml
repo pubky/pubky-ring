@@ -1,0 +1,107 @@
+name: iOS E2E Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      commit-sha:
+        description: 'Commit SHA to test (leave empty to use current branch head)'
+        required: false
+        type: string
+
+jobs:
+  ios-e2e:
+    runs-on: macos-latest
+    concurrency:
+      group: ios-e2e-${{ github.head_ref }}
+      cancel-in-progress: true
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        cache: 'yarn'
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Install Appium drivers
+      run: yarn e2e:drivers
+
+    - name: Install iOS dependencies
+      run: |
+        cd ios
+        pod install
+
+    - name: Wait for iOS Build
+      id: wait-ios-build
+      uses: ./.github/actions/wait-for-workflow
+      with:
+        workflow-name: 'iOS Build'
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        max-attempts: '360'  # 1 hour with 10s intervals
+
+    - name: Download iOS App
+      uses: dawidd6/action-download-artifact@v4
+      with:
+        name: ios-release-app
+        path: ./artifacts
+        workflow: ios-build.yml
+        run_id: ${{ steps.wait-ios-build.outputs.workflow-run-id }}
+
+    - name: Extract iOS App Bundle
+      run: |
+        cd artifacts
+        unzip pubkyring.app.zip
+        ls -la
+        
+    - name: Run E2E tests
+      env:
+        IOS_APP: ./artifacts/pubkyring.app
+      run: yarn e2e:ios
+
+    - name: Upload Video
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ios-e2e-video
+        path: ./e2e/artefacts/
+        retention-days: 7
+
+    - name: Upload Logcat
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ios-e2e-logcat
+        path: ./logcat.txt
+        retention-days: 7
+
+    - name: Upload Simulator Logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ios-e2e-simulator-logs
+        path: ./ios-simulator-logs.txt
+        retention-days: 7
+    
+    - name: Upload Test Results
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ios-e2e-results
+        path: |
+          ./e2e/results/
+        retention-days: 7
+
+    - name: Upload Appium Logs
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: ios-e2e-appium-logs
+        path: ./e2e/appium.log
+        retention-days: 7

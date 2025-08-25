@@ -64,7 +64,11 @@ const OnboardingContent = (): ReactElement => {
 
 					{/* Buttons */}
 					<View style={styles.buttonContainer}>
-						<TouchableOpacity style={styles.buttonPrimary} onPress={navigateHome}>
+						<TouchableOpacity
+							style={styles.buttonPrimary}
+							onPress={navigateHome}
+							accessibilityLabel="OnboardingGetStartedButton"
+						>
 							<Text style={styles.buttonText}>Get Started</Text>
 						</TouchableOpacity>
 					</View>

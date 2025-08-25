@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: macos-latest
+    concurrency:
+      group: ios-build-${{ github.head_ref }}
+      cancel-in-progress: true
     
     steps:
     - name: Checkout code
@@ -38,10 +41,15 @@ jobs:
       run: |
         cd ios
         xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -derivedDataPath ./build build
+
+    - name: Create app bundle zip
+      run: |
+        cd ios/build/Build/Products/Release-iphonesimulator
+        zip -r pubkyring.app.zip pubkyring.app
         
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:
         name: ios-release-app
-        path: ios/build/Build/Products/Release-iphonesimulator/pubkyring.app
+        path: ios/build/Build/Products/Release-iphonesimulator/pubkyring.app.zip
         retention-days: 7

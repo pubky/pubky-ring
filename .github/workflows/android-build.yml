@@ -7,6 +7,9 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    concurrency:
+      group: android-build-${{ github.head_ref }}
+      cancel-in-progress: true
     
     steps:
     - name: Checkout code
@@ -39,21 +42,6 @@ jobs:
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
-
-    # - name: Create assets directory
-    #   run: mkdir -p android/app/src/main/assets
-
-    # - name: Bundle JavaScript
-    #   run: |
-    #     npx react-native bundle \
-    #       --platform android \
-    #       --dev false \
-    #       --entry-file index.js \
-    #       --bundle-output android/app/src/main/assets/index.android.bundle \
-    #       --assets-dest android/app/src/main/res/
-
-    # - name: Make Gradlew Executable
-    #   run: chmod +x android/gradlew
 
     - name: Generate Codegen
       run: |

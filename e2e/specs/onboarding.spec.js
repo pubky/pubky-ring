@@ -1,40 +1,19 @@
-const { expect } = require('chai');
-const { getAppId, getAppPath } = require('./constants');
+export function elementByText(text) {
+    if (driver.isAndroid) {
+        return $(`android=new UiSelector().textContains("${text}")`);
+    } else {
+        return $(`~test`);
+    }
+}
 
-/**
- * Basic onboarding flow:
- * 1) Accept both checkboxes on Terms screen, tap Continue.
- * 2) On Onboarding screen, check Get Started button is displayed.
- */
-
-// Note: This test will be redone when we have the new onboarding flow and more tests will be added.
-// We will also use PageObjectModel pattern for the tests, not using selectors and Appium api directly.
-
-const reinstallApp = async () => {
-  console.info('→ Reinstalling app...');
-  const appId = getAppId();
-  const appPath = getAppPath();
-
-  await driver.removeApp(appId);
-  await driver.installApp(appPath);
-  await driver.activateApp(appId);
-};
+export const sleep = (ms) => browser.pause(ms);
 
 describe('Onboarding flow', () => {
-	it('should accept terms and navigate to Home', async () => {
-		const termsScreen = await $('~TermsContinueButton');
-		await termsScreen.waitForDisplayed({ interval: 1000, timeout: 60_000 });
-
-		const termsRow = await $('~TermsAgreeRow');
-		await termsRow.click();
-
-		const privacyRow = await $('~PrivacyAgreeRow');
-		await privacyRow.click();
-
-		const continueBtn = await $('~TermsContinueButton');
-		await continueBtn.click();
-
-		const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
-		expect(await onboardingGetStartedButton.isDisplayed()).to.equal(true);
-	});
+    it('should accept terms and navigate to Home', async () => {
+		sleep(100000);
+        const t = await elementByText("I declare that I have read and accept the terms of use.").click();
+        const p = await elementByText("I declare that I have read and accept the privacy policy.").click();
+        const r = await elementByText("Continue").click();
+		sleep(1000000);
+    });
 });

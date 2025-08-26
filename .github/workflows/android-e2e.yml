@@ -10,6 +10,10 @@ on:
         required: false
         type: string
 
+env:
+  TERM: xterm-256color
+  FORCE_COLOR: 1
+
 jobs:
   android-e2e:
     runs-on: ubuntu-latest # [self-hosted, linux]

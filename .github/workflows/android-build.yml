@@ -44,10 +44,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-    - name: Generate Codegen
-      run: |
-        cd android
-        ./gradlew generateCodegenArtifactsFromSchema
+#    - name: Generate Codegen
+#      run: |
+#        cd android
+#        ./gradlew generateCodegenArtifactsFromSchema
 
 #    - name: Use debug key for release build
 #      run: |
@@ -61,13 +61,13 @@ jobs:
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: android-release-apk
-        path: android/app/build/outputs/apk/release/app-release.apk
-        retention-days: 7
-
+#    - name: Upload APK
+#      uses: actions/upload-artifact@v4
+#      with:
+#        name: android-release-apk
+#        path: android/app/build/outputs/apk/release/app-release.apk
+#        retention-days: 7
+#
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:

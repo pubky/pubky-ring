@@ -66,8 +66,8 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
-        #commit-sha: 11e30840b0ca2cc0675daf3d8162e373124aa586
+        #commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: 51cf2fe8381b5f2ed99ddc848706adb88bf780c2
         #commit-sha: f8fcc7d720f25acd8687bca5d548c400b1020ec6
         max-attempts: '360'  # 1 hour with 10s intervals
 

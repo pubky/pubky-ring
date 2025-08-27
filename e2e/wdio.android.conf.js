@@ -18,8 +18,8 @@ exports.config = {
 			'appium:avd': avdName,
 			'appium:autoGrantPermissions': true,
 			'appium:allowTestPackages': false,
-			'appium:shouldTerminateApp': true,
-			'appium:sessionOverride': true,
+//			'appium:shouldTerminateApp': true,
+//			'appium:sessionOverride': true,
 			'appium:relaxedSecurity': true,
 			'appium:log_level': 'debug',
 			...(resolvedAppPath

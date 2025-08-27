@@ -92,7 +92,7 @@ jobs:
       with:
         target: "google_apis"
         profile: pixel_6
-        api-level: 34
+        api-level: 35
         avd-name: Pixel_6
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64

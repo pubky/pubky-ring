@@ -100,7 +100,7 @@ jobs:
         ANDROID_APP: ./artefacts/app-debug.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
-        target: "google_apis"
+        target: "default"
         profile: pixel_6
         api-level: 35
         avd-name: Pixel_6

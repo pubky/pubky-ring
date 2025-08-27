@@ -2,13 +2,20 @@ import { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { SheetManager } from 'react-native-actions-sheet';
+import { Result } from '@synonymdev/result';
+import { mnemonicPhraseToKeypair, IGenerateSecretKey } from '@synonymdev/react-native-pubky';
 import {
 	getAllPubkys,
 	getDeepLink,
 	getSignedUpPubkys,
+	getPubkyKeys,
 } from '../store/selectors/pubkySelectors';
 import { setDeepLink } from '../store/slices/pubkysSlice';
-import { handleDeepLink, showToast, sleep } from '../utils/helpers';
+import { handleDeepLink, showToast, sleep, isSecretKeyImport } from '../utils/helpers';
+import { importPubky as importPubkyUtil } from '../utils/pubky';
+import { showImportSuccessSheet, showEditPubkySheet } from '../utils/sheetHelpers';
+import { getStore } from '../utils/store-helpers';
+import { EBackupPreference } from '../types/pubky.ts';
 
 const handleSignedUpPubkys = async (
 	signedUpPubkysLength: number,
@@ -85,6 +92,80 @@ export const useDeepLinkHandler = (
 
 	const handleDeepLinkCallback = useCallback(async (): Promise<void> => {
 		if (!deepLink) return;
+
+		const isRecoveryRes = await isSecretKeyImport(deepLink);
+
+		// Check if deepLink is a recovery phrase
+		if (isRecoveryRes.isOk() && isRecoveryRes.value.isSecretKey) {
+			// Clear the deeplink from store
+			dispatch(setDeepLink(''));
+
+			// Get current pubkys before import to check if this is new
+			const currentPubkys = getPubkyKeys(getStore());
+
+			// Normalize the recovery phrase (decode URL encoding and replace delimiters with spaces)
+			let normalizedPhrase = deepLink;
+			try {
+				normalizedPhrase = decodeURIComponent(deepLink);
+			} catch {
+				// If decoding fails, use original
+			}
+			// Replace any delimiter (dash, underscore, plus) with space
+			normalizedPhrase = normalizedPhrase.trim().replace(/[\-_+]+/g, ' ').toLowerCase();
+
+			let secretKey = normalizedPhrase;
+			if (isRecoveryRes.value.backupPreference === EBackupPreference.recoveryPhrase) {
+				// Convert mnemonic to secret key
+				const secretKeyRes: Result<IGenerateSecretKey> =
+          await mnemonicPhraseToKeypair(normalizedPhrase);
+				if (secretKeyRes.isErr()) {
+					showToast({
+						type: 'error',
+						title: 'Import Failed',
+						description: 'Invalid recovery phrase',
+					});
+					return;
+				}
+				secretKey = secretKeyRes.value.secret_key;
+			}
+
+			// Import the pubky using the same util as normal import
+			const pubkyResult = await importPubkyUtil({
+				secretKey,
+				dispatch,
+				mnemonic: isRecoveryRes.value.backupPreference === EBackupPreference.recoveryPhrase ? normalizedPhrase : '',
+			});
+
+			if (pubkyResult.isErr()) {
+				showToast({
+					type: 'error',
+					title: 'Import Failed',
+					description: pubkyResult.error.message,
+				});
+				return;
+			}
+
+			// Check if this is a new pubky
+			const isNewPubky = !currentPubkys.includes(pubkyResult.value);
+
+			// Show the import success sheet exactly like the normal flow
+			setTimeout(() => {
+				showImportSuccessSheet({
+					pubky: pubkyResult.value,
+					isNewPubky,
+					onContinue: () => {
+						setTimeout(() => {
+							showEditPubkySheet({
+								title: 'Setup',
+								pubky: pubkyResult.value,
+							});
+						}, 150);
+					},
+				});
+			}, 150);
+
+			return;
+		}
 
 		const signedUpPubkysLength = Object.keys(signedUpPubkys).length;
 

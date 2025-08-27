@@ -48,15 +48,15 @@ jobs:
         cd android
         ./gradlew generateCodegenArtifactsFromSchema
 
-    - name: Use debug key for release build
-      run: |
-        cd android/app
-        sed -i '/signingConfig signingConfigs.release/s/release/debug/' build.gradle
+#    - name: Use debug key for release build
+#      run: |
+#        cd android/app
+#        sed -i '/signingConfig signingConfigs.release/s/release/debug/' build.gradle
 
     - name: Build Android App
       run: |
         cd android
-        ./gradlew assembleRelease
+        ./gradlew assembleDebug
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
 
@@ -65,4 +65,11 @@ jobs:
       with:
         name: android-release-apk
         path: android/app/build/outputs/apk/release/app-release.apk
+        retention-days: 7
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v4
+      with:
+        name: android-release-apk
+        path: android/app/build/outputs/apk/debug/app-debug.apk
         retention-days: 7

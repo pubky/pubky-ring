@@ -6,7 +6,7 @@ const logStream = fs.createWriteStream('./wdio-output.log', { flags: 'a' });
 exports.config = {
 	runner: 'local',
 	specs: [path.resolve(__dirname, 'specs/**/*.spec.js')],
-	maxInstances: 10,
+	maxInstances: 3,
 	logLevel: 'debug',
 	bail: 0,
 	baseUrl: 'http://localhost',

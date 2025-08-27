@@ -65,9 +65,9 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        #commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
         #commit-sha: 11e30840b0ca2cc0675daf3d8162e373124aa586
-        commit-sha: f8fcc7d720f25acd8687bca5d548c400b1020ec6
+        #commit-sha: f8fcc7d720f25acd8687bca5d548c400b1020ec6
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -86,7 +86,7 @@ jobs:
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2.34.0
       env:
-        ANDROID_APP: ./artefacts/app-release.apk
+        ANDROID_APP: ./artefacts/app-debug.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
         target: "google_apis"
@@ -98,8 +98,7 @@ jobs:
         #emulator-build: 12325540
         #pre-emulator-launch-script: adb wait-for-device
         script: |
-          adb reverse
-          yarn e2e:android # adb logcat -v threadtime *:E >> errors.txt & adb shell dmesg >> dmesg.txt & yarn e2e:android
+          yarn e2e:android
 
     - name: Upload Video
       uses: actions/upload-artifact@v4

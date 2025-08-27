@@ -102,6 +102,7 @@ jobs:
       with:
         target: "default"
         profile: pixel_6
+        force-avd-creation: false
         api-level: 35
         avd-name: Pixel_6
         #emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none

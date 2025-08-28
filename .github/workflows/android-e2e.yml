@@ -39,36 +39,11 @@ jobs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
-#    - name: Set up Java
-#      uses: actions/setup-java@v4
-#      with:
-#        distribution: 'zulu'
-#        java-version: '17'
-
-#    - name: Set up Android SDK
-#      uses: android-actions/setup-android@v3.2.2
-
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
     - name: Install Appium drivers
       run: yarn e2e:drivers
-
-#    - name: Start Metro Bundler in background
-#      run: |
-#        npx react-native start --port 8081 &
-#        echo "Metro started on port 8081"
-#
-#    - name: Wait for Metro to be ready
-#      run: |
-#        timeout 60 bash -c 'until curl -f -s -o /dev/null http://localhost:8081; do echo "Waiting for Metro..."; sleep 2; done'
-#        echo "Metro is ready!"
-
-#    - name: Show versions
-#      run: |
-#        npx appium -v
-#        npx appium driver list --installed
-#      shell: bash
 
 
     - name: Wait for Android Build
@@ -89,11 +64,6 @@ jobs:
         workflow: android-build.yml
         run_id: ${{ steps.wait-android-build.outputs.workflow-run-id }}
 
-    # - name: Download APK from URL
-    #   run: |
-    #     mkdir -p ./artefacts
-    #     curl -L "https://github.com/synonymdev/bitkit/releases/download/v1.1.3/app-x86_64-release.apk" -o ./artefacts/app-release.apk
-
     - name: Run E2E tests on Android emulator
       uses: reactivecircus/android-emulator-runner@v2.34.0
       env:
@@ -112,7 +82,7 @@ jobs:
         #emulator-build: 12325540
         #pre-emulator-launch-script: adb wait-for-device
         script: |
-          sdkmanager --list
+          npx react-native run-android
           yarn e2e:android
 
 

@@ -100,7 +100,6 @@ jobs:
         ANDROID_APP: ./artefacts/app-debug.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
-        target: "default"
         profile: pixel_6
         force-avd-creation: false
         api-level: Baklava

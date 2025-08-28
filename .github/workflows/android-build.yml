@@ -44,10 +44,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-gradle-
 
-#    - name: Generate Codegen
-#      run: |
-#        cd android
-#        ./gradlew generateCodegenArtifactsFromSchema
+    - name: Generate Codegen
+      run: |
+        cd android
+        ./gradlew generateCodegenArtifactsFromSchema
 
 #    - name: Use debug key for release build
 #      run: |

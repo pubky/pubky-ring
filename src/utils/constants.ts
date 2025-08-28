@@ -15,3 +15,10 @@ export const STAGING_APP_URL = 'https://staging.pubky.app';
 export const PRODUCTION_APP_URL = 'https://pubky.app';
 export const PUBKY_APP_URL = PRODUCTION_APP_URL;
 export const TERMS_OF_USE = 'https://synonym.to/pubky-ring-privacy-policy';
+
+// Timing constants for consistent animations and delays
+export const SHEET_ANIMATION_DELAY = 50; // Delay for sheet animations
+export const SHEET_TRANSITION_DELAY = 50; // Delay between sheet transitions
+export const AUTH_SHEET_DELAY = 50; // Small delay for auth sheet display
+export const ANDROID_DEEPLINK_DELAY = 50; // Delay before opening Android deep links
+export const SCANNER_CLOSE_DELAY = 50; // Delay after closing scanner before opening new sheet

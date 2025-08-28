@@ -320,7 +320,7 @@ const styles = StyleSheet.create({
 	},
 	title: {
 		fontSize: 20,
-		fontWeight: '600',
+		fontWeight: '700',
 		textAlign: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',

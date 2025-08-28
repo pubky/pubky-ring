@@ -248,7 +248,7 @@ export const savePubky = async ({
 	pubky,
 	dispatch,
 	mnemonic = '',
-	backupPreference = EBackupPreference.encryptedFile,
+	backupPreference = EBackupPreference.unknown,
 	isBackedUp = false,
 }: {
 	secretKey: string,
@@ -530,12 +530,15 @@ export const performAuth = async ({
 	authUrl,
 	dispatch,
 }: {
-	pubky: string;
+	pubky?: string;
 	authUrl: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
 	try {
 		const authPromise = (async (): Promise<Result<string>> => {
+			if (!pubky) {
+				return err('Pubky is required for auth');
+			}
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
 				return err('Failed to get secret key');

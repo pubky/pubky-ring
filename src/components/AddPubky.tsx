@@ -19,10 +19,11 @@ import {
 	RadialGradient,
 	NavButton,
 	ArrowLeft,
+	AuthorizeButton,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import ModalIndicator from './ModalIndicator.tsx';
 import MnemonicForm from './MnemonicForm.tsx';
@@ -31,6 +32,8 @@ import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { Result } from '@synonymdev/result';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
+import { showImportQRScanner } from '../utils/helpers.ts';
+import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 
 const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
 const { height } = Dimensions.get('window');
@@ -50,6 +53,7 @@ const AddPubky = ({ payload }: {
 	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
+	const dispatch = useDispatch();
 	const { createPubky, importPubky } = useMemo(() => payload, [payload]);
 	const [currentScreen, setCurrentScreen] = useState<'main' | 'import-options' | 'mnemonic-form'>('main');
 
@@ -66,7 +70,7 @@ const AddPubky = ({ payload }: {
 			await closeSheet();
 			setTimeout(() => {
 				importPubky();
-			}, 100);
+			}, SCANNER_CLOSE_DELAY);
 		} catch {}
 	}, [importPubky, closeSheet]);
 
@@ -94,6 +98,16 @@ const AddPubky = ({ payload }: {
 			setCurrentScreen('import-options');
 		}
 	}, [currentScreen]);
+
+	const onScanQrPress = useCallback(async () => {
+		await closeSheet();
+		setTimeout(async () => {
+			await showImportQRScanner({
+				dispatch,
+				onComplete: () => {}
+			});
+		}, SCANNER_CLOSE_DELAY);
+	}, [closeSheet, dispatch]);
 
 	const renderBackButton = useCallback(() => (
 		<NavButton
@@ -138,11 +152,14 @@ const AddPubky = ({ payload }: {
 	}, [currentScreen]);
 
 	const getHeaderText = useCallback(() => {
-		const txt = 'Restore or\nimport pubky.';
 		switch (currentScreen) {
+			case 'main':
+				return (
+					<Text style={styles.headerText}>{'Your keys,\nyou identity.'}</Text>
+				);
 			case 'import-options':
 				return (
-					<Text style={styles.headerText}>{txt}</Text>
+					<Text style={styles.headerText}>{'Restore or\nimport pubky.'}</Text>
 				);
 			default:
 				return <></>;
@@ -221,9 +238,16 @@ const AddPubky = ({ payload }: {
 						/>
 					))}
 				</View>
+				{currentScreen === 'import-options' &&
+				<AuthorizeButton
+          	style={styles.authorizeButton}
+          	onPressIn={onScanQrPress}
+				>
+					<Text style={styles.buttonText}>Scan QR to import</Text>
+				</AuthorizeButton>}
 			</>
 		);
-	}, [currentScreen, getButtonConfig, getHeaderText, getImage, importPubky, messageText, onMnemonicBack, onMnemonicCancel, renderBackButton, shouldShowBackButton, titleText]);
+	}, [currentScreen, getButtonConfig, getHeaderText, getImage, importPubky, messageText, onMnemonicBack, onMnemonicCancel, onScanQrPress, renderBackButton, shouldShowBackButton, titleText]);
 
 	return (
 		<View style={styles.container}>
@@ -275,12 +299,16 @@ const styles = StyleSheet.create({
 	headerText: {
 		fontSize: 48,
 		lineHeight: 48,
+		fontWeight: '700',
 		marginBottom: 20,
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		fontSize: 17,
+		fontWeight: '700',
+		lineHeight: 22,
+		letterSpacing: 0.4,
 		textAlign: 'center',
+		textTransform: 'capitalize',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
@@ -299,10 +327,12 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingVertical: 12,
 		backgroundColor: 'transparent',
+		marginBottom: 10,
 	},
 	button: {
 		width: '47%',
 		minHeight: 64,
+		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
 	importButton: {
 	},
@@ -329,6 +359,19 @@ const styles = StyleSheet.create({
 		left: 20,
 		zIndex: 10,
 		backgroundColor: 'transparent',
+	},
+	authorizeButton: {
+		width: '100%',
+		borderRadius: 64,
+		paddingVertical: 20,
+		alignItems: 'center',
+		display: 'flex',
+		flexDirection: 'row',
+		gap: 4,
+		alignSelf: 'center',
+		alignContent: 'center',
+		justifyContent: 'center',
+		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
 });
 

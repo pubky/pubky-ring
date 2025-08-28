@@ -17,8 +17,19 @@ import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
-import { PUBKY_APP_URL } from './constants.ts';
+import {
+	PUBKY_APP_URL,
+	SHEET_ANIMATION_DELAY,
+	SHEET_TRANSITION_DELAY,
+	AUTH_SHEET_DELAY,
+	ANDROID_DEEPLINK_DELAY
+} from './constants.ts';
 import { SheetManager } from 'react-native-actions-sheet';
+import { EBackupPreference } from '../types/pubky.ts';
+import {
+	mnemonicPhraseToKeypair,
+	getPublicKeyFromSecretKey
+} from '@synonymdev/react-native-pubky';
 
 /**
  * Formats a signup/invite token to the XXXX-XXXX-XXXX pattern
@@ -57,18 +68,134 @@ export const isValidSignupTokenFormat = (token: string): boolean => {
 	return /^[A-Z0-9]{4}-[A-Z0-9]{4}-[A-Z0-9]{4}$/i.test(token);
 };
 
+/**
+ * Determines if the provided data is a valid secret key or mnemonic phrase.
+ * @param {string} data
+ * @returns {Promise<Result<{ isSecretKey: boolean; backupPreference?: EBackupPreference }>>}
+ */
+export const isSecretKeyImport = async (data: string): Promise<Result<{
+  isSecretKey: boolean;
+  backupPreference?: EBackupPreference;
+}>> => {
+	data = formatImportData(data);
+	let isSecretKey = false;
+	let backupPreference = EBackupPreference.unknown;
+	// Check if it's a valid mnemonic phrase
+	const isMnemonicRes = await mnemonicPhraseToKeypair(data);
+	if (isMnemonicRes.isOk()) {
+		isSecretKey = true;
+		backupPreference = EBackupPreference.recoveryPhrase;
+	}
+	if (!isSecretKey) {
+		// Check if it's a valid secret key
+		const isEncryptedFileRes = await getPublicKeyFromSecretKey(data);
+		if (isEncryptedFileRes.isOk()) {
+			isSecretKey = true;
+			backupPreference = EBackupPreference.encryptedFile;
+		}
+	}
+	if (!isSecretKey) {
+		return err('Not a valid secret key or mnemonic phrase');
+	}
+	return ok({ isSecretKey, backupPreference });
+};
+
 export const handleScannedData = async ({
 	pubky,
 	data,
 	dispatch,
 	deepLink = false,
+	skipImportSheet = false,
 }: {
-	pubky: string,
+	pubky?: string,
 	data: string,
 	dispatch: Dispatch
 	deepLink?: boolean;
+	skipImportSheet?: boolean;
 }): Promise<Result<string>> => {
 	try {
+		const isSecretKeyRes = await isSecretKeyImport(data);
+		if (isSecretKeyRes.isOk() && isSecretKeyRes.value.isSecretKey) {
+			data = formatImportData(data);
+			// Ensure the camera sheet is closed on iOS
+			if (Platform.OS === 'ios') {
+				SheetManager.hide('camera');
+			}
+
+			// If skipImportSheet is true, import directly
+			if (skipImportSheet) {
+				const { importPubky } = await import('./pubky');
+				const { showImportSuccessSheet, showEditPubkySheet } = await import('./sheetHelpers');
+				const { getPubkyKeys } = await import('../store/selectors/pubkySelectors');
+				const { getStore } = await import('./store-helpers');
+
+				// Get current pubkys before import to determine if this is new
+				const currentPubkys = getPubkyKeys(getStore());
+
+				let secretKey = '';
+				let mnemonic = '';
+
+				if (isSecretKeyRes.value.backupPreference === EBackupPreference.recoveryPhrase) {
+					mnemonic = data;
+					// Convert mnemonic to secret key
+					const keypairRes = await mnemonicPhraseToKeypair(data);
+					if (keypairRes.isOk()) {
+						secretKey = keypairRes.value.secret_key;
+					} else {
+						showToast({
+							type: 'error',
+							title: 'Import Failed',
+							description: 'Invalid recovery phrase',
+						});
+						return err('Invalid recovery phrase');
+					}
+				} else {
+					secretKey = data;
+				}
+
+				const importRes = await importPubky({
+					secretKey,
+					dispatch,
+					mnemonic,
+				});
+				if (importRes.isOk()) {
+					const isNewPubky = !currentPubkys.includes(importRes.value);
+					// Show the import success sheet
+					setTimeout(() => {
+						showImportSuccessSheet({
+							pubky: importRes.value,
+							isNewPubky,
+							onContinue: () => {
+								setTimeout(() => {
+									showEditPubkySheet({
+										title: 'Setup',
+										pubky: importRes.value,
+									});
+								}, SHEET_TRANSITION_DELAY);
+							}
+						});
+					}, SHEET_ANIMATION_DELAY);
+					return ok('Pubky imported successfully');
+				} else {
+					showToast({
+						type: 'error',
+						title: 'Import Failed',
+						description: importRes.error.message,
+					});
+					return err(importRes.error.message);
+				}
+			}
+		}
+
+		if (!pubky) {
+			showToast({
+				type: 'error',
+				title: 'No Pubky Selected',
+				description: 'Please select a pubky to proceed',
+			});
+			return err('No pubky provided');
+		}
+		// Check if auth URL
 		const authResult = await parseAuthUrl(data);
 		if (authResult.isOk()) {
 			const autoAuth = getAutoAuthFromStore();
@@ -77,7 +204,7 @@ export const handleScannedData = async ({
 				if (Platform.OS === 'ios') {
 					SheetManager.hide('camera');
 				}
-				return await handleAuth(pubky, data, deepLink);
+				return await handleAuth({ pubky, authUrl: data, deepLink });
 			}
 
 			// Auto-auth flow
@@ -102,7 +229,7 @@ export const handleScannedData = async ({
 			}
 			if (deepLink && res.isOk()) {
 				if (Platform.OS === 'android') {
-					await sleep(250);
+					await sleep(ANDROID_DEEPLINK_DELAY);
 					Linking.openURL(PUBKY_APP_URL);
 				} else {
 					showToast({
@@ -128,7 +255,7 @@ export const handleScannedData = async ({
 			});
 			if (deepLink && signInRes.isOk()) {
 				if (Platform.OS === 'android') {
-					await sleep(250);
+					await sleep(ANDROID_DEEPLINK_DELAY);
 					Linking.openURL(PUBKY_APP_URL);
 				} else {
 					showToast({
@@ -159,7 +286,15 @@ export const handleScannedData = async ({
 	}
 };
 
-export const handleAuth = async (pubky: string, authUrl: string, deepLink?: boolean): Promise<Result<string>> => {
+export const handleAuth = async ({
+	pubky,
+	authUrl,
+	deepLink,
+}: {
+  pubky?: string;
+  authUrl: string;
+  deepLink?: boolean;
+}): Promise<Result<string>> => {
 	try {
 		const authDetails = await parseAuthUrl(authUrl);
 		if (authDetails.isErr()) {
@@ -187,7 +322,7 @@ export const handleAuth = async (pubky: string, authUrl: string, deepLink?: bool
 					SheetManager.hide('confirm-auth');
 				},
 			});
-		}, 50);
+		}, AUTH_SHEET_DELAY);
 		return ok('success');
 	} catch (error) {
 		const description = 'Failed to parse auth details';
@@ -201,12 +336,115 @@ export const handleAuth = async (pubky: string, authUrl: string, deepLink?: bool
 	}
 };
 
+/**
+ * Generic QR scanner function
+ * @param onScan - Callback when QR code is scanned
+ * @param onClipboard - Callback when clipboard button is pressed
+ * @param onComplete - Optional callback when scanning is complete
+ * @returns Promise<string> - Resolves with scanned data or clipboard data
+ */
+export const showQRScannerGeneric = async ({
+	onScan,
+	onClipboard,
+	onComplete,
+}: {
+	onScan: (data: string) => Promise<string>;
+	onClipboard: () => Promise<string>;
+	onComplete?: () => void;
+}): Promise<string> => {
+	return new Promise<string>((resolve) => {
+		SheetManager.show('camera', {
+			payload: {
+				onScan: async (data: string) => {
+					await SheetManager.hide('camera');
+					const result = await onScan(data);
+					onComplete?.();
+					resolve(result);
+				},
+				onCopyClipboard: async (): Promise<void> => {
+					await SheetManager.hide('camera');
+					const result = await onClipboard();
+					resolve(result);
+				},
+				onClose: () => {
+					SheetManager.hide('camera');
+					resolve('');
+				},
+			},
+		});
+	});
+};
+
+export const showImportQRScanner = async ({
+	dispatch,
+	onComplete,
+}: {
+  dispatch: Dispatch;
+  onComplete?: () => void;
+}): Promise<string> => {
+	return showQRScannerGeneric({
+		onScan: async (data: string) => {
+			const result = await handleScannedData({
+				data,
+				dispatch,
+				skipImportSheet: true,
+			});
+			return result.isOk() ? 'success' : result.error.message;
+		},
+		onClipboard: async () => {
+			const clipboardContents = await readFromClipboard();
+			const data = formatImportData(clipboardContents);
+			// Check if clipboard contains valid import data
+			const isSecretKeyRes = await isSecretKeyImport(data);
+			if (isSecretKeyRes.isOk() && isSecretKeyRes.value.isSecretKey) {
+				const result = await handleScannedData({
+					data,
+					dispatch,
+					skipImportSheet: true,
+				});
+				return result.isOk() ? 'success' : result.error.message;
+			} else {
+				showToast({
+					type: 'error',
+					title: 'Invalid Data',
+					description: 'Clipboard does not contain a valid recovery phrase or secret key',
+				});
+				return 'Invalid clipboard data';
+			}
+		},
+		onComplete,
+	});
+};
+
+export const formatImportData = (data: string): string => {
+	if (!data) return '';
+
+	let formatted = data.trim();
+
+	// Decode URL encoding if present
+	if (formatted.includes('://') || formatted.includes('%20')) {
+		try {
+			formatted = decodeURIComponent(formatted);
+		} catch {
+			// Continue with original if decoding fails
+		}
+	}
+
+	// Remove custom protocol prefix
+	formatted = formatted.replace(/^pubkyring:\/\//, '');
+
+	// Normalize word separators to spaces
+	formatted = formatted.replace(/[-_+]+/g, ' ');
+
+	return formatted;
+};
+
 export const showQRScanner = async ({
 	pubky,
 	dispatch,
 	onComplete,
 }: {
-	pubky: string;
+	pubky?: string;
 	dispatch: Dispatch;
 	onComplete?: () => void;
 }): Promise<string> => {
@@ -229,30 +467,29 @@ export const showQRScanner = async ({
 			return Promise.resolve('');
 		}
 	}
-	return new Promise<string>((resolve) => {
-		SheetManager.show('camera', {
-			payload: {
-				onScan: async (data: string) => {
-					await SheetManager.hide('camera');
-					await handleScannedData({
-						pubky,
-						data,
-						dispatch,
-					});
-					onComplete?.();
-					resolve(data);
-				},
-				onCopyClipboard: async (): Promise<void> => {
-					await SheetManager.hide('camera');
-					const res = await handleClipboardData({ pubky, dispatch });
-					resolve(res.isOk() ? res.value : res.error.message);
-				},
-				onClose: () => {
-					SheetManager.hide('camera');
-					resolve('');
-				},
-			},
-		});
+
+	return showQRScannerGeneric({
+		onScan: async (data: string) => {
+			await handleScannedData({
+				pubky,
+				data,
+				dispatch,
+			});
+			return data;
+		},
+		onClipboard: async () => {
+			if (!pubky) {
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: 'No pubky provided for clipboard handling',
+				});
+				return 'No pubky provided';
+			}
+			const res = await handleClipboardData({ pubky, dispatch });
+			return res.isOk() ? res.value : res.error.message;
+		},
+		onComplete,
 	});
 };
 
@@ -278,7 +515,7 @@ export const handleClipboardData = async ({
 	pubky,
 	dispatch,
 }: {
-	pubky: string;
+	pubky?: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
 	const clipboardContents = await readFromClipboard();

@@ -4,13 +4,11 @@ import React, {
 	useMemo,
 	useState,
 } from 'react';
-import { PixelRatio, StyleSheet } from 'react-native';
+import { Image, PixelRatio, StyleSheet } from 'react-native';
 import { PubkyData } from '../../navigation/types.ts';
 import {
 	View,
-	Save,
 	Trash2,
-	Share,
 	QrCode,
 	LinearGradient
 } from '../../theme/components.ts';
@@ -76,17 +74,17 @@ export const PubkyListHeader = memo(({
 	}, [pubkyData.signedUp]);
 
 	const ShareIcon = useMemo(() =>
-			fontScale <= 1 ? <Share size={16} /> : <></>,
+			fontScale <= 1 ? <Image source={require('../../images/share-icon.png')} style={styles.icon} /> : <></>,
 	[fontScale]
 	);
 
 	const BackupIcon = useMemo(() =>
-			fontScale <= 1 ? <Save size={16} /> : <></>,
+			fontScale <= 1 ? <Image source={require('../../images/shield-icon.png')} style={styles.icon} /> : <></>,
 	[fontScale]
 	);
 
 	const DeleteIcon = useMemo(() =>
-			fontScale <= 1 ? <Trash2 size={16} /> : <></>,
+			fontScale <= 1 ? <Trash2 size={24} /> : <></>,
 	[fontScale]
 	);
 
@@ -147,6 +145,10 @@ const styles = StyleSheet.create({
 	profileSection: {
 		width: '100%',
 		borderRadius: 16,
+	},
+	icon: {
+		width: 24,
+		height: 24,
 	},
 });
 

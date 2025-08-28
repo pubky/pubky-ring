@@ -226,8 +226,12 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		fontWeight: '700',
 		lineHeight: 22,
+		letterSpacing: 0.4,
+		textAlign: 'center',
+		textTransform: 'capitalize',
 		marginBottom: 24,
 		alignSelf: 'center',
+		backgroundColor: 'transparent',
 	},
 	messageContainer: {
 		marginBottom: 16,

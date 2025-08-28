@@ -60,6 +60,7 @@ const Content = ({
 				<View style={styles.fullSize}>
 					<PubkyReview
 						modalTitle={title}
+						headerText={'Your pubky.'}
 						description={subTitle}
 						pubky={pubky}
 						pubkyData={pubkyData}

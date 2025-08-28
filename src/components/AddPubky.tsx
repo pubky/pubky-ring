@@ -152,11 +152,14 @@ const AddPubky = ({ payload }: {
 	}, [currentScreen]);
 
 	const getHeaderText = useCallback(() => {
-		const txt = 'Restore or\nimport pubky.';
 		switch (currentScreen) {
+			case 'main':
+				return (
+					<Text style={styles.headerText}>{'Your keys,\nyou identity.'}</Text>
+				);
 			case 'import-options':
 				return (
-					<Text style={styles.headerText}>{txt}</Text>
+					<Text style={styles.headerText}>{'Restore or\nimport pubky.'}</Text>
 				);
 			default:
 				return <></>;
@@ -300,9 +303,12 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		fontSize: 17,
+		fontWeight: '700',
+		lineHeight: 22,
+		letterSpacing: 0.4,
 		textAlign: 'center',
+		textTransform: 'capitalize',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},

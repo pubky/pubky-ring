@@ -18,14 +18,13 @@ import {
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import ModalIndicator from './ModalIndicator.tsx';
 import { AUTHORIZE_KEY_GRADIENT } from '../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { EBackupPreference } from "../types/pubky.ts";
 import { showBackupPrompt } from "../utils/sheetHelpers.ts";
-import { setPubkyData } from "../store/slices/pubkysSlice.ts";
 import { truncateStr } from "../utils/pubky.ts";
 
 const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
@@ -37,7 +36,6 @@ const SelectBackupPreference = ({ payload }: {
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky } = useMemo(() => payload, [payload]);
-	const dispatch = useDispatch();
 
 	const titleText = useMemo(() => {
 		return 'Backup Pubky';
@@ -69,12 +67,6 @@ const SelectBackupPreference = ({ payload }: {
 	}, [truncatedPubky]);
 
 	const selectPreference = useCallback((backupPreference: EBackupPreference): void => {
-		dispatch(setPubkyData({
-			pubky,
-			data: {
-				backupPreference
-			},
-		}));
 		SheetManager.hide('select-backup-preference');
 		setTimeout(() => {
 			showBackupPrompt({
@@ -82,7 +74,7 @@ const SelectBackupPreference = ({ payload }: {
 				backupPreference,
 			}).then();
 		}, 250);
-	}, [dispatch, pubky]);
+	}, [pubky]);
 
 	const getButtonConfig = useCallback(() => {
 		return [
@@ -169,6 +161,7 @@ const styles = StyleSheet.create({
 	headerText: {
 		fontSize: 48,
 		lineHeight: 48,
+		fontWeight: '700',
 		marginBottom: 20,
 	},
 	title: {

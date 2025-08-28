@@ -26,8 +26,8 @@ describe('Onboarding flow', () => {
         //const p = await $('~TermsContinueButton');
         //console.log(p)
 		const termsScreen = await $('~TermsContinueButton');
-		await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60000 });
-		console.log(termsScreen)
+//		await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60000 });
+//		console.log(termsScreen)
         //console.log(elementsList)
         //const r = await elementByText("Continue").click();
 		const termsRow = await $('~TermsAgreeRow');

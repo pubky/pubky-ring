@@ -84,6 +84,7 @@ jobs:
         script: |
           adb reverse tcp:8081 tcp:8081
           npx react-native run-android --binary-path='artefacts/app-debug.apk'
+          sleep 15
           yarn e2e:android
 
 

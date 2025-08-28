@@ -45,8 +45,8 @@ jobs:
         distribution: 'zulu'
         java-version: '17'
 
-#    - name: Set up Android SDK
-#      uses: android-actions/setup-android@v3.2.2
+    - name: Set up Android SDK
+      uses: android-actions/setup-android@v3.2.2
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
@@ -54,15 +54,15 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-    - name: Start Metro Bundler in background
-      run: |
-        npx react-native start --port 8081 &
-        echo "Metro started on port 8081"
-
-    - name: Wait for Metro to be ready
-      run: |
-        timeout 60 bash -c 'until curl -f -s -o /dev/null http://localhost:8081; do echo "Waiting for Metro..."; sleep 2; done'
-        echo "Metro is ready!"
+#    - name: Start Metro Bundler in background
+#      run: |
+#        npx react-native start --port 8081 &
+#        echo "Metro started on port 8081"
+#
+#    - name: Wait for Metro to be ready
+#      run: |
+#        timeout 60 bash -c 'until curl -f -s -o /dev/null http://localhost:8081; do echo "Waiting for Metro..."; sleep 2; done'
+#        echo "Metro is ready!"
 
     - name: Show versions
       run: |

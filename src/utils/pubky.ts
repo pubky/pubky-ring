@@ -248,7 +248,7 @@ export const savePubky = async ({
 	pubky,
 	dispatch,
 	mnemonic = '',
-	backupPreference = EBackupPreference.encryptedFile,
+	backupPreference = EBackupPreference.unknown,
 	isBackedUp = false,
 }: {
 	secretKey: string,

@@ -51,8 +51,8 @@ jobs:
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
-        #commit-sha: 51cf2fe8381b5f2ed99ddc848706adb88bf780c2
+        #commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: ebf94f743b47a4809cf2bca1aeb30db0173107d5
         #commit-sha: f8fcc7d720f25acd8687bca5d548c400b1020ec6
         max-attempts: '360'  # 1 hour with 10s intervals
 
@@ -78,12 +78,12 @@ jobs:
         #emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         heap-size: 512M
-        ndk: 28.2.13676358
+        ndk: 27.1.12297006
         #emulator-build: 12325540
         #pre-emulator-launch-script: adb wait-for-device
         script: |
           adb reverse tcp:8081 tcp:8081
-          npx react-native run-android --binary-path='artifacts/app-debug.apk'
+          npx react-native run-android --binary-path='artefacts/app-debug.apk'
           yarn e2e:android
 
 

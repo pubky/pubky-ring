@@ -90,7 +90,7 @@ const BackupPrompt = ({ payload }: {
 	const title = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return 'Backup Pubky';
+				return 'Encrypted File';
 			case EBackupPromptViewId.import:
 				return 'Import Pubky';
 			default:
@@ -125,7 +125,7 @@ const BackupPrompt = ({ payload }: {
 			case EBackupPromptViewId.backup:
 				return (
 					<Text style={styles.message}>
-						Passphrase for <Text style={styles.boldText}>pk:{truncatedPubky}</Text>
+						<Text style={[styles.message, styles.passphraseText]}>Passphrase for</Text> <Text style={styles.boldText}>pk:{truncatedPubky}</Text>
 					</Text>
 				);
 			case EBackupPromptViewId.import:
@@ -239,8 +239,13 @@ const styles = StyleSheet.create({
 	},
 	message: {
 		fontSize: 17,
+		fontWeight: '400',
 		lineHeight: 22,
+		letterSpacing: 0.4,
 		alignItems: 'center',
+	},
+	passphraseText: {
+		color: 'rgba(255, 255, 255, 0.5)',
 	},
 	inputContainer: {
 		flexDirection: 'row',

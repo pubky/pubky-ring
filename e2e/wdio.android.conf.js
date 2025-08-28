@@ -24,8 +24,6 @@ exports.config = {
 			'appium:log_level': 'debug',
 			'appium:printPageSourceOnFindFailure': true,
 			'appium:appWaitForLaunch': true,
-			'appium:appWaitForLaunch': true,
-			'appium:appWaitForLaunch': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

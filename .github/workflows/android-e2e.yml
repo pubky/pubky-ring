@@ -39,7 +39,8 @@ jobs:
         sudo udevadm trigger --name-match=kvm
       shell: bash
 
-    - name: Set up Java uses: actions/setup-java@v4
+    - name: Set up Java
+      uses: actions/setup-java@v4
       with:
         distribution: 'zulu'
         java-version: '17'
@@ -140,7 +141,6 @@ jobs:
         retention-days: 7
 
     - name: Upload Dmesg
-
       uses: actions/upload-artifact@v4
       if: always()
       with:

@@ -26,7 +26,7 @@ describe('Onboarding flow', () => {
         //const p = await $('~TermsContinueButton');
         //console.log(p)
 		const termsScreen = await $('~TermsContinueButton');
-//		await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60000 });
+		//await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60000 });
 //		console.log(termsScreen)
         //console.log(elementsList)
         //const r = await elementByText("Continue").click();
@@ -39,6 +39,6 @@ describe('Onboarding flow', () => {
 		const continueBtn = await $('~TermsContinueButton');
 		await continueBtn.click();
 
-		const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
+		//const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
     });
 });

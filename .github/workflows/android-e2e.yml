@@ -28,6 +28,8 @@ jobs:
 
     - name: Set up Node.js
       uses: actions/setup-node@v4
+      env:
+        NODE_OPTIONS: "--max-old-space-size=8192"
       with:
         node-version: '20.19.0'
         cache: 'yarn'

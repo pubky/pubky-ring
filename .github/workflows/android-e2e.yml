@@ -33,7 +33,7 @@ jobs:
         NODE_OPTIONS: "--max-old-space-size=8192"
       with:
         cache: 'yarn'
-        node_version: '24.0.0'
+        node-version: '24.0.0'
 
     - name: Set up JDK 17
       uses: actions/setup-java@v3

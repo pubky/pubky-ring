@@ -1,4 +1,5 @@
 const { expect } = require('chai');
+const { elementById, waitForDisplayed } = require('../helpers/actions');
 
 /**
  * Basic onboarding flow:
@@ -12,20 +13,27 @@ const { expect } = require('chai');
 describe('Onboarding flow', () => {
 
 	it('should accept terms and navigate to Home', async () => {
-		// Terms screen
-		const termsScreen = await $('~TermsContinueButton');
-		await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60_000 });
+		const termsScreen = await elementById('TermsOfUseTitle');
+		await waitForDisplayed(termsScreen, 60_000);
 
-		const termsRow = await $('~TermsAgreeRow');
+		const header = await elementById('TermsOfUseTitle');
+		expect(await header.isDisplayed()).to.be.true;
+		expect(await header.getText()).to.equal('Terms of Use.');
+
+		const termsRow = await elementById('TermsAgreeRow');
 		await termsRow.click();
 
-		const privacyRow = await $('~PrivacyAgreeRow');
+		const privacyRow = await elementById('PrivacyAgreeRow');
 		await privacyRow.click();
 
-		const continueBtn = await $('~TermsContinueButton');
+		const continueBtn = await elementById('TermsContinueButton');
 		await continueBtn.click();
 
-		const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
-		expect(await onboardingGetStartedButton.isDisplayed()).to.equal(true);
+		const onboardingGetStartedButton = await elementById('OnboardingGetStartedButton');
+		await onboardingGetStartedButton.click();
+
+		const addPubkyButton = await elementById('EmptyStateAddPubkyButton');
+		await waitForDisplayed(addPubkyButton);
+		expect(await addPubkyButton.isDisplayed()).to.be.true;
 	});
 });

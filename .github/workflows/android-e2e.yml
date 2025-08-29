@@ -2,8 +2,8 @@ name: Android E2E Tests
 description: 'Disabled for now due to instability - UiAutomator2 crash'
 
 on:
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       commit-sha:

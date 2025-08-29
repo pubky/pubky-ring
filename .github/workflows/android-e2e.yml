@@ -86,7 +86,7 @@ jobs:
         arch: x86_64
         heap-size: 512M
         ndk: 27.1.12297006
-        ram-size: 512M
+        ram-size: 5048M
         cores: 1
         #emulator-build: 12325540
         #pre-emulator-launch-script: adb wait-for-device

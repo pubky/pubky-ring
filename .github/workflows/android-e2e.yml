@@ -31,7 +31,6 @@ jobs:
       env:
         NODE_OPTIONS: "--max-old-space-size=8192"
       with:
-        node-version: '24.6.0'
         cache: 'yarn'
 
     - name: Set up JDK 17

@@ -25,27 +25,23 @@ describe('Onboarding flow', () => {
 //
 //    afterEach(async function () {
 //        await driver.deleteSession();
+//		await sleep(50000)
 //    },10)
+
     it('should accept terms and navigate to Home', async () => {
-        const t = await elementByText("I declare that I have read and accept the terms of use.").click();
-        const p = await elementByText("I declare that I have read and accept the privacy policy.").click();
-        //const t = await elementByText("I declare that I have read and accept the terms of use.");
-        //const p = await $('~TermsContinueButton');
-        //console.log(p)
-//		const termsScreen = await $('~TermsContinueButton');
-		//await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60000 });
-//		console.log(termsScreen)
-        //console.log(elementsList)
-        //const r = await elementByText("Continue").click();
-//		const termsRow = await $('~TermsAgreeRow');
-//		await termsRow.click();
+        const t = await elementByText("I declare that I have read and accept the terms of use.");
+        const p = await $('~TermsContinueButton');
+		const termsScreen = await $('~TermsContinueButton');
+		await termsScreen.waitForDisplayed({ interval: 5000, timeout: 60000 });
+		const termsRow = await $('~TermsAgreeRow');
+		await termsRow.click();
 
-//		const privacyRow = await $('~PrivacyAgreeRow');
-//		await privacyRow.click();
-//
-//		const continueBtn = await $('~TermsContinueButton');
-//		await continueBtn.click();
+		const privacyRow = await $('~PrivacyAgreeRow');
+		await privacyRow.click();
 
-		//const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
+		const continueBtn = await $('~TermsContinueButton');
+		await continueBtn.click();
+
+        const onboardingGetStartedButton = await $('~OnboardingGetStartedButton');
     });
 });

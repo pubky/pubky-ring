@@ -19,7 +19,9 @@ import {
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
-import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants.ts';
+import {
+	BLUE_RADIAL_GRADIENT,
+} from '../../utils/constants.ts';
 import { showEditPubkySheet } from "../../utils/sheetHelpers.ts";
 import { defaultPubkyState } from "../../store/shapes/pubky.ts";
 
@@ -77,7 +79,7 @@ const NewHomeserverSetup = ({ payload }: {
 	return (
 		<RadialGradient
 			style={styles.content}
-			colors={AUTHORIZE_KEY_GRADIENT}
+			colors={BLUE_RADIAL_GRADIENT}
 			center={{ x: 0.5, y: 0.5 }}
 		>
 			<ModalIndicator />

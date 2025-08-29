@@ -7,7 +7,7 @@ import {
 	Image,
 } from 'react-native';
 import { RadialGradient } from '../theme/components.ts';
-import { ONBOARDING_KEY_RADIAL_GRADIENT } from '../utils/constants.ts';
+import { BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { useDispatch } from 'react-redux';
 import { buttonStyles } from '../theme/utils';
@@ -26,7 +26,7 @@ const OnboardingContent = (): ReactElement => {
 		<View style={styles.container}>
 			<RadialGradient
 				style={styles.onboardingGradient}
-				colors={ONBOARDING_KEY_RADIAL_GRADIENT}
+				colors={BLUE_RADIAL_GRADIENT}
 				center={{ x: 1, y: 0.5 }}
 			>
 				{/* Background image */}

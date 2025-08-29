@@ -26,6 +26,7 @@ const EmptyState = (): ReactElement => {
 					</View>
 				</View>
 				<Button
+					testID="EmptyStateAddPubkyButton"
 					style={[buttonStyles.primary, styles.buttonSecondary]}
 					onPressIn={onPress}
 				>

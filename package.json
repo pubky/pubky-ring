@@ -80,6 +80,7 @@
     "@wdio/appium-service": "^9.19.1",
     "webdriverio": "^9.19.1",
     "appium": "^2.19.0",
+    "appium-uiautomator2-driver": "^2.2.0",
     "chai": "5.1.2"
   },
   "engines": {

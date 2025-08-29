@@ -7,6 +7,7 @@ import {
 } from '../theme/components.ts';
 
 const Button = ({
+	testID,
 	text,
 	loading = false,
 	onPress = (): null => null,
@@ -18,6 +19,7 @@ const Button = ({
 	activeOpacity = 0.7,
 	disabled = false,
 }: {
+	  testID?: string;
     text: string;
     loading?: boolean;
     onPress?: () => void;
@@ -32,6 +34,7 @@ const Button = ({
 	const disabledStyle = useMemo(() => (disabled || loading ? styles.disabled : null), [disabled, loading]);
 	return (
 		<ActionButton
+			testID={testID}
 			style={[styles.actionButton, disabledStyle, style]}
 			onPress={onPress}
 			onPressIn={onPressIn}

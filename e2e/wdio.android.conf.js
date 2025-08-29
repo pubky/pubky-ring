@@ -26,6 +26,9 @@ exports.config = {
 			'appium:printPageSourceOnFindFailure': true,
 			'appium:appWaitForLaunch': true,
 			'appium:remoteAppsCacheLimit': 0,
+			'appium:ignoreHiddenApiPolicyError': true,
+			'appium:suppressKillServer': true,
+			'appium:newCommandTimeout': 0,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

@@ -87,7 +87,6 @@ jobs:
           adb reverse tcp:8081 tcp:8081
           npx react-native start &
           npx react-native run-android --binary-path='artefacts/app-debug.apk' --device=emulator-5554 --active-arch-only
-          sleep 60
           yarn e2e:android
 
 

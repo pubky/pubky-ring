@@ -19,6 +19,13 @@ export function elementByID(id) {
 export const sleep = (ms) => browser.pause(ms);
 
 describe('Onboarding flow', () => {
+//    beforeEach(async function () {
+//        driver = await getAppiumClient();
+//    },10);
+//
+//    afterEach(async function () {
+//        await driver.deleteSession();
+//    },10)
     it('should accept terms and navigate to Home', async () => {
         const t = await elementByText("I declare that I have read and accept the terms of use.").click();
         const p = await elementByText("I declare that I have read and accept the privacy policy.").click();

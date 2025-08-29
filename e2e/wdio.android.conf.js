@@ -22,8 +22,10 @@ exports.config = {
 //			'appium:sessionOverride': true,
 			'appium:relaxedSecurity': true,
 			'appium:log_level': 'debug',
+			'appium:fullReset': true,
 			'appium:printPageSourceOnFindFailure': true,
 			'appium:appWaitForLaunch': true,
+			'appium:remoteAppsCacheLimit': 0,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

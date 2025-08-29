@@ -82,7 +82,7 @@ jobs:
         api-level: Baklava
         avd-name: Pixel_6
         target: google_apis
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -logcat *:e
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -logcat '*:*'
         arch: x86_64
         heap-size: 512M
         ndk: 27.1.12297006

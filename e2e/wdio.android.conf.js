@@ -16,7 +16,7 @@ exports.config = {
 			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
 			'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
 			'appium:avd': avdName,
-			'appium:autoGrantPermissions': true,
+			'appium:autoGrantPermissions': false,
 			'appium:allowTestPackages': false,
 //			'appium:shouldTerminateApp': true,
 //			'appium:sessionOverride': true,

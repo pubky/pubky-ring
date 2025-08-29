@@ -17,7 +17,7 @@ env:
 
 jobs:
   android-e2e:
-    runs-on: ubuntu-latest # [self-hosted, linux]
+    runs-on: ubuntu-22.04 # [self-hosted, linux]
     concurrency:
       group: android-e2e-${{ github.head_ref }}
       cancel-in-progress: true

@@ -57,6 +57,7 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 
 	return (
 		<Button
+			testID="AddPubkyButton"
 			style={styles.listFooter}
 			text={'Add pubky'}
 			onPress={onPress}

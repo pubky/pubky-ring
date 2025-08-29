@@ -34,6 +34,12 @@ jobs:
         node-version: '24.6.0'
         cache: 'yarn'
 
+    - name: Set up JDK 17
+      uses: actions/setup-java@v3
+      with:
+        java-version: '17'
+        distribution: 'temurin'
+
     - name: Enable KVM
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -81,6 +87,7 @@ jobs:
         arch: x86_64
         heap-size: 512M
         ndk: 27.1.12297006
+        ram-size: 2048M
         #emulator-build: 12325540
         #pre-emulator-launch-script: adb wait-for-device
         script: |

@@ -55,7 +55,7 @@ jobs:
       run: yarn e2e:drivers
 
     - name: Setup Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v3.2.2
 
     - name: Wait for Android Build
       id: wait-android-build

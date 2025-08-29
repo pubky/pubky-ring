@@ -132,3 +132,12 @@ export const getPubkyName = (state: RootState, pubky: string): string => {
 export const getPubkyHomeserver = (state: RootState, pubky: string): string => {
 	return state.pubky.pubkys[pubky]?.homeserver || '';
 };
+
+/**
+ * Get the index of a pubky in the getPubkyKeys array
+ * Returns -1 if the pubky is not found
+ */
+export const getPubkyIndex = (state: RootState, pubky: string): number => {
+	const keys = getPubkyKeys(state);
+	return keys.indexOf(pubky);
+};

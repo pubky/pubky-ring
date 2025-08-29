@@ -6,7 +6,9 @@ import { getNavigationAnimation } from '../../store/selectors/settingsSelectors'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../../theme/toastConfig';
 import ModalIndicator from '../ModalIndicator';
-import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants';
+import {
+	BLUE_RADIAL_GRADIENT,
+} from '../../utils/constants';
 
 interface ModalWrapperProps {
 	id: string;
@@ -48,7 +50,7 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
 	const GradientContent = gradientType === 'radial' ? (
 		<RadialGradient
 			style={[styles.content, contentStyle]}
-			colors={AUTHORIZE_KEY_GRADIENT}
+			colors={BLUE_RADIAL_GRADIENT}
 			center={{ x: 0.5, y: 0.5 }}
 		>
 			{showIndicator && <ModalIndicator />}

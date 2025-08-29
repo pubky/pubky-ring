@@ -31,7 +31,7 @@ import {
 import {
 	DEFAULT_HOMESERVER,
 	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
-	ONBOARDING_KEY_RADIAL_GRADIENT,
+	BLUE_RADIAL_GRADIENT,
 	STAGING_HOMESERVER,
 } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
@@ -403,7 +403,7 @@ const EditPubky = ({ payload }: {
 	}, []);
 
 	const checkMarkGradient = useMemo(() => {
-		return error ? ONBOARDING_KEY_ERROR_RADIAL_GRADIENT : ONBOARDING_KEY_RADIAL_GRADIENT;
+		return error ? ONBOARDING_KEY_ERROR_RADIAL_GRADIENT : BLUE_RADIAL_GRADIENT;
 	}, [error]);
 
 	const checkMarkImage = useMemo(() => {

@@ -12,7 +12,7 @@ import { PubkyState } from '../types/pubky';
 import { NavView } from '../theme/components';
 import { RadialGradient } from '../theme/components.ts';
 import {
-	ONBOARDING_KEY_RADIAL_GRADIENT,
+	BLUE_RADIAL_GRADIENT,
 	ONBOARDING_PUBKY_RADIAL_GRADIENT,
 } from '../utils/constants.ts';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
@@ -33,7 +33,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 		<View style={styles.container}>
 			<RadialGradient
 				style={styles.onBoardingRadialGradient}
-				colors={ONBOARDING_KEY_RADIAL_GRADIENT}
+				colors={BLUE_RADIAL_GRADIENT}
 				center={{ x: 1, y: 0.5 }}
 			>
 				{/* Background image */}

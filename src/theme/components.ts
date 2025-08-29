@@ -262,7 +262,7 @@ interface LinearGradientProps {
 }
 
 export const LinearGradient = styled(_LinearGradient).attrs<LinearGradientProps>((props) => ({
-	colors: props.colors || (props.modal ? props.theme.colors.modalGradient : props.theme.colors.gradient),
+	colors: props.colors || (props.modal ? props.theme.colors.defaultGradient : props.theme.colors.defaultGradient),
 }))``;
 
 interface SkiaGradientProps {

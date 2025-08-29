@@ -21,7 +21,9 @@ import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import ModalIndicator from './ModalIndicator.tsx';
-import { AUTHORIZE_KEY_GRADIENT } from '../utils/constants.ts';
+import {
+	BLUE_RADIAL_GRADIENT,
+} from '../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { EBackupPreference } from "../types/pubky.ts";
 import { showBackupPrompt } from "../utils/sheetHelpers.ts";
@@ -124,7 +126,7 @@ const SelectBackupPreference = ({ payload }: {
 			>
 				<RadialGradient
 					style={styles.content}
-					colors={AUTHORIZE_KEY_GRADIENT}
+					colors={BLUE_RADIAL_GRADIENT}
 					center={{ x: 0.5, y: 0.5 }}
 				>
 					{getContent()}

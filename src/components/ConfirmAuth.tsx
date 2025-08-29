@@ -23,7 +23,10 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
-import { AUTHORIZE_KEY_GRADIENT, PUBKY_APP_URL } from '../utils/constants.ts';
+import {
+	BLUE_RADIAL_GRADIENT,
+	PUBKY_APP_URL,
+} from '../utils/constants.ts';
 import { buttonStyles } from '../theme/utils';
 
 interface ConfirmAuthProps {
@@ -188,7 +191,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			return (
 				<RadialGradient
 					style={styles.content}
-					colors={AUTHORIZE_KEY_GRADIENT}
+					colors={BLUE_RADIAL_GRADIENT}
 					center={{ x: 0.5, y: 0.5 }}
 				>
 					{children}

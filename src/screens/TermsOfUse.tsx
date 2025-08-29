@@ -8,7 +8,7 @@ import {
 } from '../theme/components.ts';
 import LinearGradient from 'react-native-linear-gradient';
 import PubkyRingHeader from '../components/PubkyRingHeader.tsx';
-import { ONBOARDING_KEY_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
+import { BLUE_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
 import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
@@ -44,7 +44,7 @@ const TermsOfUse = (): React.ReactElement => {
 		<View style={styles.container}>
 			<RadialGradient
 				style={styles.onboardingGradient}
-				colors={ONBOARDING_KEY_RADIAL_GRADIENT}
+				colors={BLUE_RADIAL_GRADIENT}
 				center={{ x: 1, y: 0.5 }}
 			>
 				<PubkyRingHeader />

@@ -25,7 +25,7 @@ import RequestInviteCode from "./RequestInviteCode.tsx";
 import Welcome from "./Welcome.tsx";
 import PubkyReview from "./PubkyReview.tsx";
 import { defaultPubkyState } from "../../store/shapes/pubky.ts";
-const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
+import { ACTION_SHEET_HEIGHT } from '../../utils/constants.ts';
 
 export enum ECurrentScreen {
 	main = 'main',

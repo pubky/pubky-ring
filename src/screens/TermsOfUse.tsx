@@ -59,7 +59,7 @@ const TermsOfUse = (): React.ReactElement => {
 						showsVerticalScrollIndicator={false}
 					>
 						<View style={styles.textContainer}>
-							<Text style={styles.title}>Terms of Use.</Text>
+							<Text style={styles.title} testID="TermsOfUseTitle">Terms of Use.</Text>
 							<View style={styles.subtitleContainer}>
 								<Text style={[styles.subtitle, styles.subtitleHeading]}>PUBKY RING TERMS OF SERVICE</Text>
 
@@ -256,12 +256,12 @@ const TermsOfUse = (): React.ReactElement => {
 								onPress={() => setChecked(!checked)}
 								activeOpacity={0.7}
 								style={styles.checkboxRow}
-								accessibilityLabel="TermsAgreeRow">
+								testID="TermsAgreeRow">
 								<Text style={styles.footerText}>
 									I declare that I have read and accept the terms of use.
 								</Text>
 								<TouchableOpacity
-									accessibilityLabel="TermsAgreeCheckbox"
+									testID="TermsAgreeCheckbox"
 									style={[styles.checkbox, checked && styles.checkboxChecked]}
 									onPress={() => setChecked(!checked)}
 									activeOpacity={0.7}
@@ -279,7 +279,7 @@ const TermsOfUse = (): React.ReactElement => {
 								onPress={() => setPrivacyChecked(!privacyChecked)}
 								activeOpacity={0.7}
 								style={styles.checkboxRow}
-								accessibilityLabel="PrivacyAgreeRow">
+								testID="PrivacyAgreeRow">
 								<Text style={styles.footerText}>
 									I declare that I have read and accept the{' '}
 									<Text
@@ -287,7 +287,7 @@ const TermsOfUse = (): React.ReactElement => {
 										style={styles.linkText}>privacy policy</Text>.
 								</Text>
 								<TouchableOpacity
-									accessibilityLabel="PrivacyAgreeCheckbox"
+									testID="PrivacyAgreeCheckbox"
 									style={[styles.checkbox, privacyChecked && styles.checkboxChecked]}
 									onPress={() => setPrivacyChecked(!privacyChecked)}
 									activeOpacity={0.7}
@@ -301,7 +301,7 @@ const TermsOfUse = (): React.ReactElement => {
 							onPress={onContinue}
 							disabled={!canContinue}
 							style={[styles.continueButton, canContinue ? null : styles.continueButtonInactive ]}
-							accessibilityLabel="TermsContinueButton"
+							testID="TermsContinueButton"
 						>
 							<Text style={styles.buttonText}>Continue</Text>
 						</TouchableOpacity>

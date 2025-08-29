@@ -16,6 +16,8 @@ exports.config = {
 			//'appium:wdaLocalPort': 8100,
 			'appium:preventWDAAttachments': true,
 			'appium:noReset': false,
+			'appium:sessionOverride': true,
+			'appium:relaxedSecurity': true,
 			'appium:fullReset': false,
 			'appium:shouldTerminateApp': true,
 			'appium:autoAcceptAlerts': true,

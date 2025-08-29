@@ -13,12 +13,12 @@ const { elementById, waitForDisplayed } = require('../helpers/actions');
 describe('Onboarding flow', () => {
 
 	it('should accept terms and navigate to Home', async () => {
+		await driver.pause(5_000);
+
 		const termsScreen = await elementById('TermsOfUseTitle');
 		await waitForDisplayed(termsScreen, 60_000);
-
-		const header = await elementById('TermsOfUseTitle');
-		expect(await header.isDisplayed()).to.be.true;
-		expect(await header.getText()).to.equal('Terms of Use.');
+		expect(await termsScreen.isDisplayed()).to.be.true;
+		expect(await termsScreen.getText()).to.equal('Terms of Use.');
 
 		const termsRow = await elementById('TermsAgreeRow');
 		await termsRow.click();

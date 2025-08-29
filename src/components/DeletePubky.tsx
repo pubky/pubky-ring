@@ -9,7 +9,7 @@ import PubkyCard from './PubkyCard.tsx';
 import { getPubky, getPubkyIndex } from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { truncatePubky } from '../utils/pubky.ts';
+import { truncatePubky, truncateStr } from '../utils/pubky.ts';
 import {
 	View,
 	Text,
@@ -38,7 +38,7 @@ const DeletePubky = ({ payload }: {
 	const pubkyIndex = useSelector((state: RootState) => getPubkyIndex(state, publicKey));
 	const navigationAnimation = useSelector(getNavigationAnimation);
 
-	const name = useMemo(() => pubkyData?.name || `pubky #${pubkyIndex + 1}`, [pubkyData, pubkyIndex]);
+	const name = useMemo(() => truncateStr(pubkyData?.name, 8) || `pubky #${pubkyIndex + 1}`, [pubkyData, pubkyIndex]);
 
 	const closeSheet = useCallback((): void => {
 		SheetManager.hide('delete-pubky').then();

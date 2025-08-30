@@ -8,6 +8,7 @@ exports.config = {
 	logLevel: 'debug',
 	bail: 0,
 	baseUrl: 'http://localhost',
+	headless: true,
 	waitforTimeout: 30_000,
 	connectionRetryTimeout: 300_000,
 	connectionRetryCount: 2,

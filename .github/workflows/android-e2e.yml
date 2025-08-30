@@ -92,7 +92,7 @@ jobs:
         api-level: 32
         avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         emulator-port: 5560
         disable-animations: true

@@ -11,7 +11,7 @@
     "optimize-images": "node scripts/optimize-images.js",
     "e2e:android": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.shared.conf.js",
     "e2e:ios": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.ios.conf.js",
-    "e2e:drivers": "npm ci; npm i --save-dev appium@2.18.0; npx appium driver uninstall uiautomator2 || echo ok; npx appium driver install uiautomator2@v4.2.9"
+    "e2e:drivers": "npm ci; npm i appium@2.18.0"
   },
   "dependencies": {
     "@dr.pogodin/react-native-fs": "2.34.0",

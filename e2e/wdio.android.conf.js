@@ -27,6 +27,9 @@ exports.config = {
 			'appium:androidInstallTimeout': 300_000,
 			'appium:ignoreHiddenApiPolicyError': true,
 			'appium:appWaitForLaunch': false,
+            'appium:showChromedriverLog': true,
+            'appium:logcatFormat': 'raw',
+            'appium:logcatFilterSpecs': ['*:*'],
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

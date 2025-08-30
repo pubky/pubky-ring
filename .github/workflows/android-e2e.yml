@@ -42,10 +42,10 @@ jobs:
         distribution: 'adopt'
         java-version: '17'
 
-    - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
-      with:
-        cmdline-tools-version: "12266719"
+#    - name: Set up Android SDK
+#      uses: android-actions/setup-android@v3
+#      with:
+#        cmdline-tools-version: "12266719"
 
 #    - name: Install dependencies
 #      run: yarn install --frozen-lockfile
@@ -99,9 +99,6 @@ jobs:
         emulator-port: 5560
         disable-animations: true
         script: |
-          echo "$ANDROID_HOME"
-          echo "$ANDROID_ROOT"
-          echo "$JAVA_HOME"
           bash .github/workflows/run-android-e2e.sh
 
 #    - name: Upload Video

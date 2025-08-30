@@ -3991,6 +3991,11 @@ appium-uiautomator2-driver@^2.2.0:
     teen_process "^2.0.0"
     type-fest "^4.4.0"
 
+appium-uiautomator2-server@8.0.0:
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/appium-uiautomator2-server/-/appium-uiautomator2-server-8.0.0.tgz#4859990b418828a4a45134f2b23f8662ad40a3df"
+  integrity sha512-qnDSWymFnrTkhY78AbWaiwftxW6Lt62Wa0rl4vErK8JHHu4wxTkPl3hwuPoCMFRiH30sanCBv37N9oOaaC4w6A==
+
 appium-uiautomator2-server@^6.0.7:
   version "6.0.9"
   resolved "https://registry.yarnpkg.com/appium-uiautomator2-server/-/appium-uiautomator2-server-6.0.9.tgz#6ef8ff125dfb4a5b7f25d2e3ca528e7a9602bed9"

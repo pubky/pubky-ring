@@ -125,7 +125,7 @@ jobs:
       if: always()
       with:
         name: android-e2e-errors
-        path: ./errors.txt
+        path: ./logs/appium.log
         retention-days: 7
 
     - name: Upload Dmesg

@@ -65,7 +65,7 @@ exports.config = {
 	},
 	services: [
 		[
-			'appium'
+			'appium', { args: { log:'./logs/appium.log', relaxedSecurity: true } }
 		]
 	],
 

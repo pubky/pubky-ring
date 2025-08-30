@@ -96,7 +96,11 @@ jobs:
         arch: x86_64
         emulator-port: 5560
         disable-animations: true
-        script: bash .github/workflows/run-android-e2e.sh
+        script: |
+          echo "$ANDROID_HOME"
+          echo "$ANDROID_ROOT"
+          echo "$JAVA_HOME"
+          bash .github/workflows/run-android-e2e.sh
 
 #    - name: Upload Video
 #      uses: actions/upload-artifact@v4

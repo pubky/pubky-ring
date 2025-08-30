@@ -12,12 +12,12 @@ exports.config = {
       {
                                   platformName: 'Android',
                                   'appium:automationName': 'UiAutomator2',
-                                  'appium:autoWebview': true,
                       'appium:userProfile': 0,
                                   'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '12',
                                   'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
                                   'appium:avd': avdName,
                                   'appium:autoGrantPermissions': true,
+                                  'appium:browserstack.deviceLogs': true,
                                   'appium:newCommandTimeout': 3000,
                                   'appium:fullReset': false,
                                   'appium:noReset': false,
@@ -65,7 +65,7 @@ exports.config = {
 	},
 	services: [
 		[
-			'appium', { args: { relaxedSecurity: true } }
+			'appium', { args: { relaxedSecurity: true, log: './logs/test.log' } }
 		]
 	],
 

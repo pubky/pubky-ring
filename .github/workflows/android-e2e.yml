@@ -100,8 +100,8 @@ jobs:
         disable-animations: true
         enable-hw-keyboard: true
         script: |
-          npx appium -v
-          npx appium driver list --installed
+          npm exec -c "appium -v"
+          npm exec -c "appium driver list --installed"
           bash .github/workflows/run-android-e2e.sh
 
 #    - name: Upload Video

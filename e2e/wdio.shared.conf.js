@@ -50,7 +50,6 @@ exports.config = {
 	specs: [path.resolve(__dirname, 'specs/**/*.spec.js')],
 	maxInstances: 1,
 	logLevel: 'debug',
-    port: 4723,
 	bail: 0,
 	baseUrl: 'http://localhost',
 	headless: true,

@@ -11,7 +11,7 @@
     "optimize-images": "node scripts/optimize-images.js",
     "e2e:android": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.shared.conf.js",
     "e2e:ios": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.ios.conf.js",
-    "e2e:drivers": "npm ci"
+    "e2e:drivers": "npm ci; npm i --save-dev appium@2.18.0; npx appium driver install uiautomator2@v4.2.9"
   },
   "dependencies": {
     "@dr.pogodin/react-native-fs": "2.34.0",
@@ -27,7 +27,6 @@
     "@shopify/react-native-skia": "^2.2.3",
     "@synonymdev/react-native-pubky": "0.10.6",
     "@synonymdev/result": "^0.0.2",
-    "appium-uiautomator2-server": "8.0.0",
     "bip39": "^3.1.0",
     "buffer": "^6.0.3",
     "jdenticon": "2.2.0",
@@ -73,8 +72,8 @@
     "@wdio/local-runner": "^9.19.1",
     "@wdio/mocha-framework": "^9.19.1",
     "@wdio/spec-reporter": "^9.19.1",
-    "appium": "^2.19.0",
-    "appium-uiautomator2-driver": "^2.2.0",
+    "appium": "^2.18.0",
+    "appium-uiautomator2-driver": "^4.2.9",
     "chai": "5.1.2",
     "eslint": "^8.19.0",
     "jest": "^29.6.3",

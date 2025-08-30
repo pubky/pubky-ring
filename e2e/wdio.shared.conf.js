@@ -11,6 +11,7 @@ exports.config = {
 	waitforTimeout: 30_000,
 	connectionRetryTimeout: 300_000,
 	connectionRetryCount: 2,
+	xvfbAutoInstall: true,
 	framework: 'mocha',
 	reporters: ['spec'],
 	mochaOpts: {

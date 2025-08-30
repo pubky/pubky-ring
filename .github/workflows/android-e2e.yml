@@ -50,17 +50,18 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-    - name: Install ffmpeg
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y ffmpeg
+#    - name: Install ffmpeg
+#      run: |
+#        sudo apt-get update
+#        sudo apt-get install -y ffmpeg
 
     - name: Wait for Android Build
       id: wait-android-build
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        #commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: "4902ecce9214c04770981cc4ff91c5d20cbfbb57"
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -91,23 +92,18 @@ jobs:
         api-level: 32
         avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -memory 8192
+        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
-        disable-animations: false
-        ram-size: 8192
-        heap-size: 2048
         emulator-port: 5560
-        #emulator-build: 12325540
-        pre-emulator-launch-script: yarn appium driver doctor uiautomator2
         script: bash .github/workflows/run-android-e2e.sh
 
-    - name: Upload Video
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: android-e2e-video
-        path: ./e2e/artefacts/
-        retention-days: 7
+#    - name: Upload Video
+#      uses: actions/upload-artifact@v4
+#      if: always()
+#      with:
+#        name: android-e2e-video
+#        path: ./e2e/artefacts/
+#        retention-days: 7
 
     - name: Upload Logcat
       uses: actions/upload-artifact@v4

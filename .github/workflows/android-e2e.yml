@@ -45,8 +45,8 @@ jobs:
     - name: Set up Android SDK
       uses: android-actions/setup-android@v3
 
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
+#    - name: Install dependencies
+#      run: yarn install --frozen-lockfile
 
     - name: Install Appium drivers
       run: yarn e2e:drivers

@@ -9,8 +9,8 @@
     "start": "react-native start",
     "test": "jest",
     "optimize-images": "node scripts/optimize-images.js",
-    "e2e:android": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.shared.conf.js",
-    "e2e:ios": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.ios.conf.js",
+    "e2e:android": "wdio ./e2e/wdio.shared.conf.js",
+    "e2e:ios": "wdio ./e2e/wdio.ios.conf.js",
     "e2e:drivers": "npm ci"
   },
   "dependencies": {

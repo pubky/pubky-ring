@@ -18,7 +18,7 @@ mkdir -p ./e2e/artefacts
 
 # Run the actual tests
 echo "yarn e2e:android"
-yarn e2e:android
+npm e2e:android
 
 ## Kill the background processes
 #kill $MEMINFO_PID 2>/dev/null || true

@@ -20,7 +20,7 @@ exports.config = {
 	},
 	services: [
 		[
-			'appium'
+			'appium', { args: { relaxedSecurity: true } }
 		]
 	],
 

@@ -24,7 +24,8 @@ exports.config = {
 			'appium:uiautomator2ServerLaunchTimeout': 300_000,
 			'appium:uiautomator2ServerInstallTimeout': 300_000,
 			'appium:androidInstallTimeout': 300_000,
-			"appium:ignoreHiddenApiPolicyError": true,
+			'appium:ignoreHiddenApiPolicyError': true,
+			'appium:appWaitForLaunch': false,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,

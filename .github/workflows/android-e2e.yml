@@ -88,14 +88,14 @@ jobs:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
-        target: google_apis_playstore
         profile: pixel_6
         api-level: 32
         avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        emulator-options: -no-window swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
         emulator-port: 5560
+        disable-animations: true
         script: bash .github/workflows/run-android-e2e.sh
 
 #    - name: Upload Video

@@ -12,6 +12,7 @@ exports.config = {
       {
                                   platformName: 'Android',
                                   'appium:automationName': 'UiAutomator2',
+                                  'appium:autoWebview': true,
                       'appium:userProfile': 0,
                                   'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '12',
                                   'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',

@@ -13,7 +13,8 @@ on:
 
 jobs:
   android-e2e:
-    runs-on: [self-hosted, linux]
+    runs-on: ubuntu-latest
+    #runs-on: [self-hosted, linux]
     concurrency:
       group: android-e2e-${{ github.head_ref }}
       cancel-in-progress: true

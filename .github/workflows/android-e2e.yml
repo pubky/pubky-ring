@@ -102,8 +102,6 @@ jobs:
         script: |
           npx appium -v
           npx appium driver list --installed
-          npx appium driver install uiautomator2@v4.2.9
-          npx appium driver list --installed
           bash .github/workflows/run-android-e2e.sh
 
 #    - name: Upload Video

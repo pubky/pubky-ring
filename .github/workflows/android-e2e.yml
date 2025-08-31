@@ -103,7 +103,7 @@ jobs:
 
     - name: Run tests
       run: |
-        emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
+        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
         sleep 30
         yarn e2e:android
 

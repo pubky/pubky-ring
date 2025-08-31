@@ -42,10 +42,10 @@ exports.config = {
 	waitforTimeout: 130_000,
 	connectionRetryTimeout: 120000,
 	connectionRetryCount: 3,
-	xvfbAutoInstall: true,
+//	xvfbAutoInstall: true,
 	framework: 'mocha',
 	reporters: ['spec'],
-    tsConfigPath: './tsconfig.json',
+    tsConfigPath: '../tsconfig.json',
     port: 4723,
 	mochaOpts: {
 		ui: 'bdd',

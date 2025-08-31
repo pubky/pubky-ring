@@ -51,9 +51,13 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-#    - name: Install ffmpeg
-#      run: |
-#        sudo ulimit -c unlimited
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get install -y cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+
+    - name: Check KVM
+      run: |
+        sudo kvm-ok
 
     - name: Wait for Android Build
       id: wait-android-build

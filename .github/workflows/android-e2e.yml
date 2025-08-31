@@ -92,13 +92,14 @@ jobs:
         api-level: 32
         avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none --cache-size 500
         arch: x86_64
         ram-size: 1024M
         heap-size: 256M
         script: |
           npm exec -c "appium -v"
           npm exec -c "appium driver list --installed"
+          adb shell settings put global stay_on_while_plugged_in 3
           bash .github/workflows/run-android-e2e.sh
 
 #    - name: Upload Video

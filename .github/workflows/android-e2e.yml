@@ -51,9 +51,9 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-    - name: Install ffmpeg
-      run: |
-        sudo ulimit -c unlimited
+#    - name: Install ffmpeg
+#      run: |
+#        sudo ulimit -c unlimited
 
     - name: Wait for Android Build
       id: wait-android-build

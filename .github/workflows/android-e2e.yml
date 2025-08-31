@@ -99,8 +99,11 @@ jobs:
         script: |
           npm exec -c "appium -v"
           npm exec -c "appium driver list --installed"
-          adb shell settings put global stay_on_while_plugged_in 3
-          bash .github/workflows/run-android-e2e.sh
+
+    - name: Run tests
+      run: |
+        .github/workflows/run-android-e2e.sh
+
 
 #    - name: Upload Video
 #      uses: actions/upload-artifact@v4

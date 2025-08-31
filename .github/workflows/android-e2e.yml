@@ -53,6 +53,7 @@ jobs:
 
     - name: Install ffmpeg
       run: |
+        sudo apt-get update
         sudo apt-get install -y cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
 
     - name: Check KVM

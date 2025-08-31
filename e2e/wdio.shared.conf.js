@@ -60,8 +60,6 @@ exports.config = {
              if (process.env.RECORD_VIDEO === 'true') {
                        await driver.startRecordingScreen();
                      }
-             await driver.sleep(5000);
-             console.log(`🧪 Start: ${test.parent} - ${test.title}`);
 	 },
 
 	// afterSuite: async function (_test) {

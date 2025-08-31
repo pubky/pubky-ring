@@ -13,8 +13,6 @@ const { elementById, waitForDisplayed } = require('../helpers/actions');
 describe('Onboarding flow', () => {
 
 	it('should accept terms and navigate to Home', async () => {
-		await driver.pause(5_000);
-
 		const termsScreen = await elementById('TermsOfUseTitle');
 		await waitForDisplayed(termsScreen, 60_000);
 		expect(await termsScreen.isDisplayed()).to.be.true;

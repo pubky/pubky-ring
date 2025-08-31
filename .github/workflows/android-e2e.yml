@@ -53,9 +53,7 @@ jobs:
 
     - name: Install ffmpeg
       run: |
-        sudo apt-get update
-        sudo apt-get install -y libpulse0 qtbase5-dev qt5-qmake libxcb-cursor0 libxcb-xinerama0
-        sudo apt-get install -y --reinstall libxcb-xinerama0
+        sudo ulimit -c unlimited
 
     - name: Wait for Android Build
       id: wait-android-build
@@ -112,7 +110,7 @@ jobs:
     - name: Run tests
       if: always()
       run: |
-        sudo dmesg -T
+        sudo ls -lah /var/lib/apport/coredump
 
 
 #    - name: Upload Video

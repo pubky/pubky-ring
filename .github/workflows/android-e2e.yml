@@ -115,7 +115,7 @@ jobs:
     - name: Run tests
       if: always()
       run: |
-        sudo ls -lah /var/lib/apport/coredump
+        sudo ls -lah /var/crash/
 
 
 #    - name: Upload Video

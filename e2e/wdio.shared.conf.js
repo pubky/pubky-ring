@@ -12,9 +12,9 @@ exports.config = {
       {
                                   platformName: 'Android',
                                   maxInstances: 1,
-                                  'appium:settings[waitForIdleTimeout]': 0,
+//                                  'appium:settings[waitForIdleTimeout]': 0,
                                   'appium:printPageSourceOnFindFailure': true,
-                                  "appium:newCommandTimeout" : "30",
+                                  "appium:newCommandTimeout" : "300000",
                                   'appium:automationName': 'UiAutomator2',
                                   'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
                                   'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',

@@ -51,6 +51,10 @@ exports.config = {
 		ui: 'bdd',
 		timeout: 120_000
 	},
+    logLevels: {
+        webdriver: 'debug',
+        '@wdio/appium-service': 'debug'
+    },
 	services: [
 		[
 			'appium', { args: { log:'./logs/appium.log', relaxedSecurity: true, sessionOverride: true, debugLogSpacing: true, nativeInstrumentsLib: false } }

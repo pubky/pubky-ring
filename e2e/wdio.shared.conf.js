@@ -18,20 +18,9 @@ exports.config = {
                                   'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
                                   'appium:avd': avdName,
                                   'appium:autoGrantPermissions': true,
-                                  ...(resolvedAppPath
-                                                                      ? {
-                                                                                                                  'appium:app': resolvedAppPath,
-                                                                                                                  'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-                                                                                                                  'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-                                                                                                                  'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
-                                                                                                                  'appium:forceAppLaunch': false
-                                                                                                          }
-                                                                      : {
-                                                                                                                  'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
-                                                                                                                  'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-                                                                                                                  'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
-                                                                                                                  'appium:forceAppLaunch': false
-                                                                                                          })
+                                  'appium:allowTestPackages': true,
+                                  'appium:app': resolvedAppPath,
+                                  'appium:forceAppLaunch': false
       }
     ],
 	runner: 'local',

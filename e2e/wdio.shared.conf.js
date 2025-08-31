@@ -39,7 +39,7 @@ exports.config = {
 	bail: 0,
 	headless: true,
 	waitforTimeout: 130_000,
-	connectionRetryTimeout: 120000,,
+	connectionRetryTimeout: 120000,
 	connectionRetryCount: 3,
 	xvfbAutoInstall: true,
 	framework: 'mocha',

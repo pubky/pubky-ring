@@ -102,7 +102,8 @@ jobs:
 
     - name: Run tests
       run: |
-        .github/workflows/run-android-e2e.sh
+        emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
+        yarn e2e:android
 
 
 #    - name: Upload Video

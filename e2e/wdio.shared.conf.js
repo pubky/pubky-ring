@@ -51,28 +51,17 @@ exports.config = {
 	},
 	services: [
 		[
-			'appium', { args: { log:'./logs/appium.log', relaxedSecurity: true } }
+			'appium', { args: { log:'./logs/appium.log', relaxedSecurity: true, sessionOverride: true, debugLogSpacing: true, nativeInstrumentsLib: false } }
 		]
 	],
 
 	// Test hooks
-	// beforeSuite: async function (test) {
-	//   // Install APK in CI environment for Android
-	//   if (process.env.CI && driver.capabilities.platformName === 'Android') {
-	//     try {
-	//       console.log('📱 Installing APK in CI environment...');
-	//       await driver.installApp('/Users/runner/work/pubkyring/pubkyring/artifacts/app-release.apk');
-	//       console.log('✅ APK installed successfully');
-	//     } catch (error) {
-	//       console.log('⚠️ APK installation failed:', error.message);
-	//     }
-	//   }
-
-	//   if (process.env.RECORD_VIDEO === 'true') {
-	//     await driver.startRecordingScreen();
-	//   }
-	//   console.log(`🧪 Start: ${test.parent} - ${test.title}`);
-	// },
+	 beforeSuite: async function (test) {
+             if (process.env.RECORD_VIDEO === 'true') {
+                       await driver.startRecordingScreen();
+                     }
+             console.log(`🧪 Start: ${test.parent} - ${test.title}`);
+	 },
 
 	// afterSuite: async function (_test) {
 	//   if (process.env.CI && driver.capabilities.platformName === 'Android') {

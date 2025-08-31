@@ -27,20 +27,18 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '22'
-        cache: 'yarn'
 
     - name: Enable KVM
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
-      shell: bash
 
-    - name: Set up Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'adopt'
-        java-version: '17'
+#    - name: Set up Java
+#      uses: actions/setup-java@v4
+#      with:
+#        distribution: 'adopt'
+#        java-version: '17'
 
 #    - name: Set up Android SDK
 #      uses: android-actions/setup-android@v3
@@ -85,7 +83,7 @@ jobs:
     #     yarn install appium-uiautomator2-driver@latest
 
     - name: Run E2E tests on Android emulator
-      uses: reactivecircus/android-emulator-runner@v2
+      uses: reactivecircus/android-emulator-runner@v2.34.0
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
@@ -96,9 +94,8 @@ jobs:
         force-avd-creation: false
         emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
-        emulator-port: 5560
-        disable-animations: true
-        enable-hw-keyboard: true
+        ram-size: 1024M
+        heap-size: 256M
         script: |
           npm exec -c "appium -v"
           npm exec -c "appium driver list --installed"

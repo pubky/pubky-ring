@@ -126,12 +126,12 @@ jobs:
 #        path: ./e2e/artefacts/
 #        retention-days: 7
 
-    - name: Upload Logcat
+    - name: Upload Crash
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: android-e2e-logcat
-        path: ./logcat.txt
+        name: android-e2e-crash
+        path: /tmp/android-runner/emu-crash-*.db
         retention-days: 7
 
     - name: Upload Errors

@@ -104,7 +104,7 @@ jobs:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
       run: |
-        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -gpu guest &
+        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -gpu host -accel on &
         sleep 30
         yarn e2e:android
         

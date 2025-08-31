@@ -22,7 +22,9 @@ exports.config = {
                                   'appium:autoGrantPermissions': true,
                                   'appium:allowTestPackages': true,
                                   'appium:app': resolvedAppPath,
-                                  'appium:forceAppLaunch': true
+                                  'appium:forceAppLaunch': false,
+                                  'appium:dontStopAppOnReset': true,
+                                  'appium:noReset': true
       }
     ],
 	runner: 'local',

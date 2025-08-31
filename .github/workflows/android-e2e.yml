@@ -98,12 +98,11 @@ jobs:
         ram-size: 1024M
         heap-size: 256M
         script: |
-          npm exec -c "appium -v"
-          npm exec -c "appium driver list --installed"
+          yarn e2e:android
 
     - name: Run tests
       run: |
-        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
+#        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
         sleep 30
         yarn e2e:android
 

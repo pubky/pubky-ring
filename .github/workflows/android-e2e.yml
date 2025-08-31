@@ -54,7 +54,7 @@ jobs:
     - name: Install ffmpeg
       run: |
         sudo apt-get update
-        sudo apt-get install -y libpulse0 qt5-default
+        sudo apt-get install -y libpulse0 qtbase5-dev qt5-qmake
         sudo apt-get install -y --reinstall libxcb-xinerama0
 
     - name: Wait for Android Build

@@ -53,7 +53,10 @@ exports.config = {
 	},
     logLevels: {
         webdriver: 'debug',
-        '@wdio/appium-service': 'debug'
+        '@wdio/appium-service': 'debug',
+        'appium-uiautomator2-server': 'debug',
+        'appium-uiautomator2-driver': 'debug',
+        'appium': 'debug',
     },
 	services: [
 		[

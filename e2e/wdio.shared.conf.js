@@ -12,7 +12,7 @@ exports.config = {
       {
                                   platformName: 'Android',
                                   maxInstances: 1,
-                                  'appium:settings[waitForIdleTimeout]': 1000000,
+                                  'appium:settings[waitForIdleTimeout]': 0,
                                   "appium:newCommandTimeout" : "30",
                                   'appium:automationName': 'UiAutomator2',
                                   'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',

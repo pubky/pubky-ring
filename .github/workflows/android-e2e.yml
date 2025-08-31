@@ -51,10 +51,10 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-#    - name: Install ffmpeg
-#      run: |
-#        sudo apt-get update
-#        sudo apt-get install -y ffmpeg
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libpulse0
 
     - name: Wait for Android Build
       id: wait-android-build
@@ -97,14 +97,12 @@ jobs:
         ram-size: 1024M
         heap-size: 256M
         script: |
-          apt-get update
-          apt-get install libpulse0
           npm exec -c "appium -v"
           npm exec -c "appium driver list --installed"
 
     - name: Run tests
       run: |
-#        emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
+        emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
         yarn e2e:android
 
 

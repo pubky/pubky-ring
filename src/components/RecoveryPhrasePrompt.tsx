@@ -16,6 +16,7 @@ import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
+import { truncatePubky } from '../utils/pubky.ts';
 
 const getMarginBottom = (index: number): number => {
 	return index + 1 === 6 ? 0 : 12;
@@ -31,7 +32,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 	const [error, setError] = useState<string>('');
 	const [isBlurred, setIsBlurred] = useState<boolean>(true);
 	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
-	const pubkyName = useSelector((state: RootState) => getPubkyName(state, payload.pubky));
+	const pubkyName = useSelector((state: RootState) => getPubkyName(state, payload.pubky, 12));
 	const { confirmPubkyBackup } = usePubkyManagement();
 
 	const title = useMemo(() => {
@@ -99,7 +100,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 					)}
 				</View>
 
-				<PubkyCard name={pubkyName} publicKey={payload.pubky} />
+				<PubkyCard name={pubkyName} publicKey={truncatePubky(payload.pubky)} />
 
 				<Text style={styles.warningText}>
 					Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.
@@ -210,7 +211,7 @@ const styles = StyleSheet.create({
 		fontWeight: 400,
 		lineHeight: 20,
 		color: '#888',
-		textAlign: 'center',
+		textAlign: 'left',
 		marginBottom: 24,
 	},
 	errorText: {

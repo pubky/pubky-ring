@@ -10,12 +10,11 @@ import {
 	ArrowRight,
 	CardView,
 	ScrollView,
-	LinearGradient,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { version } from '../../package.json';
 // @ts-ignore
-import PubkyRingLogo from '../images/pubky-ring.png';
+import PubkyRingLogo from '../images/pubky-app-logo.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
@@ -106,19 +105,20 @@ const About = ({ navigation }: Props): ReactElement => {
 				<CardView style={styles.divider} />
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onFooterPress}>
-					<LinearGradient style={styles.footer}>
+					<View style={styles.footer}>
 						<View style={styles.footerContent}>
-							<Text style={styles.footerText1}>Discover the next web</Text>
-							<Text style={styles.footerText2}>Your keys, your content, your rules.</Text>
 							<View style={styles.row}>
-								<Image
-									source={PubkyRingLogo}
-									style={styles.pubkyLogo}
-								/>
+								<View style={styles.logo}>
+									<Image
+										source={PubkyRingLogo}
+										style={styles.pubkyLogo}
+									/>
+									<Text style={styles.footerText}>Join with Pubky Ring</Text>
+								</View>
 								<ArrowRight />
 							</View>
 						</View>
-					</LinearGradient>
+					</View>
 				</TouchableOpacity>
 
 			</ScrollView>
@@ -162,6 +162,9 @@ const styles = StyleSheet.create({
 		height: 60,
 		backgroundColor: 'transparent',
 	},
+	logo: {
+		backgroundColor: 'transparent',
+	},
 	rowTitle: {
 		fontSize: 17,
 		fontWeight: 400,
@@ -188,26 +191,21 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 		marginHorizontal: 24,
 		width: '100%',
+		backgroundColor: 'rgba(200, 255, 0, 0.1)',
 	},
 	footerContent: {
 		margin: 25,
 		backgroundColor: 'transparent',
 	},
-	footerText1: {
-		fontSize: 26,
-		fontWeight: 300,
-		lineHeight: 26,
-		letterSpacing: 0,
-	},
-	footerText2: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 20,
+	footerText: {
+		fontSize: 17,
+		fontWeight: '600',
+		lineHeight: 22,
 		letterSpacing: 0.4,
-		marginBottom: 16,
+		color: 'rgba(200, 255, 0, 1)',
 	},
 	pubkyLogo: {
-		height: 48,
+		height: 56,
 		resizeMode: 'contain',
 		backgroundColor: 'transparent',
 	},

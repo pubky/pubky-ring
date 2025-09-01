@@ -13,7 +13,7 @@ import {
 	RadialGradient,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
-import { performAuth } from '../utils/pubky';
+import { performAuth, truncatePubky } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
@@ -23,11 +23,15 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
+import { Globe } from 'lucide-react-native';
 import {
+	ACTION_SHEET_HEIGHT,
 	BLUE_RADIAL_GRADIENT,
 	PUBKY_APP_URL,
 } from '../utils/constants.ts';
 import { buttonStyles } from '../theme/utils';
+import { RootState } from '../store';
+import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -52,10 +56,14 @@ const toastStyle = {
 };
 
 const CapabilitiesList = memo(({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
+	const capabilitiesCount = capabilities.length;
 	return (
 		<>
 			{capabilities.map((capability, index) => (
-				<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
+				<View style={styles.permissionsSection} key={index}>
+					<Permission capability={capability} isAuthorized={isAuthorized} />
+					{index !== capabilitiesCount - 1 && <View style={styles.spacer} />}
+				</View>
 			))}
 		</>
 	);
@@ -82,7 +90,7 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 	);
 });
 
-const FADE_DURATION = 200;
+const FADE_DURATION = 100;
 const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete } = payload;
@@ -91,8 +99,10 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
 
+	const pubkyName = useSelector((state: RootState) => getPubkyName(state, pubky));
+
 	const checkOpacity = useSharedValue(0);
-	const checkScale = useSharedValue(0.2); // Start very small
+	const checkScale = useSharedValue(0.5); // Start half size
 
 	const checkStyle = useAnimatedStyle(() => ({
 		opacity: checkOpacity.value,
@@ -105,32 +115,27 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		setAuthorizing(false);
 		setIsAuthorized(false);
 		checkOpacity.value = 0;
-		checkScale.value = 0.2;
+		checkScale.value = 0.5;
 	}, [pubky, checkOpacity, checkScale]);
 
 	useEffect(() => {
 		if (authorizing) {
 			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
-			checkScale.value = withTiming(0.2);
+			checkScale.value = withTiming(0.5);
 		} else if (isAuthorized) {
 			checkOpacity.value = withTiming(1, { duration: FADE_DURATION });
 			checkScale.value = withSequence(
-				// Start small
-				withTiming(0.2, { duration: 0 }),
-				// Overshoot slightly with spring
-				withSpring(1.2, {
-					damping: 12,
-					stiffness: 100,
-				}),
-				// Settle back to normal size with spring
+				// Start at half size
+				withTiming(0.5, { duration: 0 }),
+				// Spring to full size
 				withSpring(1, {
-					damping: 15,
-					stiffness: 100,
+					damping: 20,
+					stiffness: 350,
 				})
 			);
 		} else {
 			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
-			checkScale.value = withTiming(0.2);
+			checkScale.value = withTiming(0.5);
 		}
 	}, [authorizing, checkOpacity, checkScale, isAuthorized]);
 
@@ -215,45 +220,59 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			<ActionSheetContainer
 				id="confirm-auth"
 				navigationAnimation={navigationAnimation}
-				CustomHeaderComponent={<></>}>
+				CustomHeaderComponent={<></>}
+				height={ACTION_SHEET_HEIGHT}
+			>
 				<GradientView>
 					<ModalIndicator />
-					<View style={styles.titleContainer}>
-						<Text style={styles.title}>
-							{isAuthorized ? 'Authorized' : 'Authorize'}
-						</Text>
-					</View>
-
-					<View style={styles.section}>
-						<SessionText style={styles.warningText}>
-							{isAuthorized ? 'Successfully granted permission to manage your data.' : 'Make sure you trust this service, browser, or device before granting permission to manage your data.'}
-						</SessionText>
-					</View>
-
-					<View style={styles.section}>
-						<SessionText style={styles.sectionTitle}>Relay</SessionText>
-						<Text style={styles.relayText}>{authDetails.relay}</Text>
-					</View>
-
-					<View style={styles.permissionsSection}>
-						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
-						<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
-					</View>
-
-					{!isSmallScreen && (
-						<View style={styles.imageContainer}>
-							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-								<Image
-									source={require('../images/check.png')}
-									style={styles.keyImage}
-								/>
-							</AnimatedView>
+					<View style={styles.mainContent}>
+						<View style={styles.titleContainer}>
+							<Text style={styles.title}>
+								{isAuthorized ? 'Authorized' : 'Authorize'}
+							</Text>
 						</View>
-					)}
+
+						<PubkyCard
+							name={pubkyName}
+							publicKey={truncatePubky(pubky)}
+							style={styles.pubkyCard}
+							containerStyle={styles.pubkyContainer}
+							nameStyle={styles.pubkyName}
+							pubkyTextStyle={styles.pubkyText}
+							avatarSize={48}
+							avatarStyle={styles.avatarContainer}
+						/>
+
+						<View style={styles.section}>
+							<SessionText style={styles.sectionTitle}>Relay</SessionText>
+							<View style={styles.relayContainer}>
+								<Globe color="rgba(255, 255, 255, 0.8)" size={15} />
+								<Text style={styles.relayText}>{authDetails.relay}</Text>
+							</View>
+						</View>
+
+						<View style={styles.section}>
+							<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
+							<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
+						</View>
+
+						<SessionText style={styles.warningText}>
+							{isAuthorized ? 'Successfully granted permission to manage your data.' : 'Make sure you trust this relay, service, browser, or device before authorizing with your pubky.'}
+						</SessionText>
+
+						{!isSmallScreen && (
+							<View style={styles.imageContainer}>
+								<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+									<Image
+										source={require('../images/check.png')}
+										style={styles.keyImage}
+									/>
+								</AnimatedView>
+							</View>
+						)}
+					</View>
 
 					<View style={styles.footerContainer}>
-						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Authorized with Pubky' : 'Authorize With Pubky'}</SessionText>
-						<PubkyCard publicKey={pubky} />
 						<View style={styles.buttonContainer}>
 							{!isAuthorized ? (
 								<>
@@ -299,7 +318,7 @@ const styles = StyleSheet.create({
 		zIndex: 100,
 	},
 	content: {
-		paddingHorizontal: 12,
+		height: '100%',
 		backgroundColor: 'transparent',
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
@@ -318,27 +337,40 @@ const styles = StyleSheet.create({
 	},
 	section: {
 		marginBottom: 24,
-		backgroundColor: 'transparent',
+		backgroundColor: 'rgba(0, 0, 0, 0)',
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 0.16)',
+		padding: 20,
+		borderRadius: 16,
+	},
+	relayContainer: {
+		flexDirection: 'row',
+		justifyContent: 'flex-start',
+		alignItems: 'center',
+		backgroundColor: 'transparent'
 	},
 	permissionsSection: {
-		marginBottom: 10,
 		backgroundColor: 'transparent',
 	},
 	relayText: {
-		fontSize: 16,
-		marginBottom: 8,
+		fontSize: 13,
+		fontWeight: '600',
+		lineHeight: 18,
+		letterSpacing: 0.4,
+		justifyContent: 'center',
+		marginLeft: 6,
 	},
 	warningText: {
 		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		fontSize: 15,
+		lineHeight: 20,
+		letterSpacing: 0.4,
 		marginBottom: 8,
 	},
 	permissionRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		marginBottom: 12,
 		backgroundColor: 'transparent',
 	},
 	pathContainer: {
@@ -368,14 +400,19 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		justifyContent: 'space-evenly',
 		gap: 12,
 		zIndex: 3,
 		backgroundColor: 'transparent',
-		paddingBottom: 20,
+	},
+	mainContent: {
+		height: '80%',
+		paddingHorizontal: 12,
+		backgroundColor: 'transparent',
 	},
 	footerContainer: {
-		marginBottom: 10,
+		height: '15%',
+		paddingHorizontal: 12,
+		justifyContent: 'center',
 		backgroundColor: 'transparent',
 	},
 	imageContainer: {
@@ -436,6 +473,7 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		fontWeight: '500',
 		lineHeight: 18,
+		letterSpacing: 0.8,
 		textTransform: 'uppercase',
 		marginBottom: 8,
 		backgroundColor: 'transparent',
@@ -444,6 +482,7 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		fontWeight: '500',
 		lineHeight: 18,
+		letterSpacing: 0.8,
 		textTransform: 'uppercase',
 		backgroundColor: 'transparent',
 	},
@@ -451,6 +490,7 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		fontWeight: '500',
 		lineHeight: 18,
+		letterSpacing: 0.8,
 		textTransform: 'uppercase',
 		backgroundColor: 'transparent',
 	},
@@ -471,6 +511,35 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		backgroundColor: 'transparent',
 	},
+
+	pubkyCard: {
+		minHeight: 100,
+	},
+	pubkyContainer: {
+		//paddingHorizontal: 20,
+	},
+	avatarContainer: {
+		width: 48,
+		height: 48,
+		borderRadius: 24,
+		marginRight: 16,
+	},
+	pubkyName: {
+		fontSize: 26,
+		fontWeight: '300',
+		lineHeight: 26,
+		letterSpacing: 0,
+		marginBottom: 2,
+	},
+	pubkyText: {
+		fontSize: 15,
+		fontWeight: '600',
+		lineHeight: 20,
+		letterSpacing: 0.4,
+	},
+	spacer: {
+		marginBottom: 12,
+	}
 });
 
 export default memo(ConfirmAuth);

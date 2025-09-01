@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { Pubky, PubkySession } from '../../types/pubky';
 import { RootState } from '../../types';
+import { truncateStr } from '../../utils/pubky.ts';
 
 /**
  * Get a specific pubky by its identifier
@@ -121,9 +122,24 @@ export const getPubkyImage = (state: RootState, pubky: string): string => {
 
 /**
  * Get pubky name
+ * If no name is set, returns "pubky #N" where N is the index + 1
+ * Optionally truncates the name to displayLength characters
+ * @param state Redux state
+ * @param pubky Pubky identifier
+ * @param displayLength Number of characters to display (default: 8)
+ * @returns Truncated name or "pubky #N"
  */
-export const getPubkyName = (state: RootState, pubky: string): string => {
-	return state.pubky.pubkys[pubky]?.name || '';
+export const getPubkyName = (state: RootState, pubky: string, displayLength = 8): string => {
+	const pubkyData = state.pubky.pubkys[pubky];
+	const pubkyIndex = getPubkyIndex(state, pubky);
+	const name = pubkyData?.name;
+
+	if (name) {
+		return truncateStr(name, displayLength);
+	}
+
+	// Fall back to "pubky #N" if no name
+	return `pubky #${pubkyIndex + 1}`;
 };
 
 /**

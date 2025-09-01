@@ -6,10 +6,12 @@ import React, {
 } from 'react';
 import { SheetManager } from 'react-native-actions-sheet';
 import PubkyCard from './PubkyCard.tsx';
-import { getPubky, getPubkyIndex } from '../store/selectors/pubkySelectors.ts';
+import {
+	getPubkyName,
+} from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { truncatePubky, truncateStr } from '../utils/pubky.ts';
+import { truncatePubky } from '../utils/pubky.ts';
 import {
 	View,
 	Text,
@@ -34,11 +36,8 @@ const DeletePubky = ({ payload }: {
 }): ReactElement => {
 	const { onDelete } = useMemo(() => payload, [payload]);
 	const publicKey = useMemo(() => payload?.publicKey ?? '', [payload]);
-	const pubkyData = useSelector((state: RootState) => getPubky(state, publicKey));
-	const pubkyIndex = useSelector((state: RootState) => getPubkyIndex(state, publicKey));
+	const pubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
 	const navigationAnimation = useSelector(getNavigationAnimation);
-
-	const name = useMemo(() => truncateStr(pubkyData?.name, 8) || `pubky #${pubkyIndex + 1}`, [pubkyData, pubkyIndex]);
 
 	const closeSheet = useCallback((): void => {
 		SheetManager.hide('delete-pubky').then();
@@ -66,7 +65,7 @@ const DeletePubky = ({ payload }: {
 					Are you sure you want to delete this pubky?
 				</SessionText>
 				<PubkyCard
-					name={name}
+					name={pubkyName}
 					publicKey={truncatePubky(publicKey)}
 					style={styles.pubkyCard}
 					containerStyle={styles.pubkyContainer}

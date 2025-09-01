@@ -125,7 +125,7 @@ const BackupPrompt = ({ payload }: {
 			case EBackupPromptViewId.backup:
 				return (
 					<Text style={styles.message}>
-						<Text style={[styles.message, styles.passphraseText]}>Passphrase for</Text> <Text style={styles.boldText}>pk:{truncatedPubky}</Text>
+						<Text style={[styles.message, styles.passphraseText]}>Passphrase for</Text> <Text style={styles.boldPubky}>pk:{truncatedPubky}</Text>
 					</Text>
 				);
 			case EBackupPromptViewId.import:
@@ -246,6 +246,11 @@ const styles = StyleSheet.create({
 	},
 	passphraseText: {
 		color: 'rgba(255, 255, 255, 0.5)',
+		textTransform: 'uppercase',
+		fontWeight: '500',
+		fontSize: 13,
+		lineHeight: 18,
+		letterSpacing: 0.8,
 	},
 	inputContainer: {
 		flexDirection: 'row',
@@ -321,8 +326,12 @@ const styles = StyleSheet.create({
 		marginRight: 8,
 		backgroundColor: 'transparent',
 	},
-	boldText: {
+	boldPubky: {
 		fontWeight: 'bold',
+		textTransform: 'uppercase',
+		fontSize: 13,
+		lineHeight: 18,
+		letterSpacing: 0.8,
 	},
 	fileText: {
 		fontSize: 17,

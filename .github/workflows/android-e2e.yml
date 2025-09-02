@@ -2,8 +2,8 @@ name: Android E2E Tests
 description: 'Disabled for now due to instability - UiAutomator2 crash'
 
 on:
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       commit-sha:
@@ -13,7 +13,8 @@ on:
 
 jobs:
   android-e2e:
-    runs-on: ubuntu-latest # [self-hosted, linux]
+    runs-on: ubuntu-latest
+    #runs-on: [self-hosted, linux]
     concurrency:
       group: android-e2e-${{ github.head_ref }}
       cancel-in-progress: true
@@ -25,37 +26,47 @@ jobs:
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
-        cache: 'yarn'
+        node-version: '22'
 
     - name: Enable KVM
       run: |
         echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
         sudo udevadm control --reload-rules
         sudo udevadm trigger --name-match=kvm
-      shell: bash
 
-    - name: Set up Java
-      uses: actions/setup-java@v4
-      with:
-        distribution: 'zulu'
-        java-version: '17'
+#    - name: Set up Java
+#      uses: actions/setup-java@v4
+#      with:
+#        distribution: 'adopt'
+#        java-version: '17'
 
-    # - name: Set up Android SDK
-    #   uses: android-actions/setup-android@v3
+#    - name: Set up Android SDK
+#      uses: android-actions/setup-android@v3
+#      with:
+#        cmdline-tools-version: "12266719"
 
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
+#    - name: Install dependencies
+#      run: yarn install --frozen-lockfile
 
     - name: Install Appium drivers
       run: yarn e2e:drivers
+
+    - name: Install ffmpeg
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y cpu-checker qemu-kvm libvirt-daemon-system libvirt-clients bridge-utils
+
+    - name: Check KVM
+      run: |
+        sudo kvm-ok
 
     - name: Wait for Android Build
       id: wait-android-build
       uses: ./.github/actions/wait-for-workflow
       with:
         workflow-name: 'Android Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        #commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
+        commit-sha: "4902ecce9214c04770981cc4ff91c5d20cbfbb57"
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
@@ -71,36 +82,57 @@ jobs:
     #     mkdir -p ./artefacts
     #     curl -L "https://github.com/synonymdev/bitkit/releases/download/v1.1.3/app-x86_64-release.apk" -o ./artefacts/app-release.apk
 
+    # - name: Install latest UiAutomator2 driver
+    #   run: |
+    #     yarn install appium-uiautomator2-driver@latest
+
     - name: Run E2E tests on Android emulator
-      uses: reactivecircus/android-emulator-runner@v2
+      uses: reactivecircus/android-emulator-runner@v2.34.0
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
       with:
         profile: pixel_6
-        api-level: 34
+        api-level: 32
         avd-name: Pixel_6
         force-avd-creation: false
-        emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        emulator-options: -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        emulator-build: 13823996
         arch: x86_64
-        disable-animations: true
-        emulator-build: 12325540
-        script: yarn e2e:android
+        script: |
+          echo "ok"
 
-    - name: Upload Video
+#        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none &
+    - name: Run tests
+      env:
+        ANDROID_APP: ./artefacts/app-release.apk
+        ANDROID_DEVICE_NAME: Pixel_6
+      run: |
+        sudo ulimit -c unlimited
+        /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -gpu swiftshader_indirect -netspeed full -netdelay none -engine auto -nojni &
+        sleep 30
+        yarn e2e:android
+        
+    - name: show core dumps
+      if: always()
+      run: |
+        sudo ls -lah /var/crash/
+
+
+#    - name: Upload Video
+#      uses: actions/upload-artifact@v4
+#      if: always()
+#      with:
+#        name: android-e2e-video
+#        path: ./e2e/artefacts/
+#        retention-days: 7
+
+    - name: Upload Crash
       uses: actions/upload-artifact@v4
       if: always()
       with:
-        name: android-e2e-video
-        path: ./e2e/artefacts/
-        retention-days: 7
-
-    - name: Upload Logcat
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: android-e2e-logcat
-        path: ./logcat.txt
+        name: android-e2e-crash
+        path: /tmp/android-runner/emu-crash-*.db
         retention-days: 7
 
     - name: Upload Errors
@@ -108,7 +140,7 @@ jobs:
       if: always()
       with:
         name: android-e2e-errors
-        path: ./errors.txt
+        path: ./logs/appium.log
         retention-days: 7
 
     - name: Upload Dmesg

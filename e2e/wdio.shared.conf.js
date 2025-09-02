@@ -8,7 +8,7 @@ exports.config = {
 	logLevel: 'debug',
 	bail: 0,
 	baseUrl: 'http://localhost',
-	waitforTimeout: 30_000,
+	waitforTimeout: 20_000,
 	connectionRetryTimeout: 300_000,
 	connectionRetryCount: 2,
 	framework: 'mocha',

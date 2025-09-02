@@ -185,13 +185,13 @@ const AddPubky = ({ payload }: {
 		switch (currentScreen) {
 			case 'main':
 				return [
-					{ text: 'Import pubky', onPress: onImportPubky, style: styles.importButton },
-					{ text: 'New pubky', onPress: onCreatePubky, style: styles.createButton },
+					{ id: 'ImportPubkyButton', text: 'Import pubky', onPress: onImportPubky, style: styles.importButton },
+					{ id: 'NewPubkyButton', text: 'New pubky', onPress: onCreatePubky, style: styles.createButton },
 				];
 			case 'import-options':
 				return [
-					{ text: 'Encrypted File', onPress: onUploadFile, style: styles.importButton },
-					{ text: 'Recovery Phrase', onPress: onMnemonicPhrase, style: styles.importButton },
+					{ id: 'EncryptedFileButton', text: 'Encrypted File', onPress: onUploadFile, style: styles.importButton },
+					{ id: 'RecoveryPhraseButton', text: 'Recovery Phrase', onPress: onMnemonicPhrase, style: styles.importButton },
 				];
 			case 'mnemonic-form':
 				return [];
@@ -230,8 +230,9 @@ const AddPubky = ({ payload }: {
 					{getImage()}
 				</View>
 				<View style={styles.buttonContainer}>
-					{getButtonConfig().map((button: { text: string; style: any; onPress: (() => void) | undefined; }, index: React.Key | null | undefined) => (
+					{getButtonConfig().map((button: { id?: string; text: string; style: any; onPress: (() => void) | undefined; }, index: React.Key | null | undefined) => (
 						<Button
+							testID={button.id}
 							key={index}
 							text={button.text}
 							style={[styles.button, button.style]}

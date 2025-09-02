@@ -108,11 +108,12 @@ jobs:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
       run: |
+        sudo ulimit -c unlimited
         /usr/local/lib/android/sdk/emulator/emulator -port 5560 -avd 'Pixel_6' -no-window -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none -gpu swiftshader_indirect -netspeed full -netdelay none -engine auto -nojni &
         sleep 30
         yarn e2e:android
         
-    - name: Run tests
+    - name: show core dumps
       if: always()
       run: |
         sudo ls -lah /var/crash/

@@ -55,6 +55,7 @@ const PubkyReview = ({
 			</ForegroundView>
 			<View style={styles.footer}>
 				<AuthorizeButton
+					testID="NewPubkyContinueButton"
 					style={styles.authorizeButton}
 					onPressIn={onContinue}
 				>

@@ -1,0 +1,13 @@
+const { expect } = require('chai');
+const { elementById, waitForDisplayed, completeOnboardingFlow } = require('../helpers/actions');
+
+
+before(async () => {
+  await completeOnboardingFlow();
+});
+
+describe('Import a pubky flow', () => {
+  it.skip('can import a pubky with encrypted file', async () => {});  
+  it.skip('can import a pubky with recovery phrase', async () => {});  
+  it.skip('can import a pubky by scanning QR code (paste link)', async () => {});
+});

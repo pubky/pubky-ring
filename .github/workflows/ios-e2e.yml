@@ -47,7 +47,7 @@ jobs:
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download iOS App
-      uses: dawidd6/action-download-artifact@v4
+      uses: dawidd6/action-download-artifact@v6
       with:
         name: ios-release-app
         path: ./artifacts

@@ -76,6 +76,7 @@ jobs:
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
+        ANDROID_PLATFORM_VERSION: 14
       with:
         profile: pixel_6
         api-level: 34

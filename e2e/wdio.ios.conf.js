@@ -20,7 +20,7 @@ exports.config = {
 			'appium:autoAcceptAlerts': true,
 			'appium:autoDismissAlerts': true,
 			'appium:simulatorStartupTimeout': 300_000,
-			'appium:wdaStartupTimeout': 300_000,
+			'appium:wdaLaunchTimeout': 300_000,
 			...(appPath
         ? { 'appium:app': appPath }
         : {

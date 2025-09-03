@@ -36,11 +36,11 @@ jobs:
         key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
         restore-keys: |
           ${{ runner.os }}-pods-
-          
+
     - name: Build iOS App
       run: |
         cd ios
-        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 15,OS=latest' -derivedDataPath ./build build
+        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.6' -derivedDataPath ./build build
 
     - name: Create app bundle zip
       run: |

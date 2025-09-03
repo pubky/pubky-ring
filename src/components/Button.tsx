@@ -45,7 +45,7 @@ const Button = ({
 			{loading ? (<ActivityIndicator size="small" />) : (
 				<>
 					{icon && icon}
-					<Text style={[styles.actionButtonText, textStyle]}>{text}</Text>
+					<Text testID={`${testID}-Text`} style={[styles.actionButtonText, textStyle]}>{text}</Text>
 				</>
 			)}
 		</ActionButton>

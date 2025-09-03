@@ -142,8 +142,15 @@ const PubkyBox = ({
 		}
 	}, [handleQRAction, pubky, pubkyData]);
 
+	// testId example: PubkyBox-StagingTestPubky-0
+	const pubkyBoxTestID = useMemo(() => {
+		const sanitizedName = pubkyData.name.replace(/[^a-zA-Z0-9]/g, '');
+		const indexStr = index !== undefined ? `-${index}` : '';
+		return `PubkyBox-${sanitizedName}${indexStr}`;
+	}, [pubkyData.name, index]);
+
 	return (
-		<LinearGradient style={styles.container}>
+		<LinearGradient testID={pubkyBoxTestID} style={styles.container}>
 			<Button
 				activeOpacity={0.7}
 				onPress={handleOnPress}

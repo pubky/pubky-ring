@@ -76,6 +76,7 @@ jobs:
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
+        HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       with:
         profile: pixel_6
         api-level: 34

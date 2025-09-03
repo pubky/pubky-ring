@@ -19,8 +19,8 @@ exports.config = {
 			'appium:shouldTerminateApp': true,
 			'appium:autoAcceptAlerts': true,
 			'appium:autoDismissAlerts': true,
-			'appium:simulatorStartupTimeout': 300_000,
-			'appium:wdaLaunchTimeout': 300_000,
+			'appium:simulatorStartupTimeout': 600_000,
+			'appium:wdaLaunchTimeout': 600_000,
 			...(appPath
         ? { 'appium:app': appPath }
         : {

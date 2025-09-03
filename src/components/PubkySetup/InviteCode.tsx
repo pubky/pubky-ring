@@ -294,7 +294,7 @@ const InviteCode = ({ payload }: {
 				<View style={styles.content}>
 					<ModalIndicator />
 					<View style={styles.titleContainer}>
-						<Text style={styles.title}>Default Homeserver</Text>
+						<Text testID="InviteCodeTitle" style={styles.title}>Default Homeserver</Text>
 					</View>
 					<Text style={styles.headerText}>Invite code.</Text>
 					<SessionText style={styles.message}>

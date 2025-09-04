@@ -85,6 +85,7 @@ const ImportSuccessSheet = ({ payload }: {
 						pubky={pubky}
 						pubkyData={data}
 						onContinue={onContinue}
+						authorizeButtonStyle={styles.authorizeButton}
 					/>
 				</View>
 			</ActionSheetContainer>
@@ -104,6 +105,9 @@ const styles = StyleSheet.create({
 		height: '100%',
 		width: '100%',
 	},
+	authorizeButton: {
+		borderWidth: 0
+	}
 });
 
 export default memo(ImportSuccessSheet);

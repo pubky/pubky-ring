@@ -147,6 +147,8 @@ const styles = StyleSheet.create({
 	nameText: {
 		fontSize: 26,
 		fontWeight: '300',
+		letterSpacing: 0,
+		lineHeight: 26,
 		marginBottom: 8,
 		textAlign: 'center',
 		backgroundColor: 'transparent',
@@ -156,7 +158,7 @@ const styles = StyleSheet.create({
 		fontFamily: 'monospace',
 		textAlign: 'center',
 		marginBottom: 8,
-		fontWeight: 600,
+		fontWeight: '600',
 		lineHeight: 22,
 		letterSpacing: 0.4,
 	},

@@ -20,6 +20,7 @@ interface PubkyReviewProps {
 	pubky: string;
 	pubkyData: PubkyData;
 	onContinue: () => void;
+	authorizeButtonStyle?: Object;
 }
 
 const PubkyReview = ({
@@ -28,7 +29,8 @@ const PubkyReview = ({
 	description,
 	pubky,
 	pubkyData,
-	onContinue
+	onContinue,
+	authorizeButtonStyle
 }: PubkyReviewProps): ReactElement => {
 	return (
 		<RadialGradient
@@ -55,7 +57,7 @@ const PubkyReview = ({
 			</ForegroundView>
 			<View style={styles.footer}>
 				<AuthorizeButton
-					style={styles.authorizeButton}
+					style={[styles.authorizeButton, authorizeButtonStyle]}
 					onPressIn={onContinue}
 				>
 					<Text style={styles.buttonText}>Continue</Text>
@@ -98,7 +100,7 @@ const styles = StyleSheet.create({
 		fontWeight: '400',
 		fontSize: 17,
 		lineHeight: 24,
-		marginBottom: 40,
+		marginBottom: 24,
 	},
 	profileCard: {
 		alignItems: 'center',
@@ -132,6 +134,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
+		marginBottom: 16,
 	}
 });
 

@@ -4,7 +4,7 @@ import React, {
 	useCallback,
 	useMemo,
 } from 'react';
-import { StyleSheet } from 'react-native';
+import { Image, StyleSheet } from 'react-native';
 import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import {
@@ -17,7 +17,6 @@ import {
 	NavButton,
 	View,
 	ArrowLeft,
-	Pencil,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { Dispatch } from 'redux';
@@ -63,7 +62,10 @@ const PubkyDetailScreen = (): ReactElement => {
 				left: 10,
 				right: 10 }}
 		>
-			<Pencil size={18.44} />
+			<Image
+				source={require('../images/pencil.png')}
+				style={styles.pencilIcon}
+			/>
 		</NavButton>
 	), [onRightButtonPress]);
 
@@ -101,6 +103,11 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		alignItems: 'center',
 		justifyContent: 'center',
+	},
+	pencilIcon: {
+		width: 24,
+		height: 24,
+		alignSelf: 'center',
 	},
 });
 

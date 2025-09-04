@@ -47,7 +47,7 @@ jobs:
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download iOS App
-      uses: dawidd6/action-download-artifact@v4
+      uses: dawidd6/action-download-artifact@v6
       with:
         name: ios-release-app
         path: ./artifacts
@@ -63,6 +63,9 @@ jobs:
     - name: Run E2E tests
       env:
         IOS_APP: ./artifacts/pubkyring.app
+        IOS_SIM: iPhone 16
+        IOS_PLATFORM_VERSION: 18.6
+        HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       run: yarn e2e:ios
 
     - name: Upload Video

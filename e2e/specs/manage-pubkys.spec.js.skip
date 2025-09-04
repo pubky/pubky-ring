@@ -1,0 +1,15 @@
+const { expect } = require('chai');
+const { elementById, waitForDisplayed, completeOnboardingFlow } = require('../helpers/actions');
+
+
+before(async () => {
+  await completeOnboardingFlow();
+});
+
+describe('Create a pubky flow', () => {
+
+	it.skip('can create a pubky without setting up a homeserver', async () => {});
+  it.skip('can list multiple pubkys', async () => {});
+  it.skip('can edit a pubky', async () => {});
+  it.skip('can delete a pubky', async () => {});
+});

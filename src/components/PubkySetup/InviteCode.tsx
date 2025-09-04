@@ -294,7 +294,7 @@ const InviteCode = ({ payload }: {
 				<View style={styles.content}>
 					<ModalIndicator />
 					<View style={styles.titleContainer}>
-						<Text style={styles.title}>Default Homeserver</Text>
+						<Text testID="InviteCodeTitle" style={styles.title}>Default Homeserver</Text>
 					</View>
 					<Text style={styles.headerText}>Invite code.</Text>
 					<SessionText style={styles.message}>
@@ -303,6 +303,7 @@ const InviteCode = ({ payload }: {
 
 					<View style={styles.inputContainer}>
 						<TextInput
+							testID="InviteCodeInput"
 							style={styles.input}
 							value={inviteCode}
 							onChangeText={handleInviteCodeChange}
@@ -332,7 +333,7 @@ const InviteCode = ({ payload }: {
 					</TouchableOpacity>
 
 					{error ? (
-						<Text style={styles.errorText}>{error}</Text>
+						<Text testID="InviteCodeErrorText" style={styles.errorText}>{error}</Text>
 				) : null}
 					<View style={styles.imageContainer}>
 						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
@@ -346,11 +347,12 @@ const InviteCode = ({ payload }: {
 
 					<View style={styles.footer}>
 						<AuthorizeButton
+							testID="InviteCodeContinueButton"
 							style={[styles.continueButton, (!isValid || loading) && styles.continueButtonDisabled]}
 							onPressIn={isValid && !loading ? handleContinue : undefined}
 							disabled={!isValid || loading}
 						>
-							<Text style={styles.buttonText}>{loading ? 'Processing...' : 'Continue'}</Text>
+							<Text testID="InviteCodeContinueButtonText" style={styles.buttonText}>{loading ? 'Processing...' : 'Continue'}</Text>
 						</AuthorizeButton>
 					</View>
 				</View>

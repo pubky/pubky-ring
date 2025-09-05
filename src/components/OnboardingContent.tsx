@@ -69,7 +69,7 @@ const OnboardingContent = (): ReactElement => {
 							onPress={navigateHome}
 							testID="OnboardingGetStartedButton"
 						>
-							<Text style={styles.buttonText}>Get Started</Text>
+							<Text testID="OnboardingGetStartedButtonText" style={styles.buttonText}>Get Started</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

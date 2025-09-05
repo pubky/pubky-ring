@@ -9,6 +9,14 @@ export function elementById(selector: string): ChainablePromiseElement {
 	}
 }
 
+export function elementByText(text: string): ChainablePromiseElement {
+	if (driver.isAndroid) {
+		return $(`android=new UiSelector().text("${text}")`);
+	} else {
+		return $(`~${text}`);
+	}
+}
+
 export async function waitForDisplayed(element: ChainablePromiseElement, timeout?: number, interval: number = 1000): Promise<ChainablePromiseElement> {
 	await element.waitForDisplayed({ timeout, interval });
 	expect(await element.isDisplayed()).to.be.true;
@@ -16,22 +24,24 @@ export async function waitForDisplayed(element: ChainablePromiseElement, timeout
 }
 
 export async function completeOnboardingFlow(): Promise<void> {
-	// Wait for terms screen to be displayed
-	const termsScreen = await elementById('TermsOfUseTitle');
+	// Wait for terms screen to be displayed - use text content instead of testID
+	const termsScreen = elementByText('Terms of Use.');
 	await waitForDisplayed(termsScreen, 60_000);
 	expect(await termsScreen.getText()).to.equal('Terms of Use.');
 
 	// Tap terms checkbox
-	(await waitForDisplayed(elementById('TermsAgreeRow'))).click();
+	(await waitForDisplayed(elementById('TermsAgreeCheckbox'))).click();
 
 	// Tap privacy checkbox
-	(await waitForDisplayed(elementById('PrivacyAgreeRow'))).click();
+	(await waitForDisplayed(elementById('PrivacyAgreeCheckbox'))).click();
 
-	// Tap continue button
-	(await waitForDisplayed(elementById('TermsContinueButton'))).click();
+	// Tap continue button - use text content instead of testID
+	const continueButton = elementById('TermsContinueButtonText');
+	(await waitForDisplayed(continueButton)).click();
 
 	// Wait for onboarding screen to be displayed and tap get started button
-	(await waitForDisplayed(elementById('OnboardingGetStartedButton'))).click();
+	const getStartedButton = elementById('OnboardingGetStartedButtonText');
+	(await waitForDisplayed(getStartedButton)).click();
 
 	// Wait for home page's add pubky button to be displayed
 	await waitForDisplayed(elementById('EmptyStateAddPubkyButton'));

@@ -20,22 +20,26 @@ exports.config = {
 			'appium:newCommandTimeout': 300,
 			'appium:fullReset': false,
 			'appium:noReset': false,
-			'appium:adbExecTimeout': 300_000,
-			'appium:uiautomator2ServerLaunchTimeout': 300_000,
-			'appium:uiautomator2ServerInstallTimeout': 300_000,
-			'appium:androidInstallTimeout': 300_000,
+			'appium:avdLaunchTimeout': 600_000,
+			'appium:avdReadyTimeout': 600_000,
+			'appium:adbExecTimeout': 600_000,
+			'appium:uiautomator2ServerLaunchTimeout': 600_000,
+			'appium:uiautomator2ServerInstallTimeout': 600_000,
+			'appium:androidInstallTimeout': 600_000,
+			'appium:deviceReadyTimeout': 600_000,
+			'appium:androidDeviceReadyTimeout': 600_000,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
 					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:forceAppLaunch': false
 				}
 				: {
 					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:forceAppLaunch': false
 				})
 		}

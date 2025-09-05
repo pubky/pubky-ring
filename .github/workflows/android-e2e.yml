@@ -2,8 +2,8 @@ name: Android E2E Tests
 description: 'Disabled for now due to instability - UiAutomator2 crash'
 
 on:
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       commit-sha:
@@ -76,6 +76,7 @@ jobs:
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
+        ANDROID_PLATFORM_VERSION: 14
         HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       with:
         profile: pixel_6
@@ -84,8 +85,8 @@ jobs:
         force-avd-creation: false
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
-        disable-animations: true
-        emulator-build: 12325540
+        disable-animations: false
+        #emulator-build: 12325540
         script: yarn e2e:android
 
     - name: Upload Video

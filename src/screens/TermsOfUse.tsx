@@ -303,7 +303,7 @@ const TermsOfUse = (): React.ReactElement => {
 							style={[styles.continueButton, canContinue ? null : styles.continueButtonInactive ]}
 							testID="TermsContinueButton"
 						>
-							<Text style={styles.buttonText}>Continue</Text>
+							<Text testID="TermsContinueButtonText" style={styles.buttonText}>Continue</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

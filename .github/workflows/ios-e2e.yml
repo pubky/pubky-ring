@@ -1,14 +1,14 @@
 name: iOS E2E Tests
 
-on:
-  pull_request:
-    branches: [ main ]
-  workflow_dispatch:
-    inputs:
-      commit-sha:
-        description: 'Commit SHA to test (leave empty to use current branch head)'
-        required: false
-        type: string
+# on:
+#   pull_request:
+#     branches: [ main ]
+#   workflow_dispatch:
+#     inputs:
+#       commit-sha:
+#         description: 'Commit SHA to test (leave empty to use current branch head)'
+#         required: false
+#         type: string
 
 jobs:
   ios-e2e:

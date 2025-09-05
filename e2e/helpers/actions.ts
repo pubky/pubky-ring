@@ -22,10 +22,10 @@ export async function completeOnboardingFlow(): Promise<void> {
 	expect(await termsScreen.getText()).to.equal('Terms of Use.');
 
 	// Tap terms checkbox
-	(await waitForDisplayed(elementById('TermsAgreeRow'))).click();
+	(await waitForDisplayed(elementById('TermsAgreeCheckbox'))).click();
 
 	// Tap privacy checkbox
-	(await waitForDisplayed(elementById('PrivacyAgreeRow'))).click();
+	(await waitForDisplayed(elementById('PrivacyAgreeCheckbox'))).click();
 
 	// Tap continue button
 	(await waitForDisplayed(elementById('TermsContinueButton'))).click();

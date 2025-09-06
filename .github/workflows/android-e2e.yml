@@ -2,8 +2,8 @@ name: Android E2E Tests
 description: 'Disabled for now due to instability - UiAutomator2 crash'
 
 on:
-  # pull_request:
-  #   branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
     inputs:
       commit-sha:
@@ -59,7 +59,7 @@ jobs:
         max-attempts: '360'  # 1 hour with 10s intervals
 
     - name: Download Android APK
-      uses: dawidd6/action-download-artifact@v4
+      uses: dawidd6/action-download-artifact@v6
       with:
         name: android-release-apk
         path: ./artefacts
@@ -76,6 +76,7 @@ jobs:
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
+        HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       with:
         profile: pixel_6
         api-level: 34

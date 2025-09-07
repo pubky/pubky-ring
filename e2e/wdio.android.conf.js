@@ -13,9 +13,9 @@ exports.config = {
 		{
 			platformName: 'Android',
 			'appium:automationName': 'UiAutomator2',
-			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '13',
+			'appium:platformVersion': process.env.ANDROID_PLATFORM_VERSION || '14',
 			'appium:deviceName': process.env.ANDROID_DEVICE_NAME || 'Android Emulator',
-			'appium:avd': avdName,
+			'appium:avd': avdName, // same as deviceName?
 			'appium:autoGrantPermissions': true,
 			'appium:newCommandTimeout': 300,
 			'appium:fullReset': false,
@@ -28,19 +28,31 @@ exports.config = {
 			'appium:androidInstallTimeout': 600_000,
 			'appium:deviceReadyTimeout': 600_000,
 			'appium:androidDeviceReadyTimeout': 600_000,
+			// Additional stability options
+			'appium:skipServerInstallation': false,
+			'appium:skipDeviceInitialization': false,
+			'appium:systemPort': 8200,
+			'appium:mjpegScreenshotUrl': '',
+			'appium:clearSystemFiles': false,
+			//'appium:enforceXPath1': true,
+			'appium:waitForIdleTimeout': 600_000,
+			'appium:waitForQuiescence': true,
+			'appium:shouldTerminateApp': true,
+			'appium:forceAppLaunch': true,
+			'appium:autoLaunch': true,
+			'appium:appWaitDuration': 60000,
+			'appium:appWaitForLaunch': true,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
 					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:forceAppLaunch': false
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity'
 				}
 				: {
 					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity',
-					'appium:forceAppLaunch': false
+					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || 'to.pubkyring.MainActivity'
 				})
 		}
 	]

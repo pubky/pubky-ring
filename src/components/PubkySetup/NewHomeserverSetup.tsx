@@ -16,6 +16,7 @@ import {
 	RadialGradient,
 	AuthorizeButton,
 	TouchableOpacity,
+	BoldText,
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
@@ -88,7 +89,7 @@ const NewHomeserverSetup = ({ payload }: {
 			</View>
 			<Text style={styles.headerText}>Data hosting.</Text>
 			<SessionText style={styles.message}>
-				Choose a homeserver to host your data for pubky {truncatedPubky}
+				Choose a homeserver to host your data for pubky <BoldText>{truncatedPubky}</BoldText>
 			</SessionText>
 
 			<View style={styles.optionsContainer}>

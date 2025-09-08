@@ -228,7 +228,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 					<View style={styles.mainContent}>
 						<View style={styles.titleContainer}>
 							<Text style={styles.title}>
-								{isAuthorized ? 'Authorized' : 'Authorize'}
+								{isAuthorized ? 'Authorization Successful' : 'Authorize'}
 							</Text>
 						</View>
 
@@ -502,8 +502,10 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 24,
-		fontWeight: '600',
+		fontSize: 17,
+		fontWeight: '700',
+		lineHeight: 22,
+		letterSpacing: 0.4,
 		backgroundColor: 'transparent',
 	},
 	checkmarkContainer: {
@@ -527,7 +529,7 @@ const styles = StyleSheet.create({
 	pubkyName: {
 		fontSize: 26,
 		fontWeight: '300',
-		lineHeight: 26,
+		lineHeight: 32,
 		letterSpacing: 0,
 		marginBottom: 2,
 	},

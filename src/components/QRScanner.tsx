@@ -28,6 +28,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 				animated={true}
 				onClose={onClose}
 				navigationAnimation={navigationAnimation}
+				height={'100%'}
 			>
 				<View style={styles.cameraContainer}>
 					<Camera onBarCodeRead={handleBarCodeRead} />
@@ -57,7 +58,7 @@ const styles = StyleSheet.create({
 		zIndex: 100,
 	},
 	cameraContainer: {
-		height: '96%',
+		height: '100%',
 		borderTopLeftRadius: 20,
 		borderTopRightRadius: 20,
 	},

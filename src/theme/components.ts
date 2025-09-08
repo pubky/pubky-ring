@@ -164,6 +164,11 @@ export const SessionText = styled.Text<{ theme: Theme }>`
 	font-family: 'InterTight-VariableFont_wght';
 `;
 
+export const BoldText = styled.Text<{ theme: Theme }>`
+	font-weight: bold;
+	font-family: 'InterTight-VariableFont_wght';
+`;
+
 export const Box = styled.TouchableOpacity<{ theme: Theme }>`
   background-color: ${(props): string => props.theme.colors.foreground};
   border-color: ${(props): string => props.theme.colors.border};

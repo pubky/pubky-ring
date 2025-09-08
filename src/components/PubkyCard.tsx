@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
 	pubkyName: {
 		fontSize: 16,
 		fontWeight: 'bold',
+		lineHeight: 26,
 	},
 	pubkyText: {
 		fontWeight: '600',

@@ -36,8 +36,12 @@ const DeletePubky = ({ payload }: {
 }): ReactElement => {
 	const { onDelete } = useMemo(() => payload, [payload]);
 	const publicKey = useMemo(() => payload?.publicKey ?? '', [payload]);
-	const pubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
+	const currentPubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
 	const navigationAnimation = useSelector(getNavigationAnimation);
+
+	// Preserve the original name when component first loads
+	//eslint-disable-next-line react-hooks/exhaustive-deps
+	const pubkyName = useMemo(() => currentPubkyName, [publicKey]);
 
 	const closeSheet = useCallback((): void => {
 		SheetManager.hide('delete-pubky').then();

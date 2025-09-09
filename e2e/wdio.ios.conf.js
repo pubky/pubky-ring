@@ -13,15 +13,14 @@ exports.config = {
 			'appium:deviceName': iosSimName,
 			'appium:newCommandTimeout': 300,
 			'appium:useNewWDA': false,
-			//'appium:wdaLocalPort': 8100,
 			'appium:preventWDAAttachments': true,
 			'appium:noReset': false,
 			'appium:fullReset': false,
 			'appium:shouldTerminateApp': true,
 			'appium:autoAcceptAlerts': true,
 			'appium:autoDismissAlerts': true,
-			'appium:simulatorStartupTimeout': 300_000,
-			'appium:wdaStartupTimeout': 300_000,
+			'appium:simulatorStartupTimeout': 600_000,
+			'appium:wdaLaunchTimeout': 600_000,
 			...(appPath
         ? { 'appium:app': appPath }
         : {

@@ -39,6 +39,7 @@ import { RootState } from '../types';
 import { FlashList } from 'react-native-actions-sheet/dist/src/views/FlashList';
 
 type InputDataItem = {
+	testID?: string;
 	id: 'name' | 'homeserver' | 'signuptoken';
 	value: string;
 	onChange: (text: string) => void;
@@ -53,6 +54,7 @@ const TITLE = '';
 const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
 
 const InputItemComponent = ({
+	testID,
 	value,
 	onChangeText,
 	placeholder,
@@ -63,6 +65,7 @@ const InputItemComponent = ({
 	style,
 	inputRef,
 }: {
+	testID?: string;
 	value: string;
 	onChangeText: (text: string) => void;
 	placeholder: string;
@@ -77,6 +80,7 @@ const InputItemComponent = ({
 		<View style={[styles.inputWrapper, style]}>
 			<View style={[styles.inputContainer, error ? styles.inputError : null]}>
 				<TextInput
+					testID={testID}
 					// @ts-ignore
 					ref={inputRef}
 					style={styles.input}
@@ -410,6 +414,10 @@ const EditPubky = ({ payload }: {
 		return error ? require('../images/cross.png') : require('../images/check.png');
 	}, [error]);
 
+	const checkMarkTestID = useMemo(() => {
+		return error ? 'EditPubkyErrorCheckMarkImage' : 'EditPubkySuccessCheckMarkImage';
+	}, [error]);
+
 	const onReset = useCallback(() => {
 		try {
 			// Clear any active timers
@@ -461,6 +469,7 @@ const EditPubky = ({ payload }: {
 	const inputData = useMemo(() => {
 		const items: InputDataItem[] = [
 			{
+				testID: 'EditPubkyNameInput',
 				id: 'name' as const,
 				value: newPubkyName,
 				onChange: handleChangeText,
@@ -472,6 +481,7 @@ const EditPubky = ({ payload }: {
 
 		if (isSignupTokenInputVisible) {
 			items.push({
+				testID: 'EditPubkyInviteCodeInput',
 				id: 'signuptoken' as const,
 				value: signupToken,
 				onChange: handleSignupTokenChange,
@@ -482,6 +492,7 @@ const EditPubky = ({ payload }: {
 		}
 
 		items.push({
+			testID: 'EditPubkyHomeserverInput',
 			id: 'homeserver' as const,
 			value: homeServer,
 			onChange: setHomeServer,
@@ -497,7 +508,7 @@ const EditPubky = ({ payload }: {
 		return (
 			<>
 				<ModalIndicator />
-				<Text style={styles.title}>{title}</Text>
+				<Text testID="EditPubkyTitle" style={styles.title}>{title}</Text>
 			</>
 		);
 	}, [title]);
@@ -515,6 +526,7 @@ const EditPubky = ({ payload }: {
 				<View style={styles.imageContainer}>
 					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
 						<Image
+							testID={checkMarkTestID}
 							source={checkMarkImage}
 							style={styles.checkImage}
 							resizeMode="contain"
@@ -523,7 +535,7 @@ const EditPubky = ({ payload }: {
 				</View>
 			</View>
 		);
-	}, [error, checkStyle, checkMarkImage, footerTop]);
+	}, [error, checkStyle, checkMarkImage, checkMarkTestID, footerTop]);
 
 	const leftButtonText = useMemo(() => {
 		if (storedPubkyData.homeserver && haveFieldsChanged) {
@@ -546,6 +558,7 @@ const EditPubky = ({ payload }: {
 				<>
 					<Text style={styles.textInputTitle}>{textInputTitleText?.signuptoken}</Text>
 					<InputItemComponent
+						testID={item.testID}
 						inputRef={signupTokenInputRef}
 						value={item.value}
 						onChangeText={item.onChange}
@@ -572,6 +585,7 @@ const EditPubky = ({ payload }: {
 						{textInputTitleText[item.id]}
 					</Text>
 					<InputItemComponent
+						testID={item.testID}
 						value={item.value}
 						onChangeText={item.onChange}
 						placeholder={item.placeholder}
@@ -590,6 +604,7 @@ const EditPubky = ({ payload }: {
 					{textInputTitleText[item.id]}
 				</Text>
 				<InputItemComponent
+					testID={item.testID}
 					value={item.value}
 					onChangeText={item.onChange}
 					placeholder={item.placeholder}
@@ -640,11 +655,13 @@ const EditPubky = ({ payload }: {
 
 						<View style={styles.buttonContainer}>
 							<Button
+								testID="EditPubkyLeftButton"
 								text={leftButtonText}
 								style={styles.button}
 								onPress={leftButtonOnPress}
 							/>
 							<Button
+								testID="EditPubkySaveButton"
 								text={'Save'}
 								loading={loading}
 								style={[styles.button, styles.submitButton]}

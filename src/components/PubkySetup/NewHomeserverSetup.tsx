@@ -96,16 +96,18 @@ const NewHomeserverSetup = ({ payload }: {
 				<Text style={styles.optionLabel}>HOMESERVER</Text>
 
 				<TouchableOpacity
+					testID="HomeserverDefaultOption"
 					style={styles.optionRow}
 					onPress={() => setSelectedOption(HomeserverOption.default)}
 					activeOpacity={0.7}
 				>
-					<View style={[
-						styles.radioOuter,
-						selectedOption === HomeserverOption.default && styles.radioOuterSelected
-					]}>
+					<View
+						style={[
+							styles.radioOuter,
+							selectedOption === HomeserverOption.default && styles.radioOuterSelected
+						]}>
 						{selectedOption === HomeserverOption.default && (
-							<View style={styles.radioInner} />
+							<View testID="HomeserverDefaultRadioInner" style={styles.radioInner} />
 						)}
 					</View>
 					<Text style={styles.optionText}>
@@ -114,16 +116,18 @@ const NewHomeserverSetup = ({ payload }: {
 				</TouchableOpacity>
 
 				<TouchableOpacity
+					testID="HomeserverCustomOption"
 					style={styles.optionRow}
 					onPress={() => setSelectedOption(HomeserverOption.custom)}
 					activeOpacity={0.7}
 				>
-					<View style={[
-						styles.radioOuter,
-						selectedOption === HomeserverOption.custom && styles.radioOuterSelected
-					]}>
+					<View
+						style={[
+							styles.radioOuter,
+							selectedOption === HomeserverOption.custom && styles.radioOuterSelected
+						]}>
 						{selectedOption === HomeserverOption.custom && (
-							<View style={styles.radioInner} />
+							<View testID="HomeserverCustomRadioInner" style={styles.radioInner} />
 						)}
 					</View>
 					<Text style={styles.optionText}>Custom</Text>
@@ -137,6 +141,7 @@ const NewHomeserverSetup = ({ payload }: {
 					resizeMode="contain"
 				/>
 				<AuthorizeButton
+					testID="HomeserverContinueButton"
 					style={styles.continueButton}
 					onPressIn={handleContinue}
 				>

@@ -39,13 +39,14 @@ runs:
           let attempts = 0;
 
           while (attempts < maxAttempts) {
-            // Get workflow runs for the specific commit SHA
-            const runs = await github.rest.actions.listWorkflowRunsForRepo({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              head_sha: commitSha,
-              per_page: 100
-            });
+            try {
+              // Get workflow runs for the specific commit SHA
+              const runs = await github.rest.actions.listWorkflowRunsForRepo({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                head_sha: commitSha,
+                per_page: 100
+              });
 
             console.log(`Found ${runs.data.workflow_runs.length} total workflow runs`);
             console.log(`Looking for workflow: "${workflowName}" with commit: ${commitSha}`);
@@ -64,11 +65,20 @@ runs:
                 } else {
                   core.setFailed(`${workflowName} failed with conclusion: ${targetRun.conclusion}`);
                 }
+              } else if (targetRun.status === 'cancelled') {
+                console.log(`${workflowName} was cancelled, stopping wait`);
+                core.setFailed(`${workflowName} was cancelled`);
+                break;
               } else {
                 console.log(`${workflowName} status: ${targetRun.status}`);
               }
             } else {
               console.log(`No ${workflowName} workflow run found for commit ${commitSha}`);
+            }
+
+            } catch (error) {
+              console.log(`Error checking workflow status (attempt ${attempts + 1}/${maxAttempts}): ${error.message}`);
+              // Continue to next attempt instead of failing immediately
             }
 
             attempts++;

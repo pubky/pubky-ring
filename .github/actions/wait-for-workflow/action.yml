@@ -65,6 +65,10 @@ runs:
                 } else {
                   core.setFailed(`${workflowName} failed with conclusion: ${targetRun.conclusion}`);
                 }
+              } else if (targetRun.status === 'cancelled') {
+                console.log(`${workflowName} was cancelled, stopping wait`);
+                core.setFailed(`${workflowName} was cancelled`);
+                break;
               } else {
                 console.log(`${workflowName} status: ${targetRun.status}`);
               }

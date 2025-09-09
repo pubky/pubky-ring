@@ -1,5 +1,5 @@
 name: Android E2E Tests
-description: 'Disabled for now due to instability - UiAutomator2 crash'
+description: 'Disabled for now due to instability - AVD crashes due to use of swiftshader_indirect hardware acceleration, see bug issue with Google https://issuetracker.google.com/issues/443752805'
 
 on:
   # pull_request:
@@ -76,6 +76,7 @@ jobs:
       env:
         ANDROID_APP: ./artefacts/app-release.apk
         ANDROID_DEVICE_NAME: Pixel_6
+        ANDROID_PLATFORM_VERSION: 14
         HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       with:
         profile: pixel_6
@@ -84,8 +85,7 @@ jobs:
         force-avd-creation: false
         emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
         arch: x86_64
-        disable-animations: true
-        emulator-build: 12325540
+        disable-animations: false
         script: yarn e2e:android
 
     - name: Upload Video

@@ -24,19 +24,18 @@ exports.config = {
 			'appium:uiautomator2ServerLaunchTimeout': 300_000,
 			'appium:uiautomator2ServerInstallTimeout': 300_000,
 			'appium:androidInstallTimeout': 300_000,
+			'appium:forceAppLaunch': false,
 			...(resolvedAppPath
 				? {
 					'appium:app': resolvedAppPath,
 					'appium:appWaitPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
-					'appium:forceAppLaunch': false
 				}
 				: {
 					'appium:appPackage': process.env.APP_PACKAGE || 'to.pubky.ring',
 					'appium:appActivity': process.env.APP_ACTIVITY || 'to.pubkyring.MainActivity',
 					'appium:appWaitActivity': process.env.APP_WAIT_ACTIVITY || '*',
-					'appium:forceAppLaunch': false
 				})
 		}
 	]

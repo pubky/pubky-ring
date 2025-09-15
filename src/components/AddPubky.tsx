@@ -28,6 +28,7 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import ModalIndicator from './ModalIndicator.tsx';
 import MnemonicForm from './MnemonicForm.tsx';
 import {
+	ACTION_SHEET_HEIGHT,
 	BLUE_RADIAL_GRADIENT,
 } from '../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
@@ -37,7 +38,6 @@ import Toast from 'react-native-toast-message';
 import { showImportQRScanner } from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 
-const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
 const { height } = Dimensions.get('window');
 const isSmallScreen = height < 700;
 const toastStyle = {

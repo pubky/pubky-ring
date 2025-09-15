@@ -20,7 +20,7 @@ import { Pubky } from "../types/pubky.ts";
 import PubkyReview from "./PubkySetup/PubkyReview.tsx";
 import { getPubky, getPubkyCount } from "../store/selectors/pubkySelectors.ts";
 import { RootState } from "../store";
-const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
+import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 
 const ImportSuccessSheet = ({ payload }: {
     payload: {

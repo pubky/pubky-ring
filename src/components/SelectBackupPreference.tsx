@@ -22,14 +22,13 @@ import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import ModalIndicator from './ModalIndicator.tsx';
 import {
+	ACTION_SHEET_HEIGHT,
 	BLUE_RADIAL_GRADIENT,
 } from '../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { EBackupPreference } from "../types/pubky.ts";
 import { showBackupPrompt } from "../utils/sheetHelpers.ts";
 import { truncateStr } from "../utils/pubky.ts";
-
-const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
 
 const SelectBackupPreference = ({ payload }: {
     payload: {

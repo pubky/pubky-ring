@@ -33,6 +33,7 @@ import {
 	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
 	BLUE_RADIAL_GRADIENT,
 	STAGING_HOMESERVER,
+	ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
@@ -50,8 +51,6 @@ type InputDataItem = {
 
 const MAX_NAME_LENGTH = 50;
 const TITLE = '';
-
-const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
 
 const InputItemComponent = ({
 	testID,

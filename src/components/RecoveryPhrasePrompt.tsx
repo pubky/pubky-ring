@@ -17,6 +17,7 @@ import { RootState } from '../types';
 import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { truncatePubky } from '../utils/pubky.ts';
+import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 
 const getMarginBottom = (index: number): number => {
 	return index + 1 === 6 ? 0 : 12;
@@ -64,6 +65,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 			keyboardHandlerEnabled={true}
 			isModal={Platform.OS === 'ios'}
 			CustomHeaderComponent={<></>}
+			height={ACTION_SHEET_HEIGHT}
 		>
 			<SkiaGradient modal={true} style={styles.content}>
 				<ModalIndicator />

@@ -21,6 +21,7 @@ import {
 	ModalButton,
 	ModalButtonContainer
 } from './shared';
+import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 
 const ListItemComponent = ({ name, pubky, onPress }: { name?: string; pubky: string; onPress: () => void }): ReactElement => {
 	return (
@@ -80,7 +81,7 @@ const SelectPubky = ({ payload }: {
 		<ModalWrapper
 			id="select-pubky"
 			onClose={closeSheet}
-			height="95%"
+			height={ACTION_SHEET_HEIGHT}
 			showToast={false}
 			contentStyle={styles.container}
 		>

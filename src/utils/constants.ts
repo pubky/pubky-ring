@@ -1,5 +1,4 @@
 // Gradient definitions
-import { Platform } from 'react-native';
 
 export const BLUE_RADIAL_GRADIENT = ['#041426', '#041426', '#051322', '#040F1C', '#020B13', '#01060A' ];
 export const ONBOARDING_KEY_ERROR_RADIAL_GRADIENT = ['#260404', '#260404', '#221305', '#1C0404', '#130202', '#0A0101'];
@@ -25,4 +24,4 @@ export const AUTH_SHEET_DELAY = 50; // Small delay for auth sheet display
 export const ANDROID_DEEPLINK_DELAY = 50; // Delay before opening Android deep links
 export const SCANNER_CLOSE_DELAY = 50; // Delay after closing scanner before opening new sheet
 
-export const ACTION_SHEET_HEIGHT = Platform.OS === 'ios' ? '95%' : '100%';
+export const ACTION_SHEET_HEIGHT = `93%`;

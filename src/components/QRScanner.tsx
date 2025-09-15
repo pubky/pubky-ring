@@ -7,6 +7,7 @@ import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { CardButton } from '../theme/components.ts';
+import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
@@ -28,7 +29,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 				animated={true}
 				onClose={onClose}
 				navigationAnimation={navigationAnimation}
-				height={'100%'}
+				height={ACTION_SHEET_HEIGHT}
 			>
 				<View style={styles.cameraContainer}>
 					<Camera onBarCodeRead={handleBarCodeRead} />

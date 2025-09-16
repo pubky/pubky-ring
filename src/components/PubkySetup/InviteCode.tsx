@@ -12,7 +12,9 @@ import {
 	TextInput,
 	Linking,
 	Keyboard,
-	Image, Platform, KeyboardAvoidingView, Dimensions,
+	Image, Platform,
+	KeyboardAvoidingView,
+	Dimensions,
 } from 'react-native';
 import {
 	View,
@@ -26,7 +28,7 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 import { Gift, Check } from 'lucide-react-native';
-import { formatSignupToken, isValidSignupTokenFormat } from '../../utils/helpers.ts';
+import { formatSignupToken, isSmallScreen, isValidSignupTokenFormat } from '../../utils/helpers.ts';
 import {
 	useAnimatedStyle,
 	useSharedValue,
@@ -270,6 +272,10 @@ const InviteCode = ({ payload }: {
 		transform: [{ scale: withTiming(isValid ? 1 : 0.8, { duration: 300 }) }],
 	}));
 
+	const smallScreen = useMemo(() => {
+		return isSmallScreen();
+	}, []);
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.gradientContainer}>
@@ -335,7 +341,7 @@ const InviteCode = ({ payload }: {
 					{error ? (
 						<Text testID="InviteCodeErrorText" style={styles.errorText}>{error}</Text>
 				) : null}
-					<View style={styles.imageContainer}>
+					{!smallScreen && (<View style={styles.imageContainer}>
 						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
 							<Image
 								source={checkMarkImage}
@@ -343,7 +349,7 @@ const InviteCode = ({ payload }: {
 								resizeMode="contain"
 							/>
 						</AnimatedView>
-					</View>
+					</View>)}
 
 					<View style={styles.footer}>
 						<AuthorizeButton
@@ -434,7 +440,7 @@ const styles = StyleSheet.create({
 		fontWeight: '500',
 		color: 'rgba(173, 255, 47, 0.8)',
 		letterSpacing: 2,
-		textAlign: 'center',
+		textAlign: 'left',
 	},
 	checkmark: {
 		position: 'absolute',
@@ -494,17 +500,18 @@ const styles = StyleSheet.create({
 		height: 150,
 	},
 	continueButton: {
-		width: '100%',
-		borderRadius: 64,
-		paddingVertical: 20,
-		alignItems: 'center',
 		flexDirection: 'row',
-		gap: 4,
-		borderWidth: 1,
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-		alignSelf: 'center',
+		width: '100%',
+		minHeight: 64,
+		borderRadius: 64,
+		paddingVertical: 15,
+		paddingHorizontal: 15,
 		alignContent: 'center',
 		justifyContent: 'center',
+		alignItems: 'center',
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 1)',
+		backgroundColor: 'rgba(255, 255, 255, 0.08)'
 	},
 	continueButtonDisabled: {
 		opacity: 0.5,

@@ -215,7 +215,8 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 					<Text style={styles.title}>Import Pubky</Text>
 				</View>
 				<SessionText style={styles.message}>
-					Enter your pubky recovery phrase.
+					{'Enter the 12 words from your recovery \n' +
+            'phrase to import or restore your pubky.'}
 				</SessionText>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
@@ -329,9 +330,10 @@ const styles = StyleSheet.create({
 		fontWeight: '400',
 		fontSize: 17,
 		lineHeight: 22,
-		alignSelf: 'center',
+		alignSelf: 'flex-start',
 		minHeight: 44,
-		textAlign: 'center',
+		textAlign: 'left',
+		marginBottom: 24,
 	},
 	keyContainer: {
 		flex: 1,

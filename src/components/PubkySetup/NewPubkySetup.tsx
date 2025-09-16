@@ -1,31 +1,22 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-	useState,
-} from 'react';
-import {
-	Platform,
-	StyleSheet,
-} from 'react-native';
-import {
-	View,
-	ActionSheetContainer,
-} from '../../theme/components.ts';
+import React, { memo, ReactElement, useCallback, useMemo, useState, } from 'react';
+import { Platform, StyleSheet, } from 'react-native';
+import { ActionSheetContainer, View, } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../../store/selectors/settingsSelectors.ts';
+import { PubkyData } from '../../navigation/types.ts';
+import { Pubky } from '../../types/pubky.ts';
+import NewHomeserverSetup from './NewHomeserverSetup.tsx';
+import InviteCode from './InviteCode.tsx';
+import RequestInviteCode from './RequestInviteCode.tsx';
+import Welcome from './Welcome.tsx';
+import PubkyReview from './PubkyReview.tsx';
+import { defaultPubkyState } from '../../store/shapes/pubky.ts';
+import {
+	ACTION_SHEET_HEIGHT,
+	ACTION_SHEET_HEIGHT_TEXTINPUT,
+} from '../../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
-import { PubkyData } from "../../navigation/types.ts";
-import { Pubky } from "../../types/pubky.ts";
-import NewHomeserverSetup from "./NewHomeserverSetup.tsx";
-import InviteCode from "./InviteCode.tsx";
-import RequestInviteCode from "./RequestInviteCode.tsx";
-import Welcome from "./Welcome.tsx";
-import PubkyReview from "./PubkyReview.tsx";
-import { defaultPubkyState } from "../../store/shapes/pubky.ts";
-import { ACTION_SHEET_HEIGHT } from '../../utils/constants.ts';
 
 export enum ECurrentScreen {
 	main = 'main',
@@ -137,6 +128,15 @@ const NewPubkySetup = ({ payload }: {
 		}
 	}, [currentScreen]);
 
+	const acionSheetHeight = useMemo(() => {
+		switch (currentScreen) {
+			case ECurrentScreen.inviteCode:
+				return ACTION_SHEET_HEIGHT_TEXTINPUT;
+			default:
+				return ACTION_SHEET_HEIGHT;
+		}
+	}, [currentScreen]);
+
 	const subTitle = useMemo(() => {
 		return 'This is your new unique identifier, your pubky. Create as many as you need for different purposes.';
 	}, []);
@@ -155,7 +155,7 @@ const NewPubkySetup = ({ payload }: {
 				keyboardHandlerEnabled={Platform.OS === 'ios'}
 				//isModal={Platform.OS === 'ios'}
 				CustomHeaderComponent={<></>}
-				height={ACTION_SHEET_HEIGHT}
+				height={acionSheetHeight}
 			>
 				<Content
 					currentScreen={currentScreen}

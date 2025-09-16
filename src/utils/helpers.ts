@@ -11,7 +11,7 @@ import {
 import { parseAuthUrl } from '@synonymdev/react-native-pubky';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
-import { Linking, Platform, Share } from 'react-native';
+import { Dimensions, Linking, Platform, Share } from 'react-native';
 import { getAutoAuthFromStore, getIsOnline } from './store-helpers.ts';
 import { readFromClipboard } from './clipboard.ts';
 import NetInfo from '@react-native-community/netinfo';
@@ -36,26 +36,36 @@ import {
  * Used for homeserver invite codes
  */
 export const formatSignupToken = (text: string): string => {
-	// Convert to uppercase
-	text = text.toUpperCase();
+	const cleaned = text.toUpperCase().replace(/[^A-Z0-9-]/g, '');
+	if (!cleaned) return '';
 
-	// Remove all characters except alphanumeric and hyphens
-	text = text.replace(/[^A-Z0-9-]/g, '');
-
-	// Remove all hyphens first to count actual characters
-	const withoutHyphens = text.replace(/-/g, '');
-
-	// Limit to 12 alphanumeric characters
-	const limited = withoutHyphens.slice(0, 12);
-
-	// Build the formatted string with hyphens in correct positions
 	let result = '';
-	for (let i = 0; i < limited.length; i++) {
-		// Add hyphen at position 4 and 8
-		if (i === 4 || i === 8) {
-			result += '-';
+	let alphanumericCount = 0;
+
+	for (let i = 0; i < cleaned.length; i++) {
+		const char = cleaned[i];
+		if (char === '-') {
+			// Allow hyphen only at positions 4 and 9 (after 4 and 8 alphanumeric chars)
+			if (alphanumericCount === 4 || alphanumericCount === 8) {
+				// Only add if not already there
+				if (result[result.length - 1] !== '-') {
+					result += '-';
+				}
+			}
+			// Skip invalid hyphens
+		} else {
+			if (alphanumericCount >= 12) break; // Max 12 alphanumeric chars
+			// Auto-insert hyphen if needed
+			if (
+				(alphanumericCount === 4 || alphanumericCount === 8) &&
+        result.length > 0 &&
+        result[result.length - 1] !== '-'
+			) {
+				result += '-';
+			}
+			result += char;
+			alphanumericCount++;
 		}
-		result += limited[i];
 	}
 
 	return result;
@@ -662,4 +672,9 @@ export const sleep = (ms = 1000): Promise<void> => {
 	return new Promise((resolve) => {
 		setTimeout(resolve, ms);
 	});
+};
+
+export const isSmallScreen = (): boolean => {
+	const { height: screenHeight } = Dimensions.get('window');
+	return screenHeight < 700;
 };

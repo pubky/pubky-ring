@@ -6,7 +6,7 @@ import {
 	SessionText,
 	RadialGradient,
 	ForegroundView,
-	AuthorizeButton
+	CardButton,
 } from '../../theme/components.ts';
 import ModalIndicator from '../ModalIndicator.tsx';
 import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants.ts';
@@ -56,13 +56,13 @@ const PubkyReview = ({
 				/>
 			</ForegroundView>
 			<View style={styles.footer}>
-				<AuthorizeButton
+				<CardButton
 					testID="NewPubkyContinueButton"
 					style={[styles.authorizeButton, authorizeButtonStyle]}
 					onPressIn={onContinue}
 				>
 					<Text style={styles.buttonText}>Continue</Text>
-				</AuthorizeButton>
+				</CardButton>
 			</View>
 		</RadialGradient>
 	);
@@ -109,6 +109,20 @@ const styles = StyleSheet.create({
 		borderRadius: 24,
 		backgroundColor: 'rgba(255, 255, 255, 0.05)',
 	},
+	authorizeButton: {
+		flexDirection: 'row',
+		width: '100%',
+		minHeight: 64,
+		borderRadius: 64,
+		paddingVertical: 15,
+		paddingHorizontal: 15,
+		alignContent: 'center',
+		justifyContent: 'center',
+		alignItems: 'center',
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 1)',
+		backgroundColor: 'rgba(255, 255, 255, 0.08)'
+	},
 	buttonText: {
 		fontSize: 15,
 		fontWeight: 600,
@@ -116,26 +130,11 @@ const styles = StyleSheet.create({
 		letterSpacing: 0.2,
 		marginLeft: 5,
 	},
-	authorizeButton: {
-		width: '100%',
-		borderRadius: 64,
-		paddingVertical: 20,
-		alignItems: 'center',
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 4,
-		borderWidth: 1,
-		alignSelf: 'center',
-		alignContent: 'center',
-		justifyContent: 'center',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-	},
 	footer: {
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
-		marginBottom: 16,
 	}
 });
 

@@ -175,7 +175,10 @@ const AddPubky = ({ payload }: {
 			case 'import-options':
 				return 'Choose the backup method you used.';
 			case 'mnemonic-form':
-				return 'Enter your pubky recovery phrase.';
+				return (
+					'Enter the 12 words from your recovery \n' +
+          'phrase to import or restore your pubky.'
+				);
 			default:
 				return 'Do you want to create a new pubky or import an existing one?';
 		}

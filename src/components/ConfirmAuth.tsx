@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Dimensions, Linking, Platform, StyleSheet } from 'react-native';
+import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -14,7 +14,7 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth, truncatePubky } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { showToast, sleep } from '../utils/helpers.ts';
+import { isSmallScreen, showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
@@ -45,12 +45,12 @@ interface Capability {
 	permission: string;
 }
 
-const { height } = Dimensions.get('window');
-const isSmallScreen = height < 700;
+const smallScreen = isSmallScreen();
+
 const toastStyle = {
 	top: Platform.select({
-		ios: isSmallScreen ? -9 : -50,
-		android: isSmallScreen ? -9 : -50,
+		ios: smallScreen ? -9 : -50,
+		android: smallScreen ? -9 : -50,
 	}),
 };
 

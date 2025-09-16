@@ -24,6 +24,9 @@ interface PubkyProfileProps {
     isButtonLoading?: boolean;
 }
 
+const smallScreen = isSmallScreen();
+const smallScreenStyle = smallScreen ? { padding: 15 } : {};
+
 export const PubkyProfile = memo(({
 	index,
 	pubky,
@@ -56,11 +59,6 @@ export const PubkyProfile = memo(({
 		}
 		return 'pubky';
 	}, [index, pubkyData.name]);
-
-	const smallScreenStyle = useMemo(() => {
-		const smallScreen = isSmallScreen();
-		return smallScreen ? { padding: 15 } : {};
-	}, []);
 
 	return (
 		<View style={[styles.profileContainer, smallScreenStyle]}>

@@ -51,6 +51,8 @@ import { getPubky } from '../../store/selectors/pubkySelectors.ts';
 import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
+const smallScreen = isSmallScreen();
+
 const InviteCode = ({ payload }: {
 	payload: {
 		pubky: string;
@@ -271,10 +273,6 @@ const InviteCode = ({ payload }: {
 		opacity: withTiming(isValid ? 1 : 0, { duration: 300 }),
 		transform: [{ scale: withTiming(isValid ? 1 : 0.8, { duration: 300 }) }],
 	}));
-
-	const smallScreen = useMemo(() => {
-		return isSmallScreen();
-	}, []);
 
 	return (
 		<View style={styles.container}>

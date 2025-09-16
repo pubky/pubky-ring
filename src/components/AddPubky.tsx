@@ -6,7 +6,6 @@ import React, {
 	useState,
 } from 'react';
 import {
-	Dimensions,
 	Image,
 	Platform,
 	StyleSheet,
@@ -35,15 +34,14 @@ import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { Result } from '@synonymdev/result';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
-import { showImportQRScanner } from '../utils/helpers.ts';
+import { isSmallScreen, showImportQRScanner } from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 
-const { height } = Dimensions.get('window');
-const isSmallScreen = height < 700;
+const smallScreen = isSmallScreen();
 const toastStyle = {
 	top: Platform.select({
-		ios: isSmallScreen ? -9 : -50,
-		android: isSmallScreen ? -9 : -50,
+		ios: smallScreen ? -9 : -50,
+		android: smallScreen ? -9 : -50,
 	}),
 };
 

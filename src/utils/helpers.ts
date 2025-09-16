@@ -675,6 +675,6 @@ export const sleep = (ms = 1000): Promise<void> => {
 };
 
 export const isSmallScreen = (): boolean => {
-	const { height: screenHeight } = Dimensions.get('window');
-	return screenHeight < 700;
+	const { height } = Dimensions.get('window');
+	return height < 700;
 };

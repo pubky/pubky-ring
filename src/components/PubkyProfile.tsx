@@ -10,7 +10,7 @@ import {
 	Card,
 	AuthorizeButton,
 } from '../theme/components';
-import { showToast } from '../utils/helpers';
+import { isSmallScreen, showToast } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
 
 interface PubkyProfileProps {
@@ -23,6 +23,9 @@ interface PubkyProfileProps {
     buttonIcon?: React.ReactNode;
     isButtonLoading?: boolean;
 }
+
+const smallScreen = isSmallScreen();
+const smallScreenStyle = smallScreen ? { padding: 15 } : {};
 
 export const PubkyProfile = memo(({
 	index,
@@ -58,7 +61,7 @@ export const PubkyProfile = memo(({
 	}, [index, pubkyData.name]);
 
 	return (
-		<View style={styles.profileContainer}>
+		<View style={[styles.profileContainer, smallScreenStyle]}>
 			<Card style={styles.profile}>
 				<View style={styles.avatarContainer}>
 					<ProfileAvatar pubky={pubky} size={86} />

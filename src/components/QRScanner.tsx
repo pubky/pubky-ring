@@ -1,11 +1,9 @@
 import React, { memo, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Camera from './Camera/Camera';
-import ScanningOverlay from './Camera/ScanningOverlay';
 import { ActionSheetContainer, Clipboard, Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { CardButton } from '../theme/components.ts';
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 interface QRScannerProps {
@@ -23,65 +21,65 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 	}, [onScan]);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="camera"
-				animated={true}
-				onClose={onClose}
-				navigationAnimation={navigationAnimation}
-				height={ACTION_SHEET_HEIGHT}
-			>
+		<ActionSheetContainer
+			id="camera"
+			animated={true}
+			onClose={onClose}
+			navigationAnimation={navigationAnimation}
+			height={ACTION_SHEET_HEIGHT}
+		>
+			<View style={styles.container}>
 				<View style={styles.cameraContainer}>
 					<Camera onBarCodeRead={handleBarCodeRead} />
-					<ScanningOverlay />
-					<View style={styles.buttonContainer}>
-						<CardButton
-							style={styles.actionButton2}
-							onPress={onCopyClipboard}
-						>
-							<Clipboard size={16} />
-							<Text style={styles.buttonText}>Paste Link</Text>
-						</CardButton>
-					</View>
 				</View>
-			</ActionSheetContainer>
-		</View>
+				<View style={styles.buttonContainer}>
+					<CardButton
+						style={styles.actionButton2}
+						onPress={onCopyClipboard}
+					>
+						<Clipboard size={20} style={styles.clipboard} />
+						<Text style={styles.buttonText}>Paste Link</Text>
+					</CardButton>
+				</View>
+			</View>
+		</ActionSheetContainer>
 	);
 });
 
 const styles = StyleSheet.create({
-	// TODO: Eventially remove the absolute positioned container View.
-	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
 	container: {
-		...absoluteFillObject,
 		height: '100%',
 		width: '100%',
-		zIndex: 100,
 	},
 	cameraContainer: {
-		height: '100%',
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
+		height: '81%', // There's quirk on Android where the camera barely appears above the modal if this is 80%
+		width: '90%',
+		alignSelf: 'center'
 	},
 	buttonContainer: {
-		position: 'absolute',
-		bottom: 20,
-		left: 0,
-		right: 0,
+		height: '19%',
 		alignItems: 'center',
 		justifyContent: 'center',
-		zIndex: 100,
+		alignContent: 'center',
+		bottom: 0,
 	},
 	actionButton2: {
-		borderRadius: 64,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		alignItems: 'center',
-		justifyContent: 'center',
-		display: 'flex',
 		flexDirection: 'row',
+		minWidth: 327,
+		minHeight: 64,
+		borderRadius: 48,
+		paddingVertical: 15,
+		paddingHorizontal: 15,
+		alignContent: 'center',
+		justifyContent: 'center',
 		gap: 8,
-		maxWidth: '80%',
+		width: '90%',
+		borderWidth: 1,
+		borderColor: 'rgba(255, 255, 255, 1)',
+		backgroundColor: 'rgba(255, 255, 255, 0.1)'
+	},
+	clipboard: {
+		alignSelf: 'center'
 	},
 	buttonText: {
 		fontSize: 15,

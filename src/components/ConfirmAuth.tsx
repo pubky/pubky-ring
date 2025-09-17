@@ -1,5 +1,5 @@
-import React, { JSX, memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Dimensions, Image, Linking, Platform, StyleSheet } from 'react-native';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import { Alert, Linking, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -10,14 +10,13 @@ import {
 	Text,
 	View,
 	SkiaGradient,
-	RadialGradient,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth, truncatePubky } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { showToast, sleep } from '../utils/helpers.ts';
+import { isSmallScreen, showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
-import { useAnimatedStyle, useSharedValue, withSpring, withTiming, withSequence } from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import Toast from 'react-native-toast-message';
@@ -26,12 +25,12 @@ import ModalIndicator from './ModalIndicator.tsx';
 import { Globe } from 'lucide-react-native';
 import {
 	ACTION_SHEET_HEIGHT,
-	BLUE_RADIAL_GRADIENT,
 	PUBKY_APP_URL,
 } from '../utils/constants.ts';
 import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
+import { CircleCheck } from 'lucide-react-native';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -46,12 +45,12 @@ interface Capability {
 	permission: string;
 }
 
-const { height } = Dimensions.get('window');
-const isSmallScreen = height < 700;
+const smallScreen = isSmallScreen();
+
 const toastStyle = {
 	top: Platform.select({
-		ios: isSmallScreen ? -9 : -50,
-		android: isSmallScreen ? -9 : -50,
+		ios: smallScreen ? -9 : -50,
+		android: smallScreen ? -9 : -50,
 	}),
 };
 
@@ -128,10 +127,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				// Start at half size
 				withTiming(0.5, { duration: 0 }),
 				// Spring to full size
-				withSpring(1, {
-					damping: 20,
-					stiffness: 350,
-				})
+				withTiming(1, { duration: 300,				})
 			);
 		} else {
 			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
@@ -190,27 +186,6 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		}
 	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky]);
 
-	// eslint-disable-next-line react/no-unused-prop-types
-	const GradientView = useCallback(({ children }: { children: React.ReactNode }): JSX.Element => {
-		if (isAuthorized)  {
-			return (
-				<RadialGradient
-					style={styles.content}
-					colors={BLUE_RADIAL_GRADIENT}
-					center={{ x: 0.5, y: 0.5 }}
-				>
-					{children}
-				</RadialGradient>
-			);
-		} else {
-			return (
-				<SkiaGradient modal={true} style={styles.content}>
-					{children}
-				</SkiaGradient>
-			);
-		}
-	}, [isAuthorized]);
-
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];
 	}, [authDetails?.capabilities]);
@@ -223,7 +198,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				CustomHeaderComponent={<></>}
 				height={ACTION_SHEET_HEIGHT}
 			>
-				<GradientView>
+				<SkiaGradient modal={true} style={styles.content}>
 					<ModalIndicator />
 					<View style={styles.mainContent}>
 						<View style={styles.titleContainer}>
@@ -256,20 +231,15 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 							<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
 						</View>
 
-						<SessionText style={styles.warningText}>
-							{isAuthorized ? 'Successfully granted permission to manage your data.' : 'Make sure you trust this relay, service, browser, or device before authorizing with your pubky.'}
-						</SessionText>
+						{!isAuthorized && (<SessionText style={styles.warningText}>
+							Make sure you trust this relay, service, browser, or device before authorizing with your pubky.
+						</SessionText>)}
 
-						{!isSmallScreen && (
-							<View style={styles.imageContainer}>
-								<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-									<Image
-										source={require('../images/check.png')}
-										style={styles.keyImage}
-									/>
-								</AnimatedView>
-							</View>
-						)}
+						<View style={styles.imageContainer}>
+							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+								<CircleCheck color="rgba(200, 255, 0, 1)" size={52} />
+							</AnimatedView>
+						</View>
 					</View>
 
 					<View style={styles.footerContainer}>
@@ -300,7 +270,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 							)}
 						</View>
 					</View>
-				</GradientView>
+				</SkiaGradient>
 				<Toast config={toastConfig({ style: toastStyle })} />
 			</ActionSheetContainer>
 		</View>
@@ -398,6 +368,13 @@ const styles = StyleSheet.create({
 		borderRadius: 12,
 		backgroundColor: '#f0f0f0',
 	},
+	footerContainer: {
+		height: '15%',
+		paddingHorizontal: 12,
+		justifyContent: 'center',
+		backgroundColor: 'transparent',
+		paddingBottom: 16,
+	},
 	buttonContainer: {
 		flexDirection: 'row',
 		gap: 12,
@@ -407,12 +384,6 @@ const styles = StyleSheet.create({
 	mainContent: {
 		height: '80%',
 		paddingHorizontal: 12,
-		backgroundColor: 'transparent',
-	},
-	footerContainer: {
-		height: '15%',
-		paddingHorizontal: 12,
-		justifyContent: 'center',
 		backgroundColor: 'transparent',
 	},
 	imageContainer: {
@@ -444,6 +415,7 @@ const styles = StyleSheet.create({
 		width: '45%',
 		margin: 8,
 		justifyContent: 'center',
+		borderWidth: 0,
 	},
 	authorizeButton: {
 		...buttonStyles.compactOutline,

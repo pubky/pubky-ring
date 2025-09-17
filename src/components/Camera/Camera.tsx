@@ -86,11 +86,12 @@ const Camera = ({
 	}, [onBarCodeRead]);
 
 	const cameraKitProps = React.useMemo(() => ({
-		style: styles.camera,
+		style: styles.cameraView,
 		scanBarcode: true,
 		showFrame: false,
 		onReadCode: handleCodeRead,
 		cameraType: CameraType.Back,
+		resizeMode: 'cover',
 	}), [handleCodeRead]);
 
 	// Early return for loading state
@@ -105,7 +106,9 @@ const Camera = ({
 	if (cameraState.status === true && cameraState.isInitialized) {
 		return (
 			<View style={styles.container}>
-				<CameraKit {...cameraKitProps} />
+				<View style={styles.cameraWrapper}>
+					<CameraKit {...cameraKitProps} />
+				</View>
 				{children}
 			</View>
 		);
@@ -117,9 +120,16 @@ const Camera = ({
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		alignItems: 'center',
 	},
-	camera: {
-		...StyleSheet.absoluteFillObject,
+	cameraWrapper: {
+		height: '100%',
+		width: '100%',
+		borderRadius: 16,
+		overflow: 'hidden',
+	},
+	cameraView: {
+		flex: 1,
 	},
 });
 

@@ -1,5 +1,5 @@
 import React, { memo, ReactNode } from 'react';
-import { StyleSheet, Platform, Dimensions } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 import { View, ActionSheetContainer, SkiaGradient, RadialGradient } from '../../theme/components';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../../store/selectors/settingsSelectors';
@@ -9,6 +9,7 @@ import ModalIndicator from '../ModalIndicator';
 import {
 	BLUE_RADIAL_GRADIENT,
 } from '../../utils/constants';
+import { isSmallScreen } from '../../utils/helpers.ts';
 
 interface ModalWrapperProps {
 	id: string;
@@ -23,13 +24,12 @@ interface ModalWrapperProps {
 	contentStyle?: any;
 }
 
-const { height: screenHeight } = Dimensions.get('window');
-const isSmallScreen = screenHeight < 700;
+const smallScreen = isSmallScreen();
 
 const toastStyle = {
 	top: Platform.select({
-		ios: isSmallScreen ? -9 : -50,
-		android: isSmallScreen ? -9 : -50,
+		ios: smallScreen ? -9 : -50,
+		android: smallScreen ? -9 : -50,
 	}),
 };
 

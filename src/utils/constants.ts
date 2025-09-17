@@ -24,4 +24,5 @@ export const AUTH_SHEET_DELAY = 50; // Small delay for auth sheet display
 export const ANDROID_DEEPLINK_DELAY = 50; // Delay before opening Android deep links
 export const SCANNER_CLOSE_DELAY = 50; // Delay after closing scanner before opening new sheet
 
-export const ACTION_SHEET_HEIGHT = `93%`;
+export const ACTION_SHEET_HEIGHT = `91%`;
+export const ACTION_SHEET_HEIGHT_TEXTINPUT = `85%`;

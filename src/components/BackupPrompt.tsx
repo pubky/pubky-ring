@@ -20,7 +20,9 @@ import { Result } from '@synonymdev/result';
 import ModalIndicator from './ModalIndicator.tsx';
 import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
-import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
+import {
+	ACTION_SHEET_HEIGHT_TEXTINPUT,
+} from '../utils/constants.ts';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -162,7 +164,7 @@ const BackupPrompt = ({ payload }: {
 			keyboardHandlerEnabled={true}
 			isModal={Platform.OS === 'ios'}
 			CustomHeaderComponent={<></>}
-			height={ACTION_SHEET_HEIGHT}
+			height={ACTION_SHEET_HEIGHT_TEXTINPUT}
 		>
 			<SkiaGradient modal={true} style={styles.content}>
 				<ModalIndicator />

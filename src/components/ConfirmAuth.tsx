@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, Platform, StyleSheet } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -14,7 +14,11 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth, truncatePubky } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { isSmallScreen, showToast, sleep } from '../utils/helpers.ts';
+import {
+	getToastStyle,
+	showToast,
+	sleep,
+} from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
@@ -45,14 +49,7 @@ interface Capability {
 	permission: string;
 }
 
-const smallScreen = isSmallScreen();
-
-const toastStyle = {
-	top: Platform.select({
-		ios: smallScreen ? -9 : -50,
-		android: smallScreen ? -9 : -50,
-	}),
-};
+const toastStyle = getToastStyle();
 
 const CapabilitiesList = memo(({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
 	const capabilitiesCount = capabilities.length;

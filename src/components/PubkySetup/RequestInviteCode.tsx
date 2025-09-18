@@ -149,7 +149,6 @@ const styles = StyleSheet.create({
 		fontSize: 48,
 		lineHeight: 48,
 		marginTop: 24,
-		marginBottom: 16,
 		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
@@ -157,8 +156,8 @@ const styles = StyleSheet.create({
 		fontWeight: '400',
 		fontSize: 17,
 		lineHeight: 22,
-		marginBottom: 24,
-		color: '#FFFFFF',
+		marginTop: 24,
+		color: 'rgba(255, 255, 255, 0.8)',
 		backgroundColor: 'transparent',
 	},
 	contactOptions: {
@@ -167,6 +166,7 @@ const styles = StyleSheet.create({
 		alignItems: 'flex-start',
 		marginBottom: 20,
 		backgroundColor: 'transparent',
+		marginTop: 24,
 	},
 	contactButton: {
 		width: 50,

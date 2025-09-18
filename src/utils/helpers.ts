@@ -678,3 +678,14 @@ export const isSmallScreen = (): boolean => {
 	const { height } = Dimensions.get('window');
 	return height < 700;
 };
+
+export const getToastStyle = (): {} => {
+	const smallScreen = isSmallScreen();
+
+	return {
+		top: Platform.select({
+			ios: smallScreen ? -25 : -80,
+			android: smallScreen ? -25 : -80,
+		}),
+	};
+};

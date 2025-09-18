@@ -34,16 +34,13 @@ import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { Result } from '@synonymdev/result';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
-import { isSmallScreen, showImportQRScanner } from '../utils/helpers.ts';
+import {
+	getToastStyle,
+	showImportQRScanner,
+} from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 
-const smallScreen = isSmallScreen();
-const toastStyle = {
-	top: Platform.select({
-		ios: smallScreen ? -9 : -50,
-		android: smallScreen ? -9 : -50,
-	}),
-};
+const toastStyle = getToastStyle();
 
 
 const AddPubky = ({ payload }: {

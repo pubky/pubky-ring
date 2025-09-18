@@ -17,6 +17,11 @@ import {
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
 } from '../../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
+import { toastConfig } from '../../theme/toastConfig.tsx';
+import Toast from 'react-native-toast-message';
+import { getToastStyle } from '../../utils/helpers.ts';
+
+const toastStyle = getToastStyle();
 
 export enum ECurrentScreen {
 	main = 'main',
@@ -166,6 +171,7 @@ const NewPubkySetup = ({ payload }: {
 					setCurrentScreen={setCurrentScreen}
 					closeSheet={closeSheet}
 				/>
+				<Toast config={toastConfig({ style: toastStyle })} />
 			</ActionSheetContainer>
 		</View>
 	);

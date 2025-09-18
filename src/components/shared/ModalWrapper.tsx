@@ -9,7 +9,7 @@ import ModalIndicator from '../ModalIndicator';
 import {
 	BLUE_RADIAL_GRADIENT,
 } from '../../utils/constants';
-import { isSmallScreen } from '../../utils/helpers.ts';
+import { getToastStyle } from '../../utils/helpers.ts';
 
 interface ModalWrapperProps {
 	id: string;
@@ -24,14 +24,7 @@ interface ModalWrapperProps {
 	contentStyle?: any;
 }
 
-const smallScreen = isSmallScreen();
-
-const toastStyle = {
-	top: Platform.select({
-		ios: smallScreen ? -9 : -50,
-		android: smallScreen ? -9 : -50,
-	}),
-};
+const toastStyle = getToastStyle();
 
 const ModalWrapper: React.FC<ModalWrapperProps> = ({
 	id,

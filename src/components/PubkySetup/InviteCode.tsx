@@ -321,7 +321,7 @@ const InviteCode = ({ payload }: {
 							autoFocus={true}
 						/>
 						<AnimatedView style={[styles.checkmark, inputCheckmarkStyle]}>
-							<Check color="rgba(173, 255, 47, 1)" size={24} />
+							<Check color="rgba(173, 255, 47, 1)" size={16} />
 						</AnimatedView>
 					</View>
 

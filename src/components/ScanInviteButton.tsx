@@ -5,87 +5,85 @@ import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
 import Toast from 'react-native-toast-message';
 import PubkyRingLogo from '../images/pubky.png';
-import { parseInviteCode } from '../utils/helpers.ts';
+import { parseInviteCode, showQRScannerGeneric } from '../utils/helpers.ts';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
 
 	const handleInviteScan = useCallback(async () => {
 		if (isProcessingInvite.current) return;
+		await showQRScannerGeneric({
+			title: 'Invite',
+			onScan: async (data: string) => {
+				if (isProcessingInvite.current) return '';
+				isProcessingInvite.current = true;
 
-		SheetManager.show('camera', {
-			payload: {
-				onScan: async (data: string) => {
-					if (isProcessingInvite.current) return;
-					isProcessingInvite.current = true;
+				await SheetManager.hide('camera');
 
-					await SheetManager.hide('camera');
+				const inviteCode = parseInviteCode(data);
+				if (inviteCode) {
+					Toast.show({
+						type: 'success',
+						text1: 'Invite Code Detected',
+						text2: `Code: ${inviteCode}`,
+						visibilityTime: 3000,
+					});
+					// TODO: Process the invite code here
+					console.log('Invite code found:', inviteCode);
+				} else {
+					Toast.show({
+						type: 'error',
+						text1: 'Invalid QR Code',
+						text2: 'Please scan a valid invite QR code',
+						visibilityTime: 3000,
+					});
+				}
 
-					const inviteCode = parseInviteCode(data);
+				isProcessingInvite.current = false;
+				return '';
+			},
+			onClipboard: async (): Promise<string> => {
+				if (isProcessingInvite.current) return '';
+				isProcessingInvite.current = true;
+
+				await SheetManager.hide('camera');
+
+				try {
+					const clipboardContent = await readFromClipboard();
+					const inviteCode = parseInviteCode(clipboardContent);
+
 					if (inviteCode) {
 						Toast.show({
 							type: 'success',
-							text1: 'Invite Code Detected',
+							text1: 'Invite Code Pasted',
 							text2: `Code: ${inviteCode}`,
 							visibilityTime: 3000,
 						});
 						// TODO: Process the invite code here
-						console.log('Invite code found:', inviteCode);
+						console.log('Invite code from clipboard:', inviteCode);
 					} else {
 						Toast.show({
 							type: 'error',
-							text1: 'Invalid QR Code',
-							text2: 'Please scan a valid invite QR code',
+							text1: 'Invalid Link',
+							text2: 'Clipboard does not contain a valid invite link',
 							visibilityTime: 3000,
 						});
 					}
+				} catch (error) {
+					Toast.show({
+						type: 'error',
+						text1: 'Error',
+						text2: 'Failed to read clipboard',
+						visibilityTime: 3000,
+					});
+				}
 
-					isProcessingInvite.current = false;
-					return '';
-				},
-				onCopyClipboard: async (): Promise<string> => {
-					if (isProcessingInvite.current) return '';
-					isProcessingInvite.current = true;
-
-					await SheetManager.hide('camera');
-
-					try {
-						const clipboardContent = await readFromClipboard();
-						const inviteCode = parseInviteCode(clipboardContent);
-
-						if (inviteCode) {
-							Toast.show({
-								type: 'success',
-								text1: 'Invite Code Pasted',
-								text2: `Code: ${inviteCode}`,
-								visibilityTime: 3000,
-							});
-							// TODO: Process the invite code here
-							console.log('Invite code from clipboard:', inviteCode);
-						} else {
-							Toast.show({
-								type: 'error',
-								text1: 'Invalid Link',
-								text2: 'Clipboard does not contain a valid invite link',
-								visibilityTime: 3000,
-							});
-						}
-					} catch (error) {
-						Toast.show({
-							type: 'error',
-							text1: 'Error',
-							text2: 'Failed to read clipboard',
-							visibilityTime: 3000,
-						});
-					}
-
-					isProcessingInvite.current = false;
-					return '';
-				},
-				onClose: () => {
-					SheetManager.hide('camera');
-					isProcessingInvite.current = false;
-				},
+				isProcessingInvite.current = false;
+				return '';
+			},
+			onComplete: () => {
+				SheetManager.hide('camera');
+				isProcessingInvite.current = false;
 			},
 		});
 	}, []);

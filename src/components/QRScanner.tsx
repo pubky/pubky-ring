@@ -10,10 +10,11 @@ interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
 	onClose: () => void;
+  title?: string;
 }
 
 const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
-	const { onScan, onCopyClipboard, onClose } = payload;
+	const { onScan, onCopyClipboard, onClose, title = 'Authorize' } = payload;
 	const navigationAnimation = useSelector(getNavigationAnimation);
 
 	const handleBarCodeRead = useCallback((data: string) => {
@@ -29,6 +30,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 			height={ACTION_SHEET_HEIGHT}
 		>
 			<View style={styles.container}>
+				<Text style={styles.title}>{title}</Text>
 				<View style={styles.cameraContainer}>
 					<Camera onBarCodeRead={handleBarCodeRead} />
 				</View>
@@ -55,6 +57,14 @@ const styles = StyleSheet.create({
 		height: '81%', // There's quirk on Android where the camera barely appears above the modal if this is 80%
 		width: '90%',
 		alignSelf: 'center'
+	},
+	title: {
+		fontSize: 17,
+		fontWeight: 700,
+		lineHeight: 22,
+		letterSpacing: 0.4,
+		alignSelf: 'center',
+		marginBottom: 16,
 	},
 	buttonContainer: {
 		height: '19%',

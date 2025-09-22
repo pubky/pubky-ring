@@ -7,7 +7,10 @@ import { StyleSheet } from 'react-native';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
-import { View, Plus } from '../theme/components';
+import {
+	View,
+	Plus,
+} from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
@@ -20,6 +23,8 @@ import { usePubkyManagement } from '../hooks/usePubkyManagement';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
 import AppHeader from '../components/AppHeader';
 import { buttonStyles } from '../theme/utils';
+import ScanInviteButton from '../components/ScanInviteButton';
+import { ENABLE_INVITE_SCANNER } from "../utils/constants.ts";
 
 const PubkyItem = memo(({
 	item,
@@ -112,19 +117,24 @@ const HomeScreen = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
-			<DraggableFlatList
-				data={pubkyArray}
-				onDragEnd={handleDragEnd}
-				keyExtractor={keyExtractor}
-				renderItem={renderItem}
-				ListHeaderComponent={<ListHeader />}
-				ListFooterComponent={hasPubkys ? <ListFooter createPubky={createPubky} importPubky={importPubky} /> : null}
-				ListEmptyComponent={<EmptyState />}
-				contentContainerStyle={styles.listContent}
-				showsVerticalScrollIndicator={false}
-				showsHorizontalScrollIndicator={false}
-				getItemLayout={getItemLayout}
-			/>
+			<View style={styles.container}>
+				<DraggableFlatList
+					data={pubkyArray}
+					onDragEnd={handleDragEnd}
+					keyExtractor={keyExtractor}
+					renderItem={renderItem}
+					ListHeaderComponent={<ListHeader />}
+					ListFooterComponent={hasPubkys ? <ListFooter createPubky={createPubky} importPubky={importPubky} /> : null}
+					ListEmptyComponent={<EmptyState />}
+					contentContainerStyle={styles.listContent}
+					showsVerticalScrollIndicator={false}
+					showsHorizontalScrollIndicator={false}
+					getItemLayout={getItemLayout}
+				/>
+			</View>
+			{ENABLE_INVITE_SCANNER && (
+				<ScanInviteButton />
+			)}
 		</View>
 	);
 };

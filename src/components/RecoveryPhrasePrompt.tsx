@@ -17,11 +17,18 @@ import { RootState } from '../types';
 import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { truncatePubky } from '../utils/pubky.ts';
-import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
+import {
+	ACTION_SHEET_HEIGHT,
+	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
+} from '../utils/constants.ts';
+import { isSmallScreen } from '../utils/helpers.ts';
 
 const getMarginBottom = (index: number): number => {
 	return index + 1 === 6 ? 0 : 12;
 };
+const smallScreen = isSmallScreen();
+const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
+
 const RecoveryPhrasePrompt = ({ payload }: {
     payload: {
         pubky: string;
@@ -65,60 +72,63 @@ const RecoveryPhrasePrompt = ({ payload }: {
 			keyboardHandlerEnabled={true}
 			isModal={Platform.OS === 'ios'}
 			CustomHeaderComponent={<></>}
-			height={ACTION_SHEET_HEIGHT}
+			height={actionSheetHeight}
 		>
 			<SkiaGradient modal={true} style={styles.content}>
-				<ModalIndicator />
-				<Text style={styles.title}>{title}</Text>
-				<Text style={styles.message}>{message}</Text>
+				<View style={styles.mainContent}>
+					<ModalIndicator />
+					<Text style={styles.title}>{title}</Text>
+					<Text style={styles.message}>{message}</Text>
 
-				<View style={styles.mnemonicContainer}>
-					<View style={styles.columnContainer}>
-						{mnemonicWords.slice(0, 6).map((word, index) => (
-							<View key={index} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
-								<Text style={styles.wordNumber}>{index + 1}.</Text>
-								<Text style={styles.wordText}>{word}</Text>
-							</View>
-						))}
+					<View style={styles.mnemonicContainer}>
+						<View style={styles.columnContainer}>
+							{mnemonicWords.slice(0, 6).map((word, index) => (
+								<View key={index} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
+									<Text style={styles.wordNumber}>{index + 1}.</Text>
+									<Text style={styles.wordText}>{word}</Text>
+								</View>
+							))}
+						</View>
+						<View style={styles.columnContainer}>
+							{mnemonicWords.slice(6, 12).map((word, index) => (
+								<View key={index + 6} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
+									<Text style={styles.wordNumber}>{index + 7}.</Text>
+									<Text style={styles.wordText}>{word}</Text>
+								</View>
+							))}
+						</View>
+						{isBlurred && (
+							<>
+								<BlurView style={styles.blurOverlay} />
+								<TouchableOpacity
+									style={styles.revealButton}
+									onPress={handleConfirmBackup}
+								>
+									<Text style={styles.tapToRevealText}>Tap to reveal</Text>
+								</TouchableOpacity>
+							</>
+						)}
 					</View>
-					<View style={styles.columnContainer}>
-						{mnemonicWords.slice(6, 12).map((word, index) => (
-							<View key={index + 6} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
-								<Text style={styles.wordNumber}>{index + 7}.</Text>
-								<Text style={styles.wordText}>{word}</Text>
-							</View>
-						))}
+
+					<PubkyCard name={pubkyName} publicKey={truncatePubky(payload.pubky)} />
+
+					<Text style={styles.warningText}>
+						Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.
+					</Text>
+
+					{error ? (
+						<Text style={styles.errorText}>{error}</Text>
+					) : null}
+					<View style={styles.footer}>
+						<View style={styles.buttonContainer}>
+							<Button
+								text={'Finish backup'}
+								style={styles.button}
+								onPress={onClose}
+								disabled={isBlurred}
+							/>
+						</View>
 					</View>
-					{isBlurred && (
-						<>
-							<BlurView style={styles.blurOverlay} />
-							<TouchableOpacity
-								style={styles.revealButton}
-								onPress={handleConfirmBackup}
-							>
-								<Text style={styles.tapToRevealText}>Tap to reveal</Text>
-							</TouchableOpacity>
-						</>
-					)}
-				</View>
-
-				<PubkyCard name={pubkyName} publicKey={truncatePubky(payload.pubky)} />
-
-				<Text style={styles.warningText}>
-					Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.
-				</Text>
-
-				{error ? (
-					<Text style={styles.errorText}>{error}</Text>
-				) : null}
-
-				<View style={styles.buttonContainer}>
-					<Button
-						text={'Finish backup'}
-						style={styles.button}
-						onPress={onClose}
-						disabled={isBlurred}
-					/>
 				</View>
 			</SkiaGradient>
 		</ActionSheetContainer>
@@ -127,11 +137,14 @@ const RecoveryPhrasePrompt = ({ payload }: {
 
 const styles = StyleSheet.create({
 	content: {
+		height: '100%',
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
-		minHeight: '90%',
 		paddingHorizontal: 24,
-		paddingBottom: 34,
+	},
+	mainContent: {
+		flex: 1,
+		backgroundColor: 'transparent',
 	},
 	title: {
 		fontSize: 17,
@@ -214,19 +227,20 @@ const styles = StyleSheet.create({
 		lineHeight: 20,
 		color: '#888',
 		textAlign: 'left',
-		marginBottom: 24,
 	},
 	errorText: {
 		color: '#dc2626',
 		fontSize: 12,
-		marginBottom: 16,
 		marginLeft: 4,
+		marginVertical: 12
+	},
+	footer: {
+		flex: 1,
+		justifyContent: 'flex-end',
+		backgroundColor: 'transparent'
 	},
 	buttonContainer: {
-		flexDirection: 'row',
-		marginTop: 24,
 		width: '100%',
-		justifyContent: 'space-around',
 		alignItems: 'center',
 		alignSelf: 'center',
 		backgroundColor: 'transparent',

@@ -25,4 +25,7 @@ export const ANDROID_DEEPLINK_DELAY = 50; // Delay before opening Android deep l
 export const SCANNER_CLOSE_DELAY = 50; // Delay after closing scanner before opening new sheet
 
 export const ACTION_SHEET_HEIGHT = `91%`;
+export const SMALL_SCREEN_ACTION_SHEET_HEIGHT = `98%`;
 export const ACTION_SHEET_HEIGHT_TEXTINPUT = `85%`;
+
+export const ENABLE_INVITE_SCANNER = false; // Toggle for enabling invite code scanner feature

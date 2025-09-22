@@ -357,14 +357,17 @@ export const showQRScannerGeneric = async ({
 	onScan,
 	onClipboard,
 	onComplete,
+	title,
 }: {
 	onScan: (data: string) => Promise<string>;
 	onClipboard: () => Promise<string>;
 	onComplete?: () => void;
+  title?: string;
 }): Promise<string> => {
 	return new Promise<string>((resolve) => {
 		SheetManager.show('camera', {
 			payload: {
+				title,
 				onScan: async (data: string) => {
 					await SheetManager.hide('camera');
 					const result = await onScan(data);
@@ -393,6 +396,7 @@ export const showImportQRScanner = async ({
   onComplete?: () => void;
 }): Promise<string> => {
 	return showQRScannerGeneric({
+		title: 'Import Pubky',
 		onScan: async (data: string) => {
 			const result = await handleScannedData({
 				data,

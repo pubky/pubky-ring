@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import Camera from './Camera/Camera';
 import { ActionSheetContainer, Clipboard, Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
@@ -54,7 +54,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	cameraContainer: {
-		height: '81%', // There's quirk on Android where the camera barely appears above the modal if this is 80%
+		height: '81%',
 		width: '90%',
 		alignSelf: 'center'
 	},
@@ -71,7 +71,10 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 		alignContent: 'center',
-		bottom: 0,
+		bottom: Platform.select({
+			ios: 0,
+			android: 20,
+		})
 	},
 	actionButton2: {
 		flexDirection: 'row',

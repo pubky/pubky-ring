@@ -525,6 +525,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 0, android: 20 })
 	}
 });
 

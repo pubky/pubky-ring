@@ -25,11 +25,18 @@ import {
 	ANDROID_DEEPLINK_DELAY
 } from './constants.ts';
 import { SheetManager } from 'react-native-actions-sheet';
-import { EBackupPreference } from '../types/pubky.ts';
+import { EBackupPreference, DeepLinkData } from '../types/pubky.ts';
 import {
 	mnemonicPhraseToKeypair,
 	getPublicKeyFromSecretKey
 } from '@synonymdev/react-native-pubky';
+
+export enum EDeepLinkType {
+	invite = 'invite',
+	auth = 'auth',
+	import = 'import',
+	unknown = 'unknown'
+}
 
 /**
  * Formats a signup/invite token to the XXXX-XXXX-XXXX pattern
@@ -635,17 +642,41 @@ export const checkNetworkConnection = async ({
 	return isConnected;
 };
 
-export const parseDeepLink = (url: string): string => {
-	if (url.startsWith('pubkyring://')) {
-		url = url.replace('pubkyring://', '');
-		if (url.startsWith('pubkyauth///')) {
-			url = url.replace('pubkyauth///', 'pubkyauth:///');
+export const parseDeepLink = (url: string): DeepLinkData => {
+	let processedUrl = url;
+
+	// Remove pubkyring:// prefix if present
+	if (processedUrl.startsWith('pubkyring://')) {
+		processedUrl = processedUrl.replace('pubkyring://', '');
+		if (processedUrl.startsWith('pubkyauth///')) {
+			processedUrl = processedUrl.replace('pubkyauth///', 'pubkyauth:///');
 		}
 	}
-	return url;
+
+	// Check if it's an invite code
+	const inviteCode = parseInviteCode(processedUrl);
+	if (inviteCode) {
+		return { type: EDeepLinkType.invite, data: inviteCode };
+	}
+
+	// Check if it's a pubkyauth URL
+	if (processedUrl.startsWith('pubkyauth:///')) {
+		return { type: EDeepLinkType.auth, data: processedUrl };
+	}
+
+	// Check if it's a recovery phrase or secret key
+	const formattedData = formatImportData(processedUrl);
+	// Quick check for recovery phrase pattern (12 words)
+	const words = formattedData.trim().split(/\s+/);
+	if (words.length === 12) {
+		return { type: EDeepLinkType.import, data: formattedData };
+	}
+
+	// Default to returning as-is for backward compatibility
+	return { type: EDeepLinkType.unknown, data: processedUrl };
 };
 
-export const handleDeepLink = ({
+export const handleDeepLink = async ({
 	pubky,
 	url,
 	dispatch,
@@ -653,11 +684,11 @@ export const handleDeepLink = ({
 	pubky: string;
 	url: string;
 	dispatch: Dispatch;
-}): string => {
+}): Promise<string> => {
 	try {
 		url = decodeURIComponent(decodeURIComponent(url));
 	} catch {}
-	handleScannedData({
+	await handleScannedData({
 		pubky,
 		data: url,
 		dispatch,
@@ -696,7 +727,7 @@ export const getToastStyle = (): {} => {
 
 export const parseInviteCode = (url: string): string | null => {
 	// Pattern to match invite codes in format XXXX-XXXX-XXXX
-	const invitePattern = /\/invite\/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/;
+	const invitePattern = /\invite\/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/;
 	const match = url.match(invitePattern);
 	return match ? match[1] : null;
 };

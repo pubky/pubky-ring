@@ -42,8 +42,8 @@ function App(): React.JSX.Element {
 
 		// Handle the deep link
 		const handleDeepLink = (url: string): void => {
-			const parsedUrl = parseDeepLink(url);
-			dispatch(setDeepLink(parsedUrl));
+			const parsedData = parseDeepLink(url);
+			dispatch(setDeepLink(JSON.stringify(parsedData)));
 		};
 
 		// Set up deep link listeners

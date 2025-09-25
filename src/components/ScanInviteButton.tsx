@@ -3,12 +3,60 @@ import { StyleSheet, View, Image } from 'react-native';
 import { AuthorizeButton, QrCode, Text } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
-import Toast from 'react-native-toast-message';
 import PubkyRingLogo from '../images/pubky.png';
-import { parseInviteCode, showQRScannerGeneric } from '../utils/helpers.ts';
+import { parseInviteCode, showQRScannerGeneric, showToast } from '../utils/helpers.ts';
+import { createPubkyWithInviteCode } from '../utils/pubky.ts';
+import { useDispatch } from 'react-redux';
+import { getPubky } from '../store/selectors/pubkySelectors.ts';
+import { getStore } from '../utils/store-helpers.ts';
+import { ECurrentScreen } from './PubkySetup/NewPubkySetup.tsx';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
+	const dispatch = useDispatch();
+
+	const handleInviteCodeSignup = useCallback(async (inviteCode: string, source: 'scan' | 'clipboard') => {
+		try {
+			// Create pubky and sign up with invite code automatically
+			const createRes = await createPubkyWithInviteCode(inviteCode, dispatch);
+
+			if (createRes.isErr()) {
+				showToast({
+					type: 'error',
+					title: 'Signup Failed',
+					description: createRes.error.message,
+				});
+				return;
+			}
+
+			const { pubky } = createRes.value;
+
+			// Get the pubky data from store
+			const pubkyData = getPubky(getStore(), pubky);
+
+			// Show new pubky setup sheet on welcome screen with completed setup
+			// TODO: We may just want to tear out the Welcome action sheet and make it standalone for this instance.
+			setTimeout(() => {
+				SheetManager.show('new-pubky-setup', {
+					payload: {
+						pubky,
+						data: pubkyData,
+						currentScreen: ECurrentScreen.welcome,
+					},
+					onClose: () => {
+						SheetManager.hide('new-pubky-setup');
+					},
+				});
+			}, 150);
+		} catch (error) {
+			console.error('Error handling invite code from', source, ':', error);
+			showToast({
+				type: 'error',
+				title: 'Error',
+				description: 'Failed to process invite code',
+			});
+		}
+	}, [dispatch]);
 
 	const handleInviteScan = useCallback(async () => {
 		if (isProcessingInvite.current) return;
@@ -22,20 +70,12 @@ const ScanInviteButton = memo(() => {
 
 				const inviteCode = parseInviteCode(data);
 				if (inviteCode) {
-					Toast.show({
-						type: 'success',
-						text1: 'Invite Code Detected',
-						text2: `Code: ${inviteCode}`,
-						visibilityTime: 3000,
-					});
-					// TODO: Process the invite code here
-					console.log('Invite code found:', inviteCode);
+					await handleInviteCodeSignup(inviteCode, 'scan');
 				} else {
-					Toast.show({
+					showToast({
 						type: 'error',
-						text1: 'Invalid QR Code',
-						text2: 'Please scan a valid invite QR code',
-						visibilityTime: 3000,
+						title: 'Invalid Invite Code',
+						description: 'Please scan a valid invite code QR',
 					});
 				}
 
@@ -53,28 +93,19 @@ const ScanInviteButton = memo(() => {
 					const inviteCode = parseInviteCode(clipboardContent);
 
 					if (inviteCode) {
-						Toast.show({
-							type: 'success',
-							text1: 'Invite Code Pasted',
-							text2: `Code: ${inviteCode}`,
-							visibilityTime: 3000,
-						});
-						// TODO: Process the invite code here
-						console.log('Invite code from clipboard:', inviteCode);
+						await handleInviteCodeSignup(inviteCode, 'clipboard');
 					} else {
-						Toast.show({
+						showToast({
 							type: 'error',
-							text1: 'Invalid Link',
-							text2: 'Clipboard does not contain a valid invite link',
-							visibilityTime: 3000,
+							title: 'Invalid Link',
+							description: 'Clipboard does not contain a valid invite link',
 						});
 					}
 				} catch (error) {
-					Toast.show({
+					showToast({
 						type: 'error',
-						text1: 'Error',
-						text2: 'Failed to read clipboard',
-						visibilityTime: 3000,
+						title: 'Error',
+						description: 'Failed to read clipboard',
 					});
 				}
 
@@ -86,7 +117,7 @@ const ScanInviteButton = memo(() => {
 				isProcessingInvite.current = false;
 			},
 		});
-	}, []);
+	}, [handleInviteCodeSignup]);
 
 	return (
 		<View style={styles.container}>

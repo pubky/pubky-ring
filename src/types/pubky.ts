@@ -15,11 +15,19 @@ export interface Pubky {
 	isBackedUp: boolean;
 }
 
+import { EDeepLinkType } from '../utils/helpers';
+
 export type ISetPubkyData = Partial<Pubky>;
+
+export interface DeepLinkData {
+	type: EDeepLinkType;
+	data: string;
+}
 
 export interface PubkyState {
 	pubkys: TPubkys
 	deepLink: string;
+  processing: { [key: string]: boolean };
 }
 
 export type TPubkys = {

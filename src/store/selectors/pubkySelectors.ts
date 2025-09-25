@@ -106,6 +106,10 @@ export const hasPubky = (state: RootState, pubky: string): boolean => {
 	return !!state.pubky.pubkys[pubky];
 };
 
+export const isProcessing = (state: RootState, key: string): boolean => {
+	return key in state.pubky.processing;
+};
+
 /**
  * Get total number of pubkys
  */

@@ -312,6 +312,7 @@ const styles = StyleSheet.create({
 		textTransform: 'capitalize',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
+		flex: 1,
 	},
 	message: {
 		fontWeight: '400',

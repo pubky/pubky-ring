@@ -107,11 +107,13 @@ const NewPubkySetup = ({ payload }: {
 	payload: {
 		currentScreen?: ECurrentScreen;
 		pubky: string;
-		data?: Pubky
+		data?: Pubky;
 	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(payload?.currentScreen ?? ECurrentScreen.main);
+	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(
+		payload?.currentScreen ?? ECurrentScreen.main
+	);
 	const [pubky] = useState(payload?.pubky ?? '');
 
 	const closeSheet = useCallback(async (): Promise<void> => {

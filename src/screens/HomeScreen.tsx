@@ -25,17 +25,20 @@ import AppHeader from '../components/AppHeader';
 import { buttonStyles } from '../theme/utils';
 import ScanInviteButton from '../components/ScanInviteButton';
 import { ENABLE_INVITE_SCANNER } from "../utils/constants.ts";
+import { RootState } from '../store';
 
 const PubkyItem = memo(({
 	item,
 	drag,
 	isActive,
 	index,
+	loading = false,
 }: {
 	item: { key: string; value: Pubky };
 	drag: () => void;
 	isActive: boolean;
 	index: number;
+  loading?: boolean;
 }) => (
 	<ScaleDecorator>
 		<PubkyBox
@@ -44,6 +47,7 @@ const PubkyItem = memo(({
 			index={index}
 			onLongPress={drag}
 			disabled={isActive}
+			loading={loading}
 		/>
 	</ScaleDecorator>
 ));
@@ -74,6 +78,7 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 const HomeScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
+	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
@@ -100,9 +105,10 @@ const HomeScreen = (): ReactElement => {
 				drag={drag}
 				isActive={isActive}
 				index={index}
+				loading={pubkysProcessing[item.key]}
 			/>
 		);
-	}, []);
+	}, [pubkysProcessing]);
 
 	const getItemLayout = useCallback((data: any, index: number) => ({
 		length: 172,

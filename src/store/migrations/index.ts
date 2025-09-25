@@ -64,6 +64,16 @@ const migrations = {
 			},
 		};
 	},
+	// @ts-ignore
+	5: (state): PersistedState => {
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				processing: {},
+			},
+		};
+	},
 };
 
 export default migrations;

@@ -37,6 +37,7 @@ interface ContentProps {
 	subTitle: string;
 	pubky: string;
 	pubkyData: PubkyData;
+  isInvite?: boolean;
 	setCurrentScreen: (screen: ECurrentScreen) => void;
 	closeSheet: () => Promise<void>;
 }
@@ -47,6 +48,7 @@ const Content = ({
 	subTitle,
 	pubky,
 	pubkyData,
+	isInvite,
 	setCurrentScreen,
 	closeSheet
 }: ContentProps): ReactElement => {
@@ -96,7 +98,8 @@ const Content = ({
 				<View style={styles.fullSize}>
 					<Welcome payload={{
 						pubky,
-						onComplete: closeSheet
+						onComplete: closeSheet,
+						isInvite
 					}} />
 				</View>
 			);
@@ -108,6 +111,7 @@ const NewPubkySetup = ({ payload }: {
 		currentScreen?: ECurrentScreen;
 		pubky: string;
 		data?: Pubky;
+    isInvite?: boolean;
 	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -170,6 +174,7 @@ const NewPubkySetup = ({ payload }: {
 					subTitle={subTitle}
 					pubky={pubky}
 					pubkyData={pubkyData}
+					isInvite={payload?.isInvite}
 					setCurrentScreen={setCurrentScreen}
 					closeSheet={closeSheet}
 				/>

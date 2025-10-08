@@ -320,8 +320,10 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 20,
+		fontSize: 17,
 		fontWeight: '700',
+		lineHeight: 22,
+		letterSpacing: 0.4,
 		textAlign: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
@@ -349,6 +351,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		gap: 12,
 		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 0, android: 20 })
 	},
 	button: {
 		width: '47%',

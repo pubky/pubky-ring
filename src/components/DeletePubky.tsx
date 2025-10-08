@@ -175,7 +175,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingVertical: 12,
 		backgroundColor: 'transparent',
-		marginBottom: 10,
+		marginBottom: Platform.select({ ios: 0, android: 20 })
 	},
 	button: {
 		width: '47%',

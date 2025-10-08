@@ -42,6 +42,7 @@ const ScanInviteButton = memo(() => {
 						pubky,
 						data: pubkyData,
 						currentScreen: ECurrentScreen.welcome,
+						isInvite: true
 					},
 					onClose: () => {
 						SheetManager.hide('new-pubky-setup');

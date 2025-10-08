@@ -16,6 +16,7 @@ import { performAuth, truncatePubky } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	getToastStyle,
+	isSmallScreen,
 	showToast,
 	sleep,
 } from '../utils/helpers.ts';
@@ -30,6 +31,7 @@ import { Globe } from 'lucide-react-native';
 import {
 	ACTION_SHEET_HEIGHT,
 	PUBKY_APP_URL,
+	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
 import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
@@ -50,6 +52,9 @@ interface Capability {
 }
 
 const toastStyle = getToastStyle();
+
+const smallScreen = isSmallScreen();
+const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
 const CapabilitiesList = memo(({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
 	const capabilitiesCount = capabilities.length;
@@ -193,7 +198,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				id="confirm-auth"
 				navigationAnimation={navigationAnimation}
 				CustomHeaderComponent={<></>}
-				height={ACTION_SHEET_HEIGHT}
+				height={actionSheetHeight}
 			>
 				<SkiaGradient modal={true} style={styles.content}>
 					<ModalIndicator />

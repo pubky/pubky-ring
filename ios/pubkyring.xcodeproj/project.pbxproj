@@ -13,25 +13,22 @@
 		70F9B56BE652426C904D16F4 /* InterTight-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C21B8554B47148DBBCC60B15 /* InterTight-VariableFont_wght.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
-		F249E00375A9BA87AE373B42 /* libPods-pubkyring.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6500517293CA29C0F44BB325 /* libPods-pubkyring.a */; };
+		F0B0F0C33BFC0AA7CD867F18 /* libPods-pubkyring.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F66FC2D5C5C4019367FA619 /* libPods-pubkyring.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		03704ACE8EBA61EB1DF0B9CD /* Pods-pubkyring-pubkyringTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring-pubkyringTests.debug.xcconfig"; path = "Target Support Files/Pods-pubkyring-pubkyringTests/Pods-pubkyring-pubkyringTests.debug.xcconfig"; sourceTree = "<group>"; };
-		076BB43B9E1699605230DFE6 /* Pods-pubkyring-pubkyringTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring-pubkyringTests.release.xcconfig"; path = "Target Support Files/Pods-pubkyring-pubkyringTests/Pods-pubkyring-pubkyringTests.release.xcconfig"; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* pubkyring.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = pubkyring.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = pubkyring/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = pubkyring/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = pubkyring/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		6500517293CA29C0F44BB325 /* libPods-pubkyring.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pubkyring.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		5F66FC2D5C5C4019367FA619 /* libPods-pubkyring.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pubkyring.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = pubkyring/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = pubkyring/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		B2ABDED632F64E4DABAEE478 /* InterTight-Italic-VariableFont_wght.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InterTight-Italic-VariableFont_wght.ttf"; path = "../assets/fonts/InterTight-Italic-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		C21B8554B47148DBBCC60B15 /* InterTight-VariableFont_wght.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InterTight-VariableFont_wght.ttf"; path = "../assets/fonts/InterTight-VariableFont_wght.ttf"; sourceTree = "<group>"; };
-		CF9B92FD9E3E8DCF536BC532 /* libPods-pubkyring-pubkyringTests.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pubkyring-pubkyringTests.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		DB21DDFE050214279FE2AEA5 /* Pods-pubkyring.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring.debug.xcconfig"; path = "Target Support Files/Pods-pubkyring/Pods-pubkyring.debug.xcconfig"; sourceTree = "<group>"; };
-		E6D3176A8E8B38F7DCC248A0 /* Pods-pubkyring.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring.release.xcconfig"; path = "Target Support Files/Pods-pubkyring/Pods-pubkyring.release.xcconfig"; sourceTree = "<group>"; };
+		E9BEEC22DDF3D2C7155A00F4 /* Pods-pubkyring.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring.debug.xcconfig"; path = "Target Support Files/Pods-pubkyring/Pods-pubkyring.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		FF42E8010883080C68665233 /* Pods-pubkyring.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring.release.xcconfig"; path = "Target Support Files/Pods-pubkyring/Pods-pubkyring.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -39,7 +36,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F249E00375A9BA87AE373B42 /* libPods-pubkyring.a in Frameworks */,
+				F0B0F0C33BFC0AA7CD867F18 /* libPods-pubkyring.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -62,8 +59,7 @@
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				6500517293CA29C0F44BB325 /* libPods-pubkyring.a */,
-				CF9B92FD9E3E8DCF536BC532 /* libPods-pubkyring-pubkyringTests.a */,
+				5F66FC2D5C5C4019367FA619 /* libPods-pubkyring.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -110,10 +106,8 @@
 		BBD78D7AC51CEA395F1C20DB /* Pods */ = {
 			isa = PBXGroup;
 			children = (
-				DB21DDFE050214279FE2AEA5 /* Pods-pubkyring.debug.xcconfig */,
-				E6D3176A8E8B38F7DCC248A0 /* Pods-pubkyring.release.xcconfig */,
-				03704ACE8EBA61EB1DF0B9CD /* Pods-pubkyring-pubkyringTests.debug.xcconfig */,
-				076BB43B9E1699605230DFE6 /* Pods-pubkyring-pubkyringTests.release.xcconfig */,
+				E9BEEC22DDF3D2C7155A00F4 /* Pods-pubkyring.debug.xcconfig */,
+				FF42E8010883080C68665233 /* Pods-pubkyring.release.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -125,13 +119,13 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "pubkyring" */;
 			buildPhases = (
-				89DA63D279A6657E953381DB /* [CP] Check Pods Manifest.lock */,
+				CAEEEAA6C5C8969DF0B245A7 /* [CP] Check Pods Manifest.lock */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				A8972D13F002185EC6DDA525 /* [CP] Embed Pods Frameworks */,
-				93304EF1E99190BD8FD2F2ED /* [CP] Copy Pods Resources */,
+				A922A2D323AD61F1033D48F9 /* [CP] Embed Pods Frameworks */,
+				FB6CDADF44D0A26D2D80A59D /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -205,7 +199,24 @@
 			shellPath = /bin/sh;
 			shellScript = "set -e\n\nWITH_ENVIRONMENT=\"$REACT_NATIVE_PATH/scripts/xcode/with-environment.sh\"\nREACT_NATIVE_XCODE=\"$REACT_NATIVE_PATH/scripts/react-native-xcode.sh\"\n\n/bin/sh -c \"$WITH_ENVIRONMENT $REACT_NATIVE_XCODE\"\n";
 		};
-		89DA63D279A6657E953381DB /* [CP] Check Pods Manifest.lock */ = {
+		A922A2D323AD61F1033D48F9 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-frameworks-${CONFIGURATION}-input-files.xcfilelist",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputFileListPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-frameworks-${CONFIGURATION}-output-files.xcfilelist",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		CAEEEAA6C5C8969DF0B245A7 /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -227,7 +238,7 @@
 			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		93304EF1E99190BD8FD2F2ED /* [CP] Copy Pods Resources */ = {
+		FB6CDADF44D0A26D2D80A59D /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -235,38 +246,13 @@
 			inputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-resources-${CONFIGURATION}-input-files.xcfilelist",
 			);
-			inputPaths = (
-			);
 			name = "[CP] Copy Pods Resources";
 			outputFileListPaths = (
 				"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-resources-${CONFIGURATION}-output-files.xcfilelist",
 			);
-			outputPaths = (
-			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-resources.sh\"\n";
-			showEnvVarsInLog = 0;
-		};
-		A8972D13F002185EC6DDA525 /* [CP] Embed Pods Frameworks */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-frameworks-${CONFIGURATION}-input-files.xcfilelist",
-			);
-			inputPaths = (
-			);
-			name = "[CP] Embed Pods Frameworks";
-			outputFileListPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-frameworks-${CONFIGURATION}-output-files.xcfilelist",
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-pubkyring/Pods-pubkyring-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
@@ -285,11 +271,11 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = DB21DDFE050214279FE2AEA5 /* Pods-pubkyring.debug.xcconfig */;
+			baseConfigurationReference = E9BEEC22DDF3D2C7155A00F4 /* Pods-pubkyring.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KYH47R284B;
 				ENABLE_BITCODE = NO;
 				INFOPLIST_FILE = pubkyring/Info.plist;
@@ -300,7 +286,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.7;
+				MARKETING_VERSION = 0.8;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -316,11 +302,11 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = E6D3176A8E8B38F7DCC248A0 /* Pods-pubkyring.release.xcconfig */;
+			baseConfigurationReference = FF42E8010883080C68665233 /* Pods-pubkyring.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
-				CURRENT_PROJECT_VERSION = 8;
+				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KYH47R284B;
 				INFOPLIST_FILE = pubkyring/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Pubky Ring";
@@ -330,7 +316,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 0.7;
+				MARKETING_VERSION = 0.8;
 				OTHER_LDFLAGS = (
 					"$(inherited)",
 					"-ObjC",
@@ -413,7 +399,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "$(inherited) DEBUG";
@@ -482,7 +471,10 @@
 					"-DFOLLY_CFG_NO_COROUTINES=1",
 					"-DFOLLY_HAVE_CLOCK_GETTIME=1",
 				);
-				OTHER_LDFLAGS = "$(inherited)  ";
+				OTHER_LDFLAGS = (
+					"$(inherited)",
+					" ",
+				);
 				REACT_NATIVE_PATH = "${PODS_ROOT}/../../node_modules/react-native";
 				SDKROOT = iphoneos;
 				USE_HERMES = true;

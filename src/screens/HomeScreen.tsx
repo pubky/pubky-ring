@@ -2,6 +2,7 @@ import React, {
 	memo,
 	ReactElement,
 	useCallback,
+	useMemo,
 } from 'react';
 import { StyleSheet } from 'react-native';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -119,7 +120,23 @@ const HomeScreen = (): ReactElement => {
 	const keyExtractor = useCallback((item: { key: string; value: Pubky }, index: number) =>
 		`${item.key}-${index}`, []);
 
-	const hasPubkys = pubkyArray.length > 0;
+	const hasPubkys = useMemo(() => {
+		return pubkyArray.length > 0;
+	}, [pubkyArray.length]);
+
+	const showScanInviteButton = useMemo(() => {
+		return ENABLE_INVITE_SCANNER && !hasPubkys;
+	}, [hasPubkys]);
+
+	const ListFooterComponent = useMemo(() => {
+		if (hasPubkys) {
+			return <ListFooter createPubky={createPubky} importPubky={importPubky} />;
+		}
+		if (showScanInviteButton) {
+			return <ScanInviteButton />;
+		}
+		return null;
+	}, [hasPubkys, showScanInviteButton, createPubky, importPubky]);
 
 	return (
 		<View style={styles.container}>
@@ -130,7 +147,7 @@ const HomeScreen = (): ReactElement => {
 					keyExtractor={keyExtractor}
 					renderItem={renderItem}
 					ListHeaderComponent={<ListHeader />}
-					ListFooterComponent={hasPubkys ? <ListFooter createPubky={createPubky} importPubky={importPubky} /> : null}
+					ListFooterComponent={ListFooterComponent}
 					ListEmptyComponent={<EmptyState />}
 					contentContainerStyle={styles.listContent}
 					showsVerticalScrollIndicator={false}
@@ -138,9 +155,6 @@ const HomeScreen = (): ReactElement => {
 					getItemLayout={getItemLayout}
 				/>
 			</View>
-			{ENABLE_INVITE_SCANNER && (
-				<ScanInviteButton />
-			)}
 		</View>
 	);
 };
@@ -150,7 +164,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	listContent: {
-		paddingBottom: '100%',
+		height: '100%'
 	},
 	listFooter: {
 		...buttonStyles.primary,

@@ -20,25 +20,33 @@ import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 // @ts-ignore
 import PubkyRingLogo from "../../images/pubky-ring.png";
-import { WELCOME_GRADIENT } from '../../utils/constants.ts';
+import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
 
 const Welcome = ({ payload }: {
 	payload: {
 		pubky: string;
 		onComplete?: () => void;
+    isInvite?: boolean;
 	};
 }): ReactElement => {
 	const closeSheet = useCallback(async (): Promise<void> => {
 		return SheetManager.hide('new-pubky-setup');
 	}, []);
 
+  const appUrl = useMemo(() => {
+    if (payload?.isInvite) {
+      return `${PUBKY_APP_URL}/sign-in`;
+    }
+    return PUBKY_APP_URL;
+  }, [payload?.isInvite]);
+
 	const handleOpenPubkyApp = useCallback(() => {
 		// Open pubky.app or the app store if not installed
-		Linking.openURL('https://pubky.app');
+		Linking.openURL(appUrl);
 		setTimeout(() => {
 			closeSheet();
 		}, 100);
-	}, [closeSheet]);
+	}, [appUrl, closeSheet]);
 
 	const truncatedPubky = useMemo(() => {
 		if (!payload.pubky) return '';
@@ -81,7 +89,7 @@ const Welcome = ({ payload }: {
 						style={styles.openButton}
 						onPressIn={handleOpenPubkyApp}
 					>
-						<Text style={styles.buttonText}>Open pubky.app</Text>
+						<Text style={styles.buttonText}>`Open {PUBKY_APP_URL}`</Text>
 						<Image
 							source={PubkyRingLogo}
 							style={styles.pubkyLogo}

@@ -353,7 +353,7 @@ const styles = StyleSheet.create({
 	},
 	footerBuffer: {
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
+		marginBottom: Platform.select({ ios: 10, android: 20 })
 	},
 	importImage: {
 		width: 279,
@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
 		alignContent: 'center',
 		justifyContent: 'center',
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
+		marginBottom: 5
 	},
 });
 

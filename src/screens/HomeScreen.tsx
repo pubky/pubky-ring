@@ -4,7 +4,7 @@ import React, {
 	useCallback,
 	useMemo,
 } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
@@ -132,44 +132,53 @@ const HomeScreen = (): ReactElement => {
 		if (hasPubkys) {
 			return <ListFooter createPubky={createPubky} importPubky={importPubky} />;
 		}
-		if (showScanInviteButton) {
-			return <ScanInviteButton />;
-		}
 		return null;
-	}, [hasPubkys, showScanInviteButton, createPubky, importPubky]);
+	}, [hasPubkys, createPubky, importPubky]);
+
+	const FixedScanButton = useMemo(() => {
+		if (!showScanInviteButton) return null;
+		return (
+			<View style={styles.fixedButtonContainer}>
+				<ScanInviteButton />
+			</View>
+		);
+	}, [showScanInviteButton]);
 
 	return (
-		<View style={styles.container}>
-			<View style={styles.container}>
-				<DraggableFlatList
-					data={pubkyArray}
-					onDragEnd={handleDragEnd}
-					keyExtractor={keyExtractor}
-					renderItem={renderItem}
-					ListHeaderComponent={<ListHeader />}
-					ListFooterComponent={ListFooterComponent}
-					ListEmptyComponent={<EmptyState />}
-					contentContainerStyle={styles.listContent}
-					showsVerticalScrollIndicator={false}
-					showsHorizontalScrollIndicator={false}
-					getItemLayout={getItemLayout}
-				/>
-			</View>
-		</View>
+		<>
+			<DraggableFlatList
+				data={pubkyArray}
+				onDragEnd={handleDragEnd}
+				keyExtractor={keyExtractor}
+				renderItem={renderItem}
+				ListHeaderComponent={<ListHeader />}
+				ListFooterComponent={ListFooterComponent}
+				ListEmptyComponent={<EmptyState />}
+				contentContainerStyle={styles.listContent}
+				showsVerticalScrollIndicator={false}
+				showsHorizontalScrollIndicator={false}
+				getItemLayout={getItemLayout}
+			/>
+			{FixedScanButton}
+		</>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
 	listContent: {
-		height: '100%'
+		paddingBottom: '100%',
 	},
 	listFooter: {
 		...buttonStyles.primary,
 		width: '90%',
 		alignSelf: 'center',
+	},
+	fixedButtonContainer: {
+		position: 'absolute',
+		bottom: Platform.select({ ios: 0, android: 20 }),
+		left: 0,
+		right: 0,
+		backgroundColor: 'transparent',
 	},
 });
 

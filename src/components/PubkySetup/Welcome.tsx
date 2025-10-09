@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	Image,
 	Linking,
+	Platform,
 } from 'react-native';
 import {
 	View,
@@ -168,7 +169,8 @@ const styles = StyleSheet.create({
 	footer: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	openButton: {
 		width: '100%',

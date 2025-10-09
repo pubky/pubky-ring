@@ -15,13 +15,15 @@ import { defaultPubkyState } from '../../store/shapes/pubky.ts';
 import {
 	ACTION_SHEET_HEIGHT,
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
+	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { toastConfig } from '../../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
-import { getToastStyle } from '../../utils/helpers.ts';
+import { getToastStyle, isSmallScreen } from '../../utils/helpers.ts';
 
 const toastStyle = getToastStyle();
+const smallScreen = isSmallScreen();
 
 export enum ECurrentScreen {
 	main = 'main',
@@ -143,6 +145,8 @@ const NewPubkySetup = ({ payload }: {
 		switch (currentScreen) {
 			case ECurrentScreen.inviteCode:
 				return ACTION_SHEET_HEIGHT_TEXTINPUT;
+			case (ECurrentScreen.welcome):
+				return smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 			default:
 				return ACTION_SHEET_HEIGHT;
 		}

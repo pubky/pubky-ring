@@ -89,7 +89,7 @@ const Welcome = ({ payload }: {
 						style={styles.openButton}
 						onPressIn={handleOpenPubkyApp}
 					>
-						<Text style={styles.buttonText}>`Open {PUBKY_APP_URL}`</Text>
+						<Text style={styles.buttonText}>Open {PUBKY_APP_URL}</Text>
 						<Image
 							source={PubkyRingLogo}
 							style={styles.pubkyLogo}

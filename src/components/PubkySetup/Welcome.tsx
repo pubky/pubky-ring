@@ -8,6 +8,7 @@ import {
 	StyleSheet,
 	Image,
 	Linking,
+	Platform,
 } from 'react-native';
 import {
 	View,
@@ -20,25 +21,52 @@ import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 // @ts-ignore
 import PubkyRingLogo from "../../images/pubky-ring.png";
-import { WELCOME_GRADIENT } from '../../utils/constants.ts';
+import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
+import { isSmallScreen } from '../../utils/helpers.ts';
+
+const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
 
 const Welcome = ({ payload }: {
 	payload: {
 		pubky: string;
 		onComplete?: () => void;
+    isInvite?: boolean;
 	};
 }): ReactElement => {
+	const smallScreen = useMemo(() => isSmallScreen(), []);
+
+	const dynamicStyles = useMemo(() => StyleSheet.create({
+		// eslint-disable-next-line react-native/no-unused-styles
+		messageContainer: {
+			marginBottom: smallScreen ? 20 : 40,
+			backgroundColor: 'transparent',
+		},
+		// eslint-disable-next-line react-native/no-unused-styles
+		tagImage: {
+			width: smallScreen ? 280 : 380,
+			height: smallScreen ? 280 : 380,
+			bottom: smallScreen ? 10 : 40
+		},
+	}), [smallScreen]);
+
 	const closeSheet = useCallback(async (): Promise<void> => {
 		return SheetManager.hide('new-pubky-setup');
 	}, []);
 
+	const appUrl = useMemo(() => {
+		if (payload?.isInvite) {
+			return `${PUBKY_APP_URL}/sign-in`;
+		}
+		return PUBKY_APP_URL;
+	}, [payload?.isInvite]);
+
 	const handleOpenPubkyApp = useCallback(() => {
 		// Open pubky.app or the app store if not installed
-		Linking.openURL('https://pubky.app');
+		Linking.openURL(appUrl);
 		setTimeout(() => {
 			closeSheet();
 		}, 100);
-	}, [closeSheet]);
+	}, [appUrl, closeSheet]);
 
 	const truncatedPubky = useMemo(() => {
 		if (!payload.pubky) return '';
@@ -61,7 +89,7 @@ const Welcome = ({ payload }: {
 				</View>
 
 				<Text style={styles.headerText}>Welcome.</Text>
-				<View style={styles.messageContainer}>
+				<View style={dynamicStyles.messageContainer}>
 					<SessionText style={styles.message}>
 						Your invite code is valid. Your pubky{' '}
 						<Text style={styles.pubkyText}>{truncatedPubky}</Text>
@@ -69,10 +97,10 @@ const Welcome = ({ payload }: {
 					</SessionText>
 				</View>
 
-				<View style={styles.padlockContainer}>
+				<View style={styles.tagContainer}>
 					<Image
 						source={require('../../images/welcome-tag.png')}
-						style={styles.padlockImage}
+						style={dynamicStyles.tagImage}
 						resizeMode="contain"
 					/>
 				</View>
@@ -81,7 +109,7 @@ const Welcome = ({ payload }: {
 						style={styles.openButton}
 						onPressIn={handleOpenPubkyApp}
 					>
-						<Text style={styles.buttonText}>Open pubky.app</Text>
+						<Text style={styles.buttonText}>Open {BUTTON_TEXT}</Text>
 						<Image
 							source={PubkyRingLogo}
 							style={styles.pubkyLogo}
@@ -124,10 +152,6 @@ const styles = StyleSheet.create({
 		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
-	messageContainer: {
-		marginBottom: 40,
-		backgroundColor: 'transparent',
-	},
 	message: {
 		fontWeight: '400',
 		fontSize: 17,
@@ -137,22 +161,16 @@ const styles = StyleSheet.create({
 	pubkyText: {
 		fontWeight: '600',
 		backgroundColor: 'transparent',
-
 	},
-	padlockContainer: {
+	tagContainer: {
 		alignItems: 'center',
-		marginBottom: 40,
 		backgroundColor: 'transparent',
-	},
-	padlockImage: {
-		width: 380,
-		height: 380,
-		bottom: 40
 	},
 	footer: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	openButton: {
 		width: '100%',

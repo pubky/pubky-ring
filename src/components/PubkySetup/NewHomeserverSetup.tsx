@@ -5,10 +5,7 @@ import React, {
 	useMemo,
 	useState,
 } from 'react';
-import {
-	StyleSheet,
-	Image,
-} from 'react-native';
+import { StyleSheet, Image, Platform } from 'react-native';
 import {
 	View,
 	Text,
@@ -250,6 +247,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 		flex: 1,
 		justifyContent: 'flex-end',
+		marginBottom: Platform.select({ ios: 0, android: 20 })
 	},
 	deviceImage: {
 		width: 480,

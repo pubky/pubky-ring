@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
-		height: '98%',
+		height: '100%',
 	},
 	keyContainer: {
 		flex: 1,
@@ -166,8 +166,10 @@ const styles = StyleSheet.create({
 		marginBottom: 20,
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		fontSize: 17,
+		fontWeight: '700',
+		lineHeight: 22,
+		letterSpacing: 0.4,
 		textAlign: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
@@ -187,6 +189,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingVertical: 12,
 		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	button: {
 		width: '47%',

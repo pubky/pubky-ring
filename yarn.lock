@@ -2508,10 +2508,10 @@
     recyclerlistview "4.2.3"
     tslib "2.8.1"
 
-"@shopify/react-native-skia@^2.2.3":
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-2.2.4.tgz#2a504e5d35f94454ceffe14ac746325827349d34"
-  integrity sha512-A8ZR8/jA8pak4fJnTq/DDlGuVRUyoqN41W629o8F5ADorjP2i9VmM6z32BHWMciSckTPdBHWGqF0Thl4BVTpXw==
+"@shopify/react-native-skia@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@shopify/react-native-skia/-/react-native-skia-2.3.0.tgz#d4062b97b377c5c75c862bfb3f67d9117f97581b"
+  integrity sha512-ur382ShRjoCeKCXcOfnMTSr4GiyNzlVsexhna5lfBRkduxzva+/gGp9txi0lIMY4CB+szHAnuV/T40b+K9pyNA==
   dependencies:
     canvaskit-wasm "0.40.0"
     react-reconciler "0.31.0"
@@ -8675,9 +8675,10 @@ react-native-actions-sheet@^0.9.7:
   resolved "https://registry.yarnpkg.com/react-native-actions-sheet/-/react-native-actions-sheet-0.9.7.tgz#43ff2d9252f7af2da6dc051be5a5c375a844cdfb"
   integrity sha512-rjUwxUr5dxbdSLDtLDUFAdSlFxpNSpJsbXLhHkBzEBMxEMPUhRT3zqbvKqsPj0JUkjwuRligxrhbIJZkg/6ZDw==
 
-"react-native-camera-kit@https://github.com/SmartArray/react-native-camera-kit#fix/rn-ios-0.80.0":
-  version "15.1.0"
-  resolved "https://github.com/SmartArray/react-native-camera-kit#c70b91e38599799b574af5a0fca7967aee99b22c"
+react-native-camera-kit@16.1.3:
+  version "16.1.3"
+  resolved "https://registry.yarnpkg.com/react-native-camera-kit/-/react-native-camera-kit-16.1.3.tgz#71a3005688f37cfad16b89bc85addf56921498df"
+  integrity sha512-mqOgFY8wON6YGaZVSP1eaH+fbcxIbUSgAaFlt5yLTz3H8Lc1Hl0IvQ4FlcC1lG5AbyqCyNqvK60kkgq5dWFnag==
 
 react-native-draggable-flatlist@^4.0.3:
   version "4.0.3"

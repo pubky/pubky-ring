@@ -15,13 +15,15 @@ import { defaultPubkyState } from '../../store/shapes/pubky.ts';
 import {
 	ACTION_SHEET_HEIGHT,
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
+	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { toastConfig } from '../../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
-import { getToastStyle } from '../../utils/helpers.ts';
+import { getToastStyle, isSmallScreen } from '../../utils/helpers.ts';
 
 const toastStyle = getToastStyle();
+const smallScreen = isSmallScreen();
 
 export enum ECurrentScreen {
 	main = 'main',
@@ -37,6 +39,7 @@ interface ContentProps {
 	subTitle: string;
 	pubky: string;
 	pubkyData: PubkyData;
+  isInvite?: boolean;
 	setCurrentScreen: (screen: ECurrentScreen) => void;
 	closeSheet: () => Promise<void>;
 }
@@ -47,6 +50,7 @@ const Content = ({
 	subTitle,
 	pubky,
 	pubkyData,
+	isInvite,
 	setCurrentScreen,
 	closeSheet
 }: ContentProps): ReactElement => {
@@ -96,7 +100,8 @@ const Content = ({
 				<View style={styles.fullSize}>
 					<Welcome payload={{
 						pubky,
-						onComplete: closeSheet
+						onComplete: closeSheet,
+						isInvite
 					}} />
 				</View>
 			);
@@ -107,11 +112,14 @@ const NewPubkySetup = ({ payload }: {
 	payload: {
 		currentScreen?: ECurrentScreen;
 		pubky: string;
-		data?: Pubky
+		data?: Pubky;
+    isInvite?: boolean;
 	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(payload?.currentScreen ?? ECurrentScreen.main);
+	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(
+		payload?.currentScreen ?? ECurrentScreen.main
+	);
 	const [pubky] = useState(payload?.pubky ?? '');
 
 	const closeSheet = useCallback(async (): Promise<void> => {
@@ -137,6 +145,8 @@ const NewPubkySetup = ({ payload }: {
 		switch (currentScreen) {
 			case ECurrentScreen.inviteCode:
 				return ACTION_SHEET_HEIGHT_TEXTINPUT;
+			case (ECurrentScreen.welcome):
+				return smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 			default:
 				return ACTION_SHEET_HEIGHT;
 		}
@@ -168,6 +178,7 @@ const NewPubkySetup = ({ payload }: {
 					subTitle={subTitle}
 					pubky={pubky}
 					pubkyData={pubkyData}
+					isInvite={payload?.isInvite}
 					setCurrentScreen={setCurrentScreen}
 					closeSheet={closeSheet}
 				/>

@@ -3,6 +3,7 @@ import { EBackupPreference, Pubky, PubkyState, TProfile } from '../../types/pubk
 export const initialState: PubkyState = {
 	pubkys: {},
 	deepLink: '',
+	processing: {},
 };
 
 export const defaultPubkyState: Pubky = {

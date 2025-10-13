@@ -1,5 +1,5 @@
 import React, { ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
+import { Platform, StyleSheet } from 'react-native';
 import {
 	View,
 	Text,
@@ -135,6 +135,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 0, android: 20 })
 	}
 });
 

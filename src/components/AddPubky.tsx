@@ -29,6 +29,7 @@ import MnemonicForm from './MnemonicForm.tsx';
 import {
 	ACTION_SHEET_HEIGHT,
 	BLUE_RADIAL_GRADIENT,
+	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
 import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { Result } from '@synonymdev/result';
@@ -36,11 +37,15 @@ import { toastConfig } from '../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
 import {
 	getToastStyle,
+	isSmallScreen,
 	showImportQRScanner,
 } from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 
 const toastStyle = getToastStyle();
+
+const smallScreen = isSmallScreen();
+const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
 
 const AddPubky = ({ payload }: {
@@ -246,6 +251,7 @@ const AddPubky = ({ payload }: {
 				>
 					<Text style={styles.buttonText}>Scan QR to import</Text>
 				</AuthorizeButton>}
+				<View style={styles.footerBuffer} />
 			</>
 		);
 	}, [currentScreen, getButtonConfig, getHeaderText, getImage, importPubky, messageText, onMnemonicBack, onMnemonicCancel, onScanQrPress, renderBackButton, shouldShowBackButton, titleText]);
@@ -258,7 +264,7 @@ const AddPubky = ({ payload }: {
 				keyboardHandlerEnabled={Platform.OS === 'ios'}
 				//isModal={Platform.OS === 'ios'}
 				CustomHeaderComponent={<></>}
-				height={ACTION_SHEET_HEIGHT}
+				height={actionSheetHeight}
 			>
 				<RadialGradient
 					style={styles.content}
@@ -285,7 +291,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 20,
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
-		height: '98%',
+		height: '100%',
 	},
 	keyContainer: {
 		flex: 1,
@@ -312,6 +318,7 @@ const styles = StyleSheet.create({
 		textTransform: 'capitalize',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
+		flex: 1,
 	},
 	message: {
 		fontWeight: '400',
@@ -328,7 +335,6 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingVertical: 12,
 		backgroundColor: 'transparent',
-		marginBottom: 10,
 	},
 	button: {
 		width: '47%',
@@ -344,6 +350,10 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		fontWeight: '600',
 		lineHeight: 18,
+	},
+	footerBuffer: {
+		backgroundColor: 'transparent',
+		marginBottom: Platform.select({ ios: 10, android: 20 })
 	},
 	importImage: {
 		width: 279,
@@ -373,6 +383,7 @@ const styles = StyleSheet.create({
 		alignContent: 'center',
 		justifyContent: 'center',
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
+		marginBottom: 5
 	},
 });
 

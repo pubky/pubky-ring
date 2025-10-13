@@ -50,7 +50,6 @@ const pubkysSlice = createSlice({
 			const { pubky, homeserver } = action.payload;
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].homeserver = homeserver;
-				state.pubkys[pubky].signedUp = false;
 			}
 		},
 		setSignedUp: (state, action: PayloadAction<{ pubky: string; signedUp: boolean }>) => {
@@ -58,6 +57,14 @@ const pubkysSlice = createSlice({
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].signedUp = signedUp;
 			}
+		},
+		addProcessing: (state, action: PayloadAction<{ pubky: string; }>) => {
+			const { pubky } = action.payload;
+			state.processing[pubky] = true;
+		},
+		removeProcessing: (state, action: PayloadAction<{ pubky: string; }>) => {
+			const { pubky } = action.payload;
+			delete state.processing[pubky];
 		},
 		addSession: (state, action: PayloadAction<{ pubky: string; session: PubkySession }>) => {
 			const { pubky, session } = action.payload;
@@ -106,6 +113,8 @@ export const {
 	removePubky,
 	reorderPubkys,
 	resetPubkys,
+	addProcessing,
+	removeProcessing,
 } = pubkysSlice.actions;
 
 export default pubkysSlice.reducer;

@@ -5,13 +5,20 @@ import { ActionSheetContainer, Clipboard, Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { CardButton } from '../theme/components.ts';
-import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
+import {
+	ACTION_SHEET_HEIGHT,
+	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
+} from '../utils/constants.ts';
+import { isSmallScreen } from '../utils/helpers.ts';
 interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
 	onClose: () => void;
   title?: string;
 }
+
+const smallScreen = isSmallScreen();
+const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
 const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 	const { onScan, onCopyClipboard, onClose, title = 'Authorize' } = payload;
@@ -27,7 +34,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 			animated={true}
 			onClose={onClose}
 			navigationAnimation={navigationAnimation}
-			height={ACTION_SHEET_HEIGHT}
+			height={actionSheetHeight}
 		>
 			<View style={styles.container}>
 				<Text style={styles.title}>{title}</Text>
@@ -54,7 +61,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	cameraContainer: {
-		height: '81%',
+		height: '79%',
 		width: '90%',
 		alignSelf: 'center'
 	},

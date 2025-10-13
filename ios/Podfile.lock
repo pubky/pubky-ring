@@ -1858,7 +1858,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-skia (2.2.4):
+  - react-native-skia (2.3.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2363,7 +2363,7 @@ PODS:
     - React-perflogger (= 0.80.2)
     - React-utils (= 0.80.2)
     - SocketRocket
-  - ReactNativeCameraKit (15.1.0):
+  - ReactNativeCameraKit (16.1.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -3266,7 +3266,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-pubky: e238e67243a780ec63ea81e12cd0eb85b746cb68
   react-native-safe-area-context: fd72bd1eb562ff2a0fda20e9a7828c4b0cabf5a4
-  react-native-skia: 8be872bfae8d97bed098069be559266ec5583657
+  react-native-skia: 8089e8b97270b2f07545477d6eff211dce61db57
   React-NativeModulesApple: b22e6abb44d78270dfdfc7d85efe29e35e0333a7
   React-oscompat: 56d6de59f9ae95cd006a1c40be2cde83bc06a4e1
   React-perflogger: 0633844e495d8b34798c9bf0cb32ce315f1d5c9f
@@ -3298,7 +3298,7 @@ SPEC CHECKSUMS:
   ReactAppDependencyProvider: 6c9197c1f6643633012ab646d2bfedd1b0d25989
   ReactCodegen: 9ea66ee246511816b72e9d6e380f884b7b3b99d7
   ReactCommon: 7aca047f2f453a7d7f0adeccb63810d61829235a
-  ReactNativeCameraKit: d81588823aaa195cb922db814af46e9d1c1de328
+  ReactNativeCameraKit: f2410555605bf19240e95fe8e1fa0b0342afa998
   ReactNativeFs: 85ddd9627980effe04c9064361066c950a0cde4a
   RNCAsyncStorage: 767abb068db6ad28b5f59a129fbc9fab18b377e2
   RNCClipboard: acf8ae07037c21f17d9284ca56e982186ed21465

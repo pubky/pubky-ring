@@ -19,8 +19,10 @@ import {
 } from './keychain';
 import { Dispatch } from 'redux';
 import {
+	addProcessing,
 	addPubky,
 	addSession,
+	removeProcessing,
 	removePubky,
 	removeSession,
 	setHomeserver,
@@ -104,6 +106,80 @@ export const createNewPubky = async (
 			description: 'Failed to create pubky',
 		});
 		return err('Failed to create pubky');
+	}
+};
+
+/**
+ * Creates a new pubky and signs up with the provided invite code automatically
+ */
+export const createPubkyWithInviteCode = async (
+	inviteCode: string,
+	dispatch: Dispatch,
+	homeserver: string = DEFAULT_HOMESERVER
+): Promise<Result<{ pubky: string }>> => {
+	try {
+		// Generate new pubky
+		const genKeyRes = await generateMnemonicPhraseAndKeypair();
+		if (genKeyRes.isErr()) {
+			return err('Failed to generate secret key');
+		}
+
+		const mnemonic = genKeyRes.value.mnemonic;
+		const secretKey = genKeyRes.value.secret_key;
+		const pubky = genKeyRes.value.public_key;
+
+		dispatch(addProcessing({ pubky }));
+		try {
+			const saveRes = await savePubky({
+				mnemonic,
+				secretKey,
+				pubky,
+				dispatch,
+				backupPreference: EBackupPreference.unknown,
+				isBackedUp: false
+			});
+
+			if (saveRes.isErr()) {
+				return err('Failed to save pubky');
+			}
+
+			// Set the homeserver
+			dispatch(setHomeserver({ pubky, homeserver }));
+
+			// Sign up to homeserver with invite code
+			const signupRes = await signUpToHomeserver({
+				pubky,
+				secretKey,
+				homeserver,
+				signupToken: inviteCode,
+				dispatch,
+			});
+
+			if (signupRes.isErr()) {
+				console.log('Signup failed, attempting signin...');
+				// If signup fails, try to sign in (in case it's an existing pubky)
+				const signinRes = await signInToHomeserver({
+					pubky,
+					homeserver,
+					secretKey,
+					dispatch,
+				});
+
+				if (signinRes.isErr()) {
+					console.error('Signin also failed:', signinRes.error);
+					return err('Invalid invite code. Please check and try again.');
+				}
+				console.log('Signin succeeded');
+			} else {
+				console.log('Signup succeeded');
+			}
+			return ok({ pubky });
+		} finally {
+			dispatch(removeProcessing({ pubky }));
+		}
+	} catch (error) {
+		console.error('Error creating pubky with invite code:', error);
+		return err('Failed to create pubky with invite code');
 	}
 };
 

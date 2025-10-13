@@ -51,7 +51,7 @@ const AuthorizeQRButton = memo(({
 		) : (
 			isSignedUp ? <QrCode size={16} /> : null
 		)}
-		<Text style={textStyles.button}>{isSignedUp ? 'Authorize' : 'Setup'}</Text>
+		<Text style={textStyles.button}>{isLoading ? '' : isSignedUp ? 'Authorize' : 'Setup'}</Text>
 	</AuthorizeButton>
 ));
 
@@ -99,6 +99,7 @@ interface PubkyBoxProps {
 	index?: number;
 	onLongPress?: () => void;
 	disabled?: boolean;
+  loading?: boolean;
 }
 
 const PubkyBox = ({
@@ -108,6 +109,7 @@ const PubkyBox = ({
 	index,
 	onLongPress,
 	disabled,
+	loading = false,
 }: PubkyBoxProps): ReactElement => {
 	const { handleQRPress, isQRLoading } = useQRScanner();
 	const { onQRPress, onPubkyPress } = usePubkyHandlers();
@@ -184,7 +186,7 @@ const PubkyBox = ({
 
 				<ForegroundView style={styles.buttonsContainer}>
 					<AuthorizeQRButton
-						isLoading={isQRLoading}
+						isLoading={isQRLoading || loading}
 						isSignedUp={pubkyData.signedUp}
 						onPress={qrPress}
 						onLongPress={onLongPress}

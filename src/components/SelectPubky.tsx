@@ -101,7 +101,6 @@ const SelectPubky = ({ payload }: {
 							/>
 						);
 					}}
-					estimatedItemSize={120}
 					keyExtractor={(item) => item.key}
 					showsVerticalScrollIndicator={true}
 				/>

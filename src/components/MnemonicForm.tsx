@@ -94,7 +94,7 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 		// Check if we're transitioning from having text to being empty
 		const previousWord = mnemonicWords[index];
 		const wasNotEmpty = previousWord && previousWord.length > 0;
-		const isNowEmpty = !word || word.length === 0;
+		const isNowEmpty = word?.length === 0;
 
 		setMnemonicWords(prev => {
 			const newWords = [...prev];
@@ -351,7 +351,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		gap: 12,
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
+		marginBottom: 20
 	},
 	button: {
 		width: '47%',

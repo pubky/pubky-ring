@@ -75,7 +75,7 @@ const ensureBackupDirectory = async (): Promise<Result<string>> => {
 			await RNFS.mkdir(dir);
 		}
 		return ok(dir);
-	} catch (error) {
+	} catch {
 		return err('Failed to create backup directory');
 	}
 };
@@ -157,7 +157,7 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 				return err(error.code);
 			}
 
-		} catch (e) {
+		} catch {
 			return err(errMsg);
 		}
 		return err(errMsg);

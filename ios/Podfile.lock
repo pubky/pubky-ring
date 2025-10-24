@@ -10,6 +10,67 @@ PODS:
   - hermes-engine (0.82.0):
     - hermes-engine/Pre-built (= 0.82.0)
   - hermes-engine/Pre-built (0.82.0)
+  - MMKVCore (2.2.4)
+  - NitroMmkv (4.0.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - MMKVCore (= 2.2.4)
+    - NitroModules
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
+  - NitroModules (0.31.2):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-callinvoker
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RCT-Folly (2024.11.18.00):
     - boost
     - DoubleConversion
@@ -1812,35 +1873,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-document-picker (10.1.3):
-    - boost
-    - DoubleConversion
-    - fast_float
-    - fmt
-    - glog
-    - hermes-engine
-    - RCT-Folly
-    - RCT-Folly/Fabric
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - SocketRocket
-    - Yoga
-  - react-native-mmkv (3.3.3):
+  - react-native-document-picker (10.1.7):
     - boost
     - DoubleConversion
     - fast_float
@@ -1985,7 +2018,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-skia (2.3.0):
+  - react-native-skia (2.3.6):
     - boost
     - DoubleConversion
     - fast_float
@@ -2666,7 +2699,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNGestureHandler (2.28.0):
+  - RNGestureHandler (2.29.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2842,7 +2875,7 @@ PODS:
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNScreens (4.17.1):
+  - RNScreens (4.18.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -2869,10 +2902,10 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNScreens/common (= 4.17.1)
+    - RNScreens/common (= 4.18.0)
     - SocketRocket
     - Yoga
-  - RNScreens/common (4.17.1):
+  - RNScreens/common (4.18.0):
     - boost
     - DoubleConversion
     - fast_float
@@ -3087,6 +3120,8 @@ DEPENDENCIES:
   - fmt (from `../node_modules/react-native/third-party-podspecs/fmt.podspec`)
   - glog (from `../node_modules/react-native/third-party-podspecs/glog.podspec`)
   - hermes-engine (from `../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec`)
+  - NitroMmkv (from `../node_modules/react-native-mmkv`)
+  - NitroModules (from `../node_modules/react-native-nitro-modules`)
   - RCT-Folly (from `../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec`)
   - RCTDeprecation (from `../node_modules/react-native/ReactApple/Libraries/RCTFoundation/RCTDeprecation`)
   - RCTRequired (from `../node_modules/react-native/Libraries/Required`)
@@ -3123,7 +3158,6 @@ DEPENDENCIES:
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
-  - react-native-mmkv (from `../node_modules/react-native-mmkv`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-pubky (from `../node_modules/@synonymdev/react-native-pubky`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -3177,6 +3211,7 @@ DEPENDENCIES:
 
 SPEC REPOS:
   trunk:
+    - MMKVCore
     - SocketRocket
 
 EXTERNAL SOURCES:
@@ -3197,6 +3232,10 @@ EXTERNAL SOURCES:
   hermes-engine:
     :podspec: "../node_modules/react-native/sdks/hermes-engine/hermes-engine.podspec"
     :tag: hermes-2025-09-01-RNv0.82.0-265ef62ff3eb7289d17e366664ac0da82303e101
+  NitroMmkv:
+    :path: "../node_modules/react-native-mmkv"
+  NitroModules:
+    :path: "../node_modules/react-native-nitro-modules"
   RCT-Folly:
     :podspec: "../node_modules/react-native/third-party-podspecs/RCT-Folly.podspec"
   RCTDeprecation:
@@ -3267,8 +3306,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-community/blur"
   react-native-document-picker:
     :path: "../node_modules/@react-native-documents/picker"
-  react-native-mmkv:
-    :path: "../node_modules/react-native-mmkv"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-pubky:
@@ -3377,6 +3414,9 @@ SPEC CHECKSUMS:
   fmt: a40bb5bd0294ea969aaaba240a927bd33d878cdd
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 8642d8f14a548ab718ec112e9bebdfdd154138b5
+  MMKVCore: f2dd4c9befea04277a55e84e7812f930537993df
+  NitroMmkv: 1b125f00aa79f5b73e5afe0340a6d058923e1269
+  NitroModules: 5f474732a91ef6a48e7788fb73b355bcb52999ee
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: f17e2ebc07876ca9ab8eb6e4b0a4e4647497ae3a
   RCTRequired: e2c574c1b45231f7efb0834936bd609d75072b63
@@ -3411,12 +3451,11 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 7e7ca4c53288117e7e0406e9eaa804bf259b4b30
   React-microtasksnativemodule: 885bebe5c5f25035e1fd0920776078840a0e3a76
   react-native-blur: ba0e9ad6274783c8d45f42da82acae02e25784ad
-  react-native-document-picker: a1e5442419486ea749a87b4d0d4e33370baf0208
-  react-native-mmkv: 8d47771bdbbe76fb96e003c343a0798bc9f8ab10
+  react-native-document-picker: ca6edbcee0abb1b92a06d34fc42ee31e9d559534
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-pubky: 3c63aa77e90c511acda2c2ee687d27f6a0a73541
   react-native-safe-area-context: 6d8a7b750e496e37bda47c938320bf2c734d441f
-  react-native-skia: 2f1d7c2aa4005fb2c94ea0a0c2723fcf17e96ab9
+  react-native-skia: 7426cbd162ae061525119c649582a2c79a2d266b
   React-NativeModulesApple: c4bee6aa736092cd347456488a4f97a8e7517604
   React-oscompat: 95875e81f5d4b3c7b2c888d5bd2c9d83450d8bdb
   React-perflogger: d5b5677902d23a6611b700601634271b29356ac6
@@ -3453,11 +3492,11 @@ SPEC CHECKSUMS:
   ReactNativeFs: b94c72969131e2dc113fedd9f1f3dafd117bac7a
   RNCAsyncStorage: 302f2fac014fd450046c120567ca364632da682b
   RNCClipboard: 962296f7af77f6c039b683e21c2e2255af9c05df
-  RNGestureHandler: 310fefa1b72004d0b0a6a361b537a74724f45d5b
+  RNGestureHandler: 4fd2c1c449479d982116e0336513fc0f2e4b4617
   RNKeychain: 182d986f809280edd9444a557adc21845f7d1e6f
   RNPermissions: a04e452e6d1129709053e792f2dda2348541c185
   RNReanimated: c76d99de4022813a27dc3745d8d2de4230ac5fef
-  RNScreens: d3b832c50356686916d18e28d3c5b9107382191c
+  RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918
   RNShare: 5d5c5158bc67618ed3f8b5cc008171f1c0607cbe
   RNSVG: 870974196fca9fedd72914d560cc4c774f98d170
   RNWorklets: daa0a3e7946a9c4042f3a962c87a12dc5bc0badd

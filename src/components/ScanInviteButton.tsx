@@ -102,7 +102,7 @@ const ScanInviteButton = memo(() => {
 							description: 'Clipboard does not contain a valid invite link',
 						});
 					}
-				} catch (error) {
+				} catch {
 					showToast({
 						type: 'error',
 						title: 'Error',

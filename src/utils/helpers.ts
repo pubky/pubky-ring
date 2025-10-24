@@ -30,6 +30,7 @@ import {
 	mnemonicPhraseToKeypair,
 	getPublicKeyFromSecretKey
 } from '@synonymdev/react-native-pubky';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 export enum EDeepLinkType {
 	invite = 'invite',
@@ -324,6 +325,7 @@ export const handleAuth = async ({
 		}
 		// Small timeout allows the sheet time to properly display and not get stuck.
 		setTimeout(() => {
+			SystemNavigationBar.navigationHide().then();
 			SheetManager.show('confirm-auth', {
 				payload: {
 					pubky,
@@ -334,6 +336,7 @@ export const handleAuth = async ({
 					deepLink,
 				},
 				onClose: () => {
+					SystemNavigationBar.navigationShow().then();
 					SheetManager.hide('confirm-auth');
 				},
 			});

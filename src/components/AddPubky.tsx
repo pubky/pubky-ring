@@ -187,9 +187,10 @@ const AddPubky = ({ payload }: {
 	const getButtonConfig = useCallback(() => {
 		switch (currentScreen) {
 			case 'main':
+				const marginStyle = { marginBottom: 5 };
 				return [
-					{ id: 'ImportPubkyButton', text: 'Import pubky', onPress: onImportPubky, style: styles.importButton },
-					{ id: 'NewPubkyButton', text: 'New pubky', onPress: onCreatePubky, style: styles.createButton },
+					{ id: 'ImportPubkyButton', text: 'Import pubky', onPress: onImportPubky, style: [styles.importButton, marginStyle] },
+					{ id: 'NewPubkyButton', text: 'New pubky', onPress: onCreatePubky, style: [styles.createButton, marginStyle] },
 				];
 			case 'import-options':
 				return [

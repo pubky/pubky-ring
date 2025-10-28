@@ -213,7 +213,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 
 					<PubkyCard
 						name={pubkyName}
-						publicKey={truncatePubky(pubky)}
+						publicKey={pubky}
 						style={styles.pubkyCard}
 						containerStyle={styles.pubkyContainer}
 						nameStyle={styles.pubkyName}

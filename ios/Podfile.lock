@@ -42,7 +42,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - NitroModules (0.31.2):
+  - NitroModules (0.31.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -2018,7 +2018,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - react-native-skia (2.3.6):
+  - react-native-skia (2.3.7):
     - boost
     - DoubleConversion
     - fast_float
@@ -2755,7 +2755,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNPermissions (5.4.2):
+  - RNPermissions (5.4.3):
     - boost
     - DoubleConversion
     - fast_float
@@ -3416,7 +3416,7 @@ SPEC CHECKSUMS:
   hermes-engine: 273e30e7fb618279934b0b95ffab60ecedb7acf5
   MMKVCore: f2dd4c9befea04277a55e84e7812f930537993df
   NitroMmkv: 1b125f00aa79f5b73e5afe0340a6d058923e1269
-  NitroModules: 5f474732a91ef6a48e7788fb73b355bcb52999ee
+  NitroModules: eece9344ec509515aed59b5405120a15be84e6b9
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: f17e2ebc07876ca9ab8eb6e4b0a4e4647497ae3a
   RCTRequired: e2c574c1b45231f7efb0834936bd609d75072b63
@@ -3455,7 +3455,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-pubky: 3c63aa77e90c511acda2c2ee687d27f6a0a73541
   react-native-safe-area-context: 6d8a7b750e496e37bda47c938320bf2c734d441f
-  react-native-skia: 7426cbd162ae061525119c649582a2c79a2d266b
+  react-native-skia: 4a1c8c04bd135a36d822271024866f7fd965e61c
   React-NativeModulesApple: c4bee6aa736092cd347456488a4f97a8e7517604
   React-oscompat: 95875e81f5d4b3c7b2c888d5bd2c9d83450d8bdb
   React-perflogger: d5b5677902d23a6611b700601634271b29356ac6
@@ -3494,7 +3494,7 @@ SPEC CHECKSUMS:
   RNCClipboard: 962296f7af77f6c039b683e21c2e2255af9c05df
   RNGestureHandler: 4fd2c1c449479d982116e0336513fc0f2e4b4617
   RNKeychain: 182d986f809280edd9444a557adc21845f7d1e6f
-  RNPermissions: a04e452e6d1129709053e792f2dda2348541c185
+  RNPermissions: ced7638abb298552d556478f8ade7b4d3d04b443
   RNReanimated: c76d99de4022813a27dc3745d8d2de4230ac5fef
   RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918
   RNShare: 5d5c5158bc67618ed3f8b5cc008171f1c0607cbe

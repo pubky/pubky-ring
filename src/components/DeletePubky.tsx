@@ -70,7 +70,7 @@ const DeletePubky = ({ payload }: {
 				</SessionText>
 				<PubkyCard
 					name={pubkyName}
-					publicKey={truncatePubky(publicKey)}
+					publicKey={publicKey}
 					style={styles.pubkyCard}
 					containerStyle={styles.pubkyContainer}
 					nameStyle={styles.pubkyName}

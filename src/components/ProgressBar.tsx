@@ -97,11 +97,13 @@ const ProgressBar = ({
 			cancelAnimation(progress);
 			cancelAnimation(opacity);
 		};
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [shouldRender, duration, delayStart, fadeIn, fadeInDuration, onComplete]);
 
 	if (!shouldRender) {
 		return (<View style={[
 			styles.container,
+			//eslint-disable-next-line react-native/no-inline-styles
 			{ backgroundColor: 'transparent', height, borderRadius },
 			style,
 		]}  />);
@@ -111,6 +113,7 @@ const ProgressBar = ({
 		<View
 			style={[
 				styles.container,
+				//eslint-disable-next-line react-native/no-inline-styles
 				{ height, borderRadius, overflow: 'hidden', opacity: fadeIn ? undefined : 1 },
 				style
 			]}

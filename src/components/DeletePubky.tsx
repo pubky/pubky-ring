@@ -11,7 +11,6 @@ import {
 } from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { truncatePubky } from '../utils/pubky.ts';
 import {
 	View,
 	Text,

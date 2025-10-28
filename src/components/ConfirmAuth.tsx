@@ -12,7 +12,7 @@ import {
 	SkiaGradient,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
-import { performAuth, truncatePubky } from '../utils/pubky';
+import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	getToastStyle,

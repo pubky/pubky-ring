@@ -22,7 +22,9 @@ jobs:
         cache: 'yarn'
         
     - name: Install dependencies
-      run: yarn install --frozen-lockfile
+      run: |
+        yarn cache clean
+        yarn install --frozen-lockfile
       
     - name: Install iOS dependencies
       run: |

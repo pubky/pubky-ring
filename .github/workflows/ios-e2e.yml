@@ -9,6 +9,11 @@ on:
         description: 'Commit SHA to test (leave empty to use current branch head)'
         required: false
         type: string
+      clear-cache:
+        description: 'Clear yarn cache before install'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   ios-e2e:
@@ -26,6 +31,10 @@ jobs:
       with:
         node-version: '20'
         cache: 'yarn'
+
+    - name: Clean yarn cache
+      if: ${{ github.event.inputs.clear-cache == 'true' }}
+      run: yarn cache clean
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile

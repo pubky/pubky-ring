@@ -10,34 +10,37 @@ jobs:
     concurrency:
       group: ios-build-${{ github.head_ref }}
       cancel-in-progress: true
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
-      
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
         node-version: '20'
         cache: 'yarn'
-        
+
     - name: Install dependencies
-      run: |
-        yarn cache clean
-        yarn install --frozen-lockfile
-      
-    - name: Install iOS dependencies
-      run: |
-        cd ios
-        pod install
-        
+      run: yarn install --frozen-lockfile
+
     - name: Cache CocoaPods
       uses: actions/cache@v4
       with:
         path: ios/Pods
-        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock') }}
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock', 'package.json', 'yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-pods-
+
+    - name: Install iOS dependencies
+      run: |
+        cd ios
+        pod install
+
+    - name: Clean build
+      run: |
+        cd ios
+        xcodebuild clean -workspace pubkyring.xcworkspace -scheme pubkyring
 
     - name: Build iOS App
       run: |
@@ -48,7 +51,7 @@ jobs:
       run: |
         cd ios/build/Build/Products/Release-iphonesimulator
         zip -r pubkyring.app.zip pubkyring.app
-        
+
     - name: Upload build artifacts
       uses: actions/upload-artifact@v4
       with:

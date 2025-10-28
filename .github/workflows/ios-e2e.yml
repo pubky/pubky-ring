@@ -25,6 +25,7 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '20'
+        cache: 'yarn'
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
@@ -58,7 +59,7 @@ jobs:
         cd artifacts
         unzip pubkyring.app.zip
         ls -la
-        
+
     - name: Run E2E tests
       env:
         IOS_APP: ./artifacts/pubkyring.app
@@ -90,7 +91,7 @@ jobs:
         name: ios-e2e-simulator-logs
         path: ./ios-simulator-logs.txt
         retention-days: 7
-    
+
     - name: Upload Test Results
       uses: actions/upload-artifact@v4
       if: always()

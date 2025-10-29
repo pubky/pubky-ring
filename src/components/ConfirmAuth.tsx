@@ -12,7 +12,7 @@ import {
 	SkiaGradient,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
-import { performAuth, truncatePubky } from '../utils/pubky';
+import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import {
 	getToastStyle,
@@ -37,6 +37,8 @@ import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { CircleCheck } from 'lucide-react-native';
+import ProgressBar from './ProgressBar.tsx';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -139,6 +141,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 
 	const handleClose = useCallback(() => {
 		SheetManager.hide('confirm-auth');
+		SystemNavigationBar.navigationShow();
 	}, []);
 
 	const handleAuth = useCallback(async () => {
@@ -193,102 +196,105 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 	}, [authDetails?.capabilities]);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="confirm-auth"
-				navigationAnimation={navigationAnimation}
-				CustomHeaderComponent={<></>}
-				height={actionSheetHeight}
-			>
-				<SkiaGradient modal={true} style={styles.content}>
-					<ModalIndicator />
-					<View style={styles.mainContent}>
-						<View style={styles.titleContainer}>
-							<Text style={styles.title}>
-								{isAuthorized ? 'Authorization Successful' : 'Authorize'}
-							</Text>
-						</View>
+		<ActionSheetContainer
+			id="confirm-auth"
+			navigationAnimation={navigationAnimation}
+			CustomHeaderComponent={<></>}
+			height={actionSheetHeight}
+		>
+			<SkiaGradient modal={true} style={styles.content}>
+				<ModalIndicator />
+				<View style={styles.mainContent}>
+					<View style={styles.titleContainer}>
+						<Text style={styles.title}>
+							{isAuthorized ? 'Authorization Successful' : 'Authorize'}
+						</Text>
+					</View>
 
-						<PubkyCard
-							name={pubkyName}
-							publicKey={truncatePubky(pubky)}
-							style={styles.pubkyCard}
-							containerStyle={styles.pubkyContainer}
-							nameStyle={styles.pubkyName}
-							pubkyTextStyle={styles.pubkyText}
-							avatarSize={48}
-							avatarStyle={styles.avatarContainer}
-						/>
+					<PubkyCard
+						name={pubkyName}
+						publicKey={pubky}
+						style={styles.pubkyCard}
+						containerStyle={styles.pubkyContainer}
+						nameStyle={styles.pubkyName}
+						pubkyTextStyle={styles.pubkyText}
+						avatarSize={48}
+						avatarStyle={styles.avatarContainer}
+					/>
 
-						<View style={styles.section}>
-							<SessionText style={styles.sectionTitle}>Relay</SessionText>
-							<View style={styles.relayContainer}>
-								<Globe color="rgba(255, 255, 255, 0.8)" size={15} />
-								<Text style={styles.relayText}>{authDetails.relay}</Text>
-							</View>
-						</View>
-
-						<View style={styles.section}>
-							<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
-							<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
-						</View>
-
-						{!isAuthorized && (<SessionText style={styles.warningText}>
-							Make sure you trust this relay, service, browser, or device before authorizing with your pubky.
-						</SessionText>)}
-
-						<View style={styles.imageContainer}>
-							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-								<CircleCheck color="rgba(200, 255, 0, 1)" size={52} />
-							</AnimatedView>
+					<View style={styles.section}>
+						<SessionText style={styles.sectionTitle}>Relay</SessionText>
+						<View style={styles.relayContainer}>
+							<Globe color="rgba(255, 255, 255, 0.8)" size={15} />
+							<Text style={styles.relayText}>{authDetails.relay}</Text>
 						</View>
 					</View>
 
-					<View style={styles.footerContainer}>
-						<View style={styles.buttonContainer}>
-							{!isAuthorized ? (
-								<>
-									<ActionButton
-										style={styles.denyButton}
-										onPressIn={handleClose}
-										activeOpacity={0.7}
-									>
-										<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
-									</ActionButton>
+					<View style={styles.section}>
+						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
+						<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
+					</View>
 
-									<ActionButton
-										style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
-										onPressIn={handleAuth}
-										disabled={authorizing}
-										activeOpacity={0.7}
-									>
-										<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
-									</ActionButton>
-								</>
+					{!isAuthorized && (<SessionText style={styles.warningText}>
+						Make sure you trust this relay, service, browser, or device before authorizing with your pubky.
+					</SessionText>)}
+
+					<View style={styles.imageContainer}>
+						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+							<CircleCheck color="rgba(200, 255, 0, 1)" size={52} />
+						</AnimatedView>
+					</View>
+				</View>
+
+				<View style={styles.footerContainer}>
+					<View style={styles.buttonContainer}>
+						{!isAuthorized ? (
+							<>
+								<ActionButton
+									style={styles.denyButton}
+									onPressIn={handleClose}
+									activeOpacity={0.7}
+								>
+									<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+								</ActionButton>
+
+								<ActionButton
+									style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
+									onPressIn={handleAuth}
+									disabled={authorizing}
+									activeOpacity={0.7}
+								>
+									<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
+								</ActionButton>
+							</>
 							) : (
 								<ActionButton style={styles.okButton} onPressIn={handleClose}>
 									<Text style={styles.buttonText}>OK</Text>
 								</ActionButton>
 							)}
-						</View>
 					</View>
-				</SkiaGradient>
-				<Toast config={toastConfig({ style: toastStyle })} />
-			</ActionSheetContainer>
-		</View>
+					<View style={styles.progressBarContainer}>
+						{!isAuthorized ? (
+							<ProgressBar
+								duration={20000}
+								//fadeIn={true}
+								//fadeInDuration={1000}
+								delayRender={0}
+								unfilledColor="#333333"
+								filledColor="#FFFFFF"
+								height={6}
+								borderRadius={3}
+								onComplete={handleClose}
+							/>) : null}
+					</View>
+				</View>
+			</SkiaGradient>
+			<Toast config={toastConfig({ style: toastStyle })} />
+		</ActionSheetContainer>
 	);
 });
 
 const styles = StyleSheet.create({
-	// TODO: Eventially remove the absolute positioned container View.
-	// It only exists because the ActionSheetContainer does not work well with the DraggableFlatList component.
-	container: {
-		...StyleSheet.absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	content: {
 		height: '100%',
 		backgroundColor: 'transparent',
@@ -375,7 +381,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 12,
 		justifyContent: 'center',
 		backgroundColor: 'transparent',
-		paddingBottom: 16,
+		//paddingBottom: 16,
 	},
 	buttonContainer: {
 		flexDirection: 'row',
@@ -515,7 +521,12 @@ const styles = StyleSheet.create({
 	},
 	spacer: {
 		marginBottom: 12,
-	}
+	},
+	progressBarContainer: {
+		width: 200,
+		alignSelf: 'center',
+		marginTop: 10,
+	},
 });
 
 export default memo(ConfirmAuth);

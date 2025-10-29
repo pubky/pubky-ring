@@ -30,6 +30,7 @@ import {
 	mnemonicPhraseToKeypair,
 	getPublicKeyFromSecretKey
 } from '@synonymdev/react-native-pubky';
+import SystemNavigationBar from 'react-native-system-navigation-bar';
 
 export enum EDeepLinkType {
 	invite = 'invite',
@@ -264,24 +265,22 @@ export const handleScannedData = async ({
 			pubky,
 			dispatch,
 		});
-		if (signInRes.isOk()) {
+		if (signInRes.isOk() && deepLink) {
 			showToast({
 				type: 'success',
 				title: 'Success',
 				description: `Signed in to ${data} successfully`,
 			});
-			if (deepLink && signInRes.isOk()) {
-				if (Platform.OS === 'android') {
-					await sleep(ANDROID_DEEPLINK_DELAY);
-					Linking.openURL(PUBKY_APP_URL);
-				} else {
-					showToast({
-						type: 'info',
-						title: 'Successfully Signed In!',
-						description: 'Please navigate back to your browser.',
-						visibilityTime: 8000,
-					});
-				}
+			if (Platform.OS === 'android') {
+				await sleep(ANDROID_DEEPLINK_DELAY);
+				Linking.openURL(PUBKY_APP_URL);
+			} else {
+				showToast({
+					type: 'info',
+					title: 'Successfully Signed In!',
+					description: 'Please navigate back to your browser.',
+					visibilityTime: 8000,
+				});
 			}
 			return ok('sign-in');
 		}
@@ -326,6 +325,7 @@ export const handleAuth = async ({
 		}
 		// Small timeout allows the sheet time to properly display and not get stuck.
 		setTimeout(() => {
+			SystemNavigationBar.navigationHide().then();
 			SheetManager.show('confirm-auth', {
 				payload: {
 					pubky,
@@ -336,6 +336,7 @@ export const handleAuth = async ({
 					deepLink,
 				},
 				onClose: () => {
+					SystemNavigationBar.navigationShow().then();
 					SheetManager.hide('confirm-auth');
 				},
 			});

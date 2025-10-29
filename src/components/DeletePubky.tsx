@@ -11,7 +11,6 @@ import {
 } from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { truncatePubky } from '../utils/pubky.ts';
 import {
 	View,
 	Text,
@@ -70,7 +69,7 @@ const DeletePubky = ({ payload }: {
 				</SessionText>
 				<PubkyCard
 					name={pubkyName}
-					publicKey={truncatePubky(publicKey)}
+					publicKey={publicKey}
 					style={styles.pubkyCard}
 					containerStyle={styles.pubkyContainer}
 					nameStyle={styles.pubkyName}

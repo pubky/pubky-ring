@@ -14,7 +14,6 @@ module.exports = {
 			plugins: ['@typescript-eslint'],
 			rules: {
 				'@typescript-eslint/explicit-function-return-type': 2,
-				'@typescript-eslint/semi': 2,
 				'@typescript-eslint/no-misused-promises': [
 					2,
 					{

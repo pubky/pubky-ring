@@ -10,7 +10,7 @@ jobs:
     concurrency:
       group: android-build-${{ github.head_ref }}
       cancel-in-progress: true
-    
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
@@ -39,7 +39,7 @@ jobs:
         path: |
           ~/.gradle/caches
           ~/.gradle/wrapper
-        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+        key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties', 'package.json', 'yarn.lock') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
 
@@ -47,6 +47,11 @@ jobs:
       run: |
         cd android
         ./gradlew generateCodegenArtifactsFromSchema
+
+    - name: Clean Gradle Build
+      run: |
+        cd android
+        ./gradlew clean
 
     - name: Use debug key for release build
       run: |

@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native';
 import { View, TouchableOpacity } from '../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
-import { FlashList } from 'react-native-actions-sheet/dist/src/views/FlashList';
+import { FlashList } from '@shopify/flash-list';
 import PubkyCard from './PubkyCard.tsx';
 import { handleDeepLink } from '../utils/helpers.ts';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
@@ -101,7 +101,6 @@ const SelectPubky = ({ payload }: {
 							/>
 						);
 					}}
-					estimatedItemSize={120}
 					keyExtractor={(item) => item.key}
 					showsVerticalScrollIndicator={true}
 				/>

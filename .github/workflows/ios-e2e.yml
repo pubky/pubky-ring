@@ -9,11 +9,6 @@ on:
         description: 'Commit SHA to test (leave empty to use current branch head)'
         required: false
         type: string
-      clear-cache:
-        description: 'Clear yarn cache before install'
-        required: false
-        type: boolean
-        default: false
 
 jobs:
   ios-e2e:

@@ -1,5 +1,5 @@
 import { PersistedState } from 'redux-persist';
-import { EBackupPreference } from '../../types/pubky';
+import { EBackupPreference, PubkySession } from '../../types/pubky';
 
 const migrations = {
 	// @ts-ignore
@@ -71,6 +71,32 @@ const migrations = {
 			pubky: {
 				...state.pubky,
 				processing: {},
+			},
+		};
+	},
+	// @ts-ignore
+	6: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		// Add session_secret to all existing sessions
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			const pubky = updatedPubkys[pubkyKey];
+			if (pubky.sessions && pubky.sessions.length > 0) {
+				updatedPubkys[pubkyKey] = {
+					...pubky,
+					sessions: pubky.sessions.map((session: PubkySession) => ({
+						...session,
+						session_secret: '',
+					})),
+				};
+			}
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
 			},
 		};
 	},

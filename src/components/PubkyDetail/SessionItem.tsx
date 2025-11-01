@@ -22,7 +22,7 @@ const formatTimestamp = (timestamp: number): string => {
 
 const SessionItem = ({ session, onSignOut }: {
     session: PubkySession;
-    onSignOut: (sessionPubky: string) => void;
+    onSignOut: (sessionSecret: string) => void;
 }): ReactElement => {
 	const formattedDate = useMemo(() =>
     session.created_at ? formatTimestamp(session.created_at) : '',
@@ -30,8 +30,8 @@ const SessionItem = ({ session, onSignOut }: {
 	);
 
 	const handleSignOut = useCallback(() => {
-		onSignOut(session.pubky);
-	}, [onSignOut, session.pubky]);
+		onSignOut(session.session_secret);
+	}, [onSignOut, session.session_secret]);
 
 	return (
 		<SessionBox style={styles.sessionCard}>

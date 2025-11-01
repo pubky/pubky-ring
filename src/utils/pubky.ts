@@ -563,12 +563,12 @@ export const signInToHomeserver = async ({
 	return ok(response);
 };
 
-export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, dispatch: Dispatch): Promise<void> => {
+export const signOutOfHomeserver = async (pubky: string, sessionSecret: string, dispatch: Dispatch): Promise<void> => {
 	const secretKeyRes = await getPubkySecretKey(pubky);
 	if (secretKeyRes.isErr()) {
 		return;
 	}
-	const signOutRes = await signOut(secretKeyRes.value.secretKey);
+	const signOutRes = await signOut(sessionSecret);
 	if (signOutRes.isErr()) {
 		showToast({
 			type: 'error',
@@ -578,7 +578,7 @@ export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, d
 		return;
 	}
 	dispatch(setSignedUp({ pubky, signedUp: false }));
-	dispatch(removeSession({ pubky, sessionPubky }));
+	dispatch(removeSession({ pubky }));
 };
 
 export const truncateStr = (str: string, displayLength: number = 5): string => {

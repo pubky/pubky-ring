@@ -128,8 +128,9 @@ const BackupPrompt = ({ payload }: {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
 				return (
-					<Text style={styles.message}>
-						<Text style={[styles.message, styles.passphraseText]}>Passphrase for</Text> <Text style={styles.boldPubky}>pk:{truncatedPubky}</Text>
+					<Text style={[styles.message, styles.noWrap]}>
+						<Text style={[styles.message, styles.passphraseText]}>Passphrase for </Text>
+						<Text style={styles.boldPubky}>pk:{truncatedPubky}</Text>
 					</Text>
 				);
 			case EBackupPromptViewId.import:
@@ -347,6 +348,9 @@ const styles = StyleSheet.create({
 		fontSize: 13,
 		fontWeight: 500,
 		lineHeight: 18,
+	},
+	noWrap: {
+		flexWrap: 'nowrap',
 	},
 });
 

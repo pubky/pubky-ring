@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
 	row: {
 		flexDirection: 'row',
 		backgroundColor: 'transparent',
+		flexWrap: 'nowrap',
 	},
 	actionButton: {
 		...buttonStyles.secondary,

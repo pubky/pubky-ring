@@ -385,7 +385,6 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		gap: 12,
 		zIndex: 3,
 		backgroundColor: 'transparent',
 	},
@@ -526,6 +525,7 @@ const styles = StyleSheet.create({
 		width: 200,
 		alignSelf: 'center',
 		marginTop: 10,
+		marginBottom: smallScreen ? 20 : 0,
 	},
 });
 

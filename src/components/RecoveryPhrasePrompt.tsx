@@ -16,7 +16,6 @@ import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
-import { truncatePubky } from '../utils/pubky.ts';
 import {
 	ACTION_SHEET_HEIGHT,
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
@@ -110,7 +109,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 						)}
 					</View>
 
-					<PubkyCard name={pubkyName} publicKey={truncatePubky(payload.pubky)} />
+					<PubkyCard name={pubkyName} publicKey={payload.pubky} />
 
 					<Text style={styles.warningText}>
 						Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.

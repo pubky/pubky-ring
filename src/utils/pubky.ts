@@ -297,7 +297,10 @@ export const importPubky = async ({
 		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
 		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference, isBackedUp: true });
 		if (savePubkyRes.isOk()) {
-			dispatch(setHomeserver({ pubky, homeserver }));
+			// Only set homeserver if we have a valid non-empty value
+			if (homeserver?.trim()) {
+				dispatch(setHomeserver({ pubky, homeserver }));
+			}
 			// If they're using Synonym's default or staging homeserver, fetch the profile name and set it accordingly.
 			if (homeserver === DEFAULT_HOMESERVER || homeserver === STAGING_HOMESERVER) {
 				const app = homeserver === DEFAULT_HOMESERVER ? 'pubky.app' : 'staging.pubky.app';

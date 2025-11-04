@@ -22,6 +22,7 @@ import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import {
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
+	BACKUP_PASSWORD_CHAR_MIN,
 } from '../utils/constants.ts';
 
 export enum EBackupPromptViewId {
@@ -69,8 +70,8 @@ const BackupPrompt = ({ payload }: {
 		try {
 			setLoading(true);
 			// Only validate password length for backup creation
-			if (viewId === EBackupPromptViewId.backup && password.length < 6) {
-				setError('Password must be at least 6 characters long');
+			if (viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN) {
+				setError(`Password must be at least ${BACKUP_PASSWORD_CHAR_MIN} ${BACKUP_PASSWORD_CHAR_MIN > 1 ? 'character' : 'characters'} long`);
 				return;
 			}
 
@@ -210,7 +211,7 @@ const BackupPrompt = ({ payload }: {
 						loading={loading}
 						style={[styles.button, styles.submitButton]}
 						onPress={handleSubmit}
-						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
+						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN)}
 					/>
 				</View>
 			</SkiaGradient>

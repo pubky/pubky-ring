@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
 	},
 	actionButtonText: {
 		fontSize: 15,
-		fontWeight: 600,
+		fontWeight: '600',
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		alignSelf: 'center',
@@ -526,6 +526,7 @@ const styles = StyleSheet.create({
 		width: 200,
 		alignSelf: 'center',
 		marginTop: 10,
+		marginBottom: smallScreen ? 20 : 0,
 	},
 });
 

@@ -77,7 +77,7 @@ const PubkyInfo = memo(({
 				{pubkyName}
 			</Text>
 			<Card style={styles.row}>
-				<Text style={textStyles.body}>
+				<Text style={textStyles.body} numberOfLines={1} ellipsizeMode="middle">
 					pk:{truncateStr(publicKey)}
 				</Text>
 				{!isBackedUp && <TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}><Text
@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
 	row: {
 		flexDirection: 'row',
 		backgroundColor: 'transparent',
+		flexWrap: 'nowrap',
 	},
 	actionButton: {
 		...buttonStyles.secondary,

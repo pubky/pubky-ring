@@ -29,3 +29,4 @@ export const SMALL_SCREEN_ACTION_SHEET_HEIGHT = `98%`;
 export const ACTION_SHEET_HEIGHT_TEXTINPUT = `85%`;
 
 export const ENABLE_INVITE_SCANNER = true; // Toggle for enabling invite code scanner feature
+export const BACKUP_PASSWORD_CHAR_MIN = 6; // Minimum characters for file backup password

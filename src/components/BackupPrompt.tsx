@@ -22,6 +22,7 @@ import { EBackupPreference } from "../types/pubky.ts";
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import {
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
+	BACKUP_PASSWORD_CHAR_MIN,
 } from '../utils/constants.ts';
 
 export enum EBackupPromptViewId {
@@ -69,8 +70,8 @@ const BackupPrompt = ({ payload }: {
 		try {
 			setLoading(true);
 			// Only validate password length for backup creation
-			if (viewId === EBackupPromptViewId.backup && password.length < 6) {
-				setError('Password must be at least 6 characters long');
+			if (viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN) {
+				setError(`Password must be at least ${BACKUP_PASSWORD_CHAR_MIN} ${BACKUP_PASSWORD_CHAR_MIN > 1 ? 'characters' : 'character'} long`);
 				return;
 			}
 
@@ -127,8 +128,9 @@ const BackupPrompt = ({ payload }: {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
 				return (
-					<Text style={styles.message}>
-						<Text style={[styles.message, styles.passphraseText]}>Passphrase for</Text> <Text style={styles.boldPubky}>pk:{truncatedPubky}</Text>
+					<Text numberOfLines={1} ellipsizeMode="middle" style={styles.message}>
+						<Text style={[styles.message, styles.passphraseText]}>Passphrase for </Text>
+						<Text style={styles.boldPubky}>pk:{truncatedPubky}</Text>
 					</Text>
 				);
 			case EBackupPromptViewId.import:
@@ -181,7 +183,10 @@ const BackupPrompt = ({ payload }: {
 						style={[styles.input, error ? styles.inputError : null]}
 						secureTextEntry={!showPassword}
 						value={password}
-						onChangeText={setPassword}
+						onChangeText={(t) => {
+							setPassword(t);
+							if (error) setError('');
+						}}
 						placeholder="Enter passphrase"
 						placeholderTextColor="#999"
 						autoFocus
@@ -210,7 +215,7 @@ const BackupPrompt = ({ payload }: {
 						loading={loading}
 						style={[styles.button, styles.submitButton]}
 						onPress={handleSubmit}
-						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < 6)}
+						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN)}
 					/>
 				</View>
 			</SkiaGradient>
@@ -339,12 +344,12 @@ const styles = StyleSheet.create({
 	},
 	fileText: {
 		fontSize: 17,
-		fontWeight: 600,
+		fontWeight: '600',
 		lineHeight: 22,
 	},
 	dateText: {
 		fontSize: 13,
-		fontWeight: 500,
+		fontWeight: '500',
 		lineHeight: 18,
 	},
 });

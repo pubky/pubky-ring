@@ -58,8 +58,8 @@ export const PubkyDetail = ({
 		navigation.goBack();
 	}, [dispatch, navigation, pubky]);
 
-	const onSignOut = useCallback((sessionPubky: string) => {
-		signOutOfHomeserver(pubky, sessionPubky, dispatch);
+	const onSignOut = useCallback((sessionSecret: string) => {
+		signOutOfHomeserver(pubky, sessionSecret, dispatch);
 	}, [dispatch, pubky]);
 
 	const handleDelete = useCallback(() => {

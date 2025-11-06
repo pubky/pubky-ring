@@ -323,9 +323,9 @@ export const handleAuth = async ({
 			});
 			return err(description);
 		}
+		SystemNavigationBar.navigationHide().then();
 		// Small timeout allows the sheet time to properly display and not get stuck.
 		setTimeout(() => {
-			SystemNavigationBar.navigationHide().then();
 			SheetManager.show('confirm-auth', {
 				payload: {
 					pubky,
@@ -350,6 +350,7 @@ export const handleAuth = async ({
 			description,
 		});
 		console.log(`${description}:`, error);
+		SystemNavigationBar.navigationShow().then();
 		return err(description);
 	}
 };

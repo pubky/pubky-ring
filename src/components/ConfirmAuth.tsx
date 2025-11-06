@@ -255,7 +255,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 									onPressIn={handleClose}
 									activeOpacity={0.7}
 								>
-									<Text style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
 								</ActionButton>
 
 								<ActionButton
@@ -264,7 +264,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 									disabled={authorizing}
 									activeOpacity={0.7}
 								>
-									<Text style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
+									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
 								</ActionButton>
 							</>
 							) : (
@@ -308,7 +308,7 @@ const styles = StyleSheet.create({
 	},
 	actionButtonText: {
 		fontSize: 15,
-		fontWeight: 600,
+		fontWeight: '600',
 		lineHeight: 18,
 		letterSpacing: 0.2,
 		alignSelf: 'center',
@@ -526,6 +526,7 @@ const styles = StyleSheet.create({
 		width: 200,
 		alignSelf: 'center',
 		marginTop: 10,
+		marginBottom: smallScreen ? 20 : 0,
 	},
 });
 

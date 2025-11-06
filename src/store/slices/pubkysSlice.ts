@@ -80,11 +80,11 @@ const pubkysSlice = createSlice({
 				}
 			}
 		},
-		removeSession: (state, action: PayloadAction<{ pubky: string; sessionPubky: string }>) => {
-			const { pubky, sessionPubky } = action.payload;
+		removeSession: (state, action: PayloadAction<{ pubky: string; }>) => {
+			const { pubky } = action.payload;
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].sessions = state.pubkys[pubky].sessions.filter(
-					session => session.pubky !== sessionPubky
+					session => session.pubky !== pubky
 				);
 			}
 		},

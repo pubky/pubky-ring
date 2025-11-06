@@ -297,7 +297,10 @@ export const importPubky = async ({
 		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
 		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference, isBackedUp: true });
 		if (savePubkyRes.isOk()) {
-			dispatch(setHomeserver({ pubky, homeserver }));
+			// Only set homeserver if we have a valid non-empty value
+			if (homeserver?.trim()) {
+				dispatch(setHomeserver({ pubky, homeserver }));
+			}
 			// If they're using Synonym's default or staging homeserver, fetch the profile name and set it accordingly.
 			if (homeserver === DEFAULT_HOMESERVER || homeserver === STAGING_HOMESERVER) {
 				const app = homeserver === DEFAULT_HOMESERVER ? 'pubky.app' : 'staging.pubky.app';
@@ -563,12 +566,12 @@ export const signInToHomeserver = async ({
 	return ok(response);
 };
 
-export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, dispatch: Dispatch): Promise<void> => {
+export const signOutOfHomeserver = async (pubky: string, sessionSecret: string, dispatch: Dispatch): Promise<void> => {
 	const secretKeyRes = await getPubkySecretKey(pubky);
 	if (secretKeyRes.isErr()) {
 		return;
 	}
-	const signOutRes = await signOut(secretKeyRes.value.secretKey);
+	const signOutRes = await signOut(sessionSecret);
 	if (signOutRes.isErr()) {
 		showToast({
 			type: 'error',
@@ -578,7 +581,7 @@ export const signOutOfHomeserver = async (pubky: string, sessionPubky: string, d
 		return;
 	}
 	dispatch(setSignedUp({ pubky, signedUp: false }));
-	dispatch(removeSession({ pubky, sessionPubky }));
+	dispatch(removeSession({ pubky }));
 };
 
 export const truncateStr = (str: string, displayLength: number = 5): string => {

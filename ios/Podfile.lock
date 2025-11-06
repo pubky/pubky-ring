@@ -1903,7 +1903,7 @@ PODS:
     - Yoga
   - react-native-netinfo (11.4.1):
     - React-Core
-  - react-native-pubky (0.10.6):
+  - react-native-pubky (0.11.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -3453,7 +3453,7 @@ SPEC CHECKSUMS:
   react-native-blur: ba0e9ad6274783c8d45f42da82acae02e25784ad
   react-native-document-picker: ca6edbcee0abb1b92a06d34fc42ee31e9d559534
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
-  react-native-pubky: 3c63aa77e90c511acda2c2ee687d27f6a0a73541
+  react-native-pubky: 90501faeaab4dd0044d55509ac24dce563de9f22
   react-native-safe-area-context: 6d8a7b750e496e37bda47c938320bf2c734d441f
   react-native-skia: 4a1c8c04bd135a36d822271024866f7fd965e61c
   React-NativeModulesApple: c4bee6aa736092cd347456488a4f97a8e7517604

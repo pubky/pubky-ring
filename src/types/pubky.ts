@@ -1,6 +1,7 @@
 export interface PubkySession {
 	pubky: string;
 	capabilities: string[];
+  session_secret: string;
 	created_at: number;
 }
 

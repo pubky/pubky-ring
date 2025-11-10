@@ -179,6 +179,7 @@ const styles = StyleSheet.create({
 	button: {
 		width: '47%',
 		minHeight: 64,
+		minWidth: 80, // Prevent text wrapping on small screens
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
 	buttonText: {

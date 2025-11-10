@@ -286,7 +286,7 @@ export const importPubky = async ({
 		const pubky = pubkyRes.value.public_key;
 		let homeserver = defaultPubkyState.homeserver;
 		const getHomeserverRes = await getHomeserver(pubky);
-		if (getHomeserverRes.isOk() && getHomeserverRes.value) {
+		if (getHomeserverRes.isOk() && getHomeserverRes.value && !getHomeserverRes.value.toLowerCase().includes('error') && !getHomeserverRes.value.toLowerCase().includes('no homeserver')) {
 			homeserver = getHomeserverRes.value;
 		}
 		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then((res) => {
@@ -524,7 +524,10 @@ export const signInToHomeserver = async ({
 }): Promise<Result<SessionInfo>> => {
 	if (!homeserver) {
 		const pubkyData = getPubkyDataFromStore(pubky);
-		homeserver = pubkyData.homeserver;
+		homeserver = pubkyData?.homeserver ?? DEFAULT_HOMESERVER;
+		if (!homeserver) {
+			return err('Homeserver not found for this pubky. Please ensure the pubky is properly configured.');
+		}
 	}
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);

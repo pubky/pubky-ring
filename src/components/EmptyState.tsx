@@ -19,7 +19,7 @@ const EmptyState = (): ReactElement => {
 					<View style={styles.image} />
 					<View>
 						<Text style={[textStyles.heading, styles.name]}>pubky</Text>
-						<Text style={[textStyles.body, styles.pubky]}>pk:xxxxx..xxxxx</Text>
+						<Text style={[textStyles.body, styles.pubky]}>xxxxx..xxxxx</Text>
 					</View>
 					<View style={styles.buttonArrow}>
 						<ArrowRight size={24} />

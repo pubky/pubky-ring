@@ -236,7 +236,7 @@ export const handleScannedData = async ({
 				showToast({
 					type: 'success',
 					title: 'Success',
-					description: `Authorized with: pk:${pubky}`,
+					description: `Authorized with: ${pubky}`,
 				});
 			} else {
 				showToast({

@@ -36,7 +36,7 @@ const PubkyCard = ({
 						{name}
 					</Text>}
 					<Text style={[styles.pubkyText, pubkyTextStyle]} numberOfLines={2}>
-						pk:{publicKey}
+						{publicKey}
 					</Text>
 				</Card>
 			</Card>

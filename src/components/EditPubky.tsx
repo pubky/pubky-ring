@@ -398,7 +398,7 @@ const EditPubky = ({ payload }: {
 	}, [loading, homeServer, storedPubkyData.homeserver, storedPubkyData?.signedUp]);
 
 	const title = useMemo(() => {
-		return `${payload?.title} pk:${truncatePubky(pubky)}` ?? TITLE;
+		return `${payload?.title} ${truncatePubky(pubky)}` ?? TITLE;
 	}, [payload?.title, pubky]);
 
 	const onClose = useCallback(() => {

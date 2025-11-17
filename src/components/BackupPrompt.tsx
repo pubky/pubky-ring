@@ -130,7 +130,7 @@ const BackupPrompt = ({ payload }: {
 				return (
 					<Text numberOfLines={1} ellipsizeMode="middle" style={styles.message}>
 						<Text style={[styles.message, styles.passphraseText]}>Passphrase for </Text>
-						<Text style={styles.boldPubky}>pk:{truncatedPubky}</Text>
+						<Text style={styles.boldPubky}>{truncatedPubky}</Text>
 					</Text>
 				);
 			case EBackupPromptViewId.import:

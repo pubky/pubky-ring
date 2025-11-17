@@ -78,7 +78,7 @@ const PubkyInfo = memo(({
 			</Text>
 			<Card style={styles.row}>
 				<Text style={textStyles.body} numberOfLines={1} ellipsizeMode="middle">
-					pk:{truncateStr(publicKey)}
+					{truncateStr(publicKey)}
 				</Text>
 				{!isBackedUp && <TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}><Text
 					style={textStyles.backupText}>{'backup!'}</Text></TouchableOpacity>}

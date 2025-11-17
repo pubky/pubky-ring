@@ -40,7 +40,7 @@ export const PubkyListHeader = memo(({
 	const [fontScale] = useState(PixelRatio.getFontScale());
 	const [isQRLoading, setIsQRLoading] = useState(false);
 
-	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky : `pk:${pubky}`, [pubky]);
+	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
 	const onSharePress = useCallback(() => {
 		shareData(pubkyUri).then();
 	}, [pubkyUri]);

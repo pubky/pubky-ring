@@ -47,8 +47,7 @@ export const PubkyProfile = memo(({
 		});
 	}, [pubky]);
 
-
-	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky : `pk:${pubky}`, [pubky]);
+	const pubkyUri = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
 
 	const pubkyName = useMemo(() => {
 		if (pubkyData?.name) {

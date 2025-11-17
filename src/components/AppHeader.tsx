@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { NavButton, CircleAlert } from '../theme/components';
+import { NavButton, Info } from '../theme/components';
 import PubkyRingHeader from './PubkyRingHeader';
 import { useTypedNavigation } from '../navigation/hooks';
 
@@ -22,7 +22,7 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 				onPressIn={() => navigation.navigate('About')}
 				hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
 			>
-				<CircleAlert size={24} />
+				<Info size={24} />
 			</NavButton>
 		) : null,
 	[navigation, showLeftButton]);

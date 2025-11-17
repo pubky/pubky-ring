@@ -8,6 +8,7 @@ import {
 	ArrowLeft as _ArrowLeft,
 	ChevronLeft as _ChevronLeft,
 	CircleAlert as _CircleAlert,
+	Info as _Info,
 	Eye as _Eye,
 	EyeOff as _EyeOff,
 	Plus as _Plus,
@@ -225,6 +226,10 @@ export const ArrowLeft = styled(_ArrowLeft)<{ theme: Theme }>`
 `;
 
 export const CircleAlert = styled(_CircleAlert)<{ theme: Theme }>`
+  color: ${(props): string => props.theme.colors.text};
+`;
+
+export const Info = styled(_Info)<{ theme: Theme }>`
   color: ${(props): string => props.theme.colors.text};
 `;
 

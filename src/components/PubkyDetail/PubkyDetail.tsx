@@ -116,7 +116,6 @@ export const PubkyDetail = ({
 				contentContainerStyle={styles.scrollContent}
 				data={[]}
 				renderItem={renderItem}
-				estimatedItemSize={sessionsLength}
 				showsVerticalScrollIndicator={true}
 				scrollEventThrottle={16}
 				bounces={false}

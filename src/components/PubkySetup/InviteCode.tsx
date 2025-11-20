@@ -27,6 +27,7 @@ import {
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
+import DashedBorder from '../DashedBorder.tsx';
 import { Gift, Check } from 'lucide-react-native';
 import { formatSignupToken, isSmallScreen, isValidSignupTokenFormat } from '../../utils/helpers.ts';
 import {
@@ -305,7 +306,14 @@ const InviteCode = ({ payload }: {
 						Enter your code to access the Synonym homeserver. You get 1GB of storage, used for your posts, photos, videos, and profile.
 					</SessionText>
 
-					<View style={styles.inputContainer}>
+					<DashedBorder
+						borderColor="rgba(173, 255, 47, 0.3)"
+						borderWidth={2}
+						borderRadius={12}
+						dashWidth={3}
+						dashGap={3}
+						style={styles.inputContainer}
+					>
 						<TextInput
 							testID="InviteCodeInput"
 							style={styles.input}
@@ -323,7 +331,7 @@ const InviteCode = ({ payload }: {
 						<AnimatedView style={[styles.checkmark, inputCheckmarkStyle]}>
 							<Check color="rgba(173, 255, 47, 1)" size={16} />
 						</AnimatedView>
-					</View>
+					</DashedBorder>
 
 					<TouchableOpacity
 						style={styles.needInviteRow}
@@ -421,16 +429,13 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	inputContainer: {
-		borderWidth: 2,
-		borderColor: 'rgba(173, 255, 47, 0.3)',
-		borderStyle: 'dashed',
-		borderRadius: 12,
 		paddingHorizontal: 20,
-		paddingVertical: 20,
+		paddingVertical: 30,
 		marginBottom: 30,
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: 'transparent',
+		justifyContent: 'center',
 	},
 	input: {
 		flex: 1,
@@ -439,6 +444,7 @@ const styles = StyleSheet.create({
 		color: 'rgba(173, 255, 47, 0.8)',
 		letterSpacing: 2,
 		textAlign: 'left',
+		top: -5,
 	},
 	checkmark: {
 		position: 'absolute',
@@ -448,6 +454,7 @@ const styles = StyleSheet.create({
 		borderWidth: 3,
 		borderColor: 'rgba(173, 255, 47, 0.8)',
 		padding: 2,
+		marginBottom: 10,
 	},
 	needInviteRow: {
 		alignItems: 'flex-start',

@@ -1,6 +1,12 @@
 import React, { memo, ReactElement } from 'react';
 import { View, StyleSheet } from 'react-native';
-import { Canvas, Path, Skia, DashPathEffect } from '@shopify/react-native-skia';
+import {
+	Canvas,
+	Path,
+	Skia,
+	DashPathEffect,
+	SkPath,
+} from '@shopify/react-native-skia';
 
 interface DashedBorderProps {
 	children: React.ReactNode;
@@ -22,7 +28,7 @@ const DashedBorder = ({
 	style,
 }: DashedBorderProps): ReactElement => {
 	// Create the rounded rectangle path
-	const createPath = (width: number, height: number) => {
+	const createPath = (width: number, height: number): SkPath => {
 		const path = Skia.Path.Make();
 		const halfBorder = borderWidth / 2;
 

@@ -20,7 +20,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { setPubkyData } from '../store/slices/pubkysSlice.ts';
 import ModalIndicator from './ModalIndicator.tsx';
-import { SheetManager } from 'react-native-actions-sheet';
+import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
 import { err } from '@synonymdev/result';
 import {
 	useAnimatedStyle,
@@ -37,7 +37,7 @@ import {
 } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
-import { FlashList } from 'react-native-actions-sheet/dist/src/views/FlashList';
+import { FlashList } from '@shopify/flash-list';
 
 type InputDataItem = {
 	testID?: string;
@@ -643,7 +643,7 @@ const EditPubky = ({ payload }: {
 						<FlashList
 							data={inputData}
 							renderItem={renderInputItem}
-							estimatedItemSize={120}
+							renderScrollComponent={ActionSheetScrollView}
 							keyExtractor={(item) => item.id}
 							showsVerticalScrollIndicator={false}
 							ListHeaderComponent={renderListHeader}

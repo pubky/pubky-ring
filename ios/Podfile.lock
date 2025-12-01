@@ -11,7 +11,7 @@ PODS:
     - hermes-engine/Pre-built (= 0.82.1)
   - hermes-engine/Pre-built (0.82.1)
   - MMKVCore (2.2.4)
-  - NitroMmkv (4.0.0):
+  - NitroMmkv (4.0.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -42,7 +42,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - NitroModules (0.31.3):
+  - NitroModules (0.31.10):
     - boost
     - DoubleConversion
     - fast_float
@@ -2699,7 +2699,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNGestureHandler (2.29.0):
+  - RNGestureHandler (2.29.1):
     - boost
     - DoubleConversion
     - fast_float
@@ -2783,7 +2783,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNReanimated (4.1.3):
+  - RNReanimated (4.1.5):
     - boost
     - DoubleConversion
     - fast_float
@@ -2810,11 +2810,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated (= 4.1.3)
+    - RNReanimated/reanimated (= 4.1.5)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated (4.1.3):
+  - RNReanimated/reanimated (4.1.5):
     - boost
     - DoubleConversion
     - fast_float
@@ -2841,11 +2841,11 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
-    - RNReanimated/reanimated/apple (= 4.1.3)
+    - RNReanimated/reanimated/apple (= 4.1.5)
     - RNWorklets
     - SocketRocket
     - Yoga
-  - RNReanimated/reanimated/apple (4.1.3):
+  - RNReanimated/reanimated/apple (4.1.5):
     - boost
     - DoubleConversion
     - fast_float
@@ -3415,8 +3415,8 @@ SPEC CHECKSUMS:
   glog: 5683914934d5b6e4240e497e0f4a3b42d1854183
   hermes-engine: 273e30e7fb618279934b0b95ffab60ecedb7acf5
   MMKVCore: f2dd4c9befea04277a55e84e7812f930537993df
-  NitroMmkv: 1b125f00aa79f5b73e5afe0340a6d058923e1269
-  NitroModules: eece9344ec509515aed59b5405120a15be84e6b9
+  NitroMmkv: a30e1565fc7e29e9b5d088411c04a94f20071eb3
+  NitroModules: 22837572f1ecf8f1560f5aac7c9f687825754901
   RCT-Folly: 59ec0ac1f2f39672a0c6e6cecdd39383b764646f
   RCTDeprecation: f17e2ebc07876ca9ab8eb6e4b0a4e4647497ae3a
   RCTRequired: e2c574c1b45231f7efb0834936bd609d75072b63
@@ -3492,10 +3492,10 @@ SPEC CHECKSUMS:
   ReactNativeFs: b94c72969131e2dc113fedd9f1f3dafd117bac7a
   RNCAsyncStorage: 302f2fac014fd450046c120567ca364632da682b
   RNCClipboard: 962296f7af77f6c039b683e21c2e2255af9c05df
-  RNGestureHandler: 4fd2c1c449479d982116e0336513fc0f2e4b4617
+  RNGestureHandler: 927ba2c590c8973f24624f1c1279be08a22ec58d
   RNKeychain: 182d986f809280edd9444a557adc21845f7d1e6f
   RNPermissions: ced7638abb298552d556478f8ade7b4d3d04b443
-  RNReanimated: c76d99de4022813a27dc3745d8d2de4230ac5fef
+  RNReanimated: fe6e74170e4b5c5acdbe10cf8f6883e410ba80d3
   RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918
   RNShare: 5d5c5158bc67618ed3f8b5cc008171f1c0607cbe
   RNSVG: 870974196fca9fedd72914d560cc4c774f98d170

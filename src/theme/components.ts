@@ -47,12 +47,14 @@ interface ActionSheetContainerProps {
 }
 
 const fadeAnimationConfig = {
-	speed: 2000,
+	stiffness: 10000,
+	damping: 1000,
+	mass: 0.1,
 };
 const openAnimationConfig = {
-	tension: 500,
-	friction: 50,
-	velocity: 0,
+	stiffness: 500,
+	damping: 50,
+	mass: 1,
 };
 export const ActionSheetContainer = styled(
 	ActionSheet,

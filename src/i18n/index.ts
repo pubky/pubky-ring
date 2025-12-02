@@ -2,11 +2,12 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import * as RNLocalize from 'react-native-localize';
 import en from './locales/en.json';
+import es from './locales/es.json';
 
 // Define available languages
 export const resources = {
 	en: { translation: en },
-	// es: { translation: es }, // Add when ready
+	es: { translation: es },
 } as const;
 
 export const supportedLanguages = Object.keys(resources);

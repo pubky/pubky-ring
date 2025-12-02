@@ -1,0 +1,146 @@
+{
+  "common": {
+    "success": "Success",
+    "error": "Error",
+    "cancel": "Cancel",
+    "confirm": "Confirm",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "done": "Done",
+    "next": "Next",
+    "back": "Back",
+    "close": "Close",
+    "continue": "Continue",
+    "retry": "Retry",
+    "loading": "Loading...",
+    "copied": "Copied",
+    "share": "Share",
+    "submit": "Submit",
+    "ok": "OK",
+    "yes": "Yes",
+    "no": "No",
+    "name": "Name",
+    "read": "Read",
+    "write": "Write"
+  },
+  "home": {
+    "addPubky": "Add pubky"
+  },
+  "settings": {
+    "title": "Settings",
+    "navigationAnimation": "Navigation Animation",
+    "autoAuth": "Auto Auth",
+    "showOnboarding": "Show Onboarding",
+    "wipePubkyRing": "Wipe Pubky Ring",
+    "wipeConfirmTitle": "Are you sure?",
+    "wipeConfirmMessage": "This action will erase all Pubky Ring data and cannot be undone.",
+    "theme": {
+      "title": "Theme",
+      "system": "System",
+      "light": "Light",
+      "dark": "Dark"
+    },
+    "animation": {
+      "slide": "Slide",
+      "fade": "Fade"
+    }
+  },
+  "network": {
+    "backOnline": "You're Back Online!",
+    "backOnlineDescription": "You can now authorize with Pubky Ring",
+    "currentlyOffline": "Currently Offline",
+    "offlineDescription": "You need to be online to authorize with Pubky Ring"
+  },
+  "auth": {
+    "authorize": "Authorize",
+    "authorizing": "Authorizing...",
+    "authorizationSuccessful": "Authorization Successful",
+    "deny": "Deny",
+    "relay": "Relay",
+    "requestedPermissions": "Requested Permissions",
+    "grantedPermissions": "Granted Permissions",
+    "trustWarning": "Make sure you trust this relay, service, browser, or device before authorizing with your pubky.",
+    "successfullySignedIn": "Successfully Signed In!",
+    "navigateBackToBrowser": "Please navigate back to your browser.",
+    "authorized": "Authorized with: {{pubky}}",
+    "signedInSuccessfully": "Signed in to {{server}} successfully",
+    "timeoutError": "The authentication process took too long. Please try again."
+  },
+  "import": {
+    "title": "Import Pubky",
+    "failed": "Import Failed",
+    "invalidRecoveryPhrase": "Invalid recovery phrase",
+    "pubkyImportedSuccessfully": "Pubky imported successfully",
+    "invalidData": "Invalid Data",
+    "invalidClipboardData": "Clipboard does not contain a valid recovery phrase or secret key",
+    "importButton": "Import",
+    "pubkyImported": "Pubky Imported",
+    "pubkyReImported": "Pubky Re-Imported",
+    "importSuccess": "You successfully imported your Pubky.",
+    "reImportSuccess": "You successfully re-imported your Pubky."
+  },
+  "pubky": {
+    "noSelection": "No Pubky Selected",
+    "selectToProcess": "Please select a pubky to proceed",
+    "setup": "Setup",
+    "deletePubky": "Delete Pubky",
+    "deleteConfirm": "Are you sure you want to delete this pubky?",
+    "selectPubky": "Select Pubky",
+    "selectPubkyMessage": "Select which pubky you want to use to authorize this service, browser or device.",
+    "noPubkysAvailable": "You do not have any pubky's that are setup and available. Please create and setup a pubky first.",
+    "yourPubky": "Your pubky.",
+    "yourPubkyDescription": "This is your first unique identifier, your pubky. Create as many as you need for different purposes. You are your keys."
+  },
+  "backup": {
+    "encryptedFile": "Encrypted File",
+    "backup": "Backup",
+    "createBackup": "Create Backup",
+    "backupMessage": "Enter a password or passphrase to encrypt and secure your backup. Keep it safe, you'll need it to restore your pubky.",
+    "importMessage": "Enter your password or passphrase to decrypt your pubky backup.",
+    "passphraseFor": "Passphrase for ",
+    "enterPassphrase": "Enter passphrase",
+    "passwordMinLength": "Password must be at least {{min}} {{chars}} long",
+    "character": "character",
+    "characters": "characters",
+    "recoveryPhrase": "Recovery Phrase",
+    "recoveryPhraseMessage": "Write down these 12 words in the right order and store them in a safe place.",
+    "tapToReveal": "Tap to reveal",
+    "recoveryWarning": "Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.",
+    "finishBackup": "Finish backup"
+  },
+  "onboarding": {
+    "title": "Keychain for the next web.",
+    "subtitle": "Pubky Ring enables you to securely authorize services and manage your pubkys, devices, and sessions.",
+    "getStarted": "Get Started"
+  },
+  "editPubky": {
+    "enterName": "Enter name",
+    "enterHomeserver": "Enter homeserver",
+    "homeserver": "Homeserver"
+  },
+  "welcome": {
+    "defaultHomeserver": "Default Homeserver",
+    "welcome": "Welcome.",
+    "homeserverMessage": "Your invite code is valid. Your pubky {{pubky}} is now configured to use the Synonym homeserver for data hosting.",
+    "openButton": "Open {{domain}}"
+  },
+  "errors": {
+    "failedToParseQR": "Failed to parse QR code data",
+    "failedToProcessQR": "Failed to process QR code data",
+    "failedToParseAuth": "Failed to parse auth details",
+    "failedToShareData": "Failed to share data",
+    "noClipboardPubky": "No pubky provided for clipboard handling"
+  },
+  "terms": {
+    "title": "Terms of Use.",
+    "acceptTerms": "I declare that I have read and accept the terms of use.",
+    "acceptPrivacy": "I declare that I have read and accept the privacy policy.",
+    "termsOfUse": "Terms of Use",
+    "privacyPolicy": "Privacy Policy"
+  },
+  "emptyState": {
+    "placeholderName": "pubky",
+    "placeholderPubky": "xxxxx..xxxxx"
+  }
+}

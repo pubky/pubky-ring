@@ -22,6 +22,7 @@ import {
 	ModalButtonContainer
 } from './shared';
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
+import { useTranslation } from 'react-i18next';
 
 const ListItemComponent = ({ name, pubky, onPress }: { name?: string; pubky: string; onPress: () => void }): ReactElement => {
 	return (
@@ -36,6 +37,7 @@ const SelectPubky = ({ payload }: {
         deepLink: string;
     };
 }): ReactElement => {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
 
@@ -73,9 +75,9 @@ const SelectPubky = ({ payload }: {
 
 	const message = useMemo(() => {
 		return pubkyArray.length > 0
-			? 'Select which pubky you want to use to authorize this service, browser or device.'
-			: "You do not have any pubky's that are setup and available. Please create and setup a pubky first.";
-	}, [pubkyArray.length]);
+			? t('pubky.selectPubkyMessage')
+			: t('pubky.noPubkysAvailable');
+	}, [pubkyArray.length, t]);
 
 	return (
 		<ModalWrapper
@@ -85,7 +87,7 @@ const SelectPubky = ({ payload }: {
 			showToast={false}
 			contentStyle={styles.container}
 		>
-			<ModalTitle>Select Pubky</ModalTitle>
+			<ModalTitle>{t('pubky.selectPubky')}</ModalTitle>
 			<ModalMessage centered>
 				{message}
 			</ModalMessage>
@@ -107,7 +109,7 @@ const SelectPubky = ({ payload }: {
 			</View>
 			<ModalButtonContainer>
 				<ModalButton
-					text="Cancel"
+					text={t('common.cancel')}
 					variant="secondary"
 					width="full"
 					onPress={closeSheet}

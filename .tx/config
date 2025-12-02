@@ -1,0 +1,9 @@
+[main]
+host = https://www.transifex.com
+
+[o:synonym:p:pubky-ring:r:mobile-app]
+file_filter  = src/i18n/locales/<lang>.json
+source_file  = src/i18n/locales/en.json
+source_lang  = en
+type         = KEYVALUEJSON
+minimum_perc = 0

@@ -17,8 +17,10 @@ import {
 } from '../utils/constants.ts';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { useTypedNavigation } from '../navigation/hooks';
+import { useTranslation } from 'react-i18next';
 
 const ConfirmPubkyScreen = (): ReactElement => {
+	const { t } = useTranslation();
 	const navigation = useTypedNavigation();
 	const { pubkys = {} } = useSelector(
 		(state: RootState): PubkyState => state.pubky,
@@ -59,10 +61,9 @@ const ConfirmPubkyScreen = (): ReactElement => {
 				<View style={styles.contentBlock}>
 					{/* Text */}
 					<View style={styles.textContainer}>
-						<Text style={styles.title}>Your pubky.</Text>
+						<Text style={styles.title}>{t('pubky.yourPubky')}</Text>
 						<Text style={styles.subtitle}>
-							This is your first unique identifier, your pubky. Create as many as
-							you need for different purposes. You are your keys.
+							{t('pubky.yourPubkyDescription')}
 						</Text>
 					</View>
 
@@ -85,7 +86,7 @@ const ConfirmPubkyScreen = (): ReactElement => {
 						<TouchableOpacity
 							style={styles.buttonPrimary}
 							onPress={completeOnboarding}>
-							<Text style={styles.buttonText}>Get started</Text>
+							<Text style={styles.buttonText}>{t('onboarding.getStarted')}</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

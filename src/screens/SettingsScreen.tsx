@@ -24,10 +24,12 @@ import {
 } from '../store/slices/settingsSlice.ts';
 import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
 const SettingsScreen = ({ navigation }: Props): ReactElement => {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const currentTheme = useSelector(getTheme);
 	const autoAuth = useSelector(getAutoAuth);
@@ -53,23 +55,23 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 
 	const getThemeDisplayText = useCallback((theme: ETheme) => {
 		const themeText = {
-			[ETheme.system]: 'System',
-			[ETheme.light]: 'Light',
-			[ETheme.dark]: 'Dark',
+			[ETheme.system]: t('settings.theme.system'),
+			[ETheme.light]: t('settings.theme.light'),
+			[ETheme.dark]: t('settings.theme.dark'),
 		};
-		return themeText[theme] || 'System';
-	}, []);
+		return themeText[theme] || t('settings.theme.system');
+	}, [t]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const themeDisplayText = useMemo(() => getThemeDisplayText(currentTheme), [currentTheme, getThemeDisplayText]);
 
 	const navigationAnimationText = useMemo(() => {
 		const animationText = {
-			[ENavigationAnimation.slideFromRight]: 'Slide',
-			[ENavigationAnimation.fade]: 'Fade',
+			[ENavigationAnimation.slideFromRight]: t('settings.animation.slide'),
+			[ENavigationAnimation.fade]: t('settings.animation.fade'),
 		};
-		return animationText[navigationAnimation] || 'Slide';
-	}, [navigationAnimation]);
+		return animationText[navigationAnimation] || t('settings.animation.slide');
+	}, [navigationAnimation, t]);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const handleThemePress = useCallback(() => {
@@ -99,15 +101,15 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 
 	const handleWipePubkyRing = useCallback(() => {
 		Alert.alert(
-			'Are you sure?',
-			'This action will erase all Pubky Ring data and cannot be undone.',
+			t('settings.wipeConfirmTitle'),
+			t('settings.wipeConfirmMessage'),
 			[
 				{
-					text: 'No',
+					text: t('common.no'),
 					style: 'cancel',
 				},
 				{
-					text: 'Yes',
+					text: t('common.yes'),
 					onPress: (): void => {
 						wipeKeychain().then();
 						dispatch(resetSettings());
@@ -121,7 +123,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 				},
 			]
 		);
-	}, [dispatch, navigation]);
+	}, [dispatch, navigation, t]);
 
 	const handleShowOnboarding = useCallback(() => {
 		dispatch(updateShowOnboarding({ showOnboarding: true }));
@@ -163,7 +165,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						onPress={handleNavigationAnimationPress}
 						style={styles.navigationAnimationButton}
 					>
-						<Text style={styles.settingTitle}>Navigation Animation</Text>
+						<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
 						<SessionText style={styles.themeValue}>
 							{navigationAnimationText}
 						</SessionText>
@@ -175,7 +177,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						onPress={handleAutoAuthToggle}
 						style={styles.toggleRow}
 					>
-						<Text style={styles.settingTitle}>Auto Auth</Text>
+						<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
 						<Switch
 							value={enableAutoAuth}
 							onValueChange={handleAutoAuthToggle}
@@ -188,7 +190,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						onPress={handleShowOnboarding}
 						style={styles.navigationAnimationButton}
 					>
-						<Text style={styles.settingTitle}>Show Onboarding</Text>
+						<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
 					</ActionButton>
 				</Card>
 
@@ -197,7 +199,7 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						onPress={handleWipePubkyRing}
 						style={styles.navigationAnimationButton}
 					>
-						<Text style={styles.settingTitle}>Wipe Pubky Ring</Text>
+						<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
 					</ActionButton>
 				</Card>
 

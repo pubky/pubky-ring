@@ -21,6 +21,7 @@ import {
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
+import { useTranslation } from 'react-i18next';
 
 const getMarginBottom = (index: number): number => {
 	return index + 1 === 6 ? 0 : 12;
@@ -35,6 +36,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
         onClose: () => void;
     };
 }): ReactElement => {
+	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [error, setError] = useState<string>('');
 	const [isBlurred, setIsBlurred] = useState<boolean>(true);
@@ -43,12 +45,12 @@ const RecoveryPhrasePrompt = ({ payload }: {
 	const { confirmPubkyBackup } = usePubkyManagement();
 
 	const title = useMemo(() => {
-		return 'Recovery Phrase';
-	}, []);
+		return t('backup.recoveryPhrase');
+	}, [t]);
 
 	const message = useMemo(() => {
-		return 'Write down these 12 words in the right order and store them in a safe place.';
-	}, []);
+		return t('backup.recoveryPhraseMessage');
+	}, [t]);
 
 	const mnemonicWords = useMemo(() => {
 		if (!payload?.mnemonic) {return [];}
@@ -103,7 +105,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 									style={styles.revealButton}
 									onPress={handleConfirmBackup}
 								>
-									<Text style={styles.tapToRevealText}>Tap to reveal</Text>
+									<Text style={styles.tapToRevealText}>{t('backup.tapToReveal')}</Text>
 								</TouchableOpacity>
 							</>
 						)}
@@ -112,7 +114,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 					<PubkyCard name={pubkyName} publicKey={payload.pubky} />
 
 					<Text style={styles.warningText}>
-						Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.
+						{t('backup.recoveryWarning')}
 					</Text>
 
 					{error ? (
@@ -121,7 +123,7 @@ const RecoveryPhrasePrompt = ({ payload }: {
 					<View style={styles.footer}>
 						<View style={styles.buttonContainer}>
 							<Button
-								text={'Finish backup'}
+								text={t('backup.finishBackup')}
 								style={styles.button}
 								onPress={onClose}
 								disabled={isBlurred}

@@ -11,7 +11,9 @@
     "optimize-images": "node scripts/optimize-images.js",
     "e2e:android": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.android.conf.js",
     "e2e:ios": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.ios.conf.js",
-    "e2e:drivers": "APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install uiautomator2 && APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install xcuitest"
+    "e2e:drivers": "APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install uiautomator2 && APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install xcuitest",
+    "tx:push": "./tx push -s",
+    "tx:pull": "./tx pull -a"
   },
   "dependencies": {
     "@dr.pogodin/react-native-fs": "2.34.0",
@@ -29,9 +31,11 @@
     "@synonymdev/result": "^0.0.2",
     "bip39": "^3.1.0",
     "buffer": "^6.0.3",
+    "i18next": "^25.7.1",
     "jdenticon": "2.2.0",
     "lucide-react-native": "^0.534.0",
     "react": "19.1.1",
+    "react-i18next": "^16.3.5",
     "react-native": "0.82.1",
     "react-native-actions-sheet": "^10.1.0",
     "react-native-camera-kit": "^16.1.3",
@@ -39,6 +43,7 @@
     "react-native-gesture-handler": "^2.29.1",
     "react-native-keychain": "10.0.0",
     "react-native-linear-gradient": "^2.8.3",
+    "react-native-localize": "^3.6.0",
     "react-native-mmkv": "^4.0.1",
     "react-native-nitro-modules": "^0.31.10",
     "react-native-permissions": "^5.2.6",

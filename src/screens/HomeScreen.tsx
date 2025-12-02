@@ -27,6 +27,7 @@ import { buttonStyles } from '../theme/utils';
 import ScanInviteButton from '../components/ScanInviteButton';
 import { ENABLE_INVITE_SCANNER } from "../utils/constants.ts";
 import { RootState } from '../store';
+import { useTranslation } from 'react-i18next';
 
 const PubkyItem = memo(({
 	item,
@@ -61,6 +62,7 @@ interface ListFooterProps {
 }
 
 const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
+	const { t } = useTranslation();
 	const onPress = useCallback(() => {
 		showAddPubkySheet(createPubky, importPubky);
 	}, [createPubky, importPubky]);
@@ -69,7 +71,7 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 		<Button
 			testID="AddPubkyButton"
 			style={styles.listFooter}
-			text={'Add pubky'}
+			text={t('home.addPubky')}
 			onPress={onPress}
 			icon={<Plus size={16} />}
 		/>

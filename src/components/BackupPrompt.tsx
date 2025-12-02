@@ -92,7 +92,7 @@ const BackupPrompt = ({ payload }: {
 		} finally {
 			setLoading(false);
 		}
-	}, [onSubmit, password, viewId, confirmPubkyBackup, pubky]);
+	}, [viewId, password, t, onSubmit, confirmPubkyBackup, pubky]);
 
 	const title = useMemo(() => {
 		switch (viewId) {
@@ -155,7 +155,7 @@ const BackupPrompt = ({ payload }: {
 					</View>
 				);
 		}
-	}, [fileDate, fileName, truncatedPubky, viewId]);
+	}, [fileDate, fileName, t, truncatedPubky, viewId]);
 
 	return (
 		<ActionSheetContainer

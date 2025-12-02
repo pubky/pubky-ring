@@ -93,7 +93,9 @@ const Welcome = ({ payload }: {
 				<Text style={styles.headerText}>{t('welcome.welcome')}</Text>
 				<View style={dynamicStyles.messageContainer}>
 					<SessionText style={styles.message}>
-						{t('welcome.homeserverMessage', { pubky: truncatedPubky })}
+						{t('welcome.homeserverMessageStart')}{' '}
+						<Text style={styles.pubkyText}>{truncatedPubky}</Text>
+						{' '}{t('welcome.homeserverMessageEnd')}
 					</SessionText>
 				</View>
 

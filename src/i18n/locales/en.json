@@ -122,7 +122,8 @@
   "welcome": {
     "defaultHomeserver": "Default Homeserver",
     "welcome": "Welcome.",
-    "homeserverMessage": "Your invite code is valid. Your pubky {{pubky}} is now configured to use the Synonym homeserver for data hosting.",
+    "homeserverMessageStart": "Your invite code is valid. Your pubky",
+    "homeserverMessageEnd": "is now configured to use the Synonym homeserver for data hosting.",
     "openButton": "Open {{domain}}"
   },
   "errors": {

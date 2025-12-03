@@ -26,6 +26,7 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import { Image, Platform, StyleSheet } from 'react-native';
 import ModalIndicator from './ModalIndicator.tsx';
 import Button from './Button.tsx';
+import { useTranslation } from 'react-i18next';
 
 const DeletePubky = ({ payload }: {
 	payload: {
@@ -33,6 +34,7 @@ const DeletePubky = ({ payload }: {
 		onDelete: () => void;
 	};
 }): ReactElement => {
+	const { t } = useTranslation();
 	const { onDelete } = useMemo(() => payload, [payload]);
 	const publicKey = useMemo(() => payload?.publicKey ?? '', [payload]);
 	const currentPubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
@@ -62,10 +64,10 @@ const DeletePubky = ({ payload }: {
 			>
 				<ModalIndicator />
 				<View style={styles.titleContainer}>
-					<Text style={styles.title}>Delete Pubky</Text>
+					<Text style={styles.title}>{t('pubky.deletePubky')}</Text>
 				</View>
 				<SessionText style={styles.message}>
-					Are you sure you want to delete this pubky?
+					{t('pubky.deleteConfirm')}
 				</SessionText>
 				<PubkyCard
 					name={pubkyName}
@@ -85,13 +87,13 @@ const DeletePubky = ({ payload }: {
 				</View>
 				<View style={styles.buttonContainer}>
 					<Button
-						text={'Cancel'}
+						text={t('common.cancel')}
 						style={[styles.button, styles.cancelButton]}
 						textStyle={styles.buttonText}
 						onPress={closeSheet}
 					/>
 					<Button
-						text={'Delete'}
+						text={t('common.delete')}
 						style={[styles.button, styles.deleteButton]}
 						textStyle={styles.buttonText}
 						onPress={onDelete}

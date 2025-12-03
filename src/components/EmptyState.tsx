@@ -4,8 +4,10 @@ import { View, Text, ArrowRight, Plus, Button } from '../theme/components.ts';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
 import { textStyles, buttonStyles } from '../theme/utils';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
+import { useTranslation } from 'react-i18next';
 
 const EmptyState = (): ReactElement => {
+	const { t } = useTranslation();
 	const { createPubky, importPubky } = usePubkyManagement();
 
 	const onPress = useCallback(() => {
@@ -18,8 +20,8 @@ const EmptyState = (): ReactElement => {
 				<View style={styles.emptyUser}>
 					<View style={styles.image} />
 					<View>
-						<Text style={[textStyles.heading, styles.name]}>pubky</Text>
-						<Text style={[textStyles.body, styles.pubky]}>xxxxx..xxxxx</Text>
+						<Text style={[textStyles.heading, styles.name]}>{t('emptyState.placeholderName')}</Text>
+						<Text style={[textStyles.body, styles.pubky]}>{t('emptyState.placeholderPubky')}</Text>
 					</View>
 					<View style={styles.buttonArrow}>
 						<ArrowRight size={24} />
@@ -31,7 +33,7 @@ const EmptyState = (): ReactElement => {
 					onPressIn={onPress}
 				>
 					<Plus size={16} />
-					<Text style={textStyles.button}>Add pubky</Text>
+					<Text style={textStyles.button}>{t('home.addPubky')}</Text>
 				</Button>
 			</View>
 		</View>

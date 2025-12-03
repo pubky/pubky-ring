@@ -39,6 +39,7 @@ import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { CircleCheck } from 'lucide-react-native';
 import ProgressBar from './ProgressBar.tsx';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import { useTranslation } from 'react-i18next';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -73,6 +74,7 @@ const CapabilitiesList = memo(({ capabilities, isAuthorized }: { capabilities: C
 });
 
 const Permission = memo(({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
+	const { t } = useTranslation();
 	const hasReadPermission = capability.permission.includes('r');
 	const hasWritePermission = capability.permission.includes('w');
 	return (
@@ -83,10 +85,10 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 			</View>
 			<View style={styles.permissionsContainer}>
 				{hasReadPermission && (
-					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>Read{hasWritePermission ? ',' : ''}</SessionText>
+					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>{t('common.read')}{hasWritePermission ? ',' : ''}</SessionText>
 				)}
 				{hasWritePermission && (
-					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>Write</SessionText>
+					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>{t('common.write')}</SessionText>
 				)}
 			</View>
 		</View>
@@ -95,6 +97,7 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 
 const FADE_DURATION = 100;
 const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
+	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete } = payload;
 	const deepLink = payload?.deepLink;
@@ -155,7 +158,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			if (res.isErr()) {
 				showToast({
 					type: 'error',
-					title: 'Error',
+					title: t('common.error'),
 					description: res.error.message,
 				});
 				return;
@@ -172,11 +175,11 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		} catch (e: unknown) {
 			const error = e as Error;
 			const errorMsg = error.message === 'Authentication request timed out'
-				? 'The authentication process took too long. Please try again.'
+				? t('auth.timeoutError')
 				: error.message || 'An error occurred during authorization';
 			showToast({
 				type: 'error',
-				title: 'Error',
+				title: t('common.error'),
 				description: errorMsg,
 				autoHide: true,
 				visibilityTime: 20000,
@@ -189,7 +192,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky]);
+	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky, t]);
 
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];
@@ -207,7 +210,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				<View style={styles.mainContent}>
 					<View style={styles.titleContainer}>
 						<Text style={styles.title}>
-							{isAuthorized ? 'Authorization Successful' : 'Authorize'}
+							{isAuthorized ? t('auth.authorizationSuccessful') : t('auth.authorize')}
 						</Text>
 					</View>
 
@@ -223,7 +226,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 					/>
 
 					<View style={styles.section}>
-						<SessionText style={styles.sectionTitle}>Relay</SessionText>
+						<SessionText style={styles.sectionTitle}>{t('auth.relay')}</SessionText>
 						<View style={styles.relayContainer}>
 							<Globe color="rgba(255, 255, 255, 0.8)" size={15} />
 							<Text style={styles.relayText}>{authDetails.relay}</Text>
@@ -231,12 +234,12 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 					</View>
 
 					<View style={styles.section}>
-						<SessionText style={styles.sectionTitle}>{isAuthorized ? 'Granted Permissions' : 'Requested Permissions'}</SessionText>
+						<SessionText style={styles.sectionTitle}>{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}</SessionText>
 						<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
 					</View>
 
 					{!isAuthorized && (<SessionText style={styles.warningText}>
-						Make sure you trust this relay, service, browser, or device before authorizing with your pubky.
+						{t('auth.trustWarning')}
 					</SessionText>)}
 
 					<View style={styles.imageContainer}>
@@ -255,7 +258,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 									onPressIn={handleClose}
 									activeOpacity={0.7}
 								>
-									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? 'Close' : 'Deny'}</Text>
+									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('common.close') : t('auth.deny')}</Text>
 								</ActionButton>
 
 								<ActionButton
@@ -264,12 +267,12 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 									disabled={authorizing}
 									activeOpacity={0.7}
 								>
-									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? 'Authorizing...' : 'Authorize'}</Text>
+									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('auth.authorizing') : t('auth.authorize')}</Text>
 								</ActionButton>
 							</>
 							) : (
 								<ActionButton style={styles.okButton} onPressIn={handleClose}>
-									<Text style={styles.buttonText}>OK</Text>
+									<Text style={styles.buttonText}>{t('common.ok')}</Text>
 								</ActionButton>
 							)}
 					</View>

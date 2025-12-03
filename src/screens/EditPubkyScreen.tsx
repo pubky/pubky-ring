@@ -19,8 +19,10 @@ import {
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import { useTypedNavigation, useTypedRoute } from '../navigation/hooks';
+import { useTranslation } from 'react-i18next';
 
 const EditPubkyScreen = (): ReactElement => {
+	const { t } = useTranslation();
 	const navigation = useTypedNavigation();
 	const route = useTypedRoute<'EditPubky'>();
 	const { pubkyData } = route.params;
@@ -123,12 +125,12 @@ const EditPubkyScreen = (): ReactElement => {
 
 			<View style={styles.form}>
 				<View style={styles.inputContainer}>
-					<Text style={styles.label}>Name</Text>
+					<Text style={styles.label}>{t('common.name')}</Text>
 					<TextInput
 						style={styles.input}
 						value={name}
 						onChangeText={setNameState}
-						placeholder="Enter name"
+						placeholder={t('editPubky.enterName')}
 						placeholderTextColor="#666"
 						onSubmitEditing={handleSave}
 					/>
@@ -136,12 +138,12 @@ const EditPubkyScreen = (): ReactElement => {
 				</View>
 
 				<View style={styles.inputContainer}>
-					<Text style={styles.label}>Homeserver</Text>
+					<Text style={styles.label}>{t('editPubky.homeserver')}</Text>
 					<TextInput
 						style={styles.input}
 						value={homeserver}
 						onChangeText={setHomeserverState}
-						placeholder="Enter homeserver"
+						placeholder={t('editPubky.enterHomeserver')}
 						placeholderTextColor="#666"
 						onSubmitEditing={handleSave}
 					/>

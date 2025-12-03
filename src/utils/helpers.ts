@@ -31,6 +31,7 @@ import {
 	getPublicKeyFromSecretKey
 } from '@synonymdev/react-native-pubky';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
+import i18n from '../i18n';
 
 export enum EDeepLinkType {
 	invite = 'invite',
@@ -162,8 +163,8 @@ export const handleScannedData = async ({
 					} else {
 						showToast({
 							type: 'error',
-							title: 'Import Failed',
-							description: 'Invalid recovery phrase',
+							title: i18n.t('import.failed'),
+							description: i18n.t('import.invalidRecoveryPhrase'),
 						});
 						return err('Invalid recovery phrase');
 					}
@@ -197,7 +198,7 @@ export const handleScannedData = async ({
 				} else {
 					showToast({
 						type: 'error',
-						title: 'Import Failed',
+						title: i18n.t('import.failed'),
 						description: importRes.error.message,
 					});
 					return err(importRes.error.message);
@@ -208,8 +209,8 @@ export const handleScannedData = async ({
 		if (!pubky) {
 			showToast({
 				type: 'error',
-				title: 'No Pubky Selected',
-				description: 'Please select a pubky to proceed',
+				title: i18n.t('pubky.noSelection'),
+				description: i18n.t('pubky.selectToProcess'),
 			});
 			return err('No pubky provided');
 		}
@@ -235,13 +236,13 @@ export const handleScannedData = async ({
 			if (res.isOk()) {
 				showToast({
 					type: 'success',
-					title: 'Success',
-					description: `Authorized with: ${pubky}`,
+					title: i18n.t('common.success'),
+					description: i18n.t('auth.authorized', { pubky }),
 				});
 			} else {
 				showToast({
 					type: 'error',
-					title: 'Error',
+					title: i18n.t('common.error'),
 					description: res.error.message,
 				});
 			}
@@ -252,8 +253,8 @@ export const handleScannedData = async ({
 				} else {
 					showToast({
 						type: 'info',
-						title: 'Successfully Signed In!',
-						description: 'Please navigate back to your browser',
+						title: i18n.t('auth.successfullySignedIn'),
+						description: i18n.t('auth.navigateBackToBrowser'),
 						visibilityTime: 8000,
 					});
 				}
@@ -268,8 +269,8 @@ export const handleScannedData = async ({
 		if (signInRes.isOk() && deepLink) {
 			showToast({
 				type: 'success',
-				title: 'Success',
-				description: `Signed in to ${data} successfully`,
+				title: i18n.t('common.success'),
+				description: i18n.t('auth.signedInSuccessfully', { server: data }),
 			});
 			if (Platform.OS === 'android') {
 				await sleep(ANDROID_DEEPLINK_DELAY);
@@ -277,17 +278,17 @@ export const handleScannedData = async ({
 			} else {
 				showToast({
 					type: 'info',
-					title: 'Successfully Signed In!',
-					description: 'Please navigate back to your browser.',
+					title: i18n.t('auth.successfullySignedIn'),
+					description: i18n.t('auth.navigateBackToBrowser'),
 					visibilityTime: 8000,
 				});
 			}
 			return ok('sign-in');
 		}
-		const description = authResult?.error?.message ?? 'Failed to parse QR code data';
+		const description = authResult?.error?.message ?? i18n.t('errors.failedToParseQR');
 		showToast({
 			type: 'error',
-			title: 'Error',
+			title: i18n.t('common.error'),
 			description,
 		});
 		return err('Failed to parse QR code data');
@@ -295,8 +296,8 @@ export const handleScannedData = async ({
 		console.error('Error processing QR data:', error);
 		showToast({
 			type: 'error',
-			title: 'Error',
-			description: 'Failed to process QR code data',
+			title: i18n.t('common.error'),
+			description: i18n.t('errors.failedToProcessQR'),
 		});
 		return err('Failed to process QR code data');
 	}
@@ -315,10 +316,10 @@ export const handleAuth = async ({
 		const authDetails = await parseAuthUrl(authUrl);
 		if (authDetails.isErr()) {
 			console.error('Error parsing auth details:', authDetails.error);
-			const description = authDetails?.error?.message ?? 'Failed to parse auth details';
+			const description = authDetails?.error?.message ?? i18n.t('errors.failedToParseAuth');
 			showToast({
 				type: 'error',
-				title: 'Error',
+				title: i18n.t('common.error'),
 				description,
 			});
 			return err(description);
@@ -343,10 +344,10 @@ export const handleAuth = async ({
 		}, AUTH_SHEET_DELAY);
 		return ok('success');
 	} catch (error) {
-		const description = 'Failed to parse auth details';
+		const description = i18n.t('errors.failedToParseAuth');
 		showToast({
 			type: 'error',
-			title: 'Error',
+			title: i18n.t('common.error'),
 			description,
 		});
 		console.log(`${description}:`, error);
@@ -405,7 +406,7 @@ export const showImportQRScanner = async ({
   onComplete?: () => void;
 }): Promise<string> => {
 	return showQRScannerGeneric({
-		title: 'Import Pubky',
+		title: i18n.t('import.title'),
 		onScan: async (data: string) => {
 			const result = await handleScannedData({
 				data,
@@ -429,8 +430,8 @@ export const showImportQRScanner = async ({
 			} else {
 				showToast({
 					type: 'error',
-					title: 'Invalid Data',
-					description: 'Clipboard does not contain a valid recovery phrase or secret key',
+					title: i18n.t('import.invalidData'),
+					description: i18n.t('import.invalidClipboardData'),
 				});
 				return 'Invalid clipboard data';
 			}
@@ -483,8 +484,8 @@ export const showQRScanner = async ({
 		if (!res) {
 			showToast({
 				type: 'error',
-				title: 'Currently Offline',
-				description: 'You need to be online to authorize with Pubky Ring',
+				title: i18n.t('network.currentlyOffline'),
+				description: i18n.t('network.offlineDescription'),
 				autoHide: false,
 			});
 			return Promise.resolve('');
@@ -504,8 +505,8 @@ export const showQRScanner = async ({
 			if (!pubky) {
 				showToast({
 					type: 'error',
-					title: 'Error',
-					description: 'No pubky provided for clipboard handling',
+					title: i18n.t('common.error'),
+					description: i18n.t('errors.noClipboardPubky'),
 				});
 				return 'No pubky provided';
 			}
@@ -594,8 +595,8 @@ export const shareData = async (data: string): Promise<void> => {
 		console.error('Error sharing data:', error);
 		showToast({
 			type: 'error',
-			title: 'Error',
-			description: 'Failed to share data',
+			title: i18n.t('common.error'),
+			description: i18n.t('errors.failedToShareData'),
 		});
 	}
 };
@@ -629,14 +630,14 @@ export const checkNetworkConnection = async ({
 		if (isConnected && displayToastIfOnline) {
 			showToast({
 				type: 'success',
-				title: "You're Back Online!",
-				description: 'You can now authorize with Pubky Ring',
+				title: i18n.t('network.backOnline'),
+				description: i18n.t('network.backOnlineDescription'),
 			});
 		} else if (!isConnected && displayToastIfOffline) {
 			showToast({
 				type: 'error',
-				title: 'Currently Offline',
-				description: 'You need to be online to authorize with Pubky Ring',
+				title: i18n.t('network.currentlyOffline'),
+				description: i18n.t('network.offlineDescription'),
 				autoHide: false,
 			});
 		}

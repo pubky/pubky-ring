@@ -2755,6 +2755,34 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - RNLocalize (3.6.0):
+    - boost
+    - DoubleConversion
+    - fast_float
+    - fmt
+    - glog
+    - hermes-engine
+    - RCT-Folly
+    - RCT-Folly/Fabric
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - SocketRocket
+    - Yoga
   - RNPermissions (5.4.3):
     - boost
     - DoubleConversion
@@ -3200,6 +3228,7 @@ DEPENDENCIES:
   - "RNCClipboard (from `../node_modules/@react-native-clipboard/clipboard`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
   - RNKeychain (from `../node_modules/react-native-keychain`)
+  - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
@@ -3390,6 +3419,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-gesture-handler"
   RNKeychain:
     :path: "../node_modules/react-native-keychain"
+  RNLocalize:
+    :path: "../node_modules/react-native-localize"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
   RNReanimated:
@@ -3494,6 +3525,7 @@ SPEC CHECKSUMS:
   RNCClipboard: 962296f7af77f6c039b683e21c2e2255af9c05df
   RNGestureHandler: 927ba2c590c8973f24624f1c1279be08a22ec58d
   RNKeychain: 182d986f809280edd9444a557adc21845f7d1e6f
+  RNLocalize: 000be4f69edb5cc1b3266379ba6e40ec77a54a3c
   RNPermissions: ced7638abb298552d556478f8ade7b4d3d04b443
   RNReanimated: fe6e74170e4b5c5acdbe10cf8f6883e410ba80d3
   RNScreens: 3693ec4bbc0065151b843269e50e9807644e9918

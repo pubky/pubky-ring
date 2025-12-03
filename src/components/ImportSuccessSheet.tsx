@@ -21,6 +21,7 @@ import PubkyReview from "./PubkySetup/PubkyReview.tsx";
 import { getPubky, getPubkyCount } from "../store/selectors/pubkySelectors.ts";
 import { RootState } from "../store";
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
+import { useTranslation } from 'react-i18next';
 
 const ImportSuccessSheet = ({ payload }: {
     payload: {
@@ -32,6 +33,7 @@ const ImportSuccessSheet = ({ payload }: {
         onContinue?: () => void;
     };
 }): ReactElement => {
+	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const pubkyCount = useSelector(getPubkyCount);
 	const pubky = useMemo(() => payload?.pubky ?? '', [payload?.pubky]);
@@ -53,16 +55,16 @@ const ImportSuccessSheet = ({ payload }: {
 
 	const modalTitle = useMemo(() => {
 		if (!isNewPubky) {
-			return 'Pubky Re-Imported';
+			return t('import.pubkyReImported');
 		}
-		return payload?.modalTitle ?? 'Pubky Imported';
-	}, [isNewPubky, payload?.modalTitle]);
+		return payload?.modalTitle ?? t('import.pubkyImported');
+	}, [isNewPubky, payload?.modalTitle, t]);
 	const description = useMemo(() => {
 		if (!isNewPubky) {
-			return 'You successfully re-imported your Pubky.';
+			return t('import.reImportSuccess');
 		}
-		return payload?.description ?? 'You successfully imported your Pubky.';
-	}, [isNewPubky, payload?.description]);
+		return payload?.description ?? t('import.importSuccess');
+	}, [isNewPubky, payload?.description, t]);
 
 	const data = useMemo(() => {
 		return { ...pubkyData, pubky, name: pubkyData.name || `pubky #${pubkyCount}` };

@@ -12,8 +12,10 @@ import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { useDispatch } from 'react-redux';
 import { buttonStyles } from '../theme/utils';
 import { useTypedNavigation } from '../navigation/hooks';
+import { useTranslation } from 'react-i18next';
 
 const OnboardingContent = (): ReactElement => {
+	const { t } = useTranslation();
 	const navigation = useTypedNavigation();
 	const dispatch = useDispatch();
 
@@ -55,10 +57,9 @@ const OnboardingContent = (): ReactElement => {
 				<View style={styles.contentBlock}>
 					{/* Text */}
 					<View style={styles.textContainer}>
-						<Text style={styles.title}>Keychain for the next web.</Text>
+						<Text style={styles.title}>{t('onboarding.title')}</Text>
 						<Text style={styles.subtitle}>
-							Pubky Ring enables you to securely authorize services and manage
-							your pubkys, devices, and sessions.
+							{t('onboarding.subtitle')}
 						</Text>
 					</View>
 
@@ -69,7 +70,7 @@ const OnboardingContent = (): ReactElement => {
 							onPress={navigateHome}
 							testID="OnboardingGetStartedButton"
 						>
-							<Text style={styles.buttonText}>Get Started</Text>
+							<Text style={styles.buttonText}>{t('onboarding.getStarted')}</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

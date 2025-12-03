@@ -23,6 +23,7 @@ import ModalIndicator from '../ModalIndicator.tsx';
 import PubkyRingLogo from "../../images/pubky-ring.png";
 import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
+import { useTranslation } from 'react-i18next';
 
 const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
 
@@ -33,6 +34,7 @@ const Welcome = ({ payload }: {
     isInvite?: boolean;
 	};
 }): ReactElement => {
+	const { t } = useTranslation();
 	const smallScreen = useMemo(() => isSmallScreen(), []);
 
 	const dynamicStyles = useMemo(() => StyleSheet.create({
@@ -85,15 +87,15 @@ const Welcome = ({ payload }: {
 			<View style={styles.contentWrapper}>
 				<ModalIndicator />
 				<View style={styles.titleContainer}>
-					<Text style={styles.title}>Default Homeserver</Text>
+					<Text style={styles.title}>{t('welcome.defaultHomeserver')}</Text>
 				</View>
 
-				<Text style={styles.headerText}>Welcome.</Text>
+				<Text style={styles.headerText}>{t('welcome.welcome')}</Text>
 				<View style={dynamicStyles.messageContainer}>
 					<SessionText style={styles.message}>
-						Your invite code is valid. Your pubky{' '}
+						{t('welcome.homeserverMessageStart')}{' '}
 						<Text style={styles.pubkyText}>{truncatedPubky}</Text>
-						{' '}is now configured to use the Synonym homeserver for data hosting.
+						{' '}{t('welcome.homeserverMessageEnd')}
 					</SessionText>
 				</View>
 
@@ -109,7 +111,7 @@ const Welcome = ({ payload }: {
 						style={styles.openButton}
 						onPressIn={handleOpenPubkyApp}
 					>
-						<Text style={styles.buttonText}>Open {BUTTON_TEXT}</Text>
+						<Text style={styles.buttonText}>{t('welcome.openButton', { domain: BUTTON_TEXT })}</Text>
 						<Image
 							source={PubkyRingLogo}
 							style={styles.pubkyLogo}

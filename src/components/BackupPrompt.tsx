@@ -24,6 +24,7 @@ import {
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
 	BACKUP_PASSWORD_CHAR_MIN,
 } from '../utils/constants.ts';
+import { useTranslation } from 'react-i18next';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -50,6 +51,7 @@ const BackupPrompt = ({ payload }: {
         onClose: () => void;
     };
 }): ReactElement => {
+	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
@@ -71,7 +73,8 @@ const BackupPrompt = ({ payload }: {
 			setLoading(true);
 			// Only validate password length for backup creation
 			if (viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN) {
-				setError(`Password must be at least ${BACKUP_PASSWORD_CHAR_MIN} ${BACKUP_PASSWORD_CHAR_MIN > 1 ? 'characters' : 'character'} long`);
+				const chars = BACKUP_PASSWORD_CHAR_MIN > 1 ? t('backup.characters') : t('backup.character');
+				setError(t('backup.passwordMinLength', { min: BACKUP_PASSWORD_CHAR_MIN, chars }));
 				return;
 			}
 
@@ -89,47 +92,47 @@ const BackupPrompt = ({ payload }: {
 		} finally {
 			setLoading(false);
 		}
-	}, [onSubmit, password, viewId, confirmPubkyBackup, pubky]);
+	}, [viewId, password, t, onSubmit, confirmPubkyBackup, pubky]);
 
 	const title = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return 'Encrypted File';
+				return t('backup.encryptedFile');
 			case EBackupPromptViewId.import:
-				return 'Import Pubky';
+				return t('import.title');
 			default:
-				return 'Backup';
+				return t('backup.backup');
 		}
-	}, [viewId]);
+	}, [viewId, t]);
 
 	const message = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return 'Enter a password or passphrase to encrypt and secure your backup. Keep it safe, you’ll need it to restore your pubky.';
+				return t('backup.backupMessage');
 			case EBackupPromptViewId.import:
-				return 'Enter your password or passphrase to decrypt your pubky backup.';
+				return t('backup.importMessage');
 			default:
 				return '';
 		}
-	}, [viewId]);
+	}, [viewId, t]);
 
 	const submitButtonText = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return 'Create Backup';
+				return t('backup.createBackup');
 			case EBackupPromptViewId.import:
-				return 'Import';
+				return t('import.importButton');
 			default:
-				return 'Submit';
+				return t('common.submit');
 		}
-	}, [viewId]);
+	}, [viewId, t]);
 
 	const content = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
 				return (
 					<Text numberOfLines={1} ellipsizeMode="middle" style={styles.message}>
-						<Text style={[styles.message, styles.passphraseText]}>Passphrase for </Text>
+						<Text style={[styles.message, styles.passphraseText]}>{t('backup.passphraseFor')}</Text>
 						<Text style={styles.boldPubky}>{truncatedPubky}</Text>
 					</Text>
 				);
@@ -152,7 +155,7 @@ const BackupPrompt = ({ payload }: {
 					</View>
 				);
 		}
-	}, [fileDate, fileName, truncatedPubky, viewId]);
+	}, [fileDate, fileName, t, truncatedPubky, viewId]);
 
 	return (
 		<ActionSheetContainer
@@ -183,11 +186,11 @@ const BackupPrompt = ({ payload }: {
 						style={[styles.input, error ? styles.inputError : null]}
 						secureTextEntry={!showPassword}
 						value={password}
-						onChangeText={(t) => {
-							setPassword(t);
+						onChangeText={(text) => {
+							setPassword(text);
 							if (error) setError('');
 						}}
-						placeholder="Enter passphrase"
+						placeholder={t('backup.enterPassphrase')}
 						placeholderTextColor="#999"
 						autoFocus
 						onSubmitEditing={handleSubmit}
@@ -206,7 +209,7 @@ const BackupPrompt = ({ payload }: {
 				) : null}
 				<View style={styles.buttonContainer}>
 					<Button
-						text={loading ? 'Close' : 'Cancel'}
+						text={loading ? t('common.close') : t('common.cancel')}
 						style={styles.button}
 						onPress={onClose}
 					/>

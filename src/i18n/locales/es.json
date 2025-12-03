@@ -1,0 +1,147 @@
+{
+  "common": {
+    "success": "Éxito",
+    "error": "Error",
+    "cancel": "Cancelar",
+    "confirm": "Confirme",
+    "save": "Guarde",
+    "delete": "Borrar",
+    "edit": "Edite",
+    "done": "Hecho",
+    "next": "Siguiente",
+    "back": "Volver",
+    "close": "Cerrar",
+    "continue": "Continúe en",
+    "retry": "Vuelva a intentarlo",
+    "loading": "Cargando...",
+    "copied": "Copiado",
+    "share": "Compartir",
+    "submit": "Enviar",
+    "ok": "OK",
+    "yes": "Sí",
+    "no": "No",
+    "name": "Nombre",
+    "read": "Leer",
+    "write": "Escriba a"
+  },
+  "home": {
+    "addPubky": "Añadir pubky"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "navigationAnimation": "Animación de la navegación",
+    "autoAuth": "Autenticación automática",
+    "showOnboarding": "Mostrar incorporación",
+    "wipePubkyRing": "Limpiar el anillo pubis",
+    "wipeConfirmTitle": "¿Está seguro?",
+    "wipeConfirmMessage": "Esta acción borrará todos los datos de Pubky Ring y no podrá deshacerse.",
+    "theme": {
+      "title": "Tema",
+      "system": "Sistema",
+      "light": "Luz",
+      "dark": "Oscuro"
+    },
+    "animation": {
+      "slide": "Diapositiva",
+      "fade": "Desvanecer"
+    }
+  },
+  "network": {
+    "backOnline": "¡Vuelve a estar en línea!",
+    "backOnlineDescription": "Ahora puede autorizar con Pubky Ring",
+    "currentlyOffline": "Actualmente fuera de línea",
+    "offlineDescription": "Necesita estar en línea para autorizar con Pubky Ring"
+  },
+  "auth": {
+    "authorize": "Autorice",
+    "authorizing": "Autorizando...",
+    "authorizationSuccessful": "Autorización aceptada",
+    "deny": "Denegar",
+    "relay": "Relé",
+    "requestedPermissions": "Permisos solicitados",
+    "grantedPermissions": "Permisos concedidos",
+    "trustWarning": "Asegúrese de que confía en este relé, servicio, navegador o dispositivo antes de autorizar con su pubky.",
+    "successfullySignedIn": "¡Se ha registrado con éxito!",
+    "navigateBackToBrowser": "Por favor, navegue de nuevo a su navegador.",
+    "authorized": "Autorizado con: {{pubky}}",
+    "signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
+    "timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo."
+  },
+  "import": {
+    "title": "Importar Pubky",
+    "failed": "Importación fallida",
+    "invalidRecoveryPhrase": "Frase de recuperación no válida",
+    "pubkyImportedSuccessfully": "Pubky importado con éxito",
+    "invalidData": "Datos no válidos",
+    "invalidClipboardData": "El portapapeles no contiene una frase de recuperación o una clave secreta válidas",
+    "importButton": "Importar",
+    "pubkyImported": "Pubky Importado",
+    "pubkyReImported": "Pubky reimportado",
+    "importSuccess": "Ha importado correctamente su Pubky.",
+    "reImportSuccess": "Ha reimportado correctamente su Pubky."
+  },
+  "pubky": {
+    "noSelection": "No Pubky Seleccionado",
+    "selectToProcess": "Seleccione un pubky para continuar",
+    "setup": "Configurar",
+    "deletePubky": "Borrar Pubky",
+    "deleteConfirm": "¿Seguro que quiere borrar este pubky?",
+    "selectPubky": "Seleccione Pubky",
+    "selectPubkyMessage": "Seleccione qué pubky desea utilizar para autorizar este servicio, navegador o dispositivo.",
+    "noPubkysAvailable": "No tiene ningún pubky configurado y disponible. Por favor, cree y configure primero un pubky.",
+    "yourPubky": "Su pubky.",
+    "yourPubkyDescription": "Este es su primer identificador único, su pubky. Cree tantos como necesite para distintos fines. Usted es su clave."
+  },
+  "backup": {
+    "encryptedFile": "Archivo cifrado",
+    "backup": "Copia de seguridad",
+    "createBackup": "Crear copia de seguridad",
+    "backupMessage": "Introduzca una contraseña o frase de contraseña para encriptar y asegurar su copia de seguridad. Manténgala a salvo, la necesitará para restaurar su pubky.",
+    "importMessage": "Introduzca su contraseña o frase de contraseña para descifrar su copia de seguridad pubky.",
+    "passphraseFor": "Frase de contraseña para ",
+    "enterPassphrase": "Introduzca la frase de contraseña",
+    "passwordMinLength": "La contraseña debe tener una longitud mínima de {{min}} {{chars}} ",
+    "character": "carácter",
+    "characters": "caracteres",
+    "recoveryPhrase": "Frase de recuperación",
+    "recoveryPhraseMessage": "Escriba estas 12 palabras en el orden correcto y guárdelas en un lugar seguro.",
+    "tapToReveal": "Toque para revelar",
+    "recoveryWarning": "Nunca comparta su frase de recuperación con nadie, ya que podría perder el acceso a su perfil, datos e identidad en línea.",
+    "finishBackup": "Finalizar la copia de seguridad"
+  },
+  "onboarding": {
+    "title": "Llavero para la próxima web.",
+    "subtitle": "Pubky Ring le permite autorizar servicios de forma segura y gestionar sus pubkys, dispositivos y sesiones.",
+    "getStarted": "Empezar"
+  },
+  "editPubky": {
+    "enterName": "Introduzca el nombre",
+    "enterHomeserver": "Introducir servidor doméstico",
+    "homeserver": "Servidor doméstico"
+  },
+  "welcome": {
+    "defaultHomeserver": "Servidor doméstico predeterminado",
+    "welcome": "Bienvenida.",
+    "homeserverMessageStart": "Su código de invitación es válido. Su pubky",
+    "homeserverMessageEnd": "está ahora configurado para utilizar el servidor doméstico de Synonym para el alojamiento de datos.",
+    "openButton": "Abra {{domain}}"
+  },
+  "errors": {
+    "failedToParseQR": "Fallo al analizar los datos del código QR",
+    "failedToProcessQR": "Fallo al procesar los datos del código QR",
+    "failedToParseAuth": "Fallo al analizar los detalles de autenticación",
+    "failedToShareData": "No se comparten los datos",
+    "noClipboardPubky": "No se proporciona pubky para el manejo del portapapeles"
+  },
+  "terms": {
+    "title": "Condiciones de uso.",
+    "acceptTerms": "Declaro que he leído y acepto las condiciones de uso.",
+    "acceptPrivacy": "Declaro que he leído y acepto la política de privacidad.",
+    "termsOfUse": "Condiciones de uso",
+    "privacyPolicy": "Política de privacidad"
+  },
+  "emptyState": {
+    "placeholderName": "pubky",
+    "placeholderPubky": "xxxxx..xxxxx"
+  }
+}

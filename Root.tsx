@@ -4,6 +4,7 @@ import { PersistGate } from 'redux-persist/integration/react';
 import { store, persistor } from './src/store';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { enableScreens, enableFreeze } from 'react-native-screens';
+import './src/i18n';
 import App from './App';
 
 enableScreens(true);

@@ -11,9 +11,10 @@ import {
 	getPubkyKeys,
 	getPubky,
 } from '../store/selectors/pubkySelectors';
-import { setDeepLink } from '../store/slices/pubkysSlice';
-import { handleDeepLink, showToast, sleep, isSecretKeyImport, EDeepLinkType } from '../utils/helpers';
-import { importPubky as importPubkyUtil, createPubkyWithInviteCode } from '../utils/pubky';
+import { setDeepLink, addProcessing, removeProcessing } from '../store/slices/pubkysSlice';
+import { handleDeepLink, showToast, sleep, isSecretKeyImport, EDeepLinkType, SignupDeepLinkParams } from '../utils/helpers';
+import { importPubky as importPubkyUtil, createPubkyWithInviteCode, signUpToHomeserver, savePubky } from '../utils/pubky';
+import { auth, generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
 import { showImportSuccessSheet, showEditPubkySheet } from '../utils/sheetHelpers';
 import { getStore } from '../utils/store-helpers';
 import { EBackupPreference } from '../types/pubky.ts';
@@ -146,6 +147,145 @@ export const useDeepLinkHandler = (
 					title: 'Error',
 					description: 'Failed to process invite code',
 				});
+			}
+			return;
+		}
+
+		// Handle signup deep links
+		// Format: pubkyauth://signup?hs={hs_pubky}&ic={invite_code}&relay={http_relay_url_with_channel_id}&secret={secret_base64}&caps={comma_separated_capabilities}
+		if (parsedDeepLink.type === EDeepLinkType.signup) {
+			dispatch(setDeepLink(''));
+			let pubky = '';
+			try {
+				const signupParams: SignupDeepLinkParams = JSON.parse(parsedDeepLink.data);
+				const { homeserver, inviteCode, relay, secret, caps } = signupParams;
+
+				// Step 1: Generate a new keypair
+				const genKeyRes = await generateMnemonicPhraseAndKeypair();
+				if (genKeyRes.isErr()) {
+					showToast({
+						type: 'error',
+						title: 'Signup Failed',
+						description: 'Failed to generate keypair',
+					});
+					return;
+				}
+
+				const { mnemonic, secret_key: secretKey, public_key: generatedPubky } = genKeyRes.value;
+				pubky = generatedPubky;
+
+				// Set processing state
+				dispatch(addProcessing({ pubky }));
+
+				// Step 2: Save the pubky to keychain and Redux
+				const saveRes = await savePubky({
+					mnemonic,
+					secretKey,
+					pubky,
+					dispatch,
+					backupPreference: EBackupPreference.unknown,
+					isBackedUp: false,
+				});
+
+				if (saveRes.isErr()) {
+					showToast({
+						type: 'error',
+						title: 'Signup Failed',
+						description: 'Failed to save pubky',
+					});
+					return;
+				}
+
+				// Step 3: Sign up to the specified homeserver with invite code
+				const signupRes = await signUpToHomeserver({
+					pubky,
+					secretKey,
+					homeserver,
+					signupToken: inviteCode,
+					dispatch,
+				});
+
+				if (signupRes.isErr()) {
+					showToast({
+						type: 'error',
+						title: 'Signup Failed',
+						description: signupRes.error.message,
+					});
+					return;
+				}
+
+				// Step 4: Construct the pubkyauth URL and authenticate
+				// The auth URL format: pubkyauth:///?relay={relay}&secret={secret}&caps={caps}
+				const capsString = caps.join(',');
+				const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
+
+				// Retry auth up to 5 times with delays to handle homeserver processing time
+				const maxRetries = 5;
+				const retryDelay = 500;
+				let authSuccess = false;
+				let lastError = '';
+
+				for (let attempt = 1; attempt <= maxRetries; attempt++) {
+					if (attempt > 1) await sleep(retryDelay);
+					const authRes = await auth(authUrl, secretKey);
+					if (authRes.isOk()) {
+						authSuccess = true;
+						break;
+					}
+					lastError = authRes.error.message || 'Failed to complete authentication';
+					console.log(`Auth attempt ${attempt}/${maxRetries} failed:`, lastError);
+				}
+
+				if (!authSuccess) {
+					console.error('Auth failed after all retries:', lastError);
+					showToast({
+						type: 'error',
+						title: 'Auth Failed',
+						description: lastError,
+					});
+					// Still show the setup sheet since pubky was created
+				} else {
+					showToast({
+						type: 'success',
+						title: 'Signup Successful',
+						description: 'Your new Pubky has been created and authenticated',
+					});
+				}
+
+				// Step 5: Show the edit pubky sheet
+				// TODO: Consider showing welcome screen instead if needed
+				// const pubkyData = getPubky(getStore(), pubky);
+				// setTimeout(() => {
+				// 	SheetManager.show('new-pubky-setup', {
+				// 		payload: {
+				// 			pubky,
+				// 			data: pubkyData,
+				// 			currentScreen: ECurrentScreen.welcome,
+				// 			isInvite: true,
+				// 		},
+				// 		onClose: () => {
+				// 			SheetManager.hide('new-pubky-setup');
+				// 		},
+				// 	});
+				// }, 150);
+				setTimeout(() => {
+					showEditPubkySheet({
+						title: 'Setup',
+						pubky,
+					});
+				}, 150);
+			} catch (error) {
+				console.error('Error handling signup deep link:', error);
+				showToast({
+					type: 'error',
+					title: 'Error',
+					description: 'Failed to process signup',
+				});
+			} finally {
+				// Clear processing state
+				if (pubky) {
+					dispatch(removeProcessing({ pubky }));
+				}
 			}
 			return;
 		}

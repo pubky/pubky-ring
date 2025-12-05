@@ -4,12 +4,13 @@ import { AuthorizeButton, QrCode, Text } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
 import PubkyRingLogo from '../images/pubky.png';
-import { parseInviteCode, showQRScannerGeneric, showToast } from '../utils/helpers.ts';
+import { parseInviteCode, showQRScannerGeneric, showToast, parseDeepLink, EDeepLinkType } from '../utils/helpers.ts';
 import { createPubkyWithInviteCode } from '../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { getStore } from '../utils/store-helpers.ts';
 import { ECurrentScreen } from './PubkySetup/NewPubkySetup.tsx';
+import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
@@ -69,6 +70,16 @@ const ScanInviteButton = memo(() => {
 
 				await SheetManager.hide('camera');
 
+				// First check if it's a signup URL - use deep link handler
+				const parsedData = parseDeepLink(data);
+				if (parsedData.type === EDeepLinkType.signup) {
+					// Dispatch to deep link handler which handles the full signup flow
+					dispatch(setDeepLink(JSON.stringify(parsedData)));
+					isProcessingInvite.current = false;
+					return '';
+				}
+
+				// Fall back to invite code parsing
 				const inviteCode = parseInviteCode(data);
 				if (inviteCode) {
 					await handleInviteCodeSignup(inviteCode, 'scan');
@@ -76,7 +87,7 @@ const ScanInviteButton = memo(() => {
 					showToast({
 						type: 'error',
 						title: 'Invalid Invite Code',
-						description: 'Please scan a valid invite code QR',
+						description: 'Please scan a valid invite code or signup QR',
 					});
 				}
 
@@ -91,15 +102,25 @@ const ScanInviteButton = memo(() => {
 
 				try {
 					const clipboardContent = await readFromClipboard();
-					const inviteCode = parseInviteCode(clipboardContent);
 
+					// First check if it's a signup URL - use deep link handler
+					const parsedData = parseDeepLink(clipboardContent);
+					if (parsedData.type === EDeepLinkType.signup) {
+						// Dispatch to deep link handler which handles the full signup flow
+						dispatch(setDeepLink(JSON.stringify(parsedData)));
+						isProcessingInvite.current = false;
+						return '';
+					}
+
+					// Fall back to invite code parsing
+					const inviteCode = parseInviteCode(clipboardContent);
 					if (inviteCode) {
 						await handleInviteCodeSignup(inviteCode, 'clipboard');
 					} else {
 						showToast({
 							type: 'error',
 							title: 'Invalid Link',
-							description: 'Clipboard does not contain a valid invite link',
+							description: 'Clipboard does not contain a valid invite link or signup URL',
 						});
 					}
 				} catch {
@@ -118,7 +139,7 @@ const ScanInviteButton = memo(() => {
 				isProcessingInvite.current = false;
 			},
 		});
-	}, [handleInviteCodeSignup]);
+	}, [dispatch, handleInviteCodeSignup]);
 
 	return (
 		<View style={styles.container}>

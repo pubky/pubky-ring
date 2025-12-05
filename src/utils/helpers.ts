@@ -37,7 +37,16 @@ export enum EDeepLinkType {
 	invite = 'invite',
 	auth = 'auth',
 	import = 'import',
+	signup = 'signup',
 	unknown = 'unknown'
+}
+
+export interface SignupDeepLinkParams {
+	homeserver: string;
+	inviteCode: string;
+	relay: string;
+	secret: string;
+	caps: string[];
 }
 
 /**
@@ -361,6 +370,7 @@ export const handleAuth = async ({
  * @param onScan - Callback when QR code is scanned
  * @param onClipboard - Callback when clipboard button is pressed
  * @param onComplete - Optional callback when scanning is complete
+ * @param title - Optional title for the scanner sheet
  * @returns Promise<string> - Resolves with scanned data or clipboard data
  */
 export const showQRScannerGeneric = async ({
@@ -651,8 +661,31 @@ export const parseDeepLink = (url: string): DeepLinkData => {
 	// Remove pubkyring:// prefix if present
 	if (processedUrl.startsWith('pubkyring://')) {
 		processedUrl = processedUrl.replace('pubkyring://', '');
-		if (processedUrl.startsWith('pubkyauth///')) {
-			processedUrl = processedUrl.replace('pubkyauth///', 'pubkyauth:///');
+	}
+	// Remove pubkyauth:// prefix
+	if (processedUrl.startsWith('pubkyauth://')) {
+		processedUrl = processedUrl.replace('pubkyauth://', '');
+	}
+
+	// Handle signup? format
+	// Format: signup?hs={hs_pubkey}&ic={invite_code}&relay={http_relay_url_with_channel_id}&secret={secret_base64}&caps={comma_separated_capabilities}
+	if (processedUrl.startsWith('signup?')) {
+		try {
+			const queryString = processedUrl.substring(7); // Remove "signup?"
+			const params = new URLSearchParams(queryString);
+
+			const signupParams: SignupDeepLinkParams = {
+				homeserver: decodeURIComponent(params.get('hs') || ''),
+				inviteCode: params.get('ic') || '',
+				relay: decodeURIComponent(params.get('relay') || ''),
+				secret: params.get('secret') || '',
+				caps: (params.get('caps') || '').split(',').filter(Boolean),
+			};
+
+			return { type: EDeepLinkType.signup, data: JSON.stringify(signupParams) };
+		} catch (e) {
+			console.error('Failed to parse signup URL:', e);
+			return { type: EDeepLinkType.unknown, data: processedUrl };
 		}
 	}
 

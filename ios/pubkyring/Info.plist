@@ -32,6 +32,7 @@
 			<key>CFBundleURLSchemes</key>
 			<array>
 				<string>pubkyring</string>
+				<string>pubkyauth</string>
 			</array>
 		</dict>
 	</array>

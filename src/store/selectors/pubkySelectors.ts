@@ -59,16 +59,18 @@ export const getAllPubkysArray = createSelector(
 	}
 );
 
-export const getHasPubkys = (state: RootState): boolean => {
-	return Object.keys(state.pubky.pubkys).length > 0;
-};
+export const getHasPubkys = createSelector(
+	[selectAllPubkys],
+	(pubkys) => Object.keys(pubkys).length > 0
+);
 
 /**
  * Get all pubky keys (pubky identifiers)
  */
-export const getPubkyKeys = (state: RootState): string[] => {
-	return Object.keys(state.pubky.pubkys);
-};
+export const getPubkyKeys = createSelector(
+	[selectAllPubkys],
+	(pubkys) => Object.keys(pubkys)
+);
 
 /**
  * Combined selector for HomeScreen to reduce re-renders
@@ -113,9 +115,10 @@ export const isProcessing = (state: RootState, key: string): boolean => {
 /**
  * Get total number of pubkys
  */
-export const getPubkyCount = (state: RootState): number => {
-	return Object.keys(state.pubky.pubkys).length;
-};
+export const getPubkyCount = createSelector(
+	[selectAllPubkys],
+	(pubkys) => Object.keys(pubkys).length
+);
 
 /**
  * Get pubky image

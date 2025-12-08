@@ -1,29 +1,38 @@
+import { createSelector } from '@reduxjs/toolkit';
 import { ENavigationAnimation, ETheme } from '../../types/settings.ts';
 import { RootState } from '../../types';
+
+const selectSettings = (state: RootState): RootState['settings'] => state.settings;
 
 /**
  * Get the current theme.
  */
-export const getTheme = (state: RootState): ETheme => {
-	return state?.settings?.theme ?? ETheme.system;
-};
+export const getTheme = createSelector(
+	[selectSettings],
+	(settings) => settings?.theme ?? ETheme.system
+);
 
-export const getShowOnboarding = (state: RootState): boolean => {
-	return state?.settings?.showOnboarding ?? true;
-};
+export const getShowOnboarding = createSelector(
+	[selectSettings],
+	(settings) => settings?.showOnboarding ?? true
+);
 
-export const getAutoAuth = (state: RootState): boolean => {
-	return state?.settings?.autoAuth ?? false;
-};
+export const getAutoAuth = createSelector(
+	[selectSettings],
+	(settings) => settings?.autoAuth ?? false
+);
 
-export const getNavigationAnimation = (state: RootState): ENavigationAnimation => {
-	return state?.settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight;
-};
+export const getNavigationAnimation = createSelector(
+	[selectSettings],
+	(settings) => settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight
+);
 
-export const getIsOnline = (state: RootState): boolean => {
-	return state?.settings?.isOnline ?? true;
-};
+export const getIsOnline = createSelector(
+	[selectSettings],
+	(settings) => settings?.isOnline ?? true
+);
 
-export const getSignedTermsOfUse = (state: RootState): boolean => {
-	return state?.settings?.signedTermsOfUse ?? false;
-};
+export const getSignedTermsOfUse = createSelector(
+	[selectSettings],
+	(settings) => settings?.signedTermsOfUse ?? false
+);

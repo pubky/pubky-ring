@@ -12,9 +12,9 @@ import {
 	getPubky,
 } from '../store/selectors/pubkySelectors';
 import { setDeepLink, addProcessing, removeProcessing } from '../store/slices/pubkysSlice';
-import { handleDeepLink, showToast, sleep, isSecretKeyImport, EDeepLinkType, SignupDeepLinkParams } from '../utils/helpers';
+import { handleDeepLink, showToast, sleep, isSecretKeyImport, EDeepLinkType, SignupDeepLinkParams, handleAuth } from '../utils/helpers';
 import { importPubky as importPubkyUtil, createPubkyWithInviteCode, signUpToHomeserver, savePubky } from '../utils/pubky';
-import { auth, generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
+import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
 import { showImportSuccessSheet, showEditPubkySheet } from '../utils/sheetHelpers';
 import { getStore } from '../utils/store-helpers';
 import { EBackupPreference } from '../types/pubky.ts';
@@ -214,64 +214,23 @@ export const useDeepLinkHandler = (
 					return;
 				}
 
-				// Step 4: Construct the pubkyauth URL and authenticate
+				// Step 4: Construct the pubkyauth URL and show the auth modal
 				// The auth URL format: pubkyauth:///?relay={relay}&secret={secret}&caps={caps}
 				const capsString = caps.join(',');
 				const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
 
-				// Retry auth up to 5 times with delays to handle homeserver processing time
-				const maxRetries = 5;
-				const retryDelay = 500;
-				let authSuccess = false;
-				let lastError = '';
+				showToast({
+					type: 'success',
+					title: 'Signup Successful',
+					description: 'Your new Pubky has been created',
+				});
 
-				for (let attempt = 1; attempt <= maxRetries; attempt++) {
-					if (attempt > 1) await sleep(retryDelay);
-					const authRes = await auth(authUrl, secretKey);
-					if (authRes.isOk()) {
-						authSuccess = true;
-						break;
-					}
-					lastError = authRes.error.message || 'Failed to complete authentication';
-					console.log(`Auth attempt ${attempt}/${maxRetries} failed:`, lastError);
-				}
-
-				if (!authSuccess) {
-					console.error('Auth failed after all retries:', lastError);
-					showToast({
-						type: 'error',
-						title: 'Auth Failed',
-						description: lastError,
-					});
-					// Still show the setup sheet since pubky was created
-				} else {
-					showToast({
-						type: 'success',
-						title: 'Signup Successful',
-						description: 'Your new Pubky has been created and authenticated',
-					});
-				}
-
-				// Step 5: Show the edit pubky sheet
-				// TODO: Consider showing welcome screen instead if needed
-				// const pubkyData = getPubky(getStore(), pubky);
-				// setTimeout(() => {
-				// 	SheetManager.show('new-pubky-setup', {
-				// 		payload: {
-				// 			pubky,
-				// 			data: pubkyData,
-				// 			currentScreen: ECurrentScreen.welcome,
-				// 			isInvite: true,
-				// 		},
-				// 		onClose: () => {
-				// 			SheetManager.hide('new-pubky-setup');
-				// 		},
-				// 	});
-				// }, 150);
+				// Step 5: Show the auth modal
 				setTimeout(() => {
-					showEditPubkySheet({
-						title: 'Setup',
+					handleAuth({
 						pubky,
+						authUrl,
+						deepLink: true,
 					});
 				}, 150);
 			} catch (error) {

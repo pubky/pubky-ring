@@ -230,7 +230,8 @@ export const useDeepLinkHandler = (
 					handleAuth({
 						pubky,
 						authUrl,
-						deepLink: true,
+						deepLink: false,
+						retryAttempts: 5,
 					});
 				}, 150);
 			} catch (error) {

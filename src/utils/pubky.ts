@@ -611,10 +611,12 @@ export const performAuth = async ({
 	pubky,
 	authUrl,
 	dispatch,
+	retryAttempts = 1,
 }: {
 	pubky?: string;
 	authUrl: string;
 	dispatch: Dispatch;
+	retryAttempts?: number;
 }): Promise<Result<string>> => {
 	try {
 		const authPromise = (async (): Promise<Result<string>> => {
@@ -636,24 +638,42 @@ export const performAuth = async ({
 				});
 			}
 			const secretKey = secretKeyRes.value.secretKey;
-			const authRes = await auth(authUrl, secretKey);
-			if (authRes.isErr()) {
-				const signInRes = await signInToHomeserver({
-					pubky,
-					homeserver,
-					dispatch,
-					secretKey,
-				});
-				if (signInRes.isErr()) {
-					return err(signInRes.error.message);
+
+			// Retry auth up to retryAttempts times with delays
+			const retryDelay = 500;
+			let lastError = '';
+
+			for (let attempt = 1; attempt <= retryAttempts; attempt++) {
+				if (attempt > 1) {
+					await new Promise(resolve => { setTimeout(resolve, retryDelay); });
 				}
-				const authRetryRes = await auth(authUrl, secretKey);
-				if (authRetryRes.isErr()) {
-					console.error('Error processing auth:', authRes.error);
-					return err(authRes.error?.message || 'Failed to process auth');
+				const authRes = await auth(authUrl, secretKey);
+				if (authRes.isOk()) {
+					return ok('success');
+				}
+				lastError = authRes.error?.message || 'Failed to complete authentication';
+				console.log(`Auth attempt ${attempt}/${retryAttempts} failed:`, lastError);
+
+				// On first failure, try signing in to homeserver and retry once
+				if (attempt === 1) {
+					const signInRes = await signInToHomeserver({
+						pubky,
+						homeserver,
+						dispatch,
+						secretKey,
+					});
+					if (signInRes.isOk()) {
+						const authRetryRes = await auth(authUrl, secretKey);
+						if (authRetryRes.isOk()) {
+							return ok('success');
+						}
+						lastError = authRetryRes.error?.message || 'Failed to complete authentication';
+					}
 				}
 			}
-			return ok('success');
+
+			console.error('Auth failed after all retries:', lastError);
+			return err(lastError);
 		})();
 
 		const timeoutPromise = timeout(TIMEOUT_MS).then(

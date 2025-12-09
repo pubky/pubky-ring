@@ -47,6 +47,7 @@ interface ConfirmAuthProps {
 	authDetails: PubkyAuthDetails;
 	onComplete: () => void;
 	deepLink?: boolean;
+	retryAttempts?: number;
 }
 
 interface Capability {
@@ -101,6 +102,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete } = payload;
 	const deepLink = payload?.deepLink;
+	const retryAttempts = payload?.retryAttempts ?? 1;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
@@ -154,6 +156,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 				pubky,
 				authUrl,
 				dispatch,
+				retryAttempts,
 			});
 			if (res.isErr()) {
 				showToast({
@@ -192,7 +195,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky, t]);
+	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky, retryAttempts, t]);
 
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];

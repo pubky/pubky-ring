@@ -316,10 +316,12 @@ export const handleAuth = async ({
 	pubky,
 	authUrl,
 	deepLink,
+	retryAttempts = 1,
 }: {
   pubky?: string;
   authUrl: string;
   deepLink?: boolean;
+  retryAttempts?: number;
 }): Promise<Result<string>> => {
 	try {
 		const authDetails = await parseAuthUrl(authUrl);
@@ -344,6 +346,7 @@ export const handleAuth = async ({
 					onComplete: async (): Promise<void> => {
 					},
 					deepLink,
+					retryAttempts,
 				},
 				onClose: () => {
 					SystemNavigationBar.navigationShow().then();
@@ -418,6 +421,14 @@ export const showImportQRScanner = async ({
 	return showQRScannerGeneric({
 		title: i18n.t('import.title'),
 		onScan: async (data: string) => {
+			// First check if it's a signup URL - use deep link handler
+			const parsedData = parseDeepLink(data);
+			if (parsedData.type === EDeepLinkType.signup) {
+				// Dispatch to deep link handler which handles the full signup flow
+				dispatch(setDeepLink(JSON.stringify(parsedData)));
+				return 'success';
+			}
+
 			const result = await handleScannedData({
 				data,
 				dispatch,
@@ -427,6 +438,15 @@ export const showImportQRScanner = async ({
 		},
 		onClipboard: async () => {
 			const clipboardContents = await readFromClipboard();
+
+			// First check if it's a signup URL - use deep link handler
+			const parsedData = parseDeepLink(clipboardContents);
+			if (parsedData.type === EDeepLinkType.signup) {
+				// Dispatch to deep link handler which handles the full signup flow
+				dispatch(setDeepLink(JSON.stringify(parsedData)));
+				return 'success';
+			}
+
 			const data = formatImportData(clipboardContents);
 			// Check if clipboard contains valid import data
 			const isSecretKeyRes = await isSecretKeyImport(data);

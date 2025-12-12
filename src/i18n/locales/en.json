@@ -56,6 +56,7 @@
     "authorize": "Authorize",
     "authorizing": "Authorizing...",
     "authorizationSuccessful": "Authorization Successful",
+    "deeplinkAuthSuccess": "Navigate back to your browser",
     "deny": "Deny",
     "relay": "Relay",
     "requestedPermissions": "Requested Permissions",
@@ -126,12 +127,25 @@
     "homeserverMessageEnd": "is now configured to use the Synonym homeserver for data hosting.",
     "openButton": "Open {{domain}}"
   },
+  "session": {
+    "success": "Session Returned",
+    "sessionReturned": "Session data sent to requesting app",
+    "signInFailed": "Sign In Failed",
+    "invalidCallback": "Invalid callback URL provided",
+    "cannotOpenCallback": "Cannot open callback URL to return session"
+  },
   "errors": {
     "failedToParseQR": "Failed to parse QR code data",
     "failedToProcessQR": "Failed to process QR code data",
     "failedToParseAuth": "Failed to parse auth details",
     "failedToShareData": "Failed to share data",
-    "noClipboardPubky": "No pubky provided for clipboard handling"
+    "noClipboardPubky": "No pubky provided for clipboard handling",
+    "failedToProcessInput": "Failed to process input data",
+    "emptyClipboard": "Clipboard is empty",
+    "unrecognizedFormat": "Unrecognized format. Expected a recovery phrase, invite code, auth URL, or session request.",
+    "debugInfoCopied": "Debug info copied to clipboard",
+    "tapToCopyDebug": "Tap to copy debug info",
+    "unknownError": "An unknown error occurred"
   },
   "terms": {
     "title": "Terms of Use.",

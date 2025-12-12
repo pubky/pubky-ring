@@ -13,7 +13,6 @@ import {
 	Linking,
 	Keyboard,
 	Image, Platform,
-	KeyboardAvoidingView,
 	Dimensions,
 } from 'react-native';
 import {
@@ -55,11 +54,11 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const smallScreen = isSmallScreen();
 
 const InviteCode = ({ payload }: {
-	payload: {
-		pubky: string;
-		onContinue?: () => void;
-		onRequestInvite?: () => void;
-	};
+    payload: {
+        pubky: string;
+        onContinue?: () => void;
+        onRequestInvite?: () => void;
+    };
 }): ReactElement => {
 	const dispatch = useDispatch();
 	const { pubky } = payload;
@@ -292,10 +291,7 @@ const InviteCode = ({ payload }: {
 					/>
 				</AnimatedView>
 			</View>
-			<KeyboardAvoidingView
-				style={styles.keyboardAvoidingView}
-				behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-			>
+			<View style={styles.keyboardAvoidingView}>
 				<View style={styles.content}>
 					<ModalIndicator />
 					<View style={styles.titleContainer}>
@@ -346,7 +342,7 @@ const InviteCode = ({ payload }: {
 
 					{error ? (
 						<Text testID="InviteCodeErrorText" style={styles.errorText}>{error}</Text>
-				) : null}
+                    ) : null}
 					{!smallScreen && (<View style={styles.imageContainer}>
 						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
 							<Image
@@ -368,7 +364,7 @@ const InviteCode = ({ payload }: {
 						</AuthorizeButton>
 					</View>
 				</View>
-			</KeyboardAvoidingView>
+			</View>
 		</View>
 	);
 };
@@ -393,6 +389,7 @@ const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
 		zIndex: 1,
+		backgroundColor: 'transparent'
 	},
 	content: {
 		flex: 1,

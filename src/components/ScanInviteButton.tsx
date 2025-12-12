@@ -4,142 +4,104 @@ import { AuthorizeButton, QrCode, Text } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
 import PubkyRingLogo from '../images/pubky.png';
-import { parseInviteCode, showQRScannerGeneric, showToast, parseDeepLink, EDeepLinkType } from '../utils/helpers.ts';
-import { createPubkyWithInviteCode } from '../utils/pubky.ts';
+import { showToast } from '../utils/helpers';
 import { useDispatch } from 'react-redux';
-import { getPubky } from '../store/selectors/pubkySelectors.ts';
-import { getStore } from '../utils/store-helpers.ts';
-import { ECurrentScreen } from './PubkySetup/NewPubkySetup.tsx';
-import { setDeepLink } from '../store/slices/pubkysSlice.ts';
+import { parseInput, InputAction } from '../utils/inputParser';
+import { routeInput } from '../utils/inputRouter';
+import i18n from '../i18n';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
 	const dispatch = useDispatch();
 
-	const handleInviteCodeSignup = useCallback(async (inviteCode: string, source: 'scan' | 'clipboard') => {
-		try {
-			// Create pubky and sign up with invite code automatically
-			const createRes = await createPubkyWithInviteCode(inviteCode, dispatch);
+	/**
+     * Processes input data from scan or clipboard
+     * Uses the unified input parser and router
+     */
+	const processInput = useCallback(async (data: string, source: 'scan' | 'clipboard'): Promise<void> => {
+		// Parse the input using the unified parser
+		const parsed = await parseInput(data, source);
 
-			if (createRes.isErr()) {
+		// Only handle signup and invite actions in this button
+		if (parsed.action === InputAction.Signup || parsed.action === InputAction.Invite) {
+			const result = await routeInput(parsed, { dispatch });
+			if (result.isErr()) {
 				showToast({
 					type: 'error',
-					title: 'Signup Failed',
-					description: createRes.error.message,
+					title: 'Error',
+					description: result.error.message,
 				});
-				return;
 			}
-
-			const { pubky } = createRes.value;
-
-			// Get the pubky data from store
-			const pubkyData = getPubky(getStore(), pubky);
-
-			// Show new pubky setup sheet on welcome screen with completed setup
-			// TODO: We may just want to tear out the Welcome action sheet and make it standalone for this instance.
-			setTimeout(() => {
-				SheetManager.show('new-pubky-setup', {
-					payload: {
-						pubky,
-						data: pubkyData,
-						currentScreen: ECurrentScreen.welcome,
-						isInvite: true
-					},
-					onClose: () => {
-						SheetManager.hide('new-pubky-setup');
-					},
-				});
-			}, 150);
-		} catch (error) {
-			console.error('Error handling invite code from', source, ':', error);
+		} else {
+			// Not a valid invite/signup input
 			showToast({
 				type: 'error',
-				title: 'Error',
-				description: 'Failed to process invite code',
+				title: 'Invalid Invite Code',
+				description: 'Please scan a valid invite code or signup QR',
 			});
 		}
 	}, [dispatch]);
 
 	const handleInviteScan = useCallback(async () => {
 		if (isProcessingInvite.current) return;
-		await showQRScannerGeneric({
-			title: 'Invite',
-			onScan: async (data: string) => {
-				if (isProcessingInvite.current) return '';
-				isProcessingInvite.current = true;
 
-				await SheetManager.hide('camera');
+		await new Promise<void>((resolve) => {
+			SheetManager.show('camera', {
+				payload: {
+					title: i18n.t('import.title'),
+					onScan: async (data: string) => {
+						if (isProcessingInvite.current) {
+							resolve();
+							return;
+						}
+						isProcessingInvite.current = true;
 
-				// First check if it's a signup URL - use deep link handler
-				const parsedData = parseDeepLink(data);
-				if (parsedData.type === EDeepLinkType.signup) {
-					// Dispatch to deep link handler which handles the full signup flow
-					dispatch(setDeepLink(JSON.stringify(parsedData)));
-					isProcessingInvite.current = false;
-					return '';
-				}
+						await SheetManager.hide('camera');
+						await processInput(data, 'scan');
 
-				// Fall back to invite code parsing
-				const inviteCode = parseInviteCode(data);
-				if (inviteCode) {
-					await handleInviteCodeSignup(inviteCode, 'scan');
-				} else {
-					showToast({
-						type: 'error',
-						title: 'Invalid Invite Code',
-						description: 'Please scan a valid invite code or signup QR',
-					});
-				}
-
-				isProcessingInvite.current = false;
-				return '';
-			},
-			onClipboard: async (): Promise<string> => {
-				if (isProcessingInvite.current) return '';
-				isProcessingInvite.current = true;
-
-				await SheetManager.hide('camera');
-
-				try {
-					const clipboardContent = await readFromClipboard();
-
-					// First check if it's a signup URL - use deep link handler
-					const parsedData = parseDeepLink(clipboardContent);
-					if (parsedData.type === EDeepLinkType.signup) {
-						// Dispatch to deep link handler which handles the full signup flow
-						dispatch(setDeepLink(JSON.stringify(parsedData)));
 						isProcessingInvite.current = false;
-						return '';
-					}
+						resolve();
+					},
+					onCopyClipboard: async (): Promise<void> => {
+						if (isProcessingInvite.current) {
+							resolve();
+							return;
+						}
+						isProcessingInvite.current = true;
 
-					// Fall back to invite code parsing
-					const inviteCode = parseInviteCode(clipboardContent);
-					if (inviteCode) {
-						await handleInviteCodeSignup(inviteCode, 'clipboard');
-					} else {
-						showToast({
-							type: 'error',
-							title: 'Invalid Link',
-							description: 'Clipboard does not contain a valid invite link or signup URL',
-						});
-					}
-				} catch {
-					showToast({
-						type: 'error',
-						title: 'Error',
-						description: 'Failed to read clipboard',
-					});
-				}
+						await SheetManager.hide('camera');
 
-				isProcessingInvite.current = false;
-				return '';
-			},
-			onComplete: () => {
-				SheetManager.hide('camera');
-				isProcessingInvite.current = false;
-			},
+						try {
+							const clipboardContent = await readFromClipboard();
+							if (!clipboardContent) {
+								showToast({
+									type: 'error',
+									title: i18n.t('common.error'),
+									description: i18n.t('errors.emptyClipboard'),
+								});
+							} else {
+								await processInput(clipboardContent, 'clipboard');
+							}
+						} catch {
+							showToast({
+								type: 'error',
+								title: 'Error',
+								description: 'Failed to read clipboard',
+							});
+						}
+
+						isProcessingInvite.current = false;
+						resolve();
+					},
+					onClose: () => {
+						SheetManager.hide('camera');
+						isProcessingInvite.current = false;
+						resolve();
+					},
+				},
+			});
 		});
-	}, [dispatch, handleInviteCodeSignup]);
+	}, [processInput]);
 
 	return (
 		<View style={styles.container}>

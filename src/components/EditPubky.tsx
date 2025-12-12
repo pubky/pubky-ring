@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { Image, Platform, StyleSheet, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { Image, Platform, StyleSheet, Keyboard } from 'react-native';
 import {
 	ActionSheetContainer,
 	Text,
@@ -40,13 +40,13 @@ import { RootState } from '../types';
 import { FlashList } from '@shopify/flash-list';
 
 type InputDataItem = {
-	testID?: string;
-	id: 'name' | 'homeserver' | 'signuptoken';
-	value: string;
-	onChange: (text: string) => void;
-	placeholder: string;
-	error: string;
-	autoFocus: boolean;
+    testID?: string;
+    id: 'name' | 'homeserver' | 'signuptoken';
+    value: string;
+    onChange: (text: string) => void;
+    placeholder: string;
+    error: string;
+    autoFocus: boolean;
 };
 
 const MAX_NAME_LENGTH = 50;
@@ -64,16 +64,16 @@ const InputItemComponent = ({
 	style,
 	inputRef,
 }: {
-	testID?: string;
-	value: string;
-	onChangeText: (text: string) => void;
-	placeholder: string;
-	error?: string;
-	autoFocus?: boolean;
-	onSubmitEditing?: () => void;
-	editable?: boolean;
-	style?: any;
-	inputRef?: React.RefObject<any>;
+    testID?: string;
+    value: string;
+    onChangeText: (text: string) => void;
+    placeholder: string;
+    error?: string;
+    autoFocus?: boolean;
+    onSubmitEditing?: () => void;
+    editable?: boolean;
+    style?: any;
+    inputRef?: React.RefObject<any>;
 }): ReactElement => {
 	return (
 		<View style={[styles.inputWrapper, style]}>
@@ -99,9 +99,9 @@ const InputItemComponent = ({
 };
 
 const textInputTitleText: {
-	name: string;
-	homeserver: string;
-	signuptoken: string;
+    name: string;
+    homeserver: string;
+    signuptoken: string;
 } = {
 	name: 'Pubky name (label)',
 	homeserver: 'Homeserver',
@@ -109,11 +109,11 @@ const textInputTitleText: {
 };
 
 const EditPubky = ({ payload }: {
-	payload: {
-		title?: string;
-		description?: string;
-		pubky: string;
-	};
+    payload: {
+        title?: string;
+        description?: string;
+        pubky: string;
+    };
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky } = useMemo(() => payload, [payload]);
@@ -134,7 +134,7 @@ const EditPubky = ({ payload }: {
 	const gradientOpacity = useSharedValue(0);
 
 	const signupTokenOpacity = useSharedValue(
-		storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
+        storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
 	);
 
 	const isSignupTokenInputVisible = useMemo(() => {
@@ -360,9 +360,9 @@ const EditPubky = ({ payload }: {
 	const haveFieldsChanged = useMemo(() => {
 		return (
 			newPubkyName.trim() !== storedPubkyData?.name ||
-			homeServer.trim() !== storedPubkyData?.homeserver ||
-			(signupToken.trim() !== (storedPubkyData?.signupToken) &&
-			signupToken.trim() !== '')
+            homeServer.trim() !== storedPubkyData?.homeserver ||
+            (signupToken.trim() !== (storedPubkyData?.signupToken) &&
+                signupToken.trim() !== '')
 		);
 	}, [newPubkyName, homeServer, signupToken, storedPubkyData?.name, storedPubkyData?.homeserver, storedPubkyData?.signupToken]);
 
@@ -521,7 +521,7 @@ const EditPubky = ({ payload }: {
 			<View style={[styles.footerContainer, { top: footerTop }]}>
 				{error ? (
 					<Text style={styles.errorText}>{error}</Text>
-				) : null}
+                ) : null}
 				<View style={styles.imageContainer}>
 					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
 						<Image
@@ -619,7 +619,7 @@ const EditPubky = ({ payload }: {
 		<ActionSheetContainer
 			id="edit-pubky"
 			navigationAnimation={navigationAnimation}
-			keyboardHandlerEnabled={Platform.OS === 'ios'}
+			keyboardHandlerEnabled={false}
 			isModal={Platform.OS === 'ios'}
 			CustomHeaderComponent={<></>}
 			height={ACTION_SHEET_HEIGHT}
@@ -635,11 +635,7 @@ const EditPubky = ({ payload }: {
 						/>
 					</AnimatedView>
 
-					<KeyboardAvoidingView
-						style={styles.flatListWrapper}
-						behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-						keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}
-					>
+					<View style={styles.flatListWrapper}>
 						<FlashList
 							data={inputData}
 							renderItem={renderInputItem}
@@ -668,7 +664,7 @@ const EditPubky = ({ payload }: {
 								disabled={storedPubkyData?.signedUp && !haveFieldsChanged}
 							/>
 						</View>
-					</KeyboardAvoidingView>
+					</View>
 				</View>
 			</SkiaGradient>
 		</ActionSheetContainer>

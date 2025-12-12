@@ -56,8 +56,9 @@
     "authorize": "Autorice",
     "authorizing": "Autorizando...",
     "authorizationSuccessful": "Autorización aceptada",
+    "deeplinkAuthSuccess": "Navegue de nuevo a su navegador",
     "deny": "Denegar",
-    "relay": "Relé",
+    "relay": "Relay",
     "requestedPermissions": "Permisos solicitados",
     "grantedPermissions": "Permisos concedidos",
     "trustWarning": "Asegúrese de que confía en este relé, servicio, navegador o dispositivo antes de autorizar con su pubky.",
@@ -117,7 +118,7 @@
   "editPubky": {
     "enterName": "Introduzca el nombre",
     "enterHomeserver": "Introducir servidor doméstico",
-    "homeserver": "Servidor doméstico"
+    "homeserver": "Homeserver"
   },
   "welcome": {
     "defaultHomeserver": "Servidor doméstico predeterminado",
@@ -126,12 +127,25 @@
     "homeserverMessageEnd": "está ahora configurado para utilizar el servidor doméstico de Synonym para el alojamiento de datos.",
     "openButton": "Abra {{domain}}"
   },
+  "session": {
+    "success": "Sesión devuelta",
+    "sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
+    "signInFailed": "Fallo al iniciar sesión",
+    "invalidCallback": "URL de devolución de llamada no válida proporcionada",
+    "cannotOpenCallback": "No se puede abrir la URL de devolución de llamada para devolver la sesión"
+  },
   "errors": {
     "failedToParseQR": "Fallo al analizar los datos del código QR",
     "failedToProcessQR": "Fallo al procesar los datos del código QR",
     "failedToParseAuth": "Fallo al analizar los detalles de autenticación",
     "failedToShareData": "No se comparten los datos",
-    "noClipboardPubky": "No se proporciona pubky para el manejo del portapapeles"
+    "noClipboardPubky": "No se proporciona pubky para el manejo del portapapeles",
+    "failedToProcessInput": "Fallo al procesar los datos de entrada",
+    "emptyClipboard": "El portapapeles está vacío",
+    "unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación, una URL de autenticación o una solicitud de sesión.",
+    "debugInfoCopied": "Información de depuración copiada al portapapeles",
+    "tapToCopyDebug": "Pulse para copiar la información de depuración",
+    "unknownError": "Se ha producido un error desconocido"
   },
   "terms": {
     "title": "Condiciones de uso.",

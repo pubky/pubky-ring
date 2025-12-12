@@ -13,8 +13,9 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/theme/toastConfig.tsx';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
-import { checkNetworkConnection, parseDeepLink, showToast } from './src/utils/helpers.ts';
+import { checkNetworkConnection, showToast } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
+import { parseInput } from './src/utils/inputParser.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 const _toastConfig = toastConfig();
@@ -32,7 +33,6 @@ function App(): React.JSX.Element {
 			try {
 				let url = await Linking.getInitialURL();
 				if (url) {
-					// Handle the deep link URL here
 					handleDeepLink(url);
 				}
 			} catch (err) {
@@ -40,13 +40,13 @@ function App(): React.JSX.Element {
 			}
 		};
 
-		// Handle the deep link
-		const handleDeepLink = (url: string): void => {
-			const parsedData = parseDeepLink(url);
-			dispatch(setDeepLink(JSON.stringify(parsedData)));
+		// Handle the deep link using the unified input parser
+		const handleDeepLink = async (url: string): Promise<void> => {
+			const parsedInput = await parseInput(url, 'deeplink');
+			dispatch(setDeepLink(JSON.stringify(parsedInput)));
 		};
 
-		// Set up deep link listeners
+		// Set up deep link listeners for when app is already running
 		const subscription = Linking.addEventListener('url', ({ url }) => {
 			handleDeepLink(url);
 		});

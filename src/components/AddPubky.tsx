@@ -38,9 +38,13 @@ import Toast from 'react-native-toast-message';
 import {
 	getToastStyle,
 	isSmallScreen,
-	showImportQRScanner,
+	showToast,
 } from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
+import { parseInput, InputAction } from '../utils/inputParser';
+import { routeInput } from '../utils/inputRouter';
+import { readFromClipboard } from '../utils/clipboard';
+import i18n from '../i18n';
 
 const toastStyle = getToastStyle();
 
@@ -49,10 +53,10 @@ const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTIO
 
 
 const AddPubky = ({ payload }: {
-	payload: {
-		createPubky: () => void;
-		importPubky: (mnemonic?: string) => Promise<Result<string>>;
-	};
+    payload: {
+        createPubky: () => void;
+        importPubky: (mnemonic?: string) => Promise<Result<string>>;
+    };
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const dispatch = useDispatch();
@@ -103,10 +107,58 @@ const AddPubky = ({ payload }: {
 
 	const onScanQrPress = useCallback(async () => {
 		await closeSheet();
-		setTimeout(async () => {
-			await showImportQRScanner({
-				dispatch,
-				onComplete: () => {}
+		setTimeout(() => {
+			SheetManager.show('camera', {
+				payload: {
+					title: i18n.t('import.title'),
+					onScan: async (data: string) => {
+						await SheetManager.hide('camera');
+						const parsed = await parseInput(data, 'scan');
+
+						// Handle signup, import, and invite actions
+						if (parsed.action === InputAction.Signup ||
+                            parsed.action === InputAction.Import ||
+                            parsed.action === InputAction.Invite) {
+							await routeInput(parsed, { dispatch });
+						} else {
+							showToast({
+								type: 'error',
+								title: i18n.t('import.invalidData'),
+								description: i18n.t('import.invalidClipboardData'),
+							});
+						}
+					},
+					onCopyClipboard: async (): Promise<void> => {
+						await SheetManager.hide('camera');
+						const clipboardContents = await readFromClipboard();
+						if (!clipboardContents) {
+							showToast({
+								type: 'error',
+								title: i18n.t('common.error'),
+								description: i18n.t('errors.emptyClipboard'),
+							});
+							return;
+						}
+
+						const parsed = await parseInput(clipboardContents, 'clipboard');
+
+						// Handle signup, import, and invite actions
+						if (parsed.action === InputAction.Signup ||
+                            parsed.action === InputAction.Import ||
+                            parsed.action === InputAction.Invite) {
+							await routeInput(parsed, { dispatch });
+						} else {
+							showToast({
+								type: 'error',
+								title: i18n.t('import.invalidData'),
+								description: i18n.t('import.invalidClipboardData'),
+							});
+						}
+					},
+					onClose: () => {
+						SheetManager.hide('camera');
+					},
+				},
 			});
 		}, SCANNER_CLOSE_DELAY);
 	}, [closeSheet, dispatch]);
@@ -177,7 +229,7 @@ const AddPubky = ({ payload }: {
 			case 'mnemonic-form':
 				return (
 					'Enter the 12 words from your recovery \n' +
-          'phrase to import or restore your pubky.'
+                    'phrase to import or restore your pubky.'
 				);
 			default:
 				return 'Do you want to create a new pubky or import an existing one?';
@@ -247,8 +299,8 @@ const AddPubky = ({ payload }: {
 				</View>
 				{currentScreen === 'import-options' &&
 				<AuthorizeButton
-          	style={styles.authorizeButton}
-          	onPressIn={onScanQrPress}
+					style={styles.authorizeButton}
+					onPressIn={onScanQrPress}
 				>
 					<Text style={styles.buttonText}>Scan QR to import</Text>
 				</AuthorizeButton>}

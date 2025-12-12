@@ -26,22 +26,22 @@ const toastStyle = getToastStyle();
 const smallScreen = isSmallScreen();
 
 export enum ECurrentScreen {
-	main = 'main',
-	homeserver = 'homeserver',
-	inviteCode = 'inviteCode',
-	requestInvite = 'requestInvite',
-	welcome = 'welcome',
+    main = 'main',
+    homeserver = 'homeserver',
+    inviteCode = 'inviteCode',
+    requestInvite = 'requestInvite',
+    welcome = 'welcome',
 }
 
 interface ContentProps {
-	currentScreen: ECurrentScreen;
-	title: string;
-	subTitle: string;
-	pubky: string;
-	pubkyData: PubkyData;
-  isInvite?: boolean;
-	setCurrentScreen: (screen: ECurrentScreen) => void;
-	closeSheet: () => Promise<void>;
+    currentScreen: ECurrentScreen;
+    title: string;
+    subTitle: string;
+    pubky: string;
+    pubkyData: PubkyData;
+    isInvite?: boolean;
+    setCurrentScreen: (screen: ECurrentScreen) => void;
+    closeSheet: () => Promise<void>;
 }
 
 const Content = ({
@@ -109,12 +109,12 @@ const Content = ({
 };
 
 const NewPubkySetup = ({ payload }: {
-	payload: {
-		currentScreen?: ECurrentScreen;
-		pubky: string;
-		data?: Pubky;
-    isInvite?: boolean;
-	};
+    payload: {
+        currentScreen?: ECurrentScreen;
+        pubky: string;
+        data?: Pubky;
+        isInvite?: boolean;
+    };
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(
@@ -152,6 +152,14 @@ const NewPubkySetup = ({ payload }: {
 		}
 	}, [currentScreen]);
 
+	// Disable keyboard handler for inviteCode screen to prevent button from jumping
+	const keyboardHandlerEnabled = useMemo(() => {
+		if (currentScreen === ECurrentScreen.inviteCode) {
+			return false;
+		}
+		return Platform.OS === 'ios';
+	}, [currentScreen]);
+
 	const subTitle = useMemo(() => {
 		return 'This is your new unique identifier, your pubky. Create as many as you need for different purposes.';
 	}, []);
@@ -167,7 +175,7 @@ const NewPubkySetup = ({ payload }: {
 			<ActionSheetContainer
 				id="new-pubky-setup"
 				navigationAnimation={navigationAnimation}
-				keyboardHandlerEnabled={Platform.OS === 'ios'}
+				keyboardHandlerEnabled={keyboardHandlerEnabled}
 				//isModal={Platform.OS === 'ios'}
 				CustomHeaderComponent={<></>}
 				height={acionSheetHeight}

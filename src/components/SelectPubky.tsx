@@ -10,7 +10,6 @@ import { SheetManager } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
 import PubkyCard from './PubkyCard.tsx';
-import { handleDeepLink } from '../utils/helpers.ts';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
@@ -23,6 +22,8 @@ import {
 } from './shared';
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
+import { parseInput } from '../utils/inputParser';
+import { routeInput } from '../utils/inputRouter';
 
 const ListItemComponent = ({ name, pubky, onPress }: { name?: string; pubky: string; onPress: () => void }): ReactElement => {
 	return (
@@ -51,32 +52,35 @@ const SelectPubky = ({ payload }: {
 	}, [payload?.deepLink]);
 
 	const pubkyArray: {
-		key: string;
-		value: Pubky;
-	}[] = useMemo(() => {
-		return Object.entries(pubkys)
-			.filter(([_, value]) => value.signedUp)
-			.map(([key, value]) => ({
-				key,
-				value,
-			}));
-	}, [pubkys]);
+        key: string;
+        value: Pubky;
+    }[] = useMemo(() => {
+    	return Object.entries(pubkys)
+    		.filter(([_, value]) => value.signedUp)
+    		.map(([key, value]) => ({
+    			key,
+    			value,
+    		}));
+    }, [pubkys]);
 
 	const onPubkyPress = useCallback(async (pubky: string) => {
 		await SheetManager.hide('select-pubky');
-		setTimeout(() => {
-			handleDeepLink({
-				pubky,
-				url: deepLink,
+		setTimeout(async () => {
+			// Parse and route the deeplink with the selected pubky
+			const parsed = await parseInput(deepLink, 'deeplink');
+			await routeInput(parsed, {
 				dispatch,
+				pubky,
+				isDeeplink: true,
 			});
+			dispatch(setDeepLink(''));
 		}, 100);
 	}, [deepLink, dispatch]);
 
 	const message = useMemo(() => {
 		return pubkyArray.length > 0
-			? t('pubky.selectPubkyMessage')
-			: t('pubky.noPubkysAvailable');
+            ? t('pubky.selectPubkyMessage')
+            : t('pubky.noPubkysAvailable');
 	}, [pubkyArray.length, t]);
 
 	return (

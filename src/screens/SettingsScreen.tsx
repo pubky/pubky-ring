@@ -149,16 +149,16 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 
 			<View style={styles.content}>
 				{/**
-				 TODO: Adjust light-mode gradient colors.
-				 <Card style={styles.section}>
-				 <ActionButton onPress={handleThemePress} style={styles.themeButton}>
-				 <Text style={styles.settingTitle}>Theme</Text>
-				 <SessionText style={styles.themeValue}>
-				 {themeDisplayText}
-				 </SessionText>
-				 </ActionButton>
-				 </Card>
-				 **/}
+                 TODO: Adjust light-mode gradient colors.
+                 <Card style={styles.section}>
+                 <ActionButton onPress={handleThemePress} style={styles.themeButton}>
+                 <Text style={styles.settingTitle}>Theme</Text>
+                 <SessionText style={styles.themeValue}>
+                 {themeDisplayText}
+                 </SessionText>
+                 </ActionButton>
+                 </Card>
+                 **/}
 
 				<Card style={styles.section}>
 					<ActionButton
@@ -178,10 +178,12 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						style={styles.toggleRow}
 					>
 						<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
-						<Switch
-							value={enableAutoAuth}
-							onValueChange={handleAutoAuthToggle}
-						/>
+						<View style={styles.switchContainer}>
+							<Switch
+								value={enableAutoAuth}
+								onValueChange={handleAutoAuthToggle}
+							/>
+						</View>
 					</ActionButton>
 				</Card>
 
@@ -250,6 +252,9 @@ const styles = StyleSheet.create({
 	settingTitle: {
 		fontSize: 17,
 		fontWeight: '600',
+	},
+	switchContainer: {
+		justifyContent: 'center',
 	},
 	// eslint-disable-next-line react-native/no-unused-styles
 	themeButton: {

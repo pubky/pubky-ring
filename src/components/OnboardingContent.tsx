@@ -144,7 +144,7 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		marginTop: 20, // Spazio tra il testo e i bottoni
+		marginTop: 20,
 		justifyContent: 'space-between',
 		width: '100%',
 		gap: 12,

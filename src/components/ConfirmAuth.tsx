@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Linking, StyleSheet } from 'react-native';
+import { Alert, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -18,7 +18,6 @@ import {
 	getToastStyle,
 	isSmallScreen,
 	showToast,
-	sleep,
 } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
@@ -30,7 +29,6 @@ import ModalIndicator from './ModalIndicator.tsx';
 import { Globe } from 'lucide-react-native';
 import {
 	ACTION_SHEET_HEIGHT,
-	PUBKY_APP_URL,
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
 import { buttonStyles } from '../theme/utils';
@@ -42,16 +40,15 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { useTranslation } from 'react-i18next';
 
 interface ConfirmAuthProps {
-	pubky: string;
-	authUrl: string;
-	authDetails: PubkyAuthDetails;
-	onComplete: () => void;
-	deepLink?: boolean;
+    pubky: string;
+    authUrl: string;
+    authDetails: PubkyAuthDetails;
+    onComplete: () => void;
 }
 
 interface Capability {
-	path: string;
-	permission: string;
+    path: string;
+    permission: string;
 }
 
 const toastStyle = getToastStyle();
@@ -96,11 +93,10 @@ const Permission = memo(({ capability, isAuthorized }: { capability: Capability;
 });
 
 const FADE_DURATION = 100;
-const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
+const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete } = payload;
-	const deepLink = payload?.deepLink;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
@@ -165,18 +161,11 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			}
 			setIsAuthorized(true);
 			onComplete?.();
-			if (deepLink) {
-				setAuthorizing(false);
-				// Give a partial glimpse of the success animation and some time for the site to detect us as logged in.
-				await sleep(FADE_DURATION + 300);
-				handleClose();
-				Linking.openURL(PUBKY_APP_URL);
-			}
 		} catch (e: unknown) {
 			const error = e as Error;
 			const errorMsg = error.message === 'Authentication request timed out'
-				? t('auth.timeoutError')
-				: error.message || 'An error occurred during authorization';
+                ? t('auth.timeoutError')
+                : error.message || 'An error occurred during authorization';
 			showToast({
 				type: 'error',
 				title: t('common.error'),
@@ -192,7 +181,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, deepLink, dispatch, handleClose, onComplete, pubky, t]);
+	}, [authUrl, dispatch, onComplete, pubky, t]);
 
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];
@@ -254,40 +243,40 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 						{!isAuthorized ? (
 							<>
 								<ActionButton
-									style={styles.denyButton}
-									onPressIn={handleClose}
-									activeOpacity={0.7}
-								>
+                            		style={styles.denyButton}
+                            		onPressIn={handleClose}
+                            		activeOpacity={0.7}
+                            	>
 									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('common.close') : t('auth.deny')}</Text>
 								</ActionButton>
 
 								<ActionButton
-									style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
-									onPressIn={handleAuth}
-									disabled={authorizing}
-									activeOpacity={0.7}
-								>
+                            		style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
+                            		onPressIn={handleAuth}
+                            		disabled={authorizing}
+                            		activeOpacity={0.7}
+                            	>
 									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('auth.authorizing') : t('auth.authorize')}</Text>
 								</ActionButton>
 							</>
-							) : (
-								<ActionButton style={styles.okButton} onPressIn={handleClose}>
-									<Text style={styles.buttonText}>{t('common.ok')}</Text>
-								</ActionButton>
-							)}
+                        ) : (
+	<ActionButton style={styles.okButton} onPressIn={handleClose}>
+		<Text style={styles.buttonText}>{t('common.ok')}</Text>
+	</ActionButton>
+                        )}
 					</View>
 					<View style={styles.progressBarContainer}>
 						{!isAuthorized ? (
 							<ProgressBar
-								duration={20000}
-								//fadeIn={true}
-								//fadeInDuration={1000}
-								delayRender={0}
-								unfilledColor="#333333"
-								filledColor="#FFFFFF"
-								height={6}
-								borderRadius={3}
-								onComplete={handleClose}
+                            	duration={20000}
+                            	//fadeIn={true}
+                            	//fadeInDuration={1000}
+                            	delayRender={0}
+                            	unfilledColor="#333333"
+                            	filledColor="#FFFFFF"
+                            	height={6}
+                            	borderRadius={3}
+                            	onComplete={handleClose}
 							/>) : null}
 					</View>
 				</View>
@@ -295,7 +284,7 @@ const ConfirmAuth = memo(({ payload }: { payload: ConfirmAuthProps }): ReactElem
 			<Toast config={toastConfig({ style: toastStyle })} />
 		</ActionSheetContainer>
 	);
-});
+};
 
 const styles = StyleSheet.create({
 	content: {

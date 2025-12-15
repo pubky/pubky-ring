@@ -49,6 +49,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../types';
 import { getPubky } from '../../store/selectors/pubkySelectors.ts';
 import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
+import i18n from '../../i18n';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const smallScreen = isSmallScreen();
@@ -161,7 +162,7 @@ const InviteCode = ({ payload }: {
 
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
-				setError('Unable to get secret key');
+				setError(i18n.t('pubkyErrors.unableToGetSecretKey'));
 				showCheckAnimation({ success: false });
 				return;
 			}
@@ -199,13 +200,13 @@ const InviteCode = ({ payload }: {
 							dispatch,
 						});
 						if (signinRes.isErr()) {
-							setError('Invalid invite code. Please check and try again.');
+							setError(i18n.t('pubkyErrors.invalidInviteCode'));
 							showCheckAnimation({ success: false });
 							return;
 						}
 						signedIn = true;
 					} else {
-						setError('Invalid invite code. Please check and try again.');
+						setError(i18n.t('pubkyErrors.invalidInviteCode'));
 						showCheckAnimation({ success: false });
 						return;
 					}
@@ -221,7 +222,7 @@ const InviteCode = ({ payload }: {
 					dispatch,
 				});
 				if (signinRes.isErr()) {
-					setError(`Unable to sign in: ${signinRes.error.message}`);
+					setError(i18n.t('pubkyErrors.unableToSignIn', { error: signinRes.error.message }));
 					showCheckAnimation({ success: false });
 					return;
 				}
@@ -237,7 +238,7 @@ const InviteCode = ({ payload }: {
 			showCheckAnimation({ success: true });
 		} catch (err) {
 			console.error('Error during continue:', err);
-			setError('An unexpected error occurred. Please try again.');
+			setError(i18n.t('pubkyErrors.unexpectedError'));
 			showCheckAnimation({ success: false });
 		} finally {
 			setLoading(false);
@@ -295,11 +296,11 @@ const InviteCode = ({ payload }: {
 				<View style={styles.content}>
 					<ModalIndicator />
 					<View style={styles.titleContainer}>
-						<Text testID="InviteCodeTitle" style={styles.title}>Default Homeserver</Text>
+						<Text testID="InviteCodeTitle" style={styles.title}>{i18n.t('welcome.defaultHomeserver')}</Text>
 					</View>
-					<Text style={styles.headerText}>Invite code.</Text>
+					<Text style={styles.headerText}>{i18n.t('inviteCode.title')}</Text>
 					<SessionText style={styles.message}>
-						Enter your code to access the Synonym homeserver. You get 1GB of storage, used for your posts, photos, videos, and profile.
+						{i18n.t('inviteCode.description')}
 					</SessionText>
 
 					<DashedBorder
@@ -336,7 +337,7 @@ const InviteCode = ({ payload }: {
 					>
 						<View style={styles.needInviteContent}>
 							<Gift color="rgba(255, 255, 255, 0.8)" size={18} style={styles.giftIcon} />
-							<Text style={styles.needInviteText}>Need an invite code?</Text>
+							<Text style={styles.needInviteText}>{i18n.t('inviteCode.needInviteCode')}</Text>
 						</View>
 					</TouchableOpacity>
 
@@ -360,7 +361,7 @@ const InviteCode = ({ payload }: {
 							onPressIn={isValid && !loading ? handleContinue : undefined}
 							disabled={!isValid || loading}
 						>
-							<Text testID="InviteCodeContinueButtonText" style={styles.buttonText}>{loading ? 'Processing...' : 'Continue'}</Text>
+							<Text testID="InviteCodeContinueButtonText" style={styles.buttonText}>{loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}</Text>
 						</AuthorizeButton>
 					</View>
 				</View>

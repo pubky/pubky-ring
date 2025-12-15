@@ -29,6 +29,7 @@ import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { EBackupPreference } from "../types/pubky.ts";
 import { showBackupPrompt } from "../utils/sheetHelpers.ts";
 import { truncateStr } from "../utils/pubky.ts";
+import i18n from '../i18n';
 
 const SelectBackupPreference = ({ payload }: {
     payload: {
@@ -39,7 +40,7 @@ const SelectBackupPreference = ({ payload }: {
 	const { pubky } = useMemo(() => payload, [payload]);
 
 	const titleText = useMemo(() => {
-		return 'Backup Pubky';
+		return i18n.t('selectBackup.title');
 	}, []);
 
 	const getImage = useCallback(() => {
@@ -52,9 +53,8 @@ const SelectBackupPreference = ({ payload }: {
 	}, []);
 
 	const getHeaderText = useCallback(() => {
-		const txt = 'Safely backup\nyour pubky.';
 		return (
-			<Text style={styles.headerText}>{txt}</Text>
+			<Text style={styles.headerText}>{i18n.t('selectBackup.header')}</Text>
 		);
 	}, []);
 
@@ -64,7 +64,7 @@ const SelectBackupPreference = ({ payload }: {
 	}, [pubky]);
 
 	const messageText: string = useMemo(() => {
-		return `Choose your preferred backup method for pubky ${truncatedPubky} to restore access if you lose your phone or your data.`;
+		return i18n.t('selectBackup.message', { pubky: truncatedPubky });
 	}, [truncatedPubky]);
 
 	const selectPreference = useCallback((backupPreference: EBackupPreference): void => {
@@ -79,8 +79,8 @@ const SelectBackupPreference = ({ payload }: {
 
 	const getButtonConfig = useCallback(() => {
 		return [
-			{ text: 'Encrypted File', onPress: (): void => selectPreference(EBackupPreference.encryptedFile), style: styles.importButton },
-			{ text: 'Recovery Phrase', onPress: (): void => selectPreference(EBackupPreference.recoveryPhrase), style: styles.createButton },
+			{ text: i18n.t('backup.encryptedFile'), onPress: (): void => selectPreference(EBackupPreference.encryptedFile), style: styles.importButton },
+			{ text: i18n.t('backup.recoveryPhrase'), onPress: (): void => selectPreference(EBackupPreference.recoveryPhrase), style: styles.createButton },
 		];
 	}, [selectPreference]);
 

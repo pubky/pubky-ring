@@ -25,13 +25,21 @@ import { useTranslation } from 'react-i18next';
 import { parseInput } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 
-const ListItemComponent = ({ name, pubky, onPress }: { name?: string; pubky: string; onPress: () => void }): ReactElement => {
+const ListItemComponent = memo(({ name, pubky, onPubkyPress }: {
+	name?: string;
+	pubky: string;
+	onPubkyPress: (pubky: string) => void;
+}): ReactElement => {
+	const handlePress = useCallback(() => {
+		onPubkyPress(pubky);
+	}, [onPubkyPress, pubky]);
+
 	return (
-		<TouchableOpacity style={styles.pubkyCard} onPress={onPress}>
+		<TouchableOpacity style={styles.pubkyCard} onPress={handlePress}>
 			<PubkyCard publicKey={pubky} name={name} />
 		</TouchableOpacity>
 	);
-};
+});
 
 const SelectPubky = ({ payload }: {
     payload: {
@@ -83,6 +91,16 @@ const SelectPubky = ({ payload }: {
             : t('pubky.noPubkysAvailable');
 	}, [pubkyArray.length, t]);
 
+	const renderItem = useCallback(({ item }: { item: { key: string; value: Pubky } }) => (
+		<ListItemComponent
+			name={item.value.name}
+			pubky={item.key}
+			onPubkyPress={onPubkyPress}
+		/>
+	), [onPubkyPress]);
+
+	const keyExtractor = useCallback((item: { key: string }) => item.key, []);
+
 	return (
 		<ModalWrapper
 			id="select-pubky"
@@ -98,16 +116,8 @@ const SelectPubky = ({ payload }: {
 			<View style={styles.listContainer}>
 				<FlashList
 					data={pubkyArray}
-					renderItem={({ item }) => {
-						return (
-							<ListItemComponent
-								name={item.value.name}
-								pubky={item.key}
-								onPress={() => onPubkyPress(item.key)}
-							/>
-						);
-					}}
-					keyExtractor={(item) => item.key}
+					renderItem={renderItem}
+					keyExtractor={keyExtractor}
 					showsVerticalScrollIndicator={true}
 				/>
 			</View>

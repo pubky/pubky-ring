@@ -28,7 +28,7 @@ const ScanInviteButton = memo(() => {
 			if (result.isErr()) {
 				showToast({
 					type: 'error',
-					title: 'Error',
+					title: i18n.t('common.error'),
 					description: result.error.message,
 				});
 			}
@@ -36,8 +36,8 @@ const ScanInviteButton = memo(() => {
 			// Not a valid invite/signup input
 			showToast({
 				type: 'error',
-				title: 'Invalid Invite Code',
-				description: 'Please scan a valid invite code or signup QR',
+				title: i18n.t('scanInvite.invalidInviteCode'),
+				description: i18n.t('scanInvite.invalidInviteDescription'),
 			});
 		}
 	}, [dispatch]);
@@ -85,8 +85,8 @@ const ScanInviteButton = memo(() => {
 						} catch {
 							showToast({
 								type: 'error',
-								title: 'Error',
-								description: 'Failed to read clipboard',
+								title: i18n.t('common.error'),
+								description: i18n.t('scanInvite.failedToReadClipboard'),
 							});
 						}
 
@@ -111,7 +111,7 @@ const ScanInviteButton = memo(() => {
 			>
 				<View style={styles.row}>
 					<QrCode size={19} />
-					<Text style={styles.text}>Scan invite for</Text>
+					<Text style={styles.text}>{i18n.t('scanInvite.scanInviteFor')}</Text>
 					<Image
 						source={PubkyRingLogo}
 						style={styles.logo}

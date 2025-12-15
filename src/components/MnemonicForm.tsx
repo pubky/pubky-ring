@@ -28,6 +28,7 @@ import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
 import { Result } from '@synonymdev/result';
+import i18n from '../i18n';
 
 interface MnemonicFormProps {
 	onBack: () => void;
@@ -212,11 +213,10 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 				<ModalIndicator />
 				<View style={styles.titleContainer}>
 					{renderBackButton()}
-					<Text style={styles.title}>Import Pubky</Text>
+					<Text style={styles.title}>{i18n.t('import.title')}</Text>
 				</View>
 				<SessionText style={styles.message}>
-					{'Enter the 12 words from your recovery \n' +
-            'phrase to import or restore your pubky.'}
+					{i18n.t('addPubky.enterRecoveryWords')}
 				</SessionText>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
@@ -285,13 +285,13 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 				</View>
 				<View style={styles.buttonContainer}>
 					<Button
-						text="Cancel"
+						text={i18n.t('common.cancel')}
 						style={[styles.button, styles.cancelButton]}
 						textStyle={styles.buttonText}
 						onPress={handleCancel}
 					/>
 					<Button
-						text="Import Pubky"
+						text={i18n.t('import.title')}
 						style={[styles.button, styles.importButton]}
 						textStyle={styles.buttonText}
 						onPress={handleImport}

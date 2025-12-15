@@ -112,7 +112,6 @@
   },
   "onboarding": {
     "title": "Keychain for the next web.",
-    "subtitle": "Pubky Ring enables you to securely authorize services and manage your pubkys, devices, and sessions.",
     "getStarted": "Get Started"
   },
   "editPubky": {
@@ -157,5 +156,82 @@
   "emptyState": {
     "placeholderName": "pubky",
     "placeholderPubky": "xxxxx..xxxxx"
+  },
+  "about": {
+    "keychainFor": "Keychain for",
+    "theNextWeb": "the next web.",
+    "description": "Pubky Ring enables you to securely authorize services and manage your pubkys, devices, and sessions.",
+    "craftedBy": "Pubky Ring was crafted by Synonym Software Ltd. You are your keys.",
+    "legal": "Legal",
+    "version": "Version",
+    "copiedVersion": "Copied version number to clipboard",
+    "unableToOpenUrl": "Unable to open URL",
+    "joinWithPubkyRing": "Join with Pubky Ring"
+  },
+  "addPubky": {
+    "title": "Add Pubky",
+    "yourKeysYourIdentity": "Your keys,\nyour identity.",
+    "restoreOrImport": "Restore or\nimport pubky.",
+    "createOrImportQuestion": "Do you want to create a new pubky or import an existing one?",
+    "chooseBackupMethod": "Choose the backup method you used.",
+    "enterRecoveryWords": "Enter the 12 words from your recovery \nphrase to import or restore your pubky.",
+    "importPubkyButton": "Import pubky",
+    "newPubkyButton": "New pubky",
+    "scanQrToImport": "Scan QR to import"
+  },
+  "editPubkySheet": {
+    "pubkyNameLabel": "Pubky name (label)",
+    "inviteCodeOptional": "Invite code (optional)",
+    "pubkyNamePlaceholder": "Pubky Name",
+    "inviteCodePlaceholder": "Invite Code (Optional)",
+    "reset": "Reset",
+    "unableToSignUp": "Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.",
+    "unableToSignIn": "Unable to sign in to homeserver: {{error}}"
+  },
+  "scanInvite": {
+    "invalidInviteCode": "Invalid Invite Code",
+    "invalidInviteDescription": "Please scan a valid invite code or signup QR",
+    "scanInviteFor": "Scan invite for",
+    "failedToReadClipboard": "Failed to read clipboard"
+  },
+  "selectBackup": {
+    "title": "Backup Pubky",
+    "header": "Safely backup\nyour pubky.",
+    "message": "Choose your preferred backup method for pubky {{pubky}} to restore access if you lose your phone or your data."
+  },
+  "router": {
+    "importSuccessful": "Import successful",
+    "signupSuccessful": "Signup successful",
+    "inviteProcessed": "Invite processed",
+    "sessionReturned": "Session returned",
+    "unhandledInputType": "Unhandled input type",
+    "unknownRoutingError": "Unknown error during routing"
+  },
+  "confirmAuth": {
+    "errorOccurred": "An error occurred during authorization",
+    "errorCopied": "Error copied to clipboard"
+  },
+  "clipboard": {
+    "pubkyCopied": "Pubky copied",
+    "pubkyCopiedDescription": "Your Pubky has been copied to the clipboard",
+    "pasteLink": "Paste Link"
+  },
+  "pubkyErrors": {
+    "failedToDelete": "Failed to delete Pubky",
+    "deleteError": "An error occurred while deleting the Pubky.",
+    "backupProcessError": "Backup process error",
+    "unableToGetSecretKey": "Unable to get secret key",
+    "invalidInviteCode": "Invalid invite code. Please check and try again.",
+    "unableToSignIn": "Unable to sign in: {{error}}",
+    "unexpectedError": "An unexpected error occurred. Please try again."
+  },
+  "inviteCode": {
+    "title": "Invite code.",
+    "description": "Enter your code to access the Synonym homeserver. You get 1GB of storage, used for your posts, photos, videos, and profile.",
+    "needInviteCode": "Need an invite code?",
+    "processing": "Processing..."
+  },
+  "pubkyProfile": {
+    "backupReminder": "backup!"
   }
 }

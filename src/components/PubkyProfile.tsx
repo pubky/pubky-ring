@@ -12,6 +12,7 @@ import {
 } from '../theme/components';
 import { isSmallScreen, showToast } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
+import i18n from '../i18n';
 
 interface PubkyProfileProps {
     index?: number;
@@ -42,8 +43,8 @@ export const PubkyProfile = memo(({
 		copyToClipboard(pubky);
 		showToast({
 			type: 'info',
-			title: 'Pubky copied',
-			description: 'Your Pubky has been copied to the clipboard',
+			title: i18n.t('clipboard.pubkyCopied'),
+			description: i18n.t('clipboard.pubkyCopiedDescription'),
 		});
 	}, [pubky]);
 
@@ -54,9 +55,9 @@ export const PubkyProfile = memo(({
 			return pubkyData.name;
 		}
 		if (index !== undefined) {
-			return `pubky #${index + 1}`;
+			return `${i18n.t('emptyState.placeholderName')} #${index + 1}`;
 		}
-		return 'pubky';
+		return i18n.t('emptyState.placeholderName');
 	}, [index, pubkyData.name]);
 
 	return (

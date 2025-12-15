@@ -59,7 +59,7 @@ const OnboardingContent = (): ReactElement => {
 					<View style={styles.textContainer}>
 						<Text style={styles.title}>{t('onboarding.title')}</Text>
 						<Text style={styles.subtitle}>
-							{t('onboarding.subtitle')}
+							{t('about.description')}
 						</Text>
 					</View>
 

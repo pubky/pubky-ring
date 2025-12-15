@@ -40,7 +40,7 @@ const PubkyDetailScreen = (): ReactElement => {
 
 	const onRightButtonPress = useCallback(() => {
 		showEditPubkySheet({
-			title: data.signedUp ? 'Edit' : 'Setup',
+			title: data.signedUp ? i18n.t('common.edit') : i18n.t('pubky.setup'),
 			pubky,
 		});
 	}, [data, pubky]);

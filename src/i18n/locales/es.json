@@ -112,7 +112,6 @@
   },
   "onboarding": {
     "title": "Llavero para la próxima web.",
-    "subtitle": "Pubky Ring le permite autorizar servicios de forma segura y gestionar sus pubkys, dispositivos y sesiones.",
     "getStarted": "Empezar"
   },
   "editPubky": {
@@ -157,5 +156,82 @@
   "emptyState": {
     "placeholderName": "pubky",
     "placeholderPubky": "xxxxx..xxxxx"
+  },
+  "about": {
+    "keychainFor": "Llavero para",
+    "theNextWeb": "la próxima web.",
+    "description": "Pubky Ring le permite autorizar servicios de forma segura y gestionar sus pubkys, dispositivos y sesiones.",
+    "craftedBy": "Pubky Ring fue creado por Synonym Software Ltd. Usted es sus llaves.",
+    "legal": "Legal",
+    "version": "Versión",
+    "copiedVersion": "Número de versión copiado en el portapapeles",
+    "unableToOpenUrl": "No se puede abrir la URL",
+    "joinWithPubkyRing": "Únase a Pubky Ring"
+  },
+  "addPubky": {
+    "title": "Añadir Pubky",
+    "yourKeysYourIdentity": "Sus llaves,\nsu identidad.",
+    "restoreOrImport": "Restaurar o\nimportar pubky.",
+    "createOrImportQuestion": "¿Desea crear un nuevo pubky o importar uno existente?",
+    "chooseBackupMethod": "Elija el método de copia de seguridad utilizado.",
+    "enterRecoveryWords": "Introduzca las 12 palabras de su recuperación \nfrase para importar o restaurar su pubky.",
+    "importPubkyButton": "Importar pubky",
+    "newPubkyButton": "Nuevo pubky",
+    "scanQrToImport": "Escanear QR para importar"
+  },
+  "editPubkySheet": {
+    "pubkyNameLabel": "Nombre del pubky (etiqueta)",
+    "inviteCodeOptional": "Código de invitación (opcional)",
+    "pubkyNamePlaceholder": "Pubky Nombre",
+    "inviteCodePlaceholder": "Código de invitación (opcional)",
+    "reset": "Reinicie",
+    "unableToSignUp": "No es posible registrarse con el servidor doméstico. Por favor, actualice el servidor doméstico y/o el código de invitación e inténtelo de nuevo.",
+    "unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}"
+  },
+  "scanInvite": {
+    "invalidInviteCode": "Código de invitación no válido",
+    "invalidInviteDescription": "Por favor, escanee un código de invitación válido o regístrese QR",
+    "scanInviteFor": "Escanear invitación para",
+    "failedToReadClipboard": "Fallo al leer el portapapeles"
+  },
+  "selectBackup": {
+    "title": "Copia de seguridad Pubky",
+    "header": "Haga una copia de seguridad segura\nde su pubky.",
+    "message": "Elija el método de copia de seguridad que prefiera para pubky {{pubky}} para restaurar el acceso si pierde su teléfono o sus datos."
+  },
+  "router": {
+    "importSuccessful": "Importación correcta",
+    "signupSuccessful": "Inscripción realizada con éxito",
+    "inviteProcessed": "Invitación procesada",
+    "sessionReturned": "Sesión devuelta",
+    "unhandledInputType": "Tipo de entrada no manejada",
+    "unknownRoutingError": "Error desconocido durante el enrutamiento"
+  },
+  "confirmAuth": {
+    "errorOccurred": "Se ha producido un error durante la autorización",
+    "errorCopied": "Error copiado en el portapapeles"
+  },
+  "clipboard": {
+    "pubkyCopied": "Pubky copiado",
+    "pubkyCopiedDescription": "Su Pubky ha sido copiado en el portapapeles",
+    "pasteLink": "Pegar enlace"
+  },
+  "pubkyErrors": {
+    "failedToDelete": "Fallo al borrar Pubky",
+    "deleteError": "Se ha producido un error al borrar el Pubky.",
+    "backupProcessError": "Error en el proceso de copia de seguridad",
+    "unableToGetSecretKey": "No se puede obtener la clave secreta",
+    "invalidInviteCode": "Código de invitación no válido. Por favor, compruébelo e inténtelo de nuevo.",
+    "unableToSignIn": "No se puede iniciar sesión: {{error}}",
+    "unexpectedError": "Se ha producido un error inesperado. Por favor, inténtelo de nuevo."
+  },
+  "inviteCode": {
+    "title": "Código de invitación.",
+    "description": "Introduzca su código para acceder al servidor doméstico de Synonym. Obtendrá 1 GB de almacenamiento, utilizado para sus publicaciones, fotos, vídeos y perfil.",
+    "needInviteCode": "¿Necesita un código de invitación?",
+    "processing": "Procesando..."
+  },
+  "pubkyProfile": {
+    "backupReminder": "¡respaldo!"
   }
 }

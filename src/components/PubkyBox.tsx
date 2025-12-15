@@ -24,6 +24,7 @@ import ProfileAvatar from './ProfileAvatar.tsx';
 import { buttonStyles, shadowStyles, textStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from "../utils/sheetHelpers.ts";
+import i18n from '../i18n';
 
 interface AuthorizeQRButtonProps {
 	isLoading: boolean;
@@ -51,7 +52,7 @@ const AuthorizeQRButton = memo(({
 		) : (
 			isSignedUp ? <QrCode size={16} /> : null
 		)}
-		<Text style={textStyles.button}>{isLoading ? '' : isSignedUp ? 'Authorize' : 'Setup'}</Text>
+		<Text style={textStyles.button}>{isLoading ? '' : isSignedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}</Text>
 	</AuthorizeButton>
 ));
 
@@ -81,7 +82,7 @@ const PubkyInfo = memo(({
 					{truncateStr(publicKey)}
 				</Text>
 				{!isBackedUp && <TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}><Text
-					style={textStyles.backupText}>{'backup!'}</Text></TouchableOpacity>}
+					style={textStyles.backupText}>{i18n.t('pubkyProfile.backupReminder')}</Text></TouchableOpacity>}
 				{sessionsCount > 0 && (
 					<CardView style={styles.sessionsButton}>
 						<SessionText style={textStyles.button}>{sessionsCount}</SessionText>
@@ -128,7 +129,7 @@ const PubkyBox = ({
 	);
 
 	const pubkyName = useMemo(() => {
-		return truncateStr(pubkyData.name, 8) || `pubky #${index ? index + 1 : 1}`;
+		return truncateStr(pubkyData.name, 8) || `${i18n.t('emptyState.placeholderName')} #${index ? index + 1 : 1}`;
 	}, [index, pubkyData.name]);
 
 	const qrPress = useCallback(() => {
@@ -136,7 +137,7 @@ const PubkyBox = ({
 			handleQRAction();
 		} else {
 			showEditPubkySheet({
-				title: 'Setup',
+				title: i18n.t('pubky.setup'),
 				description: '',
 				pubky: pubky,
 				data: pubkyData,

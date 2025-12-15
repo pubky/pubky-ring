@@ -176,13 +176,13 @@ const AddPubky = ({ payload }: {
 	const titleText = useMemo(() => {
 		switch (currentScreen) {
 			case 'main':
-				return 'Add Pubky';
+				return i18n.t('addPubky.title');
 			case 'import-options':
-				return 'Import Pubky';
+				return i18n.t('import.title');
 			case 'mnemonic-form':
-				return 'Import Pubky';
+				return i18n.t('import.title');
 			default:
-				return 'Add Pubky';
+				return i18n.t('addPubky.title');
 		}
 	}, [currentScreen]);
 
@@ -209,11 +209,11 @@ const AddPubky = ({ payload }: {
 		switch (currentScreen) {
 			case 'main':
 				return (
-					<Text style={styles.headerText}>{'Your keys,\nyou identity.'}</Text>
+					<Text style={styles.headerText}>{i18n.t('addPubky.yourKeysYourIdentity')}</Text>
 				);
 			case 'import-options':
 				return (
-					<Text style={styles.headerText}>{'Restore or\nimport pubky.'}</Text>
+					<Text style={styles.headerText}>{i18n.t('addPubky.restoreOrImport')}</Text>
 				);
 			default:
 				return <></>;
@@ -223,16 +223,13 @@ const AddPubky = ({ payload }: {
 	const messageText: string = useMemo(() => {
 		switch (currentScreen) {
 			case 'main':
-				return 'Do you want to create a new pubky or import an existing one?';
+				return i18n.t('addPubky.createOrImportQuestion');
 			case 'import-options':
-				return 'Choose the backup method you used.';
+				return i18n.t('addPubky.chooseBackupMethod');
 			case 'mnemonic-form':
-				return (
-					'Enter the 12 words from your recovery \n' +
-                    'phrase to import or restore your pubky.'
-				);
+				return i18n.t('addPubky.enterRecoveryWords');
 			default:
-				return 'Do you want to create a new pubky or import an existing one?';
+				return i18n.t('addPubky.createOrImportQuestion');
 		}
 	}, [currentScreen]);
 
@@ -241,13 +238,13 @@ const AddPubky = ({ payload }: {
 			case 'main':
 				const marginStyle = { marginBottom: 5 };
 				return [
-					{ id: 'ImportPubkyButton', text: 'Import pubky', onPress: onImportPubky, style: [styles.importButton, marginStyle] },
-					{ id: 'NewPubkyButton', text: 'New pubky', onPress: onCreatePubky, style: [styles.createButton, marginStyle] },
+					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), onPress: onImportPubky, style: [styles.importButton, marginStyle] },
+					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), onPress: onCreatePubky, style: [styles.createButton, marginStyle] },
 				];
 			case 'import-options':
 				return [
-					{ id: 'EncryptedFileButton', text: 'Encrypted File', onPress: onUploadFile, style: styles.importButton },
-					{ id: 'RecoveryPhraseButton', text: 'Recovery Phrase', onPress: onMnemonicPhrase, style: styles.importButton },
+					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), onPress: onUploadFile, style: styles.importButton },
+					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), onPress: onMnemonicPhrase, style: styles.importButton },
 				];
 			case 'mnemonic-form':
 				return [];
@@ -302,7 +299,7 @@ const AddPubky = ({ payload }: {
 					style={styles.authorizeButton}
 					onPressIn={onScanQrPress}
 				>
-					<Text style={styles.buttonText}>Scan QR to import</Text>
+					<Text style={styles.buttonText}>{i18n.t('addPubky.scanQrToImport')}</Text>
 				</AuthorizeButton>}
 				<View style={styles.footerBuffer} />
 			</>

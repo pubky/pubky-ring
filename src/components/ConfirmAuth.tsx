@@ -160,6 +160,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				return;
 			}
 			setIsAuthorized(true);
+			SystemNavigationBar.navigationShow();
 			onComplete?.();
 		} catch (e: unknown) {
 			const error = e as Error;

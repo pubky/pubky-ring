@@ -32,10 +32,12 @@ import {
 import { Result, err, ok } from '@synonymdev/result';
 import { defaultProfile, defaultPubkyState } from '../store/shapes/pubky';
 import { showToast } from './helpers.ts';
+import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
 import { EBackupPreference, IKeychainData, TProfile } from '../types/pubky.ts';
 import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from "./constants.ts";
+import i18n from '../i18n';
 
 export const getSignupToken = ({
 	homeserver,
@@ -491,7 +493,7 @@ export const signUpToHomeserver = async ({
 	}
 	const signUpRes = await signUp(secretKey, homeserver, signupToken);
 	if (signUpRes.isErr()) {
-		return err(signUpRes.error.message);
+		return err(getErrorMessage(signUpRes.error, i18n.t('errors.signupFailed')));
 	}
 	republishHomeserver({
 		pubky,
@@ -532,7 +534,7 @@ export const signInToHomeserver = async ({
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {
-			return err(secretKeyRes.error.message);
+			return err(getErrorMessage(secretKeyRes.error, i18n.t('errors.failedToGetSecretKey')));
 		}
 		secretKey = secretKeyRes.value.secretKey;
 	}
@@ -547,12 +549,12 @@ export const signInToHomeserver = async ({
 		});
 		if (republishRes.isErr()) {
 			// If we also get an error from signUp, return the initial signIn response error.
-			return signInRes;
+			return err(getErrorMessage(signInRes.error, i18n.t('errors.signInFailed')));
 		}
 		// Attempt to signin now
 		const signInResTwo = await signIn(secretKey);
 		if (signInResTwo.isErr()) {
-			return signInResTwo;
+			return err(getErrorMessage(signInResTwo.error, i18n.t('errors.signInFailed')));
 		}
 		response = signInResTwo.value;
 	} else {
@@ -645,12 +647,12 @@ export const performAuth = async ({
 					secretKey,
 				});
 				if (signInRes.isErr()) {
-					return err(signInRes.error.message);
+					return err(getErrorMessage(signInRes.error, i18n.t('errors.signInFailed')));
 				}
 				const authRetryRes = await auth(authUrl, secretKey);
 				if (authRetryRes.isErr()) {
 					console.error('Error processing auth:', authRes.error);
-					return err(authRes.error?.message || 'Failed to process auth');
+					return err(getErrorMessage(authRes.error, i18n.t('errors.failedToProcessAuth')));
 				}
 			}
 			return ok('success');

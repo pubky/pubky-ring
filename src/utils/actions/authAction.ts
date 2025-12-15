@@ -13,6 +13,7 @@ import { InputAction, AuthParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
 import { showToast } from '../helpers';
+import { getErrorMessage } from '../errorHandler';
 import { getAutoAuthFromStore } from '../store-helpers';
 import { AUTH_SHEET_DELAY } from '../constants';
 import i18n from '../../i18n';
@@ -103,7 +104,7 @@ const handleAutoAuth = async ({
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
-			description: res.error.message,
+			description: getErrorMessage(res.error, i18n.t('errors.authorizationFailed')),
 		});
 	}
 

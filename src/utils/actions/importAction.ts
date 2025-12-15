@@ -13,6 +13,7 @@ import { InputAction, ImportParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { importPubky } from '../pubky';
 import { showToast } from '../helpers';
+import { getErrorMessage } from '../errorHandler';
 import { showImportSuccessSheet, showEditPubkySheet } from '../sheetHelpers';
 import { getPubkyKeys } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';
@@ -77,12 +78,13 @@ export const handleImportAction = async (
 		});
 
 		if (importRes.isErr()) {
+			const errorMessage = getErrorMessage(importRes.error, i18n.t('errors.failedToImportPubky'));
 			showToast({
 				type: 'error',
 				title: i18n.t('import.failed'),
-				description: importRes.error.message,
+				description: errorMessage,
 			});
-			return err(importRes.error.message);
+			return err(errorMessage);
 		}
 
 		const importedPubky = importRes.value;

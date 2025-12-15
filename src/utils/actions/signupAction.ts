@@ -11,10 +11,13 @@ import { InputAction, SignupParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { savePubky, signUpToHomeserver } from '../pubky';
 import { showToast } from '../helpers';
+import { getErrorMessage } from '../errorHandler';
 import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice';
 import { EBackupPreference } from '../../types/pubky';
 import { handleAuthAction } from './authAction';
 import { SHEET_ANIMATION_DELAY } from '../constants.ts';
+import i18n from '../../i18n';
+import { copyToClipboard } from '../clipboard.ts';
 
 type SignupActionData = {
 	action: InputAction.Signup;
@@ -83,12 +86,28 @@ export const handleSignupAction = async (
 		});
 
 		if (signupRes.isErr()) {
+			const errorMessage = getErrorMessage(signupRes.error, i18n.t('errors.signupFailedDescription'));
 			showToast({
 				type: 'error',
-				title: 'Signup Failed',
-				description: signupRes.error.message,
+				title: i18n.t('common.error'),
+				description: errorMessage,
+				onPress: () => {
+					// Copy debug info to clipboard
+					const debugInfo = JSON.stringify({
+						error: errorMessage,
+						pubky,
+						homeserver,
+						inviteCode,
+					}, null, 2);
+					copyToClipboard(debugInfo);
+					showToast({
+						type: 'info',
+						title: i18n.t('common.copied'),
+						description: i18n.t('errors.debugInfoCopied'),
+					});
+				}
 			});
-			return err(signupRes.error.message);
+			return err(errorMessage);
 		}
 
 		showToast({

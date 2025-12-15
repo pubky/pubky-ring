@@ -160,7 +160,7 @@
   "terms": {
     "title": "Terms of Use.",
     "acceptTerms": "I declare that I have read and accept the terms of use.",
-    "acceptPrivacy": "I declare that I have read and accept the privacy policy.",
+    "acceptPrivacy": "I declare that I have read and accept the ",
     "termsOfUse": "Terms of Use",
     "privacyPolicy": "Privacy Policy"
   },

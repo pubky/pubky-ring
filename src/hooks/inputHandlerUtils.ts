@@ -12,6 +12,7 @@ import { routeInput, actionRequiresPubky, ActionContext } from '../utils/inputRo
 import { setDeepLink } from '../store/slices/pubkysSlice';
 import { copyToClipboard } from '../utils/clipboard';
 import { showToast, sleep } from '../utils/helpers';
+import { getErrorMessage } from '../utils/errorHandler';
 import i18n from '../i18n';
 
 export interface PubkyCallbacks {
@@ -42,16 +43,17 @@ export const routeInputWithContext = async (
 	const result = await routeInput(parsed, context);
 
 	if (result.isErr()) {
+		const errorMessage = getErrorMessage(result.error, i18n.t('errors.unknownError'));
+
 		// Build debug info for troubleshooting
 		const debugInfo = JSON.stringify({
 			action: parsed.action,
 			rawInput: parsed.rawInput,
-			error: result.error.message,
+			error: errorMessage,
 		}, null, 2);
 
 		console.error('Input routing error:', debugInfo);
 
-		const errorMessage = result.error.message || i18n.t('errors.unknownError');
 		const description = `${errorMessage} (${i18n.t('errors.tapToCopyDebug')})`;
 
 		showToast({

@@ -24,6 +24,7 @@ import { handleSignupAction } from './actions/signupAction';
 import { handleInviteAction } from './actions/inviteAction';
 import { handleSessionAction } from './actions/sessionAction';
 import i18n from '../i18n';
+import { getErrorMessage } from './errorHandler';
 
 // Context passed to action handlers
 export interface ActionContext {
@@ -69,35 +70,35 @@ export const routeInput = async (
 			const result = await handleAuthAction(data, effectiveContext);
 			return result.isOk()
 				? ok({ success: true, action: InputAction.Auth, message: result.value })
-				: err(result.error.message);
+				: err(getErrorMessage(result.error, i18n.t('errors.authorizationFailed')));
 		}
 
 		if (isImportAction(data)) {
 			const result = await handleImportAction(data, effectiveContext);
 			return result.isOk()
 				? ok({ success: true, action: InputAction.Import, pubky: result.value, message: i18n.t('router.importSuccessful') })
-				: err(result.error.message);
+				: err(getErrorMessage(result.error, i18n.t('errors.importFailed')));
 		}
 
 		if (isSignupAction(data)) {
 			const result = await handleSignupAction(data, effectiveContext);
 			return result.isOk()
 				? ok({ success: true, action: InputAction.Signup, pubky: result.value, message: i18n.t('router.signupSuccessful') })
-				: err(result.error.message);
+				: err(getErrorMessage(result.error, i18n.t('errors.signupFailed')));
 		}
 
 		if (isInviteAction(data)) {
 			const result = await handleInviteAction(data, effectiveContext);
 			return result.isOk()
 				? ok({ success: true, action: InputAction.Invite, pubky: result.value, message: i18n.t('router.inviteProcessed') })
-				: err(result.error.message);
+				: err(getErrorMessage(result.error, i18n.t('errors.inviteProcessingFailed')));
 		}
 
 		if (isSessionAction(data)) {
 			const result = await handleSessionAction(data, effectiveContext);
 			return result.isOk()
 				? ok({ success: true, action: InputAction.Session, pubky: result.value, message: i18n.t('router.sessionReturned') })
-				: err(result.error.message);
+				: err(getErrorMessage(result.error, i18n.t('errors.sessionRequestFailed')));
 		}
 
 		if (isUnknownAction(data)) {

@@ -8,6 +8,7 @@ import { routeInput } from '../utils/inputRouter';
 import { readFromClipboard, copyToClipboard } from '../utils/clipboard';
 import { showToast, checkNetworkConnection } from '../utils/helpers';
 import { getIsOnline } from '../utils/store-helpers';
+import { getErrorMessage } from '../utils/errorHandler';
 import i18n from '../i18n';
 
 interface PubkyHandlersReturn {
@@ -61,15 +62,16 @@ export const usePubkyHandlers = (): PubkyHandlersReturn => {
 						const parsed = await parseInput(scannedData, 'scan');
 						const result = await routeInput(parsed, { dispatch, pubky });
 						if (result.isErr()) {
+							const errorMsg = getErrorMessage(result.error, i18n.t('errors.unknownError'));
 							const debugInfo = JSON.stringify({
-								error: result.error.message,
+								error: errorMsg,
 								input: scannedData.substring(0, 100),
 								action: parsed.action,
 							}, null, 2);
 							showToast({
 								type: 'error',
 								title: i18n.t('common.error'),
-								description: result.error.message,
+								description: errorMsg,
 								onPress: () => {
 									copyToClipboard(debugInfo);
 									showToast({
@@ -81,7 +83,7 @@ export const usePubkyHandlers = (): PubkyHandlersReturn => {
 							});
 						}
 						onComplete?.();
-						resolve(result.isOk() ? scannedData : result.error.message);
+						resolve(result.isOk() ? scannedData : getErrorMessage(result.error, i18n.t('errors.unknownError')));
 					},
 					onCopyClipboard: async (): Promise<void> => {
 						await SheetManager.hide('camera');
@@ -98,15 +100,16 @@ export const usePubkyHandlers = (): PubkyHandlersReturn => {
 						const parsed = await parseInput(clipboardContents, 'clipboard');
 						const result = await routeInput(parsed, { dispatch, pubky });
 						if (result.isErr()) {
+							const errorMsg = getErrorMessage(result.error, i18n.t('errors.unknownError'));
 							const debugInfo = JSON.stringify({
-								error: result.error.message,
+								error: errorMsg,
 								input: clipboardContents.substring(0, 100),
 								action: parsed.action,
 							}, null, 2);
 							showToast({
 								type: 'error',
 								title: i18n.t('common.error'),
-								description: result.error.message,
+								description: errorMsg,
 								onPress: () => {
 									copyToClipboard(debugInfo);
 									showToast({
@@ -118,7 +121,7 @@ export const usePubkyHandlers = (): PubkyHandlersReturn => {
 							});
 						}
 						onComplete?.();
-						resolve(result.isOk() ? clipboardContents : result.error.message);
+						resolve(result.isOk() ? clipboardContents : getErrorMessage(result.error, i18n.t('errors.unknownError')));
 					},
 					onClose: () => {
 						SheetManager.hide('camera');

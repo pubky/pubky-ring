@@ -144,7 +144,18 @@
     "unrecognizedFormat": "Unrecognized format. Expected a recovery phrase, invite code, auth URL, or session request.",
     "debugInfoCopied": "Debug info copied to clipboard",
     "tapToCopyDebug": "Tap to copy debug info",
-    "unknownError": "An unknown error occurred"
+    "unknownError": "An unknown error occurred",
+    "authorizationFailed": "Authorization failed",
+    "importFailed": "Import failed",
+    "signupFailed": "Signup failed",
+    "signupFailedDescription": "Please check your signup link is still valid, then try again.",
+    "inviteProcessingFailed": "Invite processing failed",
+    "sessionRequestFailed": "Session request failed",
+    "signInFailed": "Sign in failed",
+    "failedToGetSecretKey": "Failed to get secret key",
+    "failedToProcessAuth": "Failed to process auth",
+    "failedToImportPubky": "Failed to import pubky",
+    "failedToCreatePubkyWithInvite": "Failed to create pubky with invite code"
   },
   "terms": {
     "title": "Terms of Use.",

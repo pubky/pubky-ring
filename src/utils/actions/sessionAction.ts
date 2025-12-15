@@ -17,6 +17,7 @@ import { InputAction, SessionParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { signInToHomeserver } from '../pubky';
 import { showToast } from '../helpers';
+import { getErrorMessage } from '../errorHandler';
 import i18n from '../../i18n';
 
 type SessionActionData = {
@@ -62,12 +63,13 @@ export const handleSessionAction = async (
 		});
 
 		if (signInResult.isErr()) {
+			const errorMessage = getErrorMessage(signInResult.error, i18n.t('errors.signInFailed'));
 			showToast({
 				type: 'error',
 				title: i18n.t('session.signInFailed'),
-				description: signInResult.error.message,
+				description: errorMessage,
 			});
-			return err(signInResult.error.message);
+			return err(errorMessage);
 		}
 
 		const sessionInfo = signInResult.value;

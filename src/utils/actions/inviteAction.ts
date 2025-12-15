@@ -11,9 +11,11 @@ import { InputAction, InviteParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { createPubkyWithInviteCode } from '../pubky';
 import { showToast } from '../helpers';
+import { getErrorMessage } from '../errorHandler';
 import { getPubky } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';
 import { ECurrentScreen } from '../../components/PubkySetup/NewPubkySetup';
+import i18n from '../../i18n';
 
 type InviteActionData = {
 	action: InputAction.Invite;
@@ -38,12 +40,13 @@ export const handleInviteAction = async (
 		const createRes = await createPubkyWithInviteCode(inviteCode, dispatch);
 
 		if (createRes.isErr()) {
+			const errorMessage = getErrorMessage(createRes.error, i18n.t('errors.failedToCreatePubkyWithInvite'));
 			showToast({
 				type: 'error',
-				title: 'Signup Failed',
-				description: createRes.error.message,
+				title: i18n.t('errors.signupFailed'),
+				description: errorMessage,
 			});
-			return err(createRes.error.message);
+			return err(errorMessage);
 		}
 
 		const { pubky } = createRes.value;

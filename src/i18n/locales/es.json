@@ -95,7 +95,7 @@
   },
   "backup": {
     "encryptedFile": "Archivo cifrado",
-    "backup": "Copia de seguridad",
+    "backup": "Backup",
     "createBackup": "Crear copia de seguridad",
     "backupMessage": "Introduzca una contraseña o frase de contraseña para encriptar y asegurar su copia de seguridad. Manténgala a salvo, la necesitará para restaurar su pubky.",
     "importMessage": "Introduzca su contraseña o frase de contraseña para descifrar su copia de seguridad pubky.",

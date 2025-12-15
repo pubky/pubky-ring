@@ -75,28 +75,28 @@ export const routeInput = async (
 		if (isImportAction(data)) {
 			const result = await handleImportAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Import, pubky: result.value, message: 'Import successful' })
+				? ok({ success: true, action: InputAction.Import, pubky: result.value, message: i18n.t('router.importSuccessful') })
 				: err(result.error.message);
 		}
 
 		if (isSignupAction(data)) {
 			const result = await handleSignupAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Signup, pubky: result.value, message: 'Signup successful' })
+				? ok({ success: true, action: InputAction.Signup, pubky: result.value, message: i18n.t('router.signupSuccessful') })
 				: err(result.error.message);
 		}
 
 		if (isInviteAction(data)) {
 			const result = await handleInviteAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Invite, pubky: result.value, message: 'Invite processed' })
+				? ok({ success: true, action: InputAction.Invite, pubky: result.value, message: i18n.t('router.inviteProcessed') })
 				: err(result.error.message);
 		}
 
 		if (isSessionAction(data)) {
 			const result = await handleSessionAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Session, pubky: result.value, message: 'Session returned' })
+				? ok({ success: true, action: InputAction.Session, pubky: result.value, message: i18n.t('router.sessionReturned') })
 				: err(result.error.message);
 		}
 
@@ -105,9 +105,9 @@ export const routeInput = async (
 			return err(i18n.t('errors.unrecognizedFormat'));
 		}
 
-		return err('Unhandled input type');
+		return err(i18n.t('router.unhandledInputType'));
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Unknown error during routing';
+		const errorMessage = error instanceof Error ? error.message : i18n.t('router.unknownRoutingError');
 		console.error('Error routing input:', errorMessage);
 		return err(errorMessage);
 	}

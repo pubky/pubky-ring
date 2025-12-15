@@ -38,6 +38,7 @@ import {
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import { FlashList } from '@shopify/flash-list';
+import i18n from '../i18n';
 
 type InputDataItem = {
     testID?: string;
@@ -98,16 +99,6 @@ const InputItemComponent = ({
 	);
 };
 
-const textInputTitleText: {
-    name: string;
-    homeserver: string;
-    signuptoken: string;
-} = {
-	name: 'Pubky name (label)',
-	homeserver: 'Homeserver',
-	signuptoken: 'Invite code (optional)',
-};
-
 const EditPubky = ({ payload }: {
     payload: {
         title?: string;
@@ -140,6 +131,12 @@ const EditPubky = ({ payload }: {
 	const isSignupTokenInputVisible = useMemo(() => {
 		return storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
 	}, [storedPubkyData?.signedUp, storedPubkyData.homeserver, homeServer]);
+
+	const textInputTitleText = useMemo(() => ({
+		name: i18n.t('editPubkySheet.pubkyNameLabel'),
+		homeserver: i18n.t('editPubky.homeserver'),
+		signuptoken: i18n.t('editPubkySheet.inviteCodeOptional'),
+	}), []);
 
 
 	// Whether signupToken TextInput should be visible
@@ -300,14 +297,14 @@ const EditPubky = ({ payload }: {
 							});
 							if (signinRes.isErr()) {
 								updateName(); // No need to prevent updating the name if we can.
-								setError('Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.');
+								setError(i18n.t('editPubkySheet.unableToSignUp'));
 								showCheckAnimation({ success: false });
 								return;
 							}
 							signedIn = true;
 						} else {
 							updateName(); // No need to prevent updating the name if we can.
-							setError('Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.');
+							setError(i18n.t('editPubkySheet.unableToSignUp'));
 							showCheckAnimation({ success: false });
 							return;
 						}
@@ -327,7 +324,7 @@ const EditPubky = ({ payload }: {
 					});
 					if (signinRes.isErr()) {
 						updateName(); // No need to prevent updating the name if we can.
-						setError(`Unable to sign in to homeserver: ${signinRes.error.message}`);
+						setError(i18n.t('editPubkySheet.unableToSignIn', { error: signinRes.error.message }));
 						showCheckAnimation({ success: false });
 						return;
 					}
@@ -472,7 +469,7 @@ const EditPubky = ({ payload }: {
 				id: 'name' as const,
 				value: newPubkyName,
 				onChange: handleChangeText,
-				placeholder: 'Pubky Name',
+				placeholder: i18n.t('editPubkySheet.pubkyNamePlaceholder'),
 				error: nameError,
 				autoFocus: true,
 			},
@@ -484,7 +481,7 @@ const EditPubky = ({ payload }: {
 				id: 'signuptoken' as const,
 				value: signupToken,
 				onChange: handleSignupTokenChange,
-				placeholder: 'Invite Code (Optional)',
+				placeholder: i18n.t('editPubkySheet.inviteCodePlaceholder'),
 				error: '',
 				autoFocus: false,
 			});
@@ -495,7 +492,7 @@ const EditPubky = ({ payload }: {
 			id: 'homeserver' as const,
 			value: homeServer,
 			onChange: setHomeServer,
-			placeholder: 'Homeserver',
+			placeholder: i18n.t('editPubky.homeserver'),
 			error: '',
 			autoFocus: false,
 		});
@@ -538,9 +535,9 @@ const EditPubky = ({ payload }: {
 
 	const leftButtonText = useMemo(() => {
 		if (storedPubkyData.homeserver && haveFieldsChanged) {
-			return loading ? 'Close' : 'Reset';
+			return loading ? i18n.t('common.close') : i18n.t('editPubkySheet.reset');
 		}
-		return 'Close';
+		return i18n.t('common.close');
 	}, [storedPubkyData.homeserver, haveFieldsChanged, loading]);
 
 	const leftButtonOnPress = useCallback(() => {
@@ -613,7 +610,7 @@ const EditPubky = ({ payload }: {
 				/>
 			</>
 		);
-	}, [isSignupTokenEditable, handleSubmit, handleNameSubmit, handleHomeserverSubmit, haveFieldsChanged, storedPubkyData?.signedUp, clearErrorState]);
+	}, [isSignupTokenEditable, handleSubmit, handleNameSubmit, handleHomeserverSubmit, haveFieldsChanged, storedPubkyData?.signedUp, clearErrorState, textInputTitleText]);
 
 	return (
 		<ActionSheetContainer
@@ -657,7 +654,7 @@ const EditPubky = ({ payload }: {
 							/>
 							<Button
 								testID="EditPubkySaveButton"
-								text={'Save'}
+								text={i18n.t('common.save')}
 								loading={loading}
 								style={[styles.button, styles.submitButton]}
 								onPress={handleSubmit}

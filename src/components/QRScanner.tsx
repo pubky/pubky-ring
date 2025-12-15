@@ -10,6 +10,7 @@ import {
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
+import i18n from '../i18n';
 interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
@@ -21,7 +22,7 @@ const smallScreen = isSmallScreen();
 const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
 const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
-	const { onScan, onCopyClipboard, onClose, title = 'Authorize' } = payload;
+	const { onScan, onCopyClipboard, onClose, title = i18n.t('auth.authorize') } = payload;
 	const navigationAnimation = useSelector(getNavigationAnimation);
 
 	const handleBarCodeRead = useCallback((data: string) => {
@@ -47,7 +48,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 						onPress={onCopyClipboard}
 					>
 						<Clipboard size={20} style={styles.clipboard} />
-						<Text style={styles.buttonText}>Paste Link</Text>
+						<Text style={styles.buttonText}>{i18n.t('clipboard.pasteLink')}</Text>
 					</CardButton>
 				</View>
 			</View>

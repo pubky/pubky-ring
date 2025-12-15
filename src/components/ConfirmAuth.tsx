@@ -165,7 +165,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 			const error = e as Error;
 			const errorMsg = error.message === 'Authentication request timed out'
                 ? t('auth.timeoutError')
-                : error.message || 'An error occurred during authorization';
+                : error.message || t('confirmAuth.errorOccurred');
 			showToast({
 				type: 'error',
 				title: t('common.error'),
@@ -174,7 +174,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				visibilityTime: 20000,
 				onPress: () => {
 					copyToClipboard(errorMsg);
-					Alert.alert('Error copied to clipboard', errorMsg);
+					Alert.alert(t('confirmAuth.errorCopied'), errorMsg);
 				},
 			});
 			console.error('Auth error:', error);

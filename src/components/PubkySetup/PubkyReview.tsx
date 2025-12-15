@@ -12,6 +12,7 @@ import ModalIndicator from '../ModalIndicator.tsx';
 import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { PubkyData } from "../../navigation/types.ts";
+import i18n from '../../i18n';
 
 interface PubkyReviewProps {
 	modalTitle: string;
@@ -61,7 +62,7 @@ const PubkyReview = ({
 					style={[styles.authorizeButton, authorizeButtonStyle]}
 					onPressIn={onContinue}
 				>
-					<Text style={styles.buttonText}>Continue</Text>
+					<Text style={styles.buttonText}>{i18n.t('common.continue')}</Text>
 				</CardButton>
 			</View>
 		</RadialGradient>

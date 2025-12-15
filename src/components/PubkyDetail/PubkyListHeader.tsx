@@ -16,6 +16,7 @@ import Button from '../Button.tsx';
 import { shareData } from '../../utils/helpers.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
+import i18n from '../../i18n';
 
 interface PubkyListHeaderProps {
 	index: number;
@@ -48,7 +49,7 @@ export const PubkyListHeader = memo(({
 	const handleButtonPress = useCallback(async () => {
 		if (!pubkyData.signedUp) {
 			showEditPubkySheet({
-				title: 'Setup',
+				title: i18n.t('pubky.setup'),
 				pubky,
 				data: pubkyData,
 			});
@@ -70,7 +71,7 @@ export const PubkyListHeader = memo(({
 	}, [pubkyData.signedUp]);
 
 	const buttonText = useMemo(() => {
-		return pubkyData.signedUp ? 'Authorize' : 'Setup';
+		return pubkyData.signedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup');
 	}, [pubkyData.signedUp]);
 
 	const ShareIcon = useMemo(() =>
@@ -104,17 +105,17 @@ export const PubkyListHeader = memo(({
 
 			<View style={styles.actionButtonRow}>
 				<Button
-					text={'Share'}
+					text={i18n.t('common.share')}
 					icon={ShareIcon}
 					onPress={onSharePress}
 				/>
 				<Button
-					text={'Backup'}
+					text={i18n.t('backup.backup')}
 					icon={BackupIcon}
 					onPress={onBackup}
 				/>
 				<Button
-					text={'Delete'}
+					text={i18n.t('common.delete')}
 					icon={DeleteIcon}
 					onPress={onDelete}
 				/>

@@ -18,41 +18,43 @@ import PubkyRingLogo from '../images/pubky-app-logo.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
+import { useTranslation } from 'react-i18next';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
 
-const onFooterPress = (): void => {
-	try {
-		Linking.openURL(PUBKY_APP_URL).then();
-	} catch {
-		showToast({
-			type: 'error',
-			title: 'Error',
-			description: 'Unable to open URL',
-		});
-	}
-};
-
-const onSharePress = (): void => {
-	shareData(PUBKY_APP_URL).then();
-};
-
-const onLegalPress = (): void => {
-	try {
-		Linking.openURL(TERMS_OF_USE).then();
-	} catch {}
-};
-
-const onCopyPress = (): void => {
-	copyToClipboard(version);
-	showToast({
-		type: 'info',
-		title: 'Copied version number to clipboard',
-		description: `Version: ${version}`,
-	});
-};
-
 const About = ({ navigation }: Props): ReactElement => {
+	const { t } = useTranslation();
+
+	const onFooterPress = (): void => {
+		try {
+			Linking.openURL(PUBKY_APP_URL).then();
+		} catch {
+			showToast({
+				type: 'error',
+				title: t('common.error'),
+				description: t('about.unableToOpenUrl'),
+			});
+		}
+	};
+
+	const onSharePress = (): void => {
+		shareData(PUBKY_APP_URL).then();
+	};
+
+	const onLegalPress = (): void => {
+		try {
+			Linking.openURL(TERMS_OF_USE).then();
+		} catch {}
+	};
+
+	const onCopyPress = (): void => {
+		copyToClipboard(version);
+		showToast({
+			type: 'info',
+			title: t('about.copiedVersion'),
+			description: `${t('about.version')}: ${version}`,
+		});
+	};
 	const LeftButton = useMemo(() => (
 		<NavButton
 			style={styles.navButton}
@@ -78,27 +80,27 @@ const About = ({ navigation }: Props): ReactElement => {
 			/>
 
 			<ScrollView style={styles.content}>
-				<Text style={styles.title}>Keychain for</Text>
-				<Text style={styles.lowerTitle}>the next web.</Text>
-				<Text style={styles.subtitle}>Pubky Ring enables you to securely authorize services and manage your pubkys, devices, and sessions.</Text>
-				<Text style={styles.subtitle}>Pubky Ring was crafted by Synonym Software Ltd. You are your keys.</Text>
+				<Text style={styles.title}>{t('about.keychainFor')}</Text>
+				<Text style={styles.lowerTitle}>{t('about.theNextWeb')}</Text>
+				<Text style={styles.subtitle}>{t('about.description')}</Text>
+				<Text style={styles.subtitle}>{t('about.craftedBy')}</Text>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
-					<Text style={styles.rowTitle}>Legal</Text>
+					<Text style={styles.rowTitle}>{t('about.legal')}</Text>
 					<ArrowRight />
 				</TouchableOpacity>
 
 				<CardView style={styles.divider} />
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
-					<Text style={styles.rowTitle}>Share</Text>
+					<Text style={styles.rowTitle}>{t('common.share')}</Text>
 					<ArrowRight />
 				</TouchableOpacity>
 
 				<CardView style={styles.divider} />
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
-					<Text style={styles.rowTitle}>Version</Text>
+					<Text style={styles.rowTitle}>{t('about.version')}</Text>
 					<Text style={styles.rowTitle}>{version}</Text>
 				</TouchableOpacity>
 
@@ -113,7 +115,7 @@ const About = ({ navigation }: Props): ReactElement => {
 										source={PubkyRingLogo}
 										style={styles.pubkyLogo}
 									/>
-									<Text style={styles.footerText}>Join with Pubky Ring</Text>
+									<Text style={styles.footerText}>{t('about.joinWithPubkyRing')}</Text>
 								</View>
 								<ArrowRight />
 							</View>

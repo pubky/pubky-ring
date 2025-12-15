@@ -13,6 +13,7 @@ import { Dispatch } from 'redux';
 import { View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useTypedNavigation } from '../../navigation/hooks';
+import i18n from '../../i18n';
 
 export interface PubkyDetailProps {
 	index: number;
@@ -49,8 +50,8 @@ export const PubkyDetail = ({
 		if (deleteRes.isErr()) {
 			showToast({
 				type: 'error',
-				title: 'Failed to delete Pubky',
-				description: 'An error occurred while deleting the Pubky.',
+				title: i18n.t('pubkyErrors.failedToDelete'),
+				description: i18n.t('pubkyErrors.deleteError'),
 			});
 			return;
 		}
@@ -81,7 +82,7 @@ export const PubkyDetail = ({
 			console.error('Backup process error:', error);
 			showToast({
 				type: 'error',
-				title: 'Backup process error',
+				title: i18n.t('pubkyErrors.backupProcessError'),
 				description: JSON.stringify(error),
 			});
 		}

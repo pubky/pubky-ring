@@ -14,8 +14,10 @@ import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
 import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { getShowOnboarding } from '../store/selectors/settingsSelectors.ts';
 import { useTypedNavigation } from '../navigation/hooks';
+import { useTranslation } from 'react-i18next';
 
 const TermsOfUse = (): React.ReactElement => {
+	const { t } = useTranslation();
 	const navigation = useTypedNavigation();
 	const dispatch = useDispatch();
 	const _hasPubkys = useSelector(getHasPubkys);
@@ -59,7 +61,7 @@ const TermsOfUse = (): React.ReactElement => {
 						showsVerticalScrollIndicator={false}
 					>
 						<View style={styles.textContainer}>
-							<Text style={styles.title} testID="TermsOfUseTitle">Terms of Use.</Text>
+							<Text style={styles.title} testID="TermsOfUseTitle">{t('terms.title')}</Text>
 							<View style={styles.subtitleContainer}>
 								<Text style={[styles.subtitle, styles.subtitleHeading]}>PUBKY RING TERMS OF SERVICE</Text>
 
@@ -251,14 +253,14 @@ const TermsOfUse = (): React.ReactElement => {
 					{/* Footer */}
 					<View style={styles.footer}>
 						<View style={styles.checkboxContainer}>
-							<Text style={styles.footerHeaderText}>Terms of Use</Text>
+							<Text style={styles.footerHeaderText}>{t('terms.termsOfUse')}</Text>
 							<TouchableOpacity
 								onPress={() => setChecked(!checked)}
 								activeOpacity={0.7}
 								style={styles.checkboxRow}
 								testID="TermsAgreeRow">
 								<Text style={styles.footerText}>
-									I declare that I have read and accept the terms of use.
+									{t('terms.acceptTerms')}
 								</Text>
 								<TouchableOpacity
 									testID="TermsAgreeCheckbox"
@@ -274,17 +276,17 @@ const TermsOfUse = (): React.ReactElement => {
 						<View style={styles.checkboxDivider} />
 
 						<View style={styles.checkboxContainer}>
-							<Text style={styles.footerHeaderText}>Privacy Policy</Text>
+							<Text style={styles.footerHeaderText}>{t('terms.privacyPolicy')}</Text>
 							<TouchableOpacity
 								onPress={() => setPrivacyChecked(!privacyChecked)}
 								activeOpacity={0.7}
 								style={styles.checkboxRow}
 								testID="PrivacyAgreeRow">
 								<Text style={styles.footerText}>
-									I declare that I have read and accept the{' '}
+									{t('terms.acceptPrivacy')}
 									<Text
 										onPress={onPrivacyFormPress}
-										style={styles.linkText}>privacy policy</Text>.
+										style={styles.linkText}>{t('terms.privacyPolicy')}</Text>.
 								</Text>
 								<TouchableOpacity
 									testID="PrivacyAgreeCheckbox"
@@ -303,7 +305,7 @@ const TermsOfUse = (): React.ReactElement => {
 							style={[styles.continueButton, canContinue ? null : styles.continueButtonInactive ]}
 							testID="TermsContinueButton"
 						>
-							<Text style={styles.buttonText}>Continue</Text>
+							<Text style={styles.buttonText}>{t('common.continue')}</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

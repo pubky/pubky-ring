@@ -48,6 +48,8 @@ const Button = ({
 					<Text
 						testID={`${testID}-Text`}
 						numberOfLines={1}
+						adjustsFontSizeToFit
+						minimumFontScale={0.8}
 						style={[styles.actionButtonText, textStyle]}
 					>
 						{text}

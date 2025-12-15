@@ -144,7 +144,18 @@
     "unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación, una URL de autenticación o una solicitud de sesión.",
     "debugInfoCopied": "Información de depuración copiada al portapapeles",
     "tapToCopyDebug": "Pulse para copiar la información de depuración",
-    "unknownError": "Se ha producido un error desconocido"
+    "unknownError": "Se ha producido un error desconocido",
+    "authorizationFailed": "Autorización fallida",
+    "importFailed": "Importación fallida",
+    "signupFailed": "Error de registro",
+    "signupFailedDescription": "Por favor, compruebe que su enlace de inscripción sigue siendo válido y vuelva a intentarlo.",
+    "inviteProcessingFailed": "Fallo en el procesamiento de la invitación",
+    "sessionRequestFailed": "Fallo en la solicitud de sesión",
+    "signInFailed": "Fallo en el registro",
+    "failedToGetSecretKey": "Fallo al obtener la clave secreta",
+    "failedToProcessAuth": "Fallo al procesar auth",
+    "failedToImportPubky": "Fallo al importar pubky",
+    "failedToCreatePubkyWithInvite": "Fallo al crear pubky con código de invitación"
   },
   "terms": {
     "title": "Condiciones de uso.",

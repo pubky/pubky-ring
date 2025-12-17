@@ -49,7 +49,12 @@ const SessionItem = ({ session, onSignOut }: {
 					onPress={handleSignOut}
 					activeOpacity={0.7}
 				>
-					<Text style={styles.signOutText}>{t('sessionItem.signOut')}</Text>
+					<Text
+						style={styles.signOutText}
+						numberOfLines={1}
+						adjustsFontSizeToFit
+						minimumFontScale={0.8}
+					>{t('sessionItem.signOut')}</Text>
 				</TouchableOpacity>
 			</SessionView>
 

@@ -52,7 +52,12 @@ const AuthorizeQRButton = memo(({
 		) : (
 			isSignedUp ? <QrCode size={16} /> : null
 		)}
-		<Text style={textStyles.button}>{isLoading ? '' : isSignedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}</Text>
+		<Text
+			style={textStyles.button}
+			numberOfLines={1}
+			adjustsFontSizeToFit
+			minimumFontScale={0.8}
+		>{isLoading ? '' : isSignedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}</Text>
 	</AuthorizeButton>
 ));
 

@@ -105,7 +105,12 @@ const RecoveryPhrasePrompt = ({ payload }: {
 									style={styles.revealButton}
 									onPress={handleConfirmBackup}
 								>
-									<Text style={styles.tapToRevealText}>{t('backup.tapToReveal')}</Text>
+									<Text
+										style={styles.tapToRevealText}
+										numberOfLines={1}
+										adjustsFontSizeToFit
+										minimumFontScale={0.8}
+									>{t('backup.tapToReveal')}</Text>
 								</TouchableOpacity>
 							</>
 						)}

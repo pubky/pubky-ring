@@ -70,7 +70,12 @@ const OnboardingContent = (): ReactElement => {
 							onPress={navigateHome}
 							testID="OnboardingGetStartedButton"
 						>
-							<Text style={styles.buttonText}>{t('onboarding.getStarted')}</Text>
+							<Text
+								style={styles.buttonText}
+								numberOfLines={1}
+								adjustsFontSizeToFit
+								minimumFontScale={0.8}
+							>{t('onboarding.getStarted')}</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

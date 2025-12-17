@@ -111,7 +111,12 @@ const ScanInviteButton = memo(() => {
 			>
 				<View style={styles.row}>
 					<QrCode size={19} />
-					<Text style={styles.text}>{i18n.t('scanInvite.scanInviteFor')}</Text>
+					<Text
+						style={styles.text}
+						numberOfLines={1}
+						adjustsFontSizeToFit
+						minimumFontScale={0.8}
+					>{i18n.t('scanInvite.scanInviteFor')}</Text>
 					<Image
 						source={PubkyRingLogo}
 						style={styles.logo}

@@ -361,7 +361,13 @@ const InviteCode = ({ payload }: {
 							onPressIn={isValid && !loading ? handleContinue : undefined}
 							disabled={!isValid || loading}
 						>
-							<Text testID="InviteCodeContinueButtonText" style={styles.buttonText}>{loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}</Text>
+							<Text
+								testID="InviteCodeContinueButtonText"
+								style={styles.buttonText}
+								numberOfLines={1}
+								adjustsFontSizeToFit
+								minimumFontScale={0.8}
+							>{loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}</Text>
 						</AuthorizeButton>
 					</View>
 				</View>

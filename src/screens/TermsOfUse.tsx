@@ -305,7 +305,12 @@ const TermsOfUse = (): React.ReactElement => {
 							style={[styles.continueButton, canContinue ? null : styles.continueButtonInactive ]}
 							testID="TermsContinueButton"
 						>
-							<Text style={styles.buttonText}>{t('common.continue')}</Text>
+							<Text
+								style={styles.buttonText}
+								numberOfLines={1}
+								adjustsFontSizeToFit
+								minimumFontScale={0.8}
+							>{t('common.continue')}</Text>
 						</TouchableOpacity>
 					</View>
 				</View>

@@ -294,11 +294,6 @@ const styles = StyleSheet.create({
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
 	},
-	actionButton: {
-		...buttonStyles.compact,
-		width: '45%',
-		margin: 8,
-	},
 	actionButtonText: {
 		fontSize: 15,
 		fontWeight: '600',
@@ -363,12 +358,6 @@ const styles = StyleSheet.create({
 		gap: 8,
 		backgroundColor: 'transparent',
 	},
-	permissionChip: {
-		paddingHorizontal: 12,
-		paddingVertical: 4,
-		borderRadius: 12,
-		backgroundColor: '#f0f0f0',
-	},
 	footerContainer: {
 		height: '15%',
 		paddingHorizontal: 12,
@@ -400,17 +389,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		backgroundColor: 'transparent',
 	},
-	keyImage: {
-		width: 150,
-		height: 150,
-		resizeMode: 'contain',
-	},
-	button: {
-		paddingVertical: 12,
-		paddingHorizontal: 24,
-		borderRadius: 8,
-		minWidth: 100,
-	},
 	denyButton: {
 		...buttonStyles.compactOutline,
 		width: '45%',
@@ -438,9 +416,6 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		lineHeight: 18,
 		textAlign: 'center',
-	},
-	authorizeButtonText: {
-		color: 'white',
 	},
 	sectionTitle: {
 		fontSize: 13,
@@ -481,12 +456,6 @@ const styles = StyleSheet.create({
 		letterSpacing: 0.4,
 		backgroundColor: 'transparent',
 	},
-	checkmarkContainer: {
-		marginLeft: 8,
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
-	},
-
 	pubkyCard: {
 		minHeight: 100,
 	},

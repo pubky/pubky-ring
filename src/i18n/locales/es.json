@@ -100,7 +100,7 @@
     "backupMessage": "Introduzca una contraseña o frase de contraseña para encriptar y asegurar su copia de seguridad. Manténgala a salvo, la necesitará para restaurar su pubky.",
     "importMessage": "Introduzca su contraseña o frase de contraseña para descifrar su copia de seguridad pubky.",
     "passphraseFor": "Frase de contraseña para ",
-    "enterPassphrase": "Introduzca la frase de contraseña",
+    "enterPassphrase": "Introduzca la contraseña",
     "passwordMinLength": "La contraseña debe tener una longitud mínima de {{min}} {{chars}} ",
     "character": "carácter",
     "characters": "caracteres",
@@ -241,6 +241,28 @@
     "description": "Introduzca su código para acceder al servidor doméstico de Synonym. Obtendrá 1 GB de almacenamiento, utilizado para sus publicaciones, fotos, vídeos y perfil.",
     "needInviteCode": "¿Necesita un código de invitación?",
     "processing": "Procesando..."
+  },
+  "homeserver": {
+    "title": "Homeserver",
+    "dataHosting": "Alojamiento de datos.",
+    "chooseMessage": "Elija un servidor doméstico para alojar sus datos para pubky",
+    "label": "HOMESERVER",
+    "default": "Por defecto",
+    "requiresInvite": "(requiere código de invitación)",
+    "custom": "A medida"
+  },
+  "requestInvite": {
+    "needInvite": "¿Necesita una invitación?",
+    "askTeam": "Solicite al equipo de Pubky su código de invitación para acceder al servidor doméstico de Synonym."
+  },
+  "newPubkySetup": {
+    "newPubky": "Nuevo Pubky",
+    "pubkyHomeserver": "Pubky Homeserver",
+    "newPubkyDescription": "Este es su nuevo identificador único, su pubky. Cree tantos como necesite para distintos fines."
+  },
+  "sessionItem": {
+    "signOut": "Cerrar sesión",
+    "capabilities": "Capacidades:"
   },
   "pubkyProfile": {
     "backupReminder": "¡respaldo!"

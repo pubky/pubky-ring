@@ -266,5 +266,15 @@
   },
   "pubkyProfile": {
     "backupReminder": "¡respaldo!"
+  },
+  "screenTitles": {
+    "termsOfUse": "Condiciones de uso",
+    "onboarding": "Bienvenido",
+    "confirmPubky": "Confirmar pubky",
+    "home": "Anillo Pubky",
+    "about": "Acerca de",
+    "settings": "Ajustes",
+    "pubkyDetail": "Detalles del Pubky",
+    "editPubky": "Editar Pubky"
   }
 }

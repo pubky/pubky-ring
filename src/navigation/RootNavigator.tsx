@@ -17,10 +17,12 @@ import {
 import SettingsScreen from '../screens/SettingsScreen.tsx';
 import TermsOfUse from '../screens/TermsOfUse.tsx';
 import About from '../screens/About.tsx';
+import { useTranslation } from 'react-i18next';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigator = (): ReactElement => {
+	const { t } = useTranslation();
 	const showOnboarding = useSelector(getShowOnboarding);
 	const signedTermsOfUse = useSelector(getSignedTermsOfUse);
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -42,7 +44,7 @@ const RootNavigator = (): ReactElement => {
 					name="TermsOfUse"
 					component={TermsOfUse}
 					options={{
-						title: 'Terms of Use',
+						title: t('screenTitles.termsOfUse'),
 						gestureEnabled: false,
 					}}
 				/>
@@ -50,7 +52,7 @@ const RootNavigator = (): ReactElement => {
 					name="Onboarding"
 					component={OnboardingScreen}
 					options={{
-						title: 'Welcome',
+						title: t('screenTitles.onboarding'),
 						gestureEnabled: false,
 					}}
 				/>
@@ -58,7 +60,7 @@ const RootNavigator = (): ReactElement => {
 					name="ConfirmPubky"
 					component={ConfirmPubkyScreen}
 					options={{
-						title: 'Confirm pubky',
+						title: t('screenTitles.confirmPubky'),
 						gestureEnabled: false,
 					}}
 				/>
@@ -66,7 +68,7 @@ const RootNavigator = (): ReactElement => {
 					name="Home"
 					component={HomeScreen}
 					options={{
-						title: 'Pubky Ring',
+						title: t('screenTitles.home'),
 						gestureEnabled: false,
 						headerBackVisible: false,
 					}}
@@ -75,7 +77,7 @@ const RootNavigator = (): ReactElement => {
 					name="About"
 					component={About}
 					options={{
-						title: 'About',
+						title: t('screenTitles.about'),
 						gestureEnabled: true,
 					}}
 				/>
@@ -83,7 +85,7 @@ const RootNavigator = (): ReactElement => {
 					name="Settings"
 					component={SettingsScreen}
 					options={{
-						title: 'Settings',
+						title: t('screenTitles.settings'),
 						gestureEnabled: true,
 					}}
 				/>
@@ -91,7 +93,7 @@ const RootNavigator = (): ReactElement => {
 					name="PubkyDetail"
 					component={PubkyDetailScreen}
 					options={{
-						title: 'Pubky Details',
+						title: t('screenTitles.pubkyDetail'),
 						gestureEnabled: true,
 					}}
 				/>
@@ -99,7 +101,7 @@ const RootNavigator = (): ReactElement => {
 					name="EditPubky"
 					component={EditPubkyScreen}
 					options={{
-						title: 'Edit Pubky',
+						title: t('screenTitles.editPubky'),
 						gestureEnabled: true,
 					}}
 				/>

@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState, } from 'react';
 import { Platform, StyleSheet, } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { ActionSheetContainer, View, } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
@@ -54,13 +55,14 @@ const Content = ({
 	setCurrentScreen,
 	closeSheet
 }: ContentProps): ReactElement => {
+	const { t } = useTranslation();
 	switch (currentScreen) {
 		case ECurrentScreen.main:
 			return (
 				<View style={styles.fullSize}>
 					<PubkyReview
 						modalTitle={title}
-						headerText={'Your pubky.'}
+						headerText={t('pubky.yourPubky')}
 						description={subTitle}
 						pubky={pubky}
 						pubkyData={pubkyData}
@@ -116,6 +118,7 @@ const NewPubkySetup = ({ payload }: {
         isInvite?: boolean;
     };
 }): ReactElement => {
+	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(
 		payload?.currentScreen ?? ECurrentScreen.main
@@ -129,17 +132,17 @@ const NewPubkySetup = ({ payload }: {
 	const title = useMemo(() => {
 		switch (currentScreen) {
 			case ECurrentScreen.main:
-				return 'New Pubky';
+				return t('newPubkySetup.newPubky');
 			case ECurrentScreen.homeserver:
-				return 'Homeserver';
+				return t('homeserver.title');
 			case ECurrentScreen.inviteCode:
-				return 'Pubky Homeserver';
+				return t('newPubkySetup.pubkyHomeserver');
 			case ECurrentScreen.welcome:
-				return 'Pubky Homeserver';
+				return t('newPubkySetup.pubkyHomeserver');
 			default:
-				return 'Add Pubky';
+				return t('addPubky.title');
 		}
-	}, [currentScreen]);
+	}, [currentScreen, t]);
 
 	const acionSheetHeight = useMemo(() => {
 		switch (currentScreen) {
@@ -161,8 +164,8 @@ const NewPubkySetup = ({ payload }: {
 	}, [currentScreen]);
 
 	const subTitle = useMemo(() => {
-		return 'This is your new unique identifier, your pubky. Create as many as you need for different purposes.';
-	}, []);
+		return t('newPubkySetup.newPubkyDescription');
+	}, [t]);
 
 	const pubkyData: PubkyData = useMemo(() => {
 		const _data = payload?.data ?? defaultPubkyState;

@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
 import {
 	SessionView,
@@ -24,6 +25,7 @@ const SessionItem = ({ session, onSignOut }: {
     session: PubkySession;
     onSignOut: (sessionSecret: string) => void;
 }): ReactElement => {
+	const { t } = useTranslation();
 	const formattedDate = useMemo(() =>
     session.created_at ? formatTimestamp(session.created_at) : '',
 	[session.created_at]
@@ -47,13 +49,13 @@ const SessionItem = ({ session, onSignOut }: {
 					onPress={handleSignOut}
 					activeOpacity={0.7}
 				>
-					<Text style={styles.signOutText}>Sign Out</Text>
+					<Text style={styles.signOutText}>{t('sessionItem.signOut')}</Text>
 				</TouchableOpacity>
 			</SessionView>
 
 			{session.capabilities?.length > 0 && (
 				<SessionView style={styles.capsContainer}>
-					<Text style={styles.capsTitle}>Capabilities:</Text>
+					<Text style={styles.capsTitle}>{t('sessionItem.capabilities')}</Text>
 					<SessionView style={styles.capsWrapper}>
 						{session.capabilities.map((cap, idx) => (
 							<SessionView key={idx} style={styles.capChip}>

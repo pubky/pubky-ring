@@ -8,6 +8,7 @@ import {
 	Image,
 	Linking,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
 	View,
 	Text,
@@ -26,6 +27,7 @@ const RequestInviteCode = ({ payload }: {
 		onBack?: () => void;
 	};
 }): ReactElement => {
+	const { t } = useTranslation();
 	const closeSheet = useCallback(async (): Promise<void> => {
 		return SheetManager.hide('new-pubky-setup');
 	}, []);
@@ -65,12 +67,12 @@ const RequestInviteCode = ({ payload }: {
 				>
 					<ArrowLeft color="#FFFFFF" size={24} />
 				</TouchableOpacity>
-				<Text style={styles.title}>Default Homeserver</Text>
+				<Text style={styles.title}>{t('welcome.defaultHomeserver')}</Text>
 			</View>
 
-			<Text style={styles.headerText}>Do you need an invite?</Text>
+			<Text style={styles.headerText}>{t('requestInvite.needInvite')}</Text>
 			<SessionText style={styles.message}>
-				Ask the Pubky team for your invite code to access the Synonym homeserver.
+				{t('requestInvite.askTeam')}
 			</SessionText>
 
 			<View style={styles.contactOptions}>

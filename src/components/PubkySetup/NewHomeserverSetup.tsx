@@ -6,6 +6,7 @@ import React, {
 	useState,
 } from 'react';
 import { StyleSheet, Image, Platform } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import {
 	View,
 	Text,
@@ -34,6 +35,7 @@ const NewHomeserverSetup = ({ payload }: {
 		onContinue?: () => void;
 	};
 }): ReactElement => {
+	const { t } = useTranslation();
 	const [selectedOption, setSelectedOption] = useState<HomeserverOption>(HomeserverOption.default);
 	const pubky = payload?.pubky ?? '';
 
@@ -54,7 +56,7 @@ const NewHomeserverSetup = ({ payload }: {
 				await closeSheet();
 				setTimeout(() => {
 					showEditPubkySheet({
-						title: 'Setup',
+						title: t('pubky.setup'),
 						description: '',
 						pubky: pubky,
 						data: defaultPubkyState,
@@ -64,7 +66,7 @@ const NewHomeserverSetup = ({ payload }: {
 			default:
 				closeSheet();
 		}
-	}, [selectedOption, payload, closeSheet, pubky]);
+	}, [selectedOption, payload, closeSheet, pubky, t]);
 
 	const truncatedPubky = useMemo(() => {
 		if (!pubky) return '';
@@ -82,15 +84,15 @@ const NewHomeserverSetup = ({ payload }: {
 		>
 			<ModalIndicator />
 			<View style={styles.titleContainer}>
-				<Text style={styles.title}>Homeserver</Text>
+				<Text style={styles.title}>{t('homeserver.title')}</Text>
 			</View>
-			<Text style={styles.headerText}>Data hosting.</Text>
+			<Text style={styles.headerText}>{t('homeserver.dataHosting')}</Text>
 			<SessionText style={styles.message}>
-				Choose a homeserver to host your data for pubky <BoldText>{truncatedPubky}</BoldText>
+				{t('homeserver.chooseMessage')} <BoldText>{truncatedPubky}</BoldText>
 			</SessionText>
 
 			<View style={styles.optionsContainer}>
-				<Text style={styles.optionLabel}>HOMESERVER</Text>
+				<Text style={styles.optionLabel}>{t('homeserver.label')}</Text>
 
 				<TouchableOpacity
 					testID="HomeserverDefaultOption"
@@ -108,7 +110,7 @@ const NewHomeserverSetup = ({ payload }: {
 						)}
 					</View>
 					<Text style={styles.optionText}>
-						Default <Text style={styles.optionSubtext}>(requires invite code)</Text>
+						{t('homeserver.default')} <Text style={styles.optionSubtext}>{t('homeserver.requiresInvite')}</Text>
 					</Text>
 				</TouchableOpacity>
 
@@ -127,7 +129,7 @@ const NewHomeserverSetup = ({ payload }: {
 							<View testID="HomeserverCustomRadioInner" style={styles.radioInner} />
 						)}
 					</View>
-					<Text style={styles.optionText}>Custom</Text>
+					<Text style={styles.optionText}>{t('homeserver.custom')}</Text>
 				</TouchableOpacity>
 			</View>
 
@@ -142,7 +144,7 @@ const NewHomeserverSetup = ({ payload }: {
 					style={styles.continueButton}
 					onPressIn={handleContinue}
 				>
-					<Text style={styles.buttonText}>Continue</Text>
+					<Text style={styles.buttonText}>{t('common.continue')}</Text>
 				</AuthorizeButton>
 			</View>
 		</RadialGradient>

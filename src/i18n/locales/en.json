@@ -242,6 +242,28 @@
     "needInviteCode": "Need an invite code?",
     "processing": "Processing..."
   },
+  "homeserver": {
+    "title": "Homeserver",
+    "dataHosting": "Data hosting.",
+    "chooseMessage": "Choose a homeserver to host your data for pubky",
+    "label": "HOMESERVER",
+    "default": "Default",
+    "requiresInvite": "(requires invite code)",
+    "custom": "Custom"
+  },
+  "requestInvite": {
+    "needInvite": "Do you need an invite?",
+    "askTeam": "Ask the Pubky team for your invite code to access the Synonym homeserver."
+  },
+  "newPubkySetup": {
+    "newPubky": "New Pubky",
+    "pubkyHomeserver": "Pubky Homeserver",
+    "newPubkyDescription": "This is your new unique identifier, your pubky. Create as many as you need for different purposes."
+  },
+  "sessionItem": {
+    "signOut": "Sign Out",
+    "capabilities": "Capabilities:"
+  },
   "pubkyProfile": {
     "backupReminder": "backup!"
   }

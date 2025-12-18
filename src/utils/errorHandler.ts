@@ -1,5 +1,6 @@
 import { showToast } from './helpers';
 import { Result, ok, err } from '@synonymdev/result';
+import i18n from '../i18n';
 
 /**
  * Checks if a string is a valid, useful error message
@@ -19,7 +20,7 @@ const isValidErrorMessage = (msg: string | undefined | null): boolean => {
  * Handles strings, Error objects, objects with message property, and unknown types.
  * Recursively checks nested error structures.
  */
-export const getErrorMessage = (error: unknown, fallback = 'Unknown error'): string => {
+export const getErrorMessage = (error: unknown, fallback = i18n.t('errors.unknownError')): string => {
 	// Handle null/undefined
 	if (error === null || error === undefined) {
 		return fallback;
@@ -91,7 +92,7 @@ export const handleError = (error: unknown, context: string): boolean => {
 	if (error instanceof AppError) {
 		showToast({
 			type: 'error',
-			title: 'Error',
+			title: i18n.t('common.error'),
 			description: error.message,
 		});
 		return error.recoverable;
@@ -99,8 +100,8 @@ export const handleError = (error: unknown, context: string): boolean => {
 
 	showToast({
 		type: 'error',
-		title: 'Error',
-		description: 'An unexpected error occurred',
+		title: i18n.t('common.error'),
+		description: i18n.t('pubkyErrors.unexpectedError'),
 	});
 	return false;
 };
@@ -114,6 +115,6 @@ export const withErrorHandler = async <T>(
 		return ok(result);
 	} catch (error) {
 		handleError(error, context);
-		return err(error instanceof Error ? error.message : 'Unknown error');
+		return err(error instanceof Error ? error.message : i18n.t('errors.unknownError'));
 	}
 };

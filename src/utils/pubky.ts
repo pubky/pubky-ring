@@ -83,11 +83,11 @@ export const createNewPubky = async (
 		if (genKeyRes.isErr()) {
 			showToast({
 				type: 'error',
-				title: 'Error',
-				description: 'Failed to generate secret key',
+				title: i18n.t('common.error'),
+				description: i18n.t('pubkyErrors.failedToGenerateSecretKey'),
 			});
 			console.error('Failed to generate secret key');
-			return err('Failed to generate secret key');
+			return err(i18n.t('pubkyErrors.failedToGenerateSecretKey'));
 		}
 
 		const mnemonic = genKeyRes.value.mnemonic;
@@ -104,10 +104,10 @@ export const createNewPubky = async (
 		console.error('Error creating pubky:', error);
 		showToast({
 			type: 'error',
-			title: 'Error',
-			description: 'Failed to create pubky',
+			title: i18n.t('common.error'),
+			description: i18n.t('pubkyErrors.failedToCreatePubky'),
 		});
-		return err('Failed to create pubky');
+		return err(i18n.t('pubkyErrors.failedToCreatePubky'));
 	}
 };
 
@@ -123,7 +123,7 @@ export const createPubkyWithInviteCode = async (
 		// Generate new pubky
 		const genKeyRes = await generateMnemonicPhraseAndKeypair();
 		if (genKeyRes.isErr()) {
-			return err('Failed to generate secret key');
+			return err(i18n.t('pubkyErrors.failedToGenerateSecretKey'));
 		}
 
 		const mnemonic = genKeyRes.value.mnemonic;
@@ -142,7 +142,7 @@ export const createPubkyWithInviteCode = async (
 			});
 
 			if (saveRes.isErr()) {
-				return err('Failed to save pubky');
+				return err(i18n.t('pubkyErrors.failedToSavePubky'));
 			}
 
 			// Set the homeserver
@@ -169,7 +169,7 @@ export const createPubkyWithInviteCode = async (
 
 				if (signinRes.isErr()) {
 					console.error('Signin also failed:', signinRes.error);
-					return err('Invalid invite code. Please check and try again.');
+					return err(i18n.t('pubkyErrors.invalidInviteCode'));
 				}
 				console.log('Signin succeeded');
 			} else {
@@ -181,7 +181,7 @@ export const createPubkyWithInviteCode = async (
 		}
 	} catch (error) {
 		console.error('Error creating pubky with invite code:', error);
-		return err('Failed to create pubky with invite code');
+		return err(i18n.t('errors.failedToCreatePubkyWithInvite'));
 	}
 };
 
@@ -247,7 +247,7 @@ export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app')
 			const dataUri = `data:image/jpeg;base64,${base64Data}`;
 			return ok(dataUri);
 		}
-		return err('Expected image data but received text');
+		return err(i18n.t('pubkyErrors.expectedImageData'));
 	} catch (e) {
 		return err(JSON.stringify(e));
 	}
@@ -283,7 +283,7 @@ export const importPubky = async ({
 		const pubkyRes = await getPublicKeyFromSecretKey(secretKey);
 		if (pubkyRes.isErr()) {
 			console.error('Failed to get public key from secret key');
-			return err('Failed to get public key from secret key');
+			return err(i18n.t('pubkyErrors.failedToGetPublicKey'));
 		}
 		const pubky = pubkyRes.value.public_key;
 		let homeserver = defaultPubkyState.homeserver;
@@ -320,7 +320,7 @@ export const importPubky = async ({
 		return savePubkyRes;
 	} catch (error) {
 		console.error('Error saving pubky:', error);
-		return err('Error saving pubky');
+		return err(i18n.t('pubkyErrors.errorSavingPubky'));
 	}
 };
 
@@ -347,10 +347,10 @@ export const savePubky = async ({
 				return err(res.error.message);
 			}
 			if (res.value.secret_key !== secretKey) {
-				return err('The provided mnemonic phrase does not generate the expected secret key.');
+				return err(i18n.t('pubkyErrors.mnemonicDoesNotMatchSecretKey'));
 			}
 			if (res.value.public_key !== pubky) {
-				return err('The provided mnemonic phrase does not generate the expected pubky.');
+				return err(i18n.t('pubkyErrors.mnemonicDoesNotMatchPubky'));
 			}
 		} else {
 			// If no mnemonic is provided we have to default to the encrypted file.
@@ -370,7 +370,7 @@ export const savePubky = async ({
 				console.error('Failed to save keychain value');
 				showToast({
 					type: 'error',
-					title: 'Failed to save pubky to keychain',
+					title: i18n.t('pubkyErrors.failedToSaveToKeychain'),
 					description: response.error.message,
 				});
 				deletePubky(pubky, dispatch).then();
@@ -379,7 +379,7 @@ export const savePubky = async ({
 		return ok(pubky);
 	} catch (e) {
 		console.error('Error saving pubky:', e);
-		return err('Error saving pubky');
+		return err(i18n.t('pubkyErrors.errorSavingPubky'));
 	}
 };
 
@@ -406,7 +406,7 @@ export const deletePubky = async (
 			if (response.isErr()) {
 				showToast({
 					type: 'error',
-					title: 'Failed to delete pubky from keychain',
+					title: i18n.t('pubkyErrors.failedToDelete'),
 					description: response.error.message,
 				});
 				console.error('Failed to delete pubky from keychain');
@@ -415,7 +415,7 @@ export const deletePubky = async (
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);
-		return err('Error deleting pubky');
+		return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 	}
 };
 
@@ -454,11 +454,11 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 		const res = await getKeychainValue({ key: pubky });
 		if (res.isErr()) {
 			console.error('Failed to get secret key from keychain');
-			return err('Failed to get secret key from keychain');
+			return err(i18n.t('pubkyErrors.failedToGetSecretKeyFromKeychain'));
 		}
 		if (!res?.value) {
 			console.error('Secret key not found in keychain');
-			return err('Secret key not found in keychain');
+			return err(i18n.t('pubkyErrors.secretKeyNotFoundInKeychain'));
 		}
 		const isMigrated = isNewFormat(res.value);
 		if (isMigrated) {
@@ -467,7 +467,7 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 
 		return await migrateKeychainEntry(pubky, res.value);
 	} catch {
-		return err('Unable to get pubky secret key.');
+		return err(i18n.t('pubkyErrors.unableToGetSecretKey'));
 	}
 };
 
@@ -528,7 +528,7 @@ export const signInToHomeserver = async ({
 		const pubkyData = getPubkyDataFromStore(pubky);
 		homeserver = pubkyData?.homeserver ?? DEFAULT_HOMESERVER;
 		if (!homeserver) {
-			return err('Homeserver not found for this pubky. Please ensure the pubky is properly configured.');
+			return err(i18n.t('pubkyErrors.homeserverNotFound'));
 		}
 	}
 	if (!secretKey) {
@@ -580,7 +580,7 @@ export const signOutOfHomeserver = async (pubky: string, sessionSecret: string, 
 	if (signOutRes.isErr()) {
 		showToast({
 			type: 'error',
-			title: 'Failed to sign out of homeserver',
+			title: i18n.t('pubkyErrors.failedToSignOut'),
 			description: signOutRes.error.message,
 		});
 		return;
@@ -621,11 +621,11 @@ export const performAuth = async ({
 	try {
 		const authPromise = (async (): Promise<Result<string>> => {
 			if (!pubky) {
-				return err('Pubky is required for auth');
+				return err(i18n.t('pubkyErrors.pubkyRequiredForAuth'));
 			}
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
-				return err('Failed to get secret key');
+				return err(i18n.t('pubkyErrors.failedToGetSecretKey'));
 			}
 			const pubkyData = getPubkyDataFromStore(pubky);
 			const { signedUp, homeserver } = pubkyData;
@@ -659,7 +659,7 @@ export const performAuth = async ({
 		})();
 
 		const timeoutPromise = timeout(TIMEOUT_MS).then(
-			(): Result<string> => err('Authentication request timed out')
+			(): Result<string> => err(i18n.t('auth.timeoutError'))
 		);
 
 		return await Promise.race([authPromise, timeoutPromise]);
@@ -667,7 +667,7 @@ export const performAuth = async ({
 		console.error('Auth Error:', error);
 		const errorMessage = error instanceof Error
 			? error.message
-			: 'An error occurred during authorization';
+			: i18n.t('pubkyErrors.authorizationError');
 		return err(`Auth Error: ${errorMessage}`);
 	}
 };

@@ -71,12 +71,12 @@ export const handleInviteAction = async (
 
 		return ok(pubky);
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Unknown error processing invite';
+		const errorMessage = error instanceof Error ? error.message : i18n.t('invite.unknownErrorProcessing');
 		console.error('Error handling invite code:', errorMessage);
 		showToast({
 			type: 'error',
-			title: 'Error',
-			description: 'Failed to process invite code',
+			title: i18n.t('common.error'),
+			description: i18n.t('errors.inviteProcessingFailed'),
 		});
 		return err(errorMessage);
 	}

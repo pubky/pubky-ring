@@ -5,6 +5,7 @@ import {
 	RESULTS,
 } from 'react-native-permissions';
 import { Platform } from 'react-native';
+import i18n from '../i18n';
 
 export const requestCameraPermission = async (): Promise<boolean> => {
 	const cameraPermission =
@@ -16,10 +17,10 @@ export const requestCameraPermission = async (): Promise<boolean> => {
 			return false;
 		case RESULTS.DENIED:
 			const rationale = {
-				title: 'Permission to use camera',
-				message: 'Pubky Ring needs permission to use your camera',
-				buttonPositive: 'OK',
-				buttonNegative: 'Cancel',
+				title: i18n.t('permissions.cameraTitle'),
+				message: i18n.t('permissions.cameraMessage'),
+				buttonPositive: i18n.t('common.ok'),
+				buttonNegative: i18n.t('common.cancel'),
 			};
 			const requestResponse = await request(cameraPermission, rationale);
 			switch (requestResponse) {

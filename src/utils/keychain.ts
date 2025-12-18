@@ -4,6 +4,7 @@ import {
 	ok,
 	Result,
 } from '@synonymdev/result';
+import i18n from '../i18n';
 
 export const getKeychainValue = async ({
 	key,
@@ -13,11 +14,11 @@ export const getKeychainValue = async ({
 	try {
 		const result = await Keychain.getGenericPassword({ service: key });
 		if (!result || !result?.password) {
-			return err('Failed to get keychain value');
+			return err(i18n.t('keychain.failedToGetValue'));
 		}
 		return ok(result.password);
 	} catch {
-		return err('Failed to get keychain value');
+		return err(i18n.t('keychain.failedToGetValue'));
 	}
 };
 
@@ -30,9 +31,9 @@ export const setKeychainValue = async ({
 }): Promise<Result<string>> => {
 	try {
 		const res = await Keychain.setGenericPassword(key, value, { service: key });
-		return res ? ok(value) : err('Failed to set keychain value');
+		return res ? ok(value) : err(i18n.t('keychain.failedToSetValue'));
 	} catch {
-		return err('Failed to set keychain value');
+		return err(i18n.t('keychain.failedToSetValue'));
 	}
 };
 
@@ -55,7 +56,7 @@ export const resetKeychainValue = async ({
 		return ok(result);
 	} catch (e) {
 		console.log(e);
-		return err('Failed to reset keychain value');
+		return err(i18n.t('keychain.failedToResetValue'));
 	}
 };
 

@@ -79,7 +79,9 @@
     "pubkyImported": "Pubky Imported",
     "pubkyReImported": "Pubky Re-Imported",
     "importSuccess": "You successfully imported your Pubky.",
-    "reImportSuccess": "You successfully re-imported your Pubky."
+    "reImportSuccess": "You successfully re-imported your Pubky.",
+    "notValidSecretKey": "Not a valid secret key or recovery phrase.",
+    "unableToImportFile": "Unable to import file."
   },
   "pubky": {
     "noSelection": "No Pubky Selected",
@@ -91,7 +93,12 @@
     "selectPubkyMessage": "Select which pubky you want to use to authorize this service, browser or device.",
     "noPubkysAvailable": "You do not have any pubky's that are setup and available. Please create and setup a pubky first.",
     "yourPubky": "Your pubky.",
-    "yourPubkyDescription": "This is your first unique identifier, your pubky. Create as many as you need for different purposes. You are your keys."
+    "yourPubkyDescription": "This is your first unique identifier, your pubky. Create as many as you need for different purposes. You are your keys.",
+    "noPubkysSetup": "No Pubkys are setup",
+    "setupExistingToProcess": "Please setup any of your existing Pubkys to proceed.",
+    "noPubkysExist": "No Pubkys exist",
+    "addAndSetupToProcess": "Please add and setup a Pubky to proceed.",
+    "successfullyCreated": "Successfully created pubky."
   },
   "backup": {
     "encryptedFile": "Encrypted File",
@@ -108,7 +115,10 @@
     "recoveryPhraseMessage": "Write down these 12 words in the right order and store them in a safe place.",
     "tapToReveal": "Tap to reveal",
     "recoveryWarning": "Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.",
-    "finishBackup": "Finish backup"
+    "finishBackup": "Finish backup",
+    "couldNotRetrieveSecretKey": "Could not retrieve secret key for backup",
+    "backupCreated": "Backup Created",
+    "failedToCreateBackup": "Failed to create backup file"
   },
   "onboarding": {
     "title": "Keychain for the next web.",
@@ -155,7 +165,8 @@
     "failedToGetSecretKey": "Failed to get secret key",
     "failedToProcessAuth": "Failed to process auth",
     "failedToImportPubky": "Failed to import pubky",
-    "failedToCreatePubkyWithInvite": "Failed to create pubky with invite code"
+    "failedToCreatePubkyWithInvite": "Failed to create pubky with invite code",
+    "errorCopiedToClipboard": "Error message copied to clipboard"
   },
   "terms": {
     "title": "Terms of Use.",
@@ -234,7 +245,25 @@
     "unableToGetSecretKey": "Unable to get secret key",
     "invalidInviteCode": "Invalid invite code. Please check and try again.",
     "unableToSignIn": "Unable to sign in: {{error}}",
-    "unexpectedError": "An unexpected error occurred. Please try again."
+    "unexpectedError": "An unexpected error occurred. Please try again.",
+    "createError": "An error occurred while creating the Pubky",
+    "failedToGenerateSecretKey": "Failed to generate secret key",
+    "failedToCreatePubky": "Failed to create pubky",
+    "failedToSavePubky": "Failed to save pubky",
+    "expectedImageData": "Expected image data but received text",
+    "failedToGetPublicKey": "Failed to get public key from secret key",
+    "mnemonicDoesNotMatchSecretKey": "The provided mnemonic phrase does not generate the expected secret key.",
+    "mnemonicDoesNotMatchPubky": "The provided mnemonic phrase does not generate the expected pubky.",
+    "failedToSaveToKeychain": "Failed to save pubky to keychain",
+    "errorSavingPubky": "Error saving pubky",
+    "errorDeletingPubky": "Error deleting pubky",
+    "secretKeyNotFoundInKeychain": "Secret key not found in keychain",
+    "failedToGetSecretKeyFromKeychain": "Failed to get secret key from keychain",
+    "homeserverNotFound": "Homeserver not found for this pubky. Please ensure the pubky is properly configured.",
+    "failedToSignOut": "Failed to sign out of homeserver",
+    "pubkyRequiredForAuth": "Pubky is required for auth",
+    "failedToGetSecretKey": "Failed to get secret key",
+    "authorizationError": "An error occurred during authorization"
   },
   "inviteCode": {
     "title": "Invite code.",
@@ -276,5 +305,23 @@
     "settings": "Settings",
     "pubkyDetail": "Pubky Details",
     "editPubky": "Edit Pubky"
+  },
+  "permissions": {
+    "cameraTitle": "Permission to use camera",
+    "cameraMessage": "Pubky Ring needs permission to use your camera"
+  },
+  "keychain": {
+    "failedToGetValue": "Failed to get keychain value",
+    "failedToSetValue": "Failed to set keychain value",
+    "failedToResetValue": "Failed to reset keychain value"
+  },
+  "signup": {
+    "failedToGenerateKeypair": "Failed to generate keypair",
+    "signupSuccessful": "Signup Successful",
+    "newPubkyCreated": "Your new Pubky has been created",
+    "failedToProcessSignup": "Failed to process signup"
+  },
+  "invite": {
+    "unknownErrorProcessing": "Unknown error processing invite"
   }
 }

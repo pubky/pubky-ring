@@ -18,6 +18,7 @@ import { EBackupPreference } from '../types/pubky';
 import { getStore } from "../utils/store-helpers.ts";
 import { getPubkyKeys } from '../store/selectors/pubkySelectors';
 import { copyToClipboard } from "../utils/clipboard.ts";
+import { useTranslation } from 'react-i18next';
 
 export const usePubkyManagement = (): {
 	createPubky: () => Promise<void>;
@@ -25,14 +26,15 @@ export const usePubkyManagement = (): {
 	confirmPubkyBackup: (pubky: string, backupPreference: EBackupPreference) => void;
 } => {
 	const dispatch = useDispatch();
+	const { t } = useTranslation();
 
 	const createPubky = useCallback(async () => {
 		const pubky = await createNewPubky(dispatch);
 		if (pubky.isErr()) {
 			showToast({
 				type: 'error',
-				title: 'Error',
-				description: 'An error occurred while creating the Pubky',
+				title: t('common.error'),
+				description: t('pubkyErrors.createError'),
 			});
 			return;
 		}
@@ -41,7 +43,7 @@ export const usePubkyManagement = (): {
 				pubky: pubky.value,
 			});
 		}, 200);
-	}, [dispatch]);
+	}, [dispatch, t]);
 
 	const importPubky = useCallback(
 		async (data = ''): Promise<Result<string>> => {
@@ -53,7 +55,7 @@ export const usePubkyManagement = (): {
 					return err(res.error.message);
 				}
 				if (!res.value.isSecretKey) {
-					return err('Not a valid secret key or recovery phrase.');
+					return err(t('import.notValidSecretKey'));
 				}
 
 				let secretKey = '';
@@ -74,7 +76,7 @@ export const usePubkyManagement = (): {
 						const msg = secretKeyRes.error.message;
 						showToast({
 							type: 'error',
-							title: 'Error',
+							title: t('common.error'),
 							description: msg,
 						});
 						return err(msg);
@@ -91,7 +93,7 @@ export const usePubkyManagement = (): {
 						const msg = pubky.error.message;
 						showToast({
 							type: 'error',
-							title: 'Error',
+							title: t('common.error'),
 							description: msg,
 						});
 						return err(msg);
@@ -105,29 +107,29 @@ export const usePubkyManagement = (): {
 							onContinue: () => {
 								setTimeout(() => {
 									showEditPubkySheet({
-										title: 'Setup',
+										title: t('pubky.setup'),
 										pubky: pubky.value,
 									});
 								}, 200);
 							},
 						});
 					}, 200);
-					return ok('Successfully created pubky.');
+					return ok(t('pubky.successfullyCreated'));
 				}
 			}
 
 			const importFileRes = await importFile(dispatch);
 			if (importFileRes.isErr()) {
-				const msg = importFileRes.error?.message ?? 'Unable to import file.';
+				const msg = importFileRes.error?.message ?? t('import.unableToImportFile');
 				if (importFileRes.error?.message && importFileRes.error.message !== 'OPERATION_CANCELED') {
 					showToast({
 						type: 'error',
-						title: 'Error',
+						title: t('common.error'),
 						description: msg,
 						onPress: () => {
 							copyToClipboard(msg);
 							// eslint-disable-next-line no-alert
-							alert('Error message copied to clipboard');
+							alert(t('errors.errorCopiedToClipboard'));
 						},
 						visibilityTime: 10000,
 					});
@@ -143,7 +145,7 @@ export const usePubkyManagement = (): {
 					onContinue: () => {
 						setTimeout(() => {
 							showEditPubkySheet({
-								title: 'Setup',
+								title: t('pubky.setup'),
 								pubky: importFileRes.value,
 							});
 						}, 200);
@@ -151,10 +153,10 @@ export const usePubkyManagement = (): {
 				});
 			}, 200);
 
-			const msg = 'Pubky imported successfully';
+			const msg = t('import.pubkyImportedSuccessfully');
 			return ok(msg);
 		},
-		[dispatch],
+		[dispatch, t],
 	);
 
 	const confirmPubkyBackup = useCallback(

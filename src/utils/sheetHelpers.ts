@@ -8,6 +8,7 @@ import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
 import { backupPubky } from './rnfs.ts';
 import { err, ok } from '@synonymdev/result';
+import i18n from '../i18n';
 
 export const showAddPubkySheet = (
 	createPubky: () => void,
@@ -36,7 +37,7 @@ export const showNewPubkySetupSheet = ({
 };
 
 export const showEditPubkySheet = ({
-	title = 'Edit',
+	title = i18n.t('common.edit'),
 	description = '',
 	pubky,
 	data = { ...defaultPubkyState },
@@ -58,7 +59,7 @@ export const showEditPubkySheet = ({
 };
 
 export const showImportSuccessSheet = ({
-	modalTitle = 'Pubky Imported',
+	modalTitle = i18n.t('import.pubkyImported'),
 	description,
 	isNewPubky = true,
 	pubky,
@@ -107,8 +108,8 @@ export const showBackupPrompt = async ({
 	if (secretKeyResponse.isErr()) {
 		showToast({
 			type: 'error',
-			title: 'Error',
-			description: 'Could not retrieve secret key for backup',
+			title: i18n.t('common.error'),
+			description: i18n.t('backup.couldNotRetrieveSecretKey'),
 		});
 		return;
 	}
@@ -145,7 +146,7 @@ export const showBackupPrompt = async ({
 					if (createRecoveryFileRes.isErr()) {
 						showToast({
 							type: 'error',
-							title: 'Error',
+							title: i18n.t('common.error'),
 							description: createRecoveryFileRes.error.message,
 						});
 						return err(createRecoveryFileRes.error.message);
@@ -168,14 +169,14 @@ export const showBackupPrompt = async ({
 						}
 						showToast({
 							type: 'error',
-							title: 'Error',
+							title: i18n.t('common.error'),
 							description: backupRes.error.message,
 						});
 						return err(backupRes.error.message);
 					} else {
 						showToast({
 							type: 'success',
-							title: 'Backup Created',
+							title: i18n.t('backup.backupCreated'),
 							description: `${fileName}.pkarr`,
 						});
 						SheetManager.hide('backup-prompt').then();
@@ -186,10 +187,10 @@ export const showBackupPrompt = async ({
 					console.error('Backup creation error:', error);
 					showToast({
 						type: 'error',
-						title: 'Error',
-						description: 'Failed to create backup file',
+						title: i18n.t('common.error'),
+						description: i18n.t('backup.failedToCreateBackup'),
 					});
-					return err('Failed to create backup file');
+					return err(i18n.t('backup.failedToCreateBackup'));
 				}
 			},
 			onClose: () => SheetManager.hide('backup-prompt'),

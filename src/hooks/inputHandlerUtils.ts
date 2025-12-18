@@ -113,16 +113,16 @@ export const handleNoPubkysAvailable = (
 		// Has pubkys but none are set up
 		showToast({
 			type: 'info',
-			title: 'No Pubkys are setup',
-			description: 'Please setup any of your existing Pubkys to proceed.',
+			title: i18n.t('pubky.noPubkysSetup'),
+			description: i18n.t('pubky.setupExistingToProcess'),
 			visibilityTime: 5000,
 		});
 	} else {
 		// No pubkys at all - show add-pubky sheet if callbacks provided
 		showToast({
 			type: 'info',
-			title: 'No Pubkys exist',
-			description: 'Please add and setup a Pubky to proceed.',
+			title: i18n.t('pubky.noPubkysExist'),
+			description: i18n.t('pubky.addAndSetupToProcess'),
 			visibilityTime: 5000,
 			onPress: callbacks?.createPubky && callbacks?.importPubky ? (): void => {
 				SheetManager.show('add-pubky', {

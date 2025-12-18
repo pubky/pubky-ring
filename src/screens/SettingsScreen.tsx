@@ -26,9 +26,10 @@ import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
-const SettingsScreen = ({ navigation }: Props): ReactElement => {
+const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
+	const showSecretSettings = route.params?.showSecretSettings ?? true;
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const currentTheme = useSelector(getTheme);
@@ -187,23 +188,27 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 					</ActionButton>
 				</Card>
 
-				<Card style={styles.section}>
-					<ActionButton
-						onPress={handleShowOnboarding}
-						style={styles.navigationAnimationButton}
-					>
-						<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
-					</ActionButton>
-				</Card>
+				{showSecretSettings && (
+					<Card style={styles.section}>
+						<ActionButton
+							onPress={handleShowOnboarding}
+							style={styles.navigationAnimationButton}
+						>
+							<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
+						</ActionButton>
+					</Card>
+				)}
 
-				<Card style={styles.section}>
-					<ActionButton
-						onPress={handleWipePubkyRing}
-						style={styles.navigationAnimationButton}
-					>
-						<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
-					</ActionButton>
-				</Card>
+				{showSecretSettings && (
+					<Card style={styles.section}>
+						<ActionButton
+							onPress={handleWipePubkyRing}
+							style={styles.navigationAnimationButton}
+						>
+							<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
+						</ActionButton>
+					</Card>
+				)}
 
 				{/* Backup all pubkys */}
 				{/* TODO: Consider implementing a "Backup All Pubkys" feature. Backs up all pubkys with same passphrase and saves as zip file for future import

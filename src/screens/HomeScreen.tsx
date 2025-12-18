@@ -11,6 +11,7 @@ import { Pubky, TPubkys } from '../types/pubky';
 import {
 	View,
 	Plus,
+	QrCode,
 } from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
@@ -22,10 +23,14 @@ import {
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
+import { SheetManager } from 'react-native-actions-sheet';
+import { readFromClipboard } from '../utils/clipboard';
+import { showToast } from '../utils/helpers';
+import { parseInput, InputAction } from '../utils/inputParser';
+import { routeInput } from '../utils/inputRouter';
+import i18n from '../i18n';
 import AppHeader from '../components/AppHeader';
 import { buttonStyles } from '../theme/utils';
-import ScanInviteButton from '../components/ScanInviteButton';
-import { ENABLE_INVITE_SCANNER } from "../utils/constants.ts";
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 
@@ -63,18 +68,82 @@ interface ListFooterProps {
 
 const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 	const { t } = useTranslation();
-	const onPress = useCallback(() => {
+	const dispatch = useDispatch();
+
+	const onAddPubkyPress = useCallback(() => {
 		showAddPubkySheet(createPubky, importPubky);
 	}, [createPubky, importPubky]);
 
+	const onShowQRPress = useCallback(async () => {
+		await SheetManager.show('camera', {
+			payload: {
+				title: i18n.t('import.title'),
+				onScan: async (data: string) => {
+					await SheetManager.hide('camera');
+					const parsed = await parseInput(data, 'scan');
+
+					if (parsed.action === InputAction.Signup ||
+						parsed.action === InputAction.Import ||
+						parsed.action === InputAction.Invite) {
+						await routeInput(parsed, { dispatch });
+					} else {
+						showToast({
+							type: 'error',
+							title: i18n.t('import.invalidData'),
+							description: i18n.t('import.invalidClipboardData'),
+						});
+					}
+				},
+				onCopyClipboard: async (): Promise<void> => {
+					await SheetManager.hide('camera');
+					const clipboardContents = await readFromClipboard();
+					if (!clipboardContents) {
+						showToast({
+							type: 'error',
+							title: i18n.t('common.error'),
+							description: i18n.t('errors.emptyClipboard'),
+						});
+						return;
+					}
+
+					const parsed = await parseInput(clipboardContents, 'clipboard');
+
+					if (parsed.action === InputAction.Signup ||
+						parsed.action === InputAction.Import ||
+						parsed.action === InputAction.Invite) {
+						await routeInput(parsed, { dispatch });
+					} else {
+						showToast({
+							type: 'error',
+							title: i18n.t('import.invalidData'),
+							description: i18n.t('import.invalidClipboardData'),
+						});
+					}
+				},
+				onClose: () => {
+					SheetManager.hide('camera');
+				},
+			},
+		});
+	}, [dispatch]);
+
 	return (
-		<Button
-			testID="AddPubkyButton"
-			style={styles.listFooter}
-			text={t('home.addPubky')}
-			onPress={onPress}
-			icon={<Plus size={16} />}
-		/>
+		<View style={styles.listFooterContainer}>
+			<Button
+				testID="AddPubkyButton"
+				style={styles.listFooterButton}
+				text={t('home.addPubky')}
+				onPress={onAddPubkyPress}
+				icon={<Plus size={16} />}
+			/>
+			<Button
+				testID="ShowQRButton"
+				style={styles.scanQRButton}
+				text={t('home.scanQR')}
+				onPress={onShowQRPress}
+				icon={<QrCode size={16} />}
+			/>
+		</View>
 	);
 });
 
@@ -126,62 +195,67 @@ const HomeScreen = (): ReactElement => {
 		return pubkyArray.length > 0;
 	}, [pubkyArray.length]);
 
-	const showScanInviteButton = useMemo(() => {
-		return ENABLE_INVITE_SCANNER && !hasPubkys;
-	}, [hasPubkys]);
-
 	const ListFooterComponent = useMemo(() => {
-		if (hasPubkys) {
-			return <ListFooter createPubky={createPubky} importPubky={importPubky} />;
-		}
-		return null;
-	}, [hasPubkys, createPubky, importPubky]);
+		return <ListFooter createPubky={createPubky} importPubky={importPubky} />;
+	}, [createPubky, importPubky]);
 
-	const FixedScanButton = useMemo(() => {
-		if (!showScanInviteButton) return null;
+	if (!hasPubkys) {
 		return (
-			<View style={styles.fixedButtonContainer}>
-				<ScanInviteButton />
+			<View style={styles.emptyContainer}>
+				<AppHeader />
+				<EmptyState />
+				<View style={styles.emptyFooterContainer}>
+					<ListFooter createPubky={createPubky} importPubky={importPubky} />
+				</View>
 			</View>
 		);
-	}, [showScanInviteButton]);
+	}
 
 	return (
-		<>
-			<DraggableFlatList
-				data={pubkyArray}
-				onDragEnd={handleDragEnd}
-				keyExtractor={keyExtractor}
-				renderItem={renderItem}
-				ListHeaderComponent={<ListHeader />}
-				ListFooterComponent={ListFooterComponent}
-				ListEmptyComponent={<EmptyState />}
-				contentContainerStyle={styles.listContent}
-				showsVerticalScrollIndicator={false}
-				showsHorizontalScrollIndicator={false}
-				getItemLayout={getItemLayout}
-			/>
-			{FixedScanButton}
-		</>
+		<DraggableFlatList
+			data={pubkyArray}
+			onDragEnd={handleDragEnd}
+			keyExtractor={keyExtractor}
+			renderItem={renderItem}
+			ListHeaderComponent={<ListHeader />}
+			ListFooterComponent={ListFooterComponent}
+			contentContainerStyle={styles.listContent}
+			showsVerticalScrollIndicator={false}
+			showsHorizontalScrollIndicator={false}
+			getItemLayout={getItemLayout}
+		/>
 	);
 };
 
 const styles = StyleSheet.create({
+	emptyContainer: {
+		flex: 1,
+		backgroundColor: 'transparent',
+	},
+	emptyFooterContainer: {
+		paddingBottom: Platform.select({ ios: 34, android: 24 }),
+		backgroundColor: 'transparent',
+	},
 	listContent: {
 		paddingBottom: '100%',
 	},
-	listFooter: {
-		...buttonStyles.primary,
-		width: '90%',
-		alignSelf: 'center',
-	},
-	fixedButtonContainer: {
-		position: 'absolute',
-		bottom: Platform.select({ ios: 0, android: 20 }),
-		left: 0,
-		right: 0,
+	listFooterContainer: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: 12,
+		paddingHorizontal: 20,
 		backgroundColor: 'transparent',
 	},
+	listFooterButton: {
+		...buttonStyles.primary,
+		flex: 1,
+	},
+	scanQRButton: {
+		...buttonStyles.primary,
+		borderWidth: 1,
+		flex: 1,
+	}
 });
 
 export default memo(HomeScreen);

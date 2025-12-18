@@ -25,7 +25,8 @@
     "write": "Write"
   },
   "home": {
-    "addPubky": "Add pubky"
+    "addPubky": "Add pubky",
+    "scanQR": "Scan QR"
   },
   "settings": {
     "title": "Settings",
@@ -177,7 +178,9 @@
   },
   "emptyState": {
     "placeholderName": "pubky",
-    "placeholderPubky": "xxxxx..xxxxx"
+    "placeholderPubky": "xxxxx..xxxxx",
+    "heading": "Get started.",
+    "description": "Set up a pubky manually or scan a QR\nfor instant onboarding to pubky.app"
   },
   "about": {
     "keychainFor": "Keychain for",

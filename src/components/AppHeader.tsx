@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
-import { NavButton, Info } from '../theme/components';
+import { NavButton, Info, Settings } from '../theme/components';
 import PubkyRingHeader from './PubkyRingHeader';
 import { useTypedNavigation } from '../navigation/hooks';
 
@@ -29,9 +29,15 @@ const AppHeader: React.FC<AppHeaderProps> = ({
 
 	const RightButton = useMemo(() =>
 		showRightButton ? (
-			<NavButton style={styles.rightNavButton} />
+			<NavButton
+				style={styles.rightNavButton}
+				onPressIn={() => navigation.navigate('Settings', { showSecretSettings: false })}
+				hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+			>
+				<Settings size={24} />
+			</NavButton>
 		) : null,
-	[showRightButton]);
+	[navigation, showRightButton]);
 
 	return (
 		<PubkyRingHeader leftButton={LeftButton} rightButton={RightButton} />
@@ -52,7 +58,7 @@ const styles = StyleSheet.create({
 		width: 40,
 		height: 40,
 		justifyContent: 'center',
-		alignItems: 'center',
+		alignItems: 'flex-start',
 		alignSelf: 'center',
 		backgroundColor: 'transparent',
 	},

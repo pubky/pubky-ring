@@ -20,6 +20,7 @@ import {
 	Save as _Save,
 	KeyRound as _KeyRound,
 	Folder as _Folder,
+	Settings as _Settings,
 } from 'lucide-react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import Animated from 'react-native-reanimated';
@@ -264,6 +265,10 @@ export const KeyRound = styled(_KeyRound)<{ theme: Theme }>`
 `;
 
 export const Folder = styled(_Folder)<{ theme: Theme }>`
+	  color: ${(props): string => props.theme.colors.text};
+`;
+
+export const Settings = styled(_Settings)<{ theme: Theme }>`
 	  color: ${(props): string => props.theme.colors.text};
 `;
 

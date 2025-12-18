@@ -25,7 +25,8 @@
     "write": "Escriba a"
   },
   "home": {
-    "addPubky": "Añadir pubky"
+    "addPubky": "Añadir pubky",
+    "scanQR": "Escanear QR"
   },
   "settings": {
     "title": "Ajustes",
@@ -177,7 +178,9 @@
   },
   "emptyState": {
     "placeholderName": "pubky",
-    "placeholderPubky": "xxxxx..xxxxx"
+    "placeholderPubky": "xxxxx..xxxxx",
+    "heading": "Póngase en marcha.",
+    "description": "Configure una pubky manualmente o escanee un QR\npara acceder al instante a pubky.app"
   },
   "about": {
     "keychainFor": "Llavero para",

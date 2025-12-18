@@ -79,7 +79,9 @@
     "pubkyImported": "Pubky Importado",
     "pubkyReImported": "Pubky reimportado",
     "importSuccess": "Ha importado correctamente su Pubky.",
-    "reImportSuccess": "Ha reimportado correctamente su Pubky."
+    "reImportSuccess": "Ha reimportado correctamente su Pubky.",
+    "notValidSecretKey": "No es una clave secreta o frase de recuperación válida.",
+    "unableToImportFile": "No se puede importar el archivo."
   },
   "pubky": {
     "noSelection": "No Pubky Seleccionado",
@@ -91,7 +93,12 @@
     "selectPubkyMessage": "Seleccione qué pubky desea utilizar para autorizar este servicio, navegador o dispositivo.",
     "noPubkysAvailable": "No tiene ningún pubky configurado y disponible. Por favor, cree y configure primero un pubky.",
     "yourPubky": "Su pubky.",
-    "yourPubkyDescription": "Este es su primer identificador único, su pubky. Cree tantos como necesite para distintos fines. Usted es su clave."
+    "yourPubkyDescription": "Este es su primer identificador único, su pubky. Cree tantos como necesite para distintos fines. Usted es su clave.",
+    "noPubkysSetup": "No hay Pubkys",
+    "setupExistingToProcess": "Por favor, configure cualquiera de sus Pubkys existentes para continuar.",
+    "noPubkysExist": "No existen Pubkys",
+    "addAndSetupToProcess": "Por favor, añada y configure un Pubky para continuar.",
+    "successfullyCreated": "Creado con éxito pubky."
   },
   "backup": {
     "encryptedFile": "Archivo cifrado",
@@ -108,7 +115,10 @@
     "recoveryPhraseMessage": "Escriba estas 12 palabras en el orden correcto y guárdelas en un lugar seguro.",
     "tapToReveal": "Toque para revelar",
     "recoveryWarning": "Nunca comparta su frase de recuperación con nadie, ya que podría perder el acceso a su perfil, datos e identidad en línea.",
-    "finishBackup": "Finalizar la copia de seguridad"
+    "finishBackup": "Finalizar la copia de seguridad",
+    "couldNotRetrieveSecretKey": "No se ha podido recuperar la clave secreta para la copia de seguridad",
+    "backupCreated": "Copia de seguridad creada",
+    "failedToCreateBackup": "Fallo al crear el archivo de copia de seguridad"
   },
   "onboarding": {
     "title": "Llavero para la próxima web.",
@@ -155,7 +165,8 @@
     "failedToGetSecretKey": "Fallo al obtener la clave secreta",
     "failedToProcessAuth": "Fallo al procesar auth",
     "failedToImportPubky": "Fallo al importar pubky",
-    "failedToCreatePubkyWithInvite": "Fallo al crear pubky con código de invitación"
+    "failedToCreatePubkyWithInvite": "Fallo al crear pubky con código de invitación",
+    "errorCopiedToClipboard": "Mensaje de error copiado en el portapapeles"
   },
   "terms": {
     "title": "Condiciones de uso.",
@@ -234,7 +245,25 @@
     "unableToGetSecretKey": "No se puede obtener la clave secreta",
     "invalidInviteCode": "Código de invitación no válido. Por favor, compruébelo e inténtelo de nuevo.",
     "unableToSignIn": "No se puede iniciar sesión: {{error}}",
-    "unexpectedError": "Se ha producido un error inesperado. Por favor, inténtelo de nuevo."
+    "unexpectedError": "Se ha producido un error inesperado. Por favor, inténtelo de nuevo.",
+    "createError": "Se ha producido un error al crear el Pubky",
+    "failedToGenerateSecretKey": "Fallo al generar la clave secreta",
+    "failedToCreatePubky": "Fallo al crear pubky",
+    "failedToSavePubky": "No salvó a pubky",
+    "expectedImageData": "Se esperaban datos de imagen pero se recibió texto",
+    "failedToGetPublicKey": "Fallo al obtener la clave pública a partir de la clave secreta",
+    "mnemonicDoesNotMatchSecretKey": "La frase mnemotécnica proporcionada no genera la clave secreta esperada.",
+    "mnemonicDoesNotMatchPubky": "La frase mnemotécnica proporcionada no genera el pubky esperado.",
+    "failedToSaveToKeychain": "Fallo al guardar pubky en el llavero",
+    "errorSavingPubky": "Error al guardar pubky",
+    "errorDeletingPubky": "Error al borrar pubky",
+    "secretKeyNotFoundInKeychain": "Clave secreta no encontrada en el llavero",
+    "failedToGetSecretKeyFromKeychain": "Fallo al obtener la clave secreta del llavero",
+    "homeserverNotFound": "Homeserver no encontrado para este pubky. Por favor, asegúrese de que el pubky está configurado correctamente.",
+    "failedToSignOut": "Fallo al cerrar sesión en el servidor doméstico",
+    "pubkyRequiredForAuth": "Pubky es necesario para auth",
+    "failedToGetSecretKey": "Fallo al obtener la clave secreta",
+    "authorizationError": "Se ha producido un error durante la autorización"
   },
   "inviteCode": {
     "title": "Código de invitación.",
@@ -276,5 +305,23 @@
     "settings": "Ajustes",
     "pubkyDetail": "Detalles del Pubky",
     "editPubky": "Editar Pubky"
+  },
+  "permissions": {
+    "cameraTitle": "Permiso para utilizar la cámara",
+    "cameraMessage": "Pubky Ring necesita permiso para usar su cámara"
+  },
+  "keychain": {
+    "failedToGetValue": "Fallo al obtener el valor del llavero",
+    "failedToSetValue": "Fallo al establecer el valor del llavero",
+    "failedToResetValue": "Fallo al restablecer el valor del llavero"
+  },
+  "signup": {
+    "failedToGenerateKeypair": "Fallo al generar el par de claves",
+    "signupSuccessful": "Inscripción realizada con éxito",
+    "newPubkyCreated": "Su nuevo Pubky ha sido creado",
+    "failedToProcessSignup": "No se ha podido procesar la inscripción"
+  },
+  "invite": {
+    "unknownErrorProcessing": "Unknown error processing invite"
   }
 }

@@ -45,10 +45,10 @@ export const handleSignupAction = async (
 		if (genKeyRes.isErr()) {
 			showToast({
 				type: 'error',
-				title: 'Signup Failed',
-				description: 'Failed to generate keypair',
+				title: i18n.t('errors.signupFailed'),
+				description: i18n.t('signup.failedToGenerateKeypair'),
 			});
-			return err('Failed to generate keypair');
+			return err(i18n.t('signup.failedToGenerateKeypair'));
 		}
 
 		const { mnemonic, secret_key: secretKey, public_key: generatedPubky } = genKeyRes.value;
@@ -70,10 +70,10 @@ export const handleSignupAction = async (
 		if (saveRes.isErr()) {
 			showToast({
 				type: 'error',
-				title: 'Signup Failed',
-				description: 'Failed to save pubky',
+				title: i18n.t('errors.signupFailed'),
+				description: i18n.t('pubkyErrors.failedToSavePubky'),
 			});
-			return err('Failed to save pubky');
+			return err(i18n.t('pubkyErrors.failedToSavePubky'));
 		}
 
 		// Step 3: Sign up to the specified homeserver with invite code
@@ -112,8 +112,8 @@ export const handleSignupAction = async (
 
 		showToast({
 			type: 'success',
-			title: 'Signup Successful',
-			description: 'Your new Pubky has been created',
+			title: i18n.t('signup.signupSuccessful'),
+			description: i18n.t('signup.newPubkyCreated'),
 		});
 
 		// Step 4: Construct the pubkyauth URL and trigger auth
@@ -140,12 +140,12 @@ export const handleSignupAction = async (
 
 		return ok(pubky);
 	} catch (error) {
-		const errorMessage = error instanceof Error ? error.message : 'Unknown error during signup';
+		const errorMessage = error instanceof Error ? error.message : i18n.t('errors.unknownError');
 		console.error('Error handling signup:', errorMessage);
 		showToast({
 			type: 'error',
-			title: 'Error',
-			description: 'Failed to process signup',
+			title: i18n.t('common.error'),
+			description: i18n.t('signup.failedToProcessSignup'),
 		});
 		return err(errorMessage);
 	} finally {

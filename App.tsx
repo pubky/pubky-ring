@@ -17,6 +17,7 @@ import { checkNetworkConnection, showToast } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
 
 const _toastConfig = toastConfig();
 
@@ -25,6 +26,7 @@ function App(): React.JSX.Element {
 	const currentTheme = useSelector(getTheme);
 	const isOnline = useSelector(getIsOnline);
 	const dispatch = useDispatch();
+	const { t } = useTranslation();
 
 	// Handle deep linking
 	useEffect(() => {
@@ -78,14 +80,14 @@ function App(): React.JSX.Element {
 				if (isConnected) {
 					showToast({
 						type: 'success',
-						title: "You're Back Online!",
-						description: 'You can now authorize with Pubky Ring',
+						title: t('network.backOnline'),
+						description: t('network.backOnlineDescription'),
 					});
 				} else {
 					showToast({
 						type: 'error',
-						title: 'Currently Offline',
-						description: 'You need to be online to authorize with Pubky Ring',
+						title: t('network.currentlyOffline'),
+						description: t('network.offlineDescription'),
 						autoHide: false,
 					});
 				}
@@ -97,7 +99,7 @@ function App(): React.JSX.Element {
 			clearTimeout(timer);
 			unsubscribe();
 		};
-	}, [dispatch, isOnline]);
+	}, [dispatch, isOnline, t]);
 
 	const theme = useMemo(() => {
 		switch (currentTheme) {

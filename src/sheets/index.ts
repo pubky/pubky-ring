@@ -13,6 +13,7 @@ const SelectPubky = lazy(() => import('../components/SelectPubky.tsx'));
 const RecoveryPhrasePrompt = lazy(() => import('../components/RecoveryPhrasePrompt.tsx'));
 const ImportSuccessSheet = lazy(() => import('../components/ImportSuccessSheet.tsx'));
 const MigrateModal = lazy(() => import('../components/MigrateModal.tsx'));
+const LoadingModal = lazy(() => import('../components/LoadingModal.tsx'));
 
 registerSheet('camera', QRScanner as any);
 registerSheet('backup-prompt', BackupPrompt as any);
@@ -26,6 +27,7 @@ registerSheet('add-pubky', AddPubky as any);
 registerSheet('select-pubky', SelectPubky as any);
 registerSheet('import-success', ImportSuccessSheet as any);
 registerSheet('migrate-modal', MigrateModal as any);
+registerSheet('loading', LoadingModal as any);
 
 declare module 'react-native-actions-sheet' {
 	interface Sheets {
@@ -49,6 +51,15 @@ declare module 'react-native-actions-sheet' {
 		'migrate-modal': SheetDefinition<{
 			payload: {
 				onClose: () => void;
+			};
+		}>;
+		'loading': SheetDefinition<{
+			payload?: {
+				modalTitle?: string;
+				title?: string;
+				description?: string;
+				waitText?: string;
+				onClose?: () => void;
 			};
 		}>;
 	}

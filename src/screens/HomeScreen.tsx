@@ -91,6 +91,7 @@ const ListFooter = memo(({ createPubky, importPubky, onShowQRPress }: ListFooter
 });
 
 const HomeScreen = (): ReactElement => {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
@@ -101,8 +102,8 @@ const HomeScreen = (): ReactElement => {
 
 	// HomeScreen scanner - no filter, allows all actions
 	const onShowQRPress = useCallback(() => {
-		showScanner();
-	}, [showScanner]);
+		showScanner({ title: t('home.scanQR') });
+	}, [showScanner, t]);
 
 	const handleDragEnd = useCallback(({ data }: { data: { key: string; value: Pubky }[] }) => {
 		if (!data) {return;}

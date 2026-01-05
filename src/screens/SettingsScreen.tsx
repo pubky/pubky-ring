@@ -173,7 +173,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			setOnMigrationComplete(null); // Clean up
 		});
 
-		await showScanner({ title: t('import.title') });
+		await showScanner({ title: t('settings.migrateKeys') });
 	}, [showScanner, t, navigation]);
 
 	return (

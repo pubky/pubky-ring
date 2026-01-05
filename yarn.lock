@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@adrianso/react-native-device-brightness@^1.2.7":
+  version "1.2.7"
+  resolved "https://registry.yarnpkg.com/@adrianso/react-native-device-brightness/-/react-native-device-brightness-1.2.7.tgz#46905d0358c4f6dce5c88eb51882f528cc716f60"
+  integrity sha512-q3OTFGohAh04R8cBka7/eNXaeSD8bAZocMsifLIR3oDF5N9cNH2UVEjzJaFXW8DHFEsODpljpT+eyGWIhKlkow==
+
 "@appium/base-driver@^9.18.0":
   version "9.18.0"
   resolved "https://registry.yarnpkg.com/@appium/base-driver/-/base-driver-9.18.0.tgz#7a607b26f45e11258246a7a7ccdb699f9488f002"

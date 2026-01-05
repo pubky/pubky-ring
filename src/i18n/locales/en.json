@@ -166,6 +166,7 @@
     "unknownError": "An unknown error occurred",
     "authorizationFailed": "Authorization failed",
     "importFailed": "Import failed",
+    "migrateFailed": "Migration failed",
     "signupFailed": "Signup failed",
     "signupFailedDescription": "Please check your signup link is still valid, then try again.",
     "inviteProcessingFailed": "Invite processing failed",
@@ -234,6 +235,7 @@
   },
   "router": {
     "importSuccessful": "Import successful",
+    "migrateSuccessful": "Migration successful",
     "signupSuccessful": "Signup successful",
     "inviteProcessed": "Invite processed",
     "sessionReturned": "Session returned",
@@ -334,5 +336,13 @@
   },
   "invite": {
     "unknownErrorProcessing": "Unknown error processing invite"
+  },
+  "migrate": {
+    "scanning": "Scanning for Keys",
+    "successTitle": "Migration Complete",
+    "partialTitle": "Partial Migration Complete",
+    "successMessage": "Successfully imported {{imported}} of {{total}} keys",
+    "partialSuccess": "Imported {{imported}} keys, {{failed}} failed",
+    "allFailed": "All keys failed to import"
   }
 }

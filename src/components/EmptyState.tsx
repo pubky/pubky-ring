@@ -36,7 +36,7 @@ const DashedArrow = (): ReactElement => {
 
 	return (
 		<View style={styles.arrowContainer}>
-			<Canvas style={{ width: 80, height: 100 }}>
+			<Canvas style={styles.canvas}>
 				<Path path={curvePath} paint={dashedPaint} />
 				<Path path={arrowPath} paint={solidPaint} />
 			</Canvas>
@@ -86,6 +86,10 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 		marginTop: 5,
 		backgroundColor: 'transparent',
+	},
+	canvas: {
+		width: 80,
+		height: 100,
 	},
 });
 

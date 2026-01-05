@@ -11,11 +11,13 @@ import {
 	SessionText,
 	ArrowLeft,
 	QrCode,
+	Scan,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
+import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { setTheme } from '../theme/helpers.ts';
 import { ENavigationAnimation, ETheme } from '../types/settings.ts';
 import {
@@ -30,6 +32,7 @@ import { useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useInputHandler } from '../hooks/useInputHandler.ts';
 import { buttonStyles } from '../theme/utils.ts';
+import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -40,6 +43,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const currentTheme = useSelector(getTheme);
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
+	const pubkyKeys = useSelector(getPubkyKeys);
+	const hasPubkys = pubkyKeys.length > 0;
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const { showScanner } = useInputHandler({});
 
@@ -159,8 +164,17 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	}, []);
 
 	const handleScanQRPress = useCallback(async () => {
+		// Reset to Home when migration completes (prevents swipe-back to Settings)
+		setOnMigrationComplete(() => {
+			navigation.reset({
+				index: 0,
+				routes: [{ name: 'Home' }],
+			});
+			setOnMigrationComplete(null); // Clean up
+		});
+
 		await showScanner({ title: t('import.title') });
-	}, [showScanner, t]);
+	}, [showScanner, t, navigation]);
 
 	return (
 		<View style={styles.container}>
@@ -187,19 +201,21 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				</Card>
 
 				<View style={styles.buttonContainer}>
-					<Button
-						testID="ShowQRButton"
-						style={styles.actionButton}
-						text={t('settings.showQR')}
-						onPress={handleShowQRPress}
-						icon={<QrCode size={16} />}
-					/>
+					{hasPubkys && (
+						<Button
+							testID="ShowQRButton"
+							style={styles.actionButton}
+							text={t('settings.showQR')}
+							onPress={handleShowQRPress}
+							icon={<QrCode size={16} />}
+						/>
+					)}
 					<Button
 						testID="ScanQRButton"
 						style={styles.scanQRButton}
 						text={t('settings.scanQR')}
 						onPress={handleScanQRPress}
-						icon={<QrCode size={16} />}
+						icon={<Scan size={16} />}
 					/>
 				</View>
 

@@ -1873,6 +1873,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
+  - react-native-device-brightness (1.2.7):
+    - React
   - react-native-document-picker (10.1.7):
     - boost
     - DoubleConversion
@@ -3185,6 +3187,7 @@ DEPENDENCIES:
   - React-Mapbuffer (from `../node_modules/react-native/ReactCommon`)
   - React-microtasksnativemodule (from `../node_modules/react-native/ReactCommon/react/nativemodule/microtasks`)
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
+  - "react-native-device-brightness (from `../node_modules/@adrianso/react-native-device-brightness`)"
   - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-pubky (from `../node_modules/@synonymdev/react-native-pubky`)"
@@ -3333,6 +3336,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/react/nativemodule/microtasks"
   react-native-blur:
     :path: "../node_modules/@react-native-community/blur"
+  react-native-device-brightness:
+    :path: "../node_modules/@adrianso/react-native-device-brightness"
   react-native-document-picker:
     :path: "../node_modules/@react-native-documents/picker"
   react-native-netinfo:
@@ -3482,6 +3487,7 @@ SPEC CHECKSUMS:
   React-Mapbuffer: 7e7ca4c53288117e7e0406e9eaa804bf259b4b30
   React-microtasksnativemodule: 885bebe5c5f25035e1fd0920776078840a0e3a76
   react-native-blur: ba0e9ad6274783c8d45f42da82acae02e25784ad
+  react-native-device-brightness: 886cfbfb49a32b6de4ccfc1f720776dc5f381d24
   react-native-document-picker: ca6edbcee0abb1b92a06d34fc42ee31e9d559534
   react-native-netinfo: f0a9899081c185db1de5bb2fdc1c88c202a059ac
   react-native-pubky: 90501faeaab4dd0044d55509ac24dce563de9f22

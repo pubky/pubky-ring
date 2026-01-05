@@ -14,11 +14,11 @@ import { ActionContext } from '../inputRouter';
 import { importPubky } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
-import { showImportSuccessSheet, showEditPubkySheet } from '../sheetHelpers';
+import { showImportSuccessUI, showEditPubkySheet } from '../sheetHelpers';
 import { getPubkyKeys } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';
 import { EBackupPreference } from '../../types/pubky';
-import { SHEET_ANIMATION_DELAY, SHEET_TRANSITION_DELAY } from '../constants';
+import { SHEET_ANIMATION_DELAY } from '../constants';
 import i18n from '../../i18n';
 
 type ImportActionData = {
@@ -120,24 +120,4 @@ export const handleImportAction = async (
 		});
 		return err(errorMessage);
 	}
-};
-
-/**
- * Shows the import success UI flow
- */
-const showImportSuccessUI = (pubky: string, isNewPubky: boolean): void => {
-	setTimeout(() => {
-		showImportSuccessSheet({
-			pubky,
-			isNewPubky,
-			onContinue: () => {
-				setTimeout(() => {
-					showEditPubkySheet({
-						title: 'Setup',
-						pubky,
-					});
-				}, SHEET_TRANSITION_DELAY);
-			},
-		});
-	}, SHEET_ANIMATION_DELAY);
 };

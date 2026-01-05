@@ -1,5 +1,6 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
+import DeviceBrightness from '@adrianso/react-native-device-brightness';
 import {
 	ActionSheetContainer,
 	Card,
@@ -44,13 +45,34 @@ const MigrateModal = ({ payload }: {
 	const [keysData, setKeysData] = useState<KeyData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
-
-	// Get pubky name from store with proper selector
-	const getPubkyNameFromStore = useCallback((rootState: RootState, pubky: string): string => {
-		return getPubkyName(rootState, pubky, 20);
-	}, []);
-
 	const rootState = useSelector((s: RootState) => s);
+	const originalBrightnessRef = useRef<number | null>(null);
+
+	// Manage screen brightness for better QR scanning
+	useEffect(() => {
+		const setBrightness = async (): Promise<void> => {
+			try {
+				// Save current brightness
+				const currentBrightness = await DeviceBrightness.getBrightnessLevel();
+				originalBrightnessRef.current = currentBrightness;
+				// Set to maximum brightness for QR display
+				await DeviceBrightness.setBrightnessLevel(1);
+			} catch (error) {
+				console.warn('Failed to set brightness:', error);
+			}
+		};
+
+		setBrightness();
+
+		// Restore brightness on unmount
+		return (): void => {
+			if (originalBrightnessRef.current !== null) {
+				DeviceBrightness.setBrightnessLevel(originalBrightnessRef.current).catch(
+					(error) => console.warn('Failed to restore brightness:', error)
+				);
+			}
+		};
+	}, []);
 
 	// Load all keys on mount
 	useEffect(() => {
@@ -68,20 +90,21 @@ const MigrateModal = ({ payload }: {
 				const keyData: IKeychainData = keyDataResult.value;
 				const backupPref = getBackupPreference(pubky);
 
-				// Use mnemonic if recoveryPhrase preference or if mnemonic exists (default to mnemonic)
-				// Fall back to secretKey if mnemonic is not available
+				// Respect backup preference when selecting which key to use
 				let value: string;
 				if (backupPref === EBackupPreference.recoveryPhrase && keyData.mnemonic) {
 					value = keyData.mnemonic;
+				} else if (backupPref === EBackupPreference.encryptedFile) {
+					value = keyData.secretKey;
 				} else if (keyData.mnemonic) {
-					// Default to mnemonic if available
+					// Default to mnemonic if available and no preference set
 					value = keyData.mnemonic;
 				} else {
 					value = keyData.secretKey;
 				}
 
 				if (value) {
-					const name = getPubkyNameFromStore(rootState, pubky);
+					const name = getPubkyName(rootState, pubky, 20);
 					data.push({ pubky, value, name });
 				}
 			}
@@ -97,7 +120,14 @@ const MigrateModal = ({ payload }: {
 		return (): void => {
 			mounted = false;
 		};
-	}, [pubkyKeys, getPubkyNameFromStore, rootState]);
+	}, [pubkyKeys, rootState]);
+
+	// Format keys data for migration QR codes with deeplink format
+	const migrateFormattedData = useMemo(() => {
+		return keysData.map((keyData, index) => ({
+			value: `pubkyring://migrate?index=${index}&total=${keysData.length}&key=${encodeURIComponent(keyData.value)}`,
+		}));
+	}, [keysData]);
 
 	const renderContent = (): ReactElement => {
 		if (isLoading) {
@@ -117,7 +147,14 @@ const MigrateModal = ({ payload }: {
 			);
 		}
 
-		return <AnimatedQR data={keysData} />;
+		return (
+			<AnimatedQR
+				data={migrateFormattedData}
+				startCycleInterval={200}
+				cycleInterval={600}
+				transitionDuration={60000}
+			/>
+		);
 	};
 
 	return (

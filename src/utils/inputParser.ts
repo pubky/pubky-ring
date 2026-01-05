@@ -21,6 +21,7 @@ export type InputSource = 'deeplink' | 'scan' | 'clipboard';
 export enum InputAction {
 	Auth = 'auth',
 	Import = 'import',
+	Migrate = 'migrate',
 	Signup = 'signup',
 	Invite = 'invite',
 	Session = 'session',
@@ -60,10 +61,18 @@ export interface SessionParams {
 	callback: string;
 }
 
+// Migrate parameters for multi-key migration QR codes
+export interface MigrateParams {
+	index: number;
+	total: number;
+	key: string;
+}
+
 // Union type for all action data
 export type ActionData =
 	| { action: InputAction.Auth; params: AuthParams; rawUrl: string }
 	| { action: InputAction.Import; params: ImportParams }
+	| { action: InputAction.Migrate; params: MigrateParams }
 	| { action: InputAction.Signup; params: SignupParams }
 	| { action: InputAction.Invite; params: InviteParams }
 	| { action: InputAction.Session; params: SessionParams }
@@ -218,6 +227,36 @@ export const parseInput = async (
 		}
 	}
 	processedInput = decoded;
+
+	// Check for migrate deeplink format (pubkyring://migrate?index=X&total=Y&key=Z)
+	// This must be checked early before other parsing strips the protocol
+	if (processedInput.startsWith('pubkyring://migrate?')) {
+		try {
+			const queryString = processedInput.substring('pubkyring://migrate?'.length);
+			const params = new URLSearchParams(queryString);
+			const index = parseInt(params.get('index') || '', 10);
+			const total = parseInt(params.get('total') || '', 10);
+			const key = decodeURIComponent(params.get('key') || '');
+
+			if (!isNaN(index) && !isNaN(total) && key) {
+				return {
+					action: InputAction.Migrate,
+					data: {
+						action: InputAction.Migrate,
+						params: {
+							index,
+							total,
+							key,
+						},
+					},
+					source,
+					rawInput,
+				};
+			}
+		} catch {
+			// Invalid format, continue with other parsing
+		}
+	}
 
 	// Remove pubkyring:// wrapper protocol if present
 	// This handles cases like pubkyring://pubkyauth:///?...
@@ -378,6 +417,12 @@ export const isImportAction = (
 	data: ActionData
 ): data is { action: InputAction.Import; params: ImportParams } => {
 	return data.action === InputAction.Import;
+};
+
+export const isMigrateAction = (
+	data: ActionData
+): data is { action: InputAction.Migrate; params: MigrateParams } => {
+	return data.action === InputAction.Migrate;
 };
 
 export const isSignupAction = (

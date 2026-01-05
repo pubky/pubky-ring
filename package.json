@@ -16,6 +16,7 @@
     "tx:pull": "./tx pull -a"
   },
   "dependencies": {
+    "@adrianso/react-native-device-brightness": "^1.2.7",
     "@dr.pogodin/react-native-fs": "2.34.0",
     "@react-native-async-storage/async-storage": "2.2.0",
     "@react-native-clipboard/clipboard": "^1.16.2",

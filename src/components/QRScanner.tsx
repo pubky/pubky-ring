@@ -1,5 +1,5 @@
 import React, { memo, useCallback } from 'react';
-import { Platform, StyleSheet, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Camera from './Camera/Camera';
 import { ActionSheetContainer, Clipboard, Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
@@ -11,6 +11,7 @@ import {
 } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import i18n from '../i18n';
+import MigrationProgressOverlay from './MigrationProgressOverlay';
 interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
@@ -41,6 +42,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 				<Text style={styles.title}>{title}</Text>
 				<View style={styles.cameraContainer}>
 					<Camera onBarCodeRead={handleBarCodeRead} />
+					<MigrationProgressOverlay />
 				</View>
 				<View style={styles.buttonContainer}>
 					<CardButton
@@ -58,13 +60,13 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 
 const styles = StyleSheet.create({
 	container: {
-		height: '100%',
+		flex: 1,
 		width: '100%',
 	},
 	cameraContainer: {
-		height: '79%',
+		flex: 1,
 		width: '90%',
-		alignSelf: 'center'
+		alignSelf: 'center',
 	},
 	title: {
 		fontSize: 17,
@@ -75,14 +77,9 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	buttonContainer: {
-		height: '19%',
+		paddingVertical: 16,
 		alignItems: 'center',
 		justifyContent: 'center',
-		alignContent: 'center',
-		bottom: Platform.select({
-			ios: 0,
-			android: 20,
-		})
 	},
 	actionButton2: {
 		flexDirection: 'row',

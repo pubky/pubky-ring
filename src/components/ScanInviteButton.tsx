@@ -24,14 +24,8 @@ const ScanInviteButton = memo(() => {
 
 		// Only handle signup and invite actions in this button
 		if (parsed.action === InputAction.Signup || parsed.action === InputAction.Invite) {
-			const result = await routeInput(parsed, { dispatch });
-			if (result.isErr()) {
-				showToast({
-					type: 'error',
-					title: i18n.t('common.error'),
-					description: result.error.message,
-				});
-			}
+			// Error handling is done via the loading modal error state
+			await routeInput(parsed, { dispatch });
 		} else {
 			// Not a valid invite/signup input
 			showToast({

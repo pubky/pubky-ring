@@ -7,19 +7,62 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { SheetManager } from 'react-native-actions-sheet';
-import { InputAction, InviteParams } from '../inputParser';
-import { ActionContext } from '../inputRouter';
+import { InputAction, InviteParams, parseInput } from '../inputParser';
+import { ActionContext, routeInput } from '../inputRouter';
 import { createPubkyWithInviteCode } from '../pubky';
-import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { getPubky } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';
 import { ECurrentScreen } from '../../components/PubkySetup/NewPubkySetup';
+import { readFromClipboard } from '../clipboard';
+import { setLoadingModalError } from '../../store/slices/uiSlice';
+import { setStoredDispatch } from '../../store/shapes/ui';
 import i18n from '../../i18n';
+import { Dispatch } from 'redux';
 
 type InviteActionData = {
 	action: InputAction.Invite;
 	params: InviteParams;
+};
+
+/**
+ * Opens the camera modal for scanning invite codes
+ * Used for "Try again" functionality after an error
+ * Exported for use by LoadingModal
+ */
+export const openCameraForRetry = (dispatch: Dispatch): void => {
+	SheetManager.show('camera', {
+		payload: {
+			title: i18n.t('import.title'),
+			onScan: async (data: string) => {
+				await SheetManager.hide('camera');
+				const parsed = await parseInput(data, 'scan');
+				await routeInput(parsed, { dispatch });
+			},
+			onCopyClipboard: async () => {
+				await SheetManager.hide('camera');
+				const clipboardContent = await readFromClipboard();
+				if (clipboardContent) {
+					const parsed = await parseInput(clipboardContent, 'clipboard');
+					await routeInput(parsed, { dispatch });
+				}
+			},
+			onClose: () => SheetManager.hide('camera'),
+		},
+	});
+};
+
+/**
+ * Transitions the loading modal to error state via Redux
+ */
+const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
+	// Store dispatch for use in "Try again" button
+	setStoredDispatch(dispatch);
+	// Update Redux state to show error
+	dispatch(setLoadingModalError({
+		isError: true,
+		errorMessage: errorMessage,
+	}));
 };
 
 /**
@@ -47,13 +90,8 @@ export const handleInviteAction = async (
 		const createRes = await createPubkyWithInviteCode(inviteCode, dispatch);
 
 		if (createRes.isErr()) {
-			await SheetManager.hide('loading');
 			const errorMessage = getErrorMessage(createRes.error, i18n.t('errors.failedToCreatePubkyWithInvite'));
-			showToast({
-				type: 'error',
-				title: i18n.t('errors.signupFailed'),
-				description: errorMessage,
-			});
+			showErrorState(errorMessage, dispatch);
 			return err(errorMessage);
 		}
 
@@ -82,14 +120,9 @@ export const handleInviteAction = async (
 
 		return ok(pubky);
 	} catch (error) {
-		await SheetManager.hide('loading');
 		const errorMessage = error instanceof Error ? error.message : i18n.t('invite.unknownErrorProcessing');
 		console.error('Error handling invite code:', errorMessage);
-		showToast({
-			type: 'error',
-			title: i18n.t('common.error'),
-			description: i18n.t('errors.inviteProcessingFailed'),
-		});
+		showErrorState(i18n.t('errors.inviteProcessingFailed'), dispatch);
 		return err(errorMessage);
 	}
 };

@@ -13,6 +13,7 @@ import {
 import { reduxStorage } from './mmkv-storage';
 import pubkyReducer from './slices/pubkysSlice.ts';
 import settingsReducer from './slices/settingsSlice.ts';
+import uiReducer from './slices/uiSlice.ts';
 import migrations from './migrations';
 
 // TODO: Add a transform to clear transient state (deepLink, processing) on rehydration.
@@ -34,6 +35,7 @@ const persistConfig = {
 const rootReducer = combineReducers({
 	pubky: pubkyReducer,
 	settings: settingsReducer,
+	ui: uiReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

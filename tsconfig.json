@@ -4,6 +4,7 @@
   "exclude": ["**/node_modules", "**/Pods"],
   "compilerOptions": {
     "types": [
+      "jest",
       "node",
       "@wdio/globals/types",
       "expect-webdriverio",

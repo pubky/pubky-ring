@@ -350,6 +350,9 @@
     "modalTitle": "Configuring Pubky",
     "title": "Your keys,\nyour identity.",
     "description": "Creating and configuring your new pubky. This should only take a few seconds.",
-    "pleaseWait": "Please wait..."
+    "pleaseWait": "Please wait...",
+    "errorModalTitle": "Configuration Failed",
+    "errorDescription": "Your new pubky could not be configured.",
+    "tryAgain": "Try again"
   }
 }

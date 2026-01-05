@@ -13,16 +13,31 @@ import { savePubky, signUpToHomeserver } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice';
+import { setLoadingModalError } from '../../store/slices/uiSlice';
+import { setStoredDispatch } from '../../store/shapes/ui';
 import { EBackupPreference } from '../../types/pubky';
 import { handleAuthAction } from './authAction';
 import { SHEET_ANIMATION_DELAY } from '../constants.ts';
 import i18n from '../../i18n';
-import { copyToClipboard } from '../clipboard.ts';
 import { SheetManager } from 'react-native-actions-sheet';
+import { Dispatch } from 'redux';
 
 type SignupActionData = {
 	action: InputAction.Signup;
 	params: SignupParams;
+};
+
+/**
+ * Transitions the loading modal to error state via Redux
+ */
+const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
+	// Store dispatch for use in "Try again" button
+	setStoredDispatch(dispatch);
+	// Update Redux state to show error
+	dispatch(setLoadingModalError({
+		isError: true,
+		errorMessage: errorMessage,
+	}));
 };
 
 /**
@@ -51,12 +66,7 @@ export const handleSignupAction = async (
 		// Step 1: Generate a new keypair
 		const genKeyRes = await generateMnemonicPhraseAndKeypair();
 		if (genKeyRes.isErr()) {
-			await SheetManager.hide('loading');
-			showToast({
-				type: 'error',
-				title: i18n.t('errors.signupFailed'),
-				description: i18n.t('signup.failedToGenerateKeypair'),
-			});
+			showErrorState(i18n.t('signup.failedToGenerateKeypair'), dispatch);
 			return err(i18n.t('signup.failedToGenerateKeypair'));
 		}
 
@@ -77,12 +87,7 @@ export const handleSignupAction = async (
 		});
 
 		if (saveRes.isErr()) {
-			await SheetManager.hide('loading');
-			showToast({
-				type: 'error',
-				title: i18n.t('errors.signupFailed'),
-				description: i18n.t('pubkyErrors.failedToSavePubky'),
-			});
+			showErrorState(i18n.t('pubkyErrors.failedToSavePubky'), dispatch);
 			return err(i18n.t('pubkyErrors.failedToSavePubky'));
 		}
 
@@ -96,28 +101,8 @@ export const handleSignupAction = async (
 		});
 
 		if (signupRes.isErr()) {
-			await SheetManager.hide('loading');
 			const errorMessage = getErrorMessage(signupRes.error, i18n.t('errors.signupFailedDescription'));
-			showToast({
-				type: 'error',
-				title: i18n.t('common.error'),
-				description: errorMessage,
-				onPress: () => {
-					// Copy debug info to clipboard
-					const debugInfo = JSON.stringify({
-						error: errorMessage,
-						pubky,
-						homeserver,
-						inviteCode,
-					}, null, 2);
-					copyToClipboard(debugInfo);
-					showToast({
-						type: 'info',
-						title: i18n.t('common.copied'),
-						description: i18n.t('errors.debugInfoCopied'),
-					});
-				}
-			});
+			showErrorState(errorMessage, dispatch);
 			return err(errorMessage);
 		}
 
@@ -154,14 +139,9 @@ export const handleSignupAction = async (
 
 		return ok(pubky);
 	} catch (error) {
-		await SheetManager.hide('loading');
 		const errorMessage = error instanceof Error ? error.message : i18n.t('errors.unknownError');
 		console.error('Error handling signup:', errorMessage);
-		showToast({
-			type: 'error',
-			title: i18n.t('common.error'),
-			description: i18n.t('signup.failedToProcessSignup'),
-		});
+		showErrorState(i18n.t('signup.failedToProcessSignup'), dispatch);
 		return err(errorMessage);
 	} finally {
 		// Clear processing state

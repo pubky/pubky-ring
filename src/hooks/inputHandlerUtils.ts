@@ -7,7 +7,7 @@
 
 import { Dispatch } from 'redux';
 import { SheetManager } from 'react-native-actions-sheet';
-import { ParsedInput, InputSource } from '../utils/inputParser';
+import { ParsedInput, InputSource, InputAction } from '../utils/inputParser';
 import { routeInput, actionRequiresPubky, ActionContext } from '../utils/inputRouter';
 import { setDeepLink } from '../store/slices/pubkysSlice';
 import { copyToClipboard } from '../utils/clipboard';
@@ -43,6 +43,11 @@ export const routeInputWithContext = async (
 	const result = await routeInput(parsed, context);
 
 	if (result.isErr()) {
+		// Skip toast for signup/invite actions - they handle errors via the loading modal
+		if (parsed.action === InputAction.Signup || parsed.action === InputAction.Invite) {
+			return;
+		}
+
 		const errorMessage = getErrorMessage(result.error, i18n.t('errors.unknownError'));
 
 		// Build debug info for troubleshooting

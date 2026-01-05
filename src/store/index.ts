@@ -15,6 +15,14 @@ import pubkyReducer from './slices/pubkysSlice.ts';
 import settingsReducer from './slices/settingsSlice.ts';
 import migrations from './migrations';
 
+// TODO: Add a transform to clear transient state (deepLink, processing) on rehydration.
+// Example:
+// const pubkyTransform = createTransform(
+//   (inboundState: PubkyState) => inboundState,
+//   (outboundState: PubkyState) => ({ ...outboundState, deepLink: '', processing: {} }),
+//   { whitelist: ['pubky'] }
+// );
+// Then add `transforms: [pubkyTransform]` to persistConfig.
 const persistConfig = {
 	key: 'root',
 	storage: reduxStorage,

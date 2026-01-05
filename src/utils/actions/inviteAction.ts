@@ -35,11 +35,19 @@ export const handleInviteAction = async (
 	const { params } = data;
 	const { inviteCode } = params;
 
+	// Show loading modal (don't await - it resolves when sheet closes)
+	SheetManager.show('loading', {
+		payload: {
+			modalTitle: i18n.t('loading.modalTitle'),
+		},
+	});
+
 	try {
 		// Create pubky and sign up with invite code automatically
 		const createRes = await createPubkyWithInviteCode(inviteCode, dispatch);
 
 		if (createRes.isErr()) {
+			await SheetManager.hide('loading');
 			const errorMessage = getErrorMessage(createRes.error, i18n.t('errors.failedToCreatePubkyWithInvite'));
 			showToast({
 				type: 'error',
@@ -53,6 +61,9 @@ export const handleInviteAction = async (
 
 		// Get the pubky data from store
 		const pubkyData = getPubky(getStore(), pubky);
+
+		// Hide loading modal before showing setup sheet
+		await SheetManager.hide('loading');
 
 		// Show new pubky setup sheet on welcome screen with completed setup
 		setTimeout(() => {
@@ -71,6 +82,7 @@ export const handleInviteAction = async (
 
 		return ok(pubky);
 	} catch (error) {
+		await SheetManager.hide('loading');
 		const errorMessage = error instanceof Error ? error.message : i18n.t('invite.unknownErrorProcessing');
 		console.error('Error handling invite code:', errorMessage);
 		showToast({

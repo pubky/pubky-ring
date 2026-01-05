@@ -18,6 +18,7 @@ import { handleAuthAction } from './authAction';
 import { SHEET_ANIMATION_DELAY } from '../constants.ts';
 import i18n from '../../i18n';
 import { copyToClipboard } from '../clipboard.ts';
+import { SheetManager } from 'react-native-actions-sheet';
 
 type SignupActionData = {
 	action: InputAction.Signup;
@@ -39,10 +40,18 @@ export const handleSignupAction = async (
 
 	let pubky = '';
 
+	// Show loading modal (don't await - it resolves when sheet closes)
+	SheetManager.show('loading', {
+		payload: {
+			modalTitle: i18n.t('loading.modalTitle'),
+		},
+	});
+
 	try {
 		// Step 1: Generate a new keypair
 		const genKeyRes = await generateMnemonicPhraseAndKeypair();
 		if (genKeyRes.isErr()) {
+			await SheetManager.hide('loading');
 			showToast({
 				type: 'error',
 				title: i18n.t('errors.signupFailed'),
@@ -68,6 +77,7 @@ export const handleSignupAction = async (
 		});
 
 		if (saveRes.isErr()) {
+			await SheetManager.hide('loading');
 			showToast({
 				type: 'error',
 				title: i18n.t('errors.signupFailed'),
@@ -86,6 +96,7 @@ export const handleSignupAction = async (
 		});
 
 		if (signupRes.isErr()) {
+			await SheetManager.hide('loading');
 			const errorMessage = getErrorMessage(signupRes.error, i18n.t('errors.signupFailedDescription'));
 			showToast({
 				type: 'error',
@@ -120,6 +131,9 @@ export const handleSignupAction = async (
 		const capsString = caps.join(',');
 		const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
 
+		// Hide loading modal before showing auth modal
+		await SheetManager.hide('loading');
+
 		// Step 5: Trigger auth action with the new pubky
 		// Short delay to allow UI to update before showing auth modal
 		await new Promise(resolve => {setTimeout(resolve, SHEET_ANIMATION_DELAY);});
@@ -140,6 +154,7 @@ export const handleSignupAction = async (
 
 		return ok(pubky);
 	} catch (error) {
+		await SheetManager.hide('loading');
 		const errorMessage = error instanceof Error ? error.message : i18n.t('errors.unknownError');
 		console.error('Error handling signup:', errorMessage);
 		showToast({

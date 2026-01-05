@@ -153,9 +153,11 @@ const AnimatedQR = ({
 					)}
 				</Pressable>
 			</View>
-			<Text style={styles.progressText}>
-				{t('settings.keyProgress', { current: currentIndex + 1, total: data.length })}
-			</Text>
+			{isPaused && (
+				<Text style={styles.progressText}>
+					{t('settings.keyProgress', { current: currentIndex + 1, total: data.length })}
+				</Text>
+			)}
 		</>
 	);
 };

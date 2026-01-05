@@ -5,12 +5,14 @@ import React, {
 	useMemo,
 } from 'react';
 import { Platform, StyleSheet } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import {
 	View,
 	Plus,
+	Scan,
 } from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
@@ -21,11 +23,10 @@ import {
 } from '../store/selectors/pubkySelectors.ts';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
+import { useInputHandler } from '../hooks/useInputHandler';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
 import AppHeader from '../components/AppHeader';
 import { buttonStyles } from '../theme/utils';
-import ScanInviteButton from '../components/ScanInviteButton';
-import { ENABLE_INVITE_SCANNER } from "../utils/constants.ts";
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 
@@ -59,32 +60,50 @@ const ListHeader = memo(() => <AppHeader />);
 interface ListFooterProps {
 	createPubky: () => void;
 	importPubky: (mnemonic?: string) => Promise<any>;
+	onShowQRPress: () => void;
 }
 
-const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
+const ListFooter = memo(({ createPubky, importPubky, onShowQRPress }: ListFooterProps) => {
 	const { t } = useTranslation();
-	const onPress = useCallback(() => {
+
+	const onAddPubkyPress = useCallback(() => {
 		showAddPubkySheet(createPubky, importPubky);
 	}, [createPubky, importPubky]);
 
 	return (
-		<Button
-			testID="AddPubkyButton"
-			style={styles.listFooter}
-			text={t('home.addPubky')}
-			onPress={onPress}
-			icon={<Plus size={16} />}
-		/>
+		<View style={styles.listFooterContainer}>
+			<Button
+				testID="AddPubkyButton"
+				style={styles.listFooterButton}
+				text={t('home.addPubky')}
+				onPress={onAddPubkyPress}
+				icon={<Plus size={16} />}
+			/>
+			<Button
+				testID="ShowQRButton"
+				style={styles.scanQRButton}
+				text={t('home.scanQR')}
+				onPress={onShowQRPress}
+				icon={<Scan size={16} />}
+			/>
+		</View>
 	);
 });
 
 const HomeScreen = (): ReactElement => {
+	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 
 	const { createPubky, importPubky } = usePubkyManagement();
+	const { showScanner } = useInputHandler();
 	useDeepLinkHandler(createPubky, importPubky);
+
+	// HomeScreen scanner - no filter, allows all actions
+	const onShowQRPress = useCallback(() => {
+		showScanner({ title: t('home.scanQR') });
+	}, [showScanner, t]);
 
 	const handleDragEnd = useCallback(({ data }: { data: { key: string; value: Pubky }[] }) => {
 		if (!data) {return;}
@@ -126,62 +145,99 @@ const HomeScreen = (): ReactElement => {
 		return pubkyArray.length > 0;
 	}, [pubkyArray.length]);
 
-	const showScanInviteButton = useMemo(() => {
-		return ENABLE_INVITE_SCANNER && !hasPubkys;
-	}, [hasPubkys]);
-
-	const ListFooterComponent = useMemo(() => {
-		if (hasPubkys) {
-			return <ListFooter createPubky={createPubky} importPubky={importPubky} />;
-		}
-		return null;
-	}, [hasPubkys, createPubky, importPubky]);
-
-	const FixedScanButton = useMemo(() => {
-		if (!showScanInviteButton) return null;
+	if (!hasPubkys) {
 		return (
-			<View style={styles.fixedButtonContainer}>
-				<ScanInviteButton />
+			<View style={styles.emptyContainer}>
+				<AppHeader />
+				<EmptyState />
+				<View style={styles.emptyFooterContainer}>
+					<ListFooter createPubky={createPubky} importPubky={importPubky} onShowQRPress={onShowQRPress} />
+				</View>
 			</View>
 		);
-	}, [showScanInviteButton]);
+	}
 
 	return (
-		<>
+		<View style={styles.listContainer}>
 			<DraggableFlatList
 				data={pubkyArray}
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
 				ListHeaderComponent={<ListHeader />}
-				ListFooterComponent={ListFooterComponent}
-				ListEmptyComponent={<EmptyState />}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 				getItemLayout={getItemLayout}
 			/>
-			{FixedScanButton}
-		</>
+			{/* Fade overlay */}
+			<LinearGradient
+				style={styles.fadeOverlay}
+				colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']}
+				start={{ x: 0, y: 0 }}
+				end={{ x: 0, y: 1 }}
+				pointerEvents="none"
+			/>
+			{/* Fixed footer */}
+			<View style={styles.fixedFooterContainer}>
+				<ListFooter createPubky={createPubky} importPubky={importPubky} onShowQRPress={onShowQRPress} />
+			</View>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
-	listContent: {
-		paddingBottom: '100%',
-	},
-	listFooter: {
-		...buttonStyles.primary,
-		width: '90%',
-		alignSelf: 'center',
-	},
-	fixedButtonContainer: {
-		position: 'absolute',
-		bottom: Platform.select({ ios: 0, android: 20 }),
-		left: 0,
-		right: 0,
+	emptyContainer: {
+		flex: 1,
 		backgroundColor: 'transparent',
 	},
+	emptyFooterContainer: {
+		paddingBottom: Platform.select({ ios: 34, android: 24 }),
+		backgroundColor: 'transparent',
+	},
+	listContainer: {
+		flex: 1,
+		position: 'relative',
+		backgroundColor: 'transparent',
+	},
+	listContent: {
+		paddingBottom: 180,
+	},
+	fadeOverlay: {
+		position: 'absolute',
+		bottom: 100,
+		left: 0,
+		right: 0,
+		height: 80,
+		zIndex: 1,
+	},
+	fixedFooterContainer: {
+		position: 'absolute',
+		bottom: 0,
+		left: 0,
+		right: 0,
+		backgroundColor: '#000000',
+		paddingTop: 16,
+		paddingBottom: Platform.select({ ios: 34, android: 24 }),
+		zIndex: 2,
+	},
+	listFooterContainer: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: 12,
+		paddingHorizontal: 20,
+		backgroundColor: 'transparent',
+	},
+	listFooterButton: {
+		...buttonStyles.primary,
+		flex: 1,
+	},
+	scanQRButton: {
+		...buttonStyles.primary,
+		borderWidth: 1,
+		flex: 1,
+	}
 });
 
 export default memo(HomeScreen);

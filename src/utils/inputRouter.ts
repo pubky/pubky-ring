@@ -13,6 +13,7 @@ import {
 	InputAction,
 	isAuthAction,
 	isImportAction,
+	isMigrateAction,
 	isSignupAction,
 	isInviteAction,
 	isSessionAction,
@@ -20,6 +21,7 @@ import {
 } from './inputParser';
 import { handleAuthAction } from './actions/authAction';
 import { handleImportAction } from './actions/importAction';
+import { handleMigrateAction } from './actions/migrateAction';
 import { handleSignupAction } from './actions/signupAction';
 import { handleInviteAction } from './actions/inviteAction';
 import { handleSessionAction } from './actions/sessionAction';
@@ -80,6 +82,13 @@ export const routeInput = async (
 				: err(getErrorMessage(result.error, i18n.t('errors.importFailed')));
 		}
 
+		if (isMigrateAction(data)) {
+			const result = await handleMigrateAction(data, effectiveContext);
+			return result.isOk()
+				? ok({ success: true, action: InputAction.Migrate, pubky: result.value, message: i18n.t('router.migrateSuccessful') })
+				: err(getErrorMessage(result.error, i18n.t('errors.migrateFailed')));
+		}
+
 		if (isSignupAction(data)) {
 			const result = await handleSignupAction(data, effectiveContext);
 			return result.isOk()
@@ -131,4 +140,14 @@ export const actionRequiresNetwork = (action: InputAction): boolean => {
 		InputAction.Invite,
 		InputAction.Session,
 	].includes(action);
+};
+
+/**
+ * Determines if the camera should be closed before routing this action.
+ * Some actions (like Migrate) need the camera to stay open for multi-frame scanning.
+ */
+export const shouldCloseCameraBeforeRouting = (action: InputAction): boolean => {
+	// Migrate actions accumulate frames - camera is closed by the action handler
+	// when all frames are collected
+	return action !== InputAction.Migrate;
 };

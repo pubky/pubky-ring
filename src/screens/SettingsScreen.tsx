@@ -10,10 +10,14 @@ import {
 	ActionButton,
 	SessionText,
 	ArrowLeft,
+	QrCode,
+	Scan,
 } from '../theme/components.ts';
 import PubkyRingHeader from '../components/PubkyRingHeader';
+import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
+import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { setTheme } from '../theme/helpers.ts';
 import { ENavigationAnimation, ETheme } from '../types/settings.ts';
 import {
@@ -25,16 +29,24 @@ import {
 import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
+import { SheetManager } from 'react-native-actions-sheet';
+import { useInputHandler } from '../hooks/useInputHandler.ts';
+import { buttonStyles } from '../theme/utils.ts';
+import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
+type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
-const SettingsScreen = ({ navigation }: Props): ReactElement => {
+const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
+	const showSecretSettings = route.params?.showSecretSettings ?? true;
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const currentTheme = useSelector(getTheme);
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
+	const pubkyKeys = useSelector(getPubkyKeys);
+	const hasPubkys = pubkyKeys.length > 0;
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
+	const { showScanner } = useInputHandler({});
 
 	const leftButton = useCallback(() => (
 		<NavButton
@@ -143,6 +155,27 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 	// 	console.log('Backup all pubkys');
 	// }, []);
 
+	const handleShowQRPress = useCallback(async () => {
+		await SheetManager.show('migrate-modal', {
+			payload: {
+				onClose: () => SheetManager.hide('migrate-modal'),
+			},
+		});
+	}, []);
+
+	const handleScanQRPress = useCallback(async () => {
+		// Reset to Home when migration completes (prevents swipe-back to Settings)
+		setOnMigrationComplete(() => {
+			navigation.reset({
+				index: 0,
+				routes: [{ name: 'Home' }],
+			});
+			setOnMigrationComplete(null); // Clean up
+		});
+
+		await showScanner({ title: t('settings.migrateKeys') });
+	}, [showScanner, t, navigation]);
+
 	return (
 		<View style={styles.container}>
 			<PubkyRingHeader leftButton={leftButton()} rightButton={rightButton()} />
@@ -160,50 +193,82 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
                  </Card>
                  **/}
 
-				<Card style={styles.section}>
-					<ActionButton
-						onPress={handleNavigationAnimationPress}
-						style={styles.navigationAnimationButton}
-					>
-						<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
-						<SessionText style={styles.themeValue}>
-							{navigationAnimationText}
-						</SessionText>
-					</ActionButton>
+				<Card style={styles.textSection}>
+					<Text style={styles.textSettingTitle}>MIGRATE TO OTHER DEVICE</Text>
+					<Text style={styles.textSettingValue}>
+						You can migrate your keys with a dynamic QR code. Import by scanning this QR.
+					</Text>
 				</Card>
 
-				<Card style={styles.section}>
-					<ActionButton
-						onPress={handleAutoAuthToggle}
-						style={styles.toggleRow}
-					>
-						<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
-						<View style={styles.switchContainer}>
-							<Switch
-								value={enableAutoAuth}
-								onValueChange={handleAutoAuthToggle}
-							/>
-						</View>
-					</ActionButton>
-				</Card>
+				<View style={styles.buttonContainer}>
+					{hasPubkys && (
+						<Button
+							testID="ShowQRButton"
+							style={styles.actionButton}
+							text={t('settings.showQR')}
+							onPress={handleShowQRPress}
+							icon={<QrCode size={16} />}
+						/>
+					)}
+					<Button
+						testID="ScanQRButton"
+						style={styles.scanQRButton}
+						text={t('settings.scanQR')}
+						onPress={handleScanQRPress}
+						icon={<Scan size={16} />}
+					/>
+				</View>
 
-				<Card style={styles.section}>
-					<ActionButton
-						onPress={handleShowOnboarding}
-						style={styles.navigationAnimationButton}
-					>
-						<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
-					</ActionButton>
-				</Card>
+				{showSecretSettings && (
+					<Card style={styles.section}>
+						<ActionButton
+							onPress={handleNavigationAnimationPress}
+							style={styles.navigationAnimationButton}
+						>
+							<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
+							<SessionText style={styles.themeValue}>
+								{navigationAnimationText}
+							</SessionText>
+						</ActionButton>
+					</Card>)}
 
-				<Card style={styles.section}>
-					<ActionButton
-						onPress={handleWipePubkyRing}
-						style={styles.navigationAnimationButton}
-					>
-						<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
-					</ActionButton>
-				</Card>
+				{showSecretSettings && (
+					<Card style={styles.section}>
+						<ActionButton
+							onPress={handleAutoAuthToggle}
+							style={styles.toggleRow}
+						>
+							<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
+							<View style={styles.switchContainer}>
+								<Switch
+									value={enableAutoAuth}
+									onValueChange={handleAutoAuthToggle}
+								/>
+							</View>
+						</ActionButton>
+					</Card>)}
+
+				{showSecretSettings && (
+					<Card style={styles.section}>
+						<ActionButton
+							onPress={handleShowOnboarding}
+							style={styles.navigationAnimationButton}
+						>
+							<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
+						</ActionButton>
+					</Card>
+				)}
+
+				{showSecretSettings && (
+					<Card style={styles.section}>
+						<ActionButton
+							onPress={handleWipePubkyRing}
+							style={styles.navigationAnimationButton}
+						>
+							<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
+						</ActionButton>
+					</Card>
+				)}
 
 				{/* Backup all pubkys */}
 				{/* TODO: Consider implementing a "Backup All Pubkys" feature. Backs up all pubkys with same passphrase and saves as zip file for future import
@@ -244,10 +309,32 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
+	textSection: {
+		marginBottom: 16,
+		borderRadius: 16,
+		overflow: 'hidden',
+		padding: 16,
+		backgroundColor: 'transparent',
+	},
 	section: {
 		marginBottom: 16,
 		borderRadius: 16,
 		overflow: 'hidden',
+	},
+	textSettingTitle: {
+		fontSize: 13,
+		fontWeight: '500',
+		lineHeight: 18,
+		letterSpacing: 0.8,
+		color: 'rgba(255, 255, 255, 0.64)',
+	},
+	textSettingValue: {
+		fontSize: 17,
+		fontWeight: '400',
+		lineHeight: 22,
+		letterSpacing: 0,
+		marginTop: 10,
+		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	settingTitle: {
 		fontSize: 17,
@@ -284,6 +371,22 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		height: 60,
 		width: '100%',
+	},
+	buttonContainer: {
+		flexDirection: 'row',
+		justifyContent: 'center',
+		alignItems: 'center',
+		gap: 12,
+		marginBottom: 16,
+	},
+	actionButton: {
+		...buttonStyles.primary,
+		flex: 1,
+	},
+	scanQRButton: {
+		...buttonStyles.primary,
+		borderWidth: 1,
+		flex: 1,
 	},
 });
 

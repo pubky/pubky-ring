@@ -9,6 +9,7 @@ import { createRecoveryFile } from '@synonymdev/react-native-pubky';
 import { backupPubky } from './rnfs.ts';
 import { err, ok } from '@synonymdev/result';
 import i18n from '../i18n';
+import { SHEET_ANIMATION_DELAY, SHEET_TRANSITION_DELAY } from './constants';
 
 export const showAddPubkySheet = (
 	createPubky: () => void,
@@ -84,6 +85,23 @@ export const showImportSuccessSheet = ({
 		},
 		onClose: () => SheetManager.hide('import-success'),
 	});
+};
+
+export const showImportSuccessUI = (pubky: string, isNewPubky: boolean): void => {
+	setTimeout(() => {
+		showImportSuccessSheet({
+			pubky,
+			isNewPubky,
+			onContinue: () => {
+				setTimeout(() => {
+					showEditPubkySheet({
+						title: 'Setup',
+						pubky,
+					});
+				}, SHEET_TRANSITION_DELAY);
+			},
+		});
+	}, SHEET_ANIMATION_DELAY);
 };
 
 export const showBackupPrompt = async ({

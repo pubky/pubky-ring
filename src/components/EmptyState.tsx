@@ -1,40 +1,58 @@
-import React, { ReactElement, useCallback, memo } from 'react';
+import React, { ReactElement, memo } from 'react';
 import { StyleSheet } from 'react-native';
-import { View, Text, ArrowRight, Plus, Button } from '../theme/components.ts';
-import { showAddPubkySheet } from '../utils/sheetHelpers';
-import { textStyles, buttonStyles } from '../theme/utils';
-import { usePubkyManagement } from '../hooks/usePubkyManagement';
+import { View, Text } from '../theme/components.ts';
+import { Canvas, Path, Skia, StrokeCap, StrokeJoin } from '@shopify/react-native-skia';
 import { useTranslation } from 'react-i18next';
+
+const ARROW_COLOR = '#0085FF';
+
+const DashedArrow = (): ReactElement => {
+	// Curve rotated 45° clockwise - now goes top-left to bottom-right
+	const curvePath = Skia.Path.Make();
+	curvePath.moveTo(5, 0);
+	curvePath.quadTo(5, 45, 55, 85);
+
+	// Arrowhead chevron pointing down-right
+	const arrowPath = Skia.Path.Make();
+	arrowPath.moveTo(47, 90); //Left tip
+	arrowPath.lineTo(59, 87); // Middle tip
+	arrowPath.lineTo(57, 75); //Right tip
+
+	// Dashed line paint
+	const dashedPaint = Skia.Paint();
+	dashedPaint.setColor(Skia.Color(ARROW_COLOR));
+	dashedPaint.setStyle(1);
+	dashedPaint.setStrokeWidth(3);
+	dashedPaint.setStrokeCap(StrokeCap.Round);
+	dashedPaint.setPathEffect(Skia.PathEffect.MakeDash([2, 8], 5));
+
+	// Solid arrow head paint
+	const solidPaint = Skia.Paint();
+	solidPaint.setColor(Skia.Color(ARROW_COLOR));
+	solidPaint.setStyle(1);
+	solidPaint.setStrokeWidth(3);
+	solidPaint.setStrokeCap(StrokeCap.Round);
+	solidPaint.setStrokeJoin(StrokeJoin.Round);
+
+	return (
+		<View style={styles.arrowContainer}>
+			<Canvas style={styles.canvas}>
+				<Path path={curvePath} paint={dashedPaint} />
+				<Path path={arrowPath} paint={solidPaint} />
+			</Canvas>
+		</View>
+	);
+};
 
 const EmptyState = (): ReactElement => {
 	const { t } = useTranslation();
-	const { createPubky, importPubky } = usePubkyManagement();
-
-	const onPress = useCallback(() => {
-		showAddPubkySheet(createPubky, importPubky);
-	}, [createPubky, importPubky]);
 
 	return (
 		<View style={styles.container}>
-			<View style={styles.cardEmpty}>
-				<View style={styles.emptyUser}>
-					<View style={styles.image} />
-					<View>
-						<Text style={[textStyles.heading, styles.name]}>{t('emptyState.placeholderName')}</Text>
-						<Text style={[textStyles.body, styles.pubky]}>{t('emptyState.placeholderPubky')}</Text>
-					</View>
-					<View style={styles.buttonArrow}>
-						<ArrowRight size={24} />
-					</View>
-				</View>
-				<Button
-					testID="EmptyStateAddPubkyButton"
-					style={[buttonStyles.primary, styles.buttonSecondary]}
-					onPressIn={onPress}
-				>
-					<Plus size={16} />
-					<Text style={textStyles.button}>{t('home.addPubky')}</Text>
-				</Button>
+			<View style={styles.content}>
+				<Text style={styles.heading}>{t('emptyState.heading')}</Text>
+				<Text style={styles.description}>{t('emptyState.description')}</Text>
+				<DashedArrow />
 			</View>
 		</View>
 	);
@@ -43,46 +61,35 @@ const EmptyState = (): ReactElement => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		justifyContent: 'flex-end',
+		backgroundColor: 'transparent',
 	},
-	cardEmpty: {
-		display: 'flex',
-		padding: 24,
-		marginHorizontal: 20,
-		flexDirection: 'column',
+	content: {
 		alignItems: 'flex-start',
-		gap: 24,
-		alignSelf: 'stretch',
-		borderRadius: 16,
-		borderWidth: 1,
-		borderStyle: 'dashed',
+		paddingHorizontal: 24,
+		paddingBottom: 0,
+		backgroundColor: 'transparent',
 	},
-	emptyUser: {
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 18,
-		alignSelf: 'stretch',
+	heading: {
+		fontSize: 48,
+		fontWeight: '700',
+		lineHeight: 52,
+		marginBottom: 12,
 	},
-	image: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
-		borderWidth: 1,
-		borderStyle: 'dashed',
+	description: {
+		fontSize: 17,
+		fontWeight: '400',
+		lineHeight: 24,
+		opacity: 0.7,
 	},
-	name: {},
-	pubky: {},
-	buttonArrow: {
-		display: 'flex',
-		justifyContent: 'center',
-		marginLeft: 'auto',
+	arrowContainer: {
+		alignSelf: 'center',
+		marginTop: 5,
+		backgroundColor: 'transparent',
 	},
-	buttonSecondary: {
-		width: '100%',
-		display: 'flex',
-		flexDirection: 'row',
-		gap: 4,
-		justifyContent: 'center',
-		borderWidth: 1,
+	canvas: {
+		width: 80,
+		height: 100,
 	},
 });
 

@@ -25,7 +25,8 @@
     "write": "Write"
   },
   "home": {
-    "addPubky": "Add pubky"
+    "addPubky": "Add pubky",
+    "scanQR": "Scan QR"
   },
   "settings": {
     "title": "Settings",
@@ -35,6 +36,14 @@
     "wipePubkyRing": "Wipe Pubky Ring",
     "wipeConfirmTitle": "Are you sure?",
     "wipeConfirmMessage": "This action will erase all Pubky Ring data and cannot be undone.",
+    "showQR": "Show QR",
+    "scanQR": "Scan QR",
+    "migrateKeys": "Migrate Keys",
+    "scanDynamicQR": "SCAN DYNAMIC QR",
+    "scanDynamicQRDescription": "Scan this dynamic QR code with your other device to import your {{count}} key pairs.",
+    "scanThisQR": "Scan this QR code on your other device to import your keys.",
+    "keyProgress": "Key {{current}} of {{total}}",
+    "noKeysToDisplay": "No keys available to display.",
     "theme": {
       "title": "Theme",
       "system": "System",
@@ -157,6 +166,7 @@
     "unknownError": "An unknown error occurred",
     "authorizationFailed": "Authorization failed",
     "importFailed": "Import failed",
+    "migrateFailed": "Migration failed",
     "signupFailed": "Signup failed",
     "signupFailedDescription": "Please check your signup link is still valid, then try again.",
     "inviteProcessingFailed": "Invite processing failed",
@@ -177,7 +187,9 @@
   },
   "emptyState": {
     "placeholderName": "pubky",
-    "placeholderPubky": "xxxxx..xxxxx"
+    "placeholderPubky": "xxxxx..xxxxx",
+    "heading": "Get started.",
+    "description": "Set up a pubky manually or scan a QR\nfor instant onboarding to pubky.app"
   },
   "about": {
     "keychainFor": "Keychain for",
@@ -223,6 +235,7 @@
   },
   "router": {
     "importSuccessful": "Import successful",
+    "migrateSuccessful": "Migration successful",
     "signupSuccessful": "Signup successful",
     "inviteProcessed": "Invite processed",
     "sessionReturned": "Session returned",
@@ -323,5 +336,13 @@
   },
   "invite": {
     "unknownErrorProcessing": "Unknown error processing invite"
+  },
+  "migrate": {
+    "scanning": "Scanning for Keys",
+    "successTitle": "Migration Complete",
+    "partialTitle": "Partial Migration Complete",
+    "successMessage": "Successfully imported {{imported}} of {{total}} keys",
+    "partialSuccess": "Imported {{imported}} keys, {{failed}} failed",
+    "allFailed": "All keys failed to import"
   }
 }

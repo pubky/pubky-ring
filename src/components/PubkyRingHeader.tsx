@@ -49,7 +49,7 @@ const PubkyRingHeader = memo(({
 		const now = Date.now();
 
 		if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-			navigation.navigate('Settings');
+			navigation.navigate('Settings', { showSecretSettings: true });
 		}
 		lastTapRef.current = now;
 	}, [navigation]);

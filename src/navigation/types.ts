@@ -10,7 +10,9 @@ export type RootStackParamList = {
   ConfirmPubky: undefined;
   Home: undefined;
   About: undefined;
-  Settings: undefined;
+  Settings: {
+    showSecretSettings?: boolean;
+  } | undefined;
   PubkyDetail: {
     pubky: string;
     index: number;

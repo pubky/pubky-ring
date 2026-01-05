@@ -8,8 +8,8 @@
 import { useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { SheetManager } from 'react-native-actions-sheet';
-import { parseInput, InputSource } from '../utils/inputParser';
-import { actionRequiresPubky, actionRequiresNetwork } from '../utils/inputRouter';
+import { parseInput, InputSource, InputAction } from '../utils/inputParser';
+import { actionRequiresPubky, actionRequiresNetwork, shouldCloseCameraBeforeRouting } from '../utils/inputRouter';
 import { getSignedUpPubkys, getAllPubkys } from '../store/selectors/pubkySelectors';
 import { readFromClipboard } from '../utils/clipboard';
 import { showToast, checkNetworkConnection } from '../utils/helpers';
@@ -20,6 +20,7 @@ import {
 	showPubkySelectionSheet,
 	handleNoPubkysAvailable,
 } from './inputHandlerUtils';
+import { handleMigrationScannerClose, resetMigrateAccumulator } from '../utils/actions/migrateAction';
 
 interface UseInputHandlerOptions {
 	// The currently selected pubky (for auth actions)
@@ -41,6 +42,13 @@ interface ScannerOptions {
 	title?: string;
 	// Pubky to use for auth (overrides hook's pubky)
 	pubky?: string;
+	// Restrict scanner to only accept certain action types
+	allowedActions?: InputAction[];
+	// Custom error message when action is not allowed
+	disallowedActionError?: {
+		title: string;
+		description: string;
+	};
 }
 
 /**
@@ -154,7 +162,10 @@ export const useInputHandler = (options: UseInputHandlerOptions = {}): UseInputH
 	 * Show QR scanner and handle result
 	 */
 	const showScanner = useCallback(async (scannerOptions?: ScannerOptions): Promise<void> => {
-		const { title, pubky: scannerPubky } = scannerOptions || {};
+		const { title, pubky: scannerPubky, allowedActions, disallowedActionError } = scannerOptions || {};
+
+		// Reset any stale migration state before opening scanner
+		resetMigrateAccumulator();
 
 		// Check network before showing scanner
 		const isOnline = getIsOnline();
@@ -176,24 +187,70 @@ export const useInputHandler = (options: UseInputHandlerOptions = {}): UseInputH
 			}
 		}
 
+		// Helper to check if action is allowed
+		const isActionAllowed = (action: InputAction): boolean => {
+			if (!allowedActions || allowedActions.length === 0) {
+				return true; // No filter, all actions allowed
+			}
+			return allowedActions.includes(action);
+		};
+
+		// Helper to show disallowed action error
+		const showDisallowedError = async (): Promise<void> => {
+			await SheetManager.hide('camera');
+			showToast({
+				type: 'error',
+				title: disallowedActionError?.title ?? i18n.t('import.invalidData'),
+				description: disallowedActionError?.description ?? i18n.t('import.invalidClipboardData'),
+			});
+		};
+
 		return new Promise<void>((resolve) => {
 			SheetManager.show('camera', {
 				payload: {
 					title,
 					onScan: async (data: string) => {
-						await SheetManager.hide('camera');
-						await handleInput(data, 'scan', scannerPubky);
-						resolve();
+						// Parse to determine if camera should stay open
+						const parsed = await parseInput(data, 'scan');
+
+						// Check if action is allowed when filter is set
+						if (!isActionAllowed(parsed.action)) {
+							await showDisallowedError();
+							resolve();
+							return;
+						}
+
+						if (shouldCloseCameraBeforeRouting(parsed.action)) {
+							await SheetManager.hide('camera');
+							await handleInput(data, 'scan', scannerPubky);
+							resolve();
+						} else {
+							// Action handles camera closing (e.g., migrate accumulates frames)
+							await handleInput(data, 'scan', scannerPubky);
+						}
 					},
 					onCopyClipboard: async (): Promise<void> => {
 						await SheetManager.hide('camera');
 						const clipboardContent = await readFromClipboard();
 						if (clipboardContent) {
+							// Check if action is allowed when filter is set
+							const parsed = await parseInput(clipboardContent, 'clipboard');
+							if (!isActionAllowed(parsed.action)) {
+								showToast({
+									type: 'error',
+									title: disallowedActionError?.title ?? i18n.t('import.invalidData'),
+									description: disallowedActionError?.description ?? i18n.t('import.invalidClipboardData'),
+								});
+								resolve();
+								return;
+							}
 							await handleInput(clipboardContent, 'clipboard', scannerPubky);
 						}
 						resolve();
 					},
 					onClose: () => {
+						// Handle any partial migration (shows summary if keys were imported, then resets)
+						handleMigrationScannerClose();
 						SheetManager.hide('camera');
 						resolve();
 					},

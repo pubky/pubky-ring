@@ -11,7 +11,7 @@
     "next": "Siguiente",
     "back": "Volver",
     "close": "Cerrar",
-    "continue": "Continúe en",
+    "continue": "Continuar",
     "retry": "Vuelva a intentarlo",
     "loading": "Cargando...",
     "copied": "Copiado",
@@ -25,7 +25,8 @@
     "write": "Escriba a"
   },
   "home": {
-    "addPubky": "Añadir pubky"
+    "addPubky": "Añadir pubky",
+    "scanQR": "Escanear QR"
   },
   "settings": {
     "title": "Ajustes",
@@ -35,6 +36,14 @@
     "wipePubkyRing": "Limpiar el anillo pubis",
     "wipeConfirmTitle": "¿Está seguro?",
     "wipeConfirmMessage": "Esta acción borrará todos los datos de Pubky Ring y no podrá deshacerse.",
+    "showQR": "Mostrar QR",
+    "scanQR": "Escanear QR",
+    "migrateKeys": "Migrar claves",
+    "scanDynamicQR": "ESCANEAR QR DINÁMICO",
+    "scanDynamicQRDescription": "Escanee este código QR dinámico con su otro dispositivo para importar sus pares de claves {{count}}.",
+    "scanThisQR": "Escanee este código QR en su otro dispositivo para importar sus llaves.",
+    "keyProgress": "Clave {{current}} de {{total}}",
+    "noKeysToDisplay": "No hay teclas disponibles para mostrar.",
     "theme": {
       "title": "Tema",
       "system": "Sistema",
@@ -53,7 +62,7 @@
     "offlineDescription": "Necesita estar en línea para autorizar con Pubky Ring"
   },
   "auth": {
-    "authorize": "Autorice",
+    "authorize": "Autorizar",
     "authorizing": "Autorizando...",
     "authorizationSuccessful": "Autorización aceptada",
     "deeplinkAuthSuccess": "Navegue de nuevo a su navegador",
@@ -157,6 +166,7 @@
     "unknownError": "Se ha producido un error desconocido",
     "authorizationFailed": "Autorización fallida",
     "importFailed": "Importación fallida",
+    "migrateFailed": "Migración fallida",
     "signupFailed": "Error de registro",
     "signupFailedDescription": "Por favor, compruebe que su enlace de inscripción sigue siendo válido y vuelva a intentarlo.",
     "inviteProcessingFailed": "Fallo en el procesamiento de la invitación",
@@ -177,7 +187,9 @@
   },
   "emptyState": {
     "placeholderName": "pubky",
-    "placeholderPubky": "xxxxx..xxxxx"
+    "placeholderPubky": "xxxxx..xxxxx",
+    "heading": "Póngase en marcha.",
+    "description": "Configure una pubky manualmente o escanee un QR\npara acceder al instante a pubky.app"
   },
   "about": {
     "keychainFor": "Llavero para",
@@ -223,6 +235,7 @@
   },
   "router": {
     "importSuccessful": "Importación correcta",
+    "migrateSuccessful": "Migración con éxito",
     "signupSuccessful": "Inscripción realizada con éxito",
     "inviteProcessed": "Invitación procesada",
     "sessionReturned": "Sesión devuelta",
@@ -323,5 +336,13 @@
   },
   "invite": {
     "unknownErrorProcessing": "Unknown error processing invite"
+  },
+  "migrate": {
+    "scanning": "Búsqueda de llaves",
+    "successTitle": "Migración completada",
+    "partialTitle": "Migración parcial Completa",
+    "successMessage": "Importado con éxito {{imported}} de {{total}} claves",
+    "partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
+    "allFailed": "Falló la importación de todas las claves"
   }
 }

@@ -3,6 +3,7 @@ import styled from 'styled-components/native';
 import { Theme } from './index';
 import {
 	Scan as _Scan,
+	QrCode as _QrCode,
 	Clipboard as _Clipboard,
 	Share as _Share,
 	ArrowLeft as _ArrowLeft,
@@ -20,6 +21,7 @@ import {
 	Save as _Save,
 	KeyRound as _KeyRound,
 	Folder as _Folder,
+	Settings as _Settings,
 } from 'lucide-react-native';
 import ActionSheet from 'react-native-actions-sheet';
 import Animated from 'react-native-reanimated';
@@ -195,7 +197,11 @@ export const ActivityIndicator = styled.ActivityIndicator<{ theme: Theme }>`
   color: ${(props): string => props.theme.colors.sessionText};
 `;
 
-export const QrCode = styled(_Scan)<{ theme: Theme }>`
+export const QrCode = styled(_QrCode)<{ theme: Theme }>`
+  color: ${(props): string => props.theme.colors.sessionText};
+`;
+
+export const Scan = styled(_Scan)<{ theme: Theme }>`
   color: ${(props): string => props.theme.colors.sessionText};
 `;
 
@@ -239,6 +245,10 @@ export const ChevronLeft = styled(_ChevronLeft)<{ theme: Theme }>`
   color: ${(props): string => props.theme.colors.sessionText};
 `;
 
+export const ChevronRight = styled(_ChevronRight)<{ theme: Theme }>`
+  color: ${(props): string => props.theme.colors.sessionText};
+`;
+
 export const Check = styled(_Check)<{ theme: Theme }>`
 	  color: ${(props): string => props.theme.colors.text};
 `;
@@ -264,6 +274,10 @@ export const KeyRound = styled(_KeyRound)<{ theme: Theme }>`
 `;
 
 export const Folder = styled(_Folder)<{ theme: Theme }>`
+	  color: ${(props): string => props.theme.colors.text};
+`;
+
+export const Settings = styled(_Settings)<{ theme: Theme }>`
 	  color: ${(props): string => props.theme.colors.text};
 `;
 

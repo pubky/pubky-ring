@@ -8,7 +8,7 @@ import { StyleSheet } from 'react-native';
 import { View, TouchableOpacity } from '../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
-import { FlashList } from '@shopify/flash-list';
+import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import PubkyCard from './PubkyCard.tsx';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
@@ -24,6 +24,8 @@ import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 import { parseInput } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
+
+type PubkyItem = { key: string; value: Pubky };
 
 const ListItemComponent = memo(({ name, pubky, onPubkyPress }: {
 	name?: string;
@@ -91,7 +93,7 @@ const SelectPubky = ({ payload }: {
             : t('pubky.noPubkysAvailable');
 	}, [pubkyArray.length, t]);
 
-	const renderItem = useCallback(({ item }: { item: { key: string; value: Pubky } }) => (
+	const renderItem: ListRenderItem<PubkyItem> = useCallback(({ item }) => (
 		<ListItemComponent
 			name={item.value.name}
 			pubky={item.key}
@@ -99,7 +101,7 @@ const SelectPubky = ({ payload }: {
 		/>
 	), [onPubkyPress]);
 
-	const keyExtractor = useCallback((item: { key: string }) => item.key, []);
+	const keyExtractor = useCallback((item: PubkyItem) => item.key, []);
 
 	return (
 		<ModalWrapper

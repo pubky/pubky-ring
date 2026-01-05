@@ -11,7 +11,7 @@
     "next": "Siguiente",
     "back": "Volver",
     "close": "Cerrar",
-    "continue": "Continúe en",
+    "continue": "Continuar",
     "retry": "Vuelva a intentarlo",
     "loading": "Cargando...",
     "copied": "Copiado",
@@ -62,7 +62,7 @@
     "offlineDescription": "Necesita estar en línea para autorizar con Pubky Ring"
   },
   "auth": {
-    "authorize": "Autorice",
+    "authorize": "Autorizar",
     "authorizing": "Autorizando...",
     "authorizationSuccessful": "Autorización aceptada",
     "deeplinkAuthSuccess": "Navegue de nuevo a su navegador",
@@ -166,6 +166,7 @@
     "unknownError": "Se ha producido un error desconocido",
     "authorizationFailed": "Autorización fallida",
     "importFailed": "Importación fallida",
+    "migrateFailed": "Migración fallida",
     "signupFailed": "Error de registro",
     "signupFailedDescription": "Por favor, compruebe que su enlace de inscripción sigue siendo válido y vuelva a intentarlo.",
     "inviteProcessingFailed": "Fallo en el procesamiento de la invitación",
@@ -234,6 +235,7 @@
   },
   "router": {
     "importSuccessful": "Importación correcta",
+    "migrateSuccessful": "Migración con éxito",
     "signupSuccessful": "Inscripción realizada con éxito",
     "inviteProcessed": "Invitación procesada",
     "sessionReturned": "Sesión devuelta",
@@ -334,5 +336,13 @@
   },
   "invite": {
     "unknownErrorProcessing": "Unknown error processing invite"
+  },
+  "migrate": {
+    "scanning": "Búsqueda de llaves",
+    "successTitle": "Migración completada",
+    "partialTitle": "Migración parcial Completa",
+    "successMessage": "Importado con éxito {{imported}} de {{total}} claves",
+    "partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
+    "allFailed": "Falló la importación de todas las claves"
   }
 }

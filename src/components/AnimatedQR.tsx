@@ -4,6 +4,8 @@ import QRCode from 'react-native-qrcode-svg';
 import { Text, View, ChevronLeft, ChevronRight } from '../theme/components.ts';
 import { useTranslation } from 'react-i18next';
 
+const pubkyRingLogo = require('../images/pubky-ring-square.png');
+
 interface AnimatedQRData {
 	value: string;
 }
@@ -129,6 +131,11 @@ const AnimatedQR = ({
 							value={currentItem?.value || 'empty'}
 							size={size}
 							backgroundColor="#FFFFFF"
+							logo={pubkyRingLogo}
+							logoSize={45}
+							logoMargin={0}
+							logoBackgroundColor="black"
+							logoBorderRadius={20.5}
 						/>
 					</View>
 					{showControls && (

@@ -38,16 +38,27 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const smallScreen = isSmallScreen();
 const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
+// Animation timing constants
+const ROTATION_DURATION = 1600;
+const KEY_ROTATION_ANGLE = 90;
+const RING_ROTATION_ANGLE = KEY_ROTATION_ANGLE * 2;
+
+// Image scale factor - adjust this single value to resize all loading images
+const IMAGE_SCALE = 1.0;
+const OUTER_CIRCLE_SIZE = 231 * IMAGE_SCALE;
+const INNER_CIRCLE_SIZE = 140 * IMAGE_SCALE;
+const KEY_IMAGE_SIZE = 260 * IMAGE_SCALE;
+
 interface LoadingModalPayload {
-	modalTitle?: string;
-	title?: string;
-	description?: string;
-	waitText?: string;
-	onClose?: () => void;
+  modalTitle?: string;
+  title?: string;
+  description?: string;
+  waitText?: string;
+  onClose?: () => void;
 }
 
 const LoadingModal = ({ payload }: {
-	payload?: LoadingModalPayload;
+  payload?: LoadingModalPayload;
 }): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
@@ -62,7 +73,11 @@ const LoadingModal = ({ payload }: {
 	// Animation shared values
 	const errorGradientOpacity = useSharedValue(0);
 	const imageOpacity = useSharedValue(1);
-	const imageRotation = useSharedValue(0);
+
+	// Separate rotation values for each layer
+	const keyRotation = useSharedValue(0);
+	const innerCircleRotation = useSharedValue(0);
+	const outerCircleRotation = useSharedValue(0);
 
 	// Get error state from Redux
 	const isError = loadingModalState.isError;
@@ -99,28 +114,62 @@ const LoadingModal = ({ payload }: {
 		}
 	}, [isError, imageOpacity, errorGradientOpacity]);
 
-	// Rotation animation for loading state
+	// Rotation animations for loading state
 	useEffect(() => {
+		const timingConfig = { duration: ROTATION_DURATION, easing: Easing.inOut(Easing.ease) };
+
 		if (!isError) {
-			// Start rotation animation: 0 → -90° → 0° (repeat)
-			imageRotation.value = withRepeat(
+			// Key rotates: 0 → -90° → 0° (counter-clockwise first)
+			keyRotation.value = withRepeat(
 				withSequence(
-					withTiming(-90, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
-					withTiming(0, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+					withTiming(-KEY_ROTATION_ANGLE, timingConfig),
+					withTiming(0, timingConfig)
 				),
-				-1, // Repeat infinitely
-				false // Don't reverse (we handle direction in sequence)
+				-1,
+				false
+			);
+
+			// Inner circle rotates: 0 → +90° → 0° (clockwise first - opposite to key)
+			innerCircleRotation.value = withRepeat(
+				withSequence(
+					withTiming(RING_ROTATION_ANGLE, timingConfig),
+					withTiming(0, timingConfig)
+				),
+				-1,
+				false
+			);
+
+			// Outer circle rotates: 0 → -180° → 0° (counter-clockwise, twice as fast as key)
+			outerCircleRotation.value = withRepeat(
+				withSequence(
+					withTiming(-RING_ROTATION_ANGLE, timingConfig),
+					withTiming(0, timingConfig)
+				),
+				-1,
+				false
 			);
 		} else {
 			// Stop rotation and reset to 0 when in error state
-			imageRotation.value = withTiming(0, { duration: 300 });
+			keyRotation.value = withTiming(0, { duration: 300 });
+			innerCircleRotation.value = withTiming(0, { duration: 300 });
+			outerCircleRotation.value = withTiming(0, { duration: 300 });
 		}
-	}, [isError, imageRotation]);
+	}, [isError, keyRotation, innerCircleRotation, outerCircleRotation]);
 
-	// Animated styles
-	const imageAnimatedStyle = useAnimatedStyle(() => ({
+	// Animated styles for each layer
+	const keyAnimatedStyle = useAnimatedStyle(() => ({
 		opacity: imageOpacity.value,
-		transform: [{ rotate: `${imageRotation.value}deg` }],
+		transform: [{ rotate: `${keyRotation.value}deg` }],
+	}));
+
+	const innerCircleAnimatedStyle = useAnimatedStyle(() => ({
+		opacity: imageOpacity.value,
+		transform: [{ rotate: `${innerCircleRotation.value}deg` }],
+	}));
+
+	const outerCircleAnimatedStyle = useAnimatedStyle(() => ({
+		opacity: imageOpacity.value,
+		transform: [{ rotate: `${outerCircleRotation.value}deg` }],
 	}));
 
 	const errorGradientStyle = useAnimatedStyle(() => ({
@@ -146,8 +195,8 @@ const LoadingModal = ({ payload }: {
 		if (isError) {
 			const baseError = t('loading.errorDescription');
 			return errorMessage
-				? `${baseError} ${errorMessage}`
-				: baseError;
+        ? `${baseError} ${errorMessage}`
+        : baseError;
 		}
 		return payload?.description ?? t('loading.description');
 	}, [isError, errorMessage, payload?.description, t]);
@@ -175,11 +224,6 @@ const LoadingModal = ({ payload }: {
 			}
 		}, 150);
 	}, [dispatch]);
-
-	// Determine which image to show
-	const imageSource = showErrorImage
-		? require('../images/cross.png')
-		: require('../images/authorizing-key.png');
 
 	return (
 		<ActionSheetContainer
@@ -220,35 +264,68 @@ const LoadingModal = ({ payload }: {
 					{title && <Text style={styles.headerText}>{title}</Text>}
 					<SessionText style={styles.message}>{description}</SessionText>
 					<View style={styles.imageContainer}>
-						<AnimatedView style={[styles.imageWrapper, imageAnimatedStyle]}>
-							<Image
-								source={imageSource}
-								style={styles.image}
-								resizeMode="contain"
-							/>
-						</AnimatedView>
+						{showErrorImage ? (
+              // Error state: show cross image
+							<AnimatedView style={[styles.imageWrapper, keyAnimatedStyle]}>
+								<Image
+              		source={require('../images/cross.png')}
+              		style={styles.image}
+              		resizeMode="contain"
+              	/>
+							</AnimatedView>
+            ) : (
+              // Loading state: show layered rotating images
+	<View style={styles.layeredImageContainer}>
+		{/* Outer circle - bottom layer */}
+		<AnimatedView style={[styles.circleLayer, outerCircleAnimatedStyle]}>
+			<Image
+              			source={require('../images/circular-outer.png')}
+              			style={styles.outerCircle}
+              			resizeMode="contain"
+              		/>
+		</AnimatedView>
+
+		{/* Inner circle - middle layer */}
+		<AnimatedView style={[styles.circleLayer, innerCircleAnimatedStyle]}>
+			<Image
+              			source={require('../images/circular-inner.png')}
+              			style={styles.innerCircle}
+              			resizeMode="contain"
+              		/>
+		</AnimatedView>
+
+		{/* Key - top layer */}
+		<AnimatedView style={[styles.circleLayer, keyAnimatedStyle]}>
+			<Image
+              			source={require('../images/key.png')}
+              			style={styles.keyImage}
+              			resizeMode="contain"
+              		/>
+		</AnimatedView>
+	</View>
+            )}
 					</View>
 					{isError ? (
 						<ModalButtonContainer>
 							<ModalButton
-								text={t('common.cancel')}
-								variant="secondary"
-								width="half"
-								onPress={handleCancel}
-							/>
+            		text={t('common.cancel')}
+            		variant="secondary"
+            		width="half"
+            		onPress={handleCancel}
+            	/>
 							<ModalButton
-								text={t('loading.tryAgain')}
-								variant="primary"
-								width="half"
-								onPress={handleTryAgain}
-							/>
+            		text={t('loading.tryAgain')}
+            		variant="primary"
+            		width="half"
+            		onPress={handleTryAgain}
+            	/>
 						</ModalButtonContainer>
-					) : (
-						<>
-							<Text style={styles.waitText}>{waitText}</Text>
-							<View style={styles.footerBuffer} />
-						</>
-					)}
+          ) : (
+	<>
+		<Text style={styles.waitText}>{waitText}</Text>
+		<View style={styles.footerBuffer} />
+	</>
+          )}
 				</View>
 			</View>
 		</ActionSheetContainer>
@@ -326,6 +403,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: 'transparent',
 		justifyContent: 'center',
+		alignItems: 'center',
 	},
 	imageWrapper: {
 		backgroundColor: 'transparent',
@@ -334,6 +412,35 @@ const styles = StyleSheet.create({
 		width: 231,
 		height: 231,
 		alignSelf: 'center',
+	},
+	// Layered animation styles
+	layeredImageContainer: {
+		width: OUTER_CIRCLE_SIZE,
+		height: OUTER_CIRCLE_SIZE,
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'transparent',
+	},
+	circleLayer: {
+		position: 'absolute',
+		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'transparent',
+	},
+	outerCircle: {
+		width: OUTER_CIRCLE_SIZE,
+		height: OUTER_CIRCLE_SIZE,
+		backgroundColor: 'transparent',
+	},
+	innerCircle: {
+		width: INNER_CIRCLE_SIZE,
+		height: INNER_CIRCLE_SIZE,
+		backgroundColor: 'transparent',
+	},
+	keyImage: {
+		width: KEY_IMAGE_SIZE,
+		height: KEY_IMAGE_SIZE,
+		backgroundColor: 'transparent',
 	},
 	waitText: {
 		fontWeight: '600',

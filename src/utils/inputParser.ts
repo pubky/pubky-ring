@@ -230,6 +230,8 @@ export const parseInput = async (
 
 	// Check for migrate deeplink format (pubkyring://migrate?index=X&total=Y&key=Z)
 	// This must be checked early before other parsing strips the protocol
+	// Normalize trailing slash before query string for migrate URL
+	if (processedInput.startsWith('pubkyring://migrate/?')) processedInput = processedInput.replace('pubkyring://migrate/?', 'pubkyring://migrate?');
 	if (processedInput.startsWith('pubkyring://migrate?')) {
 		try {
 			const queryString = processedInput.substring('pubkyring://migrate?'.length);
@@ -275,6 +277,11 @@ export const parseInput = async (
 	if (urlWithoutProtocol.startsWith('pubkyauth://')) {
 		urlWithoutProtocol = urlWithoutProtocol.replace('pubkyauth://', '');
 	}
+
+	// Normalize: remove trailing slash before query string for known routes
+	if (urlWithoutProtocol.startsWith('signup/?')) urlWithoutProtocol = urlWithoutProtocol.replace('signup/?', 'signup?');
+	if (urlWithoutProtocol.startsWith('session/?')) urlWithoutProtocol = urlWithoutProtocol.replace('session/?', 'session?');
+	if (urlWithoutProtocol.startsWith('signin/?')) urlWithoutProtocol = urlWithoutProtocol.replace('signin/?', 'signin?');
 
 	// 1. Check for signup deeplink
 	// Format: pubkyring://signup?... or pubkyauth://signup?...

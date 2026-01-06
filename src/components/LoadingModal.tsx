@@ -25,8 +25,11 @@ import {
 import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
 import {
+	Easing,
 	useAnimatedStyle,
 	useSharedValue,
+	withRepeat,
+	withSequence,
 	withTiming,
 } from 'react-native-reanimated';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -59,6 +62,7 @@ const LoadingModal = ({ payload }: {
 	// Animation shared values
 	const errorGradientOpacity = useSharedValue(0);
 	const imageOpacity = useSharedValue(1);
+	const imageRotation = useSharedValue(0);
 
 	// Get error state from Redux
 	const isError = loadingModalState.isError;
@@ -95,9 +99,28 @@ const LoadingModal = ({ payload }: {
 		}
 	}, [isError, imageOpacity, errorGradientOpacity]);
 
+	// Rotation animation for loading state
+	useEffect(() => {
+		if (!isError) {
+			// Start rotation animation: 0 → -90° → 0° (repeat)
+			imageRotation.value = withRepeat(
+				withSequence(
+					withTiming(-90, { duration: 1000, easing: Easing.inOut(Easing.ease) }),
+					withTiming(0, { duration: 1000, easing: Easing.inOut(Easing.ease) })
+				),
+				-1, // Repeat infinitely
+				false // Don't reverse (we handle direction in sequence)
+			);
+		} else {
+			// Stop rotation and reset to 0 when in error state
+			imageRotation.value = withTiming(0, { duration: 300 });
+		}
+	}, [isError, imageRotation]);
+
 	// Animated styles
 	const imageAnimatedStyle = useAnimatedStyle(() => ({
 		opacity: imageOpacity.value,
+		transform: [{ rotate: `${imageRotation.value}deg` }],
 	}));
 
 	const errorGradientStyle = useAnimatedStyle(() => ({

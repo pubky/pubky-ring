@@ -30,6 +30,7 @@ export const buttonStyles = {
 		paddingVertical: 20,
 		paddingHorizontal: 24,
 		alignItems: 'center' as const,
+		minHeight: 64,
 	} as ViewStyle,
 	secondary: {
 		borderWidth: 1,

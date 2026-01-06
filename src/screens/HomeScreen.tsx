@@ -77,14 +77,14 @@ const ListFooter = memo(({ createPubky, importPubky, onShowQRPress }: ListFooter
 				style={styles.listFooterButton}
 				text={t('home.addPubky')}
 				onPress={onAddPubkyPress}
-				icon={<Plus size={16} />}
+				icon={<Plus size={18} />}
 			/>
 			<Button
 				testID="ShowQRButton"
 				style={styles.scanQRButton}
 				text={t('home.scanQR')}
 				onPress={onShowQRPress}
-				icon={<Scan size={16} />}
+				icon={<Scan size={18} />}
 			/>
 		</View>
 	);

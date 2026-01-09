@@ -10,6 +10,57 @@ Pubky Ring is the key manager for your identity in the Pubky ecosystem. It lets 
 - View and control active sessions
 - Stay fully self-custodial, with no accounts or tracking
 
+# Accepted Input Formats
+
+Pubky Ring accepts input via deeplinks, QR code scanning, and clipboard pasting. All parsing is handled by `src/utils/inputParser.ts`.
+
+## Deeplinks
+
+**Registered URL schemes:** `pubkyring://` and `pubkyauth://`
+
+| Action | Format | Parameters |
+|--------|--------|------------|
+| Auth | `pubkyauth:///?relay={url}&secret={secret}&caps={caps}` | `relay`: relay URL, `secret`: secret key, `caps`: comma-separated capabilities |
+| Sign In | `pubkyring://signin?caps=...&secret=...&relay=...` | Same as Auth (converted internally) |
+| Signup | `pubkyring://signup?hs={homeserver}&st={signup_token}&relay=...&secret=...&caps=...` | `hs`: homeserver URL, `st`: invite/signup token |
+| Session | `pubkyring://session?callback={callback_url}` | `callback`: URL-encoded callback URL |
+| Migrate | `pubkyring://migrate?index={n}&total={total}&key={key}` | `index`: 0-based frame index, `total`: frame count, `key`: mnemonic or secret key |
+
+## Clipboard (Pasting)
+
+| Format | Example | Action |
+|--------|---------|--------|
+| Recovery Phrase | `word1 word2 word3 ... word12` (12 BIP39 words) | Import |
+| Encrypted Secret Key | Encrypted key string | Import |
+| Invite Code | `XXXX-XXXX-XXXX` | Invite |
+| Invite URL | `https://example.com/invite/XXXX-XXXX-XXXX` | Invite (code extracted) |
+| Any deeplink | `pubkyring://signup?...` | Same as deeplink |
+
+**Note:** Pasted input is normalized—hyphens, underscores, and plus signs are converted to spaces for recovery phrases.
+
+## QR Code Scanning
+
+Accepts all deeplink and clipboard formats when encoded in a QR code. Additionally supports:
+
+| Format | Description |
+|--------|-------------|
+| Animated QR | Multi-frame QR codes cycling through migrate deeplinks for bulk key import |
+
+## Input Priority Order
+
+When parsing input, the first matching format wins:
+
+1. Migrate deeplinks
+2. Signup deeplinks
+3. Session deeplinks
+4. Sign-in deeplinks
+5. Auth URLs (`pubkyauth:///`)
+6. Invite codes in URLs
+7. Standalone invite codes
+8. Recovery phrases (12 words)
+9. Encrypted secret keys
+10. Unknown (fallback)
+
 # Getting Started
 
 ## Environment requirements

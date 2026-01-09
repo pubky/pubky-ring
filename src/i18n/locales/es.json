@@ -39,8 +39,11 @@
     "showQR": "Mostrar QR",
     "scanQR": "Escanear QR",
     "migrateKeys": "Migrar claves",
+    "migrateToOtherDevice": "MIGRAR A OTRO DISPOSITIVO",
+    "migrateDescription": "Puede migrar sus llaves con un código QR dinámico. Importe escaneando este QR.",
     "scanDynamicQR": "ESCANEAR QR DINÁMICO",
-    "scanDynamicQRDescription": "Escanee este código QR dinámico con su otro dispositivo para importar sus pares de claves {{count}}.",
+    "scanDynamicQRDescription_one": "Escanee este código QR con su otro dispositivo para importar su par de claves {{count}}.",
+    "scanDynamicQRDescription_other": "Escanee este código QR dinámico con su otro dispositivo para importar sus pares de claves {{count}}.",
     "scanThisQR": "Escanee este código QR en su otro dispositivo para importar sus llaves.",
     "keyProgress": "Clave {{current}} de {{total}}",
     "noKeysToDisplay": "No hay teclas disponibles para mostrar.",
@@ -344,5 +347,14 @@
     "successMessage": "Importado con éxito {{imported}} de {{total}} claves",
     "partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
     "allFailed": "Falló la importación de todas las claves"
+  },
+  "loading": {
+    "modalTitle": "Configuración de Pubky",
+    "title": "Sus llaves,\nsu identidad.",
+    "description": "Creación y configuración de su nuevo pubky. Esto sólo le llevará unos segundos.",
+    "pleaseWait": "Por favor, espere...",
+    "errorModalTitle": "Configuración fallida",
+    "errorDescription": "Su nuevo pubky no ha podido ser configurado.",
+    "tryAgain": "Inténtelo de nuevo"
   }
 }

@@ -39,6 +39,8 @@
     "showQR": "Show QR",
     "scanQR": "Scan QR",
     "migrateKeys": "Migrate Keys",
+    "migrateToOtherDevice": "MIGRATE TO OTHER DEVICE",
+    "migrateDescription": "You can migrate your keys with a dynamic QR code. Import by scanning this QR.",
     "scanDynamicQR": "SCAN DYNAMIC QR",
     "scanDynamicQRDescription_one": "Scan this QR code with your other device to import your {{count}} key pair.",
     "scanDynamicQRDescription_other": "Scan this dynamic QR code with your other device to import your {{count}} key pairs.",

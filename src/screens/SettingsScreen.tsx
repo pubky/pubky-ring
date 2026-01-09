@@ -194,9 +194,9 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
                  **/}
 
 				<Card style={styles.textSection}>
-					<Text style={styles.textSettingTitle}>MIGRATE TO OTHER DEVICE</Text>
+					<Text style={styles.textSettingTitle}>{t('settings.migrateToOtherDevice')}</Text>
 					<Text style={styles.textSettingValue}>
-						You can migrate your keys with a dynamic QR code. Import by scanning this QR.
+						{t('settings.migrateDescription')}
 					</Text>
 				</Card>
 

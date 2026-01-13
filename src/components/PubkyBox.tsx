@@ -13,7 +13,7 @@ import {
 	ForegroundView,
 	LinearGradient,
 	NavView,
-	QrCode,
+	Scan,
 	SessionText,
 	Text,
 	TouchableOpacity,
@@ -50,7 +50,7 @@ const AuthorizeQRButton = memo(({
 		{isLoading ? (
 			<ActivityIndicator size="small" />
 		) : (
-			isSignedUp ? <QrCode size={16} /> : null
+			isSignedUp ? <Scan size={16} /> : null
 		)}
 		<Text
 			style={textStyles.button}

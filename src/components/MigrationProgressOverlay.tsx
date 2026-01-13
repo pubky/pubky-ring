@@ -93,22 +93,6 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 						style={[styles.progressBarFill, progressBarAnimatedStyle]}
 					/>
 				</View>
-
-				{/* Step indicators - only render when total > 0 */}
-				{progress.total > 0 && (
-					<View style={styles.stepsContainer}>
-						{Array.from({ length: progress.total }, (_, i) => (
-							<View
-								key={i}
-								style={[
-									styles.stepDot,
-									i < progress.current && styles.stepDotFilled,
-									i === progress.current - 1 && styles.stepDotActive,
-								]}
-							/>
-						))}
-					</View>
-				)}
 			</View>
 		</Animated.View>
 	);
@@ -152,7 +136,6 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255, 255, 255, 0.15)',
 		borderRadius: 4,
 		overflow: 'hidden',
-		marginBottom: 12,
 	},
 	progressBarFill: {
 		position: 'absolute',
@@ -161,28 +144,6 @@ const styles = StyleSheet.create({
 		height: '100%',
 		backgroundColor: '#0085FF',
 		borderRadius: 4,
-	},
-	stepsContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		gap: 8,
-	},
-	stepDot: {
-		width: 8,
-		height: 8,
-		borderRadius: 4,
-		backgroundColor: 'rgba(255, 255, 255, 0.2)',
-	},
-	stepDotFilled: {
-		backgroundColor: '#0085FF',
-	},
-	stepDotActive: {
-		backgroundColor: '#0085FF',
-		shadowColor: '#0085FF',
-		shadowOffset: { width: 0, height: 0 },
-		shadowOpacity: 1,
-		shadowRadius: 6,
 	},
 });
 

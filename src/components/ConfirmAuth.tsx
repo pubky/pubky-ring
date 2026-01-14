@@ -10,6 +10,8 @@ import {
 	Text,
 	View,
 	SkiaGradient,
+	Globe,
+	CircleCheck,
 } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
@@ -26,7 +28,6 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
-import { Globe } from 'lucide-react-native';
 import {
 	ACTION_SHEET_HEIGHT,
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
@@ -34,7 +35,6 @@ import {
 import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
-import { CircleCheck } from 'lucide-react-native';
 import ProgressBar from './ProgressBar.tsx';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { useTranslation } from 'react-i18next';

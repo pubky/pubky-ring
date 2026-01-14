@@ -23,11 +23,12 @@ import {
 	AuthorizeButton,
 	TouchableOpacity,
 	AnimatedView,
+	Gift,
+	Check,
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 import DashedBorder from '../DashedBorder.tsx';
-import { Gift, Check } from 'lucide-react-native';
 import { formatSignupToken, isSmallScreen, isValidSignupTokenFormat } from '../../utils/helpers.ts';
 import {
 	useAnimatedStyle,

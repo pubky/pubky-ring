@@ -15,10 +15,12 @@ import {
 	SessionText,
 	RadialGradient,
 	TouchableOpacity,
+	ArrowLeft,
+	Mail,
+	Send,
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
-import { ArrowLeft, Mail, Send } from 'lucide-react-native';
 import XLogo from '../XLogo.tsx';
 import { INVITE_CODE_GRADIENT } from '../../utils/constants.ts';
 

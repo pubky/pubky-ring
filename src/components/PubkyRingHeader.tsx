@@ -71,6 +71,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-around',
 		alignContent: 'center',
+		paddingHorizontal: 8,
 	},
 	logoWrapper: {
 		alignSelf: 'center',

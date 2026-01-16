@@ -74,12 +74,13 @@ const styles = StyleSheet.create({
 		fontSize: 48,
 		fontWeight: '700',
 		lineHeight: 52,
-		marginBottom: 12,
+		marginBottom: 6,
 	},
 	description: {
 		fontSize: 17,
 		fontWeight: '400',
-		lineHeight: 24,
+		lineHeight: 22,
+		letterSpacing: 0,
 		opacity: 0.7,
 	},
 	arrowContainer: {

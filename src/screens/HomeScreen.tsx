@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	emptyFooterContainer: {
-		paddingBottom: Platform.select({ ios: 34, android: 24 }),
+		paddingBottom: Platform.select({ ios: 24, android: 24 }),
 		backgroundColor: 'transparent',
 	},
 	listContainer: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
 		right: 0,
 		backgroundColor: '#000000',
 		paddingTop: 16,
-		paddingBottom: Platform.select({ ios: 34, android: 24 }),
+		paddingBottom: Platform.select({ ios: 24, android: 24 }),
 		zIndex: 2,
 	},
 	listFooterContainer: {

@@ -31,7 +31,6 @@ import {
 	BLUE_RADIAL_GRADIENT,
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
-import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { Result } from '@synonymdev/result';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
@@ -307,41 +306,32 @@ const AddPubky = ({ payload }: {
 	}, [currentScreen, getButtonConfig, getHeaderText, getImage, importPubky, messageText, onMnemonicBack, onMnemonicCancel, onScanQrPress, renderBackButton, shouldShowBackButton, titleText]);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="add-pubky"
-				navigationAnimation={navigationAnimation}
-				keyboardHandlerEnabled={Platform.OS === 'ios'}
-				//isModal={Platform.OS === 'ios'}
-				CustomHeaderComponent={<></>}
-				height={actionSheetHeight}
+		<ActionSheetContainer
+			id="add-pubky"
+			navigationAnimation={navigationAnimation}
+			keyboardHandlerEnabled={Platform.OS === 'ios'}
+			//isModal={Platform.OS === 'ios'}
+			CustomHeaderComponent={<></>}
+			height={actionSheetHeight}
+		>
+			<RadialGradient
+				style={styles.content}
+				colors={BLUE_RADIAL_GRADIENT}
+				center={{ x: 0.5, y: 0.5 }}
 			>
-				<RadialGradient
-					style={styles.content}
-					colors={BLUE_RADIAL_GRADIENT}
-					center={{ x: 0.5, y: 0.5 }}
-				>
-					{getContent()}
-				</RadialGradient>
-				<Toast config={toastConfig({ style: toastStyle })} />
-			</ActionSheetContainer>
-		</View>
+				{getContent()}
+			</RadialGradient>
+			<Toast config={toastConfig({ style: toastStyle })} />
+		</ActionSheetContainer>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		...absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	content: {
 		paddingHorizontal: 20,
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
-		height: '100%',
+		flex: 1,
 	},
 	keyContainer: {
 		flex: 1,

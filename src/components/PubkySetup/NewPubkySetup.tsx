@@ -18,7 +18,6 @@ import {
 	ACTION_SHEET_HEIGHT_TEXTINPUT,
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../../utils/constants.ts';
-import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { toastConfig } from '../../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
 import { getToastStyle, isSmallScreen } from '../../utils/helpers.ts';
@@ -174,39 +173,30 @@ const NewPubkySetup = ({ payload }: {
 
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="new-pubky-setup"
-				navigationAnimation={navigationAnimation}
-				keyboardHandlerEnabled={keyboardHandlerEnabled}
-				//isModal={Platform.OS === 'ios'}
-				CustomHeaderComponent={<></>}
-				height={acionSheetHeight}
-			>
-				<Content
-					currentScreen={currentScreen}
-					title={title}
-					subTitle={subTitle}
-					pubky={pubky}
-					pubkyData={pubkyData}
-					isInvite={payload?.isInvite}
-					setCurrentScreen={setCurrentScreen}
-					closeSheet={closeSheet}
-				/>
-				<Toast config={toastConfig({ style: toastStyle })} />
-			</ActionSheetContainer>
-		</View>
+		<ActionSheetContainer
+			id="new-pubky-setup"
+			navigationAnimation={navigationAnimation}
+			keyboardHandlerEnabled={keyboardHandlerEnabled}
+			//isModal={Platform.OS === 'ios'}
+			CustomHeaderComponent={<></>}
+			height={acionSheetHeight}
+		>
+			<Content
+				currentScreen={currentScreen}
+				title={title}
+				subTitle={subTitle}
+				pubky={pubky}
+				pubkyData={pubkyData}
+				isInvite={payload?.isInvite}
+				setCurrentScreen={setCurrentScreen}
+				closeSheet={closeSheet}
+			/>
+			<Toast config={toastConfig({ style: toastStyle })} />
+		</ActionSheetContainer>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		...absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	fullSize: {
 		height: '100%',
 		width: '100%',

@@ -25,7 +25,6 @@ import {
 	ACTION_SHEET_HEIGHT,
 	BLUE_RADIAL_GRADIENT,
 } from '../utils/constants.ts';
-import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { EBackupPreference } from "../types/pubky.ts";
 import { showBackupPrompt } from "../utils/sheetHelpers.ts";
 import { truncateStr } from "../utils/pubky.ts";
@@ -114,40 +113,31 @@ const SelectBackupPreference = ({ payload }: {
 	}, [getButtonConfig, getHeaderText, getImage, messageText, titleText]);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="select-backup-preference"
-				navigationAnimation={navigationAnimation}
-				keyboardHandlerEnabled={Platform.OS === 'ios'}
-				//isModal={Platform.OS === 'ios'}
-				CustomHeaderComponent={<></>}
-				height={ACTION_SHEET_HEIGHT}
+		<ActionSheetContainer
+			id="select-backup-preference"
+			navigationAnimation={navigationAnimation}
+			keyboardHandlerEnabled={Platform.OS === 'ios'}
+			//isModal={Platform.OS === 'ios'}
+			CustomHeaderComponent={<></>}
+			height={ACTION_SHEET_HEIGHT}
+		>
+			<RadialGradient
+				style={styles.content}
+				colors={BLUE_RADIAL_GRADIENT}
+				center={{ x: 0.5, y: 0.5 }}
 			>
-				<RadialGradient
-					style={styles.content}
-					colors={BLUE_RADIAL_GRADIENT}
-					center={{ x: 0.5, y: 0.5 }}
-				>
-					{getContent()}
-				</RadialGradient>
-			</ActionSheetContainer>
-		</View>
+				{getContent()}
+			</RadialGradient>
+		</ActionSheetContainer>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		...absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	content: {
 		paddingHorizontal: 20,
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
-		height: '100%',
+		flex: 1,
 	},
 	keyContainer: {
 		flex: 1,

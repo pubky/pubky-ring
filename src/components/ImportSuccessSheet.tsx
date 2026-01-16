@@ -15,7 +15,6 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import absoluteFillObject = StyleSheet.absoluteFillObject;
 import { Pubky } from "../types/pubky.ts";
 import PubkyReview from "./PubkySetup/PubkyReview.tsx";
 import { getPubky, getPubkyCount } from "../store/selectors/pubkySelectors.ts";
@@ -71,38 +70,28 @@ const ImportSuccessSheet = ({ payload }: {
 	}, [pubky, pubkyCount, pubkyData]);
 
 	return (
-		<View style={styles.container}>
-			<ActionSheetContainer
-				id="import-success"
-				navigationAnimation={navigationAnimation}
-				keyboardHandlerEnabled={Platform.OS === 'ios'}
-				//isModal={Platform.OS === 'ios'}
-				CustomHeaderComponent={<></>}
-				height={ACTION_SHEET_HEIGHT}
-			>
-				<View style={styles.fullSize}>
-					<PubkyReview
-						modalTitle={modalTitle}
-						description={description}
-						pubky={pubky}
-						pubkyData={data}
-						onContinue={onContinue}
-						authorizeButtonStyle={styles.authorizeButton}
-					/>
-				</View>
-			</ActionSheetContainer>
-		</View>
+		<ActionSheetContainer
+			id="import-success"
+			navigationAnimation={navigationAnimation}
+			keyboardHandlerEnabled={Platform.OS === 'ios'}
+			CustomHeaderComponent={<></>}
+			height={ACTION_SHEET_HEIGHT}
+		>
+			<View style={styles.fullSize}>
+				<PubkyReview
+					modalTitle={modalTitle}
+					description={description}
+					pubky={pubky}
+					pubkyData={data}
+					onContinue={onContinue}
+					authorizeButtonStyle={styles.authorizeButton}
+				/>
+			</View>
+		</ActionSheetContainer>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		...absoluteFillObject,
-		backgroundColor: 'transparent',
-		height: '100%',
-		width: '100%',
-		zIndex: 100,
-	},
 	fullSize: {
 		height: '100%',
 		width: '100%',

@@ -2,7 +2,7 @@
  * Signup Action Handler
  *
  * Handles signup deeplinks that create a new pubky and authorize with a service.
- * Format: pubkyauth://signup?hs={homeserver}&ic={invite_code}&relay={relay}&secret={secret}&caps={capabilities}
+ * Format: pubkyauth://signup?hs={homeserver}&st={signup_token}&relay={relay}&secret={secret}&caps={capabilities}
  */
 
 import { Result, ok, err } from '@synonymdev/result';

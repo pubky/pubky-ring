@@ -62,8 +62,8 @@ const SessionItem = ({ session, onSignOut }: {
 				<SessionView style={styles.capsContainer}>
 					<Text style={styles.capsTitle}>{t('sessionItem.capabilities')}</Text>
 					<SessionView style={styles.capsWrapper}>
-						{session.capabilities.map((cap, idx) => (
-							<SessionView key={idx} style={styles.capChip}>
+						{session.capabilities.map((cap) => (
+							<SessionView key={cap} style={styles.capChip}>
 								<Text style={styles.capText}>{cap}</Text>
 							</SessionView>
 						))}

@@ -23,20 +23,25 @@ const ProfileAvatar = ({ pubky, size = 32 }: ProfileAvatarProps): ReactElement =
 
 	const borderRadius = useMemo(() => size / 2, [size]);
 
+	// Memoize style object to prevent unnecessary re-renders
+	const imageStyle = useMemo(() => ({
+		width: size,
+		height: size,
+		borderRadius,
+	}), [size, borderRadius]);
+
+	// Memoize SVG generation - expensive string operation
+	const svg = useMemo(() => jdenticon.toSvg(pubky, size), [pubky, size]);
+
 	if (imageUri) {
 		return (
 			<Image
 				source={{ uri: imageUri }}
-				style={{
-					width: size,
-					height: size,
-					borderRadius,
-				}}
+				style={imageStyle}
 			/>
 		);
 	}
 
-	const svg = jdenticon.toSvg(pubky, size);
 	return <SvgXml xml={svg} />;
 };
 

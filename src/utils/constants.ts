@@ -18,6 +18,7 @@ export const PUBKY_APP_URL = PRODUCTION_APP_URL;
 export const TERMS_OF_USE = 'https://synonym.to/pubky-ring-privacy-policy';
 
 // Timing constants for consistent animations and delays
+export const NAVIGATION_ANIMATION_DURATION = 200; // Duration for screen transition animations
 export const SHEET_ANIMATION_DELAY = 50; // Delay for sheet animations
 export const SHEET_TRANSITION_DELAY = 50; // Delay between sheet transitions
 export const AUTH_SHEET_DELAY = 50; // Small delay for auth sheet display

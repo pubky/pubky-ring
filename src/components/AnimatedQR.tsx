@@ -1,8 +1,13 @@
 import React, { memo, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
-import { Animated, Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { Text, View, ChevronLeft, ChevronRight } from '../theme/components.ts';
+import { Text, View, ChevronLeft, ChevronRight, AnimatedView } from '../theme/components.ts';
 import { useTranslation } from 'react-i18next';
+import {
+	useSharedValue,
+	useAnimatedStyle,
+	withTiming,
+} from 'react-native-reanimated';
 
 const pubkyRingLogo = require('../images/pubky-ring-square.png');
 
@@ -35,7 +40,7 @@ const AnimatedQR = ({
 	const [isPaused, setIsPaused] = useState(false);
 	const startTimeRef = useRef<number>(Date.now());
 	const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-	const controlsOpacity = useRef(new Animated.Value(0)).current;
+	const controlsOpacity = useSharedValue(0);
 	const isMountedRef = useRef(true);
 	const hasTransition = startCycleInterval !== undefined && startCycleInterval !== cycleInterval;
 
@@ -71,12 +76,13 @@ const AnimatedQR = ({
 
 	// Animate controls opacity when pause state changes
 	useEffect(() => {
-		Animated.timing(controlsOpacity, {
-			toValue: isPaused ? 1 : 0,
-			duration: 200,
-			useNativeDriver: true,
-		}).start();
+		controlsOpacity.value = withTiming(isPaused ? 1 : 0, { duration: 200 });
 	}, [isPaused, controlsOpacity]);
+
+	// Animated style for controls opacity
+	const controlsAnimatedStyle = useAnimatedStyle(() => ({
+		opacity: controlsOpacity.value,
+	}));
 
 	// Cycle through data items with dynamic interval
 	useEffect(() => {
@@ -140,22 +146,22 @@ const AnimatedQR = ({
 					</View>
 					{showControls && (
 						<>
-							<Animated.View
-								style={[styles.chevronLeft, { opacity: controlsOpacity }]}
+							<AnimatedView
+								style={[styles.chevronLeft, controlsAnimatedStyle]}
 								pointerEvents={isPaused ? 'auto' : 'none'}
 							>
 								<Pressable onPress={handlePrevious} hitSlop={CHEVRON_HIT_SLOP}>
 									<ChevronLeft size={32} />
 								</Pressable>
-							</Animated.View>
-							<Animated.View
-								style={[styles.chevronRight, { opacity: controlsOpacity }]}
+							</AnimatedView>
+							<AnimatedView
+								style={[styles.chevronRight, controlsAnimatedStyle]}
 								pointerEvents={isPaused ? 'auto' : 'none'}
 							>
 								<Pressable onPress={handleNext} hitSlop={CHEVRON_HIT_SLOP}>
 									<ChevronRight size={32} />
 								</Pressable>
-							</Animated.View>
+							</AnimatedView>
 						</>
 					)}
 				</Pressable>

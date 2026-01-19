@@ -21,6 +21,8 @@ import { SHEET_ANIMATION_DELAY } from '../constants.ts';
 import i18n from '../../i18n';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
+import { getSignedUpPubkysFromStore } from '../store-helpers';
+import { showPubkySelectionSheet } from '../../hooks/inputHandlerUtils';
 
 type SignupActionData = {
 	action: InputAction.Signup;
@@ -101,6 +103,54 @@ export const handleSignupAction = async (
 		});
 
 		if (signupRes.isErr()) {
+			// Check if user has existing signed-up pubkys - if so, forward to auth
+			const signedUpPubkys = getSignedUpPubkysFromStore();
+			const signedUpKeys = Object.keys(signedUpPubkys);
+
+			if (signedUpKeys.length > 0) {
+				// User has existing pubky(s) - forward to auth flow instead of showing error
+				// Hide loading modal first
+				await SheetManager.hide('loading');
+				await new Promise(resolve => {
+					setTimeout(resolve, SHEET_ANIMATION_DELAY);
+				});
+
+				const capsString = caps.join(',');
+				const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
+
+				const authData = { action: InputAction.Auth, params: { relay, secret, caps }, rawUrl: authUrl } as const;
+
+				if (signedUpKeys.length === 1) {
+					// Single pubky: auto-forward to auth
+					return await handleAuthAction(
+						authData,
+						{ ...context, pubky: signedUpKeys[0], isDeeplink: false }
+					);
+				} else {
+					// Multiple pubkys: show selector, then forward to auth
+					return new Promise((resolve) => {
+						showPubkySelectionSheet(
+							{
+								action: InputAction.Auth,
+								data: authData,
+								source: 'scan',
+								rawInput: authUrl,
+							},
+							'scan',
+							dispatch,
+							async (selectedPubky: string) => {
+								const result = await handleAuthAction(
+									authData,
+									{ ...context, pubky: selectedPubky, isDeeplink: false }
+								);
+								resolve(result);
+							}
+						);
+					});
+				}
+			}
+
+			// No existing pubkys - show error as before
 			const errorMessage = getErrorMessage(signupRes.error, i18n.t('errors.signupFailedDescription'));
 			showErrorState(errorMessage, dispatch);
 			return err(errorMessage);

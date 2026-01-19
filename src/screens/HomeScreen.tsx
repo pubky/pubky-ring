@@ -30,6 +30,11 @@ import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 
+// Extract gradient props to constants to prevent unnecessary re-renders
+const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'] as const;
+const GRADIENT_START = { x: 0, y: 0 };
+const GRADIENT_END = { x: 0, y: 1 };
+
 const PubkyItem = memo(({
 	item,
 	drag,
@@ -173,9 +178,9 @@ const HomeScreen = (): ReactElement => {
 			{/* Fade overlay */}
 			<LinearGradient
 				style={styles.fadeOverlay}
-				colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']}
-				start={{ x: 0, y: 0 }}
-				end={{ x: 0, y: 1 }}
+				colors={FADE_GRADIENT_COLORS}
+				start={GRADIENT_START}
+				end={GRADIENT_END}
 				pointerEvents="none"
 			/>
 			{/* Fixed footer */}

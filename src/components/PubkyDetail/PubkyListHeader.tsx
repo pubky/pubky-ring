@@ -74,18 +74,19 @@ export const PubkyListHeader = memo(({
 		return pubkyData.signedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup');
 	}, [pubkyData.signedUp]);
 
+	// Return undefined instead of <></> for better performance - avoids creating empty JSX objects
 	const ShareIcon = useMemo(() =>
-			fontScale <= 1 ? <Image source={require('../../images/share-icon.png')} style={styles.icon} /> : <></>,
+			fontScale <= 1 ? <Image source={require('../../images/share-icon.png')} style={styles.icon} /> : undefined,
 	[fontScale]
 	);
 
 	const BackupIcon = useMemo(() =>
-			fontScale <= 1 ? <Image source={require('../../images/shield-icon.png')} style={styles.icon} /> : <></>,
+			fontScale <= 1 ? <Image source={require('../../images/shield-icon.png')} style={styles.icon} /> : undefined,
 	[fontScale]
 	);
 
 	const DeleteIcon = useMemo(() =>
-			fontScale <= 1 ? <Trash2 size={24} /> : <></>,
+			fontScale <= 1 ? <Trash2 size={24} /> : undefined,
 	[fontScale]
 	);
 

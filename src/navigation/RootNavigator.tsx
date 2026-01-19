@@ -18,6 +18,7 @@ import SettingsScreen from '../screens/SettingsScreen.tsx';
 import TermsOfUse from '../screens/TermsOfUse.tsx';
 import About from '../screens/About.tsx';
 import { useTranslation } from 'react-i18next';
+import { NAVIGATION_ANIMATION_DURATION } from '../utils/constants';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -38,7 +39,7 @@ const RootNavigator = (): ReactElement => {
 				screenOptions={{
 					headerShown: false,
 					animation: navigationAnimation,
-					animationDuration: 200,
+					animationDuration: NAVIGATION_ANIMATION_DURATION,
 				}}>
 				<Stack.Screen
 					name="TermsOfUse"

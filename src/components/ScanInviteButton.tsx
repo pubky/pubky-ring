@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useRef } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import { AuthorizeButton, QrCode, Text } from '../theme/components';
+import { AuthorizeButton, Scan, Text } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
 import PubkyRingLogo from '../images/pubky.png';
@@ -104,7 +104,7 @@ const ScanInviteButton = memo(() => {
 				onPressIn={handleInviteScan}
 			>
 				<View style={styles.row}>
-					<QrCode size={19} />
+					<Scan size={19} />
 					<Text
 						style={styles.text}
 						numberOfLines={1}

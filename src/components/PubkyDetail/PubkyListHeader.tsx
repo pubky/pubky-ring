@@ -9,7 +9,7 @@ import { PubkyData } from '../../navigation/types.ts';
 import {
 	View,
 	Trash2,
-	QrCode,
+	Scan,
 	LinearGradient
 } from '../../theme/components.ts';
 import Button from '../Button.tsx';
@@ -65,7 +65,7 @@ export const PubkyListHeader = memo(({
 
 	const buttonIcon = useMemo(() => {
 		if (pubkyData.signedUp) {
-			return <QrCode size={16} />;
+			return <Scan size={16} />;
 		}
 		return null;
 	}, [pubkyData.signedUp]);

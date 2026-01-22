@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
 		fontSize: 26,
 		fontWeight: '300',
 		letterSpacing: 0,
-		lineHeight: 26,
+		lineHeight: 32,
 		paddingBottom: 12,
 		textAlign: 'center',
 		backgroundColor: 'transparent',

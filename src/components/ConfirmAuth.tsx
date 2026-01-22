@@ -269,7 +269,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 					<View style={styles.progressBarContainer}>
 						{!isAuthorized ? (
 							<ProgressBar
-                            	duration={20000}
+                            	duration={60000}
                             	//fadeIn={true}
                             	//fadeInDuration={1000}
                             	delayRender={0}

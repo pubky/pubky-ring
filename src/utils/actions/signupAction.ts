@@ -53,27 +53,32 @@ export const handleSignupAction = async (
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
-	const { homeserver, inviteCode, relay, secret, caps } = params;
 
 	let pubky = '';
 
-	// Show loading modal (don't await - it resolves when sheet closes)
+	// Small delay to ensure any previous sheet (e.g., camera) has fully closed
+	await new Promise(resolve => setTimeout(resolve, SHEET_ANIMATION_DELAY));
+
+	// Show loading modal FIRST (don't await - it resolves when sheet closes)
+	// This ensures errors are visible via the modal's error state
 	SheetManager.show('loading', {
 		payload: {
 			modalTitle: i18n.t('loading.modalTitle'),
 		},
 	});
 
-	try {
-		// Step 1: Generate a new keypair
-		const genKeyRes = await generateMnemonicPhraseAndKeypair();
-		if (genKeyRes.isErr()) {
-			showErrorState(i18n.t('signup.failedToGenerateKeypair'), dispatch);
-			return err(i18n.t('signup.failedToGenerateKeypair'));
-		}
+	// Step 1: Generate a new keypair
+	const genKeyRes = await generateMnemonicPhraseAndKeypair();
+	if (genKeyRes.isErr()) {
+		showErrorState(i18n.t('signup.failedToGenerateKeypair'), dispatch);
+		return err(i18n.t('signup.failedToGenerateKeypair'));
+	}
 
-		const { mnemonic, secret_key: secretKey, public_key: generatedPubky } = genKeyRes.value;
-		pubky = generatedPubky;
+	const { mnemonic, secret_key: secretKey, public_key: generatedPubky } = genKeyRes.value;
+	pubky = generatedPubky;
+
+	try {
+		const { homeserver, inviteCode, relay, secret, caps } = params;
 
 		// Set processing state
 		dispatch(addProcessing({ pubky }));
@@ -102,7 +107,12 @@ export const handleSignupAction = async (
 			dispatch,
 		});
 
+		const capsString = caps.join(',');
+		const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
+
+
 		if (signupRes.isErr()) {
+			dispatch(removeProcessing({ pubky }));
 			// Check if user has existing signed-up pubkys - if so, forward to auth
 			const signedUpPubkys = getSignedUpPubkysFromStore();
 			const signedUpKeys = Object.keys(signedUpPubkys);
@@ -115,9 +125,6 @@ export const handleSignupAction = async (
 					setTimeout(resolve, SHEET_ANIMATION_DELAY);
 				});
 
-				const capsString = caps.join(',');
-				const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
-
 				const authData = { action: InputAction.Auth, params: { relay, secret, caps }, rawUrl: authUrl } as const;
 
 				if (signedUpKeys.length === 1) {
@@ -128,25 +135,26 @@ export const handleSignupAction = async (
 					);
 				} else {
 					// Multiple pubkys: show selector, then forward to auth
-					return new Promise((resolve) => {
-						showPubkySelectionSheet(
-							{
-								action: InputAction.Auth,
-								data: authData,
-								source: 'scan',
-								rawInput: authUrl,
-							},
-							'scan',
-							dispatch,
-							async (selectedPubky: string) => {
-								const result = await handleAuthAction(
-									authData,
-									{ ...context, pubky: selectedPubky, isDeeplink: false }
-								);
-								resolve(result);
-							}
-						);
-					});
+					const selectedPubky = await showPubkySelectionSheet(
+						{
+							action: InputAction.Auth,
+							data: authData,
+							source: 'scan',
+							rawInput: authUrl,
+						},
+						'scan',
+						dispatch,
+					);
+
+					if (!selectedPubky) {
+						// User dismissed without selecting - return error
+						return err('User cancelled pubky selection');
+					}
+
+					return await handleAuthAction(
+						authData,
+						{ ...context, pubky: selectedPubky, isDeeplink: false }
+					);
 				}
 			}
 
@@ -161,15 +169,12 @@ export const handleSignupAction = async (
 			title: i18n.t('signup.signupSuccessful'),
 			description: i18n.t('signup.newPubkyCreated'),
 		});
-
-		// Step 4: Construct the pubkyauth URL and trigger auth
-		const capsString = caps.join(',');
-		const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
+		dispatch(removeProcessing({ pubky }));
 
 		// Hide loading modal before showing auth modal
 		await SheetManager.hide('loading');
 
-		// Step 5: Trigger auth action with the new pubky
+		// Step 4: Trigger auth action with the new pubky
 		// Short delay to allow UI to update before showing auth modal
 		await new Promise(resolve => {setTimeout(resolve, SHEET_ANIMATION_DELAY);});
 

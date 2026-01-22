@@ -72,14 +72,14 @@ export const useDeepLinkHandler = (
 
 				if (signedUpPubkyKeys.length > 1) {
 					// Multiple pubkys - show selection sheet
-					await showPubkySelectionSheet(
+					const selectedPubky = await showPubkySelectionSheet(
 						parsedInput,
 						'deeplink',
 						dispatch,
-						async (selectedPubky: string) => {
-							await routeInputWithContext(parsedInput, selectedPubky, 'deeplink', dispatch);
-						}
 					);
+					if (selectedPubky) {
+						await routeInputWithContext(parsedInput, selectedPubky, 'deeplink', dispatch);
+					}
 					return;
 				}
 

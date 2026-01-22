@@ -80,30 +80,33 @@ export const routeInputWithContext = async (
 
 /**
  * Shows pubky selection sheet for multi-pubky scenarios
+ * Returns the selected pubky, or null if user dismisses without selecting
  */
 export const showPubkySelectionSheet = async (
 	parsed: ParsedInput,
 	source: InputSource,
 	dispatch: Dispatch,
-	onSelect: (pubky: string) => Promise<void>
-): Promise<void> => {
+): Promise<string | null> => {
 	await SheetManager.hideAll();
 	await sleep(150);
 
-	SheetManager.show('select-pubky', {
-		payload: {
-			deepLink: parsed.rawInput,
-			onSelect: async (selectedPubky: string) => {
-				SheetManager.hide('select-pubky');
-				await onSelect(selectedPubky);
+	return new Promise((resolve) => {
+		SheetManager.show('select-pubky', {
+			payload: {
+				deepLink: parsed.rawInput,
+				onSelect: (selectedPubky: string) => {
+					SheetManager.hide('select-pubky');
+					resolve(selectedPubky);
+				},
 			},
-		},
-		onClose: (): void => {
-			SheetManager.hide('select-pubky');
-			if (source === 'deeplink') {
-				dispatch(setDeepLink(''));
-			}
-		},
+			onClose: (): void => {
+				SheetManager.hide('select-pubky');
+				if (source === 'deeplink') {
+					dispatch(setDeepLink(''));
+				}
+				resolve(null);
+			},
+		});
 	});
 };
 

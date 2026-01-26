@@ -342,6 +342,7 @@ const styles = StyleSheet.create({
 	},
 	switchContainer: {
 		justifyContent: 'center',
+		backgroundColor: 'transparent',
 	},
 	// eslint-disable-next-line react-native/no-unused-styles
 	themeButton: {

@@ -586,7 +586,7 @@ export const signOutOfHomeserver = async (pubky: string, sessionSecret: string, 
 		return;
 	}
 	dispatch(setSignedUp({ pubky, signedUp: false }));
-	dispatch(removeSession({ pubky }));
+	dispatch(removeSession({ pubky, session_secret: sessionSecret }));
 };
 
 export const truncateStr = (str: string, displayLength: number = 5): string => {

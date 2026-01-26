@@ -157,10 +157,26 @@ export const getPubkyHomeserver = (state: RootState, pubky: string): string => {
 };
 
 /**
+ * Memoized map of pubky keys to their indices
+ * This avoids O(n²) behavior when getPubkyIndex is called per item in lists
+ */
+export const getPubkyIndexMap = createSelector(
+	[selectAllPubkys],
+	(pubkys): Map<string, number> => {
+		const map = new Map<string, number>();
+		Object.keys(pubkys).forEach((key, index) => {
+			map.set(key, index);
+		});
+		return map;
+	}
+);
+
+/**
  * Get the index of a pubky in the getPubkyKeys array
  * Returns -1 if the pubky is not found
+ * Uses memoized index map for O(1) lookup
  */
 export const getPubkyIndex = (state: RootState, pubky: string): number => {
-	const keys = getPubkyKeys(state);
-	return keys.indexOf(pubky);
+	const indexMap = getPubkyIndexMap(state);
+	return indexMap.get(pubky) ?? -1;
 };

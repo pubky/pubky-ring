@@ -1,9 +1,11 @@
 import { combineReducers, configureStore } from '@reduxjs/toolkit';
 import {
 	createMigrate,
+	createTransform,
 	FLUSH,
 	PAUSE,
 	PERSIST,
+	PersistConfig,
 	persistReducer,
 	persistStore,
 	PURGE,
@@ -12,31 +14,39 @@ import {
 } from 'redux-persist';
 import { reduxStorage } from './mmkv-storage';
 import pubkyReducer from './slices/pubkysSlice.ts';
+import { initialState as pubkyInitialState } from './shapes/pubky';
 import settingsReducer from './slices/settingsSlice.ts';
 import uiReducer from './slices/uiSlice.ts';
 import migrations from './migrations';
-
-// TODO: Add a transform to clear transient state (deepLink, processing) on rehydration.
-// Example:
-// const pubkyTransform = createTransform(
-//   (inboundState: PubkyState) => inboundState,
-//   (outboundState: PubkyState) => ({ ...outboundState, deepLink: '', processing: {} }),
-//   { whitelist: ['pubky'] }
-// );
-// Then add `transforms: [pubkyTransform]` to persistConfig.
-const persistConfig = {
-	key: 'root',
-	storage: reduxStorage,
-	whitelist: ['pubky', 'settings'],
-	migrate: createMigrate(migrations),
-	version: 6,
-};
 
 const rootReducer = combineReducers({
 	pubky: pubkyReducer,
 	settings: settingsReducer,
 	ui: uiReducer,
 });
+
+type RootReducerState = ReturnType<typeof rootReducer>;
+type PubkySliceState = typeof pubkyInitialState;
+
+const pubkyTransform = createTransform<PubkySliceState, PubkySliceState>(
+	(inboundState) => inboundState,
+	(outboundState) => ({
+		...pubkyInitialState,
+		...outboundState,
+		deepLink: pubkyInitialState.deepLink,
+		processing: { ...pubkyInitialState.processing },
+	}),
+	{ whitelist: ['pubky'] }
+);
+
+const persistConfig: PersistConfig<RootReducerState> = {
+	key: 'root',
+	storage: reduxStorage,
+	whitelist: ['pubky', 'settings'],
+	migrate: createMigrate(migrations),
+	version: 6,
+	transforms: [pubkyTransform],
+};
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
@@ -49,11 +59,9 @@ export const store = configureStore({
 				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
 			},
 		}),
-	devTools: {
-		name: 'pubkyring',
-		trace: true,
-		traceLimit: 25,
-	},
+	devTools: __DEV__
+		? { name: 'pubkyring', trace: true, traceLimit: 25 }
+		: false,
 });
 
 export const persistor = persistStore(store);

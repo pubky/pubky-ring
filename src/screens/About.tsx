@@ -15,6 +15,7 @@ import PubkyRingHeader from '../components/PubkyRingHeader';
 import { version } from '../../package.json';
 // @ts-ignore
 import PubkyRingLogo from '../images/pubky-app-logo.png';
+import BrandEndoresment from '../images/brand-endorsement.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
@@ -106,6 +107,11 @@ const About = ({ navigation }: Props): ReactElement => {
 
 				<CardView style={styles.divider} />
 
+				<Image
+					source={BrandEndoresment}
+					style={styles.brandLogo}
+				/>
+
 				<TouchableOpacity activeOpacity={0.8} onPress={onFooterPress}>
 					<View style={styles.footer}>
 						<View style={styles.footerContent}>
@@ -194,6 +200,9 @@ const styles = StyleSheet.create({
 		marginHorizontal: 24,
 		width: '100%',
 		backgroundColor: 'rgba(200, 255, 0, 0.1)',
+		paddingTop: 5,
+		paddingBottom: 10,
+		paddingHorizontal: 5,
 	},
 	footerContent: {
 		margin: 25,
@@ -203,15 +212,23 @@ const styles = StyleSheet.create({
 		fontSize: 17,
 		fontWeight: '600',
 		lineHeight: 22,
-		letterSpacing: 0.4,
 		color: 'rgba(200, 255, 0, 1)',
+		marginTop: 10
 	},
 	pubkyLogo: {
-		height: 56,
+		height: 40,
 		resizeMode: 'contain',
 		backgroundColor: 'transparent',
+		left: -47,
 	},
-
+	brandLogo: {
+		height: 30,
+		width: 250,
+		alignSelf: 'flex-start',
+		resizeMode: 'contain',
+		marginTop: 10,
+		backgroundColor: 'transparent',
+	},
 	rightNavButton: {
 		width: 40,
 		height: 40,

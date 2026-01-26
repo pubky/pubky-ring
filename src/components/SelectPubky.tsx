@@ -6,7 +6,7 @@ import React, {
 } from 'react';
 import { StyleSheet } from 'react-native';
 import { View, TouchableOpacity } from '../theme/components.ts';
-import { SheetManager } from 'react-native-actions-sheet';
+import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
 import PubkyCard from './PubkyCard.tsx';
@@ -119,6 +119,7 @@ const SelectPubky = ({ payload }: {
 				<FlashList
 					data={pubkyArray}
 					renderItem={renderItem}
+					renderScrollComponent={ActionSheetScrollView}
 					keyExtractor={keyExtractor}
 					showsVerticalScrollIndicator={true}
 				/>

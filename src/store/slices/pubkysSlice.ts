@@ -69,9 +69,9 @@ const pubkysSlice = createSlice({
 		addSession: (state, action: PayloadAction<{ pubky: string; session: PubkySession }>) => {
 			const { pubky, session } = action.payload;
 			if (state.pubkys[pubky]) {
-				// Check if session already exists
+				// Check if session already exists by session_secret
 				const sessionExists = state.pubkys[pubky].sessions.some(
-					existingSession => existingSession.pubky === session.pubky
+					existingSession => existingSession.session_secret === session.session_secret
 				);
 
 				if (!sessionExists) {
@@ -80,11 +80,11 @@ const pubkysSlice = createSlice({
 				}
 			}
 		},
-		removeSession: (state, action: PayloadAction<{ pubky: string; }>) => {
-			const { pubky } = action.payload;
+		removeSession: (state, action: PayloadAction<{ pubky: string; session_secret: string }>) => {
+			const { pubky, session_secret } = action.payload;
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].sessions = state.pubkys[pubky].sessions.filter(
-					session => session.pubky !== pubky
+					session => session.session_secret !== session_secret
 				);
 			}
 		},

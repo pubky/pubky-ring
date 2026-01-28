@@ -105,19 +105,19 @@ const TermsOfUse = (): React.ReactElement => {
 
 								<Text style={[styles.subtitle, styles.sectionTitle]}>4. Using Pubky Ring</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>How you may use Pubky Ring</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>4.1 How you may use Pubky Ring</Text>
 
 								<Text style={styles.subtitle}>
 									We or our licensors own all right, title and interest, including intellectual property rights in and to Pubky Ring. We grant you a personal, non-assignable license to use Pubky Ring for your own internal use. All rights not otherwise granted under these Terms are reserved. You must not sub-license, sell, rent, lend, lease or distribute Pubky Ring, or otherwise make Pubky Ring available to any third parties for commercial purposes, including as part of a commercial product or service, without obtaining a licence to do so from us or our licensors. Synonym may terminate this license at any time for any reason.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>How does Pubky Ring work?</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>4.2 How does Pubky Ring work?</Text>
 
 								<Text style={styles.subtitle}>
 									The Pubky Ring application allows you to securely store cryptographic keys on your own device and use those keys to authenticate into third-party applications or websites. Pubky Ring does not have access to your keys, does not store your keys or recovery information, and cannot assist in recovering access if you lose this information. The application does not provide any custodial services, does not collect or transmit your data, and does not interact with any online platform or website operated by Pubky Ring. All authentication and key management activities are performed locally on your device.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Use Restrictions</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>4.3 Use Restrictions</Text>
 
 								<Text style={styles.subtitle}>
 									Pubky Ring is intended solely for proper use of managing and using cryptographic keys for authentication. Under no circumstances should you attempt to use your Pubky Ring to store, transmit, or manage any data or assets other than cryptographic keys for authentication purposes. Synonym assumes no responsibility in connection with your failure to use the application as intended. Synonym assumes no responsibility in connection with your use of the application for unsupported services or systems.
@@ -132,15 +132,15 @@ const TermsOfUse = (): React.ReactElement => {
 								</Text>
 
 								<View style={styles.bulletContainer}>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• to disguise the origin or nature of illicit proceeds or to transact or deal in, any contraband assets, funds, property, or proceeds;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• to transact with anything other than funds, keys, property and assets that have been legally obtained by you and belong to you;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• to evade taxes;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• in a manner that infringes on our or any third party's intellectual property rights;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• to engage in activity that is illegal or fraudulent;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• to copy any features, functions or graphics of Pubky Ring;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• provide any software, content or code that does or is intended to harm or extract information or data from Pubky Ring or other hardware or software;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• to use Pubky Ring in violation of any of our policies or in a manner that violates applicable law, including but not limited to sanctions, anti-money laundering, export control, privacy, and anti-terrorism laws, and you agree that you are solely responsible for compliance with all such laws and regulations; or</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• in a manner that otherwise violates, or encourages or promotes the violation of, any applicable law or third party right.</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>a) to disguise the origin or nature of illicit proceeds or to transact or deal in, any contraband assets, funds, property, or proceeds;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>b) to transact with anything other than funds, keys, property and assets that have been legally obtained by you and belong to you;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>c) to evade taxes;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>d) in a manner that infringes on our or any third party's intellectual property rights;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>e) to engage in activity that is illegal or fraudulent;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>f) to copy any features, functions or graphics of Pubky Ring;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>g) provide any software, content or code that does or is intended to harm or extract information or data from Pubky Ring or other hardware or software;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>h) to use Pubky Ring in violation of any of our policies or in a manner that violates applicable law, including but not limited to sanctions, anti-money laundering, export control, privacy, and anti-terrorism laws, and you agree that you are solely responsible for compliance with all such laws and regulations; or</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>i) in a manner that otherwise violates, or encourages or promotes the violation of, any applicable law or third party right.</Text>
 								</View>
 
 								<Text style={styles.subtitle}>
@@ -151,13 +151,13 @@ const TermsOfUse = (): React.ReactElement => {
 									If Synonym determines or suspects that you have engaged in any Prohibited Conduct, Synonym may address such Prohibited Conduct through an appropriate sanction, in its sole and absolute discretion. Such sanction may include: (i) making a report to any government, law enforcement, or other authorities, without providing any notice to you about any such report; or (ii) suspending or terminating your access to Pubky Ring. In addition, should your actions or inaction result in any loss being suffered by Synonym or any of its affiliates, you shall pay an amount to Synonym or the affiliate, as applicable, so as to render Synonym or the affiliate whole, including the amount of taxes or penalties that might be imposed on Synonym or the affiliate, as applicable.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>No Representations and Warranties</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>4.4 No Representations and Warranties</Text>
 
 								<Text style={styles.subtitle}>
 									We make no representations, warranties, covenants or guarantees to you of any kind and, to the extent permitted by applicable laws, we expressly disclaim all representations, warranties, covenants or guarantees, express, implied or statutory, with respect to Pubky Ring. Pubky Ring is offered strictly on an "as is" and "as available" basis and, without limiting the generality of the foregoing, is provided without any representation as to merchantability, merchantable quality, or fitness for any particular purpose or any representation or warranty that Pubky Ring will be operational, error-free, secure, confidential, reliable, or safe, that Pubky Ring will function without disruptions, delays or imperfections. We do not guarantee the security or functionality of any third-party software or technology. You acknowledge that we are relying upon your representations, warranties, acknowledgements, and agreements as a condition to providing Pubky Ring, and without your representations, warranties, acknowledgements, and agreements, we would not provide you with Pubky Ring.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Security Responsibility</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>4.5 Security Responsibility</Text>
 
 								<Text style={styles.subtitle}>
 									You are responsible for keeping your Pubky Ring access secure. We offer tools such as two-factor authentication to help you maintain security, but the content and protection of your personal information are ultimately your responsibility. You are responsible for all activity that occurs under your Pubky Ring access and are responsible for maintaining the security of your login credentials. Synonym cannot and will not be liable for any loss or damage from your failure to comply with this security obligation. You will promptly notify Synonym if you become aware of any unauthorized use of, or access to, your Pubky Ring access, including any unauthorized use of your password or other login credentials.
@@ -204,11 +204,11 @@ const TermsOfUse = (): React.ReactElement => {
 								<Text style={styles.subtitle}>You acknowledge and agree that in order to use Pubky Ring:</Text>
 
 								<View style={styles.bulletContainer}>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• you must be at least eighteen (18) years of age;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• we must not have previously disabled your access to Pubky Ring for violation of law or because you engaged in Prohibited Conduct as referenced herein;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• you must not be a convicted sex offender;</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• if you are under eighteen (18) years old, you represent that you have your parent or legal guardian's permission to use Pubky Ring and will have your parent or legal guardian read these Terms with you; provided, that if you are a parent or legal guardian of a user under the age of eighteen (18), by allowing your child to use Pubky Ring, you are subject to these Terms and responsible for your child's activity on Pubky Ring; and</Text>
-									<Text style={[styles.subtitle, styles.bulletMain]}>• if you are using Pubky Ring on behalf of a company or organization, you represent that you have authority to act on behalf of that company or organization, and that such entity accepts these Terms.</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>a) you must be at least eighteen (18) years of age;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>b) we must not have previously disabled your access to Pubky Ring for violation of law or because you engaged in Prohibited Conduct as referenced herein;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>c) you must not be a convicted sex offender;</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>d) if you are under eighteen (18) years old, you represent that you have your parent or legal guardian's permission to use Pubky Ring and will have your parent or legal guardian read these Terms with you; provided, that if you are a parent or legal guardian of a user under the age of eighteen (18), by allowing your child to use Pubky Ring, you are subject to these Terms and responsible for your child's activity on Pubky Ring; and</Text>
+									<Text style={[styles.subtitle, styles.bulletMain]}>e) if you are using Pubky Ring on behalf of a company or organization, you represent that you have authority to act on behalf of that company or organization, and that such entity accepts these Terms.</Text>
 								</View>
 
 								<Text style={[styles.subtitle, styles.sectionTitle]}>10. Our responsibility for loss or damage suffered by you</Text>
@@ -269,7 +269,7 @@ const TermsOfUse = (): React.ReactElement => {
 									To the maximum extent permitted by applicable law, the foregoing indemnity shall apply whether the alleged liability or losses are based on contract, negligence, tort, unjust enrichment, strict liability, violation of law or regulation, or any other basis, even if Synonym or any of its Associates have been advised of or should have known of the possibility of such losses and damages, and without regard to the success or effectiveness of any other remedies.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.sectionTitle]}>15. Cancellation and Termination</Text>
+								<Text style={[styles.subtitle, styles.sectionTitle]}>15. Cancellation, Termination and Survival</Text>
 
 								<Text style={styles.subtitle}>
 									It is your responsibility to properly cancel your Pubky Ring access with Synonym. Information relating to your Pubky Ring access cannot be recovered once such access is terminated.
@@ -307,25 +307,25 @@ const TermsOfUse = (): React.ReactElement => {
 
 								<Text style={[styles.subtitle, styles.sectionTitle]}>17. General (including Mandatory Arbitration)</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Entire agreement:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.1 Entire agreement:</Text>
 								<Text style={styles.subtitle}>
 									These Terms constitute the entire agreement between you and Synonym and supersede any prior agreements between you and Synonym. You may also be subject to additional terms of service that may apply when you use affiliate or third-party services, third-party content or third-party software.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Governing Law:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.2 Governing Law:</Text>
 								<Text style={styles.subtitle}>
 									These Terms shall be governed by and construed and enforced in accordance with the laws of England and Wales. Any transaction, dispute, controversy, claim or action arising from or related to your access or use of Pubky Ring or these Terms shall be governed by the laws of England and Wales, exclusive of choice-of-law principles.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Force Majeure:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.3 Force Majeure.</Text>
 								<Text style={styles.subtitle}>
 									We are not responsible for damages caused by delay or failure to perform undertakings under these Terms when the delay or failure is due to fires; strikes; floods; power outages or failures; acts of God or the state's enemies; disease pandemics; acts of any government or government official; computer, server, protocol or internet malfunctions; internet disruptions, viruses, and mechanical power, or communication failures; security breaches or cyberattacks; criminal acts; delays or defaults caused by common carriers; acts or omissions of other persons; or, any other delays, defaults, failures or interruptions that cannot reasonably be foreseen or provided against by us or that are otherwise outside of our control ("Force Majeure Events"). We are excused from any and all performance obligations under these Force Majeure Events.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Mandatory Arbitration:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.4 Mandatory Arbitration:</Text>
 
 								<Text style={styles.subtitle}>
-									Some jurisdictions do not allow mandatory arbitration, prohibitions against class actions or governing law and forums other than where the individual consumer is located. If you are resident in one of these jurisdictions, this paragraph may not apply to you and you may have additional rights.
+									Some jurisdictions do not allow mandatory arbitration, prohibitions against class actions or governing law and forums other than where the individual consumer is located. If you are resident in one of these jurisdictions, this paragraph 17.4 may not apply to you and you may have additional rights.
 								</Text>
 
 								<Text style={styles.subtitle}>
@@ -333,7 +333,7 @@ const TermsOfUse = (): React.ReactElement => {
 								</Text>
 
 								<Text style={styles.subtitle}>
-									The following claims and causes of action will be excluded from arbitration as described in the paragraph above: causes of action or claims in which either party seeks injunctive or other equitable relief for the alleged unlawful use of its intellectual property or its confidential information or private data. Nothing in this paragraph will prevent us from seeking any other form of injunctive relief in any court of competent jurisdiction, whether or not interim relief has also been sought from the arbitrator.
+									The following claims and causes of action will be excluded from arbitration as described in the paragraph above: causes of action or claims in which either party seeks injunctive or other equitable relief for the alleged unlawful use of its intellectual property or its confidential information or private data. Nothing in this paragraph 17.4 will prevent us from seeking any other form of injunctive relief in any court of competent jurisdiction, whether or not interim relief has also been sought from the arbitrator.
 								</Text>
 
 								<Text style={styles.subtitle}>
@@ -352,17 +352,17 @@ const TermsOfUse = (): React.ReactElement => {
 									JURY TRIAL WAIVER: TO THE FULLEST EXTENT PERMITTED BY APPLICABLE LAW, THE PARTIES HEREBY IRREVOCABLY AND UNCONDITIONALLY WAIVE ALL RIGHT TO TRIAL BY JURY IN ANY LEGAL ACTION OR PROCEEDING OF ANY KIND WHATSOEVER ARISING OUT OF OR RELATING TO THESE TERMS OR ANY BREACH THEREOF, ANY USE OR ATTEMPTED USE OF PUBKY RING BY YOU, AND/OR ANY OTHER MATTER INVOLVING YOU AND SYNONYM.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Severability:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.5 Severability:</Text>
 								<Text style={styles.subtitle}>
 									If any provision of these Terms or part thereof, as amended from time to time, is determined to be invalid, void, or unenforceable, in whole or in part, by any court of competent jurisdiction, such invalidity, voidness, or unenforceability attaches only to such provision to the extent of its illegality, unenforceability, invalidity, or voidness, as may be, and everything else in these Terms continues in full force and effect.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Waiver; Available Remedies:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.6 Waiver; Available Remedies:</Text>
 								<Text style={styles.subtitle}>
 									Any failure by Synonym to exercise any of its rights, powers, or remedies under these Terms, or any delay by Synonym in doing so, does not constitute a waiver of any such right, power, or remedy. The single or partial exercise of any right, power, or remedy by Synonym does not prevent either from exercising any other rights, powers, or remedies. The remedies of Synonym are cumulative with and not exclusive of any other remedy conferred by the provisions of these Terms, or by law or equity. You agree that the remedies to which Synonym is entitled include (i) injunctions to prevent breaches of these Terms and to enforce specifically the terms and provisions hereof, and you waive the requirement of any posting of a bond in connection with such remedies, (ii) the right to recover the amount of any losses by set off against any amounts that Synonym would otherwise be obligated to pay to you, and (iii) the right to seize and recover against any of your assets, or your interests therein, that are held by Synonym or any of its Associates.
 								</Text>
 
-								<Text style={[styles.subtitle, styles.importantText]}>Electronic Communications; Acceptance:</Text>
+								<Text style={[styles.subtitle, styles.importantText]}>17.7 Electronic Communications; Acceptance:</Text>
 								<Text style={styles.subtitle}>
 									You agree and consent to receive electronically all communications, agreements, documents, receipts, notices and disclosures that Synonym may provide in connection with these Terms through publication on any part of Pubky Ring or to an e-mail address on file that you have previously provided to Synonym. Such notices shall be deemed effective and received by you on the date on which the notice is published on any part of Pubky Ring or on which the e-mail is sent to such e-mail address. These Terms may be accepted electronically, and it is the intention of the parties that such acceptance shall be deemed to be as valid as an original signature being applied to these Terms.
 								</Text>

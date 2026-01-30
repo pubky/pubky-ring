@@ -9,7 +9,7 @@ import {
 	withTiming,
 } from 'react-native-reanimated';
 
-const pubkyRingLogo = require('../images/pubky-ring-square.png');
+const pubkyRingLogo = require('../images/pubky-ring.png');
 
 interface AnimatedQRData {
 	value: string;

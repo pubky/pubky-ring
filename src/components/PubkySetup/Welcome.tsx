@@ -20,7 +20,7 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 // @ts-ignore
-import PubkyRingLogo from "../../images/pubky-ring.png";
+import PubkyRingLogo from "../../images/pubky-app-logo.png";
 import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		alignItems: 'center',
 		flexDirection: 'row',
-		borderWidth: 0,
+		borderWidth: 1,
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 		justifyContent: 'space-evenly',
 	},

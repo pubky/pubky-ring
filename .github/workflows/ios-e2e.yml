@@ -21,6 +21,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Select Xcode 26.2
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '26.2'
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -63,7 +68,7 @@ jobs:
       env:
         IOS_APP: ./artifacts/pubkyring.app
         IOS_SIM: iPhone 16
-        IOS_PLATFORM_VERSION: 18.6
+        IOS_PLATFORM_VERSION: 26.2
         HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       run: yarn e2e:ios
 

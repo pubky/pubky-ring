@@ -15,6 +15,11 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
+    - name: Select Xcode 26.2
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: '26.2'
+
     - name: Set up Node.js
       uses: actions/setup-node@v4
       with:
@@ -47,7 +52,7 @@ jobs:
     - name: Build iOS App
       run: |
         cd ios
-        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 16,OS=18.6' -derivedDataPath ./build build
+        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 16,OS=26.2' -derivedDataPath ./build build
 
     - name: Create app bundle zip
       run: |

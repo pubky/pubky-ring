@@ -182,7 +182,7 @@ const BackupPrompt = ({ payload }: {
 				{content}
 				<View style={styles.inputContainer}>
 					<TextInput
-						autoComplete={'current-password'}
+						autoComplete="off"
 						style={[styles.input, error ? styles.inputError : null]}
 						secureTextEntry={!showPassword}
 						value={password}
@@ -195,6 +195,10 @@ const BackupPrompt = ({ payload }: {
 						autoFocus
 						onSubmitEditing={handleSubmit}
 						autoCapitalize="none"
+						autoCorrect={false}
+						textContentType="none"
+						importantForAutofill="no"
+						spellCheck={false}
 					/>
 					<TouchableOpacity
 						style={styles.eyeButton}

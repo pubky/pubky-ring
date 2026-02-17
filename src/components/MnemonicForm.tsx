@@ -242,6 +242,10 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 										placeholderTextColor="#666"
 										autoCapitalize="none"
 										autoCorrect={false}
+										autoComplete="off"
+										textContentType="none"
+										importantForAutofill="no"
+										spellCheck={false}
 										secureTextEntry={false}
 										returnKeyType={index === 11 ? 'done' : 'next'}
 										blurOnSubmit={false}
@@ -273,6 +277,10 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 										placeholderTextColor="#666"
 										autoCapitalize="none"
 										autoCorrect={false}
+										autoComplete="off"
+										textContentType="none"
+										importantForAutofill="no"
+										spellCheck={false}
 										secureTextEntry={false}
 										returnKeyType={actualIndex === 11 ? 'done' : 'next'}
 										blurOnSubmit={false}

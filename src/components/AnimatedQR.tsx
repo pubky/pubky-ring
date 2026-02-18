@@ -7,6 +7,7 @@ import {
 	useSharedValue,
 	useAnimatedStyle,
 	withTiming,
+	SharedValue,
 } from 'react-native-reanimated';
 
 const pubkyRingLogo = require('../images/pubky-ring.png');
@@ -26,7 +27,34 @@ interface AnimatedQRProps {
 	size?: number;
 }
 
+interface QRLayerProps {
+	index: number;
+	item: AnimatedQRData;
+	size: number;
+	currentIndex: SharedValue<number>;
+}
+
 const CHEVRON_HIT_SLOP = { top: 20, bottom: 20, left: 20, right: 20 };
+
+const QRLayer = memo(({ index, item, size, currentIndex }: QRLayerProps): ReactElement => {
+	const style = useAnimatedStyle(() => ({
+		opacity: currentIndex.value === index ? 1 : 0,
+	}));
+	return (
+		<AnimatedView style={[styles.qrLayer, index > 0 && styles.qrLayerAbsolute, style]}>
+			<QRCode
+				value={item.value || 'empty'}
+				size={size}
+				backgroundColor="#FFFFFF"
+				logo={pubkyRingLogo}
+				logoSize={45}
+				logoMargin={0}
+				logoBackgroundColor="black"
+				logoBorderRadius={20.5}
+			/>
+		</AnimatedView>
+	);
+});
 
 const AnimatedQR = ({
 	data,
@@ -36,7 +64,8 @@ const AnimatedQR = ({
 	size = 250,
 }: AnimatedQRProps): ReactElement => {
 	const { t } = useTranslation();
-	const [currentIndex, setCurrentIndex] = useState(0);
+	const currentIndex = useSharedValue(0);
+	const [currentIndexJS, setCurrentIndexJS] = useState(0);
 	const [isPaused, setIsPaused] = useState(false);
 	const startTimeRef = useRef<number>(Date.now());
 	const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -74,6 +103,14 @@ const AnimatedQR = ({
 		};
 	}, [hasTransition, cycleInterval, startCycleInterval, transitionDuration]);
 
+	// Clamp currentIndex if data length changes
+	useEffect(() => {
+		if (data.length > 0 && currentIndex.value >= data.length) {
+			currentIndex.value = 0;
+			setCurrentIndexJS(0);
+		}
+	}, [data.length, currentIndex]);
+
 	// Animate controls opacity when pause state changes
 	useEffect(() => {
 		controlsOpacity.value = withTiming(isPaused ? 1 : 0, { duration: 200 });
@@ -84,7 +121,7 @@ const AnimatedQR = ({
 		opacity: controlsOpacity.value,
 	}));
 
-	// Cycle through data items with dynamic interval
+	// Cycle through data items with dynamic interval (no React state updates)
 	useEffect(() => {
 		if (data.length <= 1 || isPaused) {
 			return;
@@ -94,7 +131,7 @@ const AnimatedQR = ({
 			const interval = getIntervalRef.current();
 
 			timeoutIdRef.current = setTimeout(() => {
-				setCurrentIndex(prev => (prev + 1) % data.length);
+				currentIndex.value = (currentIndex.value + 1) % data.length;
 				scheduleNext();
 			}, interval);
 		};
@@ -107,25 +144,34 @@ const AnimatedQR = ({
 				timeoutIdRef.current = null;
 			}
 		};
-	}, [data.length, isPaused]);
+	}, [data.length, isPaused, currentIndex]);
 
 	const handleQRPress = useCallback((): void => {
 		if (timeoutIdRef.current) {
 			clearTimeout(timeoutIdRef.current);
 			timeoutIdRef.current = null;
 		}
-		setIsPaused(prev => !prev);
-	}, []);
+		setIsPaused(prev => {
+			if (!prev) {
+				// Pausing: sync JS state for progress text
+				setCurrentIndexJS(currentIndex.value);
+			}
+			return !prev;
+		});
+	}, [currentIndex]);
 
 	const handlePrevious = useCallback((): void => {
-		setCurrentIndex(prev => (prev === 0 ? data.length - 1 : prev - 1));
-	}, [data.length]);
+		const newIndex = currentIndex.value === 0 ? data.length - 1 : currentIndex.value - 1;
+		currentIndex.value = newIndex;
+		setCurrentIndexJS(newIndex);
+	}, [data.length, currentIndex]);
 
 	const handleNext = useCallback((): void => {
-		setCurrentIndex(prev => (prev + 1) % data.length);
-	}, [data.length]);
+		const newIndex = (currentIndex.value + 1) % data.length;
+		currentIndex.value = newIndex;
+		setCurrentIndexJS(newIndex);
+	}, [data.length, currentIndex]);
 
-	const currentItem = data[currentIndex];
 	const showControls = isPaused && data.length > 1;
 
 	return (
@@ -133,16 +179,15 @@ const AnimatedQR = ({
 			<View style={styles.qrContainer}>
 				<Pressable onPress={handleQRPress} style={styles.qrPressable}>
 					<View style={styles.qrBackground}>
-						<QRCode
-							value={currentItem?.value || 'empty'}
-							size={size}
-							backgroundColor="#FFFFFF"
-							logo={pubkyRingLogo}
-							logoSize={45}
-							logoMargin={0}
-							logoBackgroundColor="black"
-							logoBorderRadius={20.5}
-						/>
+						{data.map((item, index) => (
+							<QRLayer
+								key={index}
+								index={index}
+								item={item}
+								size={size}
+								currentIndex={currentIndex}
+							/>
+						))}
 					</View>
 					{showControls && (
 						<>
@@ -168,7 +213,7 @@ const AnimatedQR = ({
 			</View>
 			{isPaused && (
 				<Text style={styles.progressText}>
-					{t('settings.keyProgress', { current: currentIndex + 1, total: data.length })}
+					{t('settings.keyProgress', { current: currentIndexJS + 1, total: data.length })}
 				</Text>
 			)}
 		</>
@@ -191,6 +236,14 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 		padding: 16,
 		borderRadius: 16,
+	},
+	qrLayer: {},
+	qrLayerAbsolute: {
+		position: 'absolute',
+		top: 16,
+		left: 16,
+		right: 16,
+		bottom: 16,
 	},
 	chevronLeft: {
 		position: 'absolute',

@@ -38,11 +38,20 @@ export interface SignupParams {
 	caps: string[];
 }
 
+// x-callback-url parameters for inter-app communication
+export interface XCallbackParams {
+	xSource?: string;
+	xSuccess?: string;
+	xError?: string;
+	xCancel?: string;
+}
+
 // Auth parameters extracted from auth URLs
 export interface AuthParams {
 	relay: string;
 	secret: string;
 	caps: string[];
+	xCallback?: XCallbackParams;
 }
 
 // Import parameters for recovery phrases and secret keys
@@ -325,6 +334,34 @@ export const parseInput = async (
 	// Format: pubkyauth:///...
 	const authResult = await parseAuthUrl(processedInput);
 	if (authResult.isOk()) {
+		// Extract optional x-callback-url parameters from the auth URL
+		let xCallback: XCallbackParams | undefined;
+		try {
+			const queryStart = processedInput.indexOf('?');
+			if (queryStart !== -1) {
+				const params = new URLSearchParams(processedInput.substring(queryStart));
+				const xSuccess = params.get('x-success');
+				const xError = params.get('x-error');
+				const xCancel = params.get('x-cancel');
+				const xSource = params.get('x-source');
+				const legacyCallback = params.get('callback');
+
+				// Use x-success if present, otherwise fall back to legacy callback
+				const successUrl = xSuccess ? decodeURIComponent(xSuccess) : (legacyCallback ? decodeURIComponent(legacyCallback) : undefined);
+
+				if (successUrl || xError || xCancel || xSource) {
+					xCallback = {
+						xSuccess: successUrl,
+						xError: xError ? decodeURIComponent(xError) : undefined,
+						xCancel: xCancel ? decodeURIComponent(xCancel) : undefined,
+						xSource: xSource ? decodeURIComponent(xSource) : undefined,
+					};
+				}
+			}
+		} catch {
+			// Ignore x-callback parsing errors
+		}
+
 		return {
 			action: InputAction.Auth,
 			data: {
@@ -333,6 +370,7 @@ export const parseInput = async (
 					relay: authResult.value.relay,
 					secret: authResult.value.secret,
 					caps: authResult.value.capabilities.map(c => `${c.path}:${c.permission}`),
+					xCallback,
 				},
 				rawUrl: processedInput,
 			},

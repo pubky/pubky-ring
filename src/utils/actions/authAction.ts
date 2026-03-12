@@ -7,16 +7,16 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { parseAuthUrl, PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import { Linking } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
-import { InputAction, AuthParams } from '../inputParser';
+import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { getAutoAuthFromStore } from '../store-helpers';
 import { AUTH_SHEET_DELAY } from '../constants';
+import { openXSuccess, openXError } from '../xCallback';
 import i18n from '../../i18n';
 
 type AuthActionData = {
@@ -60,7 +60,7 @@ export const handleAuthAction = async (
 	// Check if auto-auth is enabled
 	const autoAuth = getAutoAuthFromStore();
 
-	const { callback } = data.params;
+	const { xCallback } = data.params;
 
 	if (autoAuth) {
 		// Auto-auth flow - no confirmation modal
@@ -68,7 +68,7 @@ export const handleAuthAction = async (
 			pubky,
 			authUrl: rawUrl,
 			dispatch,
-			callback,
+			xCallback,
 		});
 	}
 
@@ -77,7 +77,7 @@ export const handleAuthAction = async (
 		pubky,
 		authUrl: rawUrl,
 		authDetails: authResult.value,
-		callback,
+		xCallback,
 	});
 };
 
@@ -88,12 +88,12 @@ const handleAutoAuth = async ({
 	pubky,
 	authUrl,
 	dispatch,
-	callback,
+	xCallback,
 }: {
 	pubky: string;
 	authUrl: string;
 	dispatch: ActionContext['dispatch'];
-	callback?: string;
+	xCallback?: XCallbackParams;
 }): Promise<Result<string>> => {
 	const res = await performAuth({
 		pubky,
@@ -107,15 +107,15 @@ const handleAutoAuth = async ({
 			title: i18n.t('common.success'),
 			description: i18n.t('auth.authorized', { pubky }),
 		});
-		if (callback) {
-			Linking.openURL(callback);
-		}
+		await openXSuccess(xCallback);
 	} else {
+		const errorMessage = getErrorMessage(res.error, i18n.t('errors.authorizationFailed'));
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
-			description: getErrorMessage(res.error, i18n.t('errors.authorizationFailed')),
+			description: errorMessage,
 		});
+		await openXError(xCallback, 'AUTH_FAILED', errorMessage);
 	}
 
 	return res;
@@ -128,12 +128,12 @@ const showAuthConfirmation = async ({
 	pubky,
 	authUrl,
 	authDetails,
-	callback,
+	xCallback,
 }: {
 	pubky: string;
 	authUrl: string;
 	authDetails: PubkyAuthDetails;
-	callback?: string;
+	xCallback?: XCallbackParams;
 }): Promise<Result<string>> => {
 	try {
 		SystemNavigationBar.navigationHide().then();
@@ -145,7 +145,7 @@ const showAuthConfirmation = async ({
 					pubky,
 					authUrl,
 					authDetails,
-					callback,
+					xCallback,
 					onComplete: async (): Promise<void> => {},
 				},
 				onClose: () => {

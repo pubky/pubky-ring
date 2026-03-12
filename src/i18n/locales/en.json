@@ -78,7 +78,8 @@
     "navigateBackToBrowser": "Please navigate back to your browser.",
     "authorized": "Authorized with: {{pubky}}",
     "signedInSuccessfully": "Signed in to {{server}} successfully",
-    "timeoutError": "The authentication process took too long. Please try again."
+    "timeoutError": "The authentication process took too long. Please try again.",
+    "authorizeForApp": "Authorize {{appName}}"
   },
   "import": {
     "title": "Import Pubky",

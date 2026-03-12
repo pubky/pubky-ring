@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, Linking, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
 	ActionButton,
@@ -20,6 +20,7 @@ import {
 	getToastStyle,
 	isSmallScreen,
 	showToast,
+	sleep,
 } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
@@ -44,6 +45,7 @@ interface ConfirmAuthProps {
     authUrl: string;
     authDetails: PubkyAuthDetails;
     onComplete: () => void;
+    callback?: string;
 }
 
 interface Capability {
@@ -96,7 +98,7 @@ const FADE_DURATION = 100;
 const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const { pubky, authUrl, authDetails, onComplete } = payload;
+	const { pubky, authUrl, authDetails, onComplete, callback } = payload;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
@@ -162,6 +164,11 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 			setIsAuthorized(true);
 			SystemNavigationBar.navigationShow();
 			onComplete?.();
+			if (callback) {
+				await sleep(FADE_DURATION + 300);
+				handleClose();
+				Linking.openURL(callback);
+			}
 		} catch (e: unknown) {
 			const error = e as Error;
 			const errorMsg = error.message === 'Authentication request timed out'
@@ -182,7 +189,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, dispatch, onComplete, pubky, t]);
+	}, [authUrl, callback, dispatch, handleClose, onComplete, pubky, t]);
 
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];

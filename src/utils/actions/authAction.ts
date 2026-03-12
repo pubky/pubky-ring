@@ -7,6 +7,7 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { parseAuthUrl, PubkyAuthDetails } from '@synonymdev/react-native-pubky';
+import { Linking } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { InputAction, AuthParams } from '../inputParser';
@@ -59,12 +60,15 @@ export const handleAuthAction = async (
 	// Check if auto-auth is enabled
 	const autoAuth = getAutoAuthFromStore();
 
+	const { callback } = data.params;
+
 	if (autoAuth) {
 		// Auto-auth flow - no confirmation modal
 		return handleAutoAuth({
 			pubky,
 			authUrl: rawUrl,
 			dispatch,
+			callback,
 		});
 	}
 
@@ -73,6 +77,7 @@ export const handleAuthAction = async (
 		pubky,
 		authUrl: rawUrl,
 		authDetails: authResult.value,
+		callback,
 	});
 };
 
@@ -83,10 +88,12 @@ const handleAutoAuth = async ({
 	pubky,
 	authUrl,
 	dispatch,
+	callback,
 }: {
 	pubky: string;
 	authUrl: string;
 	dispatch: ActionContext['dispatch'];
+	callback?: string;
 }): Promise<Result<string>> => {
 	const res = await performAuth({
 		pubky,
@@ -100,6 +107,9 @@ const handleAutoAuth = async ({
 			title: i18n.t('common.success'),
 			description: i18n.t('auth.authorized', { pubky }),
 		});
+		if (callback) {
+			Linking.openURL(callback);
+		}
 	} else {
 		showToast({
 			type: 'error',
@@ -118,10 +128,12 @@ const showAuthConfirmation = async ({
 	pubky,
 	authUrl,
 	authDetails,
+	callback,
 }: {
 	pubky: string;
 	authUrl: string;
 	authDetails: PubkyAuthDetails;
+	callback?: string;
 }): Promise<Result<string>> => {
 	try {
 		SystemNavigationBar.navigationHide().then();
@@ -133,6 +145,7 @@ const showAuthConfirmation = async ({
 					pubky,
 					authUrl,
 					authDetails,
+					callback,
 					onComplete: async (): Promise<void> => {},
 				},
 				onClose: () => {

@@ -43,6 +43,7 @@ export interface AuthParams {
 	relay: string;
 	secret: string;
 	caps: string[];
+	callback?: string;
 }
 
 // Import parameters for recovery phrases and secret keys
@@ -325,6 +326,21 @@ export const parseInput = async (
 	// Format: pubkyauth:///...
 	const authResult = await parseAuthUrl(processedInput);
 	if (authResult.isOk()) {
+		// Extract optional callback parameter from the auth URL
+		let callback: string | undefined;
+		try {
+			const queryStart = processedInput.indexOf('?');
+			if (queryStart !== -1) {
+				const params = new URLSearchParams(processedInput.substring(queryStart));
+				const callbackParam = params.get('callback');
+				if (callbackParam) {
+					callback = decodeURIComponent(callbackParam);
+				}
+			}
+		} catch {
+			// Ignore callback parsing errors
+		}
+
 		return {
 			action: InputAction.Auth,
 			data: {
@@ -333,6 +349,7 @@ export const parseInput = async (
 					relay: authResult.value.relay,
 					secret: authResult.value.secret,
 					caps: authResult.value.capabilities.map(c => `${c.path}:${c.permission}`),
+					callback,
 				},
 				rawUrl: processedInput,
 			},

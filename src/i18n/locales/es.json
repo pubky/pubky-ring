@@ -78,7 +78,8 @@
     "navigateBackToBrowser": "Por favor, navegue de nuevo a su navegador.",
     "authorized": "Autorizado con: {{pubky}}",
     "signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
-    "timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo."
+    "timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
+    "authorizeForApp": "Autorizar {{appName}}"
   },
   "import": {
     "title": "Importar Pubky",

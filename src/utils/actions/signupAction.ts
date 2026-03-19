@@ -7,11 +7,12 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
-import { InputAction, SignupParams } from '../inputParser';
+import { InputAction, SignupParams, XCallbackParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { savePubky, signUpToHomeserver } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
+import { openXError } from '../xCallback';
 import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice';
 import { setLoadingModalError } from '../../store/slices/uiSlice';
 import { setStoredDispatch } from '../../store/shapes/ui';
@@ -53,6 +54,7 @@ export const handleSignupAction = async (
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
+	const { xCallback } = params;
 
 	let pubky = '';
 
@@ -71,6 +73,7 @@ export const handleSignupAction = async (
 	const genKeyRes = await generateMnemonicPhraseAndKeypair();
 	if (genKeyRes.isErr()) {
 		showErrorState(i18n.t('signup.failedToGenerateKeypair'), dispatch);
+		await openXError(xCallback, 'SIGNUP_FAILED', i18n.t('signup.failedToGenerateKeypair'));
 		return err(i18n.t('signup.failedToGenerateKeypair'));
 	}
 
@@ -95,6 +98,7 @@ export const handleSignupAction = async (
 
 		if (saveRes.isErr()) {
 			showErrorState(i18n.t('pubkyErrors.failedToSavePubky'), dispatch);
+			await openXError(xCallback, 'SIGNUP_FAILED', i18n.t('pubkyErrors.failedToSavePubky'));
 			return err(i18n.t('pubkyErrors.failedToSavePubky'));
 		}
 
@@ -125,7 +129,7 @@ export const handleSignupAction = async (
 					setTimeout(resolve, SHEET_ANIMATION_DELAY);
 				});
 
-				const authData = { action: InputAction.Auth, params: { relay, secret, caps }, rawUrl: authUrl } as const;
+				const authData = { action: InputAction.Auth, params: { relay, secret, caps, xCallback }, rawUrl: authUrl } as const;
 
 				if (signedUpKeys.length === 1) {
 					// Single pubky: auto-forward to auth
@@ -161,6 +165,7 @@ export const handleSignupAction = async (
 			// No existing pubkys - show error as before
 			const errorMessage = getErrorMessage(signupRes.error, i18n.t('errors.signupFailedDescription'));
 			showErrorState(errorMessage, dispatch);
+			await openXError(xCallback, 'SIGNUP_FAILED', errorMessage);
 			return err(errorMessage);
 		}
 
@@ -181,7 +186,7 @@ export const handleSignupAction = async (
 		await handleAuthAction(
 			{
 				action: InputAction.Auth,
-				params: { relay, secret, caps },
+				params: { relay, secret, caps, xCallback },
 				rawUrl: authUrl,
 			},
 			{
@@ -197,6 +202,7 @@ export const handleSignupAction = async (
 		const errorMessage = error instanceof Error ? error.message : i18n.t('errors.unknownError');
 		console.error('Error handling signup:', errorMessage);
 		showErrorState(i18n.t('signup.failedToProcessSignup'), dispatch);
+		await openXError(xCallback, 'SIGNUP_ERROR', errorMessage);
 		return err(errorMessage);
 	} finally {
 		// Clear processing state

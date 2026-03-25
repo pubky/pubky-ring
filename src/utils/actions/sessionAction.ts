@@ -2,22 +2,23 @@
  * Session Action Handler
  *
  * Handles session requests from external apps (e.g., Bitkit).
- * Signs in to the homeserver and returns session data via callback deeplink.
+ * Signs in to the homeserver and returns session data via x-callback-url.
  *
  * Flow:
- * 1. External app sends: pubkyring://session?callback=bitkit://session-data
+ * 1. External app sends: pubkyring://session?x-success=bitkit://session-data
+ *    (or legacy: pubkyring://session?callback=bitkit://session-data)
  * 2. Ring prompts user to select a pubky (handled by useInputHandler)
  * 3. Ring signs in to homeserver
- * 4. Ring opens callback URL with session data: bitkit://session-data?pubky=...&session_secret=...
+ * 4. Ring opens x-success URL with session data: bitkit://session-data?pubky=...&session_secret=...
  */
 
 import { Result, ok, err } from '@synonymdev/result';
-import { Linking } from 'react-native';
 import { InputAction, SessionParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { signInToHomeserver } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
+import { openXSuccessWithParams, openXError } from '../xCallback';
 import i18n from '../../i18n';
 
 type SessionActionData = {
@@ -26,14 +27,14 @@ type SessionActionData = {
 };
 
 /**
- * Handles session action - signs in and returns session data to callback
+ * Handles session action - signs in and returns session data via x-callback-url
  */
 export const handleSessionAction = async (
 	data: SessionActionData,
 	context: ActionContext
 ): Promise<Result<string>> => {
 	const { pubky, dispatch } = context;
-	const { callback } = data.params;
+	const { xCallback } = data.params;
 
 	// Session requires a pubky
 	if (!pubky) {
@@ -45,8 +46,8 @@ export const handleSessionAction = async (
 		return err('No pubky provided for session');
 	}
 
-	// Validate callback URL
-	if (!callback?.includes('://')) {
+	// Validate x-success URL
+	if (!xCallback?.xSuccess?.includes('://')) {
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
@@ -69,30 +70,18 @@ export const handleSessionAction = async (
 				title: i18n.t('session.signInFailed'),
 				description: errorMessage,
 			});
+			await openXError(xCallback, 'SESSION_FAILED', errorMessage);
 			return err(errorMessage);
 		}
 
 		const sessionInfo = signInResult.value;
 
-		// Build callback URL with session data
-		const callbackUrl = buildCallbackUrl(callback, {
+		// Open x-success URL with session data appended as query params
+		await openXSuccessWithParams(xCallback, {
 			pubky: sessionInfo.pubky,
 			session_secret: sessionInfo.session_secret,
 			capabilities: sessionInfo.capabilities.join(','),
 		});
-
-		// Open the callback URL to return data to external app
-		const canOpen = await Linking.canOpenURL(callbackUrl);
-		if (!canOpen) {
-			showToast({
-				type: 'error',
-				title: i18n.t('common.error'),
-				description: i18n.t('session.cannotOpenCallback'),
-			});
-			return err('Cannot open callback URL');
-		}
-
-		await Linking.openURL(callbackUrl);
 
 		showToast({
 			type: 'success',
@@ -109,27 +98,7 @@ export const handleSessionAction = async (
 			title: i18n.t('common.error'),
 			description: errorMessage,
 		});
+		await openXError(xCallback, 'SESSION_ERROR', errorMessage);
 		return err(errorMessage);
 	}
-};
-
-/**
- * Builds the callback URL with session data as query parameters
- */
-const buildCallbackUrl = (
-	baseCallback: string,
-	params: {
-		pubky: string;
-		session_secret: string;
-		capabilities: string;
-	}
-): string => {
-	const separator = baseCallback.includes('?') ? '&' : '?';
-	const queryParams = new URLSearchParams({
-		pubky: params.pubky,
-		session_secret: params.session_secret,
-		capabilities: params.capabilities,
-	}).toString();
-
-	return `${baseCallback}${separator}${queryParams}`;
 };

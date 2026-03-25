@@ -36,6 +36,15 @@ export interface SignupParams {
 	relay: string;
 	secret: string;
 	caps: string[];
+	xCallback?: XCallbackParams;
+}
+
+// x-callback-url parameters for inter-app communication
+export interface XCallbackParams {
+	xSource?: string;
+	xSuccess?: string;
+	xError?: string;
+	xCancel?: string;
 }
 
 // Auth parameters extracted from auth URLs
@@ -43,6 +52,7 @@ export interface AuthParams {
 	relay: string;
 	secret: string;
 	caps: string[];
+	xCallback?: XCallbackParams;
 }
 
 // Import parameters for recovery phrases and secret keys
@@ -54,11 +64,12 @@ export interface ImportParams {
 // Invite parameters
 export interface InviteParams {
 	inviteCode: string;
+	xCallback?: XCallbackParams;
 }
 
 // Session parameters for external app session requests
 export interface SessionParams {
-	callback: string;
+	xCallback?: XCallbackParams;
 }
 
 // Migrate parameters for multi-key migration QR codes
@@ -155,6 +166,35 @@ const isValidInviteCode = (code: string): boolean => {
 };
 
 /**
+ * Extracts x-callback-url parameters from a query string.
+ * Supports legacy `callback` parameter as fallback for `x-success`.
+ */
+const extractXCallbackParams = (queryString: string): XCallbackParams | undefined => {
+	try {
+		const params = new URLSearchParams(queryString);
+		const xSuccess = params.get('x-success');
+		const xError = params.get('x-error');
+		const xCancel = params.get('x-cancel');
+		const xSource = params.get('x-source');
+		const legacyCallback = params.get('callback');
+
+		const successUrl = xSuccess ? decodeURIComponent(xSuccess) : (legacyCallback ? decodeURIComponent(legacyCallback) : undefined);
+
+		if (successUrl || xError || xCancel || xSource) {
+			return {
+				xSuccess: successUrl,
+				xError: xError ? decodeURIComponent(xError) : undefined,
+				xCancel: xCancel ? decodeURIComponent(xCancel) : undefined,
+				xSource: xSource ? decodeURIComponent(xSource) : undefined,
+			};
+		}
+	} catch {
+		// Ignore parsing errors
+	}
+	return undefined;
+};
+
+/**
  * Parses signup deeplink parameters
  * Format: signup?hs={homeserver}&st={signup_token}&relay={relay_url}&secret={secret}&caps={capabilities}
  */
@@ -167,6 +207,7 @@ const parseSignupParams = (queryString: string): SignupParams | null => {
 			relay: decodeURIComponent(params.get('relay') || ''),
 			secret: params.get('secret') || '',
 			caps: (params.get('caps') || '').split(',').filter(Boolean),
+			xCallback: extractXCallbackParams(queryString),
 		};
 	} catch {
 		return null;
@@ -175,19 +216,16 @@ const parseSignupParams = (queryString: string): SignupParams | null => {
 
 /**
  * Parses session deeplink parameters
- * Format: session?callback={callback_url}
- * Example: pubkyring://session?callback=bitkit://session-data
+ * Format: session?x-success={url}&x-error={url}&x-cancel={url}&x-source={name}
+ * Legacy: session?callback={callback_url}
  */
 const parseSessionParams = (queryString: string): SessionParams | null => {
 	try {
-		const params = new URLSearchParams(queryString);
-		const callback = params.get('callback');
-		if (!callback) {
+		const xCallback = extractXCallbackParams(queryString);
+		if (!xCallback?.xSuccess) {
 			return null;
 		}
-		return {
-			callback: decodeURIComponent(callback),
-		};
+		return { xCallback };
 	} catch {
 		return null;
 	}
@@ -299,11 +337,11 @@ export const parseInput = async (
 	}
 
 	// 2. Check for session deeplink
-	// Format: pubkyring://session?callback={callback_url}
+	// Format: pubkyring://session?x-success={url} or pubkyring://session?callback={url}
 	if (urlWithoutProtocol.startsWith('session?')) {
 		const queryString = urlWithoutProtocol.substring(8); // Remove "session?"
 		const sessionParams = parseSessionParams(queryString);
-		if (sessionParams?.callback) {
+		if (sessionParams?.xCallback?.xSuccess) {
 			return {
 				action: InputAction.Session,
 				data: { action: InputAction.Session, params: sessionParams },
@@ -325,6 +363,12 @@ export const parseInput = async (
 	// Format: pubkyauth:///...
 	const authResult = await parseAuthUrl(processedInput);
 	if (authResult.isOk()) {
+		// Extract optional x-callback-url parameters from the auth URL
+		const queryStart = processedInput.indexOf('?');
+		const xCallback = queryStart !== -1
+			? extractXCallbackParams(processedInput.substring(queryStart))
+			: undefined;
+
 		return {
 			action: InputAction.Auth,
 			data: {
@@ -333,6 +377,7 @@ export const parseInput = async (
 					relay: authResult.value.relay,
 					secret: authResult.value.secret,
 					caps: authResult.value.capabilities.map(c => `${c.path}:${c.permission}`),
+					xCallback,
 				},
 				rawUrl: processedInput,
 			},
@@ -344,9 +389,14 @@ export const parseInput = async (
 	// 5. Check for invite code in URL
 	const inviteCode = parseInviteCodeFromUrl(processedInput);
 	if (inviteCode) {
+		// Extract x-callback params from invite URL query string if present
+		const inviteQueryStart = processedInput.indexOf('?');
+		const inviteXCallback = inviteQueryStart !== -1
+			? extractXCallbackParams(processedInput.substring(inviteQueryStart))
+			: undefined;
 		return {
 			action: InputAction.Invite,
-			data: { action: InputAction.Invite, params: { inviteCode } },
+			data: { action: InputAction.Invite, params: { inviteCode, xCallback: inviteXCallback } },
 			source,
 			rawInput,
 		};

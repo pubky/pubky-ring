@@ -20,6 +20,7 @@ import {
 	getToastStyle,
 	isSmallScreen,
 	showToast,
+	sleep,
 } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
@@ -38,12 +39,15 @@ import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import ProgressBar from './ProgressBar.tsx';
 import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { useTranslation } from 'react-i18next';
+import { XCallbackParams } from '../utils/inputParser.ts';
+import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 
 interface ConfirmAuthProps {
     pubky: string;
     authUrl: string;
     authDetails: PubkyAuthDetails;
     onComplete: () => void;
+    xCallback?: XCallbackParams;
 }
 
 interface Capability {
@@ -96,7 +100,7 @@ const FADE_DURATION = 100;
 const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const { pubky, authUrl, authDetails, onComplete } = payload;
+	const { pubky, authUrl, authDetails, onComplete, xCallback } = payload;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const dispatch = useDispatch();
@@ -143,6 +147,11 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 		SystemNavigationBar.navigationShow();
 	}, []);
 
+	const handleDeny = useCallback(() => {
+		openXCancel(xCallback);
+		handleClose();
+	}, [xCallback, handleClose]);
+
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
 		try {
@@ -157,11 +166,17 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 					title: t('common.error'),
 					description: res.error.message,
 				});
+				await openXError(xCallback, 'AUTH_FAILED', res.error.message);
 				return;
 			}
 			setIsAuthorized(true);
 			SystemNavigationBar.navigationShow();
 			onComplete?.();
+			if (xCallback?.xSuccess) {
+				await sleep(FADE_DURATION + 300);
+				handleClose();
+				await openXSuccess(xCallback);
+			}
 		} catch (e: unknown) {
 			const error = e as Error;
 			const errorMsg = error.message === 'Authentication request timed out'
@@ -179,14 +194,21 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				},
 			});
 			console.error('Auth error:', error);
+			await openXError(xCallback, 'AUTH_ERROR', errorMsg);
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, dispatch, onComplete, pubky, t]);
+	}, [authUrl, xCallback, dispatch, handleClose, onComplete, pubky, t]);
 
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];
 	}, [authDetails?.capabilities]);
+
+	const titleText = isAuthorized
+		? t('auth.authorizationSuccessful')
+		: xCallback?.xSource
+			? t('auth.authorizeForApp', { appName: xCallback.xSource })
+			: t('auth.authorize');
 
 	return (
 		<ActionSheetContainer
@@ -200,7 +222,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				<View style={styles.mainContent}>
 					<View style={styles.titleContainer}>
 						<Text style={styles.title}>
-							{isAuthorized ? t('auth.authorizationSuccessful') : t('auth.authorize')}
+							{titleText}
 						</Text>
 					</View>
 
@@ -245,7 +267,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 							<>
 								<ActionButton
                             		style={styles.denyButton}
-                            		onPressIn={handleClose}
+                            		onPressIn={handleDeny}
                             		activeOpacity={0.7}
                             	>
 									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('common.close') : t('auth.deny')}</Text>
@@ -277,7 +299,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
                             	filledColor="#FFFFFF"
                             	height={6}
                             	borderRadius={3}
-                            	onComplete={handleClose}
+                            	onComplete={handleDeny}
 							/>) : null}
 					</View>
 				</View>

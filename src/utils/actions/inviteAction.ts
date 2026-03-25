@@ -7,10 +7,11 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { SheetManager } from 'react-native-actions-sheet';
-import { InputAction, InviteParams, parseInput } from '../inputParser';
+import { InputAction, InviteParams, parseInput, XCallbackParams } from '../inputParser';
 import { ActionContext, routeInput } from '../inputRouter';
 import { createPubkyWithInviteCode } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
+import { openXSuccess, openXError } from '../xCallback';
 import { getPubky } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';
 import { ECurrentScreen } from '../../components/PubkySetup/NewPubkySetup';
@@ -76,7 +77,7 @@ export const handleInviteAction = async (
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
-	const { inviteCode } = params;
+	const { inviteCode, xCallback } = params;
 
 	// Show loading modal (don't await - it resolves when sheet closes)
 	SheetManager.show('loading', {
@@ -92,6 +93,7 @@ export const handleInviteAction = async (
 		if (createRes.isErr()) {
 			const errorMessage = getErrorMessage(createRes.error, i18n.t('errors.failedToCreatePubkyWithInvite'));
 			showErrorState(errorMessage, dispatch);
+			await openXError(xCallback, 'INVITE_FAILED', errorMessage);
 			return err(errorMessage);
 		}
 
@@ -102,6 +104,8 @@ export const handleInviteAction = async (
 
 		// Hide loading modal before showing setup sheet
 		await SheetManager.hide('loading');
+
+		await openXSuccess(xCallback);
 
 		// Show new pubky setup sheet on welcome screen with completed setup
 		setTimeout(() => {
@@ -123,6 +127,7 @@ export const handleInviteAction = async (
 		const errorMessage = error instanceof Error ? error.message : i18n.t('invite.unknownErrorProcessing');
 		console.error('Error handling invite code:', errorMessage);
 		showErrorState(i18n.t('errors.inviteProcessingFailed'), dispatch);
+		await openXError(xCallback, 'INVITE_ERROR', errorMessage);
 		return err(errorMessage);
 	}
 };

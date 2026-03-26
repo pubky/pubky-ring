@@ -1632,7 +1632,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-skia (2.5.3):
+  - react-native-skia (2.5.4):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2195,7 +2195,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNReanimated (4.2.3):
+  - RNReanimated (4.3.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2217,10 +2217,11 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNReanimated/reanimated (= 4.2.3)
+    - RNReanimated/apple (= 4.3.0)
+    - RNReanimated/common (= 4.3.0)
     - RNWorklets
     - Yoga
-  - RNReanimated/reanimated (4.2.3):
+  - RNReanimated/apple (4.3.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2242,10 +2243,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNReanimated/reanimated/apple (= 4.2.3)
     - RNWorklets
     - Yoga
-  - RNReanimated/reanimated/apple (4.2.3):
+  - RNReanimated/common (4.3.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2804,7 +2804,7 @@ SPEC CHECKSUMS:
   react-native-netinfo: 13886ae458c33dbb849592dcd75e1795e3d70842
   react-native-pubky: 3c5833d397564122c3b02b3a66766d275b8448b8
   react-native-safe-area-context: 29044d05d61f2c60d0828c373bd0ebe17eed58d0
-  react-native-skia: b315fee85b1381253fb286744bbfb16ec28d9233
+  react-native-skia: 7d40971ecae3e59618781d5988a94605def177ae
   React-NativeModulesApple: b94faa2dce6d8c0a9d722ed7ee27b996d28b62d1
   React-networking: e409d8fb062162da6293e98b77f8d80cf4430e07
   React-oscompat: ff26abf0ae3e3fdbe47b44224571e3fc7226a573
@@ -2846,7 +2846,7 @@ SPEC CHECKSUMS:
   RNKeychain: 91be81cd32b30c7d4c2569dcad29b472d9b93982
   RNLocalize: 0454ff57ecee161c1bf5804d26ef7f0d176346e2
   RNPermissions: 0910f119ab802adbf582ea5f58dc9a05adac52f7
-  RNReanimated: bbb486670570db6c78831113191a4eb8d5eb79f0
+  RNReanimated: d570323905a3ee01616fc504a9327e7d7c48b1a5
   RNScreens: 088d923c4327c63c9f8c942cae17a9d038f47d97
   RNShare: 386b2b71977049b6b3a820c6971c82d9ca55e741
   RNSVG: 2ead7004a54d1cded41af4e6ee29104e94ba48c6

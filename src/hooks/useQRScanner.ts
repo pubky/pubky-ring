@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Dispatch } from 'redux';
 import { getIsOnline } from '../store/selectors/settingsSelectors';
@@ -40,10 +40,10 @@ export const useQRScanner = (): {
 		[dispatch, isOnline],
 	);
 
-	return { 
-		handleQRPress, 
+	return useMemo(() => ({
+		handleQRPress,
 		isQRLoading: isLoading,
 		dispatch,
 		isOnline,
-	};
+	}), [handleQRPress, isLoading, dispatch, isOnline]);
 };

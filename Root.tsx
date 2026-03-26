@@ -10,12 +10,13 @@ import App from './App';
 enableScreens(true);
 enableFreeze(true);
 
+const rootStyle = { flex: 1 } as const;
+
 function Root(): ReactElement {
 	return (
 		<Provider store={store}>
 			<PersistGate loading={null} persistor={persistor}>
-				{/* eslint-disable-next-line react-native/no-inline-styles */}
-				<GestureHandlerRootView style={{ flex: 1 }}>
+				<GestureHandlerRootView style={rootStyle}>
 					<App />
 				</GestureHandlerRootView>
 			</PersistGate>

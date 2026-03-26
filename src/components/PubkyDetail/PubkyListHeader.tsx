@@ -23,7 +23,7 @@ interface PubkyListHeaderProps {
 	pubky: string;
 	pubkyData: PubkyData;
 	sessionsCount: number;
-	onQRPress: () => Promise<string>;
+	onQRPress: () => Promise<void>;
 	onDelete: () => void;
 	onBackup: () => void;
 }
@@ -154,4 +154,4 @@ const styles = StyleSheet.create({
 	},
 });
 
-export default memo(PubkyListHeader);
+export default PubkyListHeader;

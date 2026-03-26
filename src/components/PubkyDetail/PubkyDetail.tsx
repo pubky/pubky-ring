@@ -1,15 +1,11 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
-import { Pubky, PubkySession } from '../../types/pubky.ts';
+import { ScrollView, StyleSheet } from 'react-native';
 import { deletePubky, signOutOfHomeserver } from '../../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
-import { FlashList } from '@shopify/flash-list';
-import SessionItem from './SessionItem.tsx';
 import PubkyListHeader from './PubkyListHeader.tsx';
 import { PubkyData } from '../../navigation/types.ts';
 import { showToast } from '../../utils/helpers.ts';
 import { showBackupPrompt } from '../../utils/sheetHelpers.ts';
-import { Dispatch } from 'redux';
 import { View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useTypedNavigation } from '../../navigation/hooks';
@@ -18,17 +14,7 @@ import i18n from '../../i18n';
 export interface PubkyDetailProps {
 	index: number;
     pubkyData: PubkyData;
-	onQRPress: ({
-		pubky,
-		pubkyData,
-		dispatch,
-		onComplete,
-	}: {
-		pubky: string,
-		pubkyData: Pubky,
-		dispatch: Dispatch,
-		onComplete?: () => void,
-	}) => Promise<string>;
+	onQRPress: () => Promise<void>;
 }
 
 export const PubkyDetail = ({
@@ -40,10 +26,6 @@ export const PubkyDetail = ({
 	const publicKey = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
 	const dispatch = useDispatch();
 	const navigation = useTypedNavigation();
-
-	const handleQRPress = useCallback(() => {
-		return onQRPress({ pubky, pubkyData, dispatch });
-	}, [dispatch, onQRPress, pubky, pubkyData]);
 
 	const onDelete = useCallback(async () => {
 		const deleteRes = await deletePubky(pubky, dispatch);
@@ -88,40 +70,26 @@ export const PubkyDetail = ({
 		}
 	}, [pubky, pubkyData.backupPreference]);
 
-	const keyExtractor = useCallback((item: PubkySession, i: number) =>
-		`${item.created_at}-${i}`, []);
-
-	// eslint-disable-next-line react/no-unused-prop-types
-	const renderItem = useCallback(({ item }: { item: PubkySession }) =>
-		<SessionItem session={item} onSignOut={onSignOut} />, [onSignOut]);
-
 	const sessionsLength = useMemo(() => sessions && sessions?.length > 0 ? sessions.length : 1, [sessions]);
-
-	const ListHeader = useCallback(() => (
-		<PubkyListHeader
-			index={index}
-			pubky={pubky}
-			pubkyData={pubkyData}
-			sessionsCount={sessionsLength}
-			onQRPress={handleQRPress}
-			onDelete={handleDelete}
-			onBackup={handleBackup}
-		/>
-	), [index, pubky, pubkyData, sessionsLength, handleQRPress, handleDelete, handleBackup]);
 
 	return (
 		<View style={styles.container}>
-			<FlashList
-				ListHeaderComponent={ListHeader}
-				keyExtractor={keyExtractor}
+			<ScrollView
 				contentContainerStyle={styles.scrollContent}
-				data={[]}
-				renderItem={renderItem}
 				showsVerticalScrollIndicator={true}
-				scrollEventThrottle={16}
 				bounces={false}
 				nestedScrollEnabled={true}
-			/>
+			>
+				<PubkyListHeader
+					index={index}
+					pubky={pubky}
+					pubkyData={pubkyData}
+					sessionsCount={sessionsLength}
+					onQRPress={onQRPress}
+					onDelete={handleDelete}
+					onBackup={handleBackup}
+				/>
+			</ScrollView>
 		</View>
 	);
 };

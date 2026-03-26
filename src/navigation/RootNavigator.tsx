@@ -32,8 +32,10 @@ const RootNavigator = (): ReactElement => {
 		return !signedTermsOfUse ? 'TermsOfUse' : showOnboarding ? 'Onboarding' : 'Home';
 	}, [showOnboarding, signedTermsOfUse]);
 
+	const navTheme = useMemo(() => ({ ...DefaultTheme, ...theme }), [theme]);
+
 	return (
-		<NavigationContainer theme={{ ...DefaultTheme, ...theme }}>
+		<NavigationContainer theme={navTheme}>
 			<Stack.Navigator
 				initialRouteName={initialRoute}
 				screenOptions={{

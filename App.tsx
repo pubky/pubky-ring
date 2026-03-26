@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import './src/sheets';
 import { ThemeProvider } from 'styled-components/native';
 import { darkTheme, lightTheme } from './src/theme';
@@ -25,6 +25,8 @@ function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
 	const currentTheme = useSelector(getTheme);
 	const isOnline = useSelector(getIsOnline);
+	const isOnlineRef = useRef(isOnline);
+	isOnlineRef.current = isOnline;
 	const dispatch = useDispatch();
 	const { t } = useTranslation();
 
@@ -66,7 +68,7 @@ function App(): React.JSX.Element {
 		// Defer network check to avoid blocking initial render
 		const timer = setTimeout(() => {
 			checkNetworkConnection({
-				prevNetworkState: isOnline,
+				prevNetworkState: isOnlineRef.current,
 				dispatch,
 				displayToastIfOnline: false,
 				displayToastIfOffline: true,
@@ -75,7 +77,7 @@ function App(): React.JSX.Element {
 
 		const unsubscribe = NetInfo.addEventListener(state => {
 			const isConnected = state?.isConnected ?? false;
-			if (isOnline !== isConnected) {
+			if (isOnlineRef.current !== isConnected) {
 				dispatch(updateIsOnline({ isOnline: isConnected }));
 				if (isConnected) {
 					showToast({
@@ -99,7 +101,7 @@ function App(): React.JSX.Element {
 			clearTimeout(timer);
 			unsubscribe();
 		};
-	}, [dispatch, isOnline, t]);
+	}, [dispatch, t]);
 
 	const theme = useMemo(() => {
 		switch (currentTheme) {

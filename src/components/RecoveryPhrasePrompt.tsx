@@ -85,16 +85,16 @@ const RecoveryPhrasePrompt = ({ payload }: {
 						<View style={styles.columnContainer}>
 							{mnemonicWords.slice(0, 6).map((word, index) => (
 								<View key={index} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
-									<Text style={styles.wordNumber}>{index + 1}.</Text>
-									<Text style={styles.wordText}>{word}</Text>
+									<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>{index + 1}.</Text>
+									<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>{word}</Text>
 								</View>
 							))}
 						</View>
 						<View style={styles.columnContainer}>
 							{mnemonicWords.slice(6, 12).map((word, index) => (
 								<View key={index + 6} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
-									<Text style={styles.wordNumber}>{index + 7}.</Text>
-									<Text style={styles.wordText}>{word}</Text>
+									<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>{index + 7}.</Text>
+									<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>{word}</Text>
 								</View>
 							))}
 						</View>
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
 		fontWeight: '600',
 		lineHeight: 22,
 		marginRight: 8,
-		width: 24,
+		width: 28,
 	},
 	wordText: {
 		fontSize: 17,

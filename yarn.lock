@@ -2727,10 +2727,10 @@
   resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
-"@synonymdev/react-native-pubky@0.11.2":
-  version "0.11.2"
-  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.11.2.tgz#9b7c896055705d64512671918cd83bfe72941389"
-  integrity sha512-yKau3Vt2mXuofdViBl5viffGbqBIpc4desKVzdth+p/7BUAVhqpRPhdddqr/qe7ykOYksaBBqkLcMy2Omb2Yyg==
+"@synonymdev/react-native-pubky@0.11.3":
+  version "0.11.3"
+  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.11.3.tgz#e31e929ed03f4afdfa95bdb7c286d295b19dba8e"
+  integrity sha512-EdUggk00H7+oonqBsNy0zZOU1eBR7d5zAfgYy4GMfyd+LXAe/ksapJ0KHXPvUcF7wNd76LHIoG7ETlTkdvwpLA==
   dependencies:
     "@synonymdev/result" "^0.0.2"
 
@@ -5686,9 +5686,9 @@ fast-levenshtein@^2.0.6:
   integrity sha512-DCXu6Ifhqcks7TZKY3Hxp3y6qphY5SJZmrWMDrKcERSOXWQdMhU9Ig/PYrzyw/ul9jOIyh0N4M0tbC5hodg8dw==
 
 fast-uri@^3.0.1:
-  version "3.1.0"
-  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.0.tgz#66eecff6c764c0df9b762e62ca7edcfb53b4edfa"
-  integrity sha512-iPeeDKJSWf4IEOasVVrknXpaBV0IApz/gp7S2bb7Z4Lljbl2MGJRqInZiUrQwV16cpzw/D3S5j5Julj/gT52AA==
+  version "3.1.1"
+  resolved "https://registry.yarnpkg.com/fast-uri/-/fast-uri-3.1.1.tgz#dd085fec2494a2a33bac6e61277374669e1dd774"
+  integrity sha512-h2r7rcm6Ee/J8o0LD5djLuFVcfbZxhvho4vvsbeV0aMvXjUgqv4YpxpkEx0d68l6+IleVfLAdVEfhR7QNMkGHQ==
 
 fast-xml-builder@^1.1.5:
   version "1.1.7"
@@ -6462,9 +6462,9 @@ immediate@~3.0.5:
   integrity sha512-XXOFtyqDjNDAQxVfYxuF7g9Il/IbWmmlQg2MYKOH8ExIT1qg6xc4zyS3HaEEATgs1btfzxq15ciUiY7gjSXRGQ==
 
 immer@^11.0.0:
-  version "11.1.4"
-  resolved "https://registry.yarnpkg.com/immer/-/immer-11.1.4.tgz#37aee86890b134a8f1a2fadd44361fb86c6ae67e"
-  integrity sha512-XREFCPo6ksxVzP4E0ekD5aMdf8WMwmdNaz6vuvxgI40UaEiu6q3p8X52aU6GdyvLY3XXX/8R7JOTXStz/nBbRw==
+  version "11.1.6"
+  resolved "https://registry.yarnpkg.com/immer/-/immer-11.1.6.tgz#caff5eb7261dda037ecea1b67151b1c9944074d3"
+  integrity sha512-uwrF08UBQfxk49i9WcUeCx045wjB1zXEHNJmbYHPVVspxmjwSeWCoKbB8DEIvs3XkBJV6lcRAyLaWJ2+u3MMCw==
 
 import-fresh@^3.2.1, import-fresh@^3.3.0:
   version "3.3.1"
@@ -9193,9 +9193,9 @@ react-native-worklets@^0.7.1:
     semver "7.7.3"
 
 react-native-worklets@^0.8.2:
-  version "0.8.2"
-  resolved "https://registry.yarnpkg.com/react-native-worklets/-/react-native-worklets-0.8.2.tgz#f0ad89367ad30e3f5569ad4f6e43233a6e857450"
-  integrity sha512-xnTbDclfol+DQHWgUk+2ewRs9cfyFFKqHzEdR75xX3ItQP8i5rB+rvVeRaeZABDvQ8rvEYvSiTfrjtstZ6SGUQ==
+  version "0.8.3"
+  resolved "https://registry.yarnpkg.com/react-native-worklets/-/react-native-worklets-0.8.3.tgz#87014dbe148f76a8ffd623953d3614a54aa880e8"
+  integrity sha512-oCBJROyLU7yG/1R8s0INMflygTH71bx+5XcYkH0CM938TlhSoVbiunE1WVW5FZa51vwYqfLie/IXMX2s1Kh3eg==
   dependencies:
     "@babel/plugin-transform-arrow-functions" "^7.27.1"
     "@babel/plugin-transform-class-properties" "^7.27.1"

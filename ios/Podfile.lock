@@ -1503,7 +1503,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-pubky (0.11.2):
+  - react-native-pubky (0.11.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2345,7 +2345,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNWorklets (0.8.2):
+  - RNWorklets (0.8.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2367,10 +2367,10 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNWorklets/apple (= 0.8.2)
-    - RNWorklets/common (= 0.8.2)
+    - RNWorklets/apple (= 0.8.3)
+    - RNWorklets/common (= 0.8.3)
     - Yoga
-  - RNWorklets/apple (0.8.2):
+  - RNWorklets/apple (0.8.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2393,7 +2393,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNWorklets/common (0.8.2):
+  - RNWorklets/common (0.8.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2764,7 +2764,7 @@ SPEC CHECKSUMS:
   react-native-device-brightness: 886cfbfb49a32b6de4ccfc1f720776dc5f381d24
   react-native-document-picker: 1bf3e97a53c205191d34bc3a9bbcb57fbe1c77d5
   react-native-netinfo: 723f91aea0c7b4a8701bc1ede8fc162c8b1cf282
-  react-native-pubky: 72cc7ab3a4aed903b85156f35649404a03c681ec
+  react-native-pubky: 3568b298a7a1b97a07ede80a6012506aa48faafb
   react-native-safe-area-context: a2325922b8594ddd27f98fb13437aec126be2502
   react-native-skia: 9b9e78b85db9a89108afe1424d970386c64dfe97
   React-NativeModulesApple: 902ad35a8aa6c13085cad3a19f87c5c752aa0115
@@ -2812,7 +2812,7 @@ SPEC CHECKSUMS:
   RNScreens: 63cc2156368ac1a8239e9131103c2fef901fc381
   RNShare: 43cee010ada075019148c7a6bac1ca71b074e1d7
   RNSVG: d49e9b043822ac92430dd37fa1d7031aa80911b9
-  RNWorklets: 828954504dc86bfcbdc2e8f65ea09dcf2b05a245
+  RNWorklets: 32b9ca9e0588b838ce3202a9ea3971f553c9011c
   Yoga: df8920a8f8ca99996048f6aea23a529f44992eac
 
 PODFILE CHECKSUM: f4a63f96e757c2de0d8f9bab4bdb629d23afd5ac

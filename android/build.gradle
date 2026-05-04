@@ -22,6 +22,10 @@ buildscript {
 allprojects {
     repositories {
         google()
+        mavenCentral()
+        maven {
+            url("$rootDir/../node_modules/@react-native-async-storage/async-storage/android/local_repo")
+        }
     }
 }
 

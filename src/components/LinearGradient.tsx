@@ -1,5 +1,12 @@
-import React, { memo, useCallback, useMemo, useEffect, useState } from 'react';
-import { View, StyleSheet, ViewStyle, StyleProp, LayoutChangeEvent, AppState } from 'react-native';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import {
+	View,
+	StyleSheet,
+	ViewStyle,
+	StyleProp,
+	LayoutChangeEvent,
+	AppState,
+} from 'react-native';
 import {
 	Canvas,
 	LinearGradient as SkiaLinearGradient,
@@ -30,11 +37,20 @@ interface RadialGradientProps extends GradientBaseProps {
 	radius?: number;
 }
 
-const GradientCanvas = memo(({ children }: { children: React.ReactNode }) => (
-	<Canvas style={StyleSheet.absoluteFillObject}>
-		{children}
-	</Canvas>
-));
+const useAppActiveKey = (): number => {
+	const [key, setKey] = useState(0);
+	useEffect(() => {
+		const subscription = AppState.addEventListener('change', (nextAppState) => {
+			if (nextAppState === 'active') {
+				setKey((prev) => prev + 1);
+			}
+		});
+		return (): void => {
+			subscription.remove();
+		};
+	}, []);
+	return key;
+};
 
 const LinearGradient: React.FC<LinearGradientProps> = memo(({
 	colors = ['#000000', '#FFFFFF'],
@@ -43,67 +59,41 @@ const LinearGradient: React.FC<LinearGradientProps> = memo(({
 	style,
 	children,
 	positions,
-}: {
-	colors?: string[];
-	start?: Point;
-	end?: Point;
-	style?: StyleProp<ViewStyle>;
-	children?: React.ReactNode;
-	positions?: number[];
-}) => {
-	const [layout, setLayout] = React.useState({ width: 0, height: 0 });
-	const [forceUpdate, setForceUpdate] = useState(0);
-
-	useEffect(() => {
-		const subscription = AppState.addEventListener('change', (nextAppState) => {
-			if (nextAppState === 'active') {
-				setForceUpdate(prev => prev + 1);
-			}
-		});
-
-		return (): void => {
-			subscription.remove();
-		};
-	}, []);
+}: LinearGradientProps) => {
+	const [size, setSize] = useState({ width: 0, height: 0 });
+	const forceUpdate = useAppActiveKey();
 
 	const onLayout = useCallback((event: LayoutChangeEvent) => {
 		const { width, height } = event.nativeEvent.layout;
-		setLayout({ width, height });
+		setSize((prev) =>
+			prev.width === width && prev.height === height ? prev : { width, height },
+		);
 	}, []);
 
-	const gradientProps = useMemo(() => {
-		if (layout.width === 0 || layout.height === 0) {return null;}
+	const gradientPositions = useMemo(
+		() => positions || colors.map((_, i) => i / (colors.length - 1)),
+		[colors, positions],
+	);
 
-		return {
-			startVec: vec(start.x * layout.width, start.y * layout.height),
-			endVec: vec(end.x * layout.width, end.y * layout.height),
-			gradientPositions: positions || colors.map((_, index) => index / (colors.length - 1)),
-			dimensions: { width: layout.width, height: layout.height },
-		};
-	}, [colors, end.x, end.y, layout.height, layout.width, positions, start.x, start.y]);
-
-	const renderGradient = useCallback(() => {
-		if (!gradientProps) {return null;}
-
-		const { startVec, endVec, gradientPositions, dimensions } = gradientProps;
-
-		return (
-			<GradientCanvas key={forceUpdate}>
-				<Rect x={0} y={0} width={dimensions.width} height={dimensions.height}>
-					<SkiaLinearGradient
-						start={startVec}
-						end={endVec}
-						colors={colors}
-						positions={gradientPositions}
-					/>
-				</Rect>
-			</GradientCanvas>
-		);
-	}, [colors, gradientProps, forceUpdate]);
+	const canvasStyle = useMemo(
+		() => [styles.canvas, { width: size.width, height: size.height }],
+		[size.width, size.height],
+	);
 
 	return (
 		<View style={[styles.container, style]} onLayout={onLayout}>
-			{renderGradient()}
+			{size.width > 0 && size.height > 0 && (
+				<Canvas key={forceUpdate} style={canvasStyle}>
+					<Rect x={0} y={0} width={size.width} height={size.height}>
+						<SkiaLinearGradient
+							start={vec(start.x * size.width, start.y * size.height)}
+							end={vec(end.x * size.width, end.y * size.height)}
+							colors={colors}
+							positions={gradientPositions}
+						/>
+					</Rect>
+				</Canvas>
+			)}
 			{children}
 		</View>
 	);
@@ -116,68 +106,41 @@ const RadialGradient: React.FC<RadialGradientProps> = memo(({
 	style,
 	children,
 	positions,
-}: {
-	colors?: string[];
-	center?: Point;
-	radius?: number;
-	style?: StyleProp<ViewStyle>;
-	children?: React.ReactNode;
-	positions?: number[];
-}) => {
-	const [layout, setLayout] = React.useState({ width: 0, height: 0 });
-	const [forceUpdate, setForceUpdate] = useState(0);
-
-	useEffect(() => {
-		const subscription = AppState.addEventListener('change', (nextAppState) => {
-			if (nextAppState === 'active') {
-				setForceUpdate(prev => prev + 1);
-			}
-		});
-
-		return (): void => {
-			subscription.remove();
-		};
-	}, []);
+}: RadialGradientProps) => {
+	const [size, setSize] = useState({ width: 0, height: 0 });
+	const forceUpdate = useAppActiveKey();
 
 	const onLayout = useCallback((event: LayoutChangeEvent) => {
 		const { width, height } = event.nativeEvent.layout;
-		setLayout({ width, height });
+		setSize((prev) =>
+			prev.width === width && prev.height === height ? prev : { width, height },
+		);
 	}, []);
 
-	const gradientProps = useMemo(() => {
-		if (layout.width === 0 || layout.height === 0) {return null;}
+	const gradientPositions = useMemo(
+		() => positions || colors.map((_, i) => i / (colors.length - 1)),
+		[colors, positions],
+	);
 
-		const maxDimension = Math.max(layout.width, layout.height);
-		return {
-			centerVec: vec(center.x * layout.width, center.y * layout.height),
-			radiusValue: radius * (maxDimension / 2),
-			gradientPositions: positions || colors.map((_, index) => index / (colors.length - 1)),
-			dimensions: { width: layout.width, height: layout.height },
-		};
-	}, [center.x, center.y, colors, layout.height, layout.width, positions, radius]);
-
-	const renderGradient = useCallback(() => {
-		if (!gradientProps) {return null;}
-
-		const { centerVec, radiusValue, gradientPositions, dimensions } = gradientProps;
-
-		return (
-			<GradientCanvas key={forceUpdate}>
-				<Rect x={0} y={0} width={dimensions.width} height={dimensions.height}>
-					<SkiaRadialGradient
-						c={centerVec}
-						r={radiusValue}
-						colors={colors}
-						positions={gradientPositions}
-					/>
-				</Rect>
-			</GradientCanvas>
-		);
-	}, [colors, gradientProps, forceUpdate]);
+	const canvasStyle = useMemo(
+		() => [styles.canvas, { width: size.width, height: size.height }],
+		[size.width, size.height],
+	);
 
 	return (
 		<View style={[styles.container, style]} onLayout={onLayout}>
-			{renderGradient()}
+			{size.width > 0 && size.height > 0 && (
+				<Canvas key={forceUpdate} style={canvasStyle}>
+					<Rect x={0} y={0} width={size.width} height={size.height}>
+						<SkiaRadialGradient
+							c={vec(center.x * size.width, center.y * size.height)}
+							r={radius * (Math.max(size.width, size.height) / 2)}
+							colors={colors}
+							positions={gradientPositions}
+						/>
+					</Rect>
+				</Canvas>
+			)}
 			{children}
 		</View>
 	);
@@ -188,6 +151,11 @@ const styles = StyleSheet.create({
 		position: 'relative',
 		overflow: 'hidden',
 		minHeight: 100,
+	},
+	canvas: {
+		position: 'absolute',
+		top: 0,
+		left: 0,
 	},
 });
 

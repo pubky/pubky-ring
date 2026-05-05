@@ -11,14 +11,15 @@ const pubkysSlice = createSlice({
 	name: 'pubky',
 	initialState,
 	reducers: {
-		addPubky: (state, action: PayloadAction<{ pubky: string, backupPreference?: EBackupPreference, isBackedUp?: boolean }>) => {
+		addPubky: (state, action: PayloadAction<{ pubky: string, backupPreference?: EBackupPreference, isBackedUp?: boolean, signupToken?: string }>) => {
 			state.pubkys = state?.pubkys || {};
-			const { pubky, backupPreference, isBackedUp = false } = action.payload;
+			const { pubky, backupPreference, isBackedUp = false, signupToken = '' } = action.payload;
 			if (!state.pubkys[pubky]) {
 				state.pubkys[pubky] = {
 					...defaultPubkyState,
 					backupPreference: backupPreference ?? defaultPubkyState.backupPreference,
 					isBackedUp,
+					signupToken,
 				};
 			}
 		},

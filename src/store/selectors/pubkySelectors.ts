@@ -108,6 +108,22 @@ export const hasPubky = (state: RootState, pubky: string): boolean => {
 	return !!state.pubky.pubkys[pubky];
 };
 
+/**
+ * Find the key of the pubky associated with a given signup token.
+ * Returns null when the token is empty or no match exists.
+ */
+export const getPubkyKeyBySignupToken = (
+	state: RootState,
+	signupToken: string,
+): string | null => {
+	if (!signupToken) return null;
+	const pubkys = state.pubky.pubkys;
+	for (const key in pubkys) {
+		if (pubkys[key]?.signupToken === signupToken) return key;
+	}
+	return null;
+};
+
 export const isProcessing = (state: RootState, key: string): boolean => {
 	return key in state.pubky.processing;
 };

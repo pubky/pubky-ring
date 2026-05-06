@@ -331,6 +331,7 @@ export const savePubky = async ({
 	mnemonic = '',
 	backupPreference = EBackupPreference.unknown,
 	isBackedUp = false,
+	signupToken = '',
 }: {
 	secretKey: string,
 	pubky: string,
@@ -338,6 +339,7 @@ export const savePubky = async ({
 	mnemonic?: string,
 	backupPreference?: EBackupPreference;
 	isBackedUp?: boolean;
+	signupToken?: string;
 }): Promise<Result<string>> => {
 	try {
 		// Ensure the mnemonic phrase generates the expected secretKey
@@ -356,7 +358,7 @@ export const savePubky = async ({
 			// If no mnemonic is provided we have to default to the encrypted file.
 			backupPreference = EBackupPreference.encryptedFile;
 		}
-		dispatch(addPubky({ pubky, backupPreference, isBackedUp }));
+		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken }));
 		const keychainData: IKeychainData = {
 			secretKey,
 			mnemonic,

@@ -22,7 +22,11 @@ import { SHEET_ANIMATION_DELAY } from '../constants.ts';
 import i18n from '../../i18n';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
-import { getSignedUpPubkysFromStore } from '../store-helpers';
+import {
+	getPubkyDataFromStore,
+	getPubkyKeyBySignupTokenFromStore,
+	getSignedUpPubkysFromStore,
+} from '../store-helpers';
 import { showPubkySelectionSheet } from '../../hooks/inputHandlerUtils';
 
 type SignupActionData = {
@@ -54,14 +58,40 @@ export const handleSignupAction = async (
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
-	const { xCallback } = params;
+	const { xCallback, homeserver, inviteCode, relay, secret, caps } = params;
 
 	let pubky = '';
+	let isReusedPubky = false;
+	let secretKey: string | undefined;
+	let mnemonic: string | undefined;
+
+	const capsString = caps.join(',');
+	const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
+	const authData = {
+		action: InputAction.Auth,
+		params: { relay, secret, caps, xCallback },
+		rawUrl: authUrl,
+	} as const;
 
 	// Small delay to ensure any previous sheet (e.g., camera) has fully closed
 	await new Promise(resolve => setTimeout(resolve, SHEET_ANIMATION_DELAY));
 
-	// Show loading modal FIRST (don't await - it resolves when sheet closes)
+	// If a pubky already exists for this signup token (e.g. user is rescanning the
+	// same onboarding QR after a prior failure), reuse it instead of creating a new key.
+	const existingPubkyKey = getPubkyKeyBySignupTokenFromStore(inviteCode);
+	if (existingPubkyKey) {
+		const existingPubky = getPubkyDataFromStore(existingPubkyKey);
+		pubky = existingPubkyKey;
+		isReusedPubky = true;
+
+		if (existingPubky?.signedUp) {
+			// Already signed up to homeserver — skip the loading modal and signup and forward to auth.
+			await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
+			return ok(pubky);
+		}
+	}
+
+	// Show loading modal (don't await - it resolves when sheet closes)
 	// This ensures errors are visible via the modal's error state
 	SheetManager.show('loading', {
 		payload: {
@@ -69,37 +99,42 @@ export const handleSignupAction = async (
 		},
 	});
 
-	// Step 1: Generate a new keypair
-	const genKeyRes = await generateMnemonicPhraseAndKeypair();
-	if (genKeyRes.isErr()) {
-		showErrorState(i18n.t('signup.failedToGenerateKeypair'), dispatch);
-		await openXError(xCallback, 'SIGNUP_FAILED', i18n.t('signup.failedToGenerateKeypair'));
-		return err(i18n.t('signup.failedToGenerateKeypair'));
+	// Step 1: Generate a new keypair only if we don't have an existing match
+	if (!isReusedPubky) {
+		const genKeyRes = await generateMnemonicPhraseAndKeypair();
+		if (genKeyRes.isErr()) {
+			showErrorState(i18n.t('signup.failedToGenerateKeypair'), dispatch);
+			await openXError(xCallback, 'SIGNUP_FAILED', i18n.t('signup.failedToGenerateKeypair'));
+			return err(i18n.t('signup.failedToGenerateKeypair'));
+		}
+
+		const { mnemonic: genMnemonic, secret_key: genSecretKey, public_key: generatedPubky } = genKeyRes.value;
+		mnemonic = genMnemonic;
+		secretKey = genSecretKey;
+		pubky = generatedPubky;
 	}
 
-	const { mnemonic, secret_key: secretKey, public_key: generatedPubky } = genKeyRes.value;
-	pubky = generatedPubky;
-
 	try {
-		const { homeserver, inviteCode, relay, secret, caps } = params;
-
 		// Set processing state
 		dispatch(addProcessing({ pubky }));
 
-		// Step 2: Save the pubky to keychain and Redux
-		const saveRes = await savePubky({
-			mnemonic,
-			secretKey,
-			pubky,
-			dispatch,
-			backupPreference: EBackupPreference.unknown,
-			isBackedUp: false,
-		});
+		// Step 2: Save the pubky to keychain and Redux (new keys only)
+		if (!isReusedPubky) {
+			const saveRes = await savePubky({
+				mnemonic,
+				secretKey: secretKey as string,
+				pubky,
+				dispatch,
+				backupPreference: EBackupPreference.unknown,
+				isBackedUp: false,
+				signupToken: inviteCode,
+			});
 
-		if (saveRes.isErr()) {
-			showErrorState(i18n.t('pubkyErrors.failedToSavePubky'), dispatch);
-			await openXError(xCallback, 'SIGNUP_FAILED', i18n.t('pubkyErrors.failedToSavePubky'));
-			return err(i18n.t('pubkyErrors.failedToSavePubky'));
+			if (saveRes.isErr()) {
+				showErrorState(i18n.t('pubkyErrors.failedToSavePubky'), dispatch);
+				await openXError(xCallback, 'SIGNUP_FAILED', i18n.t('pubkyErrors.failedToSavePubky'));
+				return err(i18n.t('pubkyErrors.failedToSavePubky'));
+			}
 		}
 
 		// Step 3: Sign up to the specified homeserver with invite code
@@ -110,9 +145,6 @@ export const handleSignupAction = async (
 			signupToken: inviteCode,
 			dispatch,
 		});
-
-		const capsString = caps.join(',');
-		const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
 
 
 		if (signupRes.isErr()) {
@@ -128,8 +160,6 @@ export const handleSignupAction = async (
 				await new Promise(resolve => {
 					setTimeout(resolve, SHEET_ANIMATION_DELAY);
 				});
-
-				const authData = { action: InputAction.Auth, params: { relay, secret, caps, xCallback }, rawUrl: authUrl } as const;
 
 				if (signedUpKeys.length === 1) {
 					// Single pubky: auto-forward to auth
@@ -184,11 +214,7 @@ export const handleSignupAction = async (
 		await new Promise(resolve => {setTimeout(resolve, SHEET_ANIMATION_DELAY);});
 
 		await handleAuthAction(
-			{
-				action: InputAction.Auth,
-				params: { relay, secret, caps, xCallback },
-				rawUrl: authUrl,
-			},
+			authData,
 			{
 				...context,
 				pubky,

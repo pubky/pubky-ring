@@ -76,14 +76,6 @@ export const handleSignupAction = async (
 	// Small delay to ensure any previous sheet (e.g., camera) has fully closed
 	await new Promise(resolve => setTimeout(resolve, SHEET_ANIMATION_DELAY));
 
-	// Show loading modal FIRST (don't await - it resolves when sheet closes)
-	// This ensures errors are visible via the modal's error state
-	SheetManager.show('loading', {
-		payload: {
-			modalTitle: i18n.t('loading.modalTitle'),
-		},
-	});
-
 	// If a pubky already exists for this signup token (e.g. user is rescanning the
 	// same onboarding QR after a prior failure), reuse it instead of creating a new key.
 	const existingPubkyKey = getPubkyKeyBySignupTokenFromStore(inviteCode);
@@ -93,13 +85,19 @@ export const handleSignupAction = async (
 		isReusedPubky = true;
 
 		if (existingPubky?.signedUp) {
-			// Already signed up to homeserver — skip signup and forward to auth.
-			await SheetManager.hide('loading');
-			await new Promise(resolve => setTimeout(resolve, SHEET_ANIMATION_DELAY));
+			// Already signed up to homeserver — skip the loading modal and signup and forward to auth.
 			await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
 			return ok(pubky);
 		}
 	}
+
+	// Show loading modal (don't await - it resolves when sheet closes)
+	// This ensures errors are visible via the modal's error state
+	SheetManager.show('loading', {
+		payload: {
+			modalTitle: i18n.t('loading.modalTitle'),
+		},
+	});
 
 	// Step 1: Generate a new keypair only if we don't have an existing match
 	if (!isReusedPubky) {

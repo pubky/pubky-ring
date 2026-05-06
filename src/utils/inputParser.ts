@@ -166,39 +166,59 @@ const isValidInviteCode = (code: string): boolean => {
 };
 
 /**
- * Extracts x-callback-url parameters from a query string.
+ * Extracts x-callback-url parameters from a still-encoded query string.
+ *
+ * Operates on the raw, encoded query so that callback URLs containing inner
+ * '?', '=', or '&' (encoded as %3F, %3D, %26) are captured verbatim and
+ * decoded exactly once. Apps like Bitkit verify a nonce in the callback URL
+ * they originally supplied, so the URL must round-trip byte-for-byte after a
+ * single decode.
+ *
  * Supports legacy `callback` parameter as fallback for `x-success`.
  */
-const extractXCallbackParams = (queryString: string): XCallbackParams | undefined => {
-	try {
-		const params = new URLSearchParams(queryString);
-		const xSuccess = params.get('x-success');
-		const xError = params.get('x-error');
-		const xCancel = params.get('x-cancel');
-		const xSource = params.get('x-source');
-		const legacyCallback = params.get('callback');
+export const extractXCallbackParams = (encodedQueryString: string): XCallbackParams | undefined => {
+	const getRawValue = (key: string): string | undefined => {
+		// Match `key=...` at start, or `?key=...`, or `&key=...`, capturing up to
+		// the next `&` or end of string. Keys are fixed identifiers (letters and
+		// dashes); safe to interpolate without escape.
+		const re = new RegExp(`(?:^|[?&])${key}=([^&]*)`);
+		const m = encodedQueryString.match(re);
+		return m ? m[1] : undefined;
+	};
 
-		const successUrl = xSuccess ? decodeURIComponent(xSuccess) : (legacyCallback ? decodeURIComponent(legacyCallback) : undefined);
+	const safeDecode = (s: string): string => {
+		try { return decodeURIComponent(s); } catch { return s; }
+	};
 
-		if (successUrl || xError || xCancel || xSource) {
-			return {
-				xSuccess: successUrl,
-				xError: xError ? decodeURIComponent(xError) : undefined,
-				xCancel: xCancel ? decodeURIComponent(xCancel) : undefined,
-				xSource: xSource ? decodeURIComponent(xSource) : undefined,
-			};
-		}
-	} catch {
-		// Ignore parsing errors
+	const xSuccessRaw = getRawValue('x-success');
+	const xErrorRaw   = getRawValue('x-error');
+	const xCancelRaw  = getRawValue('x-cancel');
+	const xSourceRaw  = getRawValue('x-source');
+	const callbackRaw = getRawValue('callback');
+
+	const successRaw = xSuccessRaw ?? callbackRaw;
+
+	if (successRaw === undefined && xErrorRaw === undefined && xCancelRaw === undefined && xSourceRaw === undefined) {
+		return undefined;
 	}
-	return undefined;
+
+	return {
+		xSuccess: successRaw  !== undefined ? safeDecode(successRaw)  : undefined,
+		xError:   xErrorRaw   !== undefined ? safeDecode(xErrorRaw)   : undefined,
+		xCancel:  xCancelRaw  !== undefined ? safeDecode(xCancelRaw)  : undefined,
+		xSource:  xSourceRaw  !== undefined ? safeDecode(xSourceRaw)  : undefined,
+	};
 };
 
 /**
  * Parses signup deeplink parameters
  * Format: signup?hs={homeserver}&st={signup_token}&relay={relay_url}&secret={secret}&caps={capabilities}
+ *
+ * `queryString` is the (possibly multi-pass-decoded) query for plain fields;
+ * `encodedQueryString` is the original encoded query used for x-callback
+ * extraction so inner callback URLs are preserved verbatim.
  */
-const parseSignupParams = (queryString: string): SignupParams | null => {
+const parseSignupParams = (queryString: string, encodedQueryString: string): SignupParams | null => {
 	try {
 		const params = new URLSearchParams(queryString);
 		return {
@@ -207,7 +227,7 @@ const parseSignupParams = (queryString: string): SignupParams | null => {
 			relay: decodeURIComponent(params.get('relay') || ''),
 			secret: params.get('secret') || '',
 			caps: (params.get('caps') || '').split(',').filter(Boolean),
-			xCallback: extractXCallbackParams(queryString),
+			xCallback: extractXCallbackParams(encodedQueryString),
 		};
 	} catch {
 		return null;
@@ -219,9 +239,9 @@ const parseSignupParams = (queryString: string): SignupParams | null => {
  * Format: session?x-success={url}&x-error={url}&x-cancel={url}&x-source={name}
  * Legacy: session?callback={callback_url}
  */
-const parseSessionParams = (queryString: string): SessionParams | null => {
+const parseSessionParams = (encodedQueryString: string): SessionParams | null => {
 	try {
-		const xCallback = extractXCallbackParams(queryString);
+		const xCallback = extractXCallbackParams(encodedQueryString);
 		if (!xCallback?.xSuccess) {
 			return null;
 		}
@@ -252,6 +272,13 @@ export const parseInput = async (
 	}
 
 	let processedInput = rawInput.trim();
+
+	// Snapshot of the original (still-encoded) query string. Used only for
+	// x-callback URL extraction so values like `x-cancel=bitkit%3A%2F%2F...`
+	// containing inner '?', '=', or '&' are preserved verbatim and decoded
+	// exactly once.
+	const rawQueryStart = processedInput.indexOf('?');
+	const rawEncodedQuery = rawQueryStart !== -1 ? processedInput.substring(rawQueryStart) : '';
 
 	// Try to decode URL encoding - may need multiple passes for double-encoded URLs
 	let decoded = processedInput;
@@ -325,7 +352,7 @@ export const parseInput = async (
 	// Format: pubkyring://signup?... or pubkyauth://signup?...
 	if (urlWithoutProtocol.startsWith('signup?')) {
 		const queryString = urlWithoutProtocol.substring(7); // Remove "signup?"
-		const signupParams = parseSignupParams(queryString);
+		const signupParams = parseSignupParams(queryString, rawEncodedQuery);
 		if (signupParams?.homeserver && signupParams?.inviteCode) {
 			return {
 				action: InputAction.Signup,
@@ -339,8 +366,7 @@ export const parseInput = async (
 	// 2. Check for session deeplink
 	// Format: pubkyring://session?x-success={url} or pubkyring://session?callback={url}
 	if (urlWithoutProtocol.startsWith('session?')) {
-		const queryString = urlWithoutProtocol.substring(8); // Remove "session?"
-		const sessionParams = parseSessionParams(queryString);
+		const sessionParams = parseSessionParams(rawEncodedQuery);
 		if (sessionParams?.xCallback?.xSuccess) {
 			return {
 				action: InputAction.Session,
@@ -363,11 +389,9 @@ export const parseInput = async (
 	// Format: pubkyauth:///...
 	const authResult = await parseAuthUrl(processedInput);
 	if (authResult.isOk()) {
-		// Extract optional x-callback-url parameters from the auth URL
-		const queryStart = processedInput.indexOf('?');
-		const xCallback = queryStart !== -1
-			? extractXCallbackParams(processedInput.substring(queryStart))
-			: undefined;
+		// Extract optional x-callback-url parameters from the original
+		// (still-encoded) query so inner callback URLs round-trip verbatim.
+		const xCallback = extractXCallbackParams(rawEncodedQuery);
 
 		return {
 			action: InputAction.Auth,
@@ -389,11 +413,9 @@ export const parseInput = async (
 	// 5. Check for invite code in URL
 	const inviteCode = parseInviteCodeFromUrl(processedInput);
 	if (inviteCode) {
-		// Extract x-callback params from invite URL query string if present
-		const inviteQueryStart = processedInput.indexOf('?');
-		const inviteXCallback = inviteQueryStart !== -1
-			? extractXCallbackParams(processedInput.substring(inviteQueryStart))
-			: undefined;
+		// Extract x-callback params from the original encoded query so inner
+		// callback URLs round-trip verbatim.
+		const inviteXCallback = extractXCallbackParams(rawEncodedQuery);
 		return {
 			action: InputAction.Invite,
 			data: { action: InputAction.Invite, params: { inviteCode, xCallback: inviteXCallback } },

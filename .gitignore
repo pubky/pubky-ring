@@ -36,6 +36,9 @@ local.properties
 .kotlin/
 android/app/release/
 
+# VSCode
+.vscode/
+
 # node.js
 #
 **/node_modules/

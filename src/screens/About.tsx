@@ -1,29 +1,19 @@
-import React, { memo, ReactElement, useMemo } from 'react';
+import React, { memo, ReactElement } from 'react';
 import { Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { RootStackParamList } from '../navigation/types';
-import {
-	View,
-	Text,
-	NavButton,
-	ArrowLeft,
-	ArrowRight,
-	CardView,
-	ScrollView,
-} from '../theme/components.ts';
-import PubkyRingHeader from '../components/PubkyRingHeader';
+import { View, Text, ArrowRight, ScrollView } from '../theme/components.ts';
+import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import { version } from '../../package.json';
 // @ts-ignore
 import PubkyRingLogo from '../images/pubky-app-logo.png';
 import BrandEndoresment from '../images/brand-endorsement.png';
-import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
+import { ACCENTS, PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../theme/utils.ts';
+import SafeAreaInset from '../components/SafeAreaInset.tsx';
 
-type Props = NativeStackScreenProps<RootStackParamList, 'EditPubky'>;
-
-const About = ({ navigation }: Props): ReactElement => {
+const About = (): ReactElement => {
 	const { t } = useTranslation();
 
 	const onFooterPress = (): void => {
@@ -56,79 +46,63 @@ const About = ({ navigation }: Props): ReactElement => {
 			description: `${t('about.version')}: ${version}`,
 		});
 	};
-	const LeftButton = useMemo(() => (
-		<NavButton
-			style={styles.navButton}
-			onPressIn={navigation.goBack}
-			hitSlop={{ top: 20,
-				bottom: 20,
-				left: 20,
-				right: 20 }}
-		>
-			<ArrowLeft size={24} />
-		</NavButton>
-	), [navigation]);
-
-	const RightButton = useMemo(() => (
-		<NavButton style={styles.rightNavButton} />
-	),[]);
-
 	return (
 		<View style={styles.container}>
-			<PubkyRingHeader
-				leftButton={LeftButton}
-				rightButton={RightButton}
-			/>
+			<AppHeader />
 
-			<ScrollView style={styles.content}>
+			<ScrollView
+				contentContainerStyle={styles.scrollContent}
+				showsVerticalScrollIndicator={false}
+			>
 				<Text style={styles.title}>{t('about.keychainFor')}</Text>
 				<Text style={styles.lowerTitle}>{t('about.theNextWeb')}</Text>
 				<Text style={styles.subtitle}>{t('about.description')}</Text>
 				<Text style={styles.subtitle}>{t('about.craftedBy')}</Text>
 
-				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
+				<TouchableOpacity
+					activeOpacity={0.8}
+					onPress={onLegalPress}
+					style={styles.row}
+				>
 					<Text style={styles.rowTitle}>{t('about.legal')}</Text>
 					<ArrowRight />
 				</TouchableOpacity>
 
-				<CardView style={styles.divider} />
-
-				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
+				<TouchableOpacity
+					activeOpacity={0.8}
+					onPress={onSharePress}
+					style={styles.row}
+				>
 					<Text style={styles.rowTitle}>{t('common.share')}</Text>
 					<ArrowRight />
 				</TouchableOpacity>
 
-				<CardView style={styles.divider} />
-
-				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
+				<TouchableOpacity
+					activeOpacity={0.8}
+					onPress={onCopyPress}
+					style={styles.row}
+				>
 					<Text style={styles.rowTitle}>{t('about.version')}</Text>
-					<Text style={styles.rowTitle}>{version}</Text>
+					<Text style={styles.rowValue}>{version}</Text>
 				</TouchableOpacity>
 
-				<CardView style={styles.divider} />
+				<Image source={BrandEndoresment} style={styles.brandLogo} />
 
-				<Image
-					source={BrandEndoresment}
-					style={styles.brandLogo}
-				/>
-
-				<TouchableOpacity activeOpacity={0.8} onPress={onFooterPress}>
-					<View style={styles.footer}>
-						<View style={styles.footerContent}>
-							<View style={styles.row}>
-								<View style={styles.logo}>
-									<Image
-										source={PubkyRingLogo}
-										style={styles.pubkyLogo}
-									/>
-									<Text style={styles.footerText}>{t('about.joinWithPubkyRing')}</Text>
-								</View>
-								<ArrowRight />
-							</View>
-						</View>
+				<TouchableOpacity
+					style={styles.footer}
+					activeOpacity={0.8}
+					onPress={onFooterPress}
+				>
+					<View style={styles.logo}>
+						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
+						<Text style={styles.footerText}>
+							{t('about.joinWithPubkyRing')}
+						</Text>
 					</View>
+					<ArrowRight />
 				</TouchableOpacity>
 
+				<SafeAreaInset edge="bottom" />
 			</ScrollView>
 		</View>
 	);
@@ -137,38 +111,32 @@ const About = ({ navigation }: Props): ReactElement => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
+		paddingHorizontal: 24,
 	},
-	content: {
-		padding: 16,
+	scrollContent: {
+		flexGrow: 1,
+		paddingTop: HEADER_HEIGHT + 24,
+		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 48,
-		fontWeight: 700,
-		lineHeight: 48,
-		textAlign: 'left',
+		...textStyles.display,
 	},
 	lowerTitle: {
-		fontSize: 48,
-		fontWeight: 700,
-		lineHeight: 48,
-		textAlign: 'left',
-		marginBottom: 16,
+		...textStyles.display,
+		marginBottom: 8,
 	},
 	subtitle: {
-		fontSize: 17,
-		fontWeight: 400,
-		lineHeight: 22,
-		letterSpacing: 0.4,
-		marginBottom: 16,
-		opacity: 0.8,
+		...textStyles.bodyM,
+		marginBottom: 24,
 	},
 	row: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		width: '100%',
-		height: 60,
+		height: 51,
 		backgroundColor: 'transparent',
+		borderBottomWidth: 1,
+		borderBottomColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	logo: {
 		backgroundColor: 'transparent',
@@ -179,13 +147,20 @@ const styles = StyleSheet.create({
 		lineHeight: 22,
 		letterSpacing: 0.4,
 	},
-	divider: {
-		height: 1,
-		width: '100%',
-		marginVertical: 5,
+	rowValue: {
+		fontSize: 17,
+		fontWeight: 400,
+		lineHeight: 22,
+		letterSpacing: 0.4,
+		color: 'rgba(255, 255, 255, 0.5)',
 	},
 	footer: {
-		marginTop: 40,
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		marginTop: 'auto',
+		marginHorizontal: 24,
+		padding: 24,
 		borderRadius: 16,
 		alignSelf: 'center',
 		shadowColor: '#000',
@@ -196,54 +171,29 @@ const styles = StyleSheet.create({
 		shadowOpacity: 0.1,
 		shadowRadius: 2,
 		elevation: 2,
-		marginBottom: 20,
-		marginHorizontal: 24,
 		width: '100%',
-		backgroundColor: 'rgba(200, 255, 0, 0.1)',
-		paddingTop: 5,
-		paddingBottom: 10,
-		paddingHorizontal: 5,
-	},
-	footerContent: {
-		margin: 25,
-		backgroundColor: 'transparent',
+		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	footerText: {
 		fontSize: 17,
 		fontWeight: '600',
 		lineHeight: 22,
-		color: 'rgba(200, 255, 0, 1)',
-		marginTop: 10
+		color: ACCENTS.pubkyApp,
+		marginTop: 12,
 	},
 	pubkyLogo: {
-		height: 40,
+		height: 36,
+		width: 110,
 		resizeMode: 'contain',
 		backgroundColor: 'transparent',
-		left: -47,
 	},
 	brandLogo: {
-		height: 30,
-		width: 250,
+		height: 24,
+		width: 214,
 		alignSelf: 'flex-start',
 		resizeMode: 'contain',
-		marginTop: 10,
 		backgroundColor: 'transparent',
-	},
-	rightNavButton: {
-		width: 40,
-		height: 40,
-		justifyContent: 'center',
-		alignItems: 'center',
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
-	},
-	navButton: {
-		zIndex: 1,
-		height: 40,
-		width: 40,
-		alignSelf: 'center',
-		alignItems: 'center',
-		justifyContent: 'center',
+		marginVertical: 24,
 	},
 });
 

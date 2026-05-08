@@ -1,3 +1,10 @@
+// Accent colors
+
+export const ACCENTS = {
+    pubkyRing: '#0085FF',
+    pubkyApp: '#C8FF00',
+};
+
 // Gradient definitions
 
 export const BLUE_RADIAL_GRADIENT = ['#041426', '#041426', '#051322', '#040F1C', '#020B13', '#01060A' ];

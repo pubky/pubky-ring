@@ -112,9 +112,7 @@ export const TouchableOpacity = styled.TouchableOpacity<{ theme: Theme }>`
   background-color: ${(props): string => props.theme.colors.background};
 `;
 
-export const NavButton = styled.TouchableOpacity<{ theme: Theme }>`
-  background-color: ${(props): string => props.theme.colors.background};
-`;
+export const NavButton = styled.TouchableOpacity<{ theme: Theme }>``;
 
 export const NavView = styled.View<{ theme: Theme }>`
   background-color: ${(props): string => props.theme.colors.navButton};
@@ -217,7 +215,11 @@ export const ArrowRight = styled(_ChevronRight).attrs({ strokeWidth: ICON_STROKE
   color: ${(props): string => props.theme.colors.sessionText};
 `;
 
-export const Plus = styled(_Plus).attrs({ strokeWidth: ICON_STROKE_WIDTH })<{ theme: Theme }>`
+export const Plus = styled(_Plus).attrs<{ strokeWidth?: number }>(
+  ({ strokeWidth }) => ({
+    strokeWidth: strokeWidth ?? ICON_STROKE_WIDTH,
+  }),
+)<{ theme: Theme }>`
   color: ${(props): string => props.theme.colors.text};
 `;
 

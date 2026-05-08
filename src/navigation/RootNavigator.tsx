@@ -3,11 +3,9 @@ import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import PubkyDetailScreen from '../screens/PubkyDetailScreen';
-import EditPubkyScreen from '../screens/EditPubkyScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import { useTheme } from 'styled-components';
 import { RootStackParamList } from './types';
-import ConfirmPubkyScreen from '../screens/ConfirmPubky';
 import { useSelector } from 'react-redux';
 import {
 	getNavigationAnimation,
@@ -60,14 +58,6 @@ const RootNavigator = (): ReactElement => {
 					}}
 				/>
 				<Stack.Screen
-					name="ConfirmPubky"
-					component={ConfirmPubkyScreen}
-					options={{
-						title: t('screenTitles.confirmPubky'),
-						gestureEnabled: false,
-					}}
-				/>
-				<Stack.Screen
 					name="Home"
 					component={HomeScreen}
 					options={{
@@ -97,14 +87,6 @@ const RootNavigator = (): ReactElement => {
 					component={PubkyDetailScreen}
 					options={{
 						title: t('screenTitles.pubkyDetail'),
-						gestureEnabled: true,
-					}}
-				/>
-				<Stack.Screen
-					name="EditPubky"
-					component={EditPubkyScreen}
-					options={{
-						title: t('screenTitles.editPubky'),
 						gestureEnabled: true,
 					}}
 				/>

@@ -8,7 +8,7 @@ import { Linking, useColorScheme } from 'react-native';
 import { ETheme } from './src/types/settings.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsOnline, getTheme } from './src/store/selectors/settingsSelectors.ts';
-import { SafeAreaView } from './src/theme/components.ts';
+import SafeAreaView from './src/components/SafeAreaView.tsx';
 import Toast from 'react-native-toast-message';
 import { toastConfig } from './src/theme/toastConfig.tsx';
 import NetInfo from '@react-native-community/netinfo';
@@ -119,7 +119,7 @@ function App(): React.JSX.Element {
 	return (
 		<ThemeProvider theme={theme}>
 			<SafeAreaProvider>
-				<SafeAreaView>
+				<SafeAreaView edges={['top', 'left', 'right']}>
 					<SheetProvider>
 						<RootNavigator />
 						<Toast config={_toastConfig} />

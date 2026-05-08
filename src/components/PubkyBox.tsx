@@ -174,7 +174,7 @@ const PubkyBox = ({
 				>
 					<ForegroundView style={styles.profileImageContainer}>
 						<NavView style={styles.profileImage}>
-							<ProfileAvatar pubky={publicKey} size={38} />
+							<ProfileAvatar pubky={publicKey} size={48} />
 						</NavView>
 					</ForegroundView>
 
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	profileImageContainer: {
-		marginRight: 12,
+		marginRight: 16,
 		backgroundColor: 'transparent',
 	},
 	profileImage: {
@@ -274,7 +274,6 @@ const styles = StyleSheet.create({
 	},
 	actionButton: {
 		...buttonStyles.secondary,
-		display: 'flex',
 		flexDirection: 'row',
 		justifyContent: 'center',
 		gap: 8,

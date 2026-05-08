@@ -10,6 +10,7 @@ import { View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useTypedNavigation } from '../../navigation/hooks';
 import i18n from '../../i18n';
+import { HEADER_HEIGHT } from '../AppHeader.tsx';
 
 export interface PubkyDetailProps {
 	index: number;
@@ -99,7 +100,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	scrollContent: {
-		paddingBottom: 24,
+		paddingTop: HEADER_HEIGHT + 24,
 	},
 });
 

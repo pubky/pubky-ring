@@ -7,7 +7,6 @@ export interface PubkyData extends Pubky {
 export type RootStackParamList = {
   TermsOfUse?: undefined;
   Onboarding: undefined;
-  ConfirmPubky: undefined;
   Home: undefined;
   About: undefined;
   Settings: {
@@ -16,8 +15,5 @@ export type RootStackParamList = {
   PubkyDetail: {
     pubky: string;
     index: number;
-  };
-  EditPubky: {
-    pubkyData: PubkyData;
   };
 };

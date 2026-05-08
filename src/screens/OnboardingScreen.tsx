@@ -1,28 +1,25 @@
 import React, { ReactElement, Suspense } from 'react';
-import {
-	View,
-	StyleSheet,
-} from 'react-native';
+import { StyleSheet } from 'react-native';
 import LoadingScreen from './LoadingScreen.tsx';
+import SafeAreaView from '../components/SafeAreaView.tsx';
+
 const OnboardingContent = React.lazy(() =>
-	Promise.resolve(require('../components/OnboardingContent'))
+	Promise.resolve(require('../components/OnboardingContent')),
 );
 
 const OnboardingScreen = (): ReactElement => {
 	return (
-		<View style={styles.container}>
+		<SafeAreaView style={styles.container} edges={['bottom']}>
 			<Suspense fallback={<LoadingScreen />}>
 				<OnboardingContent />
 			</Suspense>
-		</View>
+		</SafeAreaView>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: 'black',
-		alignItems: 'center',
 	},
 });
 

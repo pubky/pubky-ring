@@ -5,15 +5,13 @@ import { RootStackParamList } from '../navigation/types';
 import {
 	View,
 	Text,
-	NavButton,
 	Card,
 	ActionButton,
 	SessionText,
-	ArrowLeft,
 	QrCode,
 	Scan,
 } from '../theme/components.ts';
-import PubkyRingHeader from '../components/PubkyRingHeader';
+import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
@@ -33,6 +31,7 @@ import { SheetManager } from 'react-native-actions-sheet';
 import { useInputHandler } from '../hooks/useInputHandler.ts';
 import { buttonStyles } from '../theme/utils.ts';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
+import SafeAreaView from '../components/SafeAreaView.tsx';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -48,31 +47,17 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const { showScanner } = useInputHandler({});
 
-	const leftButton = useCallback(() => (
-		<NavButton
-			style={styles.navButton}
-			onPressIn={navigation.goBack}
-			hitSlop={{ top: 20,
-				bottom: 20,
-				left: 20,
-				right: 20 }}
-		>
-			<ArrowLeft size={24} />
-		</NavButton>
-	), [navigation]);
-
-	const rightButton = useCallback(() => (
-		<NavButton style={styles.rightNavButton} />
-	),[]);
-
-	const getThemeDisplayText = useCallback((theme: ETheme) => {
-		const themeText = {
-			[ETheme.system]: t('settings.theme.system'),
-			[ETheme.light]: t('settings.theme.light'),
-			[ETheme.dark]: t('settings.theme.dark'),
-		};
-		return themeText[theme] || t('settings.theme.system');
-	}, [t]);
+	const getThemeDisplayText = useCallback(
+		(theme: ETheme) => {
+			const themeText = {
+				[ETheme.system]: t('settings.theme.system'),
+				[ETheme.light]: t('settings.theme.light'),
+				[ETheme.dark]: t('settings.theme.dark'),
+			};
+			return themeText[theme] || t('settings.theme.system');
+		},
+		[t],
+	);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
 	const themeDisplayText = useMemo(() => getThemeDisplayText(currentTheme), [currentTheme, getThemeDisplayText]);
@@ -133,7 +118,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					},
 					style: 'destructive',
 				},
-			]
+			],
 		);
 	}, [dispatch, navigation, t]);
 
@@ -177,8 +162,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	}, [showScanner, t, navigation]);
 
 	return (
-		<View style={styles.container}>
-			<PubkyRingHeader leftButton={leftButton()} rightButton={rightButton()} />
+		<SafeAreaView style={styles.container} edges={['bottom']}>
+			<AppHeader title={t('screenTitles.settings')} />
 
 			<View style={styles.content}>
 				{/**
@@ -194,7 +179,9 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
                  **/}
 
 				<Card style={styles.textSection}>
-					<Text style={styles.textSettingTitle}>{t('settings.migrateToOtherDevice')}</Text>
+					<Text style={styles.textSettingTitle}>
+						{t('settings.migrateToOtherDevice')}
+					</Text>
 					<Text style={styles.textSettingValue}>
 						{t('settings.migrateDescription')}
 					</Text>
@@ -225,12 +212,15 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							onPress={handleNavigationAnimationPress}
 							style={styles.navigationAnimationButton}
 						>
-							<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
+							<Text style={styles.settingTitle}>
+								{t('settings.navigationAnimation')}
+							</Text>
 							<SessionText style={styles.themeValue}>
 								{navigationAnimationText}
 							</SessionText>
 						</ActionButton>
-					</Card>)}
+					</Card>
+				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
@@ -246,7 +236,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 								/>
 							</View>
 						</ActionButton>
-					</Card>)}
+					</Card>
+				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
@@ -254,7 +245,9 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							onPress={handleShowOnboarding}
 							style={styles.navigationAnimationButton}
 						>
-							<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
+							<Text style={styles.settingTitle}>
+								{t('settings.showOnboarding')}
+							</Text>
 						</ActionButton>
 					</Card>
 				)}
@@ -265,7 +258,9 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							onPress={handleWipePubkyRing}
 							style={styles.navigationAnimationButton}
 						>
-							<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
+							<Text style={styles.settingTitle}>
+								{t('settings.wipePubkyRing')}
+							</Text>
 						</ActionButton>
 					</Card>
 				)}
@@ -282,7 +277,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				</Card>
 				*/}
 			</View>
-		</View>
+		</SafeAreaView>
 	);
 };
 
@@ -291,33 +286,15 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	content: {
-		padding: 16,
-	},
-	rightNavButton: {
-		width: 40,
-		height: 40,
-		justifyContent: 'center',
-		alignItems: 'center',
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
-	},
-	navButton: {
-		zIndex: 1,
-		height: 40,
-		width: 40,
-		alignSelf: 'center',
-		alignItems: 'center',
-		justifyContent: 'center',
+		paddingTop: HEADER_HEIGHT + 24,
+		paddingHorizontal: 24,
 	},
 	textSection: {
-		marginBottom: 16,
-		borderRadius: 16,
-		overflow: 'hidden',
-		padding: 16,
+		marginBottom: 12,
 		backgroundColor: 'transparent',
 	},
 	section: {
-		marginBottom: 16,
+		marginBottom: 12,
 		borderRadius: 16,
 		overflow: 'hidden',
 	},

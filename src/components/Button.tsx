@@ -19,7 +19,7 @@ const Button = ({
 	activeOpacity = 0.7,
 	disabled = false,
 }: {
-	  testID?: string;
+	testID?: string;
     text: string;
     loading?: boolean;
     onPress?: () => void;
@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 15,
 		alignContent: 'center',
 		justifyContent: 'center',
-		gap: 8,
+		gap: 6,
 	},
 	disabled: {
 		opacity: 0.5,
@@ -79,7 +79,6 @@ const styles = StyleSheet.create({
 		fontSize: 15,
 		fontWeight: 600,
 		lineHeight: 18,
-		letterSpacing: 0.2,
 		alignSelf: 'center',
 	},
 });

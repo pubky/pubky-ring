@@ -4,7 +4,7 @@ import React, {
 	useCallback,
 	useMemo,
 } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
@@ -12,7 +12,6 @@ import { Pubky, TPubkys } from '../types/pubky';
 import {
 	View,
 	Plus,
-	Scan,
 } from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
@@ -23,15 +22,17 @@ import {
 } from '../store/selectors/pubkySelectors.ts';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
-import { useInputHandler } from '../hooks/useInputHandler';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
-import AppHeader from '../components/AppHeader';
+import HomeHeader from '../components/HomeHeader';
 import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
+import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
+import SafeAreaView from '../components/SafeAreaView.tsx';
+import SafeAreaInset from '../components/SafeAreaInset.tsx';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
-const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'] as const;
+const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
 const GRADIENT_START = { x: 0, y: 0 };
 const GRADIENT_END = { x: 0, y: 1 };
 
@@ -60,15 +61,12 @@ const PubkyItem = memo(({
 	</ScaleDecorator>
 ));
 
-const ListHeader = memo(() => <AppHeader />);
-
 interface ListFooterProps {
 	createPubky: () => void;
 	importPubky: (mnemonic?: string) => Promise<any>;
-	onShowQRPress: () => void;
 }
 
-const ListFooter = memo(({ createPubky, importPubky, onShowQRPress }: ListFooterProps) => {
+const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 	const { t } = useTranslation();
 
 	const onAddPubkyPress = useCallback(() => {
@@ -82,69 +80,72 @@ const ListFooter = memo(({ createPubky, importPubky, onShowQRPress }: ListFooter
 				style={styles.listFooterButton}
 				text={t('home.addPubky')}
 				onPress={onAddPubkyPress}
-				icon={<Plus size={16} />}
-			/>
-			<Button
-				testID="ShowQRButton"
-				style={styles.scanQRButton}
-				text={t('home.scanQR')}
-				onPress={onShowQRPress}
-				icon={<Scan size={16} />}
+				icon={<Plus size={24} strokeWidth={1.5} />}
 			/>
 		</View>
 	);
 });
 
 const HomeScreen = (): ReactElement => {
-	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
-	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
+	const pubkysProcessing = useSelector(
+		(state: RootState) => state.pubky.processing,
+		shallowEqual,
+	);
 
 	const { createPubky, importPubky } = usePubkyManagement();
-	const { showScanner } = useInputHandler();
 	useDeepLinkHandler(createPubky, importPubky);
 
-	// HomeScreen scanner - no filter, allows all actions
-	const onShowQRPress = useCallback(() => {
-		showScanner({ title: t('home.scanQR') });
-	}, [showScanner, t]);
+	const handleDragEnd = useCallback(
+		({ data }: { data: { key: string; value: Pubky }[] }) => {
+			if (!data) {
+				return;
+			}
+			const newPubkys: TPubkys = {};
+			data.forEach(({ key, value }) => {
+				newPubkys[key] = value;
+			});
+			dispatch(reorderPubkys(newPubkys));
+		},
+		[dispatch],
+	);
 
-	const handleDragEnd = useCallback(({ data }: { data: { key: string; value: Pubky }[] }) => {
-		if (!data) {return;}
-		const newPubkys: TPubkys = {};
-		data.forEach(({ key, value }) => {
-			newPubkys[key] = value;
-		});
-		dispatch(reorderPubkys(newPubkys));
-	}, [dispatch]);
+	const renderItem = useCallback(
+		({
+			item,
+			drag,
+			getIndex,
+			isActive,
+		}: RenderItemParams<{ key: string; value: Pubky }>) => {
+			const index = getIndex() ?? 0;
+			return (
+				<PubkyItem
+					item={item}
+					drag={drag}
+					isActive={isActive}
+					index={index}
+					loading={pubkysProcessing[item.key]}
+				/>
+			);
+		},
+		[pubkysProcessing],
+	);
 
-	const renderItem = useCallback(({
-		item,
-		drag,
-		getIndex,
-		isActive,
-	}: RenderItemParams<{ key: string; value: Pubky }>) => {
-		const index = getIndex() ?? 0;
-		return (
-			<PubkyItem
-				item={item}
-				drag={drag}
-				isActive={isActive}
-				index={index}
-				loading={pubkysProcessing[item.key]}
-			/>
-		);
-	}, [pubkysProcessing]);
+	const getItemLayout = useCallback(
+		(data: any, index: number) => ({
+			length: 172,
+			offset: 172 * index,
+			index,
+		}),
+		[],
+	);
 
-	const getItemLayout = useCallback((data: any, index: number) => ({
-		length: 172,
-		offset: 172 * index,
-		index,
-	}), []);
-
-	const keyExtractor = useCallback((item: { key: string; value: Pubky }, index: number) =>
-		`${item.key}-${index}`, []);
+	const keyExtractor = useCallback(
+		(item: { key: string; value: Pubky }, index: number) =>
+			`${item.key}-${index}`,
+		[],
+	);
 
 	const hasPubkys = useMemo(() => {
 		return pubkyArray.length > 0;
@@ -152,68 +153,63 @@ const HomeScreen = (): ReactElement => {
 
 	if (!hasPubkys) {
 		return (
-			<View style={styles.emptyContainer}>
-				<AppHeader />
+			<SafeAreaView style={styles.container} edges={['bottom']}>
+				<HomeHeader />
 				<EmptyState />
 				<View style={styles.emptyFooterContainer}>
-					<ListFooter createPubky={createPubky} importPubky={importPubky} onShowQRPress={onShowQRPress} />
+					<ListFooter createPubky={createPubky} importPubky={importPubky} />
 				</View>
-			</View>
+			</SafeAreaView>
 		);
 	}
 
 	return (
-		<View style={styles.listContainer}>
+		<View style={styles.container}>
+			<HomeHeader />
 			<DraggableFlatList
 				data={pubkyArray}
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
-				ListHeaderComponent={<ListHeader />}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 				getItemLayout={getItemLayout}
 			/>
-			{/* Fade overlay */}
-			<LinearGradient
-				style={styles.fadeOverlay}
-				colors={FADE_GRADIENT_COLORS}
-				start={GRADIENT_START}
-				end={GRADIENT_END}
-				pointerEvents="none"
-			/>
 			{/* Fixed footer */}
 			<View style={styles.fixedFooterContainer}>
-				<ListFooter createPubky={createPubky} importPubky={importPubky} onShowQRPress={onShowQRPress} />
+				<LinearGradient
+					style={styles.fadeOverlay}
+					colors={FADE_GRADIENT_COLORS}
+					start={GRADIENT_START}
+					end={GRADIENT_END}
+					pointerEvents="none"
+				/>
+				<ListFooter createPubky={createPubky} importPubky={importPubky} />
+				<SafeAreaInset edge="bottom" />
 			</View>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
-	emptyContainer: {
+	container: {
 		flex: 1,
 		backgroundColor: 'transparent',
 	},
 	emptyFooterContainer: {
-		paddingBottom: Platform.select({ ios: 24, android: 24 }),
-		backgroundColor: 'transparent',
-	},
-	listContainer: {
-		flex: 1,
-		position: 'relative',
 		backgroundColor: 'transparent',
 	},
 	listContent: {
+		paddingTop: HEADER_HEIGHT + 24,
 		paddingBottom: 180,
 	},
 	fadeOverlay: {
 		position: 'absolute',
-		bottom: 100,
+		top: -100,
 		left: 0,
 		right: 0,
-		height: 80,
+		height: 100,
 		zIndex: 1,
 	},
 	fixedFooterContainer: {
@@ -223,26 +219,20 @@ const styles = StyleSheet.create({
 		right: 0,
 		backgroundColor: '#000000',
 		paddingTop: 16,
-		paddingBottom: Platform.select({ ios: 24, android: 24 }),
 		zIndex: 2,
 	},
 	listFooterContainer: {
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		gap: 12,
-		paddingHorizontal: 20,
+		gap: 16,
+		paddingHorizontal: 24,
 		backgroundColor: 'transparent',
 	},
 	listFooterButton: {
 		...buttonStyles.primary,
 		flex: 1,
 	},
-	scanQRButton: {
-		...buttonStyles.primary,
-		borderWidth: 1,
-		flex: 1,
-	}
 });
 
 export default memo(HomeScreen);

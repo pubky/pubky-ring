@@ -56,7 +56,6 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>InterTight-VariableFont_wght.ttf</string>
-		<string>InterTight-Italic-VariableFont_wght.ttf</string>
 	</array>
 	<key>UIFileSharingEnabled</key>
 	<true/>

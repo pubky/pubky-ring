@@ -16,7 +16,7 @@ describe('create a pubky with a custom homeserver (stag) with valid invite code'
 		const pubkyName = 'Staging Test Pubky';
 
 		// Tap 'Add pubky' button on Home page
-		(await waitForDisplayed(elementById('EmptyStateAddPubkyButton'))).click();
+		(await waitForDisplayed(elementById('AddPubkyButton'))).click();
 
 		// Tap 'New pubky' on Add Pubky page button
 		(await waitForDisplayed(elementById('NewPubkyButton'))).click();
@@ -56,9 +56,12 @@ describe('create a pubky with a custom homeserver (stag) with valid invite code'
 		await homeserverInput.clearValue();
 		await driver.sendKeys([stagingHomeserver]);
 		expect(await elementById('EditPubkyHomeserverInput').getText()).to.equal(stagingHomeserver);
+		await dismissKeyboard(elementById('EditPubkyTitle'));
 
 		// Tap 'Save' button on Edit Pubky page
-		(await waitForDisplayed(elementById('EditPubkySaveButton'))).click();
+		const saveButton = await waitForDisplayed(elementById('EditPubkySaveButton'));
+		expect(await saveButton.isEnabled()).to.be.true;
+		await saveButton.click();
 
 		// Assert successful homeserver signup
 		const successImage = await waitForDisplayed(elementById('EditPubkySuccessCheckMarkImage'), 120_000);

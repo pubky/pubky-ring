@@ -28,7 +28,7 @@ export async function completeOnboardingFlow(): Promise<void> {
 	(await waitForDisplayed(elementById('OnboardingGetStartedButton'))).click();
 
 	// Wait for home page's add pubky button to be displayed
-	await waitForDisplayed(elementById('EmptyStateAddPubkyButton'));
+	await waitForDisplayed(elementById('AddPubkyButton'));
 }
 
 export async function waitForKeyboardToBeShown(): Promise<boolean> {

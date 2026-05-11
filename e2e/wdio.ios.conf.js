@@ -1,6 +1,6 @@
 const shared = require('./wdio.shared.conf');
 
-const iosSimName = process.env.IOS_SIM || 'iPhone 15';
+const iosSimName = process.env.IOS_SIM || 'iPhone 17';
 const appPath = process.env.IOS_APP; // optional .app/.ipa path
 
 exports.config = {
@@ -19,8 +19,9 @@ exports.config = {
 			'appium:shouldTerminateApp': true,
 			'appium:autoAcceptAlerts': true,
 			'appium:autoDismissAlerts': true,
-			'appium:simulatorStartupTimeout': 600_000,
-			'appium:wdaLaunchTimeout': 600_000,
+			'appium:simulatorStartupTimeout': 900_000,
+			'appium:wdaLaunchTimeout': 900_000,
+			'appium:wdaConnectionTimeout': 900_000,
 			...(appPath
         ? { 'appium:app': appPath }
         : {

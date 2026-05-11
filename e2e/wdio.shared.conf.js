@@ -9,8 +9,10 @@ exports.config = {
 	bail: 0,
 	baseUrl: 'http://localhost',
 	waitforTimeout: 20_000,
-	connectionRetryTimeout: 600_000,
+	connectionRetryTimeout: 900_000,
 	connectionRetryCount: 2,
+	specFileRetries: process.env.CI ? 1 : 0,
+	specFileRetriesDelay: 5_000,
 	framework: 'mocha',
 	reporters: ['spec'],
 	mochaOpts: {

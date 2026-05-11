@@ -170,5 +170,5 @@ AVD=Pixel_6_API_34 yarn e2e:android
 IOS_APP=/absolute/path/pubkyring.app yarn e2e:ios
 
 # iOS (attach to installed app on a simulator)
-IOS_SIM="iPhone 15" yarn e2e:ios
+IOS_SIM="iPhone 17" yarn e2e:ios
 ```

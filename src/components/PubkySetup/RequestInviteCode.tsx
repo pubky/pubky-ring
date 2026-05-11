@@ -23,6 +23,7 @@ import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 import XLogo from '../XLogo.tsx';
 import { INVITE_CODE_GRADIENT } from '../../utils/constants.ts';
+import { textStyles } from '../../theme/utils';
 
 const RequestInviteCode = ({ payload }: {
 	payload: {
@@ -142,24 +143,19 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
 		flex: 1,
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
+		...textStyles.display,
 		marginTop: 24,
-		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		marginTop: 24,
 		color: 'rgba(255, 255, 255, 0.8)',
 		backgroundColor: 'transparent',

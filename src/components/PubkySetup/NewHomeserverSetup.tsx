@@ -23,6 +23,7 @@ import {
 } from '../../utils/constants.ts';
 import { showEditPubkySheet } from "../../utils/sheetHelpers.ts";
 import { defaultPubkyState } from "../../store/shapes/pubky.ts";
+import { textStyles } from '../../theme/utils';
 
 export enum HomeserverOption {
 	default = 'default',
@@ -166,25 +167,19 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
-		letterSpacing: 0,
+		...textStyles.display,
 		marginBottom: 16,
-		fontWeight: '700',
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 24,
+		...textStyles.bodyM,
 		marginBottom: 30,
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
@@ -195,10 +190,7 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	optionLabel: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.caption,
 		color: '#FFFFFF',
 		opacity: 0.6,
 		marginBottom: 12,
@@ -231,17 +223,11 @@ const styles = StyleSheet.create({
 		backgroundColor: '#FFFFFF',
 	},
 	optionText: {
-		fontSize: 15,
-		lineHeight: 20,
-		letterSpacing: 0.4,
-		fontWeight: '600',
+		...textStyles.bodySSB,
 		color: '#FFFFFF',
 	},
 	optionSubtext: {
-		fontSize: 15,
-		lineHeight: 20,
-		letterSpacing: 0.4,
-		fontWeight: '400',
+		...textStyles.bodySSpaced,
 		opacity: 0.6,
 	},
 	bottomSection: {
@@ -273,10 +259,7 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 		color: '#FFFFFF',
 	},
 });

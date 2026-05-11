@@ -57,7 +57,7 @@ const ModalButton: React.FC<ModalButtonProps> = ({
 				disabled && styles.disabled,
 				style,
 			]}
-			textStyle={[styles.buttonText, textStyle]}
+			textStyle={textStyle}
 		/>
 	);
 };
@@ -73,10 +73,6 @@ const styles = StyleSheet.create({
 	},
 	fullWidth: {
 		width: '100%',
-	},
-	buttonText: {
-		...textStyles.button,
-		fontSize: 17,
 	},
 	disabled: {
 		opacity: 0.7,

@@ -2,6 +2,7 @@ import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
+import { textStyles } from '../../theme/utils';
 import {
 	SessionView,
 	Text,
@@ -93,9 +94,8 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	signOutText: {
-		fontSize: 14,
+		...textStyles.captionSBSpaced,
 		color: '#ff4444',
-		fontWeight: '500',
 	},
 	headerRow: {
 		flexDirection: 'row',
@@ -108,20 +108,18 @@ const styles = StyleSheet.create({
 		marginRight: 12,
 	},
 	pubkyText: {
-		fontSize: 14,
-		fontFamily: 'monospace',
+		...textStyles.bodySSB,
 		marginBottom: 4,
 	},
 	dateText: {
-		fontSize: 12,
+		...textStyles.bodyS,
 		fontStyle: 'italic',
 	},
 	capsContainer: {
 		marginTop: 8,
 	},
 	capsTitle: {
-		fontSize: 14,
-		fontWeight: '500',
+		...textStyles.captionSBSpaced,
 		marginBottom: 8,
 	},
 	capsWrapper: {
@@ -136,7 +134,7 @@ const styles = StyleSheet.create({
 		paddingVertical: 6,
 	},
 	capText: {
-		fontSize: 12,
+		...textStyles.bodyS,
 		color: '#666',
 	},
 });

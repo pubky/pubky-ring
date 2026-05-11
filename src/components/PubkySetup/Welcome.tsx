@@ -24,6 +24,7 @@ import PubkyRingLogo from "../../images/pubky-app-logo.png";
 import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../../theme/utils';
 
 const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
 
@@ -142,26 +143,21 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		backgroundColor: 'transparent',
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
+		...textStyles.display,
 		marginBottom: 16,
-		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		backgroundColor: 'transparent',
 	},
 	pubkyText: {
-		fontWeight: '600',
+		...textStyles.bodyMSB,
 		backgroundColor: 'transparent',
 	},
 	tagContainer: {
@@ -186,10 +182,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-evenly',
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 		right: -20
 	},
 	pubkyLogo: {

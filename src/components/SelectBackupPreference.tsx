@@ -29,6 +29,7 @@ import { EBackupPreference } from "../types/pubky.ts";
 import { showBackupPrompt } from "../utils/sheetHelpers.ts";
 import { truncateStr } from "../utils/pubky.ts";
 import i18n from '../i18n';
+import { textStyles } from '../theme/utils';
 
 const SelectBackupPreference = ({ payload }: {
     payload: {
@@ -150,24 +151,17 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
-		fontWeight: '700',
+		...textStyles.display,
 		marginBottom: 20,
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		minHeight: 44,
 	},
 	buttonContainer: {
@@ -191,9 +185,7 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
+		...textStyles.bodySSB,
 	},
 	importImage: {
 		width: 279,

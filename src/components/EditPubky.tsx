@@ -39,6 +39,7 @@ import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import { FlashList } from '@shopify/flash-list';
 import i18n from '../i18n';
+import { textStyles } from '../theme/utils';
 
 type InputDataItem = {
     testID?: string;
@@ -695,15 +696,12 @@ const styles = StyleSheet.create({
 		borderTopLeftRadius: 20,
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
+		...textStyles.bodyMB,
 		marginBottom: 24,
 		alignSelf: 'center',
 	},
 	textInputTitle: {
-		fontSize: 15,
-		lineHeight: 22,
+		...textStyles.caption,
 		alignItems: 'center',
 	},
 	inputWrapper: {
@@ -722,11 +720,9 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	input: {
+		...textStyles.bodyM,
 		flex: 1,
 		paddingLeft: 16,
-		fontSize: 26,
-		fontWeight: '300',
-		lineHeight: 32,
 		textAlignVertical: 'center',
 		left: Platform.select({
 			android: 4,
@@ -738,8 +734,8 @@ const styles = StyleSheet.create({
 		borderColor: '#dc2626',
 	},
 	errorText: {
+		...textStyles.bodyS,
 		color: '#dc2626',
-		fontSize: 15,
 		textAlign: 'center',
 		marginTop: 4,
 	},

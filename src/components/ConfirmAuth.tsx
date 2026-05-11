@@ -33,7 +33,7 @@ import {
 	ACTION_SHEET_HEIGHT,
 	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
 } from '../utils/constants.ts';
-import { buttonStyles } from '../theme/utils';
+import { buttonStyles, textStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import ProgressBar from './ProgressBar.tsx';
@@ -317,10 +317,7 @@ const styles = StyleSheet.create({
 		borderTopLeftRadius: 20,
 	},
 	actionButtonText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 		alignSelf: 'center',
 	},
 	section: {
@@ -341,18 +338,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	relayText: {
-		fontSize: 13,
-		fontWeight: '600',
-		lineHeight: 18,
-		letterSpacing: 0.4,
+		...textStyles.captionSB,
 		justifyContent: 'center',
 		marginLeft: 6,
 	},
 	warningText: {
-		fontWeight: '400',
-		fontSize: 15,
-		lineHeight: 20,
-		letterSpacing: 0.4,
+		...textStyles.bodySSpaced,
 		marginBottom: 8,
 	},
 	permissionRow: {
@@ -368,9 +359,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	pathText: {
-		fontSize: 13,
-		fontWeight: '600',
-		lineHeight: 18,
+		...textStyles.captionSB,
 		backgroundColor: 'transparent',
 	},
 	permissionsContainer: {
@@ -434,33 +423,22 @@ const styles = StyleSheet.create({
 		opacity: 0.7,
 	},
 	buttonText: {
-		fontWeight: '600',
-		fontSize: 15,
-		lineHeight: 18,
+		...textStyles.bodySSB,
 		textAlign: 'center',
 	},
 	sectionTitle: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.caption,
 		textTransform: 'uppercase',
 		marginBottom: 8,
 		backgroundColor: 'transparent',
 	},
 	unauthorizedText: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.caption,
 		textTransform: 'uppercase',
 		backgroundColor: 'transparent',
 	},
 	authorizedText: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.caption,
 		textTransform: 'uppercase',
 		backgroundColor: 'transparent',
 	},
@@ -472,10 +450,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		backgroundColor: 'transparent',
 	},
 	pubkyCard: {
@@ -491,17 +466,11 @@ const styles = StyleSheet.create({
 		marginRight: 16,
 	},
 	pubkyName: {
-		fontSize: 26,
-		fontWeight: '300',
-		lineHeight: 32,
-		letterSpacing: 0,
+		...textStyles.heading,
 		marginBottom: 2,
 	},
 	pubkyText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 20,
-		letterSpacing: 0.4,
+		...textStyles.bodySSB,
 	},
 	spacer: {
 		marginBottom: 12,

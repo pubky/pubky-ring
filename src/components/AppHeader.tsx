@@ -13,6 +13,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import LinearGradient from 'react-native-linear-gradient';
+import { textStyles } from '../theme/utils';
 
 const PubkyRingLogo = require('../images/pubky-ring-logo.png');
 
@@ -161,8 +162,7 @@ const styles = StyleSheet.create({
 		resizeMode: 'contain',
 	},
 	title: {
-		fontSize: 26,
-		fontWeight: '300',
+		...textStyles.heading,
 		textAlign: 'center',
 		flex: 1,
 	},

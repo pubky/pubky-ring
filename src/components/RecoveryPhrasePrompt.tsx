@@ -22,6 +22,7 @@ import {
 } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../theme/utils';
 
 const getMarginBottom = (index: number): number => {
 	return index + 1 === 6 ? 0 : 12;
@@ -153,16 +154,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
+		...textStyles.bodyMB,
 		marginBottom: 16,
 		alignSelf: 'center',
 	},
 	message: {
-		fontSize: 17,
-		fontWeight: '400',
-		lineHeight: 22,
+		...textStyles.bodyM,
 		textAlign: 'left',
 		marginBottom: 24,
 		color: '#E0E0E0',
@@ -199,10 +196,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	tapToRevealText: {
-		fontSize: 16,
-		fontWeight: '600',
-		color: '#FFFFFF',
-		textAlign: 'center',
+		...textStyles.bodySSB,
 	},
 	columnContainer: {
 		flex: 1,
@@ -216,27 +210,21 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	wordNumber: {
-		fontSize: 17,
-		fontWeight: '600',
-		lineHeight: 22,
+		...textStyles.bodyMSB,
 		marginRight: 8,
 		width: 28,
 	},
 	wordText: {
-		fontSize: 17,
-		fontWeight: '600',
-		lineHeight: 22,
+		...textStyles.bodyMSB,
 	},
 	warningText: {
-		fontSize: 15,
-		fontWeight: '400',
-		lineHeight: 20,
+		...textStyles.bodyS,
 		color: '#888',
 		textAlign: 'left',
 	},
 	errorText: {
+		...textStyles.bodyS,
 		color: '#dc2626',
-		fontSize: 12,
 		marginLeft: 4,
 		marginVertical: 12
 	},

@@ -18,11 +18,8 @@ const ModalTitle: React.FC<ModalTitleProps> = ({ children, style }) => {
 
 const styles = StyleSheet.create({
 	title: {
-		...textStyles.heading,
-		fontSize: 17,
-		fontWeight: '700',
+		...textStyles.bodyMB,
 		textAlign: 'center',
-		lineHeight: 22,
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},

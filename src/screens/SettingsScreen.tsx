@@ -29,7 +29,7 @@ import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useInputHandler } from '../hooks/useInputHandler.ts';
-import { buttonStyles } from '../theme/utils.ts';
+import { buttonStyles, textStyles } from '../theme/utils';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 
@@ -299,23 +299,16 @@ const styles = StyleSheet.create({
 		overflow: 'hidden',
 	},
 	textSettingTitle: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.caption,
 		color: 'rgba(255, 255, 255, 0.64)',
 	},
 	textSettingValue: {
-		fontSize: 17,
-		fontWeight: '400',
-		lineHeight: 22,
-		letterSpacing: 0,
+		...textStyles.bodyM,
 		marginTop: 10,
 		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	settingTitle: {
-		fontSize: 17,
-		fontWeight: '600',
+		...textStyles.bodyMSB,
 	},
 	switchContainer: {
 		justifyContent: 'center',
@@ -340,7 +333,7 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	themeValue: {
-		fontSize: 15,
+		...textStyles.bodyS,
 	},
 	toggleRow: {
 		flexDirection: 'row',

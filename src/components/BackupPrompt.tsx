@@ -25,6 +25,7 @@ import {
 	BACKUP_PASSWORD_CHAR_MIN,
 } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../theme/utils';
 
 export enum EBackupPromptViewId {
     backup = 'backup',
@@ -239,10 +240,7 @@ const styles = StyleSheet.create({
 		paddingBottom: 10,
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		textTransform: 'capitalize',
 		marginBottom: 24,
@@ -254,19 +252,13 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontSize: 17,
-		fontWeight: '400',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMSpaced,
 		alignItems: 'center',
 	},
 	passphraseText: {
+		...textStyles.caption,
 		color: 'rgba(255, 255, 255, 0.5)',
 		textTransform: 'uppercase',
-		fontWeight: '500',
-		fontSize: 13,
-		lineHeight: 18,
-		letterSpacing: 0.8,
 	},
 	inputContainer: {
 		flexDirection: 'row',
@@ -281,11 +273,9 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	input: {
+		...textStyles.heading,
 		flex: 1,
 		paddingLeft: 16,
-		fontSize: 26,
-		fontWeight: '300',
-		lineHeight: 32,
 		textAlignVertical: 'center',
 		left: Platform.select({
 			android: 4,
@@ -297,8 +287,8 @@ const styles = StyleSheet.create({
 		borderColor: '#dc2626',
 	},
 	errorText: {
+		...textStyles.bodyS,
 		color: '#dc2626',
-		fontSize: 12,
 		marginBottom: 16,
 		marginLeft: 4,
 	},
@@ -343,21 +333,14 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	boldPubky: {
-		fontWeight: 'bold',
-		textTransform: 'uppercase',
-		fontSize: 13,
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.captionB,
+		color: 'white',
 	},
 	fileText: {
-		fontSize: 17,
-		fontWeight: '600',
-		lineHeight: 22,
+		...textStyles.bodyMSB,
 	},
 	dateText: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
+		...textStyles.caption,
 	},
 });
 

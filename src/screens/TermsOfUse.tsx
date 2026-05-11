@@ -13,6 +13,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '../components/Button.tsx';
 import TermsOfUseContent from '../components/TermsOfUseContent.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
+import { textStyles } from '../theme/utils';
 
 const TermsOfUse = (): React.ReactElement => {
 	const { t } = useTranslation();
@@ -128,18 +129,12 @@ const styles = StyleSheet.create({
 		backgroundColor: '#000000',
 	},
 	footerHeaderText: {
-		fontSize: 17,
-		fontWeight: 600,
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMSB,
 		color: 'white',
 		marginBottom: 2,
 	},
 	footerText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 20,
-		letterSpacing: 0.4,
+		...textStyles.bodySSB,
 		color: '#a3a3a3',
 	},
 	linkText: {

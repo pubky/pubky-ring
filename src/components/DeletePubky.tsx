@@ -27,6 +27,7 @@ import { Image, Platform, StyleSheet } from 'react-native';
 import ModalIndicator from './ModalIndicator.tsx';
 import Button from './Button.tsx';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../theme/utils';
 
 const DeletePubky = ({ payload }: {
 	payload: {
@@ -75,7 +76,6 @@ const DeletePubky = ({ payload }: {
 					style={styles.pubkyCard}
 					containerStyle={styles.pubkyContainer}
 					nameStyle={styles.pubkyName}
-					pubkyTextStyle={styles.pubkyText}
 					avatarSize={48}
 					avatarStyle={styles.avatarContainer}
 				/>
@@ -123,20 +123,13 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		marginBottom: 8,
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
-		letterSpacing: 0.4,
-		textAlign: 'left',
+		...textStyles.bodyM,
 		marginBottom: 24,
 		color: 'rgba(255, 255, 255, 0.8)',
 	},
@@ -154,18 +147,8 @@ const styles = StyleSheet.create({
 		marginRight: 16,
 	},
 	pubkyName: {
-		fontSize: 26,
-		fontWeight: '300',
-		lineHeight: 26,
-		letterSpacing: 0,
+		...textStyles.heading,
 		marginBottom: 2,
-	},
-	pubkyText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 20,
-		letterSpacing: -0.4,
-		color: 'rgba(255, 255, 255, 0.55)',
 	},
 	buttonContainer: {
 		flexDirection: 'row',
@@ -185,9 +168,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
+		...textStyles.bodySSB,
 	},
 	importImage: {
 		width: 342.57,

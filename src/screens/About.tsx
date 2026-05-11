@@ -142,16 +142,10 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	rowTitle: {
-		fontSize: 17,
-		fontWeight: 400,
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMSpaced,
 	},
 	rowValue: {
-		fontSize: 17,
-		fontWeight: 400,
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMSpaced,
 		color: 'rgba(255, 255, 255, 0.5)',
 	},
 	footer: {
@@ -175,9 +169,8 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	footerText: {
-		fontSize: 17,
-		fontWeight: '600',
-		lineHeight: 22,
+		...textStyles.bodyMSB,
+		letterSpacing: 0,
 		color: ACCENTS.pubkyApp,
 		marginTop: 12,
 	},

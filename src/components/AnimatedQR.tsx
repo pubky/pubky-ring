@@ -3,6 +3,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { Text, View, ChevronLeft, ChevronRight, AnimatedView } from '../theme/components.ts';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../theme/utils';
 import {
 	useSharedValue,
 	useAnimatedStyle,
@@ -205,9 +206,7 @@ const styles = StyleSheet.create({
 		transform: [{ translateY: -16 }],
 	},
 	progressText: {
-		fontSize: 15,
-		fontWeight: '500',
-		lineHeight: 20,
+		...textStyles.bodySM,
 		textAlign: 'center',
 		color: '#888',
 		marginBottom: 16,

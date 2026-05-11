@@ -2,8 +2,24 @@
   "migIndex": 1,
   "data": [
     {
-      "path": "assets/fonts/InterTight-Italic-VariableFont_wght.ttf",
-      "sha1": "5f313456e4a34f1453bd1800b7fc179e28746f66"
+      "path": "assets/fonts/InterTight-Bold.ttf",
+      "sha1": "1fc9afdafd311b9a6c00a66fd46f8a20c8995b31"
+    },
+    {
+      "path": "assets/fonts/InterTight-Light.ttf",
+      "sha1": "d9a7a114754adeccd1852c2eae7f3f8e0ece1719"
+    },
+    {
+      "path": "assets/fonts/InterTight-Medium.ttf",
+      "sha1": "9f81461fe46d98ee43388a91d30b7343bcea497e"
+    },
+    {
+      "path": "assets/fonts/InterTight-Regular.ttf",
+      "sha1": "e72a5132362c00b8edbfc1b1ef15f3e076a367ef"
+    },
+    {
+      "path": "assets/fonts/InterTight-SemiBold.ttf",
+      "sha1": "a999affb5710c8a9ed08879667b4b26fa5b2d584"
     },
     {
       "path": "assets/fonts/InterTight-VariableFont_wght.ttf",

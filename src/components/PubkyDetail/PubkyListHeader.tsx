@@ -106,16 +106,19 @@ export const PubkyListHeader = memo(({
 
 			<View style={styles.actionButtonRow}>
 				<Button
+					style={styles.actionButton}
 					text={i18n.t('common.share')}
 					icon={ShareIcon}
 					onPress={onSharePress}
 				/>
 				<Button
+					style={styles.actionButton}
 					text={i18n.t('backup.backup')}
 					icon={BackupIcon}
 					onPress={onBackup}
 				/>
 				<Button
+					style={styles.actionButton}
 					text={i18n.t('common.delete')}
 					icon={DeleteIcon}
 					onPress={onDelete}
@@ -133,9 +136,12 @@ const styles = StyleSheet.create({
 	},
 	actionButtonRow: {
 		flexDirection: 'row',
+		gap: 6,
 		marginTop: 24,
 		width: '100%',
-		justifyContent: 'space-between',
+	},
+	actionButton: {
+		flex: 1,
 	},
 	actionButtonText: {
 		fontSize: 15,

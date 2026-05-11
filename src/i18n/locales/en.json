@@ -192,14 +192,13 @@
   "emptyState": {
     "placeholderName": "pubky",
     "placeholderPubky": "xxxxx..xxxxx",
-    "heading": "Get started.",
-    "description": "Set up a pubky manually or scan a QR\nfor instant onboarding to pubky.app"
+    "heading": "Get started,\nadd a pubky."
   },
   "about": {
     "keychainFor": "Keychain for",
     "theNextWeb": "the next web.",
     "description": "Pubky Ring enables you to securely authorize services and manage your pubkys, devices, and sessions.",
-    "craftedBy": "Pubky Ring was crafted by Synonym Software Ltd. You are your keys.",
+    "craftedBy": "Pubky Ring was crafted by Synonym Software Ltd. Your keys, your identity.",
     "legal": "Legal",
     "version": "Version",
     "copiedVersion": "Copied version number to clipboard",
@@ -316,7 +315,6 @@
   "screenTitles": {
     "termsOfUse": "Terms of Use",
     "onboarding": "Welcome",
-    "confirmPubky": "Confirm pubky",
     "home": "Pubky Ring",
     "about": "About",
     "settings": "Settings",

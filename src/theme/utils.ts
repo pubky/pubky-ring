@@ -1,4 +1,6 @@
 import { ViewStyle, TextStyle } from 'react-native';
+import { ACCENTS } from '../utils/constants';
+import { fontFamily } from './fonts';
 
 export const shadowStyles = {
 	small: {
@@ -77,6 +79,20 @@ export const buttonStyles = {
 };
 
 export const textStyles = {
+	display: {
+		fontSize: 48,
+		fontWeight: '700' as const,
+		lineHeight: 48,
+		fontFamily,
+		color: 'white',
+	} as TextStyle,
+	bodyM: {
+		fontSize: 17,
+		fontWeight: '400' as const,
+		lineHeight: 22,
+		fontFamily,
+		color: 'rgba(255, 255, 255, 0.80)',
+	} as TextStyle,
 	heading: {
 		fontSize: 26,
 		fontWeight: '300' as const,
@@ -89,7 +105,7 @@ export const textStyles = {
 		letterSpacing: 0.4,
 	} as TextStyle,
 	backupText: {
-		color: '#0085FF',
+		color: ACCENTS.pubkyRing,
 	},
 	backupTextBGColor: 'rgba(0, 133, 255, 0.16)',
 	caption: {
@@ -102,6 +118,7 @@ export const textStyles = {
 		fontWeight: '600' as const,
 		lineHeight: 18,
 		letterSpacing: 0.2,
+		fontFamily,
 	} as TextStyle,
 };
 

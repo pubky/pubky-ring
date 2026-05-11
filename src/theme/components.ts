@@ -38,6 +38,7 @@ import {
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
 import { SafeAreaView as _SafeAreaView } from 'react-native-safe-area-context';
 import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
+import { fontFamily } from './fonts';
 
 // Default stroke width for Lucide icons to improve sharpness on high-DPI displays
 const ICON_STROKE_WIDTH = 2.5;
@@ -95,7 +96,7 @@ export const ActionSheetContainer = styled(
 export const TextInput = styled.TextInput<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};
 	color: ${(props): string => props.theme.colors.text};
-	font-family: 'InterTight-VariableFont_wght';
+	font-family: ${fontFamily};
 `;
 
 export const View = styled.View<{ theme: Theme }>`
@@ -112,9 +113,7 @@ export const TouchableOpacity = styled.TouchableOpacity<{ theme: Theme }>`
   background-color: ${(props): string => props.theme.colors.background};
 `;
 
-export const NavButton = styled.TouchableOpacity<{ theme: Theme }>`
-  background-color: ${(props): string => props.theme.colors.background};
-`;
+export const NavButton = styled.TouchableOpacity<{ theme: Theme }>``;
 
 export const NavView = styled.View<{ theme: Theme }>`
   background-color: ${(props): string => props.theme.colors.navButton};
@@ -136,7 +135,7 @@ export const ScrollView = styled.ScrollView<{ theme: Theme }>`
 
 export const Text = styled.Text<{ theme: Theme }>`
 	color: ${(props): string => props.theme.colors.text};
-	font-family: 'InterTight-VariableFont_wght';
+	font-family: ${fontFamily};
 `;
 
 export const SessionBox = styled.View<{ theme: Theme }>`
@@ -174,12 +173,12 @@ export const SessionView = styled.View<{ theme: Theme }>`
 
 export const SessionText = styled.Text<{ theme: Theme }>`
 	color: ${(props): string => props.theme.colors.sessionText};
-	font-family: 'InterTight-VariableFont_wght';
+	font-family: ${fontFamily};
 `;
 
 export const BoldText = styled.Text<{ theme: Theme }>`
 	font-weight: bold;
-	font-family: 'InterTight-VariableFont_wght';
+	font-family: ${fontFamily};
 `;
 
 export const Box = styled.TouchableOpacity<{ theme: Theme }>`
@@ -217,7 +216,11 @@ export const ArrowRight = styled(_ChevronRight).attrs({ strokeWidth: ICON_STROKE
   color: ${(props): string => props.theme.colors.sessionText};
 `;
 
-export const Plus = styled(_Plus).attrs({ strokeWidth: ICON_STROKE_WIDTH })<{ theme: Theme }>`
+export const Plus = styled(_Plus).attrs<{ strokeWidth?: number }>(
+  ({ strokeWidth }) => ({
+    strokeWidth: strokeWidth ?? ICON_STROKE_WIDTH,
+  }),
+)<{ theme: Theme }>`
   color: ${(props): string => props.theme.colors.text};
 `;
 

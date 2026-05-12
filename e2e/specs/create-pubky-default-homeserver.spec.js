@@ -10,7 +10,7 @@ describe('create a pubky with default (prod) homeserver without proceeding to in
 
 	it('can go to create a pubky with default (prod) homeserver without proceeding to input invite code', async () => {
 		// Tap 'Add pubky' button on Home page
-		(await waitForDisplayed(elementById('EmptyStateAddPubkyButton'))).click();
+		(await waitForDisplayed(elementById('AddPubkyButton'))).click();
 
 		// Tap 'New pubky' on Add Pubky page button
 		(await waitForDisplayed(elementById('NewPubkyButton'))).click();

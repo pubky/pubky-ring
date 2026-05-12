@@ -3,11 +3,8 @@ import { Platform, StyleSheet } from 'react-native';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { useQRScanner } from '../hooks/useQRScanner';
 import {
-	ActivityIndicator,
 	ArrowRight,
-	AuthorizeButton,
 	Box,
-	Button,
 	Card,
 	CardView,
 	ForegroundView,
@@ -21,32 +18,12 @@ import {
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { buttonStyles, shadowStyles, textStyles } from '../theme/utils';
+import { shadowStyles, textStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import i18n from '../i18n';
 import { ACCENTS } from '../utils/constants.ts';
-
-interface AuthorizeQRButtonProps {
-	isLoading: boolean;
-	isSignedUp: boolean;
-	onPress: () => void;
-	onLongPress?: () => void;
-}
-
-const AuthorizeQRButton = memo(({ isLoading, isSignedUp, onPress, onLongPress }: AuthorizeQRButtonProps) => (
-	<AuthorizeButton
-		style={[styles.actionButton, isLoading && styles.actionButtonDisabled]}
-		onPress={onPress}
-		onLongPress={onLongPress}
-		disabled={isLoading}
-	>
-		{isLoading ? <ActivityIndicator size="small" /> : isSignedUp ? <Scan size={16} /> : null}
-		<Text style={textStyles.bodySSB} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-			{isLoading ? '' : isSignedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}
-		</Text>
-	</AuthorizeButton>
-));
+import Button from './Button.tsx';
 
 interface PubkyInfoProps {
 	pubkyName: string;
@@ -143,7 +120,12 @@ const PubkyBox = ({
 
 	return (
 		<LinearGradient testID={pubkyBoxTestID} style={styles.container}>
-			<Button activeOpacity={0.7} onPress={handleOnPress} onLongPress={onLongPress} style={styles.wrapper}>
+			<TouchableOpacity
+				style={styles.wrapper}
+				activeOpacity={0.7}
+				onPress={handleOnPress}
+				onLongPress={onLongPress}
+			>
 				<Box
 					onPress={handleOnPress}
 					onLongPress={onLongPress}
@@ -170,29 +152,29 @@ const PubkyBox = ({
 					</ForegroundView>
 				</Box>
 
-				<ForegroundView style={styles.buttonsContainer}>
-					<AuthorizeQRButton
-						isLoading={isQRLoading || loading}
-						isSignedUp={pubkyData.signedUp}
-						onPress={qrPress}
-						onLongPress={onLongPress}
-					/>
-				</ForegroundView>
-			</Button>
+				<Button
+					style={styles.button}
+					text={pubkyData.signedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}
+					size="medium"
+					variant="secondary"
+					loading={isQRLoading || loading}
+					icon={pubkyData.signedUp ? <Scan size={16} /> : <></>}
+					onPress={qrPress}
+					onLongPress={onLongPress}
+				/>
+			</TouchableOpacity>
 		</LinearGradient>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		borderRadius: 16,
-		alignSelf: 'center',
 		...shadowStyles.small,
-		marginBottom: 20,
+		borderRadius: 16,
+		marginBottom: 24,
 		marginHorizontal: 24,
 	},
 	wrapper: {
-		borderRadius: 16,
 		padding: 24,
 		backgroundColor: 'transparent',
 	},
@@ -231,14 +213,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		marginLeft: 'auto',
 	},
-	buttonsContainer: {
-		marginTop: 20,
-		justifyContent: 'space-evenly',
-		backgroundColor: 'transparent',
-		display: 'flex',
-		flexDirection: 'row',
-		width: '100%',
-	},
 	sessionsButton: {
 		borderRadius: 100,
 		height: 20,
@@ -252,16 +226,6 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 		flexWrap: 'nowrap',
 	},
-	actionButton: {
-		...buttonStyles.secondary,
-		flexDirection: 'row',
-		justifyContent: 'center',
-		gap: 8,
-		width: '100%',
-	},
-	actionButtonDisabled: {
-		opacity: 0.7,
-	},
 	backupContainer: {
 		paddingHorizontal: 8,
 		paddingVertical: 2,
@@ -269,6 +233,9 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		marginLeft: 5,
 		alignSelf: 'center',
+	},
+	button: {
+		marginTop: 24,
 	},
 });
 

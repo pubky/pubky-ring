@@ -2,7 +2,6 @@ import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } 
 import { Alert, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import {
-	ActionButton,
 	ActionSheetContainer,
 	AnimatedView,
 	Folder,
@@ -25,7 +24,7 @@ import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
 import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
-import { buttonStyles, textStyles } from '../theme/utils';
+import { textStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import ProgressBar from './ProgressBar.tsx';
@@ -33,6 +32,7 @@ import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { useTranslation } from 'react-i18next';
 import { XCallbackParams } from '../utils/inputParser.ts';
 import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
+import Button from './Button.tsx';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -230,7 +230,6 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 						name={pubkyName}
 						publicKey={pubky}
 						style={styles.pubkyCard}
-						containerStyle={styles.pubkyContainer}
 						nameStyle={styles.pubkyName}
 						pubkyTextStyle={styles.pubkyText}
 						avatarSize={48}
@@ -265,27 +264,22 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 					<View style={styles.buttonContainer}>
 						{!isAuthorized ? (
 							<>
-								<ActionButton style={styles.denyButton} onPressIn={handleDeny} activeOpacity={0.7}>
-									<Text numberOfLines={1} style={styles.actionButtonText}>
-										{authorizing ? t('common.close') : t('auth.deny')}
-									</Text>
-								</ActionButton>
+								<Button
+									text={authorizing ? t('common.close') : t('auth.deny')}
+									size="large"
+									onPress={handleDeny}
+								/>
 
-								<ActionButton
-									style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
-									onPressIn={handleAuth}
+								<Button
+									text={authorizing ? t('auth.authorizing') : t('auth.authorize')}
+									size="large"
+									variant="secondary"
 									disabled={authorizing}
-									activeOpacity={0.7}
-								>
-									<Text numberOfLines={1} style={styles.actionButtonText}>
-										{authorizing ? t('auth.authorizing') : t('auth.authorize')}
-									</Text>
-								</ActionButton>
+									onPress={handleAuth}
+								/>
 							</>
 						) : (
-							<ActionButton style={styles.okButton} onPressIn={handleClose}>
-								<Text style={styles.buttonText}>{t('common.ok')}</Text>
-							</ActionButton>
+							<Button text={t('common.ok')} size="large" variant="secondary" onPress={handleClose} />
 						)}
 					</View>
 					<View style={styles.progressBarContainer}>
@@ -312,14 +306,10 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 
 const styles = StyleSheet.create({
 	content: {
-		height: '100%',
+		flex: 1,
 		backgroundColor: 'transparent',
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
-	},
-	actionButtonText: {
-		...textStyles.bodySSB,
-		alignSelf: 'center',
 	},
 	section: {
 		marginBottom: 24,
@@ -371,21 +361,21 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	footerContainer: {
-		height: '15%',
-		paddingHorizontal: 12,
+		marginTop: 'auto',
+		paddingHorizontal: 24,
 		justifyContent: 'center',
 		backgroundColor: 'transparent',
-		//paddingBottom: 16,
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		gap: 12,
+		alignItems: 'center',
+		gap: 16,
 		zIndex: 3,
 		backgroundColor: 'transparent',
 	},
 	mainContent: {
-		height: '80%',
-		paddingHorizontal: 12,
+		flex: 1,
+		paddingHorizontal: 24,
 		backgroundColor: 'transparent',
 	},
 	imageContainer: {
@@ -400,32 +390,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		backgroundColor: 'transparent',
-	},
-	denyButton: {
-		...buttonStyles.compactOutline,
-		width: '45%',
-		margin: 8,
-		justifyContent: 'center',
-		borderWidth: 0,
-	},
-	authorizeButton: {
-		...buttonStyles.compactOutline,
-		width: '45%',
-		margin: 8,
-		justifyContent: 'center',
-	},
-	okButton: {
-		...buttonStyles.compactOutline,
-		width: '100%',
-		margin: 8,
-		justifyContent: 'center',
-	},
-	buttonDisabled: {
-		opacity: 0.7,
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-		textAlign: 'center',
 	},
 	sectionTitle: {
 		...textStyles.caption,
@@ -456,9 +420,6 @@ const styles = StyleSheet.create({
 	},
 	pubkyCard: {
 		minHeight: 100,
-	},
-	pubkyContainer: {
-		//paddingHorizontal: 20,
 	},
 	avatarContainer: {
 		width: 48,

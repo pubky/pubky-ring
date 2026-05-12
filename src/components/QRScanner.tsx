@@ -4,12 +4,13 @@ import Camera from './Camera/Camera';
 import { ActionSheetContainer, Clipboard, Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { CardButton } from '../theme/components.ts';
 import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import i18n from '../i18n';
 import MigrationProgressOverlay from './MigrationProgressOverlay';
 import { textStyles } from '../theme/utils';
+import Button from './Button.tsx';
+
 interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
@@ -46,10 +47,12 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 					<MigrationProgressOverlay />
 				</View>
 				<View style={styles.buttonContainer}>
-					<CardButton style={styles.actionButton2} onPress={onCopyClipboard}>
-						<Clipboard size={20} style={styles.clipboard} />
-						<Text style={styles.buttonText}>{i18n.t('clipboard.pasteLink')}</Text>
-					</CardButton>
+					<Button
+						text={i18n.t('clipboard.pasteLink')}
+						size="large"
+						icon={<Clipboard size={20} />}
+						onPress={onCopyClipboard}
+					/>
 				</View>
 			</View>
 		</ActionSheetContainer>
@@ -59,12 +62,11 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		width: '100%',
+		marginHorizontal: 24,
 	},
 	cameraContainer: {
 		flex: 1,
-		width: '90%',
-		alignSelf: 'center',
+		width: '100%',
 	},
 	title: {
 		...textStyles.bodyMB,
@@ -72,31 +74,8 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	buttonContainer: {
-		paddingVertical: 16,
-		alignItems: 'center',
-		justifyContent: 'center',
-	},
-	actionButton2: {
-		flexDirection: 'row',
-		minWidth: 327,
-		minHeight: 64,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 15,
-		alignContent: 'center',
-		justifyContent: 'center',
-		gap: 8,
-		width: '90%',
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-	},
-	clipboard: {
-		alignSelf: 'center',
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-		alignSelf: 'center',
+		marginTop: 24,
+		marginBottom: 24,
 	},
 });
 

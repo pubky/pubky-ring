@@ -75,7 +75,6 @@ const ImportSuccessSheet = ({
 					pubky={pubky}
 					pubkyData={data}
 					onContinue={onContinue}
-					authorizeButtonStyle={styles.authorizeButton}
 				/>
 			</View>
 		</ActionSheetContainer>
@@ -86,9 +85,6 @@ const styles = StyleSheet.create({
 	fullSize: {
 		height: '100%',
 		width: '100%',
-	},
-	authorizeButton: {
-		borderWidth: 0,
 	},
 });
 

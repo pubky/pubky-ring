@@ -15,7 +15,7 @@ const ModalMessage: React.FC<ModalMessageProps> = ({ children, style, centered =
 
 const styles = StyleSheet.create({
 	message: {
-		...textStyles.bodyMSpaced,
+		...textStyles.bodyM,
 		marginBottom: 16,
 		backgroundColor: 'transparent',
 	},

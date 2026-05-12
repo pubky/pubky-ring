@@ -1,6 +1,8 @@
+// currently unused
+
 import React, { memo, useCallback, useRef } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import { AuthorizeButton, Scan, Text } from '../theme/components';
+import { Scan } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
 import PubkyRingLogo from '../images/pubky.png';
@@ -10,6 +12,7 @@ import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
+import Button from './Button.tsx';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
@@ -103,15 +106,15 @@ const ScanInviteButton = memo(() => {
 
 	return (
 		<View style={styles.container}>
-			<AuthorizeButton style={styles.button} onPressIn={handleInviteScan}>
-				<View style={styles.row}>
-					<Scan size={19} />
-					<Text style={styles.text} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
-						{i18n.t('scanInvite.scanInviteFor')}
-					</Text>
-					<Image source={PubkyRingLogo} style={styles.logo} />
-				</View>
-			</AuthorizeButton>
+			<Button
+				text={i18n.t('scanInvite.scanInviteFor')}
+				icon={<Scan size={19} />}
+				rightIcon={<Image source={PubkyRingLogo} style={styles.logo} />}
+				size="large"
+				style={styles.button}
+				textStyle={styles.text}
+				onPress={handleInviteScan}
+			/>
 		</View>
 	);
 });
@@ -123,27 +126,10 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		width: '90%',
-		borderRadius: 64,
-		minHeight: 64,
-		alignItems: 'center',
-		display: 'flex',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-		flexDirection: 'row',
-		gap: 4,
-		alignSelf: 'center',
-		alignContent: 'center',
-		justifyContent: 'center',
 		zIndex: 1,
-	},
-	row: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
 	text: {
 		...textStyles.bodySSB,
-		paddingHorizontal: 6,
 	},
 	logo: {
 		height: 56,

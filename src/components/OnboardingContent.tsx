@@ -4,7 +4,7 @@ import { RadialGradient } from '../theme/components.ts';
 import { BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { useDispatch } from 'react-redux';
-import { buttonStyles, textStyles } from '../theme/utils';
+import { textStyles } from '../theme/utils';
 import { useTypedNavigation } from '../navigation/hooks';
 import { useTranslation } from 'react-i18next';
 import Button from './Button.tsx';
@@ -46,6 +46,7 @@ const OnboardingContent = (): ReactElement => {
 						testID="OnboardingGetStartedButton"
 						style={styles.buttonPrimary}
 						text={t('onboarding.getStarted')}
+						size="large"
 						onPress={navigateHome}
 					/>
 				</View>
@@ -108,9 +109,7 @@ const styles = StyleSheet.create({
 		marginTop: 24,
 	},
 	buttonPrimary: {
-		...buttonStyles.primary,
 		flex: 1,
-		minHeight: 64,
 	},
 });
 

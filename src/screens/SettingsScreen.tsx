@@ -1,8 +1,8 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Switch } from 'react-native';
+import { Alert, StyleSheet, Switch, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { View, Text, Card, ActionButton, SessionText, QrCode, Scan } from '../theme/components.ts';
+import { View, Text, Card, SessionText, QrCode, Scan } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,7 +21,7 @@ import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useInputHandler } from '../hooks/useInputHandler.ts';
-import { buttonStyles, textStyles } from '../theme/utils';
+import { textStyles } from '../theme/utils';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 
@@ -160,12 +160,12 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				{/**
                  TODO: Adjust light-mode gradient colors.
                  <Card style={styles.section}>
-                 <ActionButton onPress={handleThemePress} style={styles.themeButton}>
+                 <TouchableOpacity onPress={handleThemePress} style={styles.themeButton}>
                  <Text style={styles.settingTitle}>Theme</Text>
                  <SessionText style={styles.themeValue}>
                  {themeDisplayText}
                  </SessionText>
-                 </ActionButton>
+                 </TouchableOpacity>
                  </Card>
                  **/}
 
@@ -178,16 +178,18 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					{hasPubkys && (
 						<Button
 							testID="ShowQRButton"
-							style={styles.actionButton}
+							style={styles.button}
 							text={t('settings.showQR')}
+							size="medium"
 							onPress={handleShowQRPress}
 							icon={<QrCode size={16} />}
 						/>
 					)}
 					<Button
 						testID="ScanQRButton"
-						style={styles.scanQRButton}
+						style={styles.button}
 						text={t('settings.scanQR')}
+						size="medium"
 						onPress={handleScanQRPress}
 						icon={<Scan size={16} />}
 					/>
@@ -195,49 +197,52 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton onPress={handleNavigationAnimationPress} style={styles.navigationAnimationButton}>
+						<TouchableOpacity
+							onPress={handleNavigationAnimationPress}
+							style={styles.navigationAnimationButton}
+						>
 							<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
 							<SessionText style={styles.themeValue}>{navigationAnimationText}</SessionText>
-						</ActionButton>
+						</TouchableOpacity>
 					</Card>
 				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton onPress={handleAutoAuthToggle} style={styles.toggleRow}>
+						<TouchableOpacity onPress={handleAutoAuthToggle} style={styles.toggleRow}>
 							<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
 							<View style={styles.switchContainer}>
 								<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
 							</View>
-						</ActionButton>
+						</TouchableOpacity>
 					</Card>
 				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
+						<TouchableOpacity onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
 							<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
-						</ActionButton>
+						</TouchableOpacity>
 					</Card>
 				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
+						<TouchableOpacity onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
 							<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
-						</ActionButton>
+						</TouchableOpacity>
 					</Card>
 				)}
 
 				{/* Backup all pubkys */}
 				{/* TODO: Consider implementing a "Backup All Pubkys" feature. Backs up all pubkys with same passphrase and saves as zip file for future import
 				<Card style={styles.section}>
-					<ActionButton
+					<TouchableOpacity
 						onPress={handleBackupPress}
 						style={styles.backupButton}
 					>
 						<Text style={styles.settingTitle}>Backup All Pubkys</Text>
-					</ActionButton>
+					</TouchableOpacity>
 				</Card>
 				*/}
 			</View>
@@ -258,7 +263,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	section: {
-		marginBottom: 12,
+		marginBottom: 16,
 		borderRadius: 16,
 		overflow: 'hidden',
 	},
@@ -294,7 +299,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		paddingHorizontal: 16,
 		height: 60,
-		width: '100%',
 	},
 	themeValue: {
 		...textStyles.bodyS,
@@ -309,18 +313,11 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		justifyContent: 'center',
 		alignItems: 'center',
-		gap: 12,
+		gap: 6,
 		marginBottom: 16,
 	},
-	actionButton: {
-		...buttonStyles.primary,
-		flex: 1,
-	},
-	scanQRButton: {
-		...buttonStyles.primary,
-		borderWidth: 1,
+	button: {
 		flex: 1,
 	},
 });

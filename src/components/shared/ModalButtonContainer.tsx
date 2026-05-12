@@ -19,7 +19,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		alignSelf: 'center',
 		justifyContent: 'space-around',
-		gap: 12,
+		gap: 16,
 		paddingVertical: 12,
 		backgroundColor: 'transparent',
 	},

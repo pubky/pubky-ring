@@ -1,25 +1,17 @@
 import { Image, StyleSheet } from 'react-native';
-import type { StyleProp, ViewStyle } from 'react-native';
 import React, { memo, ReactElement, useCallback, useRef } from 'react';
-import { ArrowLeft, NavButton, Text, TouchableOpacity, View } from '../theme/components.ts';
+import { ArrowLeft, Text, TouchableOpacity, View } from '../theme/components.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import LinearGradient from 'react-native-linear-gradient';
 import { textStyles } from '../theme/utils';
+import HeaderNavButton from './HeaderNavButton.tsx';
 
 const PubkyRingLogo = require('../images/pubky-ring-logo.png');
 
 export const HEADER_HEIGHT = 56;
-const HEADER_HIT_SLOP = { top: 20, bottom: 20, left: 20, right: 20 };
-
-type HeaderNavButtonProps = {
-	children?: ReactElement | null;
-	disabled?: boolean;
-	style?: StyleProp<ViewStyle>;
-	onPressIn?: () => void;
-};
 
 type AppHeaderProps = {
 	title?: string;
@@ -27,19 +19,6 @@ type AppHeaderProps = {
 	rightButton?: ReactElement | null;
 	disableBackNavigation?: boolean;
 };
-
-export const HeaderNavButton = memo(
-	({ children = null, disabled = false, onPressIn, style }: HeaderNavButtonProps) => (
-		<NavButton
-			style={[styles.navButton, style]}
-			hitSlop={HEADER_HIT_SLOP}
-			disabled={disabled}
-			onPressIn={onPressIn}
-		>
-			{children}
-		</NavButton>
-	),
-);
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LogoButton = memo(({ onLongPress, onPress }: { onLongPress: () => void; onPress: () => void }) => (
@@ -146,13 +125,6 @@ const styles = StyleSheet.create({
 		...textStyles.heading,
 		textAlign: 'center',
 		flex: 1,
-	},
-	navButton: {
-		zIndex: 1,
-		height: 40,
-		width: 40,
-		alignItems: 'center',
-		justifyContent: 'center',
 	},
 });
 

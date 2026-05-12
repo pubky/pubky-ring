@@ -8,13 +8,14 @@ import {
 	Platform,
 } from 'react-native';
 import * as bip39 from 'bip39';
-import { View, Text, SessionText, NavButton, ArrowLeft, TextInput } from '../theme/components.ts';
+import { View, Text, SessionText, ArrowLeft, TextInput } from '../theme/components.ts';
 import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
 import { Result } from '@synonymdev/result';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
+import HeaderNavButton from './HeaderNavButton.tsx';
 
 interface MnemonicFormProps {
 	onBack: () => void;
@@ -199,13 +200,9 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 
 	const renderBackButton = useCallback(
 		() => (
-			<NavButton
-				style={styles.backButton}
-				onPressIn={onBack}
-				hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-			>
+			<HeaderNavButton style={styles.backButton} onPressIn={onBack}>
 				<ArrowLeft size={24} />
-			</NavButton>
+			</HeaderNavButton>
 		),
 		[onBack],
 	);
@@ -385,7 +382,7 @@ const styles = StyleSheet.create({
 	},
 	backButton: {
 		position: 'absolute',
-		left: 20,
+		left: 0,
 		zIndex: 10,
 		backgroundColor: 'transparent',
 	},

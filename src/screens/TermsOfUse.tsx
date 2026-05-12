@@ -76,9 +76,10 @@ const TermsOfUse = (): React.ReactElement => {
 					</View>
 
 					<Button
-						testID="TermsContinueButton"
 						style={styles.button}
 						text={t('common.continue')}
+						size="large"
+						testID="TermsContinueButton"
 						onPress={onContinue}
 					/>
 
@@ -156,7 +157,6 @@ const styles = StyleSheet.create({
 		backgroundColor: '#2a2a2a',
 	},
 	button: {
-		minHeight: 64,
 		marginTop: 24,
 	},
 });

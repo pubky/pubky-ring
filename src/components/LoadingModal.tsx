@@ -14,7 +14,6 @@ import { getLoadingModalState } from '../store/selectors/uiSelectors.ts';
 import { resetLoadingModal } from '../store/slices/uiSlice.ts';
 import { getStoredDispatch } from '../store/shapes/ui.ts';
 import ModalIndicator from './ModalIndicator.tsx';
-import ModalButton from './shared/ModalButton.tsx';
 import ModalButtonContainer from './shared/ModalButtonContainer.tsx';
 import {
 	ACTION_SHEET_HEIGHT,
@@ -34,6 +33,7 @@ import {
 } from 'react-native-reanimated';
 import { SheetManager } from 'react-native-actions-sheet';
 import { textStyles } from '../theme/utils';
+import Button from './Button.tsx';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const smallScreen = isSmallScreen();
@@ -289,18 +289,8 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 					</View>
 					{isError ? (
 						<ModalButtonContainer>
-							<ModalButton
-								text={t('common.cancel')}
-								variant="secondary"
-								width="half"
-								onPress={handleCancel}
-							/>
-							<ModalButton
-								text={t('loading.tryAgain')}
-								variant="primary"
-								width="half"
-								onPress={handleTryAgain}
-							/>
+							<Button text={t('common.cancel')} size="large" onPress={handleCancel} />
+							<Button text={t('loading.tryAgain')} size="large" onPress={handleTryAgain} />
 						</ModalButtonContainer>
 					) : (
 						<>

@@ -14,7 +14,6 @@ import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
 import HomeHeader from '../components/HomeHeader';
-import { buttonStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
@@ -71,6 +70,7 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 				testID="AddPubkyButton"
 				style={styles.listFooterButton}
 				text={t('home.addPubky')}
+				size="large"
 				onPress={onAddPubkyPress}
 				icon={<Plus size={24} strokeWidth={1.5} />}
 			/>
@@ -213,7 +213,6 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	listFooterButton: {
-		...buttonStyles.primary,
 		flex: 1,
 	},
 });

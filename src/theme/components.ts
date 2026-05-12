@@ -113,8 +113,6 @@ export const TouchableOpacity = styled.TouchableOpacity<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};
 `;
 
-export const NavButton = styled.TouchableOpacity<{ theme: Theme }>``;
-
 export const NavView = styled.View<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.navButton};
 `;
@@ -144,26 +142,12 @@ export const SessionBox = styled.View<{ theme: Theme }>`
 `;
 
 export const Card = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.actionButton};
+	background-color: ${(props): string => props.theme.colors.buttonBackground};
 	border-color: ${(props): string => props.theme.colors.border};
 `;
 
-export const Button = styled.TouchableOpacity<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.actionButton};
-	border-color: ${(props): string => props.theme.colors.buttonBorder};
-`;
-
 export const CardView = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.cardButton};
-`;
-
-export const CardButton = styled.TouchableOpacity<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.cardButton};
-`;
-
-export const AuthorizeButton = styled.TouchableOpacity<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.cardButton};
-	border-color: ${(props): string => props.theme.colors.buttonBorder};
+	background-color: ${(props): string => props.theme.colors.buttonBackground};
 `;
 
 export const SessionView = styled.View<{ theme: Theme }>`
@@ -193,11 +177,6 @@ export const ForegroundView = styled.View<{ theme: Theme }>`
 export const AvatarRing = styled.View<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.avatarRing};
 	border-color: ${(props): string => props.theme.colors.border};
-`;
-
-export const ActionButton = styled.TouchableOpacity<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.actionButton};
-	border-color: ${(props): string => props.theme.colors.buttonBorder};
 `;
 
 export const ActivityIndicator = styled.ActivityIndicator<{ theme: Theme }>`

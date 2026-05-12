@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Info, Settings } from '../theme/components';
-import AppHeader, { HeaderNavButton } from './AppHeader';
+import AppHeader from './AppHeader';
+import HeaderNavButton from './HeaderNavButton.tsx';
 import { useTypedNavigation } from '../navigation/hooks';
 
 const HomeHeader = () => {

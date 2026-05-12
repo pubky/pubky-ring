@@ -1,19 +1,13 @@
 import React, { ReactElement } from 'react';
-import { Platform, StyleSheet } from 'react-native';
-import {
-	View,
-	Text,
-	SessionText,
-	RadialGradient,
-	ForegroundView,
-	CardButton,
-} from '../../theme/components.ts';
+import { StyleSheet, View } from 'react-native';
+import { Text, SessionText, RadialGradient, ForegroundView } from '../../theme/components.ts';
 import ModalIndicator from '../ModalIndicator.tsx';
 import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { PubkyData } from '../../navigation/types.ts';
 import i18n from '../../i18n';
 import { textStyles } from '../../theme/utils';
+import Button from '../Button.tsx';
 
 interface PubkyReviewProps {
 	modalTitle: string;
@@ -22,7 +16,6 @@ interface PubkyReviewProps {
 	pubky: string;
 	pubkyData: PubkyData;
 	onContinue: () => void;
-	authorizeButtonStyle?: Object;
 }
 
 const PubkyReview = ({
@@ -32,7 +25,6 @@ const PubkyReview = ({
 	pubky,
 	pubkyData,
 	onContinue,
-	authorizeButtonStyle,
 }: PubkyReviewProps): ReactElement => {
 	return (
 		<RadialGradient style={styles.content} colors={AUTHORIZE_KEY_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
@@ -46,13 +38,13 @@ const PubkyReview = ({
 				<PubkyProfile pubky={pubky} pubkyData={pubkyData} hideButton={true} />
 			</ForegroundView>
 			<View style={styles.footer}>
-				<CardButton
+				<Button
+					text={i18n.t('common.continue')}
+					size="large"
+					variant="secondary"
 					testID="NewPubkyContinueButton"
-					style={[styles.authorizeButton, authorizeButtonStyle]}
-					onPressIn={onContinue}
-				>
-					<Text style={styles.buttonText}>{i18n.t('common.continue')}</Text>
-				</CardButton>
+					onPress={onContinue}
+				/>
 			</View>
 		</RadialGradient>
 	);
@@ -92,30 +84,10 @@ const styles = StyleSheet.create({
 		borderRadius: 24,
 		backgroundColor: 'rgba(255, 255, 255, 0.05)',
 	},
-	authorizeButton: {
-		flexDirection: 'row',
-		width: '100%',
-		minHeight: 64,
-		borderRadius: 64,
-		paddingVertical: 15,
-		paddingHorizontal: 15,
-		alignContent: 'center',
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-		marginLeft: 5,
-	},
 	footer: {
-		flex: 1,
+		marginTop: 'auto',
+		flexDirection: 'row',
 		alignItems: 'center',
-		justifyContent: 'flex-end',
-		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 });
 

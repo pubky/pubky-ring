@@ -1,6 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, Image, Linking, Platform } from 'react-native';
-import { View, Text, SessionText, RadialGradient, AuthorizeButton } from '../../theme/components.ts';
+import { View, Text, SessionText, RadialGradient } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 // @ts-ignore
@@ -9,6 +9,7 @@ import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../../theme/utils';
+import Button from '../Button.tsx';
 
 const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
 
@@ -93,10 +94,13 @@ const Welcome = ({
 					/>
 				</View>
 				<View style={styles.footer}>
-					<AuthorizeButton style={styles.openButton} onPressIn={handleOpenPubkyApp}>
-						<Text style={styles.buttonText}>{t('welcome.openButton', { domain: BUTTON_TEXT })}</Text>
-						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
-					</AuthorizeButton>
+					<Button
+						text={t('welcome.openButton', { domain: BUTTON_TEXT })}
+						size="large"
+						variant="secondary"
+						rightIcon={<Image source={PubkyRingLogo} style={styles.pubkyLogo} />}
+						onPress={handleOpenPubkyApp}
+					/>
 				</View>
 			</View>
 		</RadialGradient>
@@ -144,30 +148,14 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	footer: {
-		flex: 1,
-		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 }),
-	},
-	openButton: {
-		width: '100%',
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center',
-		flexDirection: 'row',
-		borderWidth: 1,
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-		justifyContent: 'space-evenly',
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-		right: -20,
+		marginTop: 'auto',
+		marginBottom: Platform.select({ ios: 12, android: 32 }),
 	},
 	pubkyLogo: {
-		height: 24,
-		resizeMode: 'contain',
-		backgroundColor: 'transparent',
+		height: 22,
+		width: 66,
+		marginLeft: 24,
 	},
 });
 

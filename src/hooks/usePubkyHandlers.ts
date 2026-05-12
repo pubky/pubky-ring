@@ -12,8 +12,8 @@ import { getErrorMessage } from '../utils/errorHandler';
 import i18n from '../i18n';
 
 interface PubkyHandlersReturn {
-    onPubkyPress: (pubky: string, index: number) => void;
-    onQRPress: (data: { pubky: string; dispatch: Dispatch; onComplete?: () => void }) => Promise<string>;
+	onPubkyPress: (pubky: string, index: number) => void;
+	onQRPress: (data: { pubky: string; dispatch: Dispatch; onComplete?: () => void }) => Promise<string>;
 }
 
 export const usePubkyHandlers = (): PubkyHandlersReturn => {
@@ -27,110 +27,123 @@ export const usePubkyHandlers = (): PubkyHandlersReturn => {
 		[navigation],
 	);
 
-	const onQRPress = useCallback(async (data: {
-        pubky: string;
-        dispatch: Dispatch;
-        onComplete?: () => void;
-    }) => {
-		const { pubky, onComplete } = data;
+	const onQRPress = useCallback(
+		async (data: { pubky: string; dispatch: Dispatch; onComplete?: () => void }) => {
+			const { pubky, onComplete } = data;
 
-		// Check network before showing scanner
-		const isOnline = getIsOnline();
-		if (!isOnline) {
-			const connected = await checkNetworkConnection({
-				prevNetworkState: isOnline,
-				dispatch,
-				displayToastIfOnline: false,
-				displayToastIfOffline: false,
-			});
-			if (!connected) {
-				showToast({
-					type: 'error',
-					title: i18n.t('network.currentlyOffline'),
-					description: i18n.t('network.offlineDescription'),
-					autoHide: false,
+			// Check network before showing scanner
+			const isOnline = getIsOnline();
+			if (!isOnline) {
+				const connected = await checkNetworkConnection({
+					prevNetworkState: isOnline,
+					dispatch,
+					displayToastIfOnline: false,
+					displayToastIfOffline: false,
 				});
-				return '';
+				if (!connected) {
+					showToast({
+						type: 'error',
+						title: i18n.t('network.currentlyOffline'),
+						description: i18n.t('network.offlineDescription'),
+						autoHide: false,
+					});
+					return '';
+				}
 			}
-		}
 
-		return new Promise<string>((resolve) => {
-			SheetManager.show('camera', {
-				payload: {
-					onScan: async (scannedData: string) => {
-						await SheetManager.hide('camera');
-						const parsed = await parseInput(scannedData, 'scan');
-						const result = await routeInput(parsed, { dispatch, pubky });
-						if (result.isErr()) {
-							const errorMsg = getErrorMessage(result.error, i18n.t('errors.unknownError'));
-							const debugInfo = JSON.stringify({
-								error: errorMsg,
-								input: scannedData.substring(0, 100),
-								action: parsed.action,
-							}, null, 2);
-							showToast({
-								type: 'error',
-								title: i18n.t('common.error'),
-								description: errorMsg,
-								onPress: () => {
-									copyToClipboard(debugInfo);
-									showToast({
-										type: 'success',
-										title: i18n.t('common.copied'),
-										description: i18n.t('errors.debugInfoCopied'),
-									});
-								},
-							});
-						}
-						onComplete?.();
-						resolve(result.isOk() ? scannedData : getErrorMessage(result.error, i18n.t('errors.unknownError')));
-					},
-					onCopyClipboard: async (): Promise<void> => {
-						await SheetManager.hide('camera');
-						const clipboardContents = await readFromClipboard();
-						if (!clipboardContents) {
-							showToast({
-								type: 'error',
-								title: i18n.t('common.error'),
-								description: i18n.t('errors.emptyClipboard'),
-							});
+			return new Promise<string>(resolve => {
+				SheetManager.show('camera', {
+					payload: {
+						onScan: async (scannedData: string) => {
+							await SheetManager.hide('camera');
+							const parsed = await parseInput(scannedData, 'scan');
+							const result = await routeInput(parsed, { dispatch, pubky });
+							if (result.isErr()) {
+								const errorMsg = getErrorMessage(result.error, i18n.t('errors.unknownError'));
+								const debugInfo = JSON.stringify(
+									{
+										error: errorMsg,
+										input: scannedData.substring(0, 100),
+										action: parsed.action,
+									},
+									null,
+									2,
+								);
+								showToast({
+									type: 'error',
+									title: i18n.t('common.error'),
+									description: errorMsg,
+									onPress: () => {
+										copyToClipboard(debugInfo);
+										showToast({
+											type: 'success',
+											title: i18n.t('common.copied'),
+											description: i18n.t('errors.debugInfoCopied'),
+										});
+									},
+								});
+							}
+							onComplete?.();
+							resolve(
+								result.isOk() ? scannedData : getErrorMessage(result.error, i18n.t('errors.unknownError')),
+							);
+						},
+						onCopyClipboard: async (): Promise<void> => {
+							await SheetManager.hide('camera');
+							const clipboardContents = await readFromClipboard();
+							if (!clipboardContents) {
+								showToast({
+									type: 'error',
+									title: i18n.t('common.error'),
+									description: i18n.t('errors.emptyClipboard'),
+								});
+								resolve('');
+								return;
+							}
+							const parsed = await parseInput(clipboardContents, 'clipboard');
+							const result = await routeInput(parsed, { dispatch, pubky });
+							if (result.isErr()) {
+								const errorMsg = getErrorMessage(result.error, i18n.t('errors.unknownError'));
+								const debugInfo = JSON.stringify(
+									{
+										error: errorMsg,
+										input: clipboardContents.substring(0, 100),
+										action: parsed.action,
+									},
+									null,
+									2,
+								);
+								showToast({
+									type: 'error',
+									title: i18n.t('common.error'),
+									description: errorMsg,
+									onPress: () => {
+										copyToClipboard(debugInfo);
+										showToast({
+											type: 'success',
+											title: i18n.t('common.copied'),
+											description: i18n.t('errors.debugInfoCopied'),
+										});
+									},
+								});
+							}
+							onComplete?.();
+							resolve(
+								result.isOk()
+									? clipboardContents
+									: getErrorMessage(result.error, i18n.t('errors.unknownError')),
+							);
+						},
+						onClose: () => {
+							SheetManager.hide('camera');
 							resolve('');
-							return;
-						}
-						const parsed = await parseInput(clipboardContents, 'clipboard');
-						const result = await routeInput(parsed, { dispatch, pubky });
-						if (result.isErr()) {
-							const errorMsg = getErrorMessage(result.error, i18n.t('errors.unknownError'));
-							const debugInfo = JSON.stringify({
-								error: errorMsg,
-								input: clipboardContents.substring(0, 100),
-								action: parsed.action,
-							}, null, 2);
-							showToast({
-								type: 'error',
-								title: i18n.t('common.error'),
-								description: errorMsg,
-								onPress: () => {
-									copyToClipboard(debugInfo);
-									showToast({
-										type: 'success',
-										title: i18n.t('common.copied'),
-										description: i18n.t('errors.debugInfoCopied'),
-									});
-								},
-							});
-						}
-						onComplete?.();
-						resolve(result.isOk() ? clipboardContents : getErrorMessage(result.error, i18n.t('errors.unknownError')));
+						},
 					},
-					onClose: () => {
-						SheetManager.hide('camera');
-						resolve('');
-					},
-				},
+				});
 			});
-		});
-	}, [dispatch]);
+		},
+		[dispatch],
+	);
 
 	return {
 		onPubkyPress,

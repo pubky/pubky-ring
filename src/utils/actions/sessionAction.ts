@@ -31,7 +31,7 @@ type SessionActionData = {
  */
 export const handleSessionAction = async (
 	data: SessionActionData,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<string>> => {
 	const { pubky, dispatch } = context;
 	const { xCallback } = data.params;

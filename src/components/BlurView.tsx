@@ -8,18 +8,8 @@ type BlurViewProps = {
 	children?: ReactNode;
 };
 
-const BlurView = ({
-	pressed,
-	style,
-	...props
-}: BlurViewProps): ReactElement => {
-	return (
-		<Blur
-			{...props}
-			style={style}
-			blurAmount={pressed ? 10 : 4}
-		/>
-	);
+const BlurView = ({ pressed, style, ...props }: BlurViewProps): ReactElement => {
+	return <Blur {...props} style={style} blurAmount={pressed ? 10 : 4} />;
 };
 
 export default memo(BlurView);

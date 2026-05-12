@@ -27,9 +27,7 @@ type MigrateActionData = {
 /**
  * Parses a key input (mnemonic or secret key) and returns the secret key and mnemonic
  */
-const parseKeyInput = async (
-	key: string
-): Promise<{ secretKey: string; mnemonic: string }> => {
+const parseKeyInput = async (key: string): Promise<{ secretKey: string; mnemonic: string }> => {
 	const keypairRes = await mnemonicPhraseToKeypair(key.toLowerCase());
 	if (keypairRes.isOk()) {
 		return {
@@ -76,10 +74,10 @@ export const subscribeMigrationProgress = (listener: ProgressListener): (() => v
  * Get current migration progress
  */
 export const getMigrationProgress = (): MigrationProgress => ({
-	current: successfulImports + failedImports,  // Completed imports
+	current: successfulImports + failedImports, // Completed imports
 	total: expectedTotal ?? 0,
-	isActive: expectedTotal !== null && (successfulImports + failedImports) < expectedTotal,
-	isImporting: importPromises.size > 0 && (successfulImports + failedImports) < importPromises.size,
+	isActive: expectedTotal !== null && successfulImports + failedImports < expectedTotal,
+	isImporting: importPromises.size > 0 && successfulImports + failedImports < importPromises.size,
 });
 
 /**
@@ -121,7 +119,7 @@ export const handleMigrationScannerClose = (): void => {
 	// If we had any successful imports, show a summary
 	if (successfulImports > 0) {
 		// Use expectedTotal for accurate count, fall back to processed count
-		const totalKeys = expectedTotal ?? (successfulImports + failedImports);
+		const totalKeys = expectedTotal ?? successfulImports + failedImports;
 		const isPartial = expectedTotal !== null && importedIndices.size < expectedTotal;
 		showMigrationSummary(successfulImports, totalKeys, isPartial);
 	}
@@ -162,7 +160,7 @@ const completeMigration = async (): Promise<void> => {
  */
 export const handleMigrateAction = async (
 	data: MigrateActionData,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
@@ -208,17 +206,16 @@ export const handleMigrateAction = async (
 		notifyProgressListeners();
 
 		// Start import immediately (DON'T await) - fire and forget with tracking
-		const importPromise = importKeyImmediately(key, dispatch)
-			.then(result => {
-				// Update progress when this individual import completes
-				if (result.isOk()) {
-					successfulImports++;
-				} else {
-					failedImports++;
-				}
-				notifyProgressListeners();
-				return result;
-			});
+		const importPromise = importKeyImmediately(key, dispatch).then(result => {
+			// Update progress when this individual import completes
+			if (result.isOk()) {
+				successfulImports++;
+			} else {
+				failedImports++;
+			}
+			notifyProgressListeners();
+			return result;
+		});
 
 		importPromises.set(index, importPromise);
 
@@ -249,10 +246,7 @@ export const handleMigrateAction = async (
 /**
  * Imports a single key (for single-key migrations)
  */
-const importSingleKey = async (
-	key: string,
-	dispatch: ActionContext['dispatch']
-): Promise<Result<string>> => {
+const importSingleKey = async (key: string, dispatch: ActionContext['dispatch']): Promise<Result<string>> => {
 	const currentPubkys = getPubkyKeys(getStore());
 	const { secretKey, mnemonic } = await parseKeyInput(key);
 
@@ -285,7 +279,7 @@ const importSingleKey = async (
  */
 const importKeyImmediately = async (
 	key: string,
-	dispatch: ActionContext['dispatch']
+	dispatch: ActionContext['dispatch'],
 ): Promise<Result<string>> => {
 	const { secretKey, mnemonic } = await parseKeyInput(key);
 

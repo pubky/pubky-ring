@@ -1,14 +1,21 @@
 // Accent colors
 
 export const ACCENTS = {
-    pubkyRing: '#0085FF',
-    pubkyApp: '#C8FF00',
+	pubkyRing: '#0085FF',
+	pubkyApp: '#C8FF00',
 };
 
 // Gradient definitions
 
-export const BLUE_RADIAL_GRADIENT = ['#041426', '#041426', '#051322', '#040F1C', '#020B13', '#01060A' ];
-export const ONBOARDING_KEY_ERROR_RADIAL_GRADIENT = ['#260404', '#260404', '#221305', '#1C0404', '#130202', '#0A0101'];
+export const BLUE_RADIAL_GRADIENT = ['#041426', '#041426', '#051322', '#040F1C', '#020B13', '#01060A'];
+export const ONBOARDING_KEY_ERROR_RADIAL_GRADIENT = [
+	'#260404',
+	'#260404',
+	'#221305',
+	'#1C0404',
+	'#130202',
+	'#0A0101',
+];
 export const ONBOARDING_PUBKY_RADIAL_GRADIENT = ['#2A333E', '#282B2F'];
 export const AUTHORIZE_KEY_GRADIENT = ['#101F30', '#131C25', '#14181D', '#171818', '#191919', '#121212'];
 

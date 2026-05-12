@@ -1,19 +1,10 @@
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import { Platform } from 'react-native';
-import {
-	check,
-	request,
-	PERMISSIONS,
-	RESULTS,
-} from 'react-native-permissions';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { decryptRecoveryFile } from '@synonymdev/react-native-pubky';
 import { Dispatch } from 'redux';
 import { importPubky } from './pubky.ts';
-import {
-	err,
-	ok,
-	Result,
-} from '@synonymdev/result';
+import { err, ok, Result } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import Share from 'react-native-share';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -145,18 +136,12 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 			content: base64Content,
 			dispatch,
 		});
-
 	} catch (error) {
 		const errMsg = `Failed to import file: ${JSON.stringify(error)}`;
 		try {
-			if (error &&
-				typeof error === 'object' &&
-				'code' in error &&
-				error?.code === 'OPERATION_CANCELED'
-			) {
+			if (error && typeof error === 'object' && 'code' in error && error?.code === 'OPERATION_CANCELED') {
 				return err(error.code);
 			}
-
 		} catch {
 			return err(errMsg);
 		}
@@ -170,12 +155,12 @@ export const showImportPrompt = ({
 	content,
 	dispatch,
 }: {
-    fileName: string;
-    fileDate?: Date;
-    content: string;
-    dispatch: Dispatch
+	fileName: string;
+	fileDate?: Date;
+	content: string;
+	dispatch: Dispatch;
 }): Promise<Result<string>> => {
-	return new Promise((resolve) => {
+	return new Promise(resolve => {
 		SheetManager.show('backup-prompt', {
 			payload: {
 				fileName,
@@ -221,9 +206,7 @@ export const showImportPrompt = ({
 
 export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
 	// Ensure filename ends with .pkarr
-	const fullFilename = filename.endsWith('.pkarr')
-		? filename
-		: `${filename}.pkarr`;
+	const fullFilename = filename.endsWith('.pkarr') ? filename : `${filename}.pkarr`;
 
 	try {
 		if (Platform.OS === 'ios') {

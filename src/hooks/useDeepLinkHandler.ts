@@ -7,11 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-	getAllPubkys,
-	getDeepLink,
-	getSignedUpPubkys,
-} from '../store/selectors/pubkySelectors';
+import { getAllPubkys, getDeepLink, getSignedUpPubkys } from '../store/selectors/pubkySelectors';
 import { setDeepLink } from '../store/slices/pubkysSlice';
 import { ParsedInput } from '../utils/inputParser';
 import { actionRequiresPubky } from '../utils/inputRouter';
@@ -72,11 +68,7 @@ export const useDeepLinkHandler = (
 
 				if (signedUpPubkyKeys.length > 1) {
 					// Multiple pubkys - show selection sheet
-					const selectedPubky = await showPubkySelectionSheet(
-						parsedInput,
-						'deeplink',
-						dispatch,
-					);
+					const selectedPubky = await showPubkySelectionSheet(parsedInput, 'deeplink', dispatch);
 					if (selectedPubky) {
 						await routeInputWithContext(parsedInput, selectedPubky, 'deeplink', dispatch);
 					}
@@ -93,7 +85,7 @@ export const useDeepLinkHandler = (
 		};
 
 		processDeepLink();
-	// Note: allPubkys is intentionally excluded to prevent re-triggering when new pubkys are created
-	// eslint-disable-next-line react-hooks/exhaustive-deps
+		// Note: allPubkys is intentionally excluded to prevent re-triggering when new pubkys are created
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [deepLink, dispatch, signedUpPubkys, createPubky, importPubky]);
 };

@@ -1,6 +1,6 @@
 import { SheetManager } from 'react-native-actions-sheet';
-import { defaultPubkyState } from "../store/shapes/pubky.ts";
-import { EBackupPreference, Pubky } from "../types/pubky.ts";
+import { defaultPubkyState } from '../store/shapes/pubky.ts';
+import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { getPubkySecretKey } from './pubky.ts';
 import { showToast, generateBackupFileName } from './helpers.ts';
 import { getBackupPreference, getStore } from './store-helpers.ts';
@@ -81,7 +81,7 @@ export const showImportSuccessSheet = ({
 			isNewPubky,
 			pubky,
 			data,
-			onContinue
+			onContinue,
 		},
 		onClose: () => SheetManager.hide('import-success'),
 	});
@@ -109,9 +109,9 @@ export const showBackupPrompt = async ({
 	backupPreference,
 	onComplete,
 }: {
-	pubky: string,
+	pubky: string;
 	backupPreference?: EBackupPreference;
-	onComplete?: () => void
+	onComplete?: () => void;
 }): Promise<void> => {
 	if (backupPreference === EBackupPreference.unknown) {
 		SheetManager.show('select-backup-preference', {
@@ -136,10 +136,7 @@ export const showBackupPrompt = async ({
 		backupPreference = getBackupPreference(pubky);
 	}
 
-	if (
-		backupPreference === EBackupPreference.recoveryPhrase &&
-		secretKeyResponse.value?.mnemonic
-	) {
+	if (backupPreference === EBackupPreference.recoveryPhrase && secretKeyResponse.value?.mnemonic) {
 		SheetManager.show('recovery-phrase-prompt', {
 			payload: {
 				pubky,
@@ -158,7 +155,7 @@ export const showBackupPrompt = async ({
 				try {
 					const createRecoveryFileRes = await createRecoveryFile(
 						secretKeyResponse.value.secretKey,
-						passphrase
+						passphrase,
 					);
 
 					if (createRecoveryFileRes.isErr()) {

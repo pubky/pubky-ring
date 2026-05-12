@@ -43,34 +43,38 @@ interface ToastComponentProps extends ToastProps {
 }
 
 const createThemedToast = (
-	ToastComponent: React.ComponentType<ToastComponentProps>
+	ToastComponent: React.ComponentType<ToastComponentProps>,
 ): React.FC<ToastComponentProps> => {
 	return React.memo((props: ToastComponentProps): React.ReactElement => {
 		const insets = useSafeAreaInsets();
 		const theme = useTheme() as Theme;
-		const styles = useMemo(() => StyleSheet.create({
-			// eslint-disable-next-line react-native/no-unused-styles
-			text1: {
-				...textStyles.bodySSB,
-				color: theme.colors.text,
-			},
-			// eslint-disable-next-line react-native/no-unused-styles
-			text2: {
-				...textStyles.bodyS,
-				color: theme.colors.sessionText,
-			},
-			// eslint-disable-next-line react-native/no-unused-styles
-			contentContainer: {
-				paddingHorizontal: 15,
-			},
-			// eslint-disable-next-line react-native/no-unused-styles
-			toastContainer: {
-				marginTop: Platform.select({
-					ios: insets.top - 50,
-					android: insets.top,
+		const styles = useMemo(
+			() =>
+				StyleSheet.create({
+					// eslint-disable-next-line react-native/no-unused-styles
+					text1: {
+						...textStyles.bodySSB,
+						color: theme.colors.text,
+					},
+					// eslint-disable-next-line react-native/no-unused-styles
+					text2: {
+						...textStyles.bodyS,
+						color: theme.colors.sessionText,
+					},
+					// eslint-disable-next-line react-native/no-unused-styles
+					contentContainer: {
+						paddingHorizontal: 15,
+					},
+					// eslint-disable-next-line react-native/no-unused-styles
+					toastContainer: {
+						marginTop: Platform.select({
+							ios: insets.top - 50,
+							android: insets.top,
+						}),
+					},
 				}),
-			},
-		}), [theme.colors.text, theme.colors.sessionText, insets]);
+			[theme.colors.text, theme.colors.sessionText, insets],
+		);
 
 		return (
 			<ToastComponent
@@ -94,16 +98,8 @@ type ToastConfigReturn = {
 };
 
 export const toastConfig = ({ style = {} }: ToastConfigStyle = {}): ToastConfigReturn => ({
-	success: (props: ToastProps): React.ReactElement => (
-		<ThemedSuccessToast {...props} style={style} />
-	),
-	error: (props: ToastProps): React.ReactElement => (
-		<ThemedErrorToast {...props} style={style} />
-	),
-	info: (props: ToastProps): React.ReactElement => (
-		<ThemedInfoToast {...props} style={style} />
-	),
-	any: (props: ToastProps): React.ReactElement => (
-		<ThemedBaseToast {...props} style={style} />
-	),
+	success: (props: ToastProps): React.ReactElement => <ThemedSuccessToast {...props} style={style} />,
+	error: (props: ToastProps): React.ReactElement => <ThemedErrorToast {...props} style={style} />,
+	info: (props: ToastProps): React.ReactElement => <ThemedInfoToast {...props} style={style} />,
+	any: (props: ToastProps): React.ReactElement => <ThemedBaseToast {...props} style={style} />,
 });

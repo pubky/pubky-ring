@@ -1,30 +1,23 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
 import { Canvas, Rect } from '@shopify/react-native-skia';
-import {
-	Easing,
-	cancelAnimation,
-	useSharedValue,
-	withTiming,
-} from 'react-native-reanimated';
+import { Easing, cancelAnimation, useSharedValue, withTiming } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import {
-	View
-} from '../theme/components.ts';
+import { View } from '../theme/components.ts';
 
 type ProgressBarProps = {
-  duration?: number;         // ms
-  delayStart?: number;       // delay before animation starts (ms)
-  delayRender?: number;      // delay before rendering the component (ms)
-  fadeIn?: boolean;          // if true, fades in the bar when it appears
-  fadeInDuration?: number;   // fade in animation duration (ms)
-  unfilledColor?: string;
-  filledColor?: string;
-  height?: number;
-  borderRadius?: number;
-  reverse?: boolean;         // if true, progress fills from right to left
-  onComplete?: () => void;
-  style?: ViewStyle | ViewStyle[];
+	duration?: number; // ms
+	delayStart?: number; // delay before animation starts (ms)
+	delayRender?: number; // delay before rendering the component (ms)
+	fadeIn?: boolean; // if true, fades in the bar when it appears
+	fadeInDuration?: number; // fade in animation duration (ms)
+	unfilledColor?: string;
+	filledColor?: string;
+	height?: number;
+	borderRadius?: number;
+	reverse?: boolean; // if true, progress fills from right to left
+	onComplete?: () => void;
+	style?: ViewStyle | ViewStyle[];
 };
 
 const ProgressBar = ({
@@ -80,16 +73,12 @@ const ProgressBar = ({
 
 		// Start progress animation after delay
 		const timer = setTimeout(() => {
-			progress.value = withTiming(
-				1,
-				{ duration, easing: Easing.linear },
-				(finished) => {
-					if (finished && onComplete && !completedOnce.current) {
-						completedOnce.current = true;
-						scheduleOnRN(onComplete);
-					}
-				},
-			);
+			progress.value = withTiming(1, { duration, easing: Easing.linear }, finished => {
+				if (finished && onComplete && !completedOnce.current) {
+					completedOnce.current = true;
+					scheduleOnRN(onComplete);
+				}
+			});
 		}, delayStart);
 
 		return (): void => {
@@ -101,12 +90,16 @@ const ProgressBar = ({
 	}, [shouldRender, duration, delayStart, fadeIn, fadeInDuration, onComplete]);
 
 	if (!shouldRender) {
-		return (<View style={[
-			styles.container,
-			//eslint-disable-next-line react-native/no-inline-styles
-			{ backgroundColor: 'transparent', height, borderRadius },
-			style,
-		]}  />);
+		return (
+			<View
+				style={[
+					styles.container,
+					//eslint-disable-next-line react-native/no-inline-styles
+					{ backgroundColor: 'transparent', height, borderRadius },
+					style,
+				]}
+			/>
+		);
 	}
 
 	return (
@@ -115,9 +108,9 @@ const ProgressBar = ({
 				styles.container,
 				//eslint-disable-next-line react-native/no-inline-styles
 				{ height, borderRadius, overflow: 'hidden', opacity: fadeIn ? undefined : 1 },
-				style
+				style,
 			]}
-			onLayout={(e) => {
+			onLayout={e => {
 				setDimensions({
 					width: e.nativeEvent.layout.width,
 					height: e.nativeEvent.layout.height,
@@ -146,10 +139,7 @@ const ProgressBar = ({
 						height={dimensions.height}
 						color={filledColor}
 						opacity={opacity}
-						transform={[
-							{ translateX: reverse ? -progress : 0 },
-							{ scaleX: dimensions.width },
-						]}
+						transform={[{ translateX: reverse ? -progress : 0 }, { scaleX: dimensions.width }]}
 					/>
 				</Canvas>
 			)}

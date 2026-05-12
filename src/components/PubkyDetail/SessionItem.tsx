@@ -3,13 +3,7 @@ import { StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
 import { textStyles } from '../../theme/utils';
-import {
-	SessionView,
-	Text,
-	TouchableOpacity,
-	SessionText,
-	SessionBox,
-} from '../../theme/components.ts';
+import { SessionView, Text, TouchableOpacity, SessionText, SessionBox } from '../../theme/components.ts';
 
 const formatTimestamp = (timestamp: number): string => {
 	const date = new Date(timestamp);
@@ -22,14 +16,17 @@ const formatTimestamp = (timestamp: number): string => {
 	return `${day}-${month}-${year} ${hours}:${minutes}`;
 };
 
-const SessionItem = ({ session, onSignOut }: {
-    session: PubkySession;
-    onSignOut: (sessionSecret: string) => void;
+const SessionItem = ({
+	session,
+	onSignOut,
+}: {
+	session: PubkySession;
+	onSignOut: (sessionSecret: string) => void;
 }): ReactElement => {
 	const { t } = useTranslation();
-	const formattedDate = useMemo(() =>
-    session.created_at ? formatTimestamp(session.created_at) : '',
-	[session.created_at]
+	const formattedDate = useMemo(
+		() => (session.created_at ? formatTimestamp(session.created_at) : ''),
+		[session.created_at],
 	);
 
 	const handleSignOut = useCallback(() => {
@@ -45,17 +42,10 @@ const SessionItem = ({ session, onSignOut }: {
 					</Text>
 					<SessionText style={styles.dateText}>{formattedDate}</SessionText>
 				</SessionView>
-				<TouchableOpacity
-					style={styles.signOutButton}
-					onPress={handleSignOut}
-					activeOpacity={0.7}
-				>
-					<Text
-						style={styles.signOutText}
-						numberOfLines={1}
-						adjustsFontSizeToFit
-						minimumFontScale={0.8}
-					>{t('sessionItem.signOut')}</Text>
+				<TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
+					<Text style={styles.signOutText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+						{t('sessionItem.signOut')}
+					</Text>
 				</TouchableOpacity>
 			</SessionView>
 
@@ -63,7 +53,7 @@ const SessionItem = ({ session, onSignOut }: {
 				<SessionView style={styles.capsContainer}>
 					<Text style={styles.capsTitle}>{t('sessionItem.capabilities')}</Text>
 					<SessionView style={styles.capsWrapper}>
-						{session.capabilities.map((cap) => (
+						{session.capabilities.map(cap => (
 							<SessionView key={cap} style={styles.capChip}>
 								<Text style={styles.capText}>{cap}</Text>
 							</SessionView>

@@ -31,7 +31,7 @@ registerSheet('loading', LoadingModal as any);
 
 declare module 'react-native-actions-sheet' {
 	interface Sheets {
-		'camera': SheetDefinition;
+		camera: SheetDefinition;
 		'backup-prompt': SheetDefinition;
 		'recovery-phrase-prompt': SheetDefinition<{
 			payload: {
@@ -53,7 +53,7 @@ declare module 'react-native-actions-sheet' {
 				onClose: () => void;
 			};
 		}>;
-		'loading': SheetDefinition<{
+		loading: SheetDefinition<{
 			payload?: {
 				modalTitle?: string;
 				title?: string;

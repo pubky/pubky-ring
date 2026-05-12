@@ -4,11 +4,7 @@ import QRCode from 'react-native-qrcode-svg';
 import { Text, View, ChevronLeft, ChevronRight, AnimatedView } from '../theme/components.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
-import {
-	useSharedValue,
-	useAnimatedStyle,
-	withTiming,
-} from 'react-native-reanimated';
+import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 
 const pubkyRingLogo = require('../images/pubky-ring.png');
 
@@ -71,7 +67,7 @@ const AnimatedQR = ({
 			// Linear interpolation from startCycleInterval to cycleInterval
 			const progress = elapsed / transitionDuration;
 			const intervalRange = cycleInterval - (startCycleInterval ?? cycleInterval);
-			return Math.round((startCycleInterval ?? cycleInterval) + (intervalRange * progress));
+			return Math.round((startCycleInterval ?? cycleInterval) + intervalRange * progress);
 		};
 	}, [hasTransition, cycleInterval, startCycleInterval, transitionDuration]);
 

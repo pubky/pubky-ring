@@ -40,7 +40,8 @@ const RootNavigator = (): ReactElement => {
 					headerShown: false,
 					animation: navigationAnimation,
 					animationDuration: NAVIGATION_ANIMATION_DURATION,
-				}}>
+				}}
+			>
 				<Stack.Screen
 					name="TermsOfUse"
 					component={TermsOfUse}

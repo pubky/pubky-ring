@@ -1,11 +1,6 @@
 import React, { memo, ReactElement, useMemo, useState } from 'react';
 import { Platform, StyleSheet, TouchableOpacity } from 'react-native';
-import {
-	ActionSheetContainer,
-	SkiaGradient,
-	Text,
-	View,
-} from '../theme/components.ts';
+import { ActionSheetContainer, SkiaGradient, Text, View } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
@@ -14,12 +9,9 @@ import BlurView from './BlurView.tsx';
 import PubkyCard from './PubkyCard.tsx';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
-import { EBackupPreference } from "../types/pubky.ts";
+import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
-import {
-	ACTION_SHEET_HEIGHT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
+import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
@@ -30,12 +22,14 @@ const getMarginBottom = (index: number): number => {
 const smallScreen = isSmallScreen();
 const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
-const RecoveryPhrasePrompt = ({ payload }: {
-    payload: {
-        pubky: string;
+const RecoveryPhrasePrompt = ({
+	payload,
+}: {
+	payload: {
+		pubky: string;
 		mnemonic: string;
-        onClose: () => void;
-    };
+		onClose: () => void;
+	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -54,7 +48,9 @@ const RecoveryPhrasePrompt = ({ payload }: {
 	}, [t]);
 
 	const mnemonicWords = useMemo(() => {
-		if (!payload?.mnemonic) {return [];}
+		if (!payload?.mnemonic) {
+			return [];
+		}
 		return payload.mnemonic.split(' ');
 	}, [payload?.mnemonic]);
 
@@ -86,32 +82,39 @@ const RecoveryPhrasePrompt = ({ payload }: {
 						<View style={styles.columnContainer}>
 							{mnemonicWords.slice(0, 6).map((word, index) => (
 								<View key={index} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
-									<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>{index + 1}.</Text>
-									<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>{word}</Text>
+									<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
+										{index + 1}.
+									</Text>
+									<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>
+										{word}
+									</Text>
 								</View>
 							))}
 						</View>
 						<View style={styles.columnContainer}>
 							{mnemonicWords.slice(6, 12).map((word, index) => (
 								<View key={index + 6} style={[styles.wordItem, { marginBottom: getMarginBottom(index) }]}>
-									<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>{index + 7}.</Text>
-									<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>{word}</Text>
+									<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
+										{index + 7}.
+									</Text>
+									<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>
+										{word}
+									</Text>
 								</View>
 							))}
 						</View>
 						{isBlurred && (
 							<>
 								<BlurView style={styles.blurOverlay} />
-								<TouchableOpacity
-									style={styles.revealButton}
-									onPress={handleConfirmBackup}
-								>
+								<TouchableOpacity style={styles.revealButton} onPress={handleConfirmBackup}>
 									<Text
 										style={styles.tapToRevealText}
 										numberOfLines={1}
 										adjustsFontSizeToFit
 										minimumFontScale={0.8}
-									>{t('backup.tapToReveal')}</Text>
+									>
+										{t('backup.tapToReveal')}
+									</Text>
 								</TouchableOpacity>
 							</>
 						)}
@@ -119,13 +122,9 @@ const RecoveryPhrasePrompt = ({ payload }: {
 
 					<PubkyCard name={pubkyName} publicKey={payload.pubky} />
 
-					<Text style={styles.warningText}>
-						{t('backup.recoveryWarning')}
-					</Text>
+					<Text style={styles.warningText}>{t('backup.recoveryWarning')}</Text>
 
-					{error ? (
-						<Text style={styles.errorText}>{error}</Text>
-					) : null}
+					{error ? <Text style={styles.errorText}>{error}</Text> : null}
 					<View style={styles.footer}>
 						<View style={styles.buttonContainer}>
 							<Button
@@ -226,12 +225,12 @@ const styles = StyleSheet.create({
 		...textStyles.bodyS,
 		color: '#dc2626',
 		marginLeft: 4,
-		marginVertical: 12
+		marginVertical: 12,
 	},
 	footer: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
 	},
 	buttonContainer: {
 		width: '100%',

@@ -1,17 +1,20 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import {
-	EBackupPreference,
-	ISetPubkyData,
-	Pubky,
-	PubkySession,
-} from '../../types/pubky';
+import { EBackupPreference, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
 import { initialState, defaultPubkyState } from '../shapes/pubky';
 
 const pubkysSlice = createSlice({
 	name: 'pubky',
 	initialState,
 	reducers: {
-		addPubky: (state, action: PayloadAction<{ pubky: string, backupPreference?: EBackupPreference, isBackedUp?: boolean, signupToken?: string }>) => {
+		addPubky: (
+			state,
+			action: PayloadAction<{
+				pubky: string;
+				backupPreference?: EBackupPreference;
+				isBackedUp?: boolean;
+				signupToken?: string;
+			}>,
+		) => {
 			state.pubkys = state?.pubkys || {};
 			const { pubky, backupPreference, isBackedUp = false, signupToken = '' } = action.payload;
 			if (!state.pubkys[pubky]) {
@@ -59,11 +62,11 @@ const pubkysSlice = createSlice({
 				state.pubkys[pubky].signedUp = signedUp;
 			}
 		},
-		addProcessing: (state, action: PayloadAction<{ pubky: string; }>) => {
+		addProcessing: (state, action: PayloadAction<{ pubky: string }>) => {
 			const { pubky } = action.payload;
 			state.processing[pubky] = true;
 		},
-		removeProcessing: (state, action: PayloadAction<{ pubky: string; }>) => {
+		removeProcessing: (state, action: PayloadAction<{ pubky: string }>) => {
 			const { pubky } = action.payload;
 			delete state.processing[pubky];
 		},
@@ -72,12 +75,11 @@ const pubkysSlice = createSlice({
 			if (state.pubkys[pubky]) {
 				// Check if session already exists by session_secret
 				const sessionExists = state.pubkys[pubky].sessions.some(
-					existingSession => existingSession.session_secret === session.session_secret
+					existingSession => existingSession.session_secret === session.session_secret,
 				);
 
 				if (!sessionExists) {
-					state.pubkys[pubky].sessions.push({ ...session,
-						created_at: Date.now()  });
+					state.pubkys[pubky].sessions.push({ ...session, created_at: Date.now() });
 				}
 			}
 		},
@@ -85,7 +87,7 @@ const pubkysSlice = createSlice({
 			const { pubky, session_secret } = action.payload;
 			if (state.pubkys[pubky]) {
 				state.pubkys[pubky].sessions = state.pubkys[pubky].sessions.filter(
-					session => session.session_secret !== session_secret
+					session => session.session_secret !== session_secret,
 				);
 			}
 		},

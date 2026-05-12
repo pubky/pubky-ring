@@ -56,7 +56,7 @@ export interface RouteResult {
  */
 export const routeInput = async (
 	parsed: ParsedInput,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<RouteResult>> => {
 	const { data, source } = parsed;
 
@@ -78,35 +78,60 @@ export const routeInput = async (
 		if (isImportAction(data)) {
 			const result = await handleImportAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Import, pubky: result.value, message: i18n.t('router.importSuccessful') })
+				? ok({
+						success: true,
+						action: InputAction.Import,
+						pubky: result.value,
+						message: i18n.t('router.importSuccessful'),
+				  })
 				: err(getErrorMessage(result.error, i18n.t('errors.importFailed')));
 		}
 
 		if (isMigrateAction(data)) {
 			const result = await handleMigrateAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Migrate, pubky: result.value, message: i18n.t('router.migrateSuccessful') })
+				? ok({
+						success: true,
+						action: InputAction.Migrate,
+						pubky: result.value,
+						message: i18n.t('router.migrateSuccessful'),
+				  })
 				: err(getErrorMessage(result.error, i18n.t('errors.migrateFailed')));
 		}
 
 		if (isSignupAction(data)) {
 			const result = await handleSignupAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Signup, pubky: result.value, message: i18n.t('router.signupSuccessful') })
+				? ok({
+						success: true,
+						action: InputAction.Signup,
+						pubky: result.value,
+						message: i18n.t('router.signupSuccessful'),
+				  })
 				: err(getErrorMessage(result.error, i18n.t('errors.signupFailed')));
 		}
 
 		if (isInviteAction(data)) {
 			const result = await handleInviteAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Invite, pubky: result.value, message: i18n.t('router.inviteProcessed') })
+				? ok({
+						success: true,
+						action: InputAction.Invite,
+						pubky: result.value,
+						message: i18n.t('router.inviteProcessed'),
+				  })
 				: err(getErrorMessage(result.error, i18n.t('errors.inviteProcessingFailed')));
 		}
 
 		if (isSessionAction(data)) {
 			const result = await handleSessionAction(data, effectiveContext);
 			return result.isOk()
-				? ok({ success: true, action: InputAction.Session, pubky: result.value, message: i18n.t('router.sessionReturned') })
+				? ok({
+						success: true,
+						action: InputAction.Session,
+						pubky: result.value,
+						message: i18n.t('router.sessionReturned'),
+				  })
 				: err(getErrorMessage(result.error, i18n.t('errors.sessionRequestFailed')));
 		}
 
@@ -134,12 +159,7 @@ export const actionRequiresPubky = (action: InputAction): boolean => {
  * Determines if an action can proceed without network
  */
 export const actionRequiresNetwork = (action: InputAction): boolean => {
-	return [
-		InputAction.Auth,
-		InputAction.Signup,
-		InputAction.Invite,
-		InputAction.Session,
-	].includes(action);
+	return [InputAction.Auth, InputAction.Signup, InputAction.Invite, InputAction.Session].includes(action);
 };
 
 /**

@@ -27,7 +27,7 @@ export const routeInputWithContext = async (
 	parsed: ParsedInput,
 	effectivePubky: string | undefined,
 	source: InputSource,
-	dispatch: Dispatch
+	dispatch: Dispatch,
 ): Promise<void> => {
 	// Clear deeplink BEFORE processing to prevent re-triggering
 	if (source === 'deeplink') {
@@ -51,11 +51,15 @@ export const routeInputWithContext = async (
 		const errorMessage = getErrorMessage(result.error, i18n.t('errors.unknownError'));
 
 		// Build debug info for troubleshooting
-		const debugInfo = JSON.stringify({
-			action: parsed.action,
-			rawInput: parsed.rawInput,
-			error: errorMessage,
-		}, null, 2);
+		const debugInfo = JSON.stringify(
+			{
+				action: parsed.action,
+				rawInput: parsed.rawInput,
+				error: errorMessage,
+			},
+			null,
+			2,
+		);
 
 		console.error('Input routing error:', debugInfo);
 
@@ -90,7 +94,7 @@ export const showPubkySelectionSheet = async (
 	await SheetManager.hideAll();
 	await sleep(150);
 
-	return new Promise((resolve) => {
+	return new Promise(resolve => {
 		SheetManager.show('select-pubky', {
 			payload: {
 				deepLink: parsed.rawInput,
@@ -115,7 +119,7 @@ export const showPubkySelectionSheet = async (
  */
 export const handleNoPubkysAvailable = (
 	allPubkys: Record<string, unknown>,
-	callbacks?: PubkyCallbacks
+	callbacks?: PubkyCallbacks,
 ): void => {
 	if (Object.keys(allPubkys).length > 0) {
 		// Has pubkys but none are set up
@@ -132,17 +136,20 @@ export const handleNoPubkysAvailable = (
 			title: i18n.t('pubky.noPubkysExist'),
 			description: i18n.t('pubky.addAndSetupToProcess'),
 			visibilityTime: 5000,
-			onPress: callbacks?.createPubky && callbacks?.importPubky ? (): void => {
-				SheetManager.show('add-pubky', {
-					payload: {
-						createPubky: callbacks.createPubky,
-						importPubky: callbacks.importPubky,
-					},
-					onClose: (): void => {
-						SheetManager.hide('add-pubky');
-					},
-				});
-			} : undefined,
+			onPress:
+				callbacks?.createPubky && callbacks?.importPubky
+					? (): void => {
+							SheetManager.show('add-pubky', {
+								payload: {
+									createPubky: callbacks.createPubky,
+									importPubky: callbacks.importPubky,
+								},
+								onClose: (): void => {
+									SheetManager.hide('add-pubky');
+								},
+							});
+					  }
+					: undefined,
 		});
 	}
 };
@@ -157,7 +164,7 @@ export const resolvePubkyForAction = async (
 	signedUpPubkys: Record<string, unknown>,
 	allPubkys: Record<string, unknown>,
 	dispatch: Dispatch,
-	callbacks?: PubkyCallbacks
+	callbacks?: PubkyCallbacks,
 ): Promise<{ pubky: string | null; handled: boolean }> => {
 	if (!actionRequiresPubky(parsed.action)) {
 		return { pubky: null, handled: false };

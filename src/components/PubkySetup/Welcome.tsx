@@ -1,26 +1,10 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-} from 'react';
-import {
-	StyleSheet,
-	Image,
-	Linking,
-	Platform,
-} from 'react-native';
-import {
-	View,
-	Text,
-	SessionText,
-	RadialGradient,
-	AuthorizeButton,
-} from '../../theme/components.ts';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import { StyleSheet, Image, Linking, Platform } from 'react-native';
+import { View, Text, SessionText, RadialGradient, AuthorizeButton } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 // @ts-ignore
-import PubkyRingLogo from "../../images/pubky-app-logo.png";
+import PubkyRingLogo from '../../images/pubky-app-logo.png';
 import { PUBKY_APP_URL, WELCOME_GRADIENT } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
@@ -28,29 +12,35 @@ import { textStyles } from '../../theme/utils';
 
 const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
 
-const Welcome = ({ payload }: {
+const Welcome = ({
+	payload,
+}: {
 	payload: {
 		pubky: string;
 		onComplete?: () => void;
-    isInvite?: boolean;
+		isInvite?: boolean;
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const smallScreen = useMemo(() => isSmallScreen(), []);
 
-	const dynamicStyles = useMemo(() => StyleSheet.create({
-		// eslint-disable-next-line react-native/no-unused-styles
-		messageContainer: {
-			marginBottom: smallScreen ? 20 : 40,
-			backgroundColor: 'transparent',
-		},
-		// eslint-disable-next-line react-native/no-unused-styles
-		tagImage: {
-			width: smallScreen ? 280 : 380,
-			height: smallScreen ? 280 : 380,
-			bottom: smallScreen ? 10 : 40
-		},
-	}), [smallScreen]);
+	const dynamicStyles = useMemo(
+		() =>
+			StyleSheet.create({
+				// eslint-disable-next-line react-native/no-unused-styles
+				messageContainer: {
+					marginBottom: smallScreen ? 20 : 40,
+					backgroundColor: 'transparent',
+				},
+				// eslint-disable-next-line react-native/no-unused-styles
+				tagImage: {
+					width: smallScreen ? 280 : 380,
+					height: smallScreen ? 280 : 380,
+					bottom: smallScreen ? 10 : 40,
+				},
+			}),
+		[smallScreen],
+	);
 
 	const closeSheet = useCallback(async (): Promise<void> => {
 		return SheetManager.hide('new-pubky-setup');
@@ -80,11 +70,7 @@ const Welcome = ({ payload }: {
 	}, [payload.pubky]);
 
 	return (
-		<RadialGradient
-			style={styles.content}
-			colors={WELCOME_GRADIENT}
-			center={{ x: 0.5, y: 0.5 }}
-		>
+		<RadialGradient style={styles.content} colors={WELCOME_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
 			<View style={styles.contentWrapper}>
 				<ModalIndicator />
 				<View style={styles.titleContainer}>
@@ -94,9 +80,8 @@ const Welcome = ({ payload }: {
 				<Text style={styles.headerText}>{t('welcome.welcome')}</Text>
 				<View style={dynamicStyles.messageContainer}>
 					<SessionText style={styles.message}>
-						{t('welcome.homeserverMessageStart')}{' '}
-						<Text style={styles.pubkyText}>{truncatedPubky}</Text>
-						{' '}{t('welcome.homeserverMessageEnd')}
+						{t('welcome.homeserverMessageStart')} <Text style={styles.pubkyText}>{truncatedPubky}</Text>{' '}
+						{t('welcome.homeserverMessageEnd')}
 					</SessionText>
 				</View>
 
@@ -108,15 +93,9 @@ const Welcome = ({ payload }: {
 					/>
 				</View>
 				<View style={styles.footer}>
-					<AuthorizeButton
-						style={styles.openButton}
-						onPressIn={handleOpenPubkyApp}
-					>
+					<AuthorizeButton style={styles.openButton} onPressIn={handleOpenPubkyApp}>
 						<Text style={styles.buttonText}>{t('welcome.openButton', { domain: BUTTON_TEXT })}</Text>
-						<Image
-							source={PubkyRingLogo}
-							style={styles.pubkyLogo}
-						/>
+						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
 					</AuthorizeButton>
 				</View>
 			</View>
@@ -183,7 +162,7 @@ const styles = StyleSheet.create({
 	},
 	buttonText: {
 		...textStyles.bodySSB,
-		right: -20
+		right: -20,
 	},
 	pubkyLogo: {
 		height: 24,

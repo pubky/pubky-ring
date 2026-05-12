@@ -3,21 +3,15 @@ import { useDispatch } from 'react-redux';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Result, err, ok } from '@synonymdev/result';
 import { mnemonicPhraseToKeypair, IGenerateSecretKey } from '@synonymdev/react-native-pubky';
-import {
-	createNewPubky,
-	importPubky as importPubkyUtil,
-} from '../utils/pubky';
+import { createNewPubky, importPubky as importPubkyUtil } from '../utils/pubky';
 import { isSecretKeyImport, showToast } from '../utils/helpers';
 import { importFile } from '../utils/rnfs';
-import { showEditPubkySheet,
-	showImportSuccessSheet,
-	showNewPubkySetupSheet
-} from "../utils/sheetHelpers.ts";
+import { showEditPubkySheet, showImportSuccessSheet, showNewPubkySetupSheet } from '../utils/sheetHelpers.ts';
 import { setPubkyData } from '../store/slices/pubkysSlice';
 import { EBackupPreference } from '../types/pubky';
-import { getStore } from "../utils/store-helpers.ts";
+import { getStore } from '../utils/store-helpers.ts';
 import { getPubkyKeys } from '../store/selectors/pubkySelectors';
-import { copyToClipboard } from "../utils/clipboard.ts";
+import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
 
 export const usePubkyManagement = (): {
@@ -70,8 +64,7 @@ export const usePubkyManagement = (): {
 				}
 
 				if (mnemonic) {
-					const secretKeyRes: Result<IGenerateSecretKey> =
-            await mnemonicPhraseToKeypair(mnemonic);
+					const secretKeyRes: Result<IGenerateSecretKey> = await mnemonicPhraseToKeypair(mnemonic);
 					if (secretKeyRes.isErr()) {
 						const msg = secretKeyRes.error.message;
 						showToast({
@@ -149,7 +142,7 @@ export const usePubkyManagement = (): {
 								pubky: importFileRes.value,
 							});
 						}, 200);
-					}
+					},
 				});
 			}, 200);
 
@@ -161,13 +154,15 @@ export const usePubkyManagement = (): {
 
 	const confirmPubkyBackup = useCallback(
 		(pubky: string, backupPreference: EBackupPreference) => {
-			dispatch(setPubkyData({
-				pubky,
-				data: {
-					backupPreference,
-					isBackedUp: true,
-				},
-			}));
+			dispatch(
+				setPubkyData({
+					pubky,
+					data: {
+						backupPreference,
+						isBackedUp: true,
+					},
+				}),
+			);
 		},
 		[dispatch],
 	);

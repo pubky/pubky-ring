@@ -7,32 +7,23 @@ const selectSettings = (state: RootState): RootState['settings'] => state.settin
 /**
  * Get the current theme.
  */
-export const getTheme = createSelector(
-	[selectSettings],
-	(settings) => settings?.theme ?? ETheme.system
-);
+export const getTheme = createSelector([selectSettings], settings => settings?.theme ?? ETheme.system);
 
 export const getShowOnboarding = createSelector(
 	[selectSettings],
-	(settings) => settings?.showOnboarding ?? true
+	settings => settings?.showOnboarding ?? true,
 );
 
-export const getAutoAuth = createSelector(
-	[selectSettings],
-	(settings) => settings?.autoAuth ?? false
-);
+export const getAutoAuth = createSelector([selectSettings], settings => settings?.autoAuth ?? false);
 
 export const getNavigationAnimation = createSelector(
 	[selectSettings],
-	(settings) => settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight
+	settings => settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight,
 );
 
-export const getIsOnline = createSelector(
-	[selectSettings],
-	(settings) => settings?.isOnline ?? true
-);
+export const getIsOnline = createSelector([selectSettings], settings => settings?.isOnline ?? true);
 
 export const getSignedTermsOfUse = createSelector(
 	[selectSettings],
-	(settings) => settings?.signedTermsOfUse ?? false
+	settings => settings?.signedTermsOfUse ?? false,
 );

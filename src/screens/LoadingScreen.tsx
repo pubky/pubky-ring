@@ -5,10 +5,7 @@ const LoadingScreen = (): ReactElement => {
 	return (
 		<View style={styles.container}>
 			<Image source={require('../images/circle.png')} style={styles.circle} />
-			<Image
-				source={require('../images/pubky-ring-logo.png')}
-				style={styles.logo}
-			/>
+			<Image source={require('../images/pubky-ring-logo.png')} style={styles.logo} />
 		</View>
 	);
 };

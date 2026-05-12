@@ -2,13 +2,7 @@ import { Dispatch } from 'redux';
 import { ETheme } from '../types/settings.ts';
 import { updateTheme } from '../store/slices/settingsSlice.ts';
 
-export const toggleTheme = ({
-	dispatch,
-	theme,
-}: {
-    dispatch: Dispatch,
-    theme: ETheme
-}): void => {
+export const toggleTheme = ({ dispatch, theme }: { dispatch: Dispatch; theme: ETheme }): void => {
 	switch (theme) {
 		case ETheme.system:
 			dispatch(updateTheme({ theme: ETheme.light }));
@@ -25,12 +19,6 @@ export const toggleTheme = ({
 	}
 };
 
-export const setTheme = ({
-	dispatch,
-	theme,
-}: {
-	dispatch: Dispatch,
-	theme: ETheme
-}): void => {
+export const setTheme = ({ dispatch, theme }: { dispatch: Dispatch; theme: ETheme }): void => {
 	dispatch(updateTheme({ theme }));
 };

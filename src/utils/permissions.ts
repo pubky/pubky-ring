@@ -1,15 +1,9 @@
-import {
-	check,
-	request,
-	PERMISSIONS,
-	RESULTS,
-} from 'react-native-permissions';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
 import { Platform } from 'react-native';
 import i18n from '../i18n';
 
 export const requestCameraPermission = async (): Promise<boolean> => {
-	const cameraPermission =
-			Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA;
+	const cameraPermission = Platform.OS === 'ios' ? PERMISSIONS.IOS.CAMERA : PERMISSIONS.ANDROID.CAMERA;
 	const checkResponse = await check(cameraPermission);
 	switch (checkResponse) {
 		case RESULTS.UNAVAILABLE:
@@ -34,4 +28,3 @@ export const requestCameraPermission = async (): Promise<boolean> => {
 			return true;
 	}
 };
-

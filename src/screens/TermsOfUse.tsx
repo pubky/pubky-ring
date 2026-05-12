@@ -75,7 +75,12 @@ const TermsOfUse = (): React.ReactElement => {
 						</Text>
 					</View>
 
-					<Button testID="TermsContinueButton" style={styles.button} text={t('common.continue')} onPress={onContinue} />
+					<Button
+						testID="TermsContinueButton"
+						style={styles.button}
+						text={t('common.continue')}
+						onPress={onContinue}
+					/>
 
 					<SafeAreaInset edge="bottom" />
 				</View>

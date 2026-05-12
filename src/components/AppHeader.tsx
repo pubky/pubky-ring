@@ -1,13 +1,7 @@
 import { Image, StyleSheet } from 'react-native';
 import type { StyleProp, ViewStyle } from 'react-native';
 import React, { memo, ReactElement, useCallback, useRef } from 'react';
-import {
-	ArrowLeft,
-	NavButton,
-	Text,
-	TouchableOpacity,
-	View,
-} from '../theme/components.ts';
+import { ArrowLeft, NavButton, Text, TouchableOpacity, View } from '../theme/components.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
@@ -35,12 +29,7 @@ type AppHeaderProps = {
 };
 
 export const HeaderNavButton = memo(
-	({
-		children = null,
-		disabled = false,
-		onPressIn,
-		style,
-	}: HeaderNavButtonProps) => (
+	({ children = null, disabled = false, onPressIn, style }: HeaderNavButtonProps) => (
 		<NavButton
 			style={[styles.navButton, style]}
 			hitSlop={HEADER_HIT_SLOP}
@@ -53,25 +42,17 @@ export const HeaderNavButton = memo(
 );
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const LogoButton = memo(
-	({
-		onLongPress,
-		onPress,
-	}: {
-		onLongPress: () => void;
-		onPress: () => void;
-	}) => (
-		<TouchableOpacity
-			activeOpacity={1}
-			// TODO: Adjust light-mode gradient colors.
-			//onLongPress={onLongPress}
-			onPress={onPress}
-			style={styles.logoWrapper}
-		>
-			<Image source={PubkyRingLogo} style={styles.logo} />
-		</TouchableOpacity>
-	),
-);
+const LogoButton = memo(({ onLongPress, onPress }: { onLongPress: () => void; onPress: () => void }) => (
+	<TouchableOpacity
+		activeOpacity={1}
+		// TODO: Adjust light-mode gradient colors.
+		//onLongPress={onLongPress}
+		onPress={onPress}
+		style={styles.logoWrapper}
+	>
+		<Image source={PubkyRingLogo} style={styles.logo} />
+	</TouchableOpacity>
+));
 
 const DOUBLE_TAP_DELAY = 300;
 

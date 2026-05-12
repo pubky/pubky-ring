@@ -11,12 +11,7 @@ import {
 	generateMnemonicPhraseAndKeypair,
 	mnemonicPhraseToKeypair,
 } from '@synonymdev/react-native-pubky';
-import {
-	setKeychainValue,
-	resetKeychainValue,
-	getKeychainValue,
-	getAllKeychainKeys,
-} from './keychain';
+import { setKeychainValue, resetKeychainValue, getKeychainValue, getAllKeychainKeys } from './keychain';
 import { Dispatch } from 'redux';
 import {
 	addProcessing,
@@ -36,7 +31,7 @@ import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
 import { EBackupPreference, IKeychainData, TProfile } from '../types/pubky.ts';
-import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from "./constants.ts";
+import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from './constants.ts';
 import i18n from '../i18n';
 
 export const getSignupToken = ({
@@ -75,9 +70,7 @@ export const republishHomeserver = async ({
 	return ok(res.value);
 };
 
-export const createNewPubky = async (
-	dispatch: Dispatch
-): Promise<Result<string>> => {
+export const createNewPubky = async (dispatch: Dispatch): Promise<Result<string>> => {
 	try {
 		const genKeyRes = await generateMnemonicPhraseAndKeypair();
 		if (genKeyRes.isErr()) {
@@ -98,7 +91,7 @@ export const createNewPubky = async (
 			secretKey,
 			pubky,
 			dispatch,
-			backupPreference: EBackupPreference.unknown
+			backupPreference: EBackupPreference.unknown,
 		});
 	} catch (error) {
 		console.error('Error creating pubky:', error);
@@ -117,7 +110,7 @@ export const createNewPubky = async (
 export const createPubkyWithInviteCode = async (
 	inviteCode: string,
 	dispatch: Dispatch,
-	homeserver: string = DEFAULT_HOMESERVER
+	homeserver: string = DEFAULT_HOMESERVER,
 ): Promise<Result<{ pubky: string }>> => {
 	try {
 		// Generate new pubky
@@ -138,7 +131,7 @@ export const createPubkyWithInviteCode = async (
 				pubky,
 				dispatch,
 				backupPreference: EBackupPreference.unknown,
-				isBackedUp: false
+				isBackedUp: false,
 			});
 
 			if (saveRes.isErr()) {
@@ -288,16 +281,28 @@ export const importPubky = async ({
 		const pubky = pubkyRes.value.public_key;
 		let homeserver = defaultPubkyState.homeserver;
 		const getHomeserverRes = await getHomeserver(pubky);
-		if (getHomeserverRes.isOk() && getHomeserverRes.value && !getHomeserverRes.value.toLowerCase().includes('error') && !getHomeserverRes.value.toLowerCase().includes('no homeserver')) {
+		if (
+			getHomeserverRes.isOk() &&
+			getHomeserverRes.value &&
+			!getHomeserverRes.value.toLowerCase().includes('error') &&
+			!getHomeserverRes.value.toLowerCase().includes('no homeserver')
+		) {
 			homeserver = getHomeserverRes.value;
 		}
-		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then((res) => {
+		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then(res => {
 			if (res.isErr()) {
 				dispatch(setSignedUp({ pubky, signedUp: false }));
 			}
 		});
 		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
-		const savePubkyRes = await savePubky({ secretKey, pubky, dispatch, mnemonic, backupPreference, isBackedUp: true });
+		const savePubkyRes = await savePubky({
+			secretKey,
+			pubky,
+			dispatch,
+			mnemonic,
+			backupPreference,
+			isBackedUp: true,
+		});
 		if (savePubkyRes.isOk()) {
 			// Only set homeserver if we have a valid non-empty value
 			if (homeserver?.trim()) {
@@ -308,12 +313,14 @@ export const importPubky = async ({
 				const app = homeserver === DEFAULT_HOMESERVER ? 'pubky.app' : 'staging.pubky.app';
 				const profileInfo = await getProfileInfo(pubky, app);
 				if (profileInfo.isOk() && profileInfo.value.name) {
-					dispatch(setPubkyData({
-						pubky,
-						data: {
-							name: profileInfo.value.name,
-						},
-					}));
+					dispatch(
+						setPubkyData({
+							pubky,
+							data: {
+								name: profileInfo.value.name,
+							},
+						}),
+					);
 				}
 			}
 		}
@@ -333,10 +340,10 @@ export const savePubky = async ({
 	isBackedUp = false,
 	signupToken = '',
 }: {
-	secretKey: string,
-	pubky: string,
-	dispatch: Dispatch,
-	mnemonic?: string,
+	secretKey: string;
+	pubky: string;
+	dispatch: Dispatch;
+	mnemonic?: string;
 	backupPreference?: EBackupPreference;
 	isBackedUp?: boolean;
 	signupToken?: string;
@@ -367,7 +374,7 @@ export const savePubky = async ({
 		setKeychainValue({
 			key: pubky,
 			value: JSON.stringify(keychainData),
-		}).then((response) => {
+		}).then(response => {
 			if (response.isErr()) {
 				console.error('Failed to save keychain value');
 				showToast({
@@ -397,14 +404,11 @@ const isNewFormat = (value: string): boolean => {
 	}
 };
 
-export const deletePubky = async (
-	pubky: string,
-	dispatch: Dispatch
-): Promise<Result<string>> => {
+export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
 	try {
 		dispatch(removePubky(pubky));
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		resetKeychainValue({ key: pubky }).then((response) => {
+		resetKeychainValue({ key: pubky }).then(response => {
 			if (response.isErr()) {
 				showToast({
 					type: 'error',
@@ -424,10 +428,7 @@ export const deletePubky = async (
 /**
  * Migrates a single keychain entry from old format to new format
  */
-const migrateKeychainEntry = async (
-	pubky: string,
-	oldSecretKey: string
-): Promise<Result<IKeychainData>> => {
+const migrateKeychainEntry = async (pubky: string, oldSecretKey: string): Promise<Result<IKeychainData>> => {
 	try {
 		// Create new format data
 		const keychainData: IKeychainData = {
@@ -504,13 +505,15 @@ export const signUpToHomeserver = async ({
 		dispatch,
 	});
 	dispatch(setHomeserver({ pubky, homeserver }));
-	dispatch(addSession({
-		pubky,
-		session: {
-			...signUpRes.value,
-			created_at: Date.now(),
-		},
-	}));
+	dispatch(
+		addSession({
+			pubky,
+			session: {
+				...signUpRes.value,
+				created_at: Date.now(),
+			},
+		}),
+	);
 	dispatch(setSignedUp({ pubky, signedUp: true }));
 	return ok(signUpRes.value);
 };
@@ -562,18 +565,24 @@ export const signInToHomeserver = async ({
 	} else {
 		response = signInRes.value;
 	}
-	dispatch(addSession({
-		pubky,
-		session: {
-			...response,
-			created_at: Date.now(),
-		},
-	}));
+	dispatch(
+		addSession({
+			pubky,
+			session: {
+				...response,
+				created_at: Date.now(),
+			},
+		}),
+	);
 	dispatch(setSignedUp({ pubky, signedUp: true }));
 	return ok(response);
 };
 
-export const signOutOfHomeserver = async (pubky: string, sessionSecret: string, dispatch: Dispatch): Promise<void> => {
+export const signOutOfHomeserver = async (
+	pubky: string,
+	sessionSecret: string,
+	dispatch: Dispatch,
+): Promise<void> => {
 	const secretKeyRes = await getPubkySecretKey(pubky);
 	if (secretKeyRes.isErr()) {
 		return;
@@ -660,16 +669,12 @@ export const performAuth = async ({
 			return ok('success');
 		})();
 
-		const timeoutPromise = timeout(TIMEOUT_MS).then(
-			(): Result<string> => err(i18n.t('auth.timeoutError'))
-		);
+		const timeoutPromise = timeout(TIMEOUT_MS).then((): Result<string> => err(i18n.t('auth.timeoutError')));
 
 		return await Promise.race([authPromise, timeoutPromise]);
 	} catch (error: unknown) {
 		console.error('Auth Error:', error);
-		const errorMessage = error instanceof Error
-			? error.message
-			: i18n.t('pubkyErrors.authorizationError');
+		const errorMessage = error instanceof Error ? error.message : i18n.t('pubkyErrors.authorizationError');
 		return err(`Auth Error: ${errorMessage}`);
 	}
 };

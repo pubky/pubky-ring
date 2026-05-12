@@ -14,10 +14,7 @@ import { getIsOnline } from './store-helpers.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { EBackupPreference } from '../types/pubky.ts';
-import {
-	mnemonicPhraseToKeypair,
-	getPublicKeyFromSecretKey
-} from '@synonymdev/react-native-pubky';
+import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import i18n from '../i18n';
 import { err, ok, Result } from '@synonymdev/result';
 
@@ -48,8 +45,8 @@ export const formatSignupToken = (text: string): string => {
 			// Auto-insert hyphen if needed
 			if (
 				(alphanumericCount === 4 || alphanumericCount === 8) &&
-                result.length > 0 &&
-                result[result.length - 1] !== '-'
+				result.length > 0 &&
+				result[result.length - 1] !== '-'
 			) {
 				result += '-';
 			}
@@ -99,10 +96,14 @@ export const formatImportData = (data: string): string => {
  * @param {string} data
  * @returns {Promise<Result<{ isSecretKey: boolean; backupPreference?: EBackupPreference }>>}
  */
-export const isSecretKeyImport = async (data: string): Promise<Result<{
-    isSecretKey: boolean;
-    backupPreference?: EBackupPreference;
-}>> => {
+export const isSecretKeyImport = async (
+	data: string,
+): Promise<
+	Result<{
+		isSecretKey: boolean;
+		backupPreference?: EBackupPreference;
+	}>
+> => {
 	data = formatImportData(data);
 	let isSecretKey = false;
 	let backupPreference = EBackupPreference.unknown;
@@ -145,12 +146,12 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 };
 
 export type ToastOptions = {
-    type: ToastType;
-    title: string;
-    description: string;
-    autoHide?: boolean;
-    visibilityTime?: number;
-    onPress?: () => void;
+	type: ToastType;
+	title: string;
+	description: string;
+	autoHide?: boolean;
+	visibilityTime?: number;
+	onPress?: () => void;
 };
 
 const defaultOptions = {
@@ -206,10 +207,10 @@ export const checkNetworkConnection = async ({
 	displayToastIfOnline = true,
 	displayToastIfOffline = true,
 }: {
-    prevNetworkState?: boolean;
-    dispatch?: Dispatch;
-    displayToastIfOnline?: boolean;
-    displayToastIfOffline?: boolean;
+	prevNetworkState?: boolean;
+	dispatch?: Dispatch;
+	displayToastIfOnline?: boolean;
+	displayToastIfOffline?: boolean;
 }): Promise<boolean> => {
 	if (!prevNetworkState) {
 		prevNetworkState = getIsOnline();
@@ -244,7 +245,7 @@ export const checkNetworkConnection = async ({
  * @returns {Promise<void>}
  */
 export const sleep = (ms = 1000): Promise<void> => {
-	return new Promise((resolve) => {
+	return new Promise(resolve => {
 		setTimeout(resolve, ms);
 	});
 };

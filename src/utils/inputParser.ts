@@ -129,7 +129,7 @@ export const formatImportData = (data: string): string => {
  * Validates and determines the backup preference for import data
  */
 const validateImportData = async (
-	data: string
+	data: string,
 ): Promise<{ isValid: boolean; backupPreference: EBackupPreference }> => {
 	const formatted = formatImportData(data);
 
@@ -187,26 +187,35 @@ export const extractXCallbackParams = (encodedQueryString: string): XCallbackPar
 	};
 
 	const safeDecode = (s: string): string => {
-		try { return decodeURIComponent(s); } catch { return s; }
+		try {
+			return decodeURIComponent(s);
+		} catch {
+			return s;
+		}
 	};
 
 	const xSuccessRaw = getRawValue('x-success');
-	const xErrorRaw   = getRawValue('x-error');
-	const xCancelRaw  = getRawValue('x-cancel');
-	const xSourceRaw  = getRawValue('x-source');
+	const xErrorRaw = getRawValue('x-error');
+	const xCancelRaw = getRawValue('x-cancel');
+	const xSourceRaw = getRawValue('x-source');
 	const callbackRaw = getRawValue('callback');
 
 	const successRaw = xSuccessRaw ?? callbackRaw;
 
-	if (successRaw === undefined && xErrorRaw === undefined && xCancelRaw === undefined && xSourceRaw === undefined) {
+	if (
+		successRaw === undefined &&
+		xErrorRaw === undefined &&
+		xCancelRaw === undefined &&
+		xSourceRaw === undefined
+	) {
 		return undefined;
 	}
 
 	return {
-		xSuccess: successRaw  !== undefined ? safeDecode(successRaw)  : undefined,
-		xError:   xErrorRaw   !== undefined ? safeDecode(xErrorRaw)   : undefined,
-		xCancel:  xCancelRaw  !== undefined ? safeDecode(xCancelRaw)  : undefined,
-		xSource:  xSourceRaw  !== undefined ? safeDecode(xSourceRaw)  : undefined,
+		xSuccess: successRaw !== undefined ? safeDecode(successRaw) : undefined,
+		xError: xErrorRaw !== undefined ? safeDecode(xErrorRaw) : undefined,
+		xCancel: xCancelRaw !== undefined ? safeDecode(xCancelRaw) : undefined,
+		xSource: xSourceRaw !== undefined ? safeDecode(xSourceRaw) : undefined,
 	};
 };
 
@@ -258,10 +267,7 @@ const parseSessionParams = (encodedQueryString: string): SessionParams | null =>
  * @param source - Where the input came from (deeplink, scan, clipboard)
  * @returns ParsedInput object with action type, data, and metadata
  */
-export const parseInput = async (
-	rawInput: string,
-	source: InputSource
-): Promise<ParsedInput> => {
+export const parseInput = async (rawInput: string, source: InputSource): Promise<ParsedInput> => {
 	if (!rawInput || typeof rawInput !== 'string') {
 		return {
 			action: InputAction.Unknown,
@@ -296,7 +302,8 @@ export const parseInput = async (
 	// Check for migrate deeplink format (pubkyring://migrate?index=X&total=Y&key=Z)
 	// This must be checked early before other parsing strips the protocol
 	// Normalize trailing slash before query string for migrate URL
-	if (processedInput.startsWith('pubkyring://migrate/?')) processedInput = processedInput.replace('pubkyring://migrate/?', 'pubkyring://migrate?');
+	if (processedInput.startsWith('pubkyring://migrate/?'))
+		processedInput = processedInput.replace('pubkyring://migrate/?', 'pubkyring://migrate?');
 	if (processedInput.startsWith('pubkyring://migrate?')) {
 		try {
 			const queryString = processedInput.substring('pubkyring://migrate?'.length);
@@ -344,9 +351,12 @@ export const parseInput = async (
 	}
 
 	// Normalize: remove trailing slash before query string for known routes
-	if (urlWithoutProtocol.startsWith('signup/?')) urlWithoutProtocol = urlWithoutProtocol.replace('signup/?', 'signup?');
-	if (urlWithoutProtocol.startsWith('session/?')) urlWithoutProtocol = urlWithoutProtocol.replace('session/?', 'session?');
-	if (urlWithoutProtocol.startsWith('signin/?')) urlWithoutProtocol = urlWithoutProtocol.replace('signin/?', 'signin?');
+	if (urlWithoutProtocol.startsWith('signup/?'))
+		urlWithoutProtocol = urlWithoutProtocol.replace('signup/?', 'signup?');
+	if (urlWithoutProtocol.startsWith('session/?'))
+		urlWithoutProtocol = urlWithoutProtocol.replace('session/?', 'session?');
+	if (urlWithoutProtocol.startsWith('signin/?'))
+		urlWithoutProtocol = urlWithoutProtocol.replace('signin/?', 'signin?');
 
 	// 1. Check for signup deeplink
 	// Format: pubkyring://signup?... or pubkyauth://signup?...
@@ -487,43 +497,43 @@ export const parseInput = async (
  * Type guards for action data
  */
 export const isAuthAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Auth; params: AuthParams; rawUrl: string } => {
 	return data.action === InputAction.Auth;
 };
 
 export const isImportAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Import; params: ImportParams } => {
 	return data.action === InputAction.Import;
 };
 
 export const isMigrateAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Migrate; params: MigrateParams } => {
 	return data.action === InputAction.Migrate;
 };
 
 export const isSignupAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Signup; params: SignupParams } => {
 	return data.action === InputAction.Signup;
 };
 
 export const isInviteAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Invite; params: InviteParams } => {
 	return data.action === InputAction.Invite;
 };
 
 export const isSessionAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Session; params: SessionParams } => {
 	return data.action === InputAction.Session;
 };
 
 export const isUnknownAction = (
-	data: ActionData
+	data: ActionData,
 ): data is { action: InputAction.Unknown; params: { rawData: string } } => {
 	return data.action === InputAction.Unknown;
 };

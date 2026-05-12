@@ -23,7 +23,7 @@ const PubkyCard = ({
 	nameStyle,
 	pubkyTextStyle,
 	avatarSize = 38,
-	avatarStyle
+	avatarStyle,
 }: PubkyCardProps): ReactElement => {
 	return (
 		<LinearGradient style={[styles.pubkyCard, style]}>
@@ -32,10 +32,7 @@ const PubkyCard = ({
 					<ProfileAvatar pubky={publicKey} size={avatarSize} />
 				</Card>
 				<Card style={styles.pubkyTextContainer}>
-					{name &&
-					<Text style={[styles.pubkyName, nameStyle]}>
-						{name}
-					</Text>}
+					{name && <Text style={[styles.pubkyName, nameStyle]}>{name}</Text>}
 					<Text style={[styles.pubkyText, pubkyTextStyle]} numberOfLines={2}>
 						{publicKey}
 					</Text>

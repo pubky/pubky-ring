@@ -1,27 +1,11 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-} from 'react';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { SheetManager } from 'react-native-actions-sheet';
 import PubkyCard from './PubkyCard.tsx';
-import {
-	getPubkyName,
-} from '../store/selectors/pubkySelectors.ts';
+import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import {
-	View,
-	Text,
-	ActionSheetContainer,
-	SessionText,
-	RadialGradient,
-} from '../theme/components.ts';
-import {
-	ACTION_SHEET_HEIGHT,
-	BLUE_RADIAL_GRADIENT,
-} from '../utils/constants.ts';
+import { View, Text, ActionSheetContainer, SessionText, RadialGradient } from '../theme/components.ts';
+import { ACTION_SHEET_HEIGHT, BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { Image, Platform, StyleSheet } from 'react-native';
 import ModalIndicator from './ModalIndicator.tsx';
@@ -29,7 +13,9 @@ import Button from './Button.tsx';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
 
-const DeletePubky = ({ payload }: {
+const DeletePubky = ({
+	payload,
+}: {
 	payload: {
 		publicKey?: string;
 		onDelete: () => void;
@@ -58,18 +44,12 @@ const DeletePubky = ({ payload }: {
 			CustomHeaderComponent={<></>}
 			height={ACTION_SHEET_HEIGHT}
 		>
-			<RadialGradient
-				style={styles.content}
-				colors={BLUE_RADIAL_GRADIENT}
-				center={{ x: 0.5, y: 0.5 }}
-			>
+			<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
 				<ModalIndicator />
 				<View style={styles.titleContainer}>
 					<Text style={styles.title}>{t('pubky.deletePubky')}</Text>
 				</View>
-				<SessionText style={styles.message}>
-					{t('pubky.deleteConfirm')}
-				</SessionText>
+				<SessionText style={styles.message}>{t('pubky.deleteConfirm')}</SessionText>
 				<PubkyCard
 					name={pubkyName}
 					publicKey={publicKey}
@@ -80,10 +60,7 @@ const DeletePubky = ({ payload }: {
 					avatarStyle={styles.avatarContainer}
 				/>
 				<View style={styles.trashContainer}>
-					<Image
-						source={require('../images/trash.png')}
-						style={styles.importImage}
-					/>
+					<Image source={require('../images/trash.png')} style={styles.importImage} />
 				</View>
 				<View style={styles.buttonContainer}>
 					<Button
@@ -159,7 +136,7 @@ const styles = StyleSheet.create({
 		gap: 12,
 		paddingVertical: 12,
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	button: {
 		width: '47%',
@@ -175,8 +152,7 @@ const styles = StyleSheet.create({
 		height: 342.57,
 		alignSelf: 'center',
 	},
-	cancelButton: {
-	},
+	cancelButton: {},
 	deleteButton: {
 		borderWidth: 1,
 	},

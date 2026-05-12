@@ -17,6 +17,7 @@ import { shareData } from '../../utils/helpers.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
 import i18n from '../../i18n';
+import { textStyles } from '../../theme/utils';
 
 interface PubkyListHeaderProps {
 	index: number;
@@ -144,10 +145,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	actionButtonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 		marginLeft: 5,
 	},
 	profileSection: {

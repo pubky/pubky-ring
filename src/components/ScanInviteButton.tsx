@@ -9,6 +9,7 @@ import { useDispatch } from 'react-redux';
 import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import i18n from '../i18n';
+import { textStyles } from '../theme/utils';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
@@ -147,9 +148,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	text: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
+		...textStyles.bodySSB,
 		paddingHorizontal: 6,
 	},
 	logo: {

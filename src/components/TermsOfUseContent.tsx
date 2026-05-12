@@ -863,8 +863,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   subtitleHeading: {
-    fontWeight: 700,
-    fontSize: 20,
+    ...textStyles.bodyMB,
     marginBottom: 18,
   },
   dateText: {
@@ -872,11 +871,10 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   importantText: {
-    fontWeight: 600,
+    ...textStyles.bodyMSB,
   },
   sectionTitle: {
-    fontWeight: 700,
-    fontSize: 18,
+    ...textStyles.bodyMB,
     marginTop: 12,
     marginBottom: 12,
   },

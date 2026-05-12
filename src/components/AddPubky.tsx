@@ -44,6 +44,7 @@ import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import { readFromClipboard } from '../utils/clipboard';
 import i18n from '../i18n';
+import { textStyles } from '../theme/utils';
 
 const toastStyle = getToastStyle();
 
@@ -288,7 +289,6 @@ const AddPubky = ({ payload }: {
 							key={index}
 							text={button.text}
 							style={[styles.button, button.style]}
-							textStyle={styles.buttonText}
 							onPress={button.onPress}
 						/>
 					))}
@@ -344,16 +344,11 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
-		fontWeight: '700',
+		...textStyles.display,
 		marginBottom: 20,
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		textTransform: 'capitalize',
 		marginBottom: 24,
@@ -361,9 +356,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		minHeight: 44,
 	},
 	buttonContainer: {
@@ -387,9 +380,7 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
+		...textStyles.bodySSB,
 	},
 	footerBuffer: {
 		backgroundColor: 'transparent',

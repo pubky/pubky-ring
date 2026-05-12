@@ -51,6 +51,7 @@ import { RootState } from '../../types';
 import { getPubky } from '../../store/selectors/pubkySelectors.ts';
 import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
 import i18n from '../../i18n';
+import { textStyles } from '../../theme/utils';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const smallScreen = isSmallScreen();
@@ -411,24 +412,19 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 20,
-		fontWeight: '600',
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
+		...textStyles.display,
 		marginTop: 24,
 		marginBottom: 16,
-		fontWeight: '700',
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		marginBottom: 40,
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
@@ -443,11 +439,9 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	input: {
+		...textStyles.bodyMSpaced,
 		flex: 1,
-		fontSize: 18,
-		fontWeight: '500',
 		color: 'rgba(173, 255, 47, 0.8)',
-		letterSpacing: 2,
 		textAlign: 'left',
 		top: -5,
 	},
@@ -479,8 +473,7 @@ const styles = StyleSheet.create({
 		marginRight: 6,
 	},
 	needInviteText: {
-		fontSize: 14,
-		fontWeight: '500',
+		...textStyles.captionSBSpaced,
 	},
 	radialGradient: {
 		width: '100%',
@@ -489,8 +482,8 @@ const styles = StyleSheet.create({
 		borderTopLeftRadius: 20,
 	},
 	errorText: {
+		...textStyles.bodyS,
 		color: '#dc2626',
-		fontSize: 15,
 		textAlign: 'center',
 		marginBottom: 16,
 	},
@@ -527,10 +520,7 @@ const styles = StyleSheet.create({
 		opacity: 0.5,
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 	},
 	footer: {
 		flex: 1,

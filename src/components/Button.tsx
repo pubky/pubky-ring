@@ -1,5 +1,6 @@
 import React, { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
+import { textStyles } from '../theme/utils';
 import {
 	Text,
 	ActionButton,
@@ -35,7 +36,7 @@ const Button = ({
 	return (
 		<ActionButton
 			testID={testID}
-			style={[styles.actionButton, disabledStyle, style]}
+			style={[styles.container, disabledStyle, style]}
 			onPress={onPress}
 			onPressIn={onPressIn}
 			onLongPress={onLongPress}
@@ -50,7 +51,7 @@ const Button = ({
 						numberOfLines={1}
 						adjustsFontSizeToFit
 						minimumFontScale={0.8}
-						style={[styles.actionButtonText, textStyle]}
+						style={[styles.text, textStyle]}
 					>
 						{text}
 					</Text>
@@ -61,7 +62,7 @@ const Button = ({
 };
 
 const styles = StyleSheet.create({
-	actionButton: {
+	container: {
 		flexDirection: 'row',
 		minWidth: 110,
 		minHeight: 48,
@@ -75,10 +76,8 @@ const styles = StyleSheet.create({
 	disabled: {
 		opacity: 0.5,
 	},
-	actionButtonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
+	text: {
+		...textStyles.bodySSB,
 		alignSelf: 'center',
 	},
 });

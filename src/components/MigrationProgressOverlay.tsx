@@ -15,6 +15,7 @@ import {
 } from '../utils/actions/migrateAction';
 import { useTranslation } from 'react-i18next';
 import { ACCENTS } from '../utils/constants';
+import { textStyles } from '../theme/utils';
 
 const MigrationProgressOverlay = (): React.ReactElement | null => {
 	const { t } = useTranslation();
@@ -121,16 +122,12 @@ const styles = StyleSheet.create({
 		marginBottom: 12,
 	},
 	title: {
-		fontSize: 15,
-		fontWeight: '600',
+		...textStyles.bodySSB,
 		color: 'rgba(255, 255, 255, 0.9)',
-		letterSpacing: 0.3,
 	},
 	progressText: {
-		fontSize: 17,
-		fontWeight: '700',
+		...textStyles.bodyMB,
 		color: ACCENTS.pubkyRing,
-		letterSpacing: 0.5,
 	},
 	progressBarContainer: {
 		height: 8,

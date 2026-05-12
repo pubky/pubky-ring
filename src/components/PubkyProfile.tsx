@@ -13,6 +13,7 @@ import {
 import { isSmallScreen, showToast } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
 import i18n from '../i18n';
+import { textStyles } from '../theme/utils';
 
 interface PubkyProfileProps {
     index?: number;
@@ -130,10 +131,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 		marginLeft: 5,
 	},
 	avatarContainer: {
@@ -148,22 +146,15 @@ const styles = StyleSheet.create({
 		marginBottom: 8,
 	},
 	nameText: {
-		fontSize: 26,
-		fontWeight: '300',
-		letterSpacing: 0,
-		lineHeight: 32,
+		...textStyles.heading,
 		paddingBottom: 12,
 		textAlign: 'center',
 		backgroundColor: 'transparent',
 	},
 	pubkyText: {
-		fontSize: 17,
-		fontFamily: 'monospace',
+		...textStyles.bodyMSB,
 		textAlign: 'center',
 		marginBottom: 8,
-		fontWeight: '600',
-		lineHeight: 22,
-		letterSpacing: 0.4,
 	},
 	pubkyButton: {
 		backgroundColor: 'transparent',

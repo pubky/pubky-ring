@@ -27,10 +27,7 @@ const ModalMessage: React.FC<ModalMessageProps> = ({
 
 const styles = StyleSheet.create({
 	message: {
-		...textStyles.body,
-		fontSize: 17,
-		lineHeight: 22,
-		fontWeight: '400',
+		...textStyles.bodyMSpaced,
 		marginBottom: 16,
 		backgroundColor: 'transparent',
 	},

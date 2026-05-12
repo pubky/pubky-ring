@@ -29,6 +29,7 @@ import Button from '../components/Button.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
 import { Result } from '@synonymdev/result';
 import i18n from '../i18n';
+import { textStyles } from '../theme/utils';
 
 interface MnemonicFormProps {
 	onBack: () => void;
@@ -328,18 +329,13 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		alignSelf: 'flex-start',
 		minHeight: 44,
 		textAlign: 'left',
@@ -372,9 +368,7 @@ const styles = StyleSheet.create({
 	cancelButton: {
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: '600',
-		lineHeight: 18,
+		...textStyles.bodySSB,
 	},
 	backButton: {
 		position: 'absolute',
@@ -392,15 +386,13 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	mnemonicInput: {
+		...textStyles.bodyM,
 		borderWidth: 1,
 		borderColor: '#444',
 		borderStyle: 'dashed',
 		borderRadius: 8,
 		paddingVertical: 10,
 		paddingHorizontal: 12,
-		fontSize: 17,
-		fontWeight: 400,
-		lineHeight: 22,
 		minHeight: 42,
 		marginBottom: 8,
 		backgroundColor: 'transparent',

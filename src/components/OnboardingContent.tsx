@@ -112,10 +112,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		minHeight: 64,
 	},
-	buttonText: {
-		...textStyles.button,
-		color: 'white',
-	},
 });
 
 export default OnboardingContent;

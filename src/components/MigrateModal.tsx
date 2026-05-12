@@ -24,6 +24,7 @@ import {
 } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
+import { textStyles } from '../theme/utils';
 
 const smallScreen = isSmallScreen();
 const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
@@ -207,10 +208,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		alignSelf: 'center',
 		marginBottom: 16,
 	},
@@ -222,17 +220,11 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	cardLabel: {
-		fontSize: 13,
-		fontWeight: '500',
-		lineHeight: 18,
-		letterSpacing: 0.8,
+		...textStyles.caption,
 		color: 'rgba(255, 255, 255, 0.64)',
 	},
 	cardDescription: {
-		fontSize: 17,
-		fontWeight: '400',
-		lineHeight: 22,
-		letterSpacing: 0,
+		...textStyles.bodyM,
 		marginTop: 10,
 		color: 'rgba(255, 255, 255, 0.8)',
 	},
@@ -243,13 +235,12 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	loadingText: {
+		...textStyles.bodyS,
 		marginTop: 16,
-		fontSize: 15,
 		color: '#E0E0E0',
 	},
 	noKeysText: {
-		fontSize: 17,
-		fontWeight: '500',
+		...textStyles.bodyMSB,
 		color: '#888',
 		textAlign: 'center',
 	},

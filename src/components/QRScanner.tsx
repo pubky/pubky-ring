@@ -12,6 +12,7 @@ import {
 import { isSmallScreen } from '../utils/helpers.ts';
 import i18n from '../i18n';
 import MigrationProgressOverlay from './MigrationProgressOverlay';
+import { textStyles } from '../theme/utils';
 interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
@@ -69,10 +70,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: 700,
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		alignSelf: 'center',
 		marginBottom: 16,
 	},
@@ -100,10 +98,7 @@ const styles = StyleSheet.create({
 		alignSelf: 'center'
 	},
 	buttonText: {
-		fontSize: 15,
-		fontWeight: 600,
-		lineHeight: 18,
-		letterSpacing: 0.2,
+		...textStyles.bodySSB,
 		alignSelf: 'center',
 	},
 });

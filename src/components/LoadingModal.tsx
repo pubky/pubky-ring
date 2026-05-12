@@ -33,6 +33,7 @@ import {
 	withTiming,
 } from 'react-native-reanimated';
 import { SheetManager } from 'react-native-actions-sheet';
+import { textStyles } from '../theme/utils';
 
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 const smallScreen = isSmallScreen();
@@ -377,25 +378,18 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	title: {
-		fontSize: 17,
-		fontWeight: '700',
-		lineHeight: 22,
-		letterSpacing: 0.4,
+		...textStyles.bodyMB,
 		textAlign: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
 	headerText: {
-		fontSize: 48,
-		lineHeight: 48,
-		fontWeight: '700',
+		...textStyles.display,
 		marginBottom: 20,
 		backgroundColor: 'transparent',
 	},
 	message: {
-		fontWeight: '400',
-		fontSize: 17,
-		lineHeight: 22,
+		...textStyles.bodyM,
 		minHeight: 44,
 		backgroundColor: 'transparent',
 	},
@@ -443,9 +437,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	waitText: {
-		fontWeight: '600',
-		fontSize: 15,
-		lineHeight: 18,
+		...textStyles.bodySSB,
 		textAlign: 'center',
 		marginBottom: 12,
 		backgroundColor: 'transparent',

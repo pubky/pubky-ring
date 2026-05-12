@@ -5,6 +5,7 @@ import { BaseToast, ErrorToast, InfoToast, SuccessToast, ToastProps } from 'reac
 import { useTheme } from 'styled-components/native';
 import { Theme } from './';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { textStyles } from './utils';
 
 type ToastConfigStyle = {
 	style?: StyleProp<ViewStyle>;
@@ -50,14 +51,12 @@ const createThemedToast = (
 		const styles = useMemo(() => StyleSheet.create({
 			// eslint-disable-next-line react-native/no-unused-styles
 			text1: {
-				fontSize: 15,
-				fontWeight: '600',
+				...textStyles.bodySSB,
 				color: theme.colors.text,
 			},
 			// eslint-disable-next-line react-native/no-unused-styles
 			text2: {
-				fontSize: 13,
-				fontWeight: '400',
+				...textStyles.bodyS,
 				color: theme.colors.sessionText,
 			},
 			// eslint-disable-next-line react-native/no-unused-styles

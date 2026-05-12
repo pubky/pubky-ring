@@ -2,6 +2,7 @@ import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
 import { Card, LinearGradient, Text } from '../theme/components.ts';
 import React, { memo, ReactElement } from 'react';
 import ProfileAvatar from './ProfileAvatar.tsx';
+import { textStyles } from '../theme/utils';
 
 interface PubkyCardProps {
 	name?: string;
@@ -69,14 +70,10 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	pubkyName: {
-		fontSize: 16,
-		fontWeight: 'bold',
-		lineHeight: 26,
+		...textStyles.heading,
 	},
 	pubkyText: {
-		fontWeight: '600',
-		fontSize: 15,
-		lineHeight: 20,
+		...textStyles.bodySSB,
 	},
 });
 

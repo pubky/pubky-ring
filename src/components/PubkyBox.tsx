@@ -25,6 +25,7 @@ import { buttonStyles, shadowStyles, textStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from "../utils/sheetHelpers.ts";
 import i18n from '../i18n';
+import { ACCENTS } from '../utils/constants.ts';
 
 interface AuthorizeQRButtonProps {
 	isLoading: boolean;
@@ -53,7 +54,7 @@ const AuthorizeQRButton = memo(({
 			isSignedUp ? <Scan size={16} /> : null
 		)}
 		<Text
-			style={textStyles.button}
+			style={textStyles.bodySSB}
 			numberOfLines={1}
 			adjustsFontSizeToFit
 			minimumFontScale={0.8}
@@ -83,14 +84,14 @@ const PubkyInfo = memo(({
 				{pubkyName}
 			</Text>
 			<Card style={styles.row}>
-				<Text style={textStyles.body} numberOfLines={1} ellipsizeMode="middle">
+				<Text style={textStyles.bodySSB} numberOfLines={1} ellipsizeMode="middle">
 					{truncateStr(publicKey)}
 				</Text>
 				{!isBackedUp && <TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}><Text
-					style={textStyles.backupText}>{i18n.t('pubkyProfile.backupReminder')}</Text></TouchableOpacity>}
+					style={{ color: ACCENTS.pubkyRing }}>{i18n.t('pubkyProfile.backupReminder')}</Text></TouchableOpacity>}
 				{sessionsCount > 0 && (
 					<CardView style={styles.sessionsButton}>
-						<SessionText style={textStyles.button}>{sessionsCount}</SessionText>
+						<SessionText style={textStyles.bodySSB}>{sessionsCount}</SessionText>
 					</CardView>
 				)}
 			</Card>
@@ -285,7 +286,7 @@ const styles = StyleSheet.create({
 	backupContainer: {
 		paddingHorizontal: 8,
 		paddingVertical: 2,
-		backgroundColor: textStyles.backupTextBGColor,
+		backgroundColor: 'rgba(0, 133, 255, 0.16)',
 		borderRadius: 16,
 		marginLeft: 5,
 		alignSelf: 'center',

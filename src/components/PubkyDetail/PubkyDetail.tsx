@@ -14,17 +14,13 @@ import { HEADER_HEIGHT } from '../AppHeader.tsx';
 
 export interface PubkyDetailProps {
 	index: number;
-    pubkyData: PubkyData;
+	pubkyData: PubkyData;
 	onQRPress: () => Promise<void>;
 }
 
-export const PubkyDetail = ({
-	index,
-	pubkyData,
-	onQRPress,
-}: PubkyDetailProps): ReactElement => {
+export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
 	const { pubky, sessions } = pubkyData;
-	const publicKey = useMemo(() => pubky.startsWith('pk:') ? pubky.slice(3) : pubky, [pubky]);
+	const publicKey = useMemo(() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky), [pubky]);
 	const dispatch = useDispatch();
 	const navigation = useTypedNavigation();
 
@@ -42,9 +38,12 @@ export const PubkyDetail = ({
 		navigation.goBack();
 	}, [dispatch, navigation, pubky]);
 
-	const onSignOut = useCallback((sessionSecret: string) => {
-		signOutOfHomeserver(pubky, sessionSecret, dispatch);
-	}, [dispatch, pubky]);
+	const onSignOut = useCallback(
+		(sessionSecret: string) => {
+			signOutOfHomeserver(pubky, sessionSecret, dispatch);
+		},
+		[dispatch, pubky],
+	);
 
 	const handleDelete = useCallback(() => {
 		SheetManager.show('delete-pubky', {
@@ -71,7 +70,7 @@ export const PubkyDetail = ({
 		}
 	}, [pubky, pubkyData.backupPreference]);
 
-	const sessionsLength = useMemo(() => sessions && sessions?.length > 0 ? sessions.length : 1, [sessions]);
+	const sessionsLength = useMemo(() => (sessions && sessions?.length > 0 ? sessions.length : 1), [sessions]);
 
 	return (
 		<View style={styles.container}>

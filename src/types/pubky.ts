@@ -1,7 +1,7 @@
 export interface PubkySession {
 	pubky: string;
 	capabilities: string[];
-  session_secret: string;
+	session_secret: string;
 	created_at: number;
 }
 
@@ -26,13 +26,13 @@ export interface DeepLinkData {
 }
 
 export interface PubkyState {
-	pubkys: TPubkys
+	pubkys: TPubkys;
 	deepLink: string;
-  processing: { [key: string]: boolean };
+	processing: { [key: string]: boolean };
 }
 
 export type TPubkys = {
-	[key: string]: Pubky
+	[key: string]: Pubky;
 };
 
 export interface IKeychainData {

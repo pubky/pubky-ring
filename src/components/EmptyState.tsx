@@ -1,13 +1,7 @@
 import React, { ReactElement, memo } from 'react';
 import { StyleSheet } from 'react-native';
 import { View, Text } from '../theme/components.ts';
-import {
-	Canvas,
-	Path,
-	Skia,
-	StrokeCap,
-	StrokeJoin,
-} from '@shopify/react-native-skia';
+import { Canvas, Path, Skia, StrokeCap, StrokeJoin } from '@shopify/react-native-skia';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
 import { ACCENTS } from '../utils/constants.ts';

@@ -9,11 +9,7 @@ interface ModalTitleProps {
 }
 
 const ModalTitle: React.FC<ModalTitleProps> = ({ children, style }) => {
-	return (
-		<Text style={[styles.title, style]}>
-			{children}
-		</Text>
-	);
+	return <Text style={[styles.title, style]}>{children}</Text>;
 };
 
 const styles = StyleSheet.create({

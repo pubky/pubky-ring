@@ -16,21 +16,18 @@ const selectAllPubkys = (state: RootState): { [key: string]: Pubky } => state.pu
  * Returns all signed up pubkys
  * @param state
  */
-export const getSignedUpPubkys = createSelector(
-	[selectAllPubkys],
-	(allPubkys): { [key: string]: Pubky } => {
-		const signedUpPubkys: { [key: string]: Pubky } = {};
+export const getSignedUpPubkys = createSelector([selectAllPubkys], (allPubkys): { [key: string]: Pubky } => {
+	const signedUpPubkys: { [key: string]: Pubky } = {};
 
-		for (const key in allPubkys) {
-			const pubky = allPubkys[key];
-			if (pubky?.signedUp) {
-				signedUpPubkys[key] = pubky;
-			}
+	for (const key in allPubkys) {
+		const pubky = allPubkys[key];
+		if (pubky?.signedUp) {
+			signedUpPubkys[key] = pubky;
 		}
-
-		return signedUpPubkys;
 	}
-);
+
+	return signedUpPubkys;
+});
 
 /**
  * Returns if a pubky is signed up to the set homeserver
@@ -56,21 +53,15 @@ export const getAllPubkysArray = createSelector(
 			key,
 			value,
 		}));
-	}
+	},
 );
 
-export const getHasPubkys = createSelector(
-	[selectAllPubkys],
-	(pubkys) => Object.keys(pubkys).length > 0
-);
+export const getHasPubkys = createSelector([selectAllPubkys], pubkys => Object.keys(pubkys).length > 0);
 
 /**
  * Get all pubky keys (pubky identifiers)
  */
-export const getPubkyKeys = createSelector(
-	[selectAllPubkys],
-	(pubkys) => Object.keys(pubkys)
-);
+export const getPubkyKeys = createSelector([selectAllPubkys], pubkys => Object.keys(pubkys));
 
 /**
  * Combined selector for HomeScreen to reduce re-renders
@@ -80,7 +71,7 @@ export const getHomeScreenData = createSelector(
 	(pubkyArray, hasPubkys) => ({
 		pubkyArray,
 		hasPubkys,
-	})
+	}),
 );
 
 export const getDeepLink = (state: RootState): string => {
@@ -112,10 +103,7 @@ export const hasPubky = (state: RootState, pubky: string): boolean => {
  * Find the key of the pubky associated with a given signup token.
  * Returns null when the token is empty or no match exists.
  */
-export const getPubkyKeyBySignupToken = (
-	state: RootState,
-	signupToken: string,
-): string | null => {
+export const getPubkyKeyBySignupToken = (state: RootState, signupToken: string): string | null => {
 	if (!signupToken) return null;
 	const pubkys = state.pubky.pubkys;
 	for (const key in pubkys) {
@@ -131,10 +119,7 @@ export const isProcessing = (state: RootState, key: string): boolean => {
 /**
  * Get total number of pubkys
  */
-export const getPubkyCount = createSelector(
-	[selectAllPubkys],
-	(pubkys) => Object.keys(pubkys).length
-);
+export const getPubkyCount = createSelector([selectAllPubkys], pubkys => Object.keys(pubkys).length);
 
 /**
  * Get pubky image
@@ -176,16 +161,13 @@ export const getPubkyHomeserver = (state: RootState, pubky: string): string => {
  * Memoized map of pubky keys to their indices
  * This avoids O(n²) behavior when getPubkyIndex is called per item in lists
  */
-export const getPubkyIndexMap = createSelector(
-	[selectAllPubkys],
-	(pubkys): Map<string, number> => {
-		const map = new Map<string, number>();
-		Object.keys(pubkys).forEach((key, index) => {
-			map.set(key, index);
-		});
-		return map;
-	}
-);
+export const getPubkyIndexMap = createSelector([selectAllPubkys], (pubkys): Map<string, number> => {
+	const map = new Map<string, number>();
+	Object.keys(pubkys).forEach((key, index) => {
+		map.set(key, index);
+	});
+	return map;
+});
 
 /**
  * Get the index of a pubky in the getPubkyKeys array

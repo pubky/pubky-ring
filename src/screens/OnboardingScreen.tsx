@@ -3,9 +3,7 @@ import { StyleSheet } from 'react-native';
 import LoadingScreen from './LoadingScreen.tsx';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 
-const OnboardingContent = React.lazy(() =>
-	Promise.resolve(require('../components/OnboardingContent')),
-);
+const OnboardingContent = React.lazy(() => Promise.resolve(require('../components/OnboardingContent')));
 
 const OnboardingScreen = (): ReactElement => {
 	return (

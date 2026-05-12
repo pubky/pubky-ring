@@ -1,13 +1,7 @@
 import React, { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
-import {
-	ActionSheetContainer,
-	Card,
-	SkiaGradient,
-	Text,
-	View,
-} from '../theme/components.ts';
+import { ActionSheetContainer, Card, SkiaGradient, Text, View } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
@@ -18,10 +12,7 @@ import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 import ModalIndicator from './ModalIndicator.tsx';
 import AnimatedQR from './AnimatedQR.tsx';
-import {
-	ACTION_SHEET_HEIGHT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
+import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
@@ -35,7 +26,9 @@ interface KeyData {
 	name: string;
 }
 
-const MigrateModal = ({ payload }: {
+const MigrateModal = ({
+	payload,
+}: {
 	payload: {
 		onClose: () => void;
 	};
@@ -68,8 +61,8 @@ const MigrateModal = ({ payload }: {
 		// Restore brightness on unmount
 		return (): void => {
 			if (originalBrightnessRef.current !== null) {
-				DeviceBrightness.setBrightnessLevel(originalBrightnessRef.current).catch(
-					(error) => console.warn('Failed to restore brightness:', error)
+				DeviceBrightness.setBrightnessLevel(originalBrightnessRef.current).catch(error =>
+					console.warn('Failed to restore brightness:', error),
 				);
 			}
 		};
@@ -126,7 +119,9 @@ const MigrateModal = ({ payload }: {
 	// Format keys data for migration QR codes with deeplink format
 	const migrateFormattedData = useMemo(() => {
 		return keysData.map((keyData, index) => ({
-			value: `pubkyring://migrate?index=${index}&total=${keysData.length}&key=${encodeURIComponent(keyData.value)}`,
+			value: `pubkyring://migrate?index=${index}&total=${keysData.length}&key=${encodeURIComponent(
+				keyData.value,
+			)}`,
 		}));
 	}, [keysData]);
 
@@ -183,11 +178,7 @@ const MigrateModal = ({ payload }: {
 
 					<View style={styles.footer}>
 						<View style={styles.buttonContainer}>
-							<Button
-								text={t('common.close')}
-								style={styles.button}
-								onPress={onClose}
-							/>
+							<Button text={t('common.close')} style={styles.button} onPress={onClose} />
 						</View>
 					</View>
 				</View>

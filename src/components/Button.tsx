@@ -1,11 +1,7 @@
 import React, { memo, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { textStyles } from '../theme/utils';
-import {
-	Text,
-	ActionButton,
-	ActivityIndicator,
-} from '../theme/components.ts';
+import { Text, ActionButton, ActivityIndicator } from '../theme/components.ts';
 
 const Button = ({
 	testID,
@@ -21,14 +17,14 @@ const Button = ({
 	disabled = false,
 }: {
 	testID?: string;
-    text: string;
-    loading?: boolean;
-    onPress?: () => void;
+	text: string;
+	loading?: boolean;
+	onPress?: () => void;
 	onPressIn?: () => void;
 	onLongPress?: () => void;
-    icon?: React.ReactElement;
-    style?: object;
-    textStyle?: object;
+	icon?: React.ReactElement;
+	style?: object;
+	textStyle?: object;
 	activeOpacity?: number;
 	disabled?: boolean;
 }): React.ReactElement => {
@@ -43,7 +39,9 @@ const Button = ({
 			disabled={loading || disabled}
 			activeOpacity={activeOpacity}
 		>
-			{loading ? (<ActivityIndicator size="small" />) : (
+			{loading ? (
+				<ActivityIndicator size="small" />
+			) : (
 				<>
 					{icon && icon}
 					<Text

@@ -21,10 +21,7 @@ export const useQRScanner = (): {
 	const isOnline = useSelector(getIsOnline);
 
 	const handleQRPress = useCallback(
-		async (
-			pubky: string,
-			onQRPress: (params: QRPressParams) => Promise<string>,
-		) => {
+		async (pubky: string, onQRPress: (params: QRPressParams) => Promise<string>) => {
 			setIsLoading(true);
 			try {
 				const result = await onQRPress({
@@ -40,10 +37,13 @@ export const useQRScanner = (): {
 		[dispatch, isOnline],
 	);
 
-	return useMemo(() => ({
-		handleQRPress,
-		isQRLoading: isLoading,
-		dispatch,
-		isOnline,
-	}), [handleQRPress, isLoading, dispatch, isOnline]);
+	return useMemo(
+		() => ({
+			handleQRPress,
+			isQRLoading: isLoading,
+			dispatch,
+			isOnline,
+		}),
+		[handleQRPress, isLoading, dispatch, isOnline],
+	);
 };

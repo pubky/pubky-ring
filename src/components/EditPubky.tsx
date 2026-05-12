@@ -10,11 +10,7 @@ import {
 	RadialGradient,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
-import {
-	getPubkySecretKey,
-	signInToHomeserver,
-	signUpToHomeserver, truncatePubky,
-} from '../utils/pubky.ts';
+import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver, truncatePubky } from '../utils/pubky.ts';
 import { formatSignupToken } from '../utils/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
@@ -22,12 +18,7 @@ import { setPubkyData } from '../store/slices/pubkysSlice.ts';
 import ModalIndicator from './ModalIndicator.tsx';
 import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
 import { err } from '@synonymdev/result';
-import {
-	useAnimatedStyle,
-	useSharedValue,
-	withSpring,
-	withTiming,
-} from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import {
 	DEFAULT_HOMESERVER,
 	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
@@ -42,13 +33,13 @@ import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
 
 type InputDataItem = {
-    testID?: string;
-    id: 'name' | 'homeserver' | 'signuptoken';
-    value: string;
-    onChange: (text: string) => void;
-    placeholder: string;
-    error: string;
-    autoFocus: boolean;
+	testID?: string;
+	id: 'name' | 'homeserver' | 'signuptoken';
+	value: string;
+	onChange: (text: string) => void;
+	placeholder: string;
+	error: string;
+	autoFocus: boolean;
 };
 
 const MAX_NAME_LENGTH = 50;
@@ -66,16 +57,16 @@ const InputItemComponent = ({
 	style,
 	inputRef,
 }: {
-    testID?: string;
-    value: string;
-    onChangeText: (text: string) => void;
-    placeholder: string;
-    error?: string;
-    autoFocus?: boolean;
-    onSubmitEditing?: () => void;
-    editable?: boolean;
-    style?: any;
-    inputRef?: React.RefObject<any>;
+	testID?: string;
+	value: string;
+	onChangeText: (text: string) => void;
+	placeholder: string;
+	error?: string;
+	autoFocus?: boolean;
+	onSubmitEditing?: () => void;
+	editable?: boolean;
+	style?: any;
+	inputRef?: React.RefObject<any>;
 }): ReactElement => {
 	return (
 		<View style={[styles.inputWrapper, style]}>
@@ -100,12 +91,14 @@ const InputItemComponent = ({
 	);
 };
 
-const EditPubky = ({ payload }: {
-    payload: {
-        title?: string;
-        description?: string;
-        pubky: string;
-    };
+const EditPubky = ({
+	payload,
+}: {
+	payload: {
+		title?: string;
+		description?: string;
+		pubky: string;
+	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky } = useMemo(() => payload, [payload]);
@@ -115,7 +108,9 @@ const EditPubky = ({ payload }: {
 	const [homeServer, setHomeServer] = useState(storedPubkyData?.homeserver || DEFAULT_HOMESERVER || '');
 	const [signupToken, setSignupToken] = useState('');
 	const pubkyNameLength = useMemo(() => newPubkyName.length, [newPubkyName.length]);
-	const [nameError, setNameError] = useState<string>(pubkyNameLength > 20 ? `${MAX_NAME_LENGTH - pubkyNameLength} / ${MAX_NAME_LENGTH}` : '');
+	const [nameError, setNameError] = useState<string>(
+		pubkyNameLength > 20 ? `${MAX_NAME_LENGTH - pubkyNameLength} / ${MAX_NAME_LENGTH}` : '',
+	);
 	const dispatch = useDispatch();
 	const checkOpacity = useSharedValue(0);
 	const checkScale = useSharedValue(0.2);
@@ -126,33 +121,38 @@ const EditPubky = ({ payload }: {
 	const gradientOpacity = useSharedValue(0);
 
 	const signupTokenOpacity = useSharedValue(
-        storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0
+		storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0,
 	);
 
 	const isSignupTokenInputVisible = useMemo(() => {
 		return storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
 	}, [storedPubkyData?.signedUp, storedPubkyData.homeserver, homeServer]);
 
-	const textInputTitleText = useMemo(() => ({
-		name: i18n.t('editPubkySheet.pubkyNameLabel'),
-		homeserver: i18n.t('editPubky.homeserver'),
-		signuptoken: i18n.t('editPubkySheet.inviteCodeOptional'),
-	}), []);
-
+	const textInputTitleText = useMemo(
+		() => ({
+			name: i18n.t('editPubkySheet.pubkyNameLabel'),
+			homeserver: i18n.t('editPubky.homeserver'),
+			signuptoken: i18n.t('editPubkySheet.inviteCodeOptional'),
+		}),
+		[],
+	);
 
 	// Whether signupToken TextInput should be visible
 	useEffect(() => {
 		signupTokenOpacity.value = withTiming(isSignupTokenInputVisible ? 1 : 0, { duration: 300 });
 	}, [isSignupTokenInputVisible, signupTokenOpacity]);
 
-	const formatSignupTokenForHomeserver = useCallback((text: string) => {
-		// Only format if using the default or staging homeserver
-		if (homeServer.trim() !== DEFAULT_HOMESERVER && homeServer.trim() !== STAGING_HOMESERVER) {
-			return text;
-		}
+	const formatSignupTokenForHomeserver = useCallback(
+		(text: string) => {
+			// Only format if using the default or staging homeserver
+			if (homeServer.trim() !== DEFAULT_HOMESERVER && homeServer.trim() !== STAGING_HOMESERVER) {
+				return text;
+			}
 
-		return formatSignupToken(text);
-	}, [homeServer]);
+			return formatSignupToken(text);
+		},
+		[homeServer],
+	);
 
 	const clearErrorState = useCallback(() => {
 		if (error) {
@@ -179,54 +179,57 @@ const EditPubky = ({ payload }: {
 		}
 	}, [error, checkOpacity, gradientOpacity, checkScale]);
 
-	const showCheckAnimation = useCallback(({ success }: { success: boolean }) => {
-		// Clear any existing timers to prevent conflicting animations
-		if (fadeOutTimerRef.current) {
-			clearTimeout(fadeOutTimerRef.current);
-			fadeOutTimerRef.current = null;
-		}
+	const showCheckAnimation = useCallback(
+		({ success }: { success: boolean }) => {
+			// Clear any existing timers to prevent conflicting animations
+			if (fadeOutTimerRef.current) {
+				clearTimeout(fadeOutTimerRef.current);
+				fadeOutTimerRef.current = null;
+			}
 
-		// If transitioning from visible error to success, fade out first
-		if (checkOpacity.value > 0 && error && success) {
-			// Fade out current state
-			checkOpacity.value = withTiming(0, { duration: 300 });
-			gradientOpacity.value = withTiming(0, { duration: 300 });
+			// If transitioning from visible error to success, fade out first
+			if (checkOpacity.value > 0 && error && success) {
+				// Fade out current state
+				checkOpacity.value = withTiming(0, { duration: 300 });
+				gradientOpacity.value = withTiming(0, { duration: 300 });
 
-			// Then show new state after brief pause
-			setTimeout(() => {
+				// Then show new state after brief pause
+				setTimeout(() => {
+					checkOpacity.value = withTiming(1, { duration: 500 });
+					gradientOpacity.value = withTiming(1, { duration: 500 });
+					checkScale.value = withSpring(1, {
+						damping: 10,
+						stiffness: 100,
+					});
+				}, 350);
+			} else {
+				// Show animation immediately if not transitioning
 				checkOpacity.value = withTiming(1, { duration: 500 });
 				gradientOpacity.value = withTiming(1, { duration: 500 });
 				checkScale.value = withSpring(1, {
 					damping: 10,
 					stiffness: 100,
 				});
-			}, 350);
-		} else {
-			// Show animation immediately if not transitioning
-			checkOpacity.value = withTiming(1, { duration: 500 });
-			gradientOpacity.value = withTiming(1, { duration: 500 });
-			checkScale.value = withSpring(1, {
-				damping: 10,
-				stiffness: 100,
-			});
-		}
+			}
 
-		if (success) {
-			// Set a new timer for fade out
-			const delay = checkOpacity.value > 0 && error ? 2150 : 1800; // Add extra time if transitioning
-			fadeOutTimerRef.current = setTimeout(() => {
-				// Hide both check and gradient
-				checkOpacity.value = withTiming(0, { duration: 3000 });
-				gradientOpacity.value = withTiming(0, { duration: 3000 });
-
-				// Store reference to reset the scale after opacity animation
+			if (success) {
+				// Set a new timer for fade out
+				const delay = checkOpacity.value > 0 && error ? 2150 : 1800; // Add extra time if transitioning
 				fadeOutTimerRef.current = setTimeout(() => {
-					checkScale.value = 0;
-					fadeOutTimerRef.current = null;
-				}, 3005);
-			}, delay);
-		}
-	}, [checkOpacity, checkScale, gradientOpacity, error]);
+					// Hide both check and gradient
+					checkOpacity.value = withTiming(0, { duration: 3000 });
+					gradientOpacity.value = withTiming(0, { duration: 3000 });
+
+					// Store reference to reset the scale after opacity animation
+					fadeOutTimerRef.current = setTimeout(() => {
+						checkScale.value = 0;
+						fadeOutTimerRef.current = null;
+					}, 3005);
+				}, delay);
+			}
+		},
+		[checkOpacity, checkScale, gradientOpacity, error],
+	);
 
 	const checkStyle = useAnimatedStyle(() => ({
 		opacity: checkOpacity.value,
@@ -247,13 +250,15 @@ const EditPubky = ({ payload }: {
 
 	const updateName = useCallback(() => {
 		if (storedPubkyData.name !== newPubkyName.trim()) {
-			dispatch(setPubkyData({
-				pubky,
-				data: {
-					...storedPubkyData,
-					name: newPubkyName,
-				},
-			}));
+			dispatch(
+				setPubkyData({
+					pubky,
+					data: {
+						...storedPubkyData,
+						name: newPubkyName,
+					},
+				}),
+			);
 		}
 	}, [dispatch, newPubkyName, pubky, storedPubkyData]);
 
@@ -275,7 +280,11 @@ const EditPubky = ({ payload }: {
 				signupToken: storedPubkyData?.signupToken ?? '',
 			};
 
-			if (!storedPubkyData?.signedUp || storedPubkyData.homeserver !== homeServer.trim() || storedPubkyData?.signupToken !== signupToken) {
+			if (
+				!storedPubkyData?.signedUp ||
+				storedPubkyData.homeserver !== homeServer.trim() ||
+				storedPubkyData?.signupToken !== signupToken
+			) {
 				let signedIn = false;
 				if (!storedPubkyData?.signedUp || storedPubkyData.homeserver !== homeServer.trim()) {
 					//Attempt sign-up
@@ -332,16 +341,29 @@ const EditPubky = ({ payload }: {
 				}
 			}
 
-			dispatch(setPubkyData({
-				pubky,
-				data: newData,
-			}));
+			dispatch(
+				setPubkyData({
+					pubky,
+					data: newData,
+				}),
+			);
 			setError('');
 			showCheckAnimation({ success: true });
 		} finally {
 			setLoading(false);
 		}
-	}, [pubky, newPubkyName, homeServer, storedPubkyData?.signupToken, storedPubkyData?.signedUp, storedPubkyData.homeserver, signupToken, dispatch, showCheckAnimation, updateName]);
+	}, [
+		pubky,
+		newPubkyName,
+		homeServer,
+		storedPubkyData?.signupToken,
+		storedPubkyData?.signedUp,
+		storedPubkyData.homeserver,
+		signupToken,
+		dispatch,
+		showCheckAnimation,
+		updateName,
+	]);
 
 	const handleChangeText = useCallback((text: string) => {
 		if (text.length > MAX_NAME_LENGTH) {
@@ -358,11 +380,17 @@ const EditPubky = ({ payload }: {
 	const haveFieldsChanged = useMemo(() => {
 		return (
 			newPubkyName.trim() !== storedPubkyData?.name ||
-            homeServer.trim() !== storedPubkyData?.homeserver ||
-            (signupToken.trim() !== (storedPubkyData?.signupToken) &&
-                signupToken.trim() !== '')
+			homeServer.trim() !== storedPubkyData?.homeserver ||
+			(signupToken.trim() !== storedPubkyData?.signupToken && signupToken.trim() !== '')
 		);
-	}, [newPubkyName, homeServer, signupToken, storedPubkyData?.name, storedPubkyData?.homeserver, storedPubkyData?.signupToken]);
+	}, [
+		newPubkyName,
+		homeServer,
+		signupToken,
+		storedPubkyData?.name,
+		storedPubkyData?.homeserver,
+		storedPubkyData?.signupToken,
+	]);
 
 	const handleNameSubmit = useCallback(() => {
 		if (storedPubkyData?.signedUp) {
@@ -377,7 +405,13 @@ const EditPubky = ({ payload }: {
 			// If not signed up and invite code input is visible, focus it
 			signupTokenInputRef.current.focus();
 		}
-	}, [storedPubkyData?.signedUp, isSignupTokenInputVisible, handleSubmit, haveFieldsChanged, clearErrorState]);
+	}, [
+		storedPubkyData?.signedUp,
+		isSignupTokenInputVisible,
+		handleSubmit,
+		haveFieldsChanged,
+		clearErrorState,
+	]);
 
 	const handleHomeserverSubmit = useCallback(() => {
 		if (homeServer.trim() !== storedPubkyData?.homeserver && !signupToken) {
@@ -388,7 +422,15 @@ const EditPubky = ({ payload }: {
 			// If signed up but no fields changed, clear error
 			clearErrorState();
 		}
-	}, [homeServer, storedPubkyData?.homeserver, storedPubkyData?.signedUp, signupToken, haveFieldsChanged, handleSubmit, clearErrorState]);
+	}, [
+		homeServer,
+		storedPubkyData?.homeserver,
+		storedPubkyData?.signedUp,
+		signupToken,
+		haveFieldsChanged,
+		handleSubmit,
+		clearErrorState,
+	]);
 
 	const isSignupTokenEditable = useMemo(() => {
 		// Not editable when loading or when already signed up with the same homeserver
@@ -458,10 +500,13 @@ const EditPubky = ({ payload }: {
 		};
 	}, []);
 
-	const handleSignupTokenChange = useCallback((text: string) => {
-		const formatted = formatSignupTokenForHomeserver(text);
-		setSignupToken(formatted);
-	}, [formatSignupTokenForHomeserver]);
+	const handleSignupTokenChange = useCallback(
+		(text: string) => {
+			const formatted = formatSignupTokenForHomeserver(text);
+			setSignupToken(formatted);
+		},
+		[formatSignupTokenForHomeserver],
+	);
 
 	const inputData = useMemo(() => {
 		const items: InputDataItem[] = [
@@ -499,13 +544,23 @@ const EditPubky = ({ payload }: {
 		});
 
 		return items;
-	}, [newPubkyName, handleChangeText, nameError, isSignupTokenInputVisible, homeServer, signupToken, handleSignupTokenChange]);
+	}, [
+		newPubkyName,
+		handleChangeText,
+		nameError,
+		isSignupTokenInputVisible,
+		homeServer,
+		signupToken,
+		handleSignupTokenChange,
+	]);
 
 	const renderListHeader = useCallback(() => {
 		return (
 			<>
 				<ModalIndicator />
-				<Text testID="EditPubkyTitle" style={styles.title}>{title}</Text>
+				<Text testID="EditPubkyTitle" style={styles.title}>
+					{title}
+				</Text>
 			</>
 		);
 	}, [title]);
@@ -517,9 +572,7 @@ const EditPubky = ({ payload }: {
 	const renderListFooter = useCallback(() => {
 		return (
 			<View style={[styles.footerContainer, { top: footerTop }]}>
-				{error ? (
-					<Text style={styles.errorText}>{error}</Text>
-                ) : null}
+				{error ? <Text style={styles.errorText}>{error}</Text> : null}
 				<View style={styles.imageContainer}>
 					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
 						<Image
@@ -549,69 +602,77 @@ const EditPubky = ({ payload }: {
 	}, [storedPubkyData.homeserver, haveFieldsChanged, loading, onClose, onReset]);
 
 	// eslint-disable-next-line react/no-unused-prop-types
-	const renderInputItem = useCallback(({ item }: { item: InputDataItem }) => {
-		if (item.id === 'signuptoken') {
+	const renderInputItem = useCallback(
+		({ item }: { item: InputDataItem }) => {
+			if (item.id === 'signuptoken') {
+				return (
+					<>
+						<Text style={styles.textInputTitle}>{textInputTitleText?.signuptoken}</Text>
+						<InputItemComponent
+							testID={item.testID}
+							inputRef={signupTokenInputRef}
+							value={item.value}
+							onChangeText={item.onChange}
+							placeholder={item.placeholder}
+							error={item.error}
+							autoFocus={item.autoFocus}
+							onSubmitEditing={() => {
+								if (haveFieldsChanged || !storedPubkyData?.signedUp) {
+									handleSubmit();
+								} else if (storedPubkyData?.signedUp) {
+									clearErrorState();
+								}
+							}}
+							editable={isSignupTokenEditable}
+						/>
+					</>
+				);
+			}
+
+			if (item.id === 'name') {
+				return (
+					<>
+						<Text style={styles.textInputTitle}>{textInputTitleText[item.id]}</Text>
+						<InputItemComponent
+							testID={item.testID}
+							value={item.value}
+							onChangeText={item.onChange}
+							placeholder={item.placeholder}
+							error={item.error}
+							autoFocus={item.autoFocus}
+							onSubmitEditing={handleNameSubmit}
+						/>
+					</>
+				);
+			}
+
+			// For homeserver input
 			return (
 				<>
-					<Text style={styles.textInputTitle}>{textInputTitleText?.signuptoken}</Text>
+					<Text style={styles.textInputTitle}>{textInputTitleText[item.id]}</Text>
 					<InputItemComponent
 						testID={item.testID}
-						inputRef={signupTokenInputRef}
 						value={item.value}
 						onChangeText={item.onChange}
 						placeholder={item.placeholder}
 						error={item.error}
 						autoFocus={item.autoFocus}
-						onSubmitEditing={() => {
-							if (haveFieldsChanged || !storedPubkyData?.signedUp) {
-								handleSubmit();
-							} else if (storedPubkyData?.signedUp) {
-								clearErrorState();
-							}
-						}}
-						editable={isSignupTokenEditable}
+						onSubmitEditing={handleHomeserverSubmit}
 					/>
 				</>
 			);
-		}
-
-		if (item.id === 'name') {
-			return (
-				<>
-					<Text style={styles.textInputTitle}>
-						{textInputTitleText[item.id]}
-					</Text>
-					<InputItemComponent
-						testID={item.testID}
-						value={item.value}
-						onChangeText={item.onChange}
-						placeholder={item.placeholder}
-						error={item.error}
-						autoFocus={item.autoFocus}
-						onSubmitEditing={handleNameSubmit}
-					/>
-				</>
-			);
-		}
-
-		// For homeserver input
-		return (
-			<>
-				<Text style={styles.textInputTitle}>
-					{textInputTitleText[item.id]}
-				</Text>
-				<InputItemComponent
-					testID={item.testID}
-					value={item.value}
-					onChangeText={item.onChange}
-					placeholder={item.placeholder}
-					error={item.error}
-					autoFocus={item.autoFocus}
-					onSubmitEditing={handleHomeserverSubmit}
-				/>
-			</>
-		);
-	}, [isSignupTokenEditable, handleSubmit, handleNameSubmit, handleHomeserverSubmit, haveFieldsChanged, storedPubkyData?.signedUp, clearErrorState, textInputTitleText]);
+		},
+		[
+			isSignupTokenEditable,
+			handleSubmit,
+			handleNameSubmit,
+			handleHomeserverSubmit,
+			haveFieldsChanged,
+			storedPubkyData?.signedUp,
+			clearErrorState,
+			textInputTitleText,
+		],
+	);
 
 	return (
 		<ActionSheetContainer
@@ -638,7 +699,7 @@ const EditPubky = ({ payload }: {
 							data={inputData}
 							renderItem={renderInputItem}
 							renderScrollComponent={ActionSheetScrollView}
-							keyExtractor={(item) => item.id}
+							keyExtractor={item => item.id}
 							showsVerticalScrollIndicator={false}
 							ListHeaderComponent={renderListHeader}
 							ListFooterComponent={renderListFooter}

@@ -15,7 +15,10 @@ const settingsSlice = createSlice({
 		updateAutoAuth: (state, action: PayloadAction<{ autoAuth: boolean }>) => {
 			state.autoAuth = action.payload.autoAuth;
 		},
-		updateNavigationAnimation: (state, action: PayloadAction<{ navigationAnimation: ENavigationAnimation }>) => {
+		updateNavigationAnimation: (
+			state,
+			action: PayloadAction<{ navigationAnimation: ENavigationAnimation }>,
+		) => {
 			state.navigationAnimation = action.payload.navigationAnimation;
 		},
 		updateIsOnline: (state, action: PayloadAction<{ isOnline: boolean }>) => {

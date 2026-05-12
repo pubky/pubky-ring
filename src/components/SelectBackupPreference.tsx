@@ -1,40 +1,24 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-} from 'react';
-import {
-	Image,
-	Platform,
-	StyleSheet,
-} from 'react-native';
-import {
-	View,
-	Text,
-	ActionSheetContainer,
-	SessionText,
-	RadialGradient,
-} from '../theme/components.ts';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import { Image, Platform, StyleSheet } from 'react-native';
+import { View, Text, ActionSheetContainer, SessionText, RadialGradient } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import ModalIndicator from './ModalIndicator.tsx';
-import {
-	ACTION_SHEET_HEIGHT,
-	BLUE_RADIAL_GRADIENT,
-} from '../utils/constants.ts';
-import { EBackupPreference } from "../types/pubky.ts";
-import { showBackupPrompt } from "../utils/sheetHelpers.ts";
-import { truncateStr } from "../utils/pubky.ts";
+import { ACTION_SHEET_HEIGHT, BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
+import { EBackupPreference } from '../types/pubky.ts';
+import { showBackupPrompt } from '../utils/sheetHelpers.ts';
+import { truncateStr } from '../utils/pubky.ts';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
 
-const SelectBackupPreference = ({ payload }: {
-    payload: {
-        pubky: string;
-    };
+const SelectBackupPreference = ({
+	payload,
+}: {
+	payload: {
+		pubky: string;
+	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky } = useMemo(() => payload, [payload]);
@@ -44,18 +28,11 @@ const SelectBackupPreference = ({ payload }: {
 	}, []);
 
 	const getImage = useCallback(() => {
-		return (
-			<Image
-				source={require('../images/shield.png')}
-				style={styles.importImage}
-			/>
-		);
+		return <Image source={require('../images/shield.png')} style={styles.importImage} />;
 	}, []);
 
 	const getHeaderText = useCallback(() => {
-		return (
-			<Text style={styles.headerText}>{i18n.t('selectBackup.header')}</Text>
-		);
+		return <Text style={styles.headerText}>{i18n.t('selectBackup.header')}</Text>;
 	}, []);
 
 	const truncatedPubky = useMemo(() => {
@@ -67,20 +44,31 @@ const SelectBackupPreference = ({ payload }: {
 		return i18n.t('selectBackup.message', { pubky: truncatedPubky });
 	}, [truncatedPubky]);
 
-	const selectPreference = useCallback((backupPreference: EBackupPreference): void => {
-		SheetManager.hide('select-backup-preference');
-		setTimeout(() => {
-			showBackupPrompt({
-				pubky,
-				backupPreference,
-			}).then();
-		}, 250);
-	}, [pubky]);
+	const selectPreference = useCallback(
+		(backupPreference: EBackupPreference): void => {
+			SheetManager.hide('select-backup-preference');
+			setTimeout(() => {
+				showBackupPrompt({
+					pubky,
+					backupPreference,
+				}).then();
+			}, 250);
+		},
+		[pubky],
+	);
 
 	const getButtonConfig = useCallback(() => {
 		return [
-			{ text: i18n.t('backup.encryptedFile'), onPress: (): void => selectPreference(EBackupPreference.encryptedFile), style: styles.importButton },
-			{ text: i18n.t('backup.recoveryPhrase'), onPress: (): void => selectPreference(EBackupPreference.recoveryPhrase), style: styles.createButton },
+			{
+				text: i18n.t('backup.encryptedFile'),
+				onPress: (): void => selectPreference(EBackupPreference.encryptedFile),
+				style: styles.importButton,
+			},
+			{
+				text: i18n.t('backup.recoveryPhrase'),
+				onPress: (): void => selectPreference(EBackupPreference.recoveryPhrase),
+				style: styles.createButton,
+			},
 		];
 	}, [selectPreference]);
 
@@ -92,22 +80,23 @@ const SelectBackupPreference = ({ payload }: {
 					<Text style={styles.title}>{titleText}</Text>
 				</View>
 				{getHeaderText()}
-				<SessionText style={styles.message}>
-					{messageText}
-				</SessionText>
-				<View style={styles.keyContainer}>
-					{getImage()}
-				</View>
+				<SessionText style={styles.message}>{messageText}</SessionText>
+				<View style={styles.keyContainer}>{getImage()}</View>
 				<View style={styles.buttonContainer}>
-					{getButtonConfig().map((button: { text: string; style: any; onPress: (() => void) | undefined; }, index: React.Key | null | undefined) => (
-						<Button
-							key={index}
-							text={button.text}
-							style={[styles.button, button.style]}
-							textStyle={styles.buttonText}
-							onPress={button.onPress}
-						/>
-					))}
+					{getButtonConfig().map(
+						(
+							button: { text: string; style: any; onPress: (() => void) | undefined },
+							index: React.Key | null | undefined,
+						) => (
+							<Button
+								key={index}
+								text={button.text}
+								style={[styles.button, button.style]}
+								textStyle={styles.buttonText}
+								onPress={button.onPress}
+							/>
+						),
+					)}
 				</View>
 			</>
 		);
@@ -122,11 +111,7 @@ const SelectBackupPreference = ({ payload }: {
 			CustomHeaderComponent={<></>}
 			height={ACTION_SHEET_HEIGHT}
 		>
-			<RadialGradient
-				style={styles.content}
-				colors={BLUE_RADIAL_GRADIENT}
-				center={{ x: 0.5, y: 0.5 }}
-			>
+			<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
 				{getContent()}
 			</RadialGradient>
 		</ActionSheetContainer>
@@ -179,8 +164,7 @@ const styles = StyleSheet.create({
 		width: '47%',
 		minHeight: 64,
 	},
-	importButton: {
-	},
+	importButton: {},
 	createButton: {
 		borderWidth: 1,
 	},

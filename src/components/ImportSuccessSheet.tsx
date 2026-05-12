@@ -1,36 +1,27 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-} from 'react';
-import {
-	Platform,
-	StyleSheet,
-} from 'react-native';
-import {
-	View,
-	ActionSheetContainer,
-} from '../theme/components.ts';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import { Platform, StyleSheet } from 'react-native';
+import { View, ActionSheetContainer } from '../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { Pubky } from "../types/pubky.ts";
-import PubkyReview from "./PubkySetup/PubkyReview.tsx";
-import { getPubky, getPubkyCount } from "../store/selectors/pubkySelectors.ts";
-import { RootState } from "../store";
+import { Pubky } from '../types/pubky.ts';
+import PubkyReview from './PubkySetup/PubkyReview.tsx';
+import { getPubky, getPubkyCount } from '../store/selectors/pubkySelectors.ts';
+import { RootState } from '../store';
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 
-const ImportSuccessSheet = ({ payload }: {
-    payload: {
-        modalTitle?: string;
-        description?: string;
+const ImportSuccessSheet = ({
+	payload,
+}: {
+	payload: {
+		modalTitle?: string;
+		description?: string;
 		isNewPubky?: boolean;
-        pubky: string;
-        data?: Pubky;
-        onContinue?: () => void;
-    };
+		pubky: string;
+		data?: Pubky;
+		onContinue?: () => void;
+	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -97,8 +88,8 @@ const styles = StyleSheet.create({
 		width: '100%',
 	},
 	authorizeButton: {
-		borderWidth: 0
-	}
+		borderWidth: 0,
+	},
 });
 
 export default memo(ImportSuccessSheet);

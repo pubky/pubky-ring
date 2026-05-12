@@ -18,18 +18,15 @@ import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { Result } from '@synonymdev/result';
 import ModalIndicator from './ModalIndicator.tsx';
-import { EBackupPreference } from "../types/pubky.ts";
+import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
-import {
-	ACTION_SHEET_HEIGHT_TEXTINPUT,
-	BACKUP_PASSWORD_CHAR_MIN,
-} from '../utils/constants.ts';
+import { ACTION_SHEET_HEIGHT_TEXTINPUT, BACKUP_PASSWORD_CHAR_MIN } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
 
 export enum EBackupPromptViewId {
-    backup = 'backup',
-    import = 'import',
+	backup = 'backup',
+	import = 'import',
 }
 
 const formatDate = (date: Date): string => {
@@ -42,15 +39,17 @@ const formatDate = (date: Date): string => {
 	return `${day}/${month}/${year} at ${hours}:${minutes}`;
 };
 
-const BackupPrompt = ({ payload }: {
-    payload: {
+const BackupPrompt = ({
+	payload,
+}: {
+	payload: {
 		pubky?: string;
 		fileName?: string;
 		fileDate?: Date;
-        viewId: EBackupPromptViewId;
-        onSubmit: (password: string) => Promise<Result<any>>;
-        onClose: () => void;
-    };
+		viewId: EBackupPromptViewId;
+		onSubmit: (password: string) => Promise<Result<any>>;
+		onClose: () => void;
+	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -60,7 +59,7 @@ const BackupPrompt = ({ payload }: {
 	const { onSubmit, onClose, viewId } = useMemo(() => payload, [payload]);
 	const [loading, setLoading] = useState(false);
 	const fileName = useMemo(() => payload?.fileName ?? '', [payload]);
-	const fileDate = useMemo(() => payload?.fileDate ? formatDate(payload.fileDate) : '', [payload]);
+	const fileDate = useMemo(() => (payload?.fileDate ? formatDate(payload.fileDate) : ''), [payload]);
 	const pubky = useMemo(() => payload?.pubky ?? '', [payload]);
 	const { confirmPubkyBackup } = usePubkyManagement();
 
@@ -147,11 +146,7 @@ const BackupPrompt = ({ payload }: {
 							<Text numberOfLines={1} ellipsizeMode="middle" style={styles.fileText}>
 								{fileName}
 							</Text>
-							{fileDate && (
-								<SessionText style={styles.dateText}>
-									{fileDate.toUpperCase()}
-								</SessionText>
-							)}
+							{fileDate && <SessionText style={styles.dateText}>{fileDate.toUpperCase()}</SessionText>}
 						</View>
 					</View>
 				);
@@ -176,9 +171,7 @@ const BackupPrompt = ({ payload }: {
 				<ModalIndicator />
 				<Text style={styles.title}>{title}</Text>
 				<View style={styles.messageContainer}>
-					<Text style={styles.message}>
-						{message}
-					</Text>
+					<Text style={styles.message}>{message}</Text>
 				</View>
 				{content}
 				<View style={styles.inputContainer}>
@@ -187,7 +180,7 @@ const BackupPrompt = ({ payload }: {
 						style={[styles.input, error ? styles.inputError : null]}
 						secureTextEntry={!showPassword}
 						value={password}
-						onChangeText={(text) => {
+						onChangeText={text => {
 							setPassword(text);
 							if (error) setError('');
 						}}
@@ -206,12 +199,10 @@ const BackupPrompt = ({ payload }: {
 						onPress={() => setShowPassword(!showPassword)}
 						activeOpacity={0.7}
 					>
-						{showPassword ? (<Eye size={20} />) : (<EyeOff size={20} />)}
+						{showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
 					</TouchableOpacity>
 				</View>
-				{error ? (
-					<Text style={styles.errorText}>{error}</Text>
-				) : null}
+				{error ? <Text style={styles.errorText}>{error}</Text> : null}
 				<View style={styles.buttonContainer}>
 					<Button
 						text={loading ? t('common.close') : t('common.cancel')}
@@ -223,7 +214,10 @@ const BackupPrompt = ({ payload }: {
 						loading={loading}
 						style={[styles.button, styles.submitButton]}
 						onPress={handleSubmit}
-						disabled={!password.trim() || (viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN)}
+						disabled={
+							!password.trim() ||
+							(viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN)
+						}
 					/>
 				</View>
 			</SkiaGradient>

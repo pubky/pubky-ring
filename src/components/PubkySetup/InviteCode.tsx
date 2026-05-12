@@ -1,20 +1,5 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useState,
-	useRef,
-	useEffect,
-	useMemo,
-} from 'react';
-import {
-	StyleSheet,
-	TextInput,
-	Linking,
-	Keyboard,
-	Image, Platform,
-	Dimensions,
-} from 'react-native';
+import React, { memo, ReactElement, useCallback, useState, useRef, useEffect, useMemo } from 'react';
+import { StyleSheet, TextInput, Linking, Keyboard, Image, Platform, Dimensions } from 'react-native';
 import {
 	View,
 	Text,
@@ -30,22 +15,13 @@ import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
 import DashedBorder from '../DashedBorder.tsx';
 import { formatSignupToken, isSmallScreen, isValidSignupTokenFormat } from '../../utils/helpers.ts';
-import {
-	useAnimatedStyle,
-	useSharedValue,
-	withSpring,
-	withTiming,
-} from 'react-native-reanimated';
+import { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
 import {
 	DEFAULT_HOMESERVER,
 	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
 	INVITE_CODE_GRADIENT,
 } from '../../utils/constants.ts';
-import {
-	getPubkySecretKey,
-	signInToHomeserver,
-	signUpToHomeserver,
-} from '../../utils/pubky.ts';
+import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver } from '../../utils/pubky.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../types';
 import { getPubky } from '../../store/selectors/pubkySelectors.ts';
@@ -56,12 +32,14 @@ const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const smallScreen = isSmallScreen();
 
-const InviteCode = ({ payload }: {
-    payload: {
-        pubky: string;
-        onContinue?: () => void;
-        onRequestInvite?: () => void;
-    };
+const InviteCode = ({
+	payload,
+}: {
+	payload: {
+		pubky: string;
+		onContinue?: () => void;
+		onRequestInvite?: () => void;
+	};
 }): ReactElement => {
 	const dispatch = useDispatch();
 	const { pubky } = payload;
@@ -91,36 +69,39 @@ const InviteCode = ({ payload }: {
 		};
 	}, []);
 
-	const showCheckAnimation = useCallback(({ success }: { success: boolean }) => {
-		// Clear any existing timers to prevent conflicting animations
-		if (fadeOutTimerRef.current) {
-			clearTimeout(fadeOutTimerRef.current);
-			fadeOutTimerRef.current = null;
-		}
+	const showCheckAnimation = useCallback(
+		({ success }: { success: boolean }) => {
+			// Clear any existing timers to prevent conflicting animations
+			if (fadeOutTimerRef.current) {
+				clearTimeout(fadeOutTimerRef.current);
+				fadeOutTimerRef.current = null;
+			}
 
-		// Set error state for animation
-		isErrorAnimation.value = success ? 0 : 1;
+			// Set error state for animation
+			isErrorAnimation.value = success ? 0 : 1;
 
-		// Show the animation
-		checkOpacity.value = withTiming(1, { duration: 300 });
-		gradientOpacity.value = withTiming(1, { duration: 300 });
-		checkScale.value = withSpring(1, {
-			damping: 12,
-			stiffness: 150,
-		});
+			// Show the animation
+			checkOpacity.value = withTiming(1, { duration: 300 });
+			gradientOpacity.value = withTiming(1, { duration: 300 });
+			checkScale.value = withSpring(1, {
+				damping: 12,
+				stiffness: 150,
+			});
 
-		if (success) {
-			// Set a new timer for fade out and transition
-			fadeOutTimerRef.current = setTimeout(() => {
-				// After success animation, transition to next screen
-				if (payload?.onContinue) {
-					payload.onContinue();
-				} else {
-					closeSheet();
-				}
-			}, 600);
-		}
-	}, [checkOpacity, checkScale, gradientOpacity, isErrorAnimation, payload, closeSheet]);
+			if (success) {
+				// Set a new timer for fade out and transition
+				fadeOutTimerRef.current = setTimeout(() => {
+					// After success animation, transition to next screen
+					if (payload?.onContinue) {
+						payload.onContinue();
+					} else {
+						closeSheet();
+					}
+				}, 600);
+			}
+		},
+		[checkOpacity, checkScale, gradientOpacity, isErrorAnimation, payload, closeSheet],
+	);
 
 	const checkStyle = useAnimatedStyle(() => ({
 		opacity: checkOpacity.value,
@@ -154,7 +135,9 @@ const InviteCode = ({ payload }: {
 					checkOpacity.value = withTiming(0, { duration: 200 });
 					gradientOpacity.value = withTiming(0, { duration: 200 });
 					// Wait for fade out to complete
-					await new Promise((resolve): void => {setTimeout(resolve, 250);});
+					await new Promise((resolve): void => {
+						setTimeout(resolve, 250);
+					});
 				}
 				// Then reset everything to neutral
 				setError('');
@@ -231,10 +214,12 @@ const InviteCode = ({ payload }: {
 			}
 
 			// Update pubky data with the homeserver and signup token
-			dispatch(setPubkyData({
-				pubky,
-				data: newData,
-			}));
+			dispatch(
+				setPubkyData({
+					pubky,
+					data: newData,
+				}),
+			);
 
 			setError('');
 			showCheckAnimation({ success: true });
@@ -245,7 +230,18 @@ const InviteCode = ({ payload }: {
 		} finally {
 			setLoading(false);
 		}
-	}, [pubky, inviteCode, storedPubkyData, dispatch, showCheckAnimation, error, checkOpacity, gradientOpacity, checkScale, isErrorAnimation]);
+	}, [
+		pubky,
+		inviteCode,
+		storedPubkyData,
+		dispatch,
+		showCheckAnimation,
+		error,
+		checkOpacity,
+		gradientOpacity,
+		checkScale,
+		isErrorAnimation,
+	]);
 
 	const handleInviteCodeChange = useCallback((text: string) => {
 		const formatted = formatSignupToken(text);
@@ -298,12 +294,12 @@ const InviteCode = ({ payload }: {
 				<View style={styles.content}>
 					<ModalIndicator />
 					<View style={styles.titleContainer}>
-						<Text testID="InviteCodeTitle" style={styles.title}>{i18n.t('welcome.defaultHomeserver')}</Text>
+						<Text testID="InviteCodeTitle" style={styles.title}>
+							{i18n.t('welcome.defaultHomeserver')}
+						</Text>
 					</View>
 					<Text style={styles.headerText}>{i18n.t('inviteCode.title')}</Text>
-					<SessionText style={styles.message}>
-						{i18n.t('inviteCode.description')}
-					</SessionText>
+					<SessionText style={styles.message}>{i18n.t('inviteCode.description')}</SessionText>
 
 					<DashedBorder
 						borderColor="rgba(173, 255, 47, 0.3)"
@@ -332,11 +328,7 @@ const InviteCode = ({ payload }: {
 						</AnimatedView>
 					</DashedBorder>
 
-					<TouchableOpacity
-						style={styles.needInviteRow}
-						onPress={handleNeedInvite}
-						activeOpacity={0.7}
-					>
+					<TouchableOpacity style={styles.needInviteRow} onPress={handleNeedInvite} activeOpacity={0.7}>
 						<View style={styles.needInviteContent}>
 							<Gift color="rgba(255, 255, 255, 0.8)" size={18} style={styles.giftIcon} />
 							<Text style={styles.needInviteText}>{i18n.t('inviteCode.needInviteCode')}</Text>
@@ -344,17 +336,17 @@ const InviteCode = ({ payload }: {
 					</TouchableOpacity>
 
 					{error ? (
-						<Text testID="InviteCodeErrorText" style={styles.errorText}>{error}</Text>
-                    ) : null}
-					{!smallScreen && (<View style={styles.imageContainer}>
-						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-							<Image
-								source={checkMarkImage}
-								style={styles.checkImage}
-								resizeMode="contain"
-							/>
-						</AnimatedView>
-					</View>)}
+						<Text testID="InviteCodeErrorText" style={styles.errorText}>
+							{error}
+						</Text>
+					) : null}
+					{!smallScreen && (
+						<View style={styles.imageContainer}>
+							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+								<Image source={checkMarkImage} style={styles.checkImage} resizeMode="contain" />
+							</AnimatedView>
+						</View>
+					)}
 
 					<View style={styles.footer}>
 						<AuthorizeButton
@@ -369,7 +361,9 @@ const InviteCode = ({ payload }: {
 								numberOfLines={1}
 								adjustsFontSizeToFit
 								minimumFontScale={0.8}
-							>{loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}</Text>
+							>
+								{loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}
+							</Text>
 						</AuthorizeButton>
 					</View>
 				</View>
@@ -380,7 +374,7 @@ const InviteCode = ({ payload }: {
 
 const styles = StyleSheet.create({
 	container: {
-		flex: 1
+		flex: 1,
 	},
 	gradientContainer: {
 		position: 'absolute',
@@ -398,7 +392,7 @@ const styles = StyleSheet.create({
 	keyboardAvoidingView: {
 		flex: 1,
 		zIndex: 1,
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
 	},
 	content: {
 		flex: 1,
@@ -514,7 +508,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		borderWidth: 1,
 		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)'
+		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
 	continueButtonDisabled: {
 		opacity: 0.5,
@@ -527,8 +521,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
-	}
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
+	},
 });
 
 export default memo(InviteCode);

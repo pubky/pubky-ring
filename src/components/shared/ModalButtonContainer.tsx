@@ -8,20 +8,8 @@ interface ModalButtonContainerProps {
 	style?: any;
 }
 
-const ModalButtonContainer: React.FC<ModalButtonContainerProps> = ({ 
-	children, 
-	single = false,
-	style 
-}) => {
-	return (
-		<View style={[
-			styles.buttonContainer, 
-			single && styles.singleButton,
-			style
-		]}>
-			{children}
-		</View>
-	);
+const ModalButtonContainer: React.FC<ModalButtonContainerProps> = ({ children, single = false, style }) => {
+	return <View style={[styles.buttonContainer, single && styles.singleButton, style]}>{children}</View>;
 };
 
 const styles = StyleSheet.create({

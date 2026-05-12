@@ -16,31 +16,34 @@ const ScanInviteButton = memo(() => {
 	const dispatch = useDispatch();
 
 	/**
-     * Processes input data from scan or clipboard
-     * Uses the unified input parser and router
-     */
-	const processInput = useCallback(async (data: string, source: 'scan' | 'clipboard'): Promise<void> => {
-		// Parse the input using the unified parser
-		const parsed = await parseInput(data, source);
+	 * Processes input data from scan or clipboard
+	 * Uses the unified input parser and router
+	 */
+	const processInput = useCallback(
+		async (data: string, source: 'scan' | 'clipboard'): Promise<void> => {
+			// Parse the input using the unified parser
+			const parsed = await parseInput(data, source);
 
-		// Only handle signup and invite actions in this button
-		if (parsed.action === InputAction.Signup || parsed.action === InputAction.Invite) {
-			// Error handling is done via the loading modal error state
-			await routeInput(parsed, { dispatch });
-		} else {
-			// Not a valid invite/signup input
-			showToast({
-				type: 'error',
-				title: i18n.t('scanInvite.invalidInviteCode'),
-				description: i18n.t('scanInvite.invalidInviteDescription'),
-			});
-		}
-	}, [dispatch]);
+			// Only handle signup and invite actions in this button
+			if (parsed.action === InputAction.Signup || parsed.action === InputAction.Invite) {
+				// Error handling is done via the loading modal error state
+				await routeInput(parsed, { dispatch });
+			} else {
+				// Not a valid invite/signup input
+				showToast({
+					type: 'error',
+					title: i18n.t('scanInvite.invalidInviteCode'),
+					description: i18n.t('scanInvite.invalidInviteDescription'),
+				});
+			}
+		},
+		[dispatch],
+	);
 
 	const handleInviteScan = useCallback(async () => {
 		if (isProcessingInvite.current) return;
 
-		await new Promise<void>((resolve) => {
+		await new Promise<void>(resolve => {
 			SheetManager.show('camera', {
 				payload: {
 					title: i18n.t('import.title'),
@@ -100,22 +103,13 @@ const ScanInviteButton = memo(() => {
 
 	return (
 		<View style={styles.container}>
-			<AuthorizeButton
-				style={styles.button}
-				onPressIn={handleInviteScan}
-			>
+			<AuthorizeButton style={styles.button} onPressIn={handleInviteScan}>
 				<View style={styles.row}>
 					<Scan size={19} />
-					<Text
-						style={styles.text}
-						numberOfLines={1}
-						adjustsFontSizeToFit
-						minimumFontScale={0.8}
-					>{i18n.t('scanInvite.scanInviteFor')}</Text>
-					<Image
-						source={PubkyRingLogo}
-						style={styles.logo}
-					/>
+					<Text style={styles.text} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+						{i18n.t('scanInvite.scanInviteFor')}
+					</Text>
+					<Image source={PubkyRingLogo} style={styles.logo} />
 				</View>
 			</AuthorizeButton>
 		</View>
@@ -125,7 +119,7 @@ const ScanInviteButton = memo(() => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 0,
-		justifyContent: 'flex-end'
+		justifyContent: 'flex-end',
 	},
 	button: {
 		width: '90%',

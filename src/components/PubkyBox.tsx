@@ -23,7 +23,7 @@ import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { buttonStyles, shadowStyles, textStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
-import { showEditPubkySheet, showBackupPrompt } from "../utils/sheetHelpers.ts";
+import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import i18n from '../i18n';
 import { ACCENTS } from '../utils/constants.ts';
 
@@ -34,31 +34,17 @@ interface AuthorizeQRButtonProps {
 	onLongPress?: () => void;
 }
 
-const AuthorizeQRButton = memo(({
-	isLoading,
-	isSignedUp,
-	onPress,
-	onLongPress
-}: AuthorizeQRButtonProps) => (
+const AuthorizeQRButton = memo(({ isLoading, isSignedUp, onPress, onLongPress }: AuthorizeQRButtonProps) => (
 	<AuthorizeButton
-		style={[
-			styles.actionButton,
-			isLoading && styles.actionButtonDisabled,
-		]}
+		style={[styles.actionButton, isLoading && styles.actionButtonDisabled]}
 		onPress={onPress}
 		onLongPress={onLongPress}
-		disabled={isLoading}>
-		{isLoading ? (
-			<ActivityIndicator size="small" />
-		) : (
-			isSignedUp ? <Scan size={16} /> : null
-		)}
-		<Text
-			style={textStyles.bodySSB}
-			numberOfLines={1}
-			adjustsFontSizeToFit
-			minimumFontScale={0.8}
-		>{isLoading ? '' : isSignedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}</Text>
+		disabled={isLoading}
+	>
+		{isLoading ? <ActivityIndicator size="small" /> : isSignedUp ? <Scan size={16} /> : null}
+		<Text style={textStyles.bodySSB} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+			{isLoading ? '' : isSignedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}
+		</Text>
 	</AuthorizeButton>
 ));
 
@@ -69,12 +55,7 @@ interface PubkyInfoProps {
 	isBackedUp: boolean;
 }
 
-const PubkyInfo = memo(({
-	pubkyName,
-	publicKey,
-	sessionsCount,
-	isBackedUp,
-}: PubkyInfoProps) => {
+const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: PubkyInfoProps) => {
 	const handleBackupPress = useCallback(() => {
 		showBackupPrompt({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
 	}, [publicKey]);
@@ -87,8 +68,11 @@ const PubkyInfo = memo(({
 				<Text style={textStyles.bodySSB} numberOfLines={1} ellipsizeMode="middle">
 					{truncateStr(publicKey)}
 				</Text>
-				{!isBackedUp && <TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}><Text
-					style={{ color: ACCENTS.pubkyRing }}>{i18n.t('pubkyProfile.backupReminder')}</Text></TouchableOpacity>}
+				{!isBackedUp && (
+					<TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}>
+						<Text style={{ color: ACCENTS.pubkyRing }}>{i18n.t('pubkyProfile.backupReminder')}</Text>
+					</TouchableOpacity>
+				)}
 				{sessionsCount > 0 && (
 					<CardView style={styles.sessionsButton}>
 						<SessionText style={textStyles.bodySSB}>{sessionsCount}</SessionText>
@@ -106,7 +90,7 @@ interface PubkyBoxProps {
 	index?: number;
 	onLongPress?: () => void;
 	disabled?: boolean;
-  loading?: boolean;
+	loading?: boolean;
 }
 
 const PubkyBox = ({
@@ -129,13 +113,12 @@ const PubkyBox = ({
 		onPubkyPress(pubky, index ?? 0);
 	}, [index, onPubkyPress, pubky]);
 
-	const publicKey = useMemo(
-		() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky),
-		[pubky],
-	);
+	const publicKey = useMemo(() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky), [pubky]);
 
 	const pubkyName = useMemo(() => {
-		return truncateStr(pubkyData.name, 8) || `${i18n.t('emptyState.placeholderName')} #${index ? index + 1 : 1}`;
+		return (
+			truncateStr(pubkyData.name, 8) || `${i18n.t('emptyState.placeholderName')} #${index ? index + 1 : 1}`
+		);
 	}, [index, pubkyData.name]);
 
 	const qrPress = useCallback(() => {
@@ -160,11 +143,7 @@ const PubkyBox = ({
 
 	return (
 		<LinearGradient testID={pubkyBoxTestID} style={styles.container}>
-			<Button
-				activeOpacity={0.7}
-				onPress={handleOnPress}
-				onLongPress={onLongPress}
-				style={styles.wrapper}>
+			<Button activeOpacity={0.7} onPress={handleOnPress} onLongPress={onLongPress} style={styles.wrapper}>
 				<Box
 					onPress={handleOnPress}
 					onLongPress={onLongPress}
@@ -290,7 +269,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		marginLeft: 5,
 		alignSelf: 'center',
-	}
+	},
 });
 
 export default memo(PubkyBox);

@@ -16,12 +16,7 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import {
-	getToastStyle,
-	isSmallScreen,
-	showToast,
-	sleep,
-} from '../utils/helpers.ts';
+import { getToastStyle, isSmallScreen, showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
@@ -29,10 +24,7 @@ import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
-import {
-	ACTION_SHEET_HEIGHT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
+import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { buttonStyles, textStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
@@ -43,16 +35,16 @@ import { XCallbackParams } from '../utils/inputParser.ts';
 import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 
 interface ConfirmAuthProps {
-    pubky: string;
-    authUrl: string;
-    authDetails: PubkyAuthDetails;
-    onComplete: () => void;
-    xCallback?: XCallbackParams;
+	pubky: string;
+	authUrl: string;
+	authDetails: PubkyAuthDetails;
+	onComplete: () => void;
+	xCallback?: XCallbackParams;
 }
 
 interface Capability {
-    path: string;
-    permission: string;
+	path: string;
+	permission: string;
 }
 
 const toastStyle = getToastStyle();
@@ -60,41 +52,50 @@ const toastStyle = getToastStyle();
 const smallScreen = isSmallScreen();
 const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
-const CapabilitiesList = memo(({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
-	const capabilitiesCount = capabilities.length;
-	return (
-		<>
-			{capabilities.map((capability, index) => (
-				<View style={styles.permissionsSection} key={index}>
-					<Permission capability={capability} isAuthorized={isAuthorized} />
-					{index !== capabilitiesCount - 1 && <View style={styles.spacer} />}
-				</View>
-			))}
-		</>
-	);
-});
+const CapabilitiesList = memo(
+	({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
+		const capabilitiesCount = capabilities.length;
+		return (
+			<>
+				{capabilities.map((capability, index) => (
+					<View style={styles.permissionsSection} key={index}>
+						<Permission capability={capability} isAuthorized={isAuthorized} />
+						{index !== capabilitiesCount - 1 && <View style={styles.spacer} />}
+					</View>
+				))}
+			</>
+		);
+	},
+);
 
-const Permission = memo(({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
-	const { t } = useTranslation();
-	const hasReadPermission = capability.permission.includes('r');
-	const hasWritePermission = capability.permission.includes('w');
-	return (
-		<View style={styles.permissionRow}>
-			<Folder size={13} />
-			<View style={styles.pathContainer}>
-				<Text style={styles.pathText}>{capability.path}</Text>
+const Permission = memo(
+	({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
+		const { t } = useTranslation();
+		const hasReadPermission = capability.permission.includes('r');
+		const hasWritePermission = capability.permission.includes('w');
+		return (
+			<View style={styles.permissionRow}>
+				<Folder size={13} />
+				<View style={styles.pathContainer}>
+					<Text style={styles.pathText}>{capability.path}</Text>
+				</View>
+				<View style={styles.permissionsContainer}>
+					{hasReadPermission && (
+						<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>
+							{t('common.read')}
+							{hasWritePermission ? ',' : ''}
+						</SessionText>
+					)}
+					{hasWritePermission && (
+						<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>
+							{t('common.write')}
+						</SessionText>
+					)}
+				</View>
 			</View>
-			<View style={styles.permissionsContainer}>
-				{hasReadPermission && (
-					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>{t('common.read')}{hasWritePermission ? ',' : ''}</SessionText>
-				)}
-				{hasWritePermission && (
-					<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>{t('common.write')}</SessionText>
-				)}
-			</View>
-		</View>
-	);
-});
+		);
+	},
+);
 
 const FADE_DURATION = 100;
 const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
@@ -134,7 +135,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				// Start at half size
 				withTiming(0.5, { duration: 0 }),
 				// Spring to full size
-				withTiming(1, { duration: 300,				})
+				withTiming(1, { duration: 300 }),
 			);
 		} else {
 			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
@@ -179,9 +180,10 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 			}
 		} catch (e: unknown) {
 			const error = e as Error;
-			const errorMsg = error.message === 'Authentication request timed out'
-                ? t('auth.timeoutError')
-                : error.message || t('confirmAuth.errorOccurred');
+			const errorMsg =
+				error.message === 'Authentication request timed out'
+					? t('auth.timeoutError')
+					: error.message || t('confirmAuth.errorOccurred');
 			showToast({
 				type: 'error',
 				title: t('common.error'),
@@ -207,8 +209,8 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 	const titleText = isAuthorized
 		? t('auth.authorizationSuccessful')
 		: xCallback?.xSource
-			? t('auth.authorizeForApp', { appName: xCallback.xSource })
-			: t('auth.authorize');
+		? t('auth.authorizeForApp', { appName: xCallback.xSource })
+		: t('auth.authorize');
 
 	return (
 		<ActionSheetContainer
@@ -221,9 +223,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				<ModalIndicator />
 				<View style={styles.mainContent}>
 					<View style={styles.titleContainer}>
-						<Text style={styles.title}>
-							{titleText}
-						</Text>
+						<Text style={styles.title}>{titleText}</Text>
 					</View>
 
 					<PubkyCard
@@ -246,13 +246,13 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 					</View>
 
 					<View style={styles.section}>
-						<SessionText style={styles.sectionTitle}>{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}</SessionText>
+						<SessionText style={styles.sectionTitle}>
+							{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
+						</SessionText>
 						<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
 					</View>
 
-					{!isAuthorized && (<SessionText style={styles.warningText}>
-						{t('auth.trustWarning')}
-					</SessionText>)}
+					{!isAuthorized && <SessionText style={styles.warningText}>{t('auth.trustWarning')}</SessionText>}
 
 					<View style={styles.imageContainer}>
 						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
@@ -265,42 +265,43 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 					<View style={styles.buttonContainer}>
 						{!isAuthorized ? (
 							<>
-								<ActionButton
-                            		style={styles.denyButton}
-                            		onPressIn={handleDeny}
-                            		activeOpacity={0.7}
-                            	>
-									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('common.close') : t('auth.deny')}</Text>
+								<ActionButton style={styles.denyButton} onPressIn={handleDeny} activeOpacity={0.7}>
+									<Text numberOfLines={1} style={styles.actionButtonText}>
+										{authorizing ? t('common.close') : t('auth.deny')}
+									</Text>
 								</ActionButton>
 
 								<ActionButton
-                            		style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
-                            		onPressIn={handleAuth}
-                            		disabled={authorizing}
-                            		activeOpacity={0.7}
-                            	>
-									<Text numberOfLines={1} style={styles.actionButtonText}>{authorizing ? t('auth.authorizing') : t('auth.authorize')}</Text>
+									style={[styles.authorizeButton, authorizing && styles.buttonDisabled]}
+									onPressIn={handleAuth}
+									disabled={authorizing}
+									activeOpacity={0.7}
+								>
+									<Text numberOfLines={1} style={styles.actionButtonText}>
+										{authorizing ? t('auth.authorizing') : t('auth.authorize')}
+									</Text>
 								</ActionButton>
 							</>
-                        ) : (
-	<ActionButton style={styles.okButton} onPressIn={handleClose}>
-		<Text style={styles.buttonText}>{t('common.ok')}</Text>
-	</ActionButton>
-                        )}
+						) : (
+							<ActionButton style={styles.okButton} onPressIn={handleClose}>
+								<Text style={styles.buttonText}>{t('common.ok')}</Text>
+							</ActionButton>
+						)}
 					</View>
 					<View style={styles.progressBarContainer}>
 						{!isAuthorized ? (
 							<ProgressBar
-                            	duration={60000}
-                            	//fadeIn={true}
-                            	//fadeInDuration={1000}
-                            	delayRender={0}
-                            	unfilledColor="#333333"
-                            	filledColor="#FFFFFF"
-                            	height={6}
-                            	borderRadius={3}
-                            	onComplete={handleDeny}
-							/>) : null}
+								duration={60000}
+								//fadeIn={true}
+								//fadeInDuration={1000}
+								delayRender={0}
+								unfilledColor="#333333"
+								filledColor="#FFFFFF"
+								height={6}
+								borderRadius={3}
+								onComplete={handleDeny}
+							/>
+						) : null}
 					</View>
 				</View>
 			</SkiaGradient>
@@ -332,7 +333,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-start',
 		alignItems: 'center',
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
 	},
 	permissionsSection: {
 		backgroundColor: 'transparent',

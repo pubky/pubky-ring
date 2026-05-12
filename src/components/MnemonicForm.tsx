@@ -1,12 +1,4 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useState,
-	useRef,
-	useMemo,
-	useEffect,
-} from 'react';
+import React, { memo, ReactElement, useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import {
 	StyleSheet,
 	NativeSyntheticEvent,
@@ -16,14 +8,7 @@ import {
 	Platform,
 } from 'react-native';
 import * as bip39 from 'bip39';
-import {
-	View,
-	Text,
-	SessionText,
-	NavButton,
-	ArrowLeft,
-	TextInput,
-} from '../theme/components.ts';
+import { View, Text, SessionText, NavButton, ArrowLeft, TextInput } from '../theme/components.ts';
 import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
 import ModalIndicator from './ModalIndicator.tsx';
@@ -34,7 +19,7 @@ import { textStyles } from '../theme/utils';
 interface MnemonicFormProps {
 	onBack: () => void;
 	onCancel: () => void;
-	onImport: (mnemonicPhrase: string) => Promise<Result<string>>
+	onImport: (mnemonicPhrase: string) => Promise<Result<string>>;
 }
 
 const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactElement => {
@@ -56,11 +41,18 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 
 	// BIP39 word validation using official wordlist
 	const isValidWord = useCallback((word: string): boolean => {
-		if (!word) {return true;} // Allow empty words
+		if (!word) {
+			return true;
+		} // Allow empty words
 
 		// Remove number prefix if it exists for validation
-		const cleanWord = word.replace(/^\d+\.\s*/, '').toLowerCase().trim();
-		if (!cleanWord) {return true;}
+		const cleanWord = word
+			.replace(/^\d+\.\s*/, '')
+			.toLowerCase()
+			.trim();
+		if (!cleanWord) {
+			return true;
+		}
 
 		// Validate against official BIP39 English wordlist
 		return bip39.wordlists.english.includes(cleanWord);
@@ -72,72 +64,83 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 		return hasAllWords && allWordsValid;
 	}, [mnemonicWords, validWords]);
 
-	const updateMnemonicWord = useCallback((index: number, text: string) => {
-		text = text.trim();
+	const updateMnemonicWord = useCallback(
+		(index: number, text: string) => {
+			text = text.trim();
 
-		// Detect if user pastes whole seed in any input
-		if (text.split(' ').length === 12) {
-			const words = text.split(' ').map(w => w.toLowerCase());
-			setMnemonicWords(words);
-			setValidWords(words.map(word => isValidWord(word)));
-			Keyboard.dismiss();
-			return;
-		}
+			// Detect if user pastes whole seed in any input
+			if (text.split(' ').length === 12) {
+				const words = text.split(' ').map(w => w.toLowerCase());
+				setMnemonicWords(words);
+				setValidWords(words.map(word => isValidWord(word)));
+				Keyboard.dismiss();
+				return;
+			}
 
-		// Remove the number prefix if it exists (e.g., "1. word" -> "word")
-		const numberPrefix = `${index + 1}. `;
-		let word = text.startsWith(numberPrefix) ? text.substring(numberPrefix.length) : text;
+			// Remove the number prefix if it exists (e.g., "1. word" -> "word")
+			const numberPrefix = `${index + 1}. `;
+			let word = text.startsWith(numberPrefix) ? text.substring(numberPrefix.length) : text;
 
-		// If the text is just the number prefix (e.g., "7."), treat as empty
-		if (text === numberPrefix.trim() || text === `${index + 1}.`) {
-			word = '';
-		}
+			// If the text is just the number prefix (e.g., "7."), treat as empty
+			if (text === numberPrefix.trim() || text === `${index + 1}.`) {
+				word = '';
+			}
 
-		// Check if we're transitioning from having text to being empty
-		const previousWord = mnemonicWords[index];
-		const wasNotEmpty = previousWord && previousWord.length > 0;
-		const isNowEmpty = word?.length === 0;
+			// Check if we're transitioning from having text to being empty
+			const previousWord = mnemonicWords[index];
+			const wasNotEmpty = previousWord && previousWord.length > 0;
+			const isNowEmpty = word?.length === 0;
 
-		setMnemonicWords(prev => {
-			const newWords = [...prev];
-			newWords[index] = word.toLowerCase();
-			return newWords;
-		});
+			setMnemonicWords(prev => {
+				const newWords = [...prev];
+				newWords[index] = word.toLowerCase();
+				return newWords;
+			});
 
-		// If field just became empty due to deletion and we have a previous input, focus it
-		if (wasNotEmpty && isNowEmpty && index > 0) {
-			inputRefs.current[index - 1]?.focus();
-		}
-	}, [isValidWord, mnemonicWords]);
+			// If field just became empty due to deletion and we have a previous input, focus it
+			if (wasNotEmpty && isNowEmpty && index > 0) {
+				inputRefs.current[index - 1]?.focus();
+			}
+		},
+		[isValidWord, mnemonicWords],
+	);
 
-	const getDisplayValue = useCallback((index: number) => {
-		const word = mnemonicWords[index];
-		if (!word) {return '';}
+	const getDisplayValue = useCallback(
+		(index: number) => {
+			const word = mnemonicWords[index];
+			if (!word) {
+				return '';
+			}
 
-		// Check if the word already starts with the number prefix
-		const expectedPrefix = `${index + 1}. `;
-		if (word.startsWith(expectedPrefix)) {
-			return word; // Already has the prefix
-		}
+			// Check if the word already starts with the number prefix
+			const expectedPrefix = `${index + 1}. `;
+			if (word.startsWith(expectedPrefix)) {
+				return word; // Already has the prefix
+			}
 
-		return `${index + 1}. ${word}`;
-	}, [mnemonicWords]);
+			return `${index + 1}. ${word}`;
+		},
+		[mnemonicWords],
+	);
 
 	const handleFocus = useCallback((index: number) => {
 		setFocused(index);
 	}, []);
 
-	const handleBlur = useCallback((index: number) => {
-		setFocused(null);
-		// Validate word when user leaves the input (like reference code)
-		setValidWords(prev => {
-			const newValidWords = [...prev];
-			const word = mnemonicWords[index];
-			// Only validate if word has content, otherwise keep as valid
-			newValidWords[index] = !word || isValidWord(word);
-			return newValidWords;
-		});
-	}, [isValidWord, mnemonicWords]);
+	const handleBlur = useCallback(
+		(index: number) => {
+			setFocused(null);
+			// Validate word when user leaves the input (like reference code)
+			setValidWords(prev => {
+				const newValidWords = [...prev];
+				const word = mnemonicWords[index];
+				// Only validate if word has content, otherwise keep as valid
+				newValidWords[index] = !word || isValidWord(word);
+				return newValidWords;
+			});
+		},
+		[isValidWord, mnemonicWords],
+	);
 
 	const handleImport = useCallback(async () => {
 		try {
@@ -146,7 +149,10 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 				// Clean the words: remove any number prefixes and extra whitespace
 				const cleanedWords = mnemonicWords.map(word => {
 					// Remove number prefix if present (e.g., "1. word" -> "word")
-					return word.replace(/^\d+\.\s*/, '').toLowerCase().trim();
+					return word
+						.replace(/^\d+\.\s*/, '')
+						.toLowerCase()
+						.trim();
 				});
 
 				// Join the cleaned words into a single string separated by spaces
@@ -171,15 +177,18 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 		inputRefs.current[focused + 1]?.focus();
 	}, [focused, enableImport, handleImport]);
 
-	const handleKeyPress = useCallback(({ nativeEvent }: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
-		if (nativeEvent.key !== 'Backspace' || focused === null || mnemonicWords[focused]) {
-			return;
-		}
-		// If backspace is pressed on empty field, move to previous input
-		if (focused > 0) {
-			inputRefs.current[focused - 1]?.focus();
-		}
-	}, [focused, mnemonicWords]);
+	const handleKeyPress = useCallback(
+		({ nativeEvent }: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+			if (nativeEvent.key !== 'Backspace' || focused === null || mnemonicWords[focused]) {
+				return;
+			}
+			// If backspace is pressed on empty field, move to previous input
+			if (focused > 0) {
+				inputRefs.current[focused - 1]?.focus();
+			}
+		},
+		[focused, mnemonicWords],
+	);
 
 	const handleCancel = useCallback(() => {
 		setMnemonicWords(Array(12).fill(''));
@@ -188,15 +197,18 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 		onCancel();
 	}, [onCancel]);
 
-	const renderBackButton = useCallback(() => (
-		<NavButton
-			style={styles.backButton}
-			onPressIn={onBack}
-			hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-		>
-			<ArrowLeft size={24} />
-		</NavButton>
-	), [onBack]);
+	const renderBackButton = useCallback(
+		() => (
+			<NavButton
+				style={styles.backButton}
+				onPressIn={onBack}
+				hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+			>
+				<ArrowLeft size={24} />
+			</NavButton>
+		),
+		[onBack],
+	);
 
 	return (
 		<KeyboardAvoidingView
@@ -216,9 +228,7 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 					{renderBackButton()}
 					<Text style={styles.title}>{i18n.t('import.title')}</Text>
 				</View>
-				<SessionText style={styles.message}>
-					{i18n.t('addPubky.enterRecoveryWords')}
-				</SessionText>
+				<SessionText style={styles.message}>{i18n.t('addPubky.enterRecoveryWords')}</SessionText>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
 						<View style={styles.mnemonicColumn}>
@@ -227,14 +237,16 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 								return (
 									<TextInput
 										key={index}
-										ref={(ref) => { inputRefs.current[index] = ref; }}
+										ref={ref => {
+											inputRefs.current[index] = ref;
+										}}
 										style={[
 											styles.mnemonicInput,
 											isInvalid && styles.invalidInput,
 											loading && styles.disabledInput,
 										]}
 										value={getDisplayValue(index)}
-										onChangeText={(text) => updateMnemonicWord(index, text)}
+										onChangeText={text => updateMnemonicWord(index, text)}
 										onFocus={() => handleFocus(index)}
 										onBlur={() => handleBlur(index)}
 										onSubmitEditing={handleSubmitEditing}
@@ -262,14 +274,16 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 								return (
 									<TextInput
 										key={actualIndex}
-										ref={(ref) => { inputRefs.current[actualIndex] = ref; }}
+										ref={ref => {
+											inputRefs.current[actualIndex] = ref;
+										}}
 										style={[
 											styles.mnemonicInput,
 											isInvalid && styles.invalidInput,
 											loading && styles.disabledInput,
 										]}
 										value={getDisplayValue(actualIndex)}
-										onChangeText={(text) => updateMnemonicWord(actualIndex, text)}
+										onChangeText={text => updateMnemonicWord(actualIndex, text)}
 										onFocus={() => handleFocus(actualIndex)}
 										onBlur={() => handleBlur(actualIndex)}
 										onSubmitEditing={handleSubmitEditing}
@@ -355,7 +369,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-around',
 		gap: 12,
 		backgroundColor: 'transparent',
-		marginBottom: 20
+		marginBottom: 20,
 	},
 	button: {
 		width: '47%',
@@ -365,8 +379,7 @@ const styles = StyleSheet.create({
 	importButton: {
 		borderWidth: 1,
 	},
-	cancelButton: {
-	},
+	cancelButton: {},
 	buttonText: {
 		...textStyles.bodySSB,
 	},

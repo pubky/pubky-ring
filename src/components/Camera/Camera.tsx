@@ -1,18 +1,6 @@
-import React, {
-	ReactElement,
-	useState,
-	useEffect,
-	memo,
-	useCallback,
-} from 'react';
-import {
-	StyleSheet,
-	View,
-} from 'react-native';
-import {
-	Camera as CameraKit,
-	CameraType,
-} from 'react-native-camera-kit';
+import React, { ReactElement, useState, useEffect, memo, useCallback } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Camera as CameraKit, CameraType } from 'react-native-camera-kit';
 import CameraNoAuth from './CameraNoAuth';
 import { requestCameraPermission } from '../../utils/permissions';
 
@@ -22,10 +10,7 @@ interface CameraProps {
 	onBarCodeRead: (data: string) => void;
 }
 
-const Camera = ({
-	children,
-	onBarCodeRead,
-}: CameraProps): ReactElement => {
+const Camera = ({ children, onBarCodeRead }: CameraProps): ReactElement => {
 	const prevDataRef = React.useRef<string>('');
 
 	const [cameraState, setCameraState] = useState<{
@@ -75,24 +60,28 @@ const Camera = ({
 		};
 	}, []);
 
-	const handleCodeRead = useCallback((event: {
-		nativeEvent: { codeStringValue: string }
-	}): void => {
-		const { codeStringValue } = event.nativeEvent;
-		if (prevDataRef.current !== codeStringValue) {
-			prevDataRef.current = codeStringValue;
-			onBarCodeRead(codeStringValue);
-		}
-	}, [onBarCodeRead]);
+	const handleCodeRead = useCallback(
+		(event: { nativeEvent: { codeStringValue: string } }): void => {
+			const { codeStringValue } = event.nativeEvent;
+			if (prevDataRef.current !== codeStringValue) {
+				prevDataRef.current = codeStringValue;
+				onBarCodeRead(codeStringValue);
+			}
+		},
+		[onBarCodeRead],
+	);
 
-	const cameraKitProps = React.useMemo(() => ({
-		style: styles.cameraView,
-		scanBarcode: true,
-		showFrame: false,
-		onReadCode: handleCodeRead,
-		cameraType: CameraType.Back,
-		resizeMode: 'cover',
-	}), [handleCodeRead]);
+	const cameraKitProps = React.useMemo(
+		() => ({
+			style: styles.cameraView,
+			scanBarcode: true,
+			showFrame: false,
+			onReadCode: handleCodeRead,
+			cameraType: CameraType.Back,
+			resizeMode: 'cover',
+		}),
+		[handleCodeRead],
+	);
 
 	// Early return for loading state
 	if (cameraState.status === undefined) {

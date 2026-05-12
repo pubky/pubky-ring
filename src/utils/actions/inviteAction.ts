@@ -60,10 +60,12 @@ const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
 	// Store dispatch for use in "Try again" button
 	setStoredDispatch(dispatch);
 	// Update Redux state to show error
-	dispatch(setLoadingModalError({
-		isError: true,
-		errorMessage: errorMessage,
-	}));
+	dispatch(
+		setLoadingModalError({
+			isError: true,
+			errorMessage: errorMessage,
+		}),
+	);
 };
 
 /**
@@ -73,7 +75,7 @@ const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
  */
 export const handleInviteAction = async (
 	data: InviteActionData,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;

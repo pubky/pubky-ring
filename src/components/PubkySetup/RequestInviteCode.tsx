@@ -1,13 +1,5 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-} from 'react';
-import {
-	StyleSheet,
-	Image,
-	Linking,
-} from 'react-native';
+import React, { memo, ReactElement, useCallback } from 'react';
+import { StyleSheet, Image, Linking } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
 	View,
@@ -25,7 +17,9 @@ import XLogo from '../XLogo.tsx';
 import { INVITE_CODE_GRADIENT } from '../../utils/constants.ts';
 import { textStyles } from '../../theme/utils';
 
-const RequestInviteCode = ({ payload }: {
+const RequestInviteCode = ({
+	payload,
+}: {
 	payload: {
 		onBack?: () => void;
 	};
@@ -56,50 +50,28 @@ const RequestInviteCode = ({ payload }: {
 	}, []);
 
 	return (
-		<RadialGradient
-			style={styles.content}
-			colors={INVITE_CODE_GRADIENT}
-			center={{ x: 0.5, y: 0.4 }}
-		>
+		<RadialGradient style={styles.content} colors={INVITE_CODE_GRADIENT} center={{ x: 0.5, y: 0.4 }}>
 			<ModalIndicator />
 			<View style={styles.header}>
-				<TouchableOpacity
-					style={styles.backButton}
-					onPress={handleBack}
-					activeOpacity={0.7}
-				>
+				<TouchableOpacity style={styles.backButton} onPress={handleBack} activeOpacity={0.7}>
 					<ArrowLeft color="#FFFFFF" size={24} />
 				</TouchableOpacity>
 				<Text style={styles.title}>{t('welcome.defaultHomeserver')}</Text>
 			</View>
 
 			<Text style={styles.headerText}>{t('requestInvite.needInvite')}</Text>
-			<SessionText style={styles.message}>
-				{t('requestInvite.askTeam')}
-			</SessionText>
+			<SessionText style={styles.message}>{t('requestInvite.askTeam')}</SessionText>
 
 			<View style={styles.contactOptions}>
-				<TouchableOpacity
-					style={styles.contactButton}
-					onPress={handleEmailContact}
-					activeOpacity={0.7}
-				>
+				<TouchableOpacity style={styles.contactButton} onPress={handleEmailContact} activeOpacity={0.7}>
 					<Mail color="rgba(255, 255, 255, 0.8)" size={24} />
 				</TouchableOpacity>
 
-				<TouchableOpacity
-					style={styles.contactButton}
-					onPress={handleTwitterContact}
-					activeOpacity={0.7}
-				>
+				<TouchableOpacity style={styles.contactButton} onPress={handleTwitterContact} activeOpacity={0.7}>
 					<XLogo color="rgba(255, 255, 255, 0.8)" size={24} />
 				</TouchableOpacity>
 
-				<TouchableOpacity
-					style={styles.contactButton}
-					onPress={handleTelegramContact}
-					activeOpacity={0.7}
-				>
+				<TouchableOpacity style={styles.contactButton} onPress={handleTelegramContact} activeOpacity={0.7}>
 					<Send color="rgba(255, 255, 255, 0.8)" size={24} />
 				</TouchableOpacity>
 			</View>
@@ -107,11 +79,7 @@ const RequestInviteCode = ({ payload }: {
 			<View style={styles.spacer} />
 
 			<View style={styles.giftContainer}>
-				<Image
-					source={require('../../images/gift.png')}
-					style={styles.giftImage}
-					resizeMode="contain"
-				/>
+				<Image source={require('../../images/gift.png')} style={styles.giftImage} resizeMode="contain" />
 			</View>
 		</RadialGradient>
 	);
@@ -187,7 +155,7 @@ const styles = StyleSheet.create({
 	giftImage: {
 		width: 420,
 		height: 420,
-		bottom: 40
+		bottom: 40,
 	},
 });
 

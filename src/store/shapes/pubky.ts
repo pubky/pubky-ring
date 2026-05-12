@@ -14,12 +14,12 @@ export const defaultPubkyState: Pubky = {
 	image: '',
 	sessions: [],
 	backupPreference: EBackupPreference.encryptedFile,
-	isBackedUp: false
+	isBackedUp: false,
 };
 
 export const defaultProfile: TProfile = {
-	name: "",
-	bio: "",
-	image: "",
+	name: '',
+	bio: '',
+	image: '',
 	links: [],
 };

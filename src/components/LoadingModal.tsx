@@ -51,16 +51,14 @@ const INNER_CIRCLE_SIZE = 140 * IMAGE_SCALE;
 const KEY_IMAGE_SIZE = 260 * IMAGE_SCALE;
 
 interface LoadingModalPayload {
-  modalTitle?: string;
-  title?: string;
-  description?: string;
-  waitText?: string;
-  onClose?: () => void;
+	modalTitle?: string;
+	title?: string;
+	description?: string;
+	waitText?: string;
+	onClose?: () => void;
 }
 
-const LoadingModal = ({ payload }: {
-  payload?: LoadingModalPayload;
-}): ReactElement => {
+const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const navigationAnimation = useSelector(getNavigationAnimation);
@@ -106,7 +104,9 @@ const LoadingModal = ({ payload }: {
 			// Fade in error gradient
 			errorGradientOpacity.value = withTiming(1, { duration: 300 });
 
-			return (): void => { clearTimeout(swapTimeout); };
+			return (): void => {
+				clearTimeout(swapTimeout);
+			};
 		} else {
 			// Reset to loading state
 			setShowErrorImage(false);
@@ -122,32 +122,23 @@ const LoadingModal = ({ payload }: {
 		if (!isError) {
 			// Key rotates: 0 → -90° → 0° (counter-clockwise first)
 			keyRotation.value = withRepeat(
-				withSequence(
-					withTiming(-KEY_ROTATION_ANGLE, timingConfig),
-					withTiming(0, timingConfig)
-				),
+				withSequence(withTiming(-KEY_ROTATION_ANGLE, timingConfig), withTiming(0, timingConfig)),
 				-1,
-				false
+				false,
 			);
 
 			// Inner circle rotates: 0 → +90° → 0° (clockwise first - opposite to key)
 			innerCircleRotation.value = withRepeat(
-				withSequence(
-					withTiming(RING_ROTATION_ANGLE, timingConfig),
-					withTiming(0, timingConfig)
-				),
+				withSequence(withTiming(RING_ROTATION_ANGLE, timingConfig), withTiming(0, timingConfig)),
 				-1,
-				false
+				false,
 			);
 
 			// Outer circle rotates: 0 → -180° → 0° (counter-clockwise, twice as fast as key)
 			outerCircleRotation.value = withRepeat(
-				withSequence(
-					withTiming(-RING_ROTATION_ANGLE, timingConfig),
-					withTiming(0, timingConfig)
-				),
+				withSequence(withTiming(-RING_ROTATION_ANGLE, timingConfig), withTiming(0, timingConfig)),
 				-1,
-				false
+				false,
 			);
 		} else {
 			// Stop rotation and reset to 0 when in error state
@@ -195,9 +186,7 @@ const LoadingModal = ({ payload }: {
 	const description = useMemo(() => {
 		if (isError) {
 			const baseError = t('loading.errorDescription');
-			return errorMessage
-        ? `${baseError} ${errorMessage}`
-        : baseError;
+			return errorMessage ? `${baseError} ${errorMessage}` : baseError;
 		}
 		return payload?.description ?? t('loading.description');
 	}, [isError, errorMessage, payload?.description, t]);
@@ -266,67 +255,59 @@ const LoadingModal = ({ payload }: {
 					<SessionText style={styles.message}>{description}</SessionText>
 					<View style={styles.imageContainer}>
 						{showErrorImage ? (
-              // Error state: show cross image
+							// Error state: show cross image
 							<AnimatedView style={[styles.imageWrapper, keyAnimatedStyle]}>
-								<Image
-              		source={require('../images/cross.png')}
-              		style={styles.image}
-              		resizeMode="contain"
-              	/>
+								<Image source={require('../images/cross.png')} style={styles.image} resizeMode="contain" />
 							</AnimatedView>
-            ) : (
-              // Loading state: show layered rotating images
-	<View style={styles.layeredImageContainer}>
-		{/* Outer circle - bottom layer */}
-		<AnimatedView style={[styles.circleLayer, outerCircleAnimatedStyle]}>
-			<Image
-              			source={require('../images/circular-outer.png')}
-              			style={styles.outerCircle}
-              			resizeMode="contain"
-              		/>
-		</AnimatedView>
+						) : (
+							// Loading state: show layered rotating images
+							<View style={styles.layeredImageContainer}>
+								{/* Outer circle - bottom layer */}
+								<AnimatedView style={[styles.circleLayer, outerCircleAnimatedStyle]}>
+									<Image
+										source={require('../images/circular-outer.png')}
+										style={styles.outerCircle}
+										resizeMode="contain"
+									/>
+								</AnimatedView>
 
-		{/* Inner circle - middle layer */}
-		<AnimatedView style={[styles.circleLayer, innerCircleAnimatedStyle]}>
-			<Image
-              			source={require('../images/circular-inner.png')}
-              			style={styles.innerCircle}
-              			resizeMode="contain"
-              		/>
-		</AnimatedView>
+								{/* Inner circle - middle layer */}
+								<AnimatedView style={[styles.circleLayer, innerCircleAnimatedStyle]}>
+									<Image
+										source={require('../images/circular-inner.png')}
+										style={styles.innerCircle}
+										resizeMode="contain"
+									/>
+								</AnimatedView>
 
-		{/* Key - top layer */}
-		<AnimatedView style={[styles.circleLayer, keyAnimatedStyle]}>
-			<Image
-              			source={require('../images/key.png')}
-              			style={styles.keyImage}
-              			resizeMode="contain"
-              		/>
-		</AnimatedView>
-	</View>
-            )}
+								{/* Key - top layer */}
+								<AnimatedView style={[styles.circleLayer, keyAnimatedStyle]}>
+									<Image source={require('../images/key.png')} style={styles.keyImage} resizeMode="contain" />
+								</AnimatedView>
+							</View>
+						)}
 					</View>
 					{isError ? (
 						<ModalButtonContainer>
 							<ModalButton
-            		text={t('common.cancel')}
-            		variant="secondary"
-            		width="half"
-            		onPress={handleCancel}
-            	/>
+								text={t('common.cancel')}
+								variant="secondary"
+								width="half"
+								onPress={handleCancel}
+							/>
 							<ModalButton
-            		text={t('loading.tryAgain')}
-            		variant="primary"
-            		width="half"
-            		onPress={handleTryAgain}
-            	/>
+								text={t('loading.tryAgain')}
+								variant="primary"
+								width="half"
+								onPress={handleTryAgain}
+							/>
 						</ModalButtonContainer>
-          ) : (
-	<>
-		<Text style={styles.waitText}>{waitText}</Text>
-		<View style={styles.footerBuffer} />
-	</>
-          )}
+					) : (
+						<>
+							<Text style={styles.waitText}>{waitText}</Text>
+							<View style={styles.footerBuffer} />
+						</>
+					)}
 				</View>
 			</View>
 		</ActionSheetContainer>

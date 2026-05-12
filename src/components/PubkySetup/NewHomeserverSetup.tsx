@@ -1,10 +1,4 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-	useState,
-} from 'react';
+import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Image, Platform } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
@@ -18,11 +12,9 @@ import {
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import ModalIndicator from '../ModalIndicator.tsx';
-import {
-	BLUE_RADIAL_GRADIENT,
-} from '../../utils/constants.ts';
-import { showEditPubkySheet } from "../../utils/sheetHelpers.ts";
-import { defaultPubkyState } from "../../store/shapes/pubky.ts";
+import { BLUE_RADIAL_GRADIENT } from '../../utils/constants.ts';
+import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
+import { defaultPubkyState } from '../../store/shapes/pubky.ts';
 import { textStyles } from '../../theme/utils';
 
 export enum HomeserverOption {
@@ -30,7 +22,9 @@ export enum HomeserverOption {
 	custom = 'custom',
 }
 
-const NewHomeserverSetup = ({ payload }: {
+const NewHomeserverSetup = ({
+	payload,
+}: {
 	payload: {
 		pubky: string;
 		onContinue?: () => void;
@@ -78,11 +72,7 @@ const NewHomeserverSetup = ({ payload }: {
 	}, [pubky]);
 
 	return (
-		<RadialGradient
-			style={styles.content}
-			colors={BLUE_RADIAL_GRADIENT}
-			center={{ x: 0.5, y: 0.5 }}
-		>
+		<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
 			<ModalIndicator />
 			<View style={styles.titleContainer}>
 				<Text style={styles.title}>{t('homeserver.title')}</Text>
@@ -104,14 +94,16 @@ const NewHomeserverSetup = ({ payload }: {
 					<View
 						style={[
 							styles.radioOuter,
-							selectedOption === HomeserverOption.default && styles.radioOuterSelected
-						]}>
+							selectedOption === HomeserverOption.default && styles.radioOuterSelected,
+						]}
+					>
 						{selectedOption === HomeserverOption.default && (
 							<View testID="HomeserverDefaultRadioInner" style={styles.radioInner} />
 						)}
 					</View>
 					<Text style={styles.optionText}>
-						{t('homeserver.default')} <Text style={styles.optionSubtext}>{t('homeserver.requiresInvite')}</Text>
+						{t('homeserver.default')}{' '}
+						<Text style={styles.optionSubtext}>{t('homeserver.requiresInvite')}</Text>
 					</Text>
 				</TouchableOpacity>
 
@@ -124,8 +116,9 @@ const NewHomeserverSetup = ({ payload }: {
 					<View
 						style={[
 							styles.radioOuter,
-							selectedOption === HomeserverOption.custom && styles.radioOuterSelected
-						]}>
+							selectedOption === HomeserverOption.custom && styles.radioOuterSelected,
+						]}
+					>
 						{selectedOption === HomeserverOption.custom && (
 							<View testID="HomeserverCustomRadioInner" style={styles.radioInner} />
 						)}
@@ -235,7 +228,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 		flex: 1,
 		justifyContent: 'flex-end',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	deviceImage: {
 		width: 480,

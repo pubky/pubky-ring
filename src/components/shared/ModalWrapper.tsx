@@ -6,9 +6,7 @@ import { getNavigationAnimation } from '../../store/selectors/settingsSelectors'
 import Toast from 'react-native-toast-message';
 import { toastConfig } from '../../theme/toastConfig';
 import ModalIndicator from '../ModalIndicator';
-import {
-	BLUE_RADIAL_GRADIENT,
-} from '../../utils/constants';
+import { BLUE_RADIAL_GRADIENT } from '../../utils/constants';
 import { getToastStyle } from '../../utils/helpers.ts';
 
 interface ModalWrapperProps {
@@ -40,21 +38,22 @@ const ModalWrapper: React.FC<ModalWrapperProps> = ({
 }) => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 
-	const GradientContent = gradientType === 'radial' ? (
-		<RadialGradient
-			style={[styles.content, contentStyle]}
-			colors={BLUE_RADIAL_GRADIENT}
-			center={{ x: 0.5, y: 0.5 }}
-		>
-			{showIndicator && <ModalIndicator />}
-			{children}
-		</RadialGradient>
-	) : (
-		<SkiaGradient modal={true} style={[styles.content, contentStyle]}>
-			{showIndicator && <ModalIndicator />}
-			{children}
-		</SkiaGradient>
-	);
+	const GradientContent =
+		gradientType === 'radial' ? (
+			<RadialGradient
+				style={[styles.content, contentStyle]}
+				colors={BLUE_RADIAL_GRADIENT}
+				center={{ x: 0.5, y: 0.5 }}
+			>
+				{showIndicator && <ModalIndicator />}
+				{children}
+			</RadialGradient>
+		) : (
+			<SkiaGradient modal={true} style={[styles.content, contentStyle]}>
+				{showIndicator && <ModalIndicator />}
+				{children}
+			</SkiaGradient>
+		);
 
 	return (
 		<View style={styles.container}>

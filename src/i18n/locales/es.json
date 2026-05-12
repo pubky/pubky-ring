@@ -1,361 +1,361 @@
 {
-  "common": {
-    "success": "Éxito",
-    "error": "Error",
-    "cancel": "Cancelar",
-    "confirm": "Confirme",
-    "save": "Guarde",
-    "delete": "Borrar",
-    "edit": "Edite",
-    "done": "Hecho",
-    "next": "Siguiente",
-    "back": "Volver",
-    "close": "Cerrar",
-    "continue": "Continuar",
-    "retry": "Vuelva a intentarlo",
-    "loading": "Cargando...",
-    "copied": "Copiado",
-    "share": "Compartir",
-    "submit": "Enviar",
-    "ok": "OK",
-    "yes": "Sí",
-    "no": "No",
-    "name": "Nombre",
-    "read": "Leer",
-    "write": "Escriba a"
-  },
-  "home": {
-    "addPubky": "Añadir pubky",
-    "scanQR": "Escanear QR"
-  },
-  "settings": {
-    "title": "Ajustes",
-    "navigationAnimation": "Animación de la navegación",
-    "autoAuth": "Autenticación automática",
-    "showOnboarding": "Mostrar incorporación",
-    "wipePubkyRing": "Limpiar el anillo pubis",
-    "wipeConfirmTitle": "¿Está seguro?",
-    "wipeConfirmMessage": "Esta acción borrará todos los datos de Pubky Ring y no podrá deshacerse.",
-    "showQR": "Mostrar QR",
-    "scanQR": "Escanear QR",
-    "migrateKeys": "Migrar claves",
-    "migrateToOtherDevice": "MIGRAR A OTRO DISPOSITIVO",
-    "migrateDescription": "Puede migrar sus llaves con un código QR dinámico. Importe escaneando este QR.",
-    "scanDynamicQR": "ESCANEAR QR DINÁMICO",
-    "scanDynamicQRDescription_one": "Escanee este código QR con su otro dispositivo para importar su par de claves {{count}}.",
-    "scanDynamicQRDescription_other": "Escanee este código QR dinámico con su otro dispositivo para importar sus pares de claves {{count}}.",
-    "scanThisQR": "Escanee este código QR en su otro dispositivo para importar sus llaves.",
-    "keyProgress": "Clave {{current}} de {{total}}",
-    "noKeysToDisplay": "No hay teclas disponibles para mostrar.",
-    "theme": {
-      "title": "Tema",
-      "system": "Sistema",
-      "light": "Luz",
-      "dark": "Oscuro"
-    },
-    "animation": {
-      "slide": "Diapositiva",
-      "fade": "Desvanecer"
-    }
-  },
-  "network": {
-    "backOnline": "¡Vuelve a estar en línea!",
-    "backOnlineDescription": "Ahora puede autorizar con Pubky Ring",
-    "currentlyOffline": "Actualmente fuera de línea",
-    "offlineDescription": "Necesita estar en línea para autorizar con Pubky Ring"
-  },
-  "auth": {
-    "authorize": "Autorizar",
-    "authorizing": "Autorizando...",
-    "authorizationSuccessful": "Autorización aceptada",
-    "deeplinkAuthSuccess": "Navegue de nuevo a su navegador",
-    "deny": "Denegar",
-    "relay": "Relay",
-    "requestedPermissions": "Permisos solicitados",
-    "grantedPermissions": "Permisos concedidos",
-    "trustWarning": "Asegúrese de que confía en este relé, servicio, navegador o dispositivo antes de autorizar con su pubky.",
-    "successfullySignedIn": "¡Se ha registrado con éxito!",
-    "navigateBackToBrowser": "Por favor, navegue de nuevo a su navegador.",
-    "authorized": "Autorizado con: {{pubky}}",
-    "signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
-    "timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
-    "authorizeForApp": "Autorizar {{appName}}"
-  },
-  "import": {
-    "title": "Importar Pubky",
-    "failed": "Importación fallida",
-    "invalidRecoveryPhrase": "Frase de recuperación no válida",
-    "pubkyImportedSuccessfully": "Pubky importado con éxito",
-    "invalidData": "Datos no válidos",
-    "invalidClipboardData": "El portapapeles no contiene una frase de recuperación o una clave secreta válidas",
-    "importButton": "Importar",
-    "pubkyImported": "Pubky Importado",
-    "pubkyReImported": "Pubky reimportado",
-    "importSuccess": "Ha importado correctamente su Pubky.",
-    "reImportSuccess": "Ha reimportado correctamente su Pubky.",
-    "notValidSecretKey": "No es una clave secreta o frase de recuperación válida.",
-    "unableToImportFile": "No se puede importar el archivo."
-  },
-  "pubky": {
-    "noSelection": "No Pubky Seleccionado",
-    "selectToProcess": "Seleccione un pubky para continuar",
-    "setup": "Configurar",
-    "deletePubky": "Borrar Pubky",
-    "deleteConfirm": "¿Seguro que quiere borrar este pubky?",
-    "selectPubky": "Seleccione Pubky",
-    "selectPubkyMessage": "Seleccione qué pubky desea utilizar para autorizar este servicio, navegador o dispositivo.",
-    "noPubkysAvailable": "No tiene ningún pubky configurado y disponible. Por favor, cree y configure primero un pubky.",
-    "yourPubky": "Su pubky.",
-    "yourPubkyDescription": "Este es su primer identificador único, su pubky. Cree tantos como necesite para distintos fines. Usted es su clave.",
-    "noPubkysSetup": "No hay Pubkys",
-    "setupExistingToProcess": "Por favor, configure cualquiera de sus Pubkys existentes para continuar.",
-    "noPubkysExist": "No existen Pubkys",
-    "addAndSetupToProcess": "Por favor, añada y configure un Pubky para continuar.",
-    "successfullyCreated": "Creado con éxito pubky."
-  },
-  "backup": {
-    "encryptedFile": "Archivo cifrado",
-    "backup": "Backup",
-    "createBackup": "Crear copia de seguridad",
-    "backupMessage": "Introduzca una contraseña o frase de contraseña para encriptar y asegurar su copia de seguridad. Manténgala a salvo, la necesitará para restaurar su pubky.",
-    "importMessage": "Introduzca su contraseña o frase de contraseña para descifrar su copia de seguridad pubky.",
-    "passphraseFor": "Frase de contraseña para ",
-    "enterPassphrase": "Introduzca la contraseña",
-    "passwordMinLength": "La contraseña debe tener una longitud mínima de {{min}} {{chars}} ",
-    "character": "carácter",
-    "characters": "caracteres",
-    "recoveryPhrase": "Frase de recuperación",
-    "recoveryPhraseMessage": "Escriba estas 12 palabras en el orden correcto y guárdelas en un lugar seguro.",
-    "tapToReveal": "Toque para revelar",
-    "recoveryWarning": "Nunca comparta su frase de recuperación con nadie, ya que podría perder el acceso a su perfil, datos e identidad en línea.",
-    "finishBackup": "Finalizar la copia de seguridad",
-    "couldNotRetrieveSecretKey": "No se ha podido recuperar la clave secreta para la copia de seguridad",
-    "backupCreated": "Copia de seguridad creada",
-    "failedToCreateBackup": "Fallo al crear el archivo de copia de seguridad"
-  },
-  "onboarding": {
-    "title": "Llavero para la próxima web.",
-    "getStarted": "Empezar"
-  },
-  "editPubky": {
-    "enterName": "Introduzca el nombre",
-    "enterHomeserver": "Introducir servidor doméstico",
-    "homeserver": "Homeserver"
-  },
-  "welcome": {
-    "defaultHomeserver": "Servidor doméstico predeterminado",
-    "welcome": "Bienvenida.",
-    "homeserverMessageStart": "Su código de invitación es válido. Su pubky",
-    "homeserverMessageEnd": "está ahora configurado para utilizar el servidor doméstico de Synonym para el alojamiento de datos.",
-    "openButton": "Abra {{domain}}"
-  },
-  "session": {
-    "success": "Sesión devuelta",
-    "sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
-    "signInFailed": "Fallo al iniciar sesión",
-    "invalidCallback": "URL de devolución de llamada no válida proporcionada",
-    "cannotOpenCallback": "No se puede abrir la URL de devolución de llamada para devolver la sesión"
-  },
-  "errors": {
-    "failedToParseQR": "Fallo al analizar los datos del código QR",
-    "failedToProcessQR": "Fallo al procesar los datos del código QR",
-    "failedToParseAuth": "Fallo al analizar los detalles de autenticación",
-    "failedToShareData": "No se comparten los datos",
-    "noClipboardPubky": "No se proporciona pubky para el manejo del portapapeles",
-    "failedToProcessInput": "Fallo al procesar los datos de entrada",
-    "emptyClipboard": "El portapapeles está vacío",
-    "unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación, una URL de autenticación o una solicitud de sesión.",
-    "debugInfoCopied": "Información de depuración copiada al portapapeles",
-    "tapToCopyDebug": "Pulse para copiar la información de depuración",
-    "unknownError": "Se ha producido un error desconocido",
-    "authorizationFailed": "Autorización fallida",
-    "importFailed": "Importación fallida",
-    "migrateFailed": "Migración fallida",
-    "signupFailed": "Error de registro",
-    "signupFailedDescription": "Por favor, compruebe que su enlace de inscripción sigue siendo válido y vuelva a intentarlo.",
-    "inviteProcessingFailed": "Fallo en el procesamiento de la invitación",
-    "sessionRequestFailed": "Fallo en la solicitud de sesión",
-    "signInFailed": "Fallo en el registro",
-    "failedToGetSecretKey": "Fallo al obtener la clave secreta",
-    "failedToProcessAuth": "Fallo al procesar auth",
-    "failedToImportPubky": "Fallo al importar pubky",
-    "failedToCreatePubkyWithInvite": "Fallo al crear pubky con código de invitación",
-    "errorCopiedToClipboard": "Mensaje de error copiado en el portapapeles"
-  },
-  "terms": {
-    "title": "Condiciones de uso.",
-    "acceptTerms": "Declaro que he leído y acepto las condiciones de uso.",
-    "acceptPrivacy": "Declaro que he leído y acepto el ",
-    "termsOfUse": "Condiciones de uso",
-    "privacyPolicy": "Política de privacidad"
-  },
-  "emptyState": {
-    "placeholderName": "pubky",
-    "placeholderPubky": "xxxxx..xxxxx",
-    "heading": "Póngase en marcha.",
-    "description": "Configure una pubky manualmente o escanee un QR\npara acceder al instante a pubky.app"
-  },
-  "about": {
-    "keychainFor": "Llavero para",
-    "theNextWeb": "la próxima web.",
-    "description": "Pubky Ring le permite autorizar servicios de forma segura y gestionar sus pubkys, dispositivos y sesiones.",
-    "craftedBy": "Pubky Ring fue creado por Synonym Software Ltd. Usted es sus llaves.",
-    "legal": "Legal",
-    "version": "Versión",
-    "copiedVersion": "Número de versión copiado en el portapapeles",
-    "unableToOpenUrl": "No se puede abrir la URL",
-    "joinWithPubkyRing": "Únase a Pubky Ring"
-  },
-  "addPubky": {
-    "title": "Añadir Pubky",
-    "yourKeysYourIdentity": "Sus llaves,\nsu identidad.",
-    "restoreOrImport": "Restaurar o\nimportar pubky.",
-    "createOrImportQuestion": "¿Desea crear un nuevo pubky o importar uno existente?",
-    "chooseBackupMethod": "Elija el método de copia de seguridad utilizado.",
-    "enterRecoveryWords": "Introduzca las 12 palabras de su recuperación \nfrase para importar o restaurar su pubky.",
-    "importPubkyButton": "Importar pubky",
-    "newPubkyButton": "Nuevo pubky",
-    "scanQrToImport": "Escanear QR para importar"
-  },
-  "editPubkySheet": {
-    "pubkyNameLabel": "Nombre del pubky (etiqueta)",
-    "inviteCodeOptional": "Código de invitación (opcional)",
-    "pubkyNamePlaceholder": "Pubky Nombre",
-    "inviteCodePlaceholder": "Código de invitación (opcional)",
-    "reset": "Reinicie",
-    "unableToSignUp": "No es posible registrarse con el servidor doméstico. Por favor, actualice el servidor doméstico y/o el código de invitación e inténtelo de nuevo.",
-    "unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}"
-  },
-  "scanInvite": {
-    "invalidInviteCode": "Código de invitación no válido",
-    "invalidInviteDescription": "Por favor, escanee un código de invitación válido o regístrese QR",
-    "scanInviteFor": "Escanear invitación para",
-    "failedToReadClipboard": "Fallo al leer el portapapeles"
-  },
-  "selectBackup": {
-    "title": "Copia de seguridad Pubky",
-    "header": "Haga una copia de seguridad segura\nde su pubky.",
-    "message": "Elija el método de copia de seguridad que prefiera para pubky {{pubky}} para restaurar el acceso si pierde su teléfono o sus datos."
-  },
-  "router": {
-    "importSuccessful": "Importación correcta",
-    "migrateSuccessful": "Migración con éxito",
-    "signupSuccessful": "Inscripción realizada con éxito",
-    "inviteProcessed": "Invitación procesada",
-    "sessionReturned": "Sesión devuelta",
-    "unhandledInputType": "Tipo de entrada no manejada",
-    "unknownRoutingError": "Error desconocido durante el enrutamiento"
-  },
-  "confirmAuth": {
-    "errorOccurred": "Se ha producido un error durante la autorización",
-    "errorCopied": "Error copiado en el portapapeles"
-  },
-  "clipboard": {
-    "pubkyCopied": "Pubky copiado",
-    "pubkyCopiedDescription": "Su Pubky ha sido copiado en el portapapeles",
-    "pasteLink": "Pegar enlace"
-  },
-  "pubkyErrors": {
-    "failedToDelete": "Fallo al borrar Pubky",
-    "deleteError": "Se ha producido un error al borrar el Pubky.",
-    "backupProcessError": "Error en el proceso de copia de seguridad",
-    "unableToGetSecretKey": "No se puede obtener la clave secreta",
-    "invalidInviteCode": "Código de invitación no válido. Por favor, compruébelo e inténtelo de nuevo.",
-    "unableToSignIn": "No se puede iniciar sesión: {{error}}",
-    "unexpectedError": "Se ha producido un error inesperado. Por favor, inténtelo de nuevo.",
-    "createError": "Se ha producido un error al crear el Pubky",
-    "failedToGenerateSecretKey": "Fallo al generar la clave secreta",
-    "failedToCreatePubky": "Fallo al crear pubky",
-    "failedToSavePubky": "No salvó a pubky",
-    "expectedImageData": "Se esperaban datos de imagen pero se recibió texto",
-    "failedToGetPublicKey": "Fallo al obtener la clave pública a partir de la clave secreta",
-    "mnemonicDoesNotMatchSecretKey": "La frase mnemotécnica proporcionada no genera la clave secreta esperada.",
-    "mnemonicDoesNotMatchPubky": "La frase mnemotécnica proporcionada no genera el pubky esperado.",
-    "failedToSaveToKeychain": "Fallo al guardar pubky en el llavero",
-    "errorSavingPubky": "Error al guardar pubky",
-    "errorDeletingPubky": "Error al borrar pubky",
-    "secretKeyNotFoundInKeychain": "Clave secreta no encontrada en el llavero",
-    "failedToGetSecretKeyFromKeychain": "Fallo al obtener la clave secreta del llavero",
-    "homeserverNotFound": "Homeserver no encontrado para este pubky. Por favor, asegúrese de que el pubky está configurado correctamente.",
-    "failedToSignOut": "Fallo al cerrar sesión en el servidor doméstico",
-    "pubkyRequiredForAuth": "Pubky es necesario para auth",
-    "failedToGetSecretKey": "Fallo al obtener la clave secreta",
-    "authorizationError": "Se ha producido un error durante la autorización"
-  },
-  "inviteCode": {
-    "title": "Código de invitación.",
-    "description": "Introduzca su código para acceder al servidor doméstico de Synonym. Obtendrá 1 GB de almacenamiento, utilizado para sus publicaciones, fotos, vídeos y perfil.",
-    "needInviteCode": "¿Necesita un código de invitación?",
-    "processing": "Procesando..."
-  },
-  "homeserver": {
-    "title": "Homeserver",
-    "dataHosting": "Alojamiento de datos.",
-    "chooseMessage": "Elija un servidor doméstico para alojar sus datos para pubky",
-    "label": "HOMESERVER",
-    "default": "Por defecto",
-    "requiresInvite": "(requiere código de invitación)",
-    "custom": "A medida"
-  },
-  "requestInvite": {
-    "needInvite": "¿Necesita una invitación?",
-    "askTeam": "Solicite al equipo de Pubky su código de invitación para acceder al servidor doméstico de Synonym."
-  },
-  "newPubkySetup": {
-    "newPubky": "Nuevo Pubky",
-    "pubkyHomeserver": "Pubky Homeserver",
-    "newPubkyDescription": "Este es su nuevo identificador único, su pubky. Cree tantos como necesite para distintos fines."
-  },
-  "sessionItem": {
-    "signOut": "Cerrar sesión",
-    "capabilities": "Capacidades:"
-  },
-  "pubkyProfile": {
-    "backupReminder": "¡respaldo!"
-  },
-  "screenTitles": {
-    "termsOfUse": "Condiciones de uso",
-    "onboarding": "Bienvenido",
-    "confirmPubky": "Confirmar pubky",
-    "home": "Anillo Pubky",
-    "about": "Acerca de",
-    "settings": "Ajustes",
-    "pubkyDetail": "Detalles del Pubky",
-    "editPubky": "Editar Pubky"
-  },
-  "permissions": {
-    "cameraTitle": "Permiso para utilizar la cámara",
-    "cameraMessage": "Pubky Ring necesita permiso para usar su cámara"
-  },
-  "keychain": {
-    "failedToGetValue": "Fallo al obtener el valor del llavero",
-    "failedToSetValue": "Fallo al establecer el valor del llavero",
-    "failedToResetValue": "Fallo al restablecer el valor del llavero"
-  },
-  "signup": {
-    "failedToGenerateKeypair": "Fallo al generar el par de claves",
-    "signupSuccessful": "Inscripción realizada con éxito",
-    "newPubkyCreated": "Su nuevo Pubky ha sido creado",
-    "failedToProcessSignup": "No se ha podido procesar la inscripción"
-  },
-  "invite": {
-    "unknownErrorProcessing": "Unknown error processing invite"
-  },
-  "migrate": {
-    "scanning": "Búsqueda de llaves",
-    "successTitle": "Migración completada",
-    "partialTitle": "Migración parcial Completa",
-    "successMessage": "Importado con éxito {{imported}} de {{total}} claves",
-    "partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
-    "allFailed": "Falló la importación de todas las claves"
-  },
-  "loading": {
-    "modalTitle": "Configuración de Pubky",
-    "title": "Sus llaves,\nsu identidad.",
-    "description": "Creación y configuración de su nuevo pubky. Esto sólo le llevará unos segundos.",
-    "pleaseWait": "Por favor, espere...",
-    "errorModalTitle": "Configuración fallida",
-    "errorDescription": "Su nuevo pubky no ha podido ser configurado.",
-    "tryAgain": "Inténtelo de nuevo"
-  }
+	"common": {
+		"success": "Éxito",
+		"error": "Error",
+		"cancel": "Cancelar",
+		"confirm": "Confirme",
+		"save": "Guarde",
+		"delete": "Borrar",
+		"edit": "Edite",
+		"done": "Hecho",
+		"next": "Siguiente",
+		"back": "Volver",
+		"close": "Cerrar",
+		"continue": "Continuar",
+		"retry": "Vuelva a intentarlo",
+		"loading": "Cargando...",
+		"copied": "Copiado",
+		"share": "Compartir",
+		"submit": "Enviar",
+		"ok": "OK",
+		"yes": "Sí",
+		"no": "No",
+		"name": "Nombre",
+		"read": "Leer",
+		"write": "Escriba a"
+	},
+	"home": {
+		"addPubky": "Añadir pubky",
+		"scanQR": "Escanear QR"
+	},
+	"settings": {
+		"title": "Ajustes",
+		"navigationAnimation": "Animación de la navegación",
+		"autoAuth": "Autenticación automática",
+		"showOnboarding": "Mostrar incorporación",
+		"wipePubkyRing": "Limpiar el anillo pubis",
+		"wipeConfirmTitle": "¿Está seguro?",
+		"wipeConfirmMessage": "Esta acción borrará todos los datos de Pubky Ring y no podrá deshacerse.",
+		"showQR": "Mostrar QR",
+		"scanQR": "Escanear QR",
+		"migrateKeys": "Migrar claves",
+		"migrateToOtherDevice": "MIGRAR A OTRO DISPOSITIVO",
+		"migrateDescription": "Puede migrar sus llaves con un código QR dinámico. Importe escaneando este QR.",
+		"scanDynamicQR": "ESCANEAR QR DINÁMICO",
+		"scanDynamicQRDescription_one": "Escanee este código QR con su otro dispositivo para importar su par de claves {{count}}.",
+		"scanDynamicQRDescription_other": "Escanee este código QR dinámico con su otro dispositivo para importar sus pares de claves {{count}}.",
+		"scanThisQR": "Escanee este código QR en su otro dispositivo para importar sus llaves.",
+		"keyProgress": "Clave {{current}} de {{total}}",
+		"noKeysToDisplay": "No hay teclas disponibles para mostrar.",
+		"theme": {
+			"title": "Tema",
+			"system": "Sistema",
+			"light": "Luz",
+			"dark": "Oscuro"
+		},
+		"animation": {
+			"slide": "Diapositiva",
+			"fade": "Desvanecer"
+		}
+	},
+	"network": {
+		"backOnline": "¡Vuelve a estar en línea!",
+		"backOnlineDescription": "Ahora puede autorizar con Pubky Ring",
+		"currentlyOffline": "Actualmente fuera de línea",
+		"offlineDescription": "Necesita estar en línea para autorizar con Pubky Ring"
+	},
+	"auth": {
+		"authorize": "Autorizar",
+		"authorizing": "Autorizando...",
+		"authorizationSuccessful": "Autorización aceptada",
+		"deeplinkAuthSuccess": "Navegue de nuevo a su navegador",
+		"deny": "Denegar",
+		"relay": "Relay",
+		"requestedPermissions": "Permisos solicitados",
+		"grantedPermissions": "Permisos concedidos",
+		"trustWarning": "Asegúrese de que confía en este relé, servicio, navegador o dispositivo antes de autorizar con su pubky.",
+		"successfullySignedIn": "¡Se ha registrado con éxito!",
+		"navigateBackToBrowser": "Por favor, navegue de nuevo a su navegador.",
+		"authorized": "Autorizado con: {{pubky}}",
+		"signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
+		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
+		"authorizeForApp": "Autorizar {{appName}}"
+	},
+	"import": {
+		"title": "Importar Pubky",
+		"failed": "Importación fallida",
+		"invalidRecoveryPhrase": "Frase de recuperación no válida",
+		"pubkyImportedSuccessfully": "Pubky importado con éxito",
+		"invalidData": "Datos no válidos",
+		"invalidClipboardData": "El portapapeles no contiene una frase de recuperación o una clave secreta válidas",
+		"importButton": "Importar",
+		"pubkyImported": "Pubky Importado",
+		"pubkyReImported": "Pubky reimportado",
+		"importSuccess": "Ha importado correctamente su Pubky.",
+		"reImportSuccess": "Ha reimportado correctamente su Pubky.",
+		"notValidSecretKey": "No es una clave secreta o frase de recuperación válida.",
+		"unableToImportFile": "No se puede importar el archivo."
+	},
+	"pubky": {
+		"noSelection": "No Pubky Seleccionado",
+		"selectToProcess": "Seleccione un pubky para continuar",
+		"setup": "Configurar",
+		"deletePubky": "Borrar Pubky",
+		"deleteConfirm": "¿Seguro que quiere borrar este pubky?",
+		"selectPubky": "Seleccione Pubky",
+		"selectPubkyMessage": "Seleccione qué pubky desea utilizar para autorizar este servicio, navegador o dispositivo.",
+		"noPubkysAvailable": "No tiene ningún pubky configurado y disponible. Por favor, cree y configure primero un pubky.",
+		"yourPubky": "Su pubky.",
+		"yourPubkyDescription": "Este es su primer identificador único, su pubky. Cree tantos como necesite para distintos fines. Usted es su clave.",
+		"noPubkysSetup": "No hay Pubkys",
+		"setupExistingToProcess": "Por favor, configure cualquiera de sus Pubkys existentes para continuar.",
+		"noPubkysExist": "No existen Pubkys",
+		"addAndSetupToProcess": "Por favor, añada y configure un Pubky para continuar.",
+		"successfullyCreated": "Creado con éxito pubky."
+	},
+	"backup": {
+		"encryptedFile": "Archivo cifrado",
+		"backup": "Backup",
+		"createBackup": "Crear copia de seguridad",
+		"backupMessage": "Introduzca una contraseña o frase de contraseña para encriptar y asegurar su copia de seguridad. Manténgala a salvo, la necesitará para restaurar su pubky.",
+		"importMessage": "Introduzca su contraseña o frase de contraseña para descifrar su copia de seguridad pubky.",
+		"passphraseFor": "Frase de contraseña para ",
+		"enterPassphrase": "Introduzca la contraseña",
+		"passwordMinLength": "La contraseña debe tener una longitud mínima de {{min}} {{chars}} ",
+		"character": "carácter",
+		"characters": "caracteres",
+		"recoveryPhrase": "Frase de recuperación",
+		"recoveryPhraseMessage": "Escriba estas 12 palabras en el orden correcto y guárdelas en un lugar seguro.",
+		"tapToReveal": "Toque para revelar",
+		"recoveryWarning": "Nunca comparta su frase de recuperación con nadie, ya que podría perder el acceso a su perfil, datos e identidad en línea.",
+		"finishBackup": "Finalizar la copia de seguridad",
+		"couldNotRetrieveSecretKey": "No se ha podido recuperar la clave secreta para la copia de seguridad",
+		"backupCreated": "Copia de seguridad creada",
+		"failedToCreateBackup": "Fallo al crear el archivo de copia de seguridad"
+	},
+	"onboarding": {
+		"title": "Llavero para la próxima web.",
+		"getStarted": "Empezar"
+	},
+	"editPubky": {
+		"enterName": "Introduzca el nombre",
+		"enterHomeserver": "Introducir servidor doméstico",
+		"homeserver": "Homeserver"
+	},
+	"welcome": {
+		"defaultHomeserver": "Servidor doméstico predeterminado",
+		"welcome": "Bienvenida.",
+		"homeserverMessageStart": "Su código de invitación es válido. Su pubky",
+		"homeserverMessageEnd": "está ahora configurado para utilizar el servidor doméstico de Synonym para el alojamiento de datos.",
+		"openButton": "Abra {{domain}}"
+	},
+	"session": {
+		"success": "Sesión devuelta",
+		"sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
+		"signInFailed": "Fallo al iniciar sesión",
+		"invalidCallback": "URL de devolución de llamada no válida proporcionada",
+		"cannotOpenCallback": "No se puede abrir la URL de devolución de llamada para devolver la sesión"
+	},
+	"errors": {
+		"failedToParseQR": "Fallo al analizar los datos del código QR",
+		"failedToProcessQR": "Fallo al procesar los datos del código QR",
+		"failedToParseAuth": "Fallo al analizar los detalles de autenticación",
+		"failedToShareData": "No se comparten los datos",
+		"noClipboardPubky": "No se proporciona pubky para el manejo del portapapeles",
+		"failedToProcessInput": "Fallo al procesar los datos de entrada",
+		"emptyClipboard": "El portapapeles está vacío",
+		"unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación, una URL de autenticación o una solicitud de sesión.",
+		"debugInfoCopied": "Información de depuración copiada al portapapeles",
+		"tapToCopyDebug": "Pulse para copiar la información de depuración",
+		"unknownError": "Se ha producido un error desconocido",
+		"authorizationFailed": "Autorización fallida",
+		"importFailed": "Importación fallida",
+		"migrateFailed": "Migración fallida",
+		"signupFailed": "Error de registro",
+		"signupFailedDescription": "Por favor, compruebe que su enlace de inscripción sigue siendo válido y vuelva a intentarlo.",
+		"inviteProcessingFailed": "Fallo en el procesamiento de la invitación",
+		"sessionRequestFailed": "Fallo en la solicitud de sesión",
+		"signInFailed": "Fallo en el registro",
+		"failedToGetSecretKey": "Fallo al obtener la clave secreta",
+		"failedToProcessAuth": "Fallo al procesar auth",
+		"failedToImportPubky": "Fallo al importar pubky",
+		"failedToCreatePubkyWithInvite": "Fallo al crear pubky con código de invitación",
+		"errorCopiedToClipboard": "Mensaje de error copiado en el portapapeles"
+	},
+	"terms": {
+		"title": "Condiciones de uso.",
+		"acceptTerms": "Declaro que he leído y acepto las condiciones de uso.",
+		"acceptPrivacy": "Declaro que he leído y acepto el ",
+		"termsOfUse": "Condiciones de uso",
+		"privacyPolicy": "Política de privacidad"
+	},
+	"emptyState": {
+		"placeholderName": "pubky",
+		"placeholderPubky": "xxxxx..xxxxx",
+		"heading": "Póngase en marcha.",
+		"description": "Configure una pubky manualmente o escanee un QR\npara acceder al instante a pubky.app"
+	},
+	"about": {
+		"keychainFor": "Llavero para",
+		"theNextWeb": "la próxima web.",
+		"description": "Pubky Ring le permite autorizar servicios de forma segura y gestionar sus pubkys, dispositivos y sesiones.",
+		"craftedBy": "Pubky Ring fue creado por Synonym Software Ltd. Usted es sus llaves.",
+		"legal": "Legal",
+		"version": "Versión",
+		"copiedVersion": "Número de versión copiado en el portapapeles",
+		"unableToOpenUrl": "No se puede abrir la URL",
+		"joinWithPubkyRing": "Únase a Pubky Ring"
+	},
+	"addPubky": {
+		"title": "Añadir Pubky",
+		"yourKeysYourIdentity": "Sus llaves,\nsu identidad.",
+		"restoreOrImport": "Restaurar o\nimportar pubky.",
+		"createOrImportQuestion": "¿Desea crear un nuevo pubky o importar uno existente?",
+		"chooseBackupMethod": "Elija el método de copia de seguridad utilizado.",
+		"enterRecoveryWords": "Introduzca las 12 palabras de su recuperación \nfrase para importar o restaurar su pubky.",
+		"importPubkyButton": "Importar pubky",
+		"newPubkyButton": "Nuevo pubky",
+		"scanQrToImport": "Escanear QR para importar"
+	},
+	"editPubkySheet": {
+		"pubkyNameLabel": "Nombre del pubky (etiqueta)",
+		"inviteCodeOptional": "Código de invitación (opcional)",
+		"pubkyNamePlaceholder": "Pubky Nombre",
+		"inviteCodePlaceholder": "Código de invitación (opcional)",
+		"reset": "Reinicie",
+		"unableToSignUp": "No es posible registrarse con el servidor doméstico. Por favor, actualice el servidor doméstico y/o el código de invitación e inténtelo de nuevo.",
+		"unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}"
+	},
+	"scanInvite": {
+		"invalidInviteCode": "Código de invitación no válido",
+		"invalidInviteDescription": "Por favor, escanee un código de invitación válido o regístrese QR",
+		"scanInviteFor": "Escanear invitación para",
+		"failedToReadClipboard": "Fallo al leer el portapapeles"
+	},
+	"selectBackup": {
+		"title": "Copia de seguridad Pubky",
+		"header": "Haga una copia de seguridad segura\nde su pubky.",
+		"message": "Elija el método de copia de seguridad que prefiera para pubky {{pubky}} para restaurar el acceso si pierde su teléfono o sus datos."
+	},
+	"router": {
+		"importSuccessful": "Importación correcta",
+		"migrateSuccessful": "Migración con éxito",
+		"signupSuccessful": "Inscripción realizada con éxito",
+		"inviteProcessed": "Invitación procesada",
+		"sessionReturned": "Sesión devuelta",
+		"unhandledInputType": "Tipo de entrada no manejada",
+		"unknownRoutingError": "Error desconocido durante el enrutamiento"
+	},
+	"confirmAuth": {
+		"errorOccurred": "Se ha producido un error durante la autorización",
+		"errorCopied": "Error copiado en el portapapeles"
+	},
+	"clipboard": {
+		"pubkyCopied": "Pubky copiado",
+		"pubkyCopiedDescription": "Su Pubky ha sido copiado en el portapapeles",
+		"pasteLink": "Pegar enlace"
+	},
+	"pubkyErrors": {
+		"failedToDelete": "Fallo al borrar Pubky",
+		"deleteError": "Se ha producido un error al borrar el Pubky.",
+		"backupProcessError": "Error en el proceso de copia de seguridad",
+		"unableToGetSecretKey": "No se puede obtener la clave secreta",
+		"invalidInviteCode": "Código de invitación no válido. Por favor, compruébelo e inténtelo de nuevo.",
+		"unableToSignIn": "No se puede iniciar sesión: {{error}}",
+		"unexpectedError": "Se ha producido un error inesperado. Por favor, inténtelo de nuevo.",
+		"createError": "Se ha producido un error al crear el Pubky",
+		"failedToGenerateSecretKey": "Fallo al generar la clave secreta",
+		"failedToCreatePubky": "Fallo al crear pubky",
+		"failedToSavePubky": "No salvó a pubky",
+		"expectedImageData": "Se esperaban datos de imagen pero se recibió texto",
+		"failedToGetPublicKey": "Fallo al obtener la clave pública a partir de la clave secreta",
+		"mnemonicDoesNotMatchSecretKey": "La frase mnemotécnica proporcionada no genera la clave secreta esperada.",
+		"mnemonicDoesNotMatchPubky": "La frase mnemotécnica proporcionada no genera el pubky esperado.",
+		"failedToSaveToKeychain": "Fallo al guardar pubky en el llavero",
+		"errorSavingPubky": "Error al guardar pubky",
+		"errorDeletingPubky": "Error al borrar pubky",
+		"secretKeyNotFoundInKeychain": "Clave secreta no encontrada en el llavero",
+		"failedToGetSecretKeyFromKeychain": "Fallo al obtener la clave secreta del llavero",
+		"homeserverNotFound": "Homeserver no encontrado para este pubky. Por favor, asegúrese de que el pubky está configurado correctamente.",
+		"failedToSignOut": "Fallo al cerrar sesión en el servidor doméstico",
+		"pubkyRequiredForAuth": "Pubky es necesario para auth",
+		"failedToGetSecretKey": "Fallo al obtener la clave secreta",
+		"authorizationError": "Se ha producido un error durante la autorización"
+	},
+	"inviteCode": {
+		"title": "Código de invitación.",
+		"description": "Introduzca su código para acceder al servidor doméstico de Synonym. Obtendrá 1 GB de almacenamiento, utilizado para sus publicaciones, fotos, vídeos y perfil.",
+		"needInviteCode": "¿Necesita un código de invitación?",
+		"processing": "Procesando..."
+	},
+	"homeserver": {
+		"title": "Homeserver",
+		"dataHosting": "Alojamiento de datos.",
+		"chooseMessage": "Elija un servidor doméstico para alojar sus datos para pubky",
+		"label": "HOMESERVER",
+		"default": "Por defecto",
+		"requiresInvite": "(requiere código de invitación)",
+		"custom": "A medida"
+	},
+	"requestInvite": {
+		"needInvite": "¿Necesita una invitación?",
+		"askTeam": "Solicite al equipo de Pubky su código de invitación para acceder al servidor doméstico de Synonym."
+	},
+	"newPubkySetup": {
+		"newPubky": "Nuevo Pubky",
+		"pubkyHomeserver": "Pubky Homeserver",
+		"newPubkyDescription": "Este es su nuevo identificador único, su pubky. Cree tantos como necesite para distintos fines."
+	},
+	"sessionItem": {
+		"signOut": "Cerrar sesión",
+		"capabilities": "Capacidades:"
+	},
+	"pubkyProfile": {
+		"backupReminder": "¡respaldo!"
+	},
+	"screenTitles": {
+		"termsOfUse": "Condiciones de uso",
+		"onboarding": "Bienvenido",
+		"confirmPubky": "Confirmar pubky",
+		"home": "Anillo Pubky",
+		"about": "Acerca de",
+		"settings": "Ajustes",
+		"pubkyDetail": "Detalles del Pubky",
+		"editPubky": "Editar Pubky"
+	},
+	"permissions": {
+		"cameraTitle": "Permiso para utilizar la cámara",
+		"cameraMessage": "Pubky Ring necesita permiso para usar su cámara"
+	},
+	"keychain": {
+		"failedToGetValue": "Fallo al obtener el valor del llavero",
+		"failedToSetValue": "Fallo al establecer el valor del llavero",
+		"failedToResetValue": "Fallo al restablecer el valor del llavero"
+	},
+	"signup": {
+		"failedToGenerateKeypair": "Fallo al generar el par de claves",
+		"signupSuccessful": "Inscripción realizada con éxito",
+		"newPubkyCreated": "Su nuevo Pubky ha sido creado",
+		"failedToProcessSignup": "No se ha podido procesar la inscripción"
+	},
+	"invite": {
+		"unknownErrorProcessing": "Unknown error processing invite"
+	},
+	"migrate": {
+		"scanning": "Búsqueda de llaves",
+		"successTitle": "Migración completada",
+		"partialTitle": "Migración parcial Completa",
+		"successMessage": "Importado con éxito {{imported}} de {{total}} claves",
+		"partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
+		"allFailed": "Falló la importación de todas las claves"
+	},
+	"loading": {
+		"modalTitle": "Configuración de Pubky",
+		"title": "Sus llaves,\nsu identidad.",
+		"description": "Creación y configuración de su nuevo pubky. Esto sólo le llevará unos segundos.",
+		"pleaseWait": "Por favor, espere...",
+		"errorModalTitle": "Configuración fallida",
+		"errorDescription": "Su nuevo pubky no ha podido ser configurado.",
+		"tryAgain": "Inténtelo de nuevo"
+	}
 }

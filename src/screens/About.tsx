@@ -50,54 +50,33 @@ const About = (): ReactElement => {
 		<View style={styles.container}>
 			<AppHeader />
 
-			<ScrollView
-				contentContainerStyle={styles.scrollContent}
-				showsVerticalScrollIndicator={false}
-			>
+			<ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
 				<Text style={styles.title}>{t('about.keychainFor')}</Text>
 				<Text style={styles.lowerTitle}>{t('about.theNextWeb')}</Text>
 				<Text style={styles.subtitle}>{t('about.description')}</Text>
 				<Text style={styles.subtitle}>{t('about.craftedBy')}</Text>
 
-				<TouchableOpacity
-					activeOpacity={0.8}
-					onPress={onLegalPress}
-					style={styles.row}
-				>
+				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
 					<Text style={styles.rowTitle}>{t('about.legal')}</Text>
 					<ArrowRight />
 				</TouchableOpacity>
 
-				<TouchableOpacity
-					activeOpacity={0.8}
-					onPress={onSharePress}
-					style={styles.row}
-				>
+				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
 					<Text style={styles.rowTitle}>{t('common.share')}</Text>
 					<ArrowRight />
 				</TouchableOpacity>
 
-				<TouchableOpacity
-					activeOpacity={0.8}
-					onPress={onCopyPress}
-					style={styles.row}
-				>
+				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
 					<Text style={styles.rowTitle}>{t('about.version')}</Text>
 					<Text style={styles.rowValue}>{version}</Text>
 				</TouchableOpacity>
 
 				<Image source={BrandEndoresment} style={styles.brandLogo} />
 
-				<TouchableOpacity
-					style={styles.footer}
-					activeOpacity={0.8}
-					onPress={onFooterPress}
-				>
+				<TouchableOpacity style={styles.footer} activeOpacity={0.8} onPress={onFooterPress}>
 					<View style={styles.logo}>
 						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
-						<Text style={styles.footerText}>
-							{t('about.joinWithPubkyRing')}
-						</Text>
+						<Text style={styles.footerText}>{t('about.joinWithPubkyRing')}</Text>
 					</View>
 					<ArrowRight />
 				</TouchableOpacity>

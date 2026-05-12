@@ -1,16 +1,8 @@
 import Keychain from 'react-native-keychain';
-import {
-	err,
-	ok,
-	Result,
-} from '@synonymdev/result';
+import { err, ok, Result } from '@synonymdev/result';
 import i18n from '../i18n';
 
-export const getKeychainValue = async ({
-	key,
-}: {
-    key: string;
-}): Promise<Result<string>> => {
+export const getKeychainValue = async ({ key }: { key: string }): Promise<Result<string>> => {
 	try {
 		const result = await Keychain.getGenericPassword({ service: key });
 		if (!result || !result?.password) {
@@ -26,8 +18,8 @@ export const setKeychainValue = async ({
 	key,
 	value,
 }: {
-    key: string;
-    value: string;
+	key: string;
+	value: string;
 }): Promise<Result<string>> => {
 	try {
 		const res = await Keychain.setGenericPassword(key, value, { service: key });
@@ -46,11 +38,7 @@ export const getAllKeychainKeys = async (): Promise<string[]> => {
 };
 
 //WARNING: This will wipe the specified key's value from storage
-export const resetKeychainValue = async ({
-	key,
-}: {
-    key: string;
-}): Promise<Result<boolean>> => {
+export const resetKeychainValue = async ({ key }: { key: string }): Promise<Result<boolean>> => {
 	try {
 		const result = await Keychain.resetGenericPassword({ service: key });
 		return ok(result);
@@ -66,5 +54,5 @@ export const resetKeychainValue = async ({
  */
 export const wipeKeychain = async (): Promise<void> => {
 	const allServices = await getAllKeychainKeys();
-	await Promise.all(allServices.map((key) => resetKeychainValue({ key })));
+	await Promise.all(allServices.map(key => resetKeychainValue({ key })));
 };

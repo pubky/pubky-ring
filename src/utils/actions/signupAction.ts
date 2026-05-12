@@ -41,10 +41,12 @@ const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
 	// Store dispatch for use in "Try again" button
 	setStoredDispatch(dispatch);
 	// Update Redux state to show error
-	dispatch(setLoadingModalError({
-		isError: true,
-		errorMessage: errorMessage,
-	}));
+	dispatch(
+		setLoadingModalError({
+			isError: true,
+			errorMessage: errorMessage,
+		}),
+	);
 };
 
 /**
@@ -54,7 +56,7 @@ const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
  */
 export const handleSignupAction = async (
 	data: SignupActionData,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
@@ -66,7 +68,9 @@ export const handleSignupAction = async (
 	let mnemonic: string | undefined;
 
 	const capsString = caps.join(',');
-	const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(secret)}&caps=${encodeURIComponent(capsString)}`;
+	const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(
+		secret,
+	)}&caps=${encodeURIComponent(capsString)}`;
 	const authData = {
 		action: InputAction.Auth,
 		params: { relay, secret, caps, xCallback },
@@ -146,7 +150,6 @@ export const handleSignupAction = async (
 			dispatch,
 		});
 
-
 		if (signupRes.isErr()) {
 			dispatch(removeProcessing({ pubky }));
 			// Check if user has existing signed-up pubkys - if so, forward to auth
@@ -163,10 +166,7 @@ export const handleSignupAction = async (
 
 				if (signedUpKeys.length === 1) {
 					// Single pubky: auto-forward to auth
-					return await handleAuthAction(
-						authData,
-						{ ...context, pubky: signedUpKeys[0], isDeeplink: false }
-					);
+					return await handleAuthAction(authData, { ...context, pubky: signedUpKeys[0], isDeeplink: false });
 				} else {
 					// Multiple pubkys: show selector, then forward to auth
 					const selectedPubky = await showPubkySelectionSheet(
@@ -185,10 +185,7 @@ export const handleSignupAction = async (
 						return err('User cancelled pubky selection');
 					}
 
-					return await handleAuthAction(
-						authData,
-						{ ...context, pubky: selectedPubky, isDeeplink: false }
-					);
+					return await handleAuthAction(authData, { ...context, pubky: selectedPubky, isDeeplink: false });
 				}
 			}
 
@@ -211,17 +208,16 @@ export const handleSignupAction = async (
 
 		// Step 4: Trigger auth action with the new pubky
 		// Short delay to allow UI to update before showing auth modal
-		await new Promise(resolve => {setTimeout(resolve, SHEET_ANIMATION_DELAY);});
+		await new Promise(resolve => {
+			setTimeout(resolve, SHEET_ANIMATION_DELAY);
+		});
 
-		await handleAuthAction(
-			authData,
-			{
-				...context,
-				pubky,
-				// Don't treat as deeplink for redirect behavior since we want user to stay in app
-				isDeeplink: false,
-			}
-		);
+		await handleAuthAction(authData, {
+			...context,
+			pubky,
+			// Don't treat as deeplink for redirect behavior since we want user to stay in app
+			isDeeplink: false,
+		});
 
 		return ok(pubky);
 	} catch (error) {

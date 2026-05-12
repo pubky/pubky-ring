@@ -1,12 +1,6 @@
 import React, { memo, ReactElement } from 'react';
 import { View, StyleSheet } from 'react-native';
-import {
-	Canvas,
-	Path,
-	Skia,
-	DashPathEffect,
-	SkPath,
-} from '@shopify/react-native-skia';
+import { Canvas, Path, Skia, DashPathEffect, SkPath } from '@shopify/react-native-skia';
 
 interface DashedBorderProps {
 	children: React.ReactNode;
@@ -52,7 +46,7 @@ const DashedBorder = ({
 	return (
 		<View
 			style={[styles.container, style]}
-			onLayout={(e) => {
+			onLayout={e => {
 				const { width, height } = e.nativeEvent.layout;
 				setDimensions({ width, height });
 			}}

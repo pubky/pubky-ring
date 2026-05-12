@@ -1,7 +1,12 @@
 import { store } from '../store';
 import { getAutoAuth } from '../store/selectors/settingsSelectors';
 import { RootState } from '../types';
-import { getPubky, isPubkySignedUp, getSignedUpPubkys, getPubkyKeyBySignupToken } from '../store/selectors/pubkySelectors.ts';
+import {
+	getPubky,
+	isPubkySignedUp,
+	getSignedUpPubkys,
+	getPubkyKeyBySignupToken,
+} from '../store/selectors/pubkySelectors.ts';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 
 export const getStore = (): RootState => store.getState();

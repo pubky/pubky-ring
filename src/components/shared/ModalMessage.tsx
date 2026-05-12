@@ -9,20 +9,8 @@ interface ModalMessageProps {
 	centered?: boolean;
 }
 
-const ModalMessage: React.FC<ModalMessageProps> = ({ 
-	children, 
-	style, 
-	centered = false 
-}) => {
-	return (
-		<SessionText style={[
-			styles.message, 
-			centered && styles.centered, 
-			style
-		]}>
-			{children}
-		</SessionText>
-	);
+const ModalMessage: React.FC<ModalMessageProps> = ({ children, style, centered = false }) => {
+	return <SessionText style={[styles.message, centered && styles.centered, style]}>{children}</SessionText>;
 };
 
 const styles = StyleSheet.create({

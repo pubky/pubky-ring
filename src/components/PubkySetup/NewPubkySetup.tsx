@@ -1,7 +1,7 @@
-import React, { memo, ReactElement, useCallback, useMemo, useState, } from 'react';
-import { Platform, StyleSheet, } from 'react-native';
+import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
+import { Platform, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetContainer, View, } from '../../theme/components.ts';
+import { ActionSheetContainer, View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../../store/selectors/settingsSelectors.ts';
@@ -26,22 +26,22 @@ const toastStyle = getToastStyle();
 const smallScreen = isSmallScreen();
 
 export enum ECurrentScreen {
-    main = 'main',
-    homeserver = 'homeserver',
-    inviteCode = 'inviteCode',
-    requestInvite = 'requestInvite',
-    welcome = 'welcome',
+	main = 'main',
+	homeserver = 'homeserver',
+	inviteCode = 'inviteCode',
+	requestInvite = 'requestInvite',
+	welcome = 'welcome',
 }
 
 interface ContentProps {
-    currentScreen: ECurrentScreen;
-    title: string;
-    subTitle: string;
-    pubky: string;
-    pubkyData: PubkyData;
-    isInvite?: boolean;
-    setCurrentScreen: (screen: ECurrentScreen) => void;
-    closeSheet: () => Promise<void>;
+	currentScreen: ECurrentScreen;
+	title: string;
+	subTitle: string;
+	pubky: string;
+	pubkyData: PubkyData;
+	isInvite?: boolean;
+	setCurrentScreen: (screen: ECurrentScreen) => void;
+	closeSheet: () => Promise<void>;
 }
 
 const Content = ({
@@ -52,7 +52,7 @@ const Content = ({
 	pubkyData,
 	isInvite,
 	setCurrentScreen,
-	closeSheet
+	closeSheet,
 }: ContentProps): ReactElement => {
 	const { t } = useTranslation();
 	switch (currentScreen) {
@@ -72,55 +72,65 @@ const Content = ({
 		case ECurrentScreen.homeserver:
 			return (
 				<View style={styles.fullSize}>
-					<NewHomeserverSetup payload={{
-						pubky,
-						onContinue: () => setCurrentScreen(ECurrentScreen.inviteCode)
-					}} />
+					<NewHomeserverSetup
+						payload={{
+							pubky,
+							onContinue: () => setCurrentScreen(ECurrentScreen.inviteCode),
+						}}
+					/>
 				</View>
 			);
 		case ECurrentScreen.inviteCode:
 			return (
 				<View style={styles.fullSize}>
-					<InviteCode payload={{
-						pubky,
-						onContinue: () => setCurrentScreen(ECurrentScreen.welcome),
-						onRequestInvite: () => setCurrentScreen(ECurrentScreen.requestInvite)
-					}} />
+					<InviteCode
+						payload={{
+							pubky,
+							onContinue: () => setCurrentScreen(ECurrentScreen.welcome),
+							onRequestInvite: () => setCurrentScreen(ECurrentScreen.requestInvite),
+						}}
+					/>
 				</View>
 			);
 		case ECurrentScreen.requestInvite:
 			return (
 				<View style={styles.fullSize}>
-					<RequestInviteCode payload={{
-						onBack: () => setCurrentScreen(ECurrentScreen.inviteCode)
-					}} />
+					<RequestInviteCode
+						payload={{
+							onBack: () => setCurrentScreen(ECurrentScreen.inviteCode),
+						}}
+					/>
 				</View>
 			);
 		case ECurrentScreen.welcome:
 			return (
 				<View style={styles.fullSize}>
-					<Welcome payload={{
-						pubky,
-						onComplete: closeSheet,
-						isInvite
-					}} />
+					<Welcome
+						payload={{
+							pubky,
+							onComplete: closeSheet,
+							isInvite,
+						}}
+					/>
 				</View>
 			);
 	}
 };
 
-const NewPubkySetup = ({ payload }: {
-    payload: {
-        currentScreen?: ECurrentScreen;
-        pubky: string;
-        data?: Pubky;
-        isInvite?: boolean;
-    };
+const NewPubkySetup = ({
+	payload,
+}: {
+	payload: {
+		currentScreen?: ECurrentScreen;
+		pubky: string;
+		data?: Pubky;
+		isInvite?: boolean;
+	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(
-		payload?.currentScreen ?? ECurrentScreen.main
+		payload?.currentScreen ?? ECurrentScreen.main,
 	);
 	const [pubky] = useState(payload?.pubky ?? '');
 
@@ -147,7 +157,7 @@ const NewPubkySetup = ({ payload }: {
 		switch (currentScreen) {
 			case ECurrentScreen.inviteCode:
 				return ACTION_SHEET_HEIGHT_TEXTINPUT;
-			case (ECurrentScreen.welcome):
+			case ECurrentScreen.welcome:
 				return smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 			default:
 				return ACTION_SHEET_HEIGHT;
@@ -170,7 +180,6 @@ const NewPubkySetup = ({ payload }: {
 		const _data = payload?.data ?? defaultPubkyState;
 		return { pubky, ..._data };
 	}, [payload.data, pubky]);
-
 
 	return (
 		<ActionSheetContainer

@@ -1,9 +1,4 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-} from 'react';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { View, TouchableOpacity } from '../theme/components.ts';
 import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
@@ -13,13 +8,7 @@ import PubkyCard from './PubkyCard.tsx';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
-import {
-	ModalWrapper,
-	ModalTitle,
-	ModalMessage,
-	ModalButton,
-	ModalButtonContainer
-} from './shared';
+import { ModalWrapper, ModalTitle, ModalMessage, ModalButton, ModalButtonContainer } from './shared';
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 import { parseInput } from '../utils/inputParser';
@@ -27,26 +16,34 @@ import { routeInput } from '../utils/inputRouter';
 
 type PubkyItem = { key: string; value: Pubky };
 
-const ListItemComponent = memo(({ name, pubky, onPubkyPress }: {
-	name?: string;
-	pubky: string;
-	onPubkyPress: (pubky: string) => void;
-}): ReactElement => {
-	const handlePress = useCallback(() => {
-		onPubkyPress(pubky);
-	}, [onPubkyPress, pubky]);
+const ListItemComponent = memo(
+	({
+		name,
+		pubky,
+		onPubkyPress,
+	}: {
+		name?: string;
+		pubky: string;
+		onPubkyPress: (pubky: string) => void;
+	}): ReactElement => {
+		const handlePress = useCallback(() => {
+			onPubkyPress(pubky);
+		}, [onPubkyPress, pubky]);
 
-	return (
-		<TouchableOpacity style={styles.pubkyCard} onPress={handlePress}>
-			<PubkyCard publicKey={pubky} name={name} />
-		</TouchableOpacity>
-	);
-});
+		return (
+			<TouchableOpacity style={styles.pubkyCard} onPress={handlePress}>
+				<PubkyCard publicKey={pubky} name={name} />
+			</TouchableOpacity>
+		);
+	},
+);
 
-const SelectPubky = ({ payload }: {
-    payload: {
-        deepLink: string;
-    };
+const SelectPubky = ({
+	payload,
+}: {
+	payload: {
+		deepLink: string;
+	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
@@ -62,44 +59,42 @@ const SelectPubky = ({ payload }: {
 	}, [payload?.deepLink]);
 
 	const pubkyArray: {
-        key: string;
-        value: Pubky;
-    }[] = useMemo(() => {
-    	return Object.entries(pubkys)
-    		.filter(([_, value]) => value.signedUp)
-    		.map(([key, value]) => ({
-    			key,
-    			value,
-    		}));
-    }, [pubkys]);
+		key: string;
+		value: Pubky;
+	}[] = useMemo(() => {
+		return Object.entries(pubkys)
+			.filter(([_, value]) => value.signedUp)
+			.map(([key, value]) => ({
+				key,
+				value,
+			}));
+	}, [pubkys]);
 
-	const onPubkyPress = useCallback(async (pubky: string) => {
-		await SheetManager.hide('select-pubky');
-		setTimeout(async () => {
-			// Parse and route the deeplink with the selected pubky
-			const parsed = await parseInput(deepLink, 'deeplink');
-			await routeInput(parsed, {
-				dispatch,
-				pubky,
-				isDeeplink: true,
-			});
-			dispatch(setDeepLink(''));
-		}, 100);
-	}, [deepLink, dispatch]);
+	const onPubkyPress = useCallback(
+		async (pubky: string) => {
+			await SheetManager.hide('select-pubky');
+			setTimeout(async () => {
+				// Parse and route the deeplink with the selected pubky
+				const parsed = await parseInput(deepLink, 'deeplink');
+				await routeInput(parsed, {
+					dispatch,
+					pubky,
+					isDeeplink: true,
+				});
+				dispatch(setDeepLink(''));
+			}, 100);
+		},
+		[deepLink, dispatch],
+	);
 
 	const message = useMemo(() => {
-		return pubkyArray.length > 0
-            ? t('pubky.selectPubkyMessage')
-            : t('pubky.noPubkysAvailable');
+		return pubkyArray.length > 0 ? t('pubky.selectPubkyMessage') : t('pubky.noPubkysAvailable');
 	}, [pubkyArray.length, t]);
 
-	const renderItem: ListRenderItem<PubkyItem> = useCallback(({ item }) => (
-		<ListItemComponent
-			name={item.value.name}
-			pubky={item.key}
-			onPubkyPress={onPubkyPress}
-		/>
-	), [onPubkyPress]);
+	const renderItem: ListRenderItem<PubkyItem> = useCallback(
+		({ item }) => <ListItemComponent name={item.value.name} pubky={item.key} onPubkyPress={onPubkyPress} />,
+		[onPubkyPress],
+	);
 
 	const keyExtractor = useCallback((item: PubkyItem) => item.key, []);
 
@@ -112,9 +107,7 @@ const SelectPubky = ({ payload }: {
 			contentStyle={styles.container}
 		>
 			<ModalTitle>{t('pubky.selectPubky')}</ModalTitle>
-			<ModalMessage centered>
-				{message}
-			</ModalMessage>
+			<ModalMessage centered>{message}</ModalMessage>
 			<View style={styles.listContainer}>
 				<FlashList
 					data={pubkyArray}
@@ -125,12 +118,7 @@ const SelectPubky = ({ payload }: {
 				/>
 			</View>
 			<ModalButtonContainer>
-				<ModalButton
-					text={t('common.cancel')}
-					variant="secondary"
-					width="full"
-					onPress={closeSheet}
-				/>
+				<ModalButton text={t('common.cancel')} variant="secondary" width="full" onPress={closeSheet} />
 			</ModalButtonContainer>
 		</ModalWrapper>
 	);
@@ -138,7 +126,7 @@ const SelectPubky = ({ payload }: {
 
 const styles = StyleSheet.create({
 	container: {
-		height: '100%'
+		height: '100%',
 	},
 	listContainer: {
 		flex: 1,

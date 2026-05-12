@@ -9,10 +9,7 @@ import Animated, {
 	interpolate,
 } from 'react-native-reanimated';
 import { View, Text } from '../theme/components';
-import {
-	subscribeMigrationProgress,
-	MigrationProgress,
-} from '../utils/actions/migrateAction';
+import { subscribeMigrationProgress, MigrationProgress } from '../utils/actions/migrateAction';
 import { useTranslation } from 'react-i18next';
 import { ACCENTS } from '../utils/constants';
 import { textStyles } from '../theme/utils';
@@ -60,11 +57,7 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 		opacity: containerOpacity.value,
 		transform: [
 			{
-				translateY: interpolate(
-					containerOpacity.value,
-					[0, 1],
-					[-20, 0]
-				),
+				translateY: interpolate(containerOpacity.value, [0, 1], [-20, 0]),
 			},
 		],
 	}));
@@ -82,18 +75,14 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 		<Animated.View style={[styles.container, containerAnimatedStyle]}>
 			<View style={styles.contentContainer}>
 				<View style={styles.textContainer}>
-					<Text style={styles.title}>
-						{t('migrate.scanning')}
-					</Text>
+					<Text style={styles.title}>{t('migrate.scanning')}</Text>
 					<Text style={styles.progressText}>
 						{progress.current} / {progress.total}
 					</Text>
 				</View>
 
 				<View style={styles.progressBarContainer}>
-					<Animated.View
-						style={[styles.progressBarFill, progressBarAnimatedStyle]}
-					/>
+					<Animated.View style={[styles.progressBarFill, progressBarAnimatedStyle]} />
 				</View>
 			</View>
 		</Animated.View>

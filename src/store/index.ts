@@ -29,14 +29,14 @@ type RootReducerState = ReturnType<typeof rootReducer>;
 type PubkySliceState = typeof pubkyInitialState;
 
 const pubkyTransform = createTransform<PubkySliceState, PubkySliceState>(
-	(inboundState) => inboundState,
-	(outboundState) => ({
+	inboundState => inboundState,
+	outboundState => ({
 		...pubkyInitialState,
 		...outboundState,
 		deepLink: pubkyInitialState.deepLink,
 		processing: { ...pubkyInitialState.processing },
 	}),
-	{ whitelist: ['pubky'] }
+	{ whitelist: ['pubky'] },
 );
 
 const persistConfig: PersistConfig<RootReducerState> = {
@@ -50,18 +50,15 @@ const persistConfig: PersistConfig<RootReducerState> = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
-
 export const store = configureStore({
 	reducer: persistedReducer,
-	middleware: (getDefaultMiddleware) =>
+	middleware: getDefaultMiddleware =>
 		getDefaultMiddleware({
 			serializableCheck: {
 				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
 			},
 		}),
-	devTools: __DEV__
-		? { name: 'pubkyring', trace: true, traceLimit: 25 }
-		: false,
+	devTools: __DEV__ ? { name: 'pubkyring', trace: true, traceLimit: 25 } : false,
 });
 
 export const persistor = persistStore(store);

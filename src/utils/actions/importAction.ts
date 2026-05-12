@@ -33,7 +33,7 @@ type ImportActionData = {
  */
 export const handleImportAction = async (
 	data: ImportActionData,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<string>> => {
 	const { dispatch, skipImportSheet = false } = context;
 	const { params } = data;

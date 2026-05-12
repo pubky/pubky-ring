@@ -1,25 +1,15 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-} from 'react';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
-import {
-	View,
-	Plus,
-} from '../theme/components';
+import { View, Plus } from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import {
-	getHomeScreenData,
-} from '../store/selectors/pubkySelectors.ts';
+import { getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
@@ -36,30 +26,32 @@ const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
 const GRADIENT_START = { x: 0, y: 0 };
 const GRADIENT_END = { x: 0, y: 1 };
 
-const PubkyItem = memo(({
-	item,
-	drag,
-	isActive,
-	index,
-	loading = false,
-}: {
-	item: { key: string; value: Pubky };
-	drag: () => void;
-	isActive: boolean;
-	index: number;
-  loading?: boolean;
-}) => (
-	<ScaleDecorator>
-		<PubkyBox
-			pubky={item.key}
-			pubkyData={item.value}
-			index={index}
-			onLongPress={drag}
-			disabled={isActive}
-			loading={loading}
-		/>
-	</ScaleDecorator>
-));
+const PubkyItem = memo(
+	({
+		item,
+		drag,
+		isActive,
+		index,
+		loading = false,
+	}: {
+		item: { key: string; value: Pubky };
+		drag: () => void;
+		isActive: boolean;
+		index: number;
+		loading?: boolean;
+	}) => (
+		<ScaleDecorator>
+			<PubkyBox
+				pubky={item.key}
+				pubkyData={item.value}
+				index={index}
+				onLongPress={drag}
+				disabled={isActive}
+				loading={loading}
+			/>
+		</ScaleDecorator>
+	),
+);
 
 interface ListFooterProps {
 	createPubky: () => void;
@@ -89,10 +81,7 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 const HomeScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
-	const pubkysProcessing = useSelector(
-		(state: RootState) => state.pubky.processing,
-		shallowEqual,
-	);
+	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
@@ -112,12 +101,7 @@ const HomeScreen = (): ReactElement => {
 	);
 
 	const renderItem = useCallback(
-		({
-			item,
-			drag,
-			getIndex,
-			isActive,
-		}: RenderItemParams<{ key: string; value: Pubky }>) => {
+		({ item, drag, getIndex, isActive }: RenderItemParams<{ key: string; value: Pubky }>) => {
 			const index = getIndex() ?? 0;
 			return (
 				<PubkyItem
@@ -142,8 +126,7 @@ const HomeScreen = (): ReactElement => {
 	);
 
 	const keyExtractor = useCallback(
-		(item: { key: string; value: Pubky }, index: number) =>
-			`${item.key}-${index}`,
+		(item: { key: string; value: Pubky }, index: number) => `${item.key}-${index}`,
 		[],
 	);
 

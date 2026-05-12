@@ -30,7 +30,7 @@ type AuthActionData = {
  */
 export const handleAuthAction = async (
 	data: AuthActionData,
-	context: ActionContext
+	context: ActionContext,
 ): Promise<Result<string>> => {
 	const { pubky, dispatch } = context;
 	const { rawUrl } = data;

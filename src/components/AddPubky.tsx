@@ -1,15 +1,5 @@
-import React, {
-	memo,
-	ReactElement,
-	useCallback,
-	useMemo,
-	useState,
-} from 'react';
-import {
-	Image,
-	Platform,
-	StyleSheet,
-} from 'react-native';
+import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
+import { Image, Platform, StyleSheet } from 'react-native';
 import {
 	View,
 	Text,
@@ -34,11 +24,7 @@ import {
 import { Result } from '@synonymdev/result';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import Toast from 'react-native-toast-message';
-import {
-	getToastStyle,
-	isSmallScreen,
-	showToast,
-} from '../utils/helpers.ts';
+import { getToastStyle, isSmallScreen, showToast } from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
@@ -51,12 +37,13 @@ const toastStyle = getToastStyle();
 const smallScreen = isSmallScreen();
 const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
-
-const AddPubky = ({ payload }: {
-    payload: {
-        createPubky: () => void;
-        importPubky: (mnemonic?: string) => Promise<Result<string>>;
-    };
+const AddPubky = ({
+	payload,
+}: {
+	payload: {
+		createPubky: () => void;
+		importPubky: (mnemonic?: string) => Promise<Result<string>>;
+	};
 }): ReactElement => {
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const dispatch = useDispatch();
@@ -116,9 +103,11 @@ const AddPubky = ({ payload }: {
 						const parsed = await parseInput(data, 'scan');
 
 						// Handle signup, import, and invite actions
-						if (parsed.action === InputAction.Signup ||
-                            parsed.action === InputAction.Import ||
-                            parsed.action === InputAction.Invite) {
+						if (
+							parsed.action === InputAction.Signup ||
+							parsed.action === InputAction.Import ||
+							parsed.action === InputAction.Invite
+						) {
 							await routeInput(parsed, { dispatch });
 						} else {
 							showToast({
@@ -143,9 +132,11 @@ const AddPubky = ({ payload }: {
 						const parsed = await parseInput(clipboardContents, 'clipboard');
 
 						// Handle signup, import, and invite actions
-						if (parsed.action === InputAction.Signup ||
-                            parsed.action === InputAction.Import ||
-                            parsed.action === InputAction.Invite) {
+						if (
+							parsed.action === InputAction.Signup ||
+							parsed.action === InputAction.Import ||
+							parsed.action === InputAction.Invite
+						) {
 							await routeInput(parsed, { dispatch });
 						} else {
 							showToast({
@@ -163,15 +154,18 @@ const AddPubky = ({ payload }: {
 		}, SCANNER_CLOSE_DELAY);
 	}, [closeSheet, dispatch]);
 
-	const renderBackButton = useCallback(() => (
-		<NavButton
-			style={styles.backButton}
-			onPressIn={goBack}
-			hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-		>
-			<ArrowLeft size={24} />
-		</NavButton>
-	), [goBack]);
+	const renderBackButton = useCallback(
+		() => (
+			<NavButton
+				style={styles.backButton}
+				onPressIn={goBack}
+				hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
+			>
+				<ArrowLeft size={24} />
+			</NavButton>
+		),
+		[goBack],
+	);
 
 	const titleText = useMemo(() => {
 		switch (currentScreen) {
@@ -189,32 +183,18 @@ const AddPubky = ({ payload }: {
 	const getImage = useCallback(() => {
 		switch (currentScreen) {
 			case 'import-options':
-				return (
-					<Image
-						source={require('../images/import-pubky.png')}
-						style={styles.importImage}
-					/>
-				);
+				return <Image source={require('../images/import-pubky.png')} style={styles.importImage} />;
 			default:
-				return (
-					<Image
-						source={require('../images/add-pubky-key.png')}
-						style={styles.keyImage}
-					/>
-				);
+				return <Image source={require('../images/add-pubky-key.png')} style={styles.keyImage} />;
 		}
 	}, [currentScreen]);
 
 	const getHeaderText = useCallback(() => {
 		switch (currentScreen) {
 			case 'main':
-				return (
-					<Text style={styles.headerText}>{i18n.t('addPubky.yourKeysYourIdentity')}</Text>
-				);
+				return <Text style={styles.headerText}>{i18n.t('addPubky.yourKeysYourIdentity')}</Text>;
 			case 'import-options':
-				return (
-					<Text style={styles.headerText}>{i18n.t('addPubky.restoreOrImport')}</Text>
-				);
+				return <Text style={styles.headerText}>{i18n.t('addPubky.restoreOrImport')}</Text>;
 			default:
 				return <></>;
 		}
@@ -238,13 +218,33 @@ const AddPubky = ({ payload }: {
 			case 'main':
 				const marginStyle = { marginBottom: 5 };
 				return [
-					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), onPress: onImportPubky, style: [styles.importButton, marginStyle] },
-					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), onPress: onCreatePubky, style: [styles.createButton, marginStyle] },
+					{
+						id: 'ImportPubkyButton',
+						text: i18n.t('addPubky.importPubkyButton'),
+						onPress: onImportPubky,
+						style: [styles.importButton, marginStyle],
+					},
+					{
+						id: 'NewPubkyButton',
+						text: i18n.t('addPubky.newPubkyButton'),
+						onPress: onCreatePubky,
+						style: [styles.createButton, marginStyle],
+					},
 				];
 			case 'import-options':
 				return [
-					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), onPress: onUploadFile, style: styles.importButton },
-					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), onPress: onMnemonicPhrase, style: styles.importButton },
+					{
+						id: 'EncryptedFileButton',
+						text: i18n.t('backup.encryptedFile'),
+						onPress: onUploadFile,
+						style: styles.importButton,
+					},
+					{
+						id: 'RecoveryPhraseButton',
+						text: i18n.t('backup.recoveryPhrase'),
+						onPress: onMnemonicPhrase,
+						style: styles.importButton,
+					},
 				];
 			case 'mnemonic-form':
 				return [];
@@ -259,13 +259,7 @@ const AddPubky = ({ payload }: {
 
 	const getContent = useCallback(() => {
 		if (currentScreen === 'mnemonic-form') {
-			return (
-				<MnemonicForm
-					onBack={onMnemonicBack}
-					onCancel={onMnemonicCancel}
-					onImport={importPubky}
-				/>
-			);
+			return <MnemonicForm onBack={onMnemonicBack} onCancel={onMnemonicCancel} onImport={importPubky} />;
 		}
 
 		return (
@@ -276,34 +270,46 @@ const AddPubky = ({ payload }: {
 					<Text style={styles.title}>{titleText}</Text>
 				</View>
 				{getHeaderText()}
-				<SessionText style={styles.message}>
-					{messageText}
-				</SessionText>
-				<View style={styles.keyContainer}>
-					{getImage()}
-				</View>
+				<SessionText style={styles.message}>{messageText}</SessionText>
+				<View style={styles.keyContainer}>{getImage()}</View>
 				<View style={styles.buttonContainer}>
-					{getButtonConfig().map((button: { id?: string; text: string; style: any; onPress: (() => void) | undefined; }, index: React.Key | null | undefined) => (
-						<Button
-							testID={button.id}
-							key={index}
-							text={button.text}
-							style={[styles.button, button.style]}
-							onPress={button.onPress}
-						/>
-					))}
+					{getButtonConfig().map(
+						(
+							button: { id?: string; text: string; style: any; onPress: (() => void) | undefined },
+							index: React.Key | null | undefined,
+						) => (
+							<Button
+								testID={button.id}
+								key={index}
+								text={button.text}
+								style={[styles.button, button.style]}
+								onPress={button.onPress}
+							/>
+						),
+					)}
 				</View>
-				{currentScreen === 'import-options' &&
-				<AuthorizeButton
-					style={styles.authorizeButton}
-					onPressIn={onScanQrPress}
-				>
-					<Text style={styles.buttonText}>{i18n.t('addPubky.scanQrToImport')}</Text>
-				</AuthorizeButton>}
+				{currentScreen === 'import-options' && (
+					<AuthorizeButton style={styles.authorizeButton} onPressIn={onScanQrPress}>
+						<Text style={styles.buttonText}>{i18n.t('addPubky.scanQrToImport')}</Text>
+					</AuthorizeButton>
+				)}
 				<View style={styles.footerBuffer} />
 			</>
 		);
-	}, [currentScreen, getButtonConfig, getHeaderText, getImage, importPubky, messageText, onMnemonicBack, onMnemonicCancel, onScanQrPress, renderBackButton, shouldShowBackButton, titleText]);
+	}, [
+		currentScreen,
+		getButtonConfig,
+		getHeaderText,
+		getImage,
+		importPubky,
+		messageText,
+		onMnemonicBack,
+		onMnemonicCancel,
+		onScanQrPress,
+		renderBackButton,
+		shouldShowBackButton,
+		titleText,
+	]);
 
 	return (
 		<ActionSheetContainer
@@ -314,11 +320,7 @@ const AddPubky = ({ payload }: {
 			CustomHeaderComponent={<></>}
 			height={actionSheetHeight}
 		>
-			<RadialGradient
-				style={styles.content}
-				colors={BLUE_RADIAL_GRADIENT}
-				center={{ x: 0.5, y: 0.5 }}
-			>
+			<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
 				{getContent()}
 			</RadialGradient>
 			<Toast config={toastConfig({ style: toastStyle })} />
@@ -374,8 +376,7 @@ const styles = StyleSheet.create({
 		minHeight: 64,
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
-	importButton: {
-	},
+	importButton: {},
 	createButton: {
 		borderWidth: 1,
 	},
@@ -384,7 +385,7 @@ const styles = StyleSheet.create({
 	},
 	footerBuffer: {
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 10, android: 20 })
+		marginBottom: Platform.select({ ios: 10, android: 20 }),
 	},
 	importImage: {
 		width: 279,
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
 		alignContent: 'center',
 		justifyContent: 'center',
 		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-		marginBottom: 5
+		marginBottom: 5,
 	},
 });
 

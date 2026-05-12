@@ -11,7 +11,7 @@ import {
 import ModalIndicator from '../ModalIndicator.tsx';
 import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
-import { PubkyData } from "../../navigation/types.ts";
+import { PubkyData } from '../../navigation/types.ts';
 import i18n from '../../i18n';
 import { textStyles } from '../../theme/utils';
 
@@ -32,30 +32,18 @@ const PubkyReview = ({
 	pubky,
 	pubkyData,
 	onContinue,
-	authorizeButtonStyle
+	authorizeButtonStyle,
 }: PubkyReviewProps): ReactElement => {
 	return (
-		<RadialGradient
-			style={styles.content}
-			colors={AUTHORIZE_KEY_GRADIENT}
-			center={{ x: 0.5, y: 0.5 }}
-		>
+		<RadialGradient style={styles.content} colors={AUTHORIZE_KEY_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
 			<ModalIndicator />
 			<View style={styles.titleContainer}>
 				<Text style={styles.title}>{modalTitle}</Text>
 			</View>
-			{headerText && (
-				<Text style={styles.headerText}>{headerText}</Text>
-			)}
-			<SessionText style={styles.message}>
-				{description}
-			</SessionText>
+			{headerText && <Text style={styles.headerText}>{headerText}</Text>}
+			<SessionText style={styles.message}>{description}</SessionText>
 			<ForegroundView style={styles.profileCard}>
-				<PubkyProfile
-					pubky={pubky}
-					pubkyData={pubkyData}
-					hideButton={true}
-				/>
+				<PubkyProfile pubky={pubky} pubkyData={pubkyData} hideButton={true} />
 			</ForegroundView>
 			<View style={styles.footer}>
 				<CardButton
@@ -116,7 +104,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		borderWidth: 1,
 		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)'
+		backgroundColor: 'rgba(255, 255, 255, 0.08)',
 	},
 	buttonText: {
 		...textStyles.bodySSB,
@@ -127,8 +115,8 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'flex-end',
 		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 })
-	}
+		marginBottom: Platform.select({ ios: 0, android: 20 }),
+	},
 });
 
 export default PubkyReview;

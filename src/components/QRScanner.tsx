@@ -5,10 +5,7 @@ import { ActionSheetContainer, Clipboard, Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { CardButton } from '../theme/components.ts';
-import {
-	ACTION_SHEET_HEIGHT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
+import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import i18n from '../i18n';
 import MigrationProgressOverlay from './MigrationProgressOverlay';
@@ -17,7 +14,7 @@ interface QRScannerProps {
 	onScan: (data: string) => void;
 	onCopyClipboard: () => Promise<string>;
 	onClose: () => void;
-  title?: string;
+	title?: string;
 }
 
 const smallScreen = isSmallScreen();
@@ -27,9 +24,12 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 	const { onScan, onCopyClipboard, onClose, title = i18n.t('auth.authorize') } = payload;
 	const navigationAnimation = useSelector(getNavigationAnimation);
 
-	const handleBarCodeRead = useCallback((data: string) => {
-		onScan(data);
-	}, [onScan]);
+	const handleBarCodeRead = useCallback(
+		(data: string) => {
+			onScan(data);
+		},
+		[onScan],
+	);
 
 	return (
 		<ActionSheetContainer
@@ -46,10 +46,7 @@ const QRScanner = memo(({ payload }: { payload: QRScannerProps }) => {
 					<MigrationProgressOverlay />
 				</View>
 				<View style={styles.buttonContainer}>
-					<CardButton
-						style={styles.actionButton2}
-						onPress={onCopyClipboard}
-					>
+					<CardButton style={styles.actionButton2} onPress={onCopyClipboard}>
 						<Clipboard size={20} style={styles.clipboard} />
 						<Text style={styles.buttonText}>{i18n.t('clipboard.pasteLink')}</Text>
 					</CardButton>
@@ -92,10 +89,10 @@ const styles = StyleSheet.create({
 		width: '90%',
 		borderWidth: 1,
 		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.1)'
+		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	clipboard: {
-		alignSelf: 'center'
+		alignSelf: 'center',
 	},
 	buttonText: {
 		...textStyles.bodySSB,

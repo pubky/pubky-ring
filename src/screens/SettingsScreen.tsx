@@ -2,15 +2,7 @@ import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react
 import { Alert, StyleSheet, Switch } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import {
-	View,
-	Text,
-	Card,
-	ActionButton,
-	SessionText,
-	QrCode,
-	Scan,
-} from '../theme/components.ts';
+import { View, Text, Card, ActionButton, SessionText, QrCode, Scan } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -60,7 +52,10 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	);
 
 	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const themeDisplayText = useMemo(() => getThemeDisplayText(currentTheme), [currentTheme, getThemeDisplayText]);
+	const themeDisplayText = useMemo(
+		() => getThemeDisplayText(currentTheme),
+		[currentTheme, getThemeDisplayText],
+	);
 
 	const navigationAnimationText = useMemo(() => {
 		const animationText = {
@@ -97,29 +92,25 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	}, [dispatch, navigationAnimation]);
 
 	const handleWipePubkyRing = useCallback(() => {
-		Alert.alert(
-			t('settings.wipeConfirmTitle'),
-			t('settings.wipeConfirmMessage'),
-			[
-				{
-					text: t('common.no'),
-					style: 'cancel',
+		Alert.alert(t('settings.wipeConfirmTitle'), t('settings.wipeConfirmMessage'), [
+			{
+				text: t('common.no'),
+				style: 'cancel',
+			},
+			{
+				text: t('common.yes'),
+				onPress: (): void => {
+					wipeKeychain().then();
+					dispatch(resetSettings());
+					dispatch(resetPubkys());
+					navigation.reset({
+						index: 0,
+						routes: [{ name: 'Onboarding' }],
+					});
 				},
-				{
-					text: t('common.yes'),
-					onPress: (): void => {
-						wipeKeychain().then();
-						dispatch(resetSettings());
-						dispatch(resetPubkys());
-						navigation.reset({
-							index: 0,
-							routes: [{ name: 'Onboarding' }],
-						});
-					},
-					style: 'destructive',
-				},
-			],
-		);
+				style: 'destructive',
+			},
+		]);
 	}, [dispatch, navigation, t]);
 
 	const handleShowOnboarding = useCallback(() => {
@@ -179,12 +170,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
                  **/}
 
 				<Card style={styles.textSection}>
-					<Text style={styles.textSettingTitle}>
-						{t('settings.migrateToOtherDevice')}
-					</Text>
-					<Text style={styles.textSettingValue}>
-						{t('settings.migrateDescription')}
-					</Text>
+					<Text style={styles.textSettingTitle}>{t('settings.migrateToOtherDevice')}</Text>
+					<Text style={styles.textSettingValue}>{t('settings.migrateDescription')}</Text>
 				</Card>
 
 				<View style={styles.buttonContainer}>
@@ -208,32 +195,19 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton
-							onPress={handleNavigationAnimationPress}
-							style={styles.navigationAnimationButton}
-						>
-							<Text style={styles.settingTitle}>
-								{t('settings.navigationAnimation')}
-							</Text>
-							<SessionText style={styles.themeValue}>
-								{navigationAnimationText}
-							</SessionText>
+						<ActionButton onPress={handleNavigationAnimationPress} style={styles.navigationAnimationButton}>
+							<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
+							<SessionText style={styles.themeValue}>{navigationAnimationText}</SessionText>
 						</ActionButton>
 					</Card>
 				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton
-							onPress={handleAutoAuthToggle}
-							style={styles.toggleRow}
-						>
+						<ActionButton onPress={handleAutoAuthToggle} style={styles.toggleRow}>
 							<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
 							<View style={styles.switchContainer}>
-								<Switch
-									value={enableAutoAuth}
-									onValueChange={handleAutoAuthToggle}
-								/>
+								<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
 							</View>
 						</ActionButton>
 					</Card>
@@ -241,26 +215,16 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton
-							onPress={handleShowOnboarding}
-							style={styles.navigationAnimationButton}
-						>
-							<Text style={styles.settingTitle}>
-								{t('settings.showOnboarding')}
-							</Text>
+						<ActionButton onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
+							<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
 						</ActionButton>
 					</Card>
 				)}
 
 				{showSecretSettings && (
 					<Card style={styles.section}>
-						<ActionButton
-							onPress={handleWipePubkyRing}
-							style={styles.navigationAnimationButton}
-						>
-							<Text style={styles.settingTitle}>
-								{t('settings.wipePubkyRing')}
-							</Text>
+						<ActionButton onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
+							<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
 						</ActionButton>
 					</Card>
 				)}

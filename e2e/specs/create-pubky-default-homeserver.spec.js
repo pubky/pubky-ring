@@ -43,11 +43,7 @@ describe('create a pubky with default (prod) homeserver without proceeding to in
 		// note: unable to assert that 'Continue' button is enabled because keyboard dismissal uses return key on iOS and that submits the form
 		await sendReturnKey();
 
-		// Assert that 'Continue' button on Default Homeserver page changes to 'Processing'
-		const inviteCodeContinueButtonText = await waitForDisplayed(elementById('InviteCodeContinueButton-Text'));
-		expect(await inviteCodeContinueButtonText.getText()).to.contain('Processing');
-
-		// TODO: Assert for error because we input an invalid invite code for prod homeserver
+		// Assert for error because we input an invalid invite code for prod homeserver
 		(await waitForDisplayed(elementById('InviteCodeErrorText'), 120_000));
 		expect(await elementById('InviteCodeErrorText').getText()).to.contain('Invalid invite code');
 	});

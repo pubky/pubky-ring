@@ -25,12 +25,12 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
-        node-version: '22'
+        node-version: '24'
         cache: 'yarn'
 
     - name: Enable KVM
@@ -98,7 +98,7 @@ jobs:
         script: yarn e2e:android
 
     - name: Upload Video
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: android-e2e-video
@@ -106,7 +106,7 @@ jobs:
         retention-days: 7
 
     - name: Upload Logcat
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: android-e2e-logcat
@@ -114,7 +114,7 @@ jobs:
         retention-days: 7
 
     - name: Upload Errors
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: android-e2e-errors
@@ -123,7 +123,7 @@ jobs:
 
     - name: Upload Dmesg
 
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: android-e2e-dmesg
@@ -131,7 +131,7 @@ jobs:
         retention-days: 7
 
     - name: Upload Test Results
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: android-e2e-results

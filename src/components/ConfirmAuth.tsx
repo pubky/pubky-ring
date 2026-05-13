@@ -209,8 +209,8 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 	const titleText = isAuthorized
 		? t('auth.authorizationSuccessful')
 		: xCallback?.xSource
-		? t('auth.authorizeForApp', { appName: xCallback.xSource })
-		: t('auth.authorize');
+			? t('auth.authorizeForApp', { appName: xCallback.xSource })
+			: t('auth.authorize');
 
 	return (
 		<ActionSheetContainer

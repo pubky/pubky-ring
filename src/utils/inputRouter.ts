@@ -83,7 +83,7 @@ export const routeInput = async (
 						action: InputAction.Import,
 						pubky: result.value,
 						message: i18n.t('router.importSuccessful'),
-				  })
+					})
 				: err(getErrorMessage(result.error, i18n.t('errors.importFailed')));
 		}
 
@@ -95,7 +95,7 @@ export const routeInput = async (
 						action: InputAction.Migrate,
 						pubky: result.value,
 						message: i18n.t('router.migrateSuccessful'),
-				  })
+					})
 				: err(getErrorMessage(result.error, i18n.t('errors.migrateFailed')));
 		}
 
@@ -107,7 +107,7 @@ export const routeInput = async (
 						action: InputAction.Signup,
 						pubky: result.value,
 						message: i18n.t('router.signupSuccessful'),
-				  })
+					})
 				: err(getErrorMessage(result.error, i18n.t('errors.signupFailed')));
 		}
 
@@ -119,7 +119,7 @@ export const routeInput = async (
 						action: InputAction.Invite,
 						pubky: result.value,
 						message: i18n.t('router.inviteProcessed'),
-				  })
+					})
 				: err(getErrorMessage(result.error, i18n.t('errors.inviteProcessingFailed')));
 		}
 
@@ -131,7 +131,7 @@ export const routeInput = async (
 						action: InputAction.Session,
 						pubky: result.value,
 						message: i18n.t('router.sessionReturned'),
-				  })
+					})
 				: err(getErrorMessage(result.error, i18n.t('errors.sessionRequestFailed')));
 		}
 

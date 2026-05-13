@@ -148,7 +148,7 @@ export const handleNoPubkysAvailable = (
 									SheetManager.hide('add-pubky');
 								},
 							});
-					  }
+						}
 					: undefined,
 		});
 	}

@@ -76,7 +76,11 @@ export const getErrorMessage = (error: unknown, fallback = i18n.t('errors.unknow
 };
 
 export class AppError extends Error {
-	constructor(message: string, public code: string, public recoverable = true) {
+	constructor(
+		message: string,
+		public code: string,
+		public recoverable = true,
+	) {
 		super(message);
 		this.name = 'AppError';
 	}

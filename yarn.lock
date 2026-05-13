@@ -9044,10 +9044,10 @@ react-native-actions-sheet@^10.1.2:
   dependencies:
     react-native-worklets "^0.7.1"
 
-react-native-camera-kit@^17.0.1:
-  version "17.0.1"
-  resolved "https://registry.yarnpkg.com/react-native-camera-kit/-/react-native-camera-kit-17.0.1.tgz#97ac40c7395e3768be5d8a2ba8d77772e798b9be"
-  integrity sha512-DcXfyiNl1yXytDgCxbpny1BbhXnUUpQdzI144v9KhkgSLJo/m7ELC6uuMimQAH6h1ccRW29fQ5KY8BGboHEmww==
+react-native-camera-kit@18.0.0:
+  version "18.0.0"
+  resolved "https://registry.yarnpkg.com/react-native-camera-kit/-/react-native-camera-kit-18.0.0.tgz#77d419d4c67d382ee8b1e31d47c2b73d51f01efa"
+  integrity sha512-FZG9kB8GDGcxTUB2cGhBn2wexIgzevv+PE7zfpLz6i/9kltDCLO/fomLhFvSaQVL2Bnu8AtxbBiI8Im0O8AqDA==
 
 react-native-draggable-flatlist@^4.0.3:
   version "4.0.3"

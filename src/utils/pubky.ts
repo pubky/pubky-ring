@@ -26,7 +26,7 @@ import {
 } from '../store/slices/pubkysSlice';
 import { Result, err, ok } from '@synonymdev/result';
 import { defaultProfile, defaultPubkyState } from '../store/shapes/pubky';
-import { showToast } from './helpers.ts';
+import { checkNetworkConnection, showToast } from './helpers.ts';
 import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
@@ -630,6 +630,13 @@ export const performAuth = async ({
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
 	try {
+		const isOnline = await checkNetworkConnection({
+			displayToastIfOnline: false,
+			displayToastIfOffline: false,
+		});
+		if (!isOnline) {
+			return err(i18n.t('network.offlineDescription'));
+		}
 		const authPromise = (async (): Promise<Result<string>> => {
 			if (!pubky) {
 				return err(i18n.t('pubkyErrors.pubkyRequiredForAuth'));

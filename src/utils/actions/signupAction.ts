@@ -7,10 +7,10 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
-import { InputAction, SignupParams, XCallbackParams } from '../inputParser';
+import { InputAction, SignupParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { savePubky, signUpToHomeserver } from '../pubky';
-import { showToast } from '../helpers';
+import { checkNetworkConnection, showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { openXError } from '../xCallback';
 import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice';
@@ -61,6 +61,22 @@ export const handleSignupAction = async (
 	const { dispatch } = context;
 	const { params } = data;
 	const { xCallback, homeserver, inviteCode, relay, secret, caps } = params;
+
+	const isOnline = await checkNetworkConnection({
+		dispatch,
+		displayToastIfOnline: false,
+		displayToastIfOffline: false,
+	});
+	if (!isOnline) {
+		const offlineMessage = i18n.t('network.offlineDescription');
+		showToast({
+			type: 'error',
+			title: i18n.t('network.currentlyOffline'),
+			description: offlineMessage,
+		});
+		await openXError(xCallback, 'OFFLINE', offlineMessage);
+		return err(offlineMessage);
+	}
 
 	let pubky = '';
 	let isReusedPubky = false;
@@ -163,30 +179,7 @@ export const handleSignupAction = async (
 				await new Promise(resolve => {
 					setTimeout(resolve, SHEET_ANIMATION_DELAY);
 				});
-
-				if (signedUpKeys.length === 1) {
-					// Single pubky: auto-forward to auth
-					return await handleAuthAction(authData, { ...context, pubky: signedUpKeys[0], isDeeplink: false });
-				} else {
-					// Multiple pubkys: show selector, then forward to auth
-					const selectedPubky = await showPubkySelectionSheet(
-						{
-							action: InputAction.Auth,
-							data: authData,
-							source: 'scan',
-							rawInput: authUrl,
-						},
-						'scan',
-						dispatch,
-					);
-
-					if (!selectedPubky) {
-						// User dismissed without selecting - return error
-						return err('User cancelled pubky selection');
-					}
-
-					return await handleAuthAction(authData, { ...context, pubky: selectedPubky, isDeeplink: false });
-				}
+				return await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
 			}
 
 			// No existing pubkys - show error as before

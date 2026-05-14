@@ -3179,7 +3179,7 @@
   resolved "https://registry.yarnpkg.com/@vscode/sudo-prompt/-/sudo-prompt-9.3.2.tgz#692ba38df40bd3502ccc4e9f099fbbaedbd5f04e"
   integrity sha512-gcXoCN00METUNFeQOFJ+C9xUI0DKB+0EGMVg7wbVYRHBw2Eq3fKisDZOkRdOz3kqXRKOENMfShPOmypw1/8nOw==
 
-"@wdio/appium-service@^9.19.1":
+"@wdio/appium-service@^9.27.1":
   version "9.27.1"
   resolved "https://registry.yarnpkg.com/@wdio/appium-service/-/appium-service-9.27.1.tgz#a63304d2995ce95a8a69dee55e092c163796f796"
   integrity sha512-JK2zvJMKrHcUo5hwZLx+6Ni+kPLs5g0Scdlr0gKlSwAW/ZZWFXF6aNDz/ltNtfjZamDo1GjxqMqreU1efOXXsw==
@@ -3197,7 +3197,7 @@
     webdriverio "9.27.1"
     xpath "^0.0.34"
 
-"@wdio/cli@^9.19.1":
+"@wdio/cli@^9.27.1":
   version "9.27.1"
   resolved "https://registry.yarnpkg.com/@wdio/cli/-/cli-9.27.1.tgz#2646dc87873ec80ee3e2bd3c92de5e7c89f0b36f"
   integrity sha512-FxwHq7UZs81FWHWUhk3F/Nh2U8VpKzJrrDTminj8EYquNzsBOr6gw11M4lENuQ+Cre/aS01cxZYkgTYWkPGrOw==
@@ -3250,7 +3250,7 @@
   resolved "https://registry.yarnpkg.com/@wdio/globals/-/globals-9.27.1.tgz#00d02475ace1c0dd7ef5a7e974aa5cc5bf9f2878"
   integrity sha512-jm6gTQ6Qo3EOBY6PA09U/5Pf17WLEJM1/lTfhc6jzLFE770EuhuhbuphqrInH0hVR9WMyWtSZQ+LRCcLfcmOPQ==
 
-"@wdio/local-runner@^9.19.1":
+"@wdio/local-runner@^9.27.1":
   version "9.27.1"
   resolved "https://registry.yarnpkg.com/@wdio/local-runner/-/local-runner-9.27.1.tgz#1a3b2bcb597c0ff14f78a564ce927de1e43d087a"
   integrity sha512-Uvol8Je1VrCUDZqLT1/fhrvXOGpAGcjEXd69LbhupFAVv336fGX+aonJlWV8VJyWow55xSW4zmKnaLIhpFk3Uw==
@@ -3277,7 +3277,7 @@
     safe-regex2 "^5.0.0"
     strip-ansi "^7.1.0"
 
-"@wdio/mocha-framework@^9.19.1":
+"@wdio/mocha-framework@^9.27.1":
   version "9.27.1"
   resolved "https://registry.yarnpkg.com/@wdio/mocha-framework/-/mocha-framework-9.27.1.tgz#efbb1de53e5cc191ff6b47a318b421d9c202131b"
   integrity sha512-HJ2FtV6qgy7Rs7xGKjyGIKMtFBlCRfxiK9jTElRlOPyQjv79BHc1+sDcQpvufunKuma35rLUCuwtbeY3HotJVg==
@@ -3328,7 +3328,7 @@
     webdriver "9.27.1"
     webdriverio "9.27.1"
 
-"@wdio/spec-reporter@^9.19.1":
+"@wdio/spec-reporter@^9.27.1":
   version "9.27.1"
   resolved "https://registry.yarnpkg.com/@wdio/spec-reporter/-/spec-reporter-9.27.1.tgz#01c643157a4c021024670c5e409984fd17984260"
   integrity sha512-q9UMJJbCcP+nCOojIvOIcsXnerhHICmWu94guRMRYPbW2IsG/5VM/uhzwru8SU/1WRXLtKgTjkuXXsjzjVpf2w==
@@ -11153,7 +11153,7 @@ webdriver@9.27.1:
     undici "^6.21.3"
     ws "^8.8.0"
 
-webdriverio@9.27.1, webdriverio@^9.19.1:
+webdriverio@9.27.1, webdriverio@^9.27.1:
   version "9.27.1"
   resolved "https://registry.yarnpkg.com/webdriverio/-/webdriverio-9.27.1.tgz#46878e9d999064190d47eb73cefd554ff9492be1"
   integrity sha512-iPaIU/DluYY7zfLiwXDdoLU/6ZW8eup4PNwQikrCzTfvH/ITllRhFUe6NRDTEEePSxxRTeXAn9nehCs98xWGVA==

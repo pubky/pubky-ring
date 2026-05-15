@@ -1,4 +1,4 @@
-name: iOS E2E Tests
+name: iOS E2E
 
 on:
   pull_request:
@@ -6,21 +6,98 @@ on:
   workflow_dispatch:
     inputs:
       commit-sha:
-        description: 'Commit SHA to test (leave empty to use current branch head)'
+        description: 'Commit SHA to build/test (leave empty to use selected branch)'
         required: false
         type: string
 
+concurrency:
+  group: ios-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  ios-e2e:
-    runs-on: macos-latest
-    # timeout-minutes: 90
-    concurrency:
-      group: ios-e2e-${{ github.head_ref }}
-      cancel-in-progress: true
+  build:
+    runs-on: macos-26
+    timeout-minutes: 75
 
     steps:
     - name: Checkout code
       uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.inputs.commit-sha || github.ref }}
+
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: "26"
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+        cache: 'yarn'
+
+    - name: Verify iOS toolchain
+      run: |
+        xcodebuild -version
+        xcodebuild -showsdks
+        xcrun simctl list runtimes
+        xcrun simctl list devices available
+
+    - name: Install dependencies
+      run: |
+        yarn cache clean
+        yarn install --frozen-lockfile
+
+    - name: Cache CocoaPods
+      uses: actions/cache@v5
+      with:
+        path: ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock', 'package.json', 'yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Install iOS dependencies
+      run: |
+        cd ios
+        pod install
+
+    - name: Clean build
+      run: |
+        cd ios
+        xcodebuild clean -workspace pubkyring.xcworkspace -scheme pubkyring
+
+    - name: Build iOS App
+      run: |
+        cd ios
+        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination 'platform=iOS Simulator,name=iPhone 17' -derivedDataPath ./build build
+
+    - name: Create app bundle zip
+      run: |
+        cd ios/build/Build/Products/Release-iphonesimulator
+        zip -r pubkyring.app.zip pubkyring.app
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v7
+      with:
+        name: ios-release-app
+        path: ios/build/Build/Products/Release-iphonesimulator/pubkyring.app.zip
+        retention-days: 7
+
+  ios-e2e:
+    runs-on: macos-26
+    needs: build
+    # timeout-minutes: 90
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.inputs.commit-sha || github.ref }}
+
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: "26"
 
     - name: Set up Node.js
       uses: actions/setup-node@v5
@@ -33,27 +110,11 @@ jobs:
     - name: Install Appium drivers
       run: yarn e2e:drivers
 
-    - name: Install iOS dependencies
-      run: |
-        cd ios
-        pod install
-
-    - name: Wait for iOS Build
-      id: wait-ios-build
-      uses: ./.github/actions/wait-for-workflow
-      with:
-        workflow-name: 'iOS Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
-        max-attempts: '60'  # 30 minutes with 30s intervals
-        interval-seconds: '30'
-
     - name: Download iOS App
-      uses: dawidd6/action-download-artifact@v6
+      uses: actions/download-artifact@v7
       with:
         name: ios-release-app
         path: ./artifacts
-        workflow: ios-build.yml
-        run_id: ${{ steps.wait-ios-build.outputs.workflow-run-id }}
 
     - name: Extract iOS App Bundle
       run: |
@@ -76,6 +137,7 @@ jobs:
       with:
         name: ios-e2e-video
         path: ./e2e/artefacts/
+        if-no-files-found: ignore
         retention-days: 7
 
     - name: Upload Logcat
@@ -84,6 +146,7 @@ jobs:
       with:
         name: ios-e2e-logcat
         path: ./logcat.txt
+        if-no-files-found: ignore
         retention-days: 7
 
     - name: Upload Simulator Logs
@@ -92,6 +155,7 @@ jobs:
       with:
         name: ios-e2e-simulator-logs
         path: ./ios-simulator-logs.txt
+        if-no-files-found: ignore
         retention-days: 7
 
     - name: Upload Test Results
@@ -101,6 +165,7 @@ jobs:
         name: ios-e2e-results
         path: |
           ./e2e/results/
+        if-no-files-found: ignore
         retention-days: 7
 
     - name: Upload Appium Logs
@@ -109,4 +174,5 @@ jobs:
       with:
         name: ios-e2e-appium-logs
         path: ./e2e/appium.log
+        if-no-files-found: ignore
         retention-days: 7

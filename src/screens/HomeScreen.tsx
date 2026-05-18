@@ -116,15 +116,6 @@ const HomeScreen = (): ReactElement => {
 		[pubkysProcessing],
 	);
 
-	const getItemLayout = useCallback(
-		(data: any, index: number) => ({
-			length: 172,
-			offset: 172 * index,
-			index,
-		}),
-		[],
-	);
-
 	const keyExtractor = useCallback(
 		(item: { key: string; value: Pubky }, index: number) => `${item.key}-${index}`,
 		[],
@@ -157,7 +148,6 @@ const HomeScreen = (): ReactElement => {
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
-				getItemLayout={getItemLayout}
 			/>
 			{/* Fixed footer */}
 			<View style={styles.fixedFooterContainer}>

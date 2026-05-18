@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	contentContainer: {
+		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'flex-start',
 		backgroundColor: 'transparent',

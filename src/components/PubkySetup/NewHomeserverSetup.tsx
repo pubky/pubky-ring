@@ -158,6 +158,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		marginBottom: 24,
 		backgroundColor: 'transparent',
+		zIndex: 1,
 	},
 	title: {
 		...textStyles.bodyMB,
@@ -170,12 +171,14 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
+		zIndex: 1,
 	},
 	message: {
 		...textStyles.bodyM,
 		marginBottom: 30,
 		color: '#FFFFFF',
 		backgroundColor: 'transparent',
+		zIndex: 1,
 	},
 	optionsContainer: {
 		marginBottom: 20,

@@ -1,5 +1,5 @@
 import React, { ReactElement, useMemo } from 'react';
-import { DefaultTheme, NavigationContainer } from '@react-navigation/native';
+import { DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import HomeScreen from '../screens/HomeScreen';
 import PubkyDetailScreen from '../screens/PubkyDetailScreen';
@@ -30,7 +30,21 @@ const RootNavigator = (): ReactElement => {
 		return !signedTermsOfUse ? 'TermsOfUse' : showOnboarding ? 'Onboarding' : 'Home';
 	}, [showOnboarding, signedTermsOfUse]);
 
-	const navTheme = useMemo(() => ({ ...DefaultTheme, ...theme }), [theme]);
+	const navTheme: NavigationTheme = useMemo(
+		() => ({
+			...DefaultTheme,
+			colors: {
+				...DefaultTheme.colors,
+				background: theme.colors.background,
+				border: theme.colors.border,
+				card: theme.colors.cardBackground,
+				notification: theme.colors.sessionText,
+				primary: theme.colors.text,
+				text: theme.colors.text,
+			},
+		}),
+		[theme],
+	);
 
 	return (
 		<NavigationContainer theme={navTheme}>

@@ -1,6 +1,6 @@
 import React, { memo, ReactElement } from 'react';
 import { Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
-import { View, Text, ArrowRight, ScrollView } from '../theme/components.ts';
+import { View, Text, ScrollView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import { version } from '../../package.json';
 // @ts-ignore
@@ -12,6 +12,7 @@ import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils.ts';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
+import { ChevronRight } from '../icons/index.ts';
 
 const About = (): ReactElement => {
 	const { t } = useTranslation();
@@ -58,12 +59,12 @@ const About = (): ReactElement => {
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
 					<Text style={styles.rowTitle}>{t('about.legal')}</Text>
-					<ArrowRight />
+					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
 					<Text style={styles.rowTitle}>{t('common.share')}</Text>
-					<ArrowRight />
+					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
@@ -78,7 +79,7 @@ const About = (): ReactElement => {
 						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
 						<Text style={styles.footerText}>{t('about.joinWithPubkyRing')}</Text>
 					</View>
-					<ArrowRight />
+					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
 
 				<SafeAreaInset edge="bottom" />

@@ -1,6 +1,6 @@
 import { Image, StyleSheet } from 'react-native';
 import React, { memo, ReactElement, useCallback, useRef } from 'react';
-import { ArrowLeft, Text, TouchableOpacity, View } from '../theme/components.ts';
+import { Text, TouchableOpacity, View } from '../theme/components.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
@@ -8,6 +8,7 @@ import { useTypedNavigation } from '../navigation/hooks.ts';
 import LinearGradient from 'react-native-linear-gradient';
 import { textStyles } from '../theme/utils';
 import HeaderNavButton from './HeaderNavButton.tsx';
+import { ArrowLeft } from '../icons/index.ts';
 
 const PubkyRingLogo = require('../images/pubky-ring-logo.png');
 

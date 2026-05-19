@@ -2,7 +2,6 @@
 
 import React, { memo, useCallback, useRef } from 'react';
 import { StyleSheet, View, Image } from 'react-native';
-import { Scan } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { readFromClipboard } from '../utils/clipboard';
 import PubkyRingLogo from '../images/pubky.png';
@@ -13,6 +12,7 @@ import { routeInput } from '../utils/inputRouter';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
 import Button from './Button.tsx';
+import { Scan } from '../icons/index.ts';
 
 const ScanInviteButton = memo(() => {
 	const isProcessingInvite = useRef(false);
@@ -107,7 +107,7 @@ const ScanInviteButton = memo(() => {
 		<View style={styles.container}>
 			<Button
 				text={i18n.t('scanInvite.scanInviteFor')}
-				icon={<Scan size={19} />}
+				icon={<Scan size={24} />}
 				rightIcon={<Image source={PubkyRingLogo} style={styles.logo} />}
 				size="large"
 				style={styles.button}

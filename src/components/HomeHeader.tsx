@@ -1,8 +1,8 @@
 import React, { memo } from 'react';
-import { Info, Settings } from '../theme/components';
 import AppHeader from './AppHeader';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { useTypedNavigation } from '../navigation/hooks';
+import { Gear, Info } from '../icons';
 
 const HomeHeader = () => {
 	const navigation = useTypedNavigation();
@@ -19,7 +19,7 @@ const HomeHeader = () => {
 				navigation.navigate('Settings', { showSecretSettings: false });
 			}}
 		>
-			<Settings size={24} />
+			<Gear size={24} />
 		</HeaderNavButton>
 	);
 

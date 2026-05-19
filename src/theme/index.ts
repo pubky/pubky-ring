@@ -1,12 +1,12 @@
-import { DefaultTheme } from 'styled-components/native';
-
-export interface Theme extends DefaultTheme {
+export interface Theme {
 	colors: {
 		background: string;
 		cardBackground: string;
 		sessionBorder: string;
 		foreground: string;
 		text: string;
+		textSecondary: string;
+		textTertiary: string;
 		sessionText: string;
 		border: string;
 		avatarRing: string;
@@ -25,6 +25,8 @@ export const lightTheme: Theme = {
 		cardBackground: '#f8f8f8',
 		foreground: '#f0f0f0',
 		text: '#333',
+		textSecondary: '#666',
+		textTertiary: '#999',
 		sessionText: '#666',
 		sessionBorder: '#eee',
 		border: '#ddd',
@@ -45,6 +47,8 @@ export const darkTheme: Theme = {
 		sessionBorder: '#333333',
 		foreground: '#202020',
 		text: '#fff',
+		textSecondary: 'rgba(255, 255, 255, 0.80)',
+		textTertiary: 'rgba(255, 255, 255, 0.64)',
 		sessionText: '#ccc',
 		border: '#444',
 		avatarRing: '#303030',

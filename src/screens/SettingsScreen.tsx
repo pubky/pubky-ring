@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react
 import { Alert, StyleSheet, Switch, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { View, Text, Card, SessionText, QrCode, Scan } from '../theme/components.ts';
+import { View, Text, Card, SessionText } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -24,6 +24,7 @@ import { useInputHandler } from '../hooks/useInputHandler.ts';
 import { textStyles } from '../theme/utils';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
+import { Qrcode, Scan } from '../icons/index.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -182,7 +183,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							text={t('settings.showQR')}
 							size="medium"
 							onPress={handleShowQRPress}
-							icon={<QrCode size={16} />}
+							icon={<Qrcode size={24} />}
 						/>
 					)}
 					<Button
@@ -191,7 +192,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 						text={t('settings.scanQR')}
 						size="medium"
 						onPress={handleScanQRPress}
-						icon={<Scan size={16} />}
+						icon={<Scan size={24} />}
 					/>
 				</View>
 

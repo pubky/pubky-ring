@@ -1,35 +1,26 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { Image, PixelRatio, StyleSheet } from 'react-native';
+import { PixelRatio, StyleSheet } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { PubkyData } from '../../navigation/types.ts';
-import { View, Trash2, Scan, LinearGradient } from '../../theme/components.ts';
+import { View, LinearGradient } from '../../theme/components.ts';
 import Button from '../Button.tsx';
 import { shareData } from '../../utils/helpers.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
-import i18n from '../../i18n';
-import { textStyles } from '../../theme/utils';
+import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
 
 interface PubkyListHeaderProps {
 	index: number;
 	pubky: string;
 	pubkyData: PubkyData;
-	sessionsCount: number;
 	onQRPress: () => Promise<void>;
 	onDelete: () => void;
 	onBackup: () => void;
 }
 
 export const PubkyListHeader = memo(
-	({
-		index,
-		pubky,
-		pubkyData,
-		// eslint-disable-next-line @typescript-eslint/no-unused-vars
-		sessionsCount,
-		onQRPress,
-		onDelete,
-		onBackup,
-	}: PubkyListHeaderProps) => {
+	({ index, pubky, pubkyData, onQRPress, onDelete, onBackup }: PubkyListHeaderProps) => {
+		const { t } = useTranslation();
 		const [fontScale] = useState(PixelRatio.getFontScale());
 		const [isQRLoading, setIsQRLoading] = useState(false);
 
@@ -41,7 +32,7 @@ export const PubkyListHeader = memo(
 		const handleButtonPress = useCallback(async () => {
 			if (!pubkyData.signedUp) {
 				showEditPubkySheet({
-					title: i18n.t('pubky.setup'),
+					title: t('pubky.setup'),
 					pubky,
 					data: pubkyData,
 				});
@@ -53,37 +44,15 @@ export const PubkyListHeader = memo(
 					setIsQRLoading(false);
 				}
 			}
-		}, [onQRPress, pubky, pubkyData]);
+		}, [onQRPress, pubky, pubkyData, t]);
 
-		const buttonIcon = useMemo(() => {
-			if (pubkyData.signedUp) {
-				return <Scan size={16} />;
-			}
-			return null;
-		}, [pubkyData.signedUp]);
+		const buttonIcon = pubkyData.signedUp ? <Scan /> : undefined;
+		const buttonText = pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup');
 
-		const buttonText = useMemo(() => {
-			return pubkyData.signedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup');
-		}, [pubkyData.signedUp]);
-
-		// Return undefined instead of <></> for better performance - avoids creating empty JSX objects
-		const ShareIcon = useMemo(
-			() =>
-				fontScale <= 1 ? (
-					<Image source={require('../../images/share-icon.png')} style={styles.icon} />
-				) : undefined,
-			[fontScale],
-		);
-
-		const BackupIcon = useMemo(
-			() =>
-				fontScale <= 1 ? (
-					<Image source={require('../../images/shield-icon.png')} style={styles.icon} />
-				) : undefined,
-			[fontScale],
-		);
-
-		const DeleteIcon = useMemo(() => (fontScale <= 1 ? <Trash2 size={24} /> : undefined), [fontScale]);
+		const showActionIcons = fontScale <= 1;
+		const shareIcon = showActionIcons ? <Share /> : undefined;
+		const backupIcon = showActionIcons ? <Shield /> : undefined;
+		const deleteIcon = showActionIcons ? <Trash /> : undefined;
 
 		return (
 			<View style={styles.container}>
@@ -102,20 +71,20 @@ export const PubkyListHeader = memo(
 				<View style={styles.actionButtonRow}>
 					<Button
 						style={styles.actionButton}
-						text={i18n.t('common.share')}
-						icon={ShareIcon}
+						text={t('common.share')}
+						icon={shareIcon}
 						onPress={onSharePress}
 					/>
 					<Button
 						style={styles.actionButton}
-						text={i18n.t('backup.backup')}
-						icon={BackupIcon}
+						text={t('backup.backup')}
+						icon={backupIcon}
 						onPress={onBackup}
 					/>
 					<Button
 						style={styles.actionButton}
-						text={i18n.t('common.delete')}
-						icon={DeleteIcon}
+						text={t('common.delete')}
+						icon={deleteIcon}
 						onPress={onDelete}
 					/>
 				</View>
@@ -139,17 +108,9 @@ const styles = StyleSheet.create({
 	actionButton: {
 		flex: 1,
 	},
-	actionButtonText: {
-		...textStyles.bodySSB,
-		marginLeft: 5,
-	},
 	profileSection: {
 		width: '100%',
 		borderRadius: 16,
-	},
-	icon: {
-		width: 24,
-		height: 24,
 	},
 });
 

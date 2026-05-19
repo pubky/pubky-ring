@@ -14,6 +14,7 @@ import { readFromClipboard } from '../utils/clipboard';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
 import Sheet from './Sheet.tsx';
+import { FileText, Lock, Pencil, Scan, Upload } from '../icons/index.ts';
 
 const AddPubky = ({
 	payload,
@@ -41,7 +42,7 @@ const AddPubky = ({
 			setTimeout(() => {
 				importPubky();
 			}, SCANNER_CLOSE_DELAY);
-		} catch {}
+		} catch { }
 	}, [importPubky, closeSheet]);
 
 	const onMnemonicPhrase = useCallback(() => {
@@ -181,18 +182,20 @@ const AddPubky = ({
 						id: 'AddPubkyScan',
 						text: i18n.t('addPubky.scanSignupQr'),
 						variant: 'secondary',
+						icon: <Scan />,
 						onPress: () => onScanQrPress(i18n.t('home.scanQR')),
 					},
-					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), onPress: onCreatePubky },
-					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), onPress: onImportPubky },
+					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), icon: <Pencil />, onPress: onCreatePubky },
+					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), icon: <Upload />, onPress: onImportPubky },
 				];
 			case 'import-options':
 				return [
-					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), onPress: onUploadFile },
-					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), onPress: onMnemonicPhrase },
+					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), icon: <Lock />, onPress: onUploadFile },
+					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), icon: <FileText />, onPress: onMnemonicPhrase },
 					{
 						id: 'ScanQrButton',
 						text: i18n.t('addPubky.scanQrToImport'),
+						icon: <Scan />,
 						onPress: () => onScanQrPress(i18n.t('import.title')),
 					},
 				];
@@ -222,6 +225,7 @@ const AddPubky = ({
 								id: string;
 								text: string;
 								variant?: any;
+								icon?: ReactElement;
 								style?: any;
 								onPress: (() => void) | undefined;
 							},
@@ -229,11 +233,12 @@ const AddPubky = ({
 						) => (
 							<Button
 								key={index}
-								testID={button.id}
-								text={button.text}
-								size="medium"
 								style={button.style}
+								text={button.text}
 								variant={button.variant}
+								size="medium"
+								icon={button.icon}
+								testID={button.id}
 								onPress={button.onPress}
 							/>
 						),

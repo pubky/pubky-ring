@@ -84,7 +84,6 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 					index={index}
 					pubky={pubky}
 					pubkyData={pubkyData}
-					sessionsCount={sessionsLength}
 					onQRPress={onQRPress}
 					onDelete={handleDelete}
 					onBackup={handleBackup}

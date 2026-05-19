@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { Image, StyleSheet } from 'react-native';
+import { StyleSheet } from 'react-native';
 import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import { useSelector } from 'react-redux';
@@ -12,6 +12,7 @@ import { showEditPubkySheet } from '../utils/sheetHelpers.ts';
 import { useInputHandler } from '../hooks/useInputHandler';
 import i18n from '../i18n';
 import SafeAreaView from '../components/SafeAreaView.tsx';
+import { Pencil } from '../icons/index.ts';
 
 const PubkyDetailScreen = (): ReactElement => {
 	const route = useTypedRoute<'PubkyDetail'>();
@@ -36,12 +37,12 @@ const PubkyDetailScreen = (): ReactElement => {
 
 	const rightButton = (
 		<HeaderNavButton onPressIn={onRightButtonPress}>
-			<Image source={require('../images/pencil.png')} style={styles.pencilIcon} />
+			<Pencil size={24} />
 		</HeaderNavButton>
 	);
 
 	return (
-		<SafeAreaView style={styles.container} edges={['bottom']}>
+		<SafeAreaView edges={['bottom']}>
 			<AppHeader rightButton={rightButton} />
 			<PubkyDetail index={index} pubkyData={pubkyData} onQRPress={handleQRPress} />
 		</SafeAreaView>
@@ -49,9 +50,6 @@ const PubkyDetailScreen = (): ReactElement => {
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
 	pencilIcon: {
 		width: 24,
 		height: 24,

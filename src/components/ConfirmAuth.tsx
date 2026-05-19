@@ -1,7 +1,7 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import { AnimatedView, Folder, SessionText, Text, View, Globe, CircleCheck } from '../theme/components';
+import { AnimatedView, SessionText, Text, View } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
@@ -20,6 +20,8 @@ import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 import Button from './Button.tsx';
 import Sheet from './Sheet.tsx';
 import SafeAreaInset from './SafeAreaInset.tsx';
+import { CheckCircle, Folder } from '../icons/index.ts';
+import { ACCENTS } from '../utils/constants.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -57,7 +59,7 @@ const Permission = memo(
 		const hasWritePermission = capability.permission.includes('w');
 		return (
 			<View style={styles.permissionRow}>
-				<Folder size={13} />
+				<Folder size={16} />
 				<View style={styles.pathContainer}>
 					<Text style={styles.pathText}>{capability.path}</Text>
 				</View>
@@ -209,7 +211,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 
 			<View style={styles.imageContainer}>
 				<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-					<CircleCheck color="rgba(200, 255, 0, 1)" size={128} />
+					<CheckCircle color={ACCENTS.pubkyApp} size={128} />
 				</AnimatedView>
 			</View>
 

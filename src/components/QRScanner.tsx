@@ -1,11 +1,11 @@
 import React, { memo, ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Clipboard } from '../theme/components.ts';
 import MigrationProgressOverlay from './MigrationProgressOverlay';
 import Button from './Button.tsx';
 import Sheet from './Sheet.tsx';
 import Camera from './Camera/Camera.tsx';
 import { useTranslation } from 'react-i18next';
+import { Qrcode } from '../icons/index.ts';
 
 interface QRScannerProps {
 	title?: string;
@@ -28,7 +28,7 @@ const QRScanner = ({ payload }: { payload: QRScannerProps }): ReactElement => {
 				<Button
 					text={t('clipboard.pasteLink')}
 					size="large"
-					icon={<Clipboard size={20} />}
+					icon={<Qrcode size={24} />}
 					onPress={onCopyClipboard}
 				/>
 			</View>

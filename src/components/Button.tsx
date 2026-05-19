@@ -77,6 +77,8 @@ const styles = StyleSheet.create({
 	text: {
 		...textStyles.bodySSB,
 		alignSelf: 'center',
+		flexShrink: 1,
+		textAlign: 'center',
 	},
 });
 

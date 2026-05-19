@@ -82,7 +82,7 @@ export const textStyles = {
 	display: {
 		fontSize: 48,
 		fontWeight: '700' as const,
-		lineHeight: 48,
+		lineHeight: 58,
 		letterSpacing: 0,
 		fontFamily,
 		color: 'white',
@@ -90,7 +90,7 @@ export const textStyles = {
 	heading: {
 		fontSize: 26,
 		fontWeight: '300' as const,
-		lineHeight: 26,
+		lineHeight: 32,
 		letterSpacing: 0,
 		fontFamily,
 	} as TextStyle,

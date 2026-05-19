@@ -5,7 +5,7 @@ import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toastConfig } from '../theme/toastConfig.tsx';
-import { BLUE_RADIAL_GRADIENT, RED_RADIAL_GRADIENT } from '../utils/constants.ts';
+import { BLUE_RADIAL_GRADIENT, DISABLE_ANIMATIONS, RED_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { isSmallScreen } from '../utils/helpers.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';

@@ -1,3 +1,7 @@
+declare const __E2E_DISABLE_ANIMATIONS__: boolean;
+
+export const DISABLE_ANIMATIONS = __E2E_DISABLE_ANIMATIONS__;
+
 // Gradient definitions
 
 export const BLUE_RADIAL_GRADIENT = ['#0b2033', 'rgba(0, 0, 0, 0.1)'];

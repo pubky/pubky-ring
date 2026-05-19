@@ -13,28 +13,28 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
-        node-version: '22'
+        node-version: '24'
         cache: 'yarn'
 
     - name: Set up Java
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         distribution: 'zulu'
         java-version: '17'
 
     - name: Set up Android SDK
-      uses: android-actions/setup-android@v3
+      uses: android-actions/setup-android@v4
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
     - name: Cache Gradle packages
-      uses: actions/cache@v4
+      uses: actions/cache@v5
       with:
         path: |
           ~/.gradle/caches
@@ -64,9 +64,10 @@ jobs:
         ./gradlew assembleRelease
       env:
         ANDROID_HOME: ${{ env.ANDROID_SDK_ROOT }}
+        E2E_DISABLE_ANIMATIONS: 'true'
 
     - name: Upload APK
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: android-release-apk
         path: android/app/build/outputs/apk/release/app-release.apk

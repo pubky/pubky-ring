@@ -18,6 +18,8 @@ import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { ReduceMotion, ReducedMotionConfig } from 'react-native-reanimated';
+import { DISABLE_ANIMATIONS } from './src/utils/constants.ts';
 
 const appToastConfig = toastConfig();
 
@@ -118,6 +120,7 @@ function App(): React.JSX.Element {
 
 	return (
 		<ThemeProvider theme={theme}>
+			<ReducedMotionConfig mode={DISABLE_ANIMATIONS ? ReduceMotion.Always : ReduceMotion.System} />
 			<SafeAreaProvider>
 				<SafeAreaView edges={['top', 'left', 'right']}>
 					<SheetProvider>

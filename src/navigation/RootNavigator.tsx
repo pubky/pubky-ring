@@ -16,7 +16,7 @@ import SettingsScreen from '../screens/SettingsScreen.tsx';
 import TermsOfUse from '../screens/TermsOfUse.tsx';
 import About from '../screens/About.tsx';
 import { useTranslation } from 'react-i18next';
-import { NAVIGATION_ANIMATION_DURATION } from '../utils/constants';
+import { DISABLE_ANIMATIONS, NAVIGATION_ANIMATION_DURATION } from '../utils/constants';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -51,7 +51,7 @@ const RootNavigator = (): ReactElement => {
 				initialRouteName={initialRoute}
 				screenOptions={{
 					headerShown: false,
-					animation: navigationAnimation,
+					animation: DISABLE_ANIMATIONS ? 'none' : navigationAnimation,
 					animationDuration: NAVIGATION_ANIMATION_DURATION,
 				}}
 			>

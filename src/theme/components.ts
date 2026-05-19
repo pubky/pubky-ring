@@ -4,6 +4,7 @@ import Animated from 'react-native-reanimated';
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
 import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
 import { fontFamily } from './fonts';
+import { DISABLE_ANIMATIONS } from '../utils/constants';
 
 interface BackgroundColorProps {
 	colorName?: ThemeColorName;

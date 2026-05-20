@@ -6,7 +6,6 @@ import {
 	Text,
 	SessionText,
 	RadialGradient,
-	AuthorizeButton,
 	TouchableOpacity,
 	BoldText,
 } from '../../theme/components.ts';
@@ -16,6 +15,7 @@ import { BLUE_RADIAL_GRADIENT } from '../../utils/constants.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import { defaultPubkyState } from '../../store/shapes/pubky.ts';
 import { textStyles } from '../../theme/utils';
+import Button from '../Button.tsx';
 
 export enum HomeserverOption {
 	default = 'default',
@@ -133,13 +133,16 @@ const NewHomeserverSetup = ({
 					style={styles.deviceImage}
 					resizeMode="contain"
 				/>
-				<AuthorizeButton
-					testID="HomeserverContinueButton"
-					style={styles.continueButton}
-					onPressIn={handleContinue}
-				>
-					<Text style={styles.buttonText}>{t('common.continue')}</Text>
-				</AuthorizeButton>
+				<View style={styles.buttonContainer}>
+					<Button
+						style={styles.continueButton}
+						text={t('common.continue')}
+						size="large"
+						variant="secondary"
+						testID="HomeserverContinueButton"
+						onPress={handleContinue}
+					/>
+				</View>
 			</View>
 		</RadialGradient>
 	);
@@ -227,10 +230,10 @@ const styles = StyleSheet.create({
 		opacity: 0.6,
 	},
 	bottomSection: {
+		flex: 1,
 		alignItems: 'center',
 		backgroundColor: 'transparent',
-		flex: 1,
-		justifyContent: 'flex-end',
+		marginTop: 'auto',
 		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	deviceImage: {
@@ -239,24 +242,15 @@ const styles = StyleSheet.create({
 		position: 'absolute',
 		bottom: -35,
 	},
-	continueButton: {
-		width: '100%',
-		borderRadius: 64,
-		paddingVertical: 20,
-		alignItems: 'center',
-		display: 'flex',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
+	buttonContainer: {
 		flexDirection: 'row',
-		gap: 4,
-		borderWidth: 1,
-		alignSelf: 'center',
-		alignContent: 'center',
-		justifyContent: 'center',
-		zIndex: 1,
+		alignItems: 'center',
+		gap: 16,
+		marginTop: 'auto',
+		backgroundColor: 'transparent',
 	},
-	buttonText: {
-		...textStyles.bodySSB,
-		color: '#FFFFFF',
+	continueButton: {
+		zIndex: 1,
 	},
 });
 

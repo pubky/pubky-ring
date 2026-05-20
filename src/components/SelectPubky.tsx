@@ -1,6 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
-import { View, TouchableOpacity } from '../theme/components.ts';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList, ListRenderItem } from '@shopify/flash-list';
@@ -8,11 +7,12 @@ import PubkyCard from './PubkyCard.tsx';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
-import { ModalWrapper, ModalTitle, ModalMessage, ModalButton, ModalButtonContainer } from './shared';
+import { ModalWrapper, ModalTitle, ModalMessage } from './shared';
 import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 import { parseInput } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
+import Button from './Button.tsx';
 
 type PubkyItem = { key: string; value: Pubky };
 
@@ -31,7 +31,7 @@ const ListItemComponent = memo(
 		}, [onPubkyPress, pubky]);
 
 		return (
-			<TouchableOpacity style={styles.pubkyCard} onPress={handlePress}>
+			<TouchableOpacity onPress={handlePress}>
 				<PubkyCard publicKey={pubky} name={name} />
 			</TouchableOpacity>
 		);
@@ -107,7 +107,7 @@ const SelectPubky = ({
 			contentStyle={styles.container}
 		>
 			<ModalTitle>{t('pubky.selectPubky')}</ModalTitle>
-			<ModalMessage centered>{message}</ModalMessage>
+			<ModalMessage>{message}</ModalMessage>
 			<View style={styles.listContainer}>
 				<FlashList
 					data={pubkyArray}
@@ -117,25 +117,26 @@ const SelectPubky = ({
 					showsVerticalScrollIndicator={true}
 				/>
 			</View>
-			<ModalButtonContainer>
-				<ModalButton text={t('common.cancel')} variant="secondary" width="full" onPress={closeSheet} />
-			</ModalButtonContainer>
+
+			<View style={styles.buttonContainer}>
+				<Button size="large" text={t('common.cancel')} onPress={closeSheet} />
+			</View>
 		</ModalWrapper>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		height: '100%',
+		flex: 1,
 	},
 	listContainer: {
 		flex: 1,
-		marginBottom: 12,
-		height: '100%',
-		backgroundColor: 'transparent',
 	},
-	pubkyCard: {
-		backgroundColor: 'transparent',
+	buttonContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 6,
+		marginTop: 'auto',
 	},
 });
 

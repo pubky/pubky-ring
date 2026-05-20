@@ -6,9 +6,7 @@ import {
 	ActionSheetContainer,
 	SessionText,
 	RadialGradient,
-	NavButton,
 	ArrowLeft,
-	AuthorizeButton,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
@@ -31,6 +29,7 @@ import { routeInput } from '../utils/inputRouter';
 import { readFromClipboard } from '../utils/clipboard';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
+import HeaderNavButton from './HeaderNavButton.tsx';
 
 const toastStyle = getToastStyle();
 
@@ -156,13 +155,9 @@ const AddPubky = ({
 
 	const renderBackButton = useCallback(
 		() => (
-			<NavButton
-				style={styles.backButton}
-				onPressIn={goBack}
-				hitSlop={{ top: 20, bottom: 20, left: 20, right: 20 }}
-			>
+			<HeaderNavButton style={styles.backButton} onPressIn={goBack}>
 				<ArrowLeft size={24} />
-			</NavButton>
+			</HeaderNavButton>
 		),
 		[goBack],
 	);
@@ -216,35 +211,14 @@ const AddPubky = ({
 	const getButtonConfig = useCallback(() => {
 		switch (currentScreen) {
 			case 'main':
-				const marginStyle = { marginBottom: 5 };
 				return [
-					{
-						id: 'ImportPubkyButton',
-						text: i18n.t('addPubky.importPubkyButton'),
-						onPress: onImportPubky,
-						style: [styles.importButton, marginStyle],
-					},
-					{
-						id: 'NewPubkyButton',
-						text: i18n.t('addPubky.newPubkyButton'),
-						onPress: onCreatePubky,
-						style: [styles.createButton, marginStyle],
-					},
+					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), onPress: onImportPubky },
+					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), onPress: onCreatePubky },
 				];
 			case 'import-options':
 				return [
-					{
-						id: 'EncryptedFileButton',
-						text: i18n.t('backup.encryptedFile'),
-						onPress: onUploadFile,
-						style: styles.importButton,
-					},
-					{
-						id: 'RecoveryPhraseButton',
-						text: i18n.t('backup.recoveryPhrase'),
-						onPress: onMnemonicPhrase,
-						style: styles.importButton,
-					},
+					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), onPress: onUploadFile },
+					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), onPress: onMnemonicPhrase },
 				];
 			case 'mnemonic-form':
 				return [];
@@ -275,25 +249,32 @@ const AddPubky = ({
 				<View style={styles.buttonContainer}>
 					{getButtonConfig().map(
 						(
-							button: { id?: string; text: string; style: any; onPress: (() => void) | undefined },
+							button: {
+								id: string;
+								text: string;
+								variant?: any;
+								style?: any;
+								onPress: (() => void) | undefined;
+							},
 							index: React.Key | null | undefined,
 						) => (
 							<Button
-								testID={button.id}
 								key={index}
+								testID={button.id}
 								text={button.text}
-								style={[styles.button, button.style]}
+								size="large"
+								style={button.style}
+								variant={button.variant}
 								onPress={button.onPress}
 							/>
 						),
 					)}
 				</View>
 				{currentScreen === 'import-options' && (
-					<AuthorizeButton style={styles.authorizeButton} onPressIn={onScanQrPress}>
-						<Text style={styles.buttonText}>{i18n.t('addPubky.scanQrToImport')}</Text>
-					</AuthorizeButton>
+					<View style={styles.buttonContainer}>
+						<Button text={i18n.t('addPubky.scanQrToImport')} size="large" onPress={onScanQrPress} />
+					</View>
 				)}
-				<View style={styles.footerBuffer} />
 			</>
 		);
 	}, [
@@ -330,7 +311,7 @@ const AddPubky = ({
 
 const styles = StyleSheet.create({
 	content: {
-		paddingHorizontal: 20,
+		paddingHorizontal: 24,
 		borderTopRightRadius: 20,
 		borderTopLeftRadius: 20,
 		flex: 1,
@@ -343,49 +324,30 @@ const styles = StyleSheet.create({
 	titleContainer: {
 		flexDirection: 'row',
 		justifyContent: 'center',
+		alignItems: 'center',
+		backgroundColor: 'transparent',
+		marginBottom: 24,
+	},
+	title: {
+		...textStyles.bodyMB,
+		textAlign: 'center',
+		textTransform: 'capitalize',
+		backgroundColor: 'transparent',
+		flex: 1,
+	},
+	backButton: {
+		position: 'absolute',
+		left: 0,
+		zIndex: 10,
 		backgroundColor: 'transparent',
 	},
 	headerText: {
 		...textStyles.display,
 		marginBottom: 20,
 	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		textTransform: 'capitalize',
-		marginBottom: 24,
-		backgroundColor: 'transparent',
-		flex: 1,
-	},
 	message: {
 		...textStyles.bodyM,
 		minHeight: 44,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		width: '100%',
-		alignItems: 'center',
-		alignSelf: 'center',
-		justifyContent: 'space-around',
-		gap: 12,
-		paddingVertical: 12,
-		backgroundColor: 'transparent',
-	},
-	button: {
-		width: '47%',
-		minHeight: 64,
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-	},
-	importButton: {},
-	createButton: {
-		borderWidth: 1,
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-	},
-	footerBuffer: {
-		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 10, android: 20 }),
 	},
 	importImage: {
 		width: 279,
@@ -397,25 +359,13 @@ const styles = StyleSheet.create({
 		height: 350,
 		alignSelf: 'center',
 	},
-	backButton: {
-		position: 'absolute',
-		left: 20,
-		zIndex: 10,
-		backgroundColor: 'transparent',
-	},
-	authorizeButton: {
-		width: '100%',
-		borderRadius: 64,
-		paddingVertical: 20,
-		alignItems: 'center',
-		display: 'flex',
+	buttonContainer: {
 		flexDirection: 'row',
-		gap: 4,
-		alignSelf: 'center',
-		alignContent: 'center',
-		justifyContent: 'center',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-		marginBottom: 5,
+		alignItems: 'center',
+		gap: 16,
+		marginTop: 'auto',
+		paddingVertical: 12,
+		backgroundColor: 'transparent',
 	},
 });
 

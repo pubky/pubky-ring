@@ -5,7 +5,6 @@ import {
 	Text,
 	SessionText,
 	RadialGradient,
-	AuthorizeButton,
 	TouchableOpacity,
 	AnimatedView,
 	Gift,
@@ -28,6 +27,7 @@ import { getPubky } from '../../store/selectors/pubkySelectors.ts';
 import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
 import i18n from '../../i18n';
 import { textStyles } from '../../theme/utils';
+import Button from '../Button.tsx';
 const { height: SCREEN_HEIGHT } = Dimensions.get('window');
 
 const smallScreen = isSmallScreen();
@@ -328,12 +328,14 @@ const InviteCode = ({
 						</AnimatedView>
 					</DashedBorder>
 
-					<TouchableOpacity style={styles.needInviteRow} onPress={handleNeedInvite} activeOpacity={0.7}>
-						<View style={styles.needInviteContent}>
-							<Gift color="rgba(255, 255, 255, 0.8)" size={18} style={styles.giftIcon} />
-							<Text style={styles.needInviteText}>{i18n.t('inviteCode.needInviteCode')}</Text>
-						</View>
-					</TouchableOpacity>
+					<View style={styles.needInviteRow}>
+						<Button
+							text={i18n.t('inviteCode.needInviteCode')}
+							size="small"
+							icon={<Gift color="rgba(255, 255, 255, 0.8)" size={18} />}
+							onPress={handleNeedInvite}
+						/>
+					</View>
 
 					{error ? (
 						<Text testID="InviteCodeErrorText" style={styles.errorText}>
@@ -349,22 +351,15 @@ const InviteCode = ({
 					)}
 
 					<View style={styles.footer}>
-						<AuthorizeButton
+						<Button
+							text={loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}
+							size="large"
+							variant="secondary"
+							loading={loading}
+							disabled={!isValid}
 							testID="InviteCodeContinueButton"
-							style={[styles.continueButton, (!isValid || loading) && styles.continueButtonDisabled]}
-							onPressIn={isValid && !loading ? handleContinue : undefined}
-							disabled={!isValid || loading}
-						>
-							<Text
-								testID="InviteCodeContinueButtonText"
-								style={styles.buttonText}
-								numberOfLines={1}
-								adjustsFontSizeToFit
-								minimumFontScale={0.8}
-							>
-								{loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}
-							</Text>
-						</AuthorizeButton>
+							onPress={handleContinue}
+						/>
 					</View>
 				</View>
 			</View>
@@ -426,7 +421,7 @@ const styles = StyleSheet.create({
 	inputContainer: {
 		paddingHorizontal: 20,
 		paddingVertical: 30,
-		marginBottom: 30,
+		marginBottom: 24,
 		flexDirection: 'row',
 		alignItems: 'center',
 		backgroundColor: 'transparent',
@@ -451,17 +446,7 @@ const styles = StyleSheet.create({
 	},
 	needInviteRow: {
 		alignItems: 'flex-start',
-		justifyContent: 'flex-start',
-		marginTop: -10,
 		backgroundColor: 'transparent',
-	},
-	needInviteContent: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		backgroundColor: 'rgba(255, 255, 255, 0.05)',
-		paddingHorizontal: 16,
-		paddingVertical: 10,
-		borderRadius: 20,
 	},
 	giftIcon: {
 		marginRight: 6,
@@ -496,30 +481,8 @@ const styles = StyleSheet.create({
 		width: 150,
 		height: 150,
 	},
-	continueButton: {
-		flexDirection: 'row',
-		width: '100%',
-		minHeight: 64,
-		borderRadius: 64,
-		paddingVertical: 15,
-		paddingHorizontal: 15,
-		alignContent: 'center',
-		justifyContent: 'center',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-	},
-	continueButtonDisabled: {
-		opacity: 0.5,
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-	},
 	footer: {
-		flex: 1,
-		alignItems: 'center',
-		justifyContent: 'flex-end',
+		marginTop: 'auto',
 		backgroundColor: 'transparent',
 		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},

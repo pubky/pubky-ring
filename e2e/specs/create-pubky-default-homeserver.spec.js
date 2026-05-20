@@ -44,7 +44,7 @@ describe('create a pubky with default (prod) homeserver without proceeding to in
 		await sendReturnKey();
 
 		// Assert that 'Continue' button on Default Homeserver page changes to 'Processing'
-		const inviteCodeContinueButtonText = await waitForDisplayed(elementById('InviteCodeContinueButtonText'));
+		const inviteCodeContinueButtonText = await waitForDisplayed(elementById('InviteCodeContinueButton-Text'));
 		expect(await inviteCodeContinueButtonText.getText()).to.contain('Processing');
 
 		// TODO: Assert for error because we input an invalid invite code for prod homeserver

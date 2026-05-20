@@ -1,5 +1,4 @@
 import { ViewStyle, TextStyle } from 'react-native';
-import { ACCENTS } from '../utils/constants';
 import { fontFamily } from './fonts';
 
 export const shadowStyles = {
@@ -23,58 +22,6 @@ export const shadowStyles = {
 		shadowOpacity: 0.2,
 		shadowRadius: 8,
 		elevation: 8,
-	} as ViewStyle,
-};
-
-export const buttonStyles = {
-	primary: {
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center' as const,
-	} as ViewStyle,
-	secondary: {
-		borderWidth: 1,
-		borderRadius: 64,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		alignItems: 'center' as const,
-	} as ViewStyle,
-	small: {
-		borderRadius: 100,
-		paddingVertical: 8,
-		paddingHorizontal: 16,
-		alignItems: 'center' as const,
-	} as ViewStyle,
-	primaryOutline: {
-		borderWidth: 1,
-		borderColor: 'white',
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center' as const,
-	} as ViewStyle,
-	compact: {
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		alignItems: 'center' as const,
-		minHeight: 48,
-	} as ViewStyle,
-	compactOutline: {
-		borderWidth: 1,
-		borderRadius: 48,
-		paddingVertical: 15,
-		paddingHorizontal: 24,
-		alignItems: 'center' as const,
-		height: 58,
-	} as ViewStyle,
-	fullWidth: {
-		width: '100%',
-		borderRadius: 64,
-		paddingVertical: 20,
-		paddingHorizontal: 24,
-		alignItems: 'center' as const,
 	} as ViewStyle,
 };
 

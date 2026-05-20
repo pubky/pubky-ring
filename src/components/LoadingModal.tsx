@@ -1,27 +1,11 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Dimensions, Image, Platform, StyleSheet } from 'react-native';
-import {
-	ActionSheetContainer,
-	AnimatedView,
-	RadialGradient,
-	SessionText,
-	Text,
-	View,
-} from '../theme/components.ts';
+import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
+import Animated from 'react-native-reanimated';
+import { Text } from '../theme/components.ts';
 import { useDispatch, useSelector } from 'react-redux';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { getLoadingModalState } from '../store/selectors/uiSelectors.ts';
 import { resetLoadingModal } from '../store/slices/uiSlice.ts';
 import { getStoredDispatch } from '../store/shapes/ui.ts';
-import ModalIndicator from './ModalIndicator.tsx';
-import ModalButtonContainer from './shared/ModalButtonContainer.tsx';
-import {
-	ACTION_SHEET_HEIGHT,
-	BLUE_RADIAL_GRADIENT,
-	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
-import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
 import {
 	Easing,
@@ -34,10 +18,7 @@ import {
 import { SheetManager } from 'react-native-actions-sheet';
 import { textStyles } from '../theme/utils';
 import Button from './Button.tsx';
-
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-const smallScreen = isSmallScreen();
-const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
+import Sheet from './Sheet.tsx';
 
 // Animation timing constants
 const ROTATION_DURATION = 1600;
@@ -61,16 +42,18 @@ interface LoadingModalPayload {
 const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const loadingModalState = useSelector(getLoadingModalState);
+	const {
+		description: payloadDescription,
+		modalTitle: payloadModalTitle,
+		onClose,
+		title: payloadTitle,
+		waitText: payloadWaitText,
+	} = payload ?? {};
 
-	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
-
-	// Track if we should show error image (delayed to allow fade transition)
 	const [showErrorImage, setShowErrorImage] = useState(false);
 
 	// Animation shared values
-	const errorGradientOpacity = useSharedValue(0);
 	const imageOpacity = useSharedValue(1);
 
 	// Separate rotation values for each layer
@@ -101,19 +84,14 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 				imageOpacity.value = withTiming(1, { duration: 300 });
 			}, 150);
 
-			// Fade in error gradient
-			errorGradientOpacity.value = withTiming(1, { duration: 300 });
-
 			return (): void => {
 				clearTimeout(swapTimeout);
 			};
-		} else {
-			// Reset to loading state
-			setShowErrorImage(false);
-			imageOpacity.value = withTiming(1, { duration: 300 });
-			errorGradientOpacity.value = withTiming(0, { duration: 300 });
 		}
-	}, [isError, imageOpacity, errorGradientOpacity]);
+
+		setShowErrorImage(false);
+		imageOpacity.value = withTiming(1, { duration: 300 });
+	}, [isError, imageOpacity]);
 
 	// Rotation animations for loading state
 	useEffect(() => {
@@ -164,36 +142,16 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 		transform: [{ rotate: `${outerCircleRotation.value}deg` }],
 	}));
 
-	const errorGradientStyle = useAnimatedStyle(() => ({
-		opacity: errorGradientOpacity.value,
-	}));
+	const baseError = t('loading.errorDescription');
+	const modalTitle = isError ? t('loading.errorModalTitle') : (payloadModalTitle ?? t('loading.modalTitle'));
+	const title = isError ? null : (payloadTitle ?? t('loading.title'));
+	const description = isError
+		? errorMessage
+			? `${baseError} ${errorMessage}`
+			: baseError
+		: (payloadDescription ?? t('loading.description'));
+	const waitText = payloadWaitText ?? t('loading.pleaseWait');
 
-	// Compute display values based on error state
-	const modalTitle = useMemo(() => {
-		if (isError) {
-			return t('loading.errorModalTitle');
-		}
-		return payload?.modalTitle ?? t('loading.modalTitle');
-	}, [isError, payload?.modalTitle, t]);
-
-	const title = useMemo(() => {
-		if (isError) {
-			return null; // Remove subtitle in error state
-		}
-		return payload?.title ?? t('loading.title');
-	}, [isError, payload?.title, t]);
-
-	const description = useMemo(() => {
-		if (isError) {
-			const baseError = t('loading.errorDescription');
-			return errorMessage ? `${baseError} ${errorMessage}` : baseError;
-		}
-		return payload?.description ?? t('loading.description');
-	}, [isError, errorMessage, payload?.description, t]);
-
-	const waitText = useMemo(() => payload?.waitText ?? t('loading.pleaseWait'), [payload?.waitText, t]);
-
-	// Button handlers
 	const handleCancel = useCallback(async () => {
 		dispatch(resetLoadingModal());
 		await SheetManager.hide('loading');
@@ -216,206 +174,105 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 	}, [dispatch]);
 
 	return (
-		<ActionSheetContainer
-			id="loading"
-			navigationAnimation={navigationAnimation}
-			onClose={onClose}
-			keyboardHandlerEnabled={false}
-			isModal={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={actionSheetHeight}
-		>
-			<View style={styles.container}>
-				{/* Gradient background layers */}
-				<View style={styles.gradientContainer}>
-					{/* Base blue gradient */}
-					<RadialGradient
-						style={styles.backgroundGradient}
-						colors={BLUE_RADIAL_GRADIENT}
-						center={{ x: 0.5, y: 0.5 }}
-					/>
-					{/* Error gradient overlay */}
-					<AnimatedView style={[styles.errorGradientOverlay, errorGradientStyle]}>
-						<RadialGradient
-							style={styles.errorGradient}
-							colors={ONBOARDING_KEY_ERROR_RADIAL_GRADIENT}
-							center={{ x: 0.5, y: 0.5 }}
-							positions={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-						/>
-					</AnimatedView>
-				</View>
-
-				{/* Content layer (on top of gradients) */}
-				<View style={styles.content}>
-					<ModalIndicator />
-					<View style={styles.titleContainer}>
-						<Text style={styles.title}>{modalTitle}</Text>
-					</View>
-					{title && <Text style={styles.headerText}>{title}</Text>}
-					<SessionText style={styles.message}>{description}</SessionText>
-					<View style={styles.imageContainer}>
-						{showErrorImage ? (
-							// Error state: show cross image
-							<AnimatedView style={[styles.imageWrapper, keyAnimatedStyle]}>
-								<Image source={require('../images/cross.png')} style={styles.image} resizeMode="contain" />
-							</AnimatedView>
-						) : (
-							// Loading state: show layered rotating images
-							<View style={styles.layeredImageContainer}>
-								{/* Outer circle - bottom layer */}
-								<AnimatedView style={[styles.circleLayer, outerCircleAnimatedStyle]}>
-									<Image
-										source={require('../images/circular-outer.png')}
-										style={styles.outerCircle}
-										resizeMode="contain"
-									/>
-								</AnimatedView>
-
-								{/* Inner circle - middle layer */}
-								<AnimatedView style={[styles.circleLayer, innerCircleAnimatedStyle]}>
-									<Image
-										source={require('../images/circular-inner.png')}
-										style={styles.innerCircle}
-										resizeMode="contain"
-									/>
-								</AnimatedView>
-
-								{/* Key - top layer */}
-								<AnimatedView style={[styles.circleLayer, keyAnimatedStyle]}>
-									<Image source={require('../images/key.png')} style={styles.keyImage} resizeMode="contain" />
-								</AnimatedView>
-							</View>
-						)}
-					</View>
-					{isError ? (
-						<ModalButtonContainer>
-							<Button text={t('common.cancel')} size="large" onPress={handleCancel} />
-							<Button text={t('loading.tryAgain')} size="large" onPress={handleTryAgain} />
-						</ModalButtonContainer>
+		<Sheet id="loading" title={modalTitle} gradientType={isError ? 'danger' : 'brand'} onClose={onClose}>
+			<View style={styles.contentLayer}>
+				{title && <Text style={styles.headerText}>{title}</Text>}
+				<Text style={styles.message}>{description}</Text>
+				<View style={styles.imageContainer}>
+					{showErrorImage ? (
+						<Animated.View style={keyAnimatedStyle}>
+							<Image source={require('../images/cross.png')} style={styles.image} resizeMode="contain" />
+						</Animated.View>
 					) : (
-						<>
-							<Text style={styles.waitText}>{waitText}</Text>
-							<View style={styles.footerBuffer} />
-						</>
+						<View style={styles.layeredImageContainer}>
+							<Animated.View style={[styles.circleLayer, outerCircleAnimatedStyle]}>
+								<Image
+									source={require('../images/circular-outer.png')}
+									style={styles.outerCircle}
+									resizeMode="contain"
+								/>
+							</Animated.View>
+
+							<Animated.View style={[styles.circleLayer, innerCircleAnimatedStyle]}>
+								<Image
+									source={require('../images/circular-inner.png')}
+									style={styles.innerCircle}
+									resizeMode="contain"
+								/>
+							</Animated.View>
+
+							<Animated.View style={[styles.circleLayer, keyAnimatedStyle]}>
+								<Image source={require('../images/key.png')} style={styles.keyImage} resizeMode="contain" />
+							</Animated.View>
+						</View>
 					)}
 				</View>
+
+				{isError ? (
+					<View style={styles.buttonContainer}>
+						<Button text={t('common.cancel')} size="large" onPress={handleCancel} />
+						<Button text={t('loading.tryAgain')} size="large" variant="secondary" onPress={handleTryAgain} />
+					</View>
+				) : (
+					<Text style={styles.waitText}>{waitText}</Text>
+				)}
 			</View>
-		</ActionSheetContainer>
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
+	contentLayer: {
 		flex: 1,
-	},
-	gradientContainer: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		height: SCREEN_HEIGHT,
-		zIndex: 0,
-	},
-	backgroundGradient: {
-		flex: 1,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-	},
-	errorGradientOverlay: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		pointerEvents: 'none',
-	},
-	errorGradient: {
-		width: '100%',
-		height: '100%',
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-	},
-	content: {
-		flex: 1,
-		paddingHorizontal: 20,
-		zIndex: 1,
-		backgroundColor: 'transparent',
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		marginBottom: 24,
-		backgroundColor: 'transparent',
 	},
 	headerText: {
 		...textStyles.display,
 		marginBottom: 20,
-		backgroundColor: 'transparent',
 	},
 	message: {
 		...textStyles.bodyM,
-		minHeight: 44,
-		backgroundColor: 'transparent',
 	},
 	imageContainer: {
 		flex: 1,
-		backgroundColor: 'transparent',
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
-	imageWrapper: {
-		backgroundColor: 'transparent',
-	},
 	image: {
-		width: 231,
-		height: 231,
+		width: 320,
+		height: 320,
 		alignSelf: 'center',
 	},
-	// Layered animation styles
 	layeredImageContainer: {
 		width: OUTER_CIRCLE_SIZE,
 		height: OUTER_CIRCLE_SIZE,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
 	circleLayer: {
 		position: 'absolute',
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
 	outerCircle: {
 		width: OUTER_CIRCLE_SIZE,
 		height: OUTER_CIRCLE_SIZE,
-		backgroundColor: 'transparent',
 	},
 	innerCircle: {
 		width: INNER_CIRCLE_SIZE,
 		height: INNER_CIRCLE_SIZE,
-		backgroundColor: 'transparent',
 	},
 	keyImage: {
 		width: KEY_IMAGE_SIZE,
 		height: KEY_IMAGE_SIZE,
-		backgroundColor: 'transparent',
 	},
 	waitText: {
 		...textStyles.bodySSB,
 		textAlign: 'center',
-		marginBottom: 12,
-		backgroundColor: 'transparent',
 	},
-	footerBuffer: {
-		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 10, android: 20 }),
+	buttonContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 16,
 	},
 });
 

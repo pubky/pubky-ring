@@ -1,29 +1,14 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, StyleSheet } from 'react-native';
+import { Alert, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import {
-	ActionSheetContainer,
-	AnimatedView,
-	Folder,
-	SessionText,
-	Text,
-	View,
-	SkiaGradient,
-	Globe,
-	CircleCheck,
-} from '../theme/components';
+import { AnimatedView, Folder, SessionText, Text, View, Globe, CircleCheck } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { getToastStyle, isSmallScreen, showToast, sleep } from '../utils/helpers.ts';
+import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import Toast from 'react-native-toast-message';
-import { toastConfig } from '../theme/toastConfig.tsx';
-import ModalIndicator from './ModalIndicator.tsx';
-import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { textStyles } from '../theme/utils';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
@@ -33,6 +18,8 @@ import { useTranslation } from 'react-i18next';
 import { XCallbackParams } from '../utils/inputParser.ts';
 import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 import Button from './Button.tsx';
+import Sheet from './Sheet.tsx';
+import SafeAreaInset from './SafeAreaInset.tsx';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -46,11 +33,6 @@ interface Capability {
 	path: string;
 	permission: string;
 }
-
-const toastStyle = getToastStyle();
-
-const smallScreen = isSmallScreen();
-const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
 
 const CapabilitiesList = memo(
 	({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
@@ -98,9 +80,9 @@ const Permission = memo(
 );
 
 const FADE_DURATION = 100;
+
 const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const { t } = useTranslation();
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky, authUrl, authDetails, onComplete, xCallback } = payload;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
@@ -213,109 +195,71 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 			: t('auth.authorize');
 
 	return (
-		<ActionSheetContainer
-			id="confirm-auth"
-			navigationAnimation={navigationAnimation}
-			CustomHeaderComponent={<></>}
-			height={actionSheetHeight}
-		>
-			<SkiaGradient modal={true} style={styles.content}>
-				<ModalIndicator />
-				<View style={styles.mainContent}>
-					<View style={styles.titleContainer}>
-						<Text style={styles.title}>{titleText}</Text>
-					</View>
+		<Sheet id="confirm-auth" title={titleText} showBottomSafeAreaInset={false}>
+			<View style={styles.section}>
+				<SessionText style={styles.sectionTitle}>
+					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
+				</SessionText>
+				<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
+			</View>
 
-					<PubkyCard
-						name={pubkyName}
-						publicKey={pubky}
-						style={styles.pubkyCard}
-						nameStyle={styles.pubkyName}
-						pubkyTextStyle={styles.pubkyText}
-						avatarSize={48}
-						avatarStyle={styles.avatarContainer}
-					/>
+			<PubkyCard name={pubkyName} publicKey={pubky} avatarSize={48} avatarStyle={styles.avatarContainer} />
 
-					<View style={styles.section}>
-						<SessionText style={styles.sectionTitle}>{t('auth.relay')}</SessionText>
-						<View style={styles.relayContainer}>
-							<Globe color="rgba(255, 255, 255, 0.8)" size={15} />
-							<Text style={styles.relayText}>{authDetails.relay}</Text>
-						</View>
-					</View>
+			{!isAuthorized && <Text style={styles.warningText}>{t('auth.trustWarning')}</Text>}
 
-					<View style={styles.section}>
-						<SessionText style={styles.sectionTitle}>
-							{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
-						</SessionText>
-						<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
-					</View>
+			<View style={styles.imageContainer}>
+				<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+					<CircleCheck color="rgba(200, 255, 0, 1)" size={128} />
+				</AnimatedView>
+			</View>
 
-					{!isAuthorized && <SessionText style={styles.warningText}>{t('auth.trustWarning')}</SessionText>}
-
-					<View style={styles.imageContainer}>
-						<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-							<CircleCheck color="rgba(200, 255, 0, 1)" size={52} />
-						</AnimatedView>
-					</View>
-				</View>
-
-				<View style={styles.footerContainer}>
-					<View style={styles.buttonContainer}>
-						{!isAuthorized ? (
-							<>
-								<Button
-									text={authorizing ? t('common.close') : t('auth.deny')}
-									size="large"
-									onPress={handleDeny}
-								/>
-
-								<Button
-									text={authorizing ? t('auth.authorizing') : t('auth.authorize')}
-									size="large"
-									variant="secondary"
-									disabled={authorizing}
-									onPress={handleAuth}
-								/>
-							</>
-						) : (
-							<Button text={t('common.ok')} size="large" variant="secondary" onPress={handleClose} />
-						)}
-					</View>
-					<View style={styles.progressBarContainer}>
-						{!isAuthorized ? (
-							<ProgressBar
-								duration={60000}
-								//fadeIn={true}
-								//fadeInDuration={1000}
-								delayRender={0}
-								unfilledColor="#333333"
-								filledColor="#FFFFFF"
-								height={6}
-								borderRadius={3}
-								onComplete={handleDeny}
+			<View style={styles.footerContainer}>
+				<View style={styles.buttonContainer}>
+					{!isAuthorized ? (
+						<>
+							<Button
+								text={authorizing ? t('common.close') : t('common.cancel')}
+								size="large"
+								onPress={handleDeny}
 							/>
-						) : null}
-					</View>
+							<Button
+								text={authorizing ? t('auth.authorizing') : t('auth.authorize')}
+								size="large"
+								variant="secondary"
+								disabled={authorizing}
+								onPress={handleAuth}
+							/>
+						</>
+					) : (
+						<Button text={t('common.ok')} size="large" variant="secondary" onPress={handleClose} />
+					)}
 				</View>
-			</SkiaGradient>
-			<Toast config={toastConfig({ style: toastStyle })} />
-		</ActionSheetContainer>
+
+				<SafeAreaInset edge="bottom" />
+
+				{!isAuthorized && (
+					<ProgressBar
+						style={styles.progressBarContainer}
+						duration={60000}
+						//fadeIn={true}
+						//fadeInDuration={1000}
+						unfilledColor="#333333"
+						height={5}
+						drain={true}
+						onComplete={handleDeny}
+					/>
+				)}
+			</View>
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	content: {
-		flex: 1,
-		backgroundColor: 'transparent',
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-	},
 	section: {
 		marginBottom: 24,
-		backgroundColor: 'rgba(0, 0, 0, 0)',
+		backgroundColor: '#000000',
 		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.16)',
+		borderColor: 'rgba(255, 255, 255, 0.32)',
 		padding: 20,
 		borderRadius: 16,
 	},
@@ -334,8 +278,9 @@ const styles = StyleSheet.create({
 		marginLeft: 6,
 	},
 	warningText: {
-		...textStyles.bodySSpaced,
-		marginBottom: 8,
+		...textStyles.bodyS,
+		color: 'rgba(255, 255, 255, 0.64)',
+		marginTop: 24,
 	},
 	permissionRow: {
 		flexDirection: 'row',
@@ -351,7 +296,7 @@ const styles = StyleSheet.create({
 	},
 	pathText: {
 		...textStyles.captionSB,
-		backgroundColor: 'transparent',
+		// backgroundColor: 'transparent',
 	},
 	permissionsContainer: {
 		flex: 1,
@@ -360,30 +305,10 @@ const styles = StyleSheet.create({
 		gap: 8,
 		backgroundColor: 'transparent',
 	},
-	footerContainer: {
-		marginTop: 'auto',
-		paddingHorizontal: 24,
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 16,
-		zIndex: 3,
-		backgroundColor: 'transparent',
-	},
-	mainContent: {
-		flex: 1,
-		paddingHorizontal: 24,
-		backgroundColor: 'transparent',
-	},
 	imageContainer: {
+		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		height: 150,
-		width: '100%',
-		position: 'relative',
 		backgroundColor: 'transparent',
 	},
 	imageWrapper: {
@@ -393,33 +318,14 @@ const styles = StyleSheet.create({
 	},
 	sectionTitle: {
 		...textStyles.caption,
-		textTransform: 'uppercase',
 		marginBottom: 8,
 		backgroundColor: 'transparent',
 	},
 	unauthorizedText: {
 		...textStyles.caption,
-		textTransform: 'uppercase',
-		backgroundColor: 'transparent',
 	},
 	authorizedText: {
 		...textStyles.caption,
-		textTransform: 'uppercase',
-		backgroundColor: 'transparent',
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
-		marginBottom: 24,
-		backgroundColor: 'transparent',
-	},
-	title: {
-		...textStyles.bodyMB,
-		backgroundColor: 'transparent',
-	},
-	pubkyCard: {
-		minHeight: 100,
 	},
 	avatarContainer: {
 		width: 48,
@@ -427,21 +333,26 @@ const styles = StyleSheet.create({
 		borderRadius: 24,
 		marginRight: 16,
 	},
-	pubkyName: {
-		...textStyles.heading,
-		marginBottom: 2,
-	},
-	pubkyText: {
-		...textStyles.bodySSB,
-	},
 	spacer: {
 		marginBottom: 12,
 	},
+	footerContainer: {
+		marginTop: 'auto',
+		justifyContent: 'center',
+		backgroundColor: 'transparent',
+	},
+	buttonContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 16,
+		backgroundColor: 'transparent',
+	},
 	progressBarContainer: {
-		width: 200,
+		position: 'absolute',
+		bottom: 0,
+		width: 143,
 		alignSelf: 'center',
-		marginTop: 10,
-		marginBottom: smallScreen ? 20 : 0,
+		marginBottom: Platform.select({ ios: 8, android: 0 }),
 	},
 });
 

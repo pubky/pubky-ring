@@ -2,33 +2,32 @@ import React, { memo, ReactElement, useCallback, useState, useRef, useMemo, useE
 import {
 	StyleSheet,
 	NativeSyntheticEvent,
+	TextInput as NativeTextInput,
 	TextInputKeyPressEventData,
 	Keyboard,
 	KeyboardAvoidingView,
 	Platform,
+	View,
 } from 'react-native';
 import * as bip39 from 'bip39';
-import { View, Text, SessionText, ArrowLeft, TextInput } from '../theme/components.ts';
+import { TextInput, Text } from '../theme/components.ts';
 import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
-import ModalIndicator from './ModalIndicator.tsx';
 import { Result } from '@synonymdev/result';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
-import HeaderNavButton from './HeaderNavButton.tsx';
 
 interface MnemonicFormProps {
-	onBack: () => void;
 	onCancel: () => void;
 	onImport: (mnemonicPhrase: string) => Promise<Result<string>>;
 }
 
-const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactElement => {
+const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement => {
 	const [mnemonicWords, setMnemonicWords] = useState<string[]>(Array(12).fill(''));
 	const [validWords, setValidWords] = useState<boolean[]>(Array(12).fill(true));
 	const [focused, setFocused] = useState<number | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
-	const inputRefs = useRef<(typeof TextInput)[]>(Array(12).fill(null));
+	const inputRefs = useRef<(NativeTextInput | null)[]>(Array(12).fill(null));
 
 	// Auto-focus first input when component mounts
 	useEffect(() => {
@@ -198,14 +197,38 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 		onCancel();
 	}, [onCancel]);
 
-	const renderBackButton = useCallback(
-		() => (
-			<HeaderNavButton style={styles.backButton} onPressIn={onBack}>
-				<ArrowLeft size={24} />
-			</HeaderNavButton>
-		),
-		[onBack],
-	);
+	const renderMnemonicInput = (index: number): ReactElement => {
+		const isInvalid = mnemonicWords[index] && !validWords[index];
+
+		return (
+			<TextInput
+				key={index}
+				// @ts-ignore
+				ref={ref => {
+					inputRefs.current[index] = ref;
+				}}
+				style={[styles.mnemonicInput, isInvalid && styles.invalidInput, loading && styles.disabledInput]}
+				value={getDisplayValue(index)}
+				onChangeText={text => updateMnemonicWord(index, text)}
+				onFocus={() => handleFocus(index)}
+				onBlur={() => handleBlur(index)}
+				onSubmitEditing={handleSubmitEditing}
+				onKeyPress={handleKeyPress}
+				placeholder={`${index + 1}.`}
+				placeholderTextColor="#666"
+				autoCapitalize="none"
+				autoCorrect={false}
+				autoComplete="off"
+				textContentType="none"
+				importantForAutofill="no"
+				spellCheck={false}
+				secureTextEntry={false}
+				returnKeyType={index === 11 ? 'done' : 'next'}
+				blurOnSubmit={false}
+				editable={!loading}
+			/>
+		);
+	};
 
 	return (
 		<KeyboardAvoidingView
@@ -220,103 +243,26 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 				showsVerticalScrollIndicator={false}
 				bounces={false}
 			>
-				<ModalIndicator />
-				<View style={styles.titleContainer}>
-					{renderBackButton()}
-					<Text style={styles.title}>{i18n.t('import.title')}</Text>
-				</View>
-				<SessionText style={styles.message}>{i18n.t('addPubky.enterRecoveryWords')}</SessionText>
+				<Text style={styles.message}>{i18n.t('addPubky.enterRecoveryWords')}</Text>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
 						<View style={styles.mnemonicColumn}>
-							{Array.from({ length: 6 }, (_, index) => {
-								const isInvalid = mnemonicWords[index] && !validWords[index];
-								return (
-									<TextInput
-										key={index}
-										ref={ref => {
-											inputRefs.current[index] = ref;
-										}}
-										style={[
-											styles.mnemonicInput,
-											isInvalid && styles.invalidInput,
-											loading && styles.disabledInput,
-										]}
-										value={getDisplayValue(index)}
-										onChangeText={text => updateMnemonicWord(index, text)}
-										onFocus={() => handleFocus(index)}
-										onBlur={() => handleBlur(index)}
-										onSubmitEditing={handleSubmitEditing}
-										onKeyPress={handleKeyPress}
-										placeholder={`${index + 1}.`}
-										placeholderTextColor="#666"
-										autoCapitalize="none"
-										autoCorrect={false}
-										autoComplete="off"
-										textContentType="none"
-										importantForAutofill="no"
-										spellCheck={false}
-										secureTextEntry={false}
-										returnKeyType={index === 11 ? 'done' : 'next'}
-										blurOnSubmit={false}
-										editable={!loading}
-									/>
-								);
-							})}
+							{Array.from({ length: 6 }, (_, index) => renderMnemonicInput(index))}
 						</View>
 						<View style={styles.mnemonicColumn}>
-							{Array.from({ length: 6 }, (_, index) => {
-								const actualIndex = index + 6;
-								const isInvalid = mnemonicWords[actualIndex] && !validWords[actualIndex];
-								return (
-									<TextInput
-										key={actualIndex}
-										ref={ref => {
-											inputRefs.current[actualIndex] = ref;
-										}}
-										style={[
-											styles.mnemonicInput,
-											isInvalid && styles.invalidInput,
-											loading && styles.disabledInput,
-										]}
-										value={getDisplayValue(actualIndex)}
-										onChangeText={text => updateMnemonicWord(actualIndex, text)}
-										onFocus={() => handleFocus(actualIndex)}
-										onBlur={() => handleBlur(actualIndex)}
-										onSubmitEditing={handleSubmitEditing}
-										onKeyPress={handleKeyPress}
-										placeholder={`${actualIndex + 1}.`}
-										placeholderTextColor="#666"
-										autoCapitalize="none"
-										autoCorrect={false}
-										autoComplete="off"
-										textContentType="none"
-										importantForAutofill="no"
-										spellCheck={false}
-										secureTextEntry={false}
-										returnKeyType={actualIndex === 11 ? 'done' : 'next'}
-										blurOnSubmit={false}
-										editable={!loading}
-									/>
-								);
-							})}
+							{Array.from({ length: 6 }, (_, index) => renderMnemonicInput(index + 6))}
 						</View>
 					</View>
 				</View>
 				<View style={styles.buttonContainer}>
-					<Button
-						text={i18n.t('common.cancel')}
-						style={[styles.button, styles.cancelButton]}
-						textStyle={styles.buttonText}
-						onPress={handleCancel}
-					/>
+					<Button text={i18n.t('common.cancel')} size="large" onPress={handleCancel} />
 					<Button
 						text={i18n.t('import.title')}
-						style={[styles.button, styles.importButton]}
-						textStyle={styles.buttonText}
-						onPress={handleImport}
+						size="large"
+						variant="secondary"
 						loading={loading}
 						disabled={!enableImport}
+						onPress={handleImport}
 					/>
 				</View>
 			</ScrollView>
@@ -325,75 +271,36 @@ const MnemonicForm = ({ onBack, onCancel, onImport }: MnemonicFormProps): ReactE
 };
 
 const styles = StyleSheet.create({
+	scrollViewWrapper: {
+		height: '100%',
+		zIndex: 1,
+		position: 'relative',
+		flex: 1,
+		justifyContent: 'space-between',
+	},
 	container: {
 		flex: 1,
-		backgroundColor: 'transparent',
 	},
 	scrollContent: {
 		flexGrow: 1,
-		backgroundColor: 'transparent',
 		justifyContent: 'space-between',
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		marginBottom: 24,
-		backgroundColor: 'transparent',
 	},
 	message: {
 		...textStyles.bodyM,
-		alignSelf: 'flex-start',
-		minHeight: 44,
-		textAlign: 'left',
 		marginBottom: 24,
 	},
 	keyContainer: {
 		flex: 1,
-		backgroundColor: 'transparent',
 		justifyContent: 'flex-start',
 		paddingBottom: 20,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		width: '100%',
-		alignItems: 'center',
-		alignSelf: 'center',
-		justifyContent: 'space-around',
-		gap: 12,
-		backgroundColor: 'transparent',
-		marginBottom: 20,
-	},
-	button: {
-		width: '47%',
-		minHeight: 64,
-		minWidth: 80, // Prevent text wrapping on small screens
-	},
-	importButton: {
-		borderWidth: 1,
-	},
-	cancelButton: {},
-	buttonText: {
-		...textStyles.bodySSB,
-	},
-	backButton: {
-		position: 'absolute',
-		left: 0,
-		zIndex: 10,
-		backgroundColor: 'transparent',
 	},
 	mnemonicGrid: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
-		backgroundColor: 'transparent',
+		gap: 6,
 	},
 	mnemonicColumn: {
-		width: '48%',
-		backgroundColor: 'transparent',
+		flex: 1,
 	},
 	mnemonicInput: {
 		...textStyles.bodyM,
@@ -415,13 +322,10 @@ const styles = StyleSheet.create({
 		opacity: 0.8,
 		color: '#666',
 	},
-	scrollViewWrapper: {
-		height: '100%',
-		backgroundColor: 'transparent',
-		zIndex: 1,
-		position: 'relative',
-		flex: 1,
-		justifyContent: 'space-between',
+	buttonContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 16,
 	},
 });
 

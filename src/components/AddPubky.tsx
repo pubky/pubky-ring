@@ -1,40 +1,19 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Image, Platform, StyleSheet } from 'react-native';
-import {
-	View,
-	Text,
-	ActionSheetContainer,
-	SessionText,
-	RadialGradient,
-	ArrowLeft,
-} from '../theme/components.ts';
+import { Image, StyleSheet, View } from 'react-native';
+import { Text } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useSelector, useDispatch } from 'react-redux';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import ModalIndicator from './ModalIndicator.tsx';
+import { useDispatch } from 'react-redux';
 import MnemonicForm from './MnemonicForm.tsx';
-import {
-	ACTION_SHEET_HEIGHT,
-	BLUE_RADIAL_GRADIENT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
 import { Result } from '@synonymdev/result';
-import { toastConfig } from '../theme/toastConfig.tsx';
-import Toast from 'react-native-toast-message';
-import { getToastStyle, isSmallScreen, showToast } from '../utils/helpers.ts';
+import { showToast } from '../utils/helpers.ts';
 import { SCANNER_CLOSE_DELAY } from '../utils/constants.ts';
 import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import { readFromClipboard } from '../utils/clipboard';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
-import HeaderNavButton from './HeaderNavButton.tsx';
-
-const toastStyle = getToastStyle();
-
-const smallScreen = isSmallScreen();
-const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
+import Sheet from './Sheet.tsx';
 
 const AddPubky = ({
 	payload,
@@ -44,7 +23,6 @@ const AddPubky = ({
 		importPubky: (mnemonic?: string) => Promise<Result<string>>;
 	};
 }): ReactElement => {
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const dispatch = useDispatch();
 	const { createPubky, importPubky } = useMemo(() => payload, [payload]);
 	const [currentScreen, setCurrentScreen] = useState<'main' | 'import-options' | 'mnemonic-form'>('main');
@@ -79,10 +57,6 @@ const AddPubky = ({
 		setCurrentScreen('import-options');
 	}, []);
 
-	const onMnemonicBack = useCallback(() => {
-		setCurrentScreen('import-options');
-	}, []);
-
 	const goBack = useCallback(() => {
 		if (currentScreen === 'import-options') {
 			setCurrentScreen('main');
@@ -91,78 +65,69 @@ const AddPubky = ({
 		}
 	}, [currentScreen]);
 
-	const onScanQrPress = useCallback(async () => {
-		await closeSheet();
-		setTimeout(() => {
-			SheetManager.show('camera', {
-				payload: {
-					title: i18n.t('import.title'),
-					onScan: async (data: string) => {
-						await SheetManager.hide('camera');
-						const parsed = await parseInput(data, 'scan');
+	const onScanQrPress = useCallback(
+		async (title: string) => {
+			await closeSheet();
+			setTimeout(() => {
+				SheetManager.show('camera', {
+					payload: {
+						title,
+						onScan: async (data: string) => {
+							await SheetManager.hide('camera');
+							const parsed = await parseInput(data, 'scan');
 
-						// Handle signup, import, and invite actions
-						if (
-							parsed.action === InputAction.Signup ||
-							parsed.action === InputAction.Import ||
-							parsed.action === InputAction.Invite
-						) {
-							await routeInput(parsed, { dispatch });
-						} else {
-							showToast({
-								type: 'error',
-								title: i18n.t('import.invalidData'),
-								description: i18n.t('import.invalidClipboardData'),
-							});
-						}
+							// Handle signup, import, and invite actions
+							if (
+								parsed.action === InputAction.Signup ||
+								parsed.action === InputAction.Import ||
+								parsed.action === InputAction.Invite
+							) {
+								await routeInput(parsed, { dispatch });
+							} else {
+								showToast({
+									type: 'error',
+									title: i18n.t('import.invalidData'),
+									description: i18n.t('import.invalidClipboardData'),
+								});
+							}
+						},
+						onCopyClipboard: async (): Promise<void> => {
+							await SheetManager.hide('camera');
+							const clipboardContents = await readFromClipboard();
+							if (!clipboardContents) {
+								showToast({
+									type: 'error',
+									title: i18n.t('common.error'),
+									description: i18n.t('errors.emptyClipboard'),
+								});
+								return;
+							}
+
+							const parsed = await parseInput(clipboardContents, 'clipboard');
+
+							// Handle signup, import, and invite actions
+							if (
+								parsed.action === InputAction.Signup ||
+								parsed.action === InputAction.Import ||
+								parsed.action === InputAction.Invite
+							) {
+								await routeInput(parsed, { dispatch });
+							} else {
+								showToast({
+									type: 'error',
+									title: i18n.t('import.invalidData'),
+									description: i18n.t('import.invalidClipboardData'),
+								});
+							}
+						},
 					},
-					onCopyClipboard: async (): Promise<void> => {
-						await SheetManager.hide('camera');
-						const clipboardContents = await readFromClipboard();
-						if (!clipboardContents) {
-							showToast({
-								type: 'error',
-								title: i18n.t('common.error'),
-								description: i18n.t('errors.emptyClipboard'),
-							});
-							return;
-						}
-
-						const parsed = await parseInput(clipboardContents, 'clipboard');
-
-						// Handle signup, import, and invite actions
-						if (
-							parsed.action === InputAction.Signup ||
-							parsed.action === InputAction.Import ||
-							parsed.action === InputAction.Invite
-						) {
-							await routeInput(parsed, { dispatch });
-						} else {
-							showToast({
-								type: 'error',
-								title: i18n.t('import.invalidData'),
-								description: i18n.t('import.invalidClipboardData'),
-							});
-						}
-					},
-					onClose: () => {
-						SheetManager.hide('camera');
-					},
-				},
-			});
-		}, SCANNER_CLOSE_DELAY);
-	}, [closeSheet, dispatch]);
-
-	const renderBackButton = useCallback(
-		() => (
-			<HeaderNavButton style={styles.backButton} onPressIn={goBack}>
-				<ArrowLeft size={24} />
-			</HeaderNavButton>
-		),
-		[goBack],
+				});
+			}, SCANNER_CLOSE_DELAY);
+		},
+		[closeSheet, dispatch],
 	);
 
-	const titleText = useMemo(() => {
+	const sheetTitle = useMemo(() => {
 		switch (currentScreen) {
 			case 'main':
 				return i18n.t('addPubky.title');
@@ -212,13 +177,24 @@ const AddPubky = ({
 		switch (currentScreen) {
 			case 'main':
 				return [
-					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), onPress: onImportPubky },
+					{
+						id: 'AddPubkyScan',
+						text: i18n.t('addPubky.scanSignupQr'),
+						variant: 'secondary',
+						onPress: () => onScanQrPress(i18n.t('home.scanQR')),
+					},
 					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), onPress: onCreatePubky },
+					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), onPress: onImportPubky },
 				];
 			case 'import-options':
 				return [
 					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), onPress: onUploadFile },
 					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), onPress: onMnemonicPhrase },
+					{
+						id: 'ScanQrButton',
+						text: i18n.t('addPubky.scanQrToImport'),
+						onPress: () => onScanQrPress(i18n.t('import.title')),
+					},
 				];
 			case 'mnemonic-form':
 				return [];
@@ -227,25 +203,18 @@ const AddPubky = ({
 		}
 	}, [currentScreen, onCreatePubky, onImportPubky, onMnemonicPhrase, onUploadFile]);
 
-	const shouldShowBackButton = useMemo(() => {
-		return currentScreen === 'import-options';
-	}, [currentScreen]);
+	const shouldShowBackButton = currentScreen !== 'main';
 
 	const getContent = useCallback(() => {
 		if (currentScreen === 'mnemonic-form') {
-			return <MnemonicForm onBack={onMnemonicBack} onCancel={onMnemonicCancel} onImport={importPubky} />;
+			return <MnemonicForm onCancel={onMnemonicCancel} onImport={importPubky} />;
 		}
 
 		return (
 			<>
-				<ModalIndicator />
-				<View style={styles.titleContainer}>
-					{shouldShowBackButton && renderBackButton()}
-					<Text style={styles.title}>{titleText}</Text>
-				</View>
 				{getHeaderText()}
-				<SessionText style={styles.message}>{messageText}</SessionText>
-				<View style={styles.keyContainer}>{getImage()}</View>
+				<Text style={styles.message}>{messageText}</Text>
+				<View style={styles.imageContainer}>{getImage()}</View>
 				<View style={styles.buttonContainer}>
 					{getButtonConfig().map(
 						(
@@ -262,7 +231,7 @@ const AddPubky = ({
 								key={index}
 								testID={button.id}
 								text={button.text}
-								size="large"
+								size="medium"
 								style={button.style}
 								variant={button.variant}
 								onPress={button.onPress}
@@ -270,11 +239,6 @@ const AddPubky = ({
 						),
 					)}
 				</View>
-				{currentScreen === 'import-options' && (
-					<View style={styles.buttonContainer}>
-						<Button text={i18n.t('addPubky.scanQrToImport')} size="large" onPress={onScanQrPress} />
-					</View>
-				)}
 			</>
 		);
 	}, [
@@ -284,62 +248,26 @@ const AddPubky = ({
 		getImage,
 		importPubky,
 		messageText,
-		onMnemonicBack,
 		onMnemonicCancel,
 		onScanQrPress,
-		renderBackButton,
-		shouldShowBackButton,
-		titleText,
 	]);
 
 	return (
-		<ActionSheetContainer
+		<Sheet
 			id="add-pubky"
-			navigationAnimation={navigationAnimation}
-			keyboardHandlerEnabled={Platform.OS === 'ios'}
-			//isModal={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={actionSheetHeight}
+			title={sheetTitle}
+			gradientType="brand"
+			onBackPress={shouldShowBackButton ? goBack : undefined}
 		>
-			<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
-				{getContent()}
-			</RadialGradient>
-			<Toast config={toastConfig({ style: toastStyle })} />
-		</ActionSheetContainer>
+			{getContent()}
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	content: {
-		paddingHorizontal: 24,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
+	imageContainer: {
 		flex: 1,
-	},
-	keyContainer: {
-		flex: 1,
-		backgroundColor: 'transparent',
 		justifyContent: 'center',
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'transparent',
-		marginBottom: 24,
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		textTransform: 'capitalize',
-		backgroundColor: 'transparent',
-		flex: 1,
-	},
-	backButton: {
-		position: 'absolute',
-		left: 0,
-		zIndex: 10,
-		backgroundColor: 'transparent',
 	},
 	headerText: {
 		...textStyles.display,
@@ -347,25 +275,20 @@ const styles = StyleSheet.create({
 	},
 	message: {
 		...textStyles.bodyM,
-		minHeight: 44,
 	},
 	importImage: {
-		width: 279,
-		height: 279,
+		width: 200,
+		height: 200,
 		alignSelf: 'center',
 	},
 	keyImage: {
-		width: 350,
-		height: 350,
+		width: 250,
+		height: 250,
 		alignSelf: 'center',
 	},
 	buttonContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 		marginTop: 'auto',
-		paddingVertical: 12,
-		backgroundColor: 'transparent',
 	},
 });
 

@@ -9,7 +9,7 @@
 import { Dispatch } from 'redux';
 import Toast from 'react-native-toast-message';
 import { ToastType } from 'react-native-toast-message/lib/src/types';
-import { Dimensions, Platform, Share } from 'react-native';
+import { Dimensions, Share } from 'react-native';
 import { getIsOnline } from './store-helpers.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
@@ -157,7 +157,7 @@ export type ToastOptions = {
 const defaultOptions = {
 	autoHide: true,
 	visibilityTime: 4000,
-	topOffset: Platform.OS === 'ios' ? 40 : 0,
+	topOffset: 12,
 };
 
 export const showToast = ({
@@ -253,17 +253,6 @@ export const sleep = (ms = 1000): Promise<void> => {
 export const isSmallScreen = (): boolean => {
 	const { height } = Dimensions.get('window');
 	return height < 700;
-};
-
-export const getToastStyle = (): {} => {
-	const smallScreen = isSmallScreen();
-
-	return {
-		top: Platform.select({
-			ios: smallScreen ? -25 : -80,
-			android: smallScreen ? -25 : -80,
-		}),
-	};
 };
 
 export const parseInviteCode = (url: string): string | null => {

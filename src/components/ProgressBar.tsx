@@ -1,7 +1,12 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { StyleSheet, ViewStyle } from 'react-native';
-import { Canvas, Rect } from '@shopify/react-native-skia';
-import { Easing, cancelAnimation, useSharedValue, withTiming } from 'react-native-reanimated';
+import Animated, {
+	Easing,
+	cancelAnimation,
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
 import { View } from '../theme/components.ts';
 
@@ -15,7 +20,8 @@ type ProgressBarProps = {
 	filledColor?: string;
 	height?: number;
 	borderRadius?: number;
-	reverse?: boolean; // if true, progress fills from right to left
+	reverse?: boolean; // if true, anchors progress to the right edge
+	drain?: boolean; // if true, progress starts full and drains to empty
 	onComplete?: () => void;
 	style?: ViewStyle | ViewStyle[];
 };
@@ -31,14 +37,28 @@ const ProgressBar = ({
 	height = 4,
 	borderRadius = 2,
 	reverse = false,
+	drain = false,
 	onComplete,
 	style,
 }: ProgressBarProps): React.ReactElement | null => {
 	const [shouldRender, setShouldRender] = useState(delayRender === 0);
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
-	const progress = useSharedValue(0);
+	const progress = useSharedValue(drain ? 1 : 0);
 	const opacity = useSharedValue(fadeIn ? 0 : 1);
 	const completedOnce = useRef(false);
+
+	const containerStyle = useAnimatedStyle(() => ({
+		opacity: opacity.value,
+	}));
+
+	const progressStyle = useAnimatedStyle(() => {
+		const width = progress.value * dimensions.width;
+
+		return {
+			width,
+			left: reverse ? dimensions.width - width : 0,
+		};
+	});
 
 	// Handle delayed rendering
 	useEffect(() => {
@@ -60,7 +80,7 @@ const ProgressBar = ({
 		completedOnce.current = false;
 		cancelAnimation(progress);
 		cancelAnimation(opacity);
-		progress.value = 0;
+		progress.value = drain ? 1 : 0;
 		opacity.value = fadeIn ? 0 : 1;
 
 		// Handle fade in animation
@@ -73,7 +93,7 @@ const ProgressBar = ({
 
 		// Start progress animation after delay
 		const timer = setTimeout(() => {
-			progress.value = withTiming(1, { duration, easing: Easing.linear }, finished => {
+			progress.value = withTiming(drain ? 0 : 1, { duration, easing: Easing.linear }, finished => {
 				if (finished && onComplete && !completedOnce.current) {
 					completedOnce.current = true;
 					scheduleOnRN(onComplete);
@@ -87,7 +107,7 @@ const ProgressBar = ({
 			cancelAnimation(opacity);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [shouldRender, duration, delayStart, fadeIn, fadeInDuration, onComplete]);
+	}, [shouldRender, duration, delayStart, fadeIn, fadeInDuration, drain, onComplete]);
 
 	if (!shouldRender) {
 		return (
@@ -103,11 +123,12 @@ const ProgressBar = ({
 	}
 
 	return (
-		<View
+		<Animated.View
 			style={[
 				styles.container,
 				//eslint-disable-next-line react-native/no-inline-styles
-				{ height, borderRadius, overflow: 'hidden', opacity: fadeIn ? undefined : 1 },
+				{ height, borderRadius, overflow: 'hidden', backgroundColor: unfilledColor },
+				containerStyle,
 				style,
 			]}
 			onLayout={e => {
@@ -120,30 +141,16 @@ const ProgressBar = ({
 			accessibilityValue={{ min: 0, max: 1, now: undefined }}
 		>
 			{dimensions.width > 0 && (
-				<Canvas style={styles.canvas}>
-					{/* Background (unfilled) */}
-					<Rect
-						x={0}
-						y={0}
-						width={dimensions.width}
-						height={dimensions.height}
-						color={unfilledColor}
-						opacity={opacity}
-					/>
-
-					{/* Progress (filled) */}
-					<Rect
-						x={reverse ? dimensions.width : 0}
-						y={0}
-						width={progress}
-						height={dimensions.height}
-						color={filledColor}
-						opacity={opacity}
-						transform={[{ translateX: reverse ? -progress : 0 }, { scaleX: dimensions.width }]}
-					/>
-				</Canvas>
+				<Animated.View
+					style={[
+						styles.progress,
+						//eslint-disable-next-line react-native/no-inline-styles
+						{ height: dimensions.height, borderRadius, backgroundColor: filledColor },
+						progressStyle,
+					]}
+				/>
 			)}
-		</View>
+		</Animated.View>
 	);
 };
 
@@ -151,8 +158,9 @@ const styles = StyleSheet.create({
 	container: {
 		width: '100%',
 	},
-	canvas: {
-		flex: 1,
+	progress: {
+		position: 'absolute',
+		top: 0,
 	},
 });
 

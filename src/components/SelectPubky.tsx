@@ -2,44 +2,24 @@ import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
 import { useDispatch, useSelector } from 'react-redux';
-import { FlashList, ListRenderItem } from '@shopify/flash-list';
+import { FlashList } from '@shopify/flash-list';
 import PubkyCard from './PubkyCard.tsx';
 import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
-import { ModalWrapper, ModalTitle, ModalMessage } from './shared';
-import { ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 import { parseInput } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import Button from './Button.tsx';
+import Sheet from './Sheet.tsx';
+import { Text } from '../theme/components.ts';
+import { textStyles } from '../theme/utils.ts';
 
 type PubkyItem = { key: string; value: Pubky };
-
-const ListItemComponent = memo(
-	({
-		name,
-		pubky,
-		onPubkyPress,
-	}: {
-		name?: string;
-		pubky: string;
-		onPubkyPress: (pubky: string) => void;
-	}): ReactElement => {
-		const handlePress = useCallback(() => {
-			onPubkyPress(pubky);
-		}, [onPubkyPress, pubky]);
-
-		return (
-			<TouchableOpacity onPress={handlePress}>
-				<PubkyCard publicKey={pubky} name={name} />
-			</TouchableOpacity>
-		);
-	},
-);
+const ROUTE_AFTER_CLOSE_DELAY = 100;
 
 const SelectPubky = ({
-	payload,
+	payload: { deepLink },
 }: {
 	payload: {
 		deepLink: string;
@@ -49,25 +29,19 @@ const SelectPubky = ({
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
 
-	const closeSheet = useCallback(async (): Promise<void> => {
+	const clearDeepLink = useCallback((): void => {
 		dispatch(setDeepLink(''));
-		return SheetManager.hide('select-pubky');
 	}, [dispatch]);
 
-	const deepLink = useMemo(() => {
-		return payload?.deepLink;
-	}, [payload?.deepLink]);
+	const closeSheet = useCallback(async (): Promise<void> => {
+		clearDeepLink();
+		return SheetManager.hide('select-pubky');
+	}, [clearDeepLink]);
 
-	const pubkyArray: {
-		key: string;
-		value: Pubky;
-	}[] = useMemo(() => {
+	const pubkyArray: { key: string; value: Pubky }[] = useMemo(() => {
 		return Object.entries(pubkys)
 			.filter(([_, value]) => value.signedUp)
-			.map(([key, value]) => ({
-				key,
-				value,
-			}));
+			.map(([key, value]) => ({ key, value }));
 	}, [pubkys]);
 
 	const onPubkyPress = useCallback(
@@ -82,7 +56,7 @@ const SelectPubky = ({
 					isDeeplink: true,
 				});
 				dispatch(setDeepLink(''));
-			}, 100);
+			}, ROUTE_AFTER_CLOSE_DELAY);
 		},
 		[deepLink, dispatch],
 	);
@@ -91,29 +65,19 @@ const SelectPubky = ({
 		return pubkyArray.length > 0 ? t('pubky.selectPubkyMessage') : t('pubky.noPubkysAvailable');
 	}, [pubkyArray.length, t]);
 
-	const renderItem: ListRenderItem<PubkyItem> = useCallback(
-		({ item }) => <ListItemComponent name={item.value.name} pubky={item.key} onPubkyPress={onPubkyPress} />,
-		[onPubkyPress],
-	);
-
-	const keyExtractor = useCallback((item: PubkyItem) => item.key, []);
-
 	return (
-		<ModalWrapper
-			id="select-pubky"
-			onClose={closeSheet}
-			height={ACTION_SHEET_HEIGHT}
-			showToast={false}
-			contentStyle={styles.container}
-		>
-			<ModalTitle>{t('pubky.selectPubky')}</ModalTitle>
-			<ModalMessage>{message}</ModalMessage>
+		<Sheet id="select-pubky" title={t('pubky.selectPubky')} onClose={clearDeepLink}>
+			<Text style={styles.message}>{message}</Text>
 			<View style={styles.listContainer}>
-				<FlashList
+				<FlashList<PubkyItem>
 					data={pubkyArray}
-					renderItem={renderItem}
+					renderItem={({ item }) => (
+						<TouchableOpacity style={styles.card} onPress={() => onPubkyPress(item.key)}>
+							<PubkyCard publicKey={item.key} name={item.value.name} />
+						</TouchableOpacity>
+					)}
 					renderScrollComponent={ActionSheetScrollView}
-					keyExtractor={keyExtractor}
+					keyExtractor={item => item.key}
 					showsVerticalScrollIndicator={true}
 				/>
 			</View>
@@ -121,21 +85,25 @@ const SelectPubky = ({
 			<View style={styles.buttonContainer}>
 				<Button size="large" text={t('common.cancel')} onPress={closeSheet} />
 			</View>
-		</ModalWrapper>
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
+	message: {
+		...textStyles.bodyM,
 	},
 	listContainer: {
 		flex: 1,
+		marginTop: 24,
+	},
+	card: {
+		marginBottom: 12,
 	},
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 6,
+		gap: 16,
 		marginTop: 'auto',
 	},
 });

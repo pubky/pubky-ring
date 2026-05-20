@@ -28,13 +28,8 @@ import {
 	Mail as _Mail,
 	Send as _Send,
 } from 'lucide-react-native';
-import ActionSheet from 'react-native-actions-sheet';
 import Animated from 'react-native-reanimated';
-import { ENavigationAnimation } from '../types/settings.ts';
-import {
-	LinearGradient as _SkiaGradient,
-	RadialGradient as _RadialGradient,
-} from '../components/LinearGradient.tsx';
+import { RadialGradient as _RadialGradient } from '../components/LinearGradient.tsx';
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
 import { SafeAreaView as _SafeAreaView } from 'react-native-safe-area-context';
 import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
@@ -42,56 +37,6 @@ import { fontFamily } from './fonts';
 
 // Default stroke width for Lucide icons to improve sharpness on high-DPI displays
 const ICON_STROKE_WIDTH = 2.5;
-
-interface ActionSheetContainerProps {
-	backgroundColor?: string;
-	navigationAnimation?: ENavigationAnimation;
-	springOffset?: number;
-	height?: string;
-	keyboardHandlerEnabled?: boolean;
-	isModal?: boolean;
-	modal?: boolean;
-	animated?: boolean;
-	onClose?: () => void;
-	CustomHeaderComponent?: React.ReactElement;
-	theme: Theme;
-}
-
-const fadeAnimationConfig = {
-	stiffness: 10000,
-	damping: 1000,
-	mass: 0.1,
-};
-const openAnimationConfig = {
-	stiffness: 500,
-	damping: 50,
-	mass: 1,
-};
-export const ActionSheetContainer = styled(ActionSheet).attrs<ActionSheetContainerProps>(props => ({
-	containerStyle: {
-		backgroundColor: props.backgroundColor || props.theme.colors.background,
-		borderTopLeftRadius: 20,
-		borderTopRightRadius: 20,
-		height: (props?.height as any) || undefined,
-	},
-	indicatorStyle: {
-		width: 32,
-		height: 4,
-		backgroundColor: '#ccc',
-		borderRadius: 2,
-		marginVertical: 12,
-	},
-	gestureEnabled: true,
-	defaultOverlayOpacity: 0.7,
-	statusBarTranslucent: true,
-	drawUnderStatusBar: false,
-	springOffset: props?.springOffset ?? 80,
-	animated: true,
-	openAnimationConfig:
-		props?.navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : openAnimationConfig,
-	closeAnimationConfig:
-		props?.navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : undefined,
-}))``;
 
 export const TextInput = styled.TextInput<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};
@@ -161,6 +106,7 @@ export const SessionText = styled.Text<{ theme: Theme }>`
 `;
 
 export const BoldText = styled.Text<{ theme: Theme }>`
+	color: ${(props): string => props.theme.colors.text};
 	font-weight: bold;
 	font-family: ${fontFamily};
 `;
@@ -298,16 +244,6 @@ interface LinearGradientProps {
 export const LinearGradient = styled(_LinearGradient).attrs<LinearGradientProps>(props => ({
 	colors:
 		props.colors || (props.modal ? props.theme.colors.defaultGradient : props.theme.colors.defaultGradient),
-}))``;
-
-interface SkiaGradientProps {
-	colors?: string[];
-	modal?: boolean;
-	theme: Theme;
-}
-
-export const SkiaGradient = styled(_SkiaGradient).attrs<SkiaGradientProps>(props => ({
-	colors: props.colors || (props.modal ? props.theme.colors.modalGradient : props.theme.colors.gradient),
 }))``;
 
 interface RadialGradientProps {

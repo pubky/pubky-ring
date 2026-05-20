@@ -1,17 +1,15 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback, useRef } from 'react';
+import { Image, StyleSheet, View } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
 import PubkyCard from './PubkyCard.tsx';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { View, Text, ActionSheetContainer, SessionText, RadialGradient } from '../theme/components.ts';
-import { ACTION_SHEET_HEIGHT, BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { Image, Platform, StyleSheet } from 'react-native';
-import ModalIndicator from './ModalIndicator.tsx';
+import { Text } from '../theme/components.ts';
 import Button from './Button.tsx';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
+import Sheet from './Sheet.tsx';
 
 const DeletePubky = ({
 	payload,
@@ -22,97 +20,45 @@ const DeletePubky = ({
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
-	const { onDelete } = useMemo(() => payload, [payload]);
-	const publicKey = useMemo(() => payload?.publicKey ?? '', [payload]);
+	const { onDelete, publicKey = '' } = payload;
 	const currentPubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
-	const navigationAnimation = useSelector(getNavigationAnimation);
-
-	// Preserve the original name when component first loads
-	//eslint-disable-next-line react-hooks/exhaustive-deps
-	const pubkyName = useMemo(() => currentPubkyName, [publicKey]);
+	// Preserve the original name while loading/deleting
+	const pubkyName = useRef(currentPubkyName).current;
 
 	const closeSheet = useCallback((): void => {
 		SheetManager.hide('delete-pubky').then();
 	}, []);
 
 	return (
-		<ActionSheetContainer
+		<Sheet
 			id="delete-pubky"
-			onClose={closeSheet}
-			navigationAnimation={navigationAnimation}
-			keyboardHandlerEnabled={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={ACTION_SHEET_HEIGHT}
+			title={t('pubky.deletePubky')}
+			gradientType="brand"
 		>
-			<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
-				<ModalIndicator />
-				<View style={styles.titleContainer}>
-					<Text style={styles.title}>{t('pubky.deletePubky')}</Text>
-				</View>
-				<SessionText style={styles.message}>{t('pubky.deleteConfirm')}</SessionText>
-				<PubkyCard
-					name={pubkyName}
-					publicKey={publicKey}
-					style={styles.pubkyCard}
-					containerStyle={styles.pubkyContainer}
-					nameStyle={styles.pubkyName}
-					avatarSize={48}
-					avatarStyle={styles.avatarContainer}
-				/>
-				<View style={styles.trashContainer}>
-					<Image source={require('../images/trash.png')} style={styles.importImage} />
-				</View>
-				<View style={styles.buttonContainer}>
-					<Button
-						text={t('common.cancel')}
-						style={[styles.button, styles.cancelButton]}
-						textStyle={styles.buttonText}
-						onPress={closeSheet}
-					/>
-					<Button
-						text={t('common.delete')}
-						style={[styles.button, styles.deleteButton]}
-						textStyle={styles.buttonText}
-						onPress={onDelete}
-					/>
-				</View>
-			</RadialGradient>
-		</ActionSheetContainer>
+			<Text style={styles.message}>{t('pubky.deleteConfirm')}</Text>
+			<PubkyCard
+				name={pubkyName}
+				publicKey={publicKey}
+				containerStyle={styles.pubkyContainer}
+				nameStyle={styles.pubkyName}
+				avatarSize={48}
+				avatarStyle={styles.avatarContainer}
+			/>
+			<View style={styles.imageContainer}>
+				<Image source={require('../images/trash.png')} style={styles.image} />
+			</View>
+			<View style={styles.buttonContainer}>
+				<Button text={t('common.cancel')} size="large" onPress={closeSheet} />
+				<Button text={t('common.delete')} size="large" variant="secondary" onPress={onDelete} />
+			</View>
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	content: {
-		paddingHorizontal: 20,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		height: '100%',
-		backgroundColor: 'transparent',
-	},
-	trashContainer: {
-		flex: 1,
-		backgroundColor: 'transparent',
-		justifyContent: 'center',
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		marginBottom: 8,
-		backgroundColor: 'transparent',
-	},
 	message: {
 		...textStyles.bodyM,
 		marginBottom: 24,
-		color: 'rgba(255, 255, 255, 0.8)',
-	},
-	pubkyCard: {
-		marginBottom: 32,
-		minHeight: 90,
 	},
 	pubkyContainer: {
 		padding: 24,
@@ -127,34 +73,19 @@ const styles = StyleSheet.create({
 		...textStyles.heading,
 		marginBottom: 2,
 	},
-	buttonContainer: {
-		flexDirection: 'row',
-		width: '100%',
-		alignItems: 'center',
-		alignSelf: 'center',
-		justifyContent: 'space-around',
-		gap: 12,
-		paddingVertical: 12,
-		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 }),
+	imageContainer: {
+		flex: 1,
+		justifyContent: 'center',
 	},
-	button: {
-		width: '47%',
-		minHeight: 64,
-		minWidth: 80, // Prevent text wrapping on small screens
-		backgroundColor: 'rgba(255, 255, 255, 0.08)',
-	},
-	buttonText: {
-		...textStyles.bodySSB,
-	},
-	importImage: {
+	image: {
 		width: 342.57,
 		height: 342.57,
 		alignSelf: 'center',
 	},
-	cancelButton: {},
-	deleteButton: {
-		borderWidth: 1,
+	buttonContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 16,
 	},
 });
 

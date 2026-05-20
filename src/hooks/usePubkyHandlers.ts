@@ -135,7 +135,6 @@ export const usePubkyHandlers = (): PubkyHandlersReturn => {
 							);
 						},
 						onClose: () => {
-							SheetManager.hide('camera');
 							resolve('');
 						},
 					},

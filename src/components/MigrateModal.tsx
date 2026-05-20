@@ -1,24 +1,17 @@
 import React, { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, Platform, StyleSheet } from 'react-native';
+import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
-import { ActionSheetContainer, Card, SkiaGradient, Text, View } from '../theme/components.ts';
-import Button from '../components/Button.tsx';
+import { Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { getPubkyKeys, getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import { getPubkySecretKey } from '../utils/pubky.ts';
 import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
-import ModalIndicator from './ModalIndicator.tsx';
 import AnimatedQR from './AnimatedQR.tsx';
-import { ACTION_SHEET_HEIGHT, SMALL_SCREEN_ACTION_SHEET_HEIGHT } from '../utils/constants.ts';
-import { isSmallScreen } from '../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
-
-const smallScreen = isSmallScreen();
-const actionSheetHeight = smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
+import Sheet from './Sheet.tsx';
 
 interface KeyData {
 	pubky: string;
@@ -34,11 +27,10 @@ const MigrateModal = ({
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const [keysData, setKeysData] = useState<KeyData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
+	const onClose = useMemo(() => payload?.onClose ?? ((): void => { }), [payload]);
 	const rootState = useSelector((s: RootState) => s);
 	const originalBrightnessRef = useRef<number | null>(null);
 
@@ -154,67 +146,33 @@ const MigrateModal = ({
 	};
 
 	return (
-		<ActionSheetContainer
+		<Sheet
 			id="migrate-modal"
-			navigationAnimation={navigationAnimation}
+			title={t('settings.migrateKeys')}
 			onClose={onClose}
-			keyboardHandlerEnabled={false}
-			isModal={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={actionSheetHeight}
 		>
-			<SkiaGradient modal={true} style={styles.gradientContainer}>
-				<View style={styles.container}>
-					<ModalIndicator />
-					<Text style={styles.title}>{t('settings.migrateKeys')}</Text>
-					<Card style={styles.card}>
-						<Text style={styles.cardLabel}>{t('settings.scanDynamicQR')}</Text>
-						<Text style={styles.cardDescription}>
-							{t('settings.scanDynamicQRDescription', { count: pubkyKeys.length })}
-						</Text>
-					</Card>
+			<View style={styles.textContainer}>
+				<Text style={styles.label}>{t('settings.scanDynamicQR')}</Text>
+				<Text style={styles.description}>
+					{t('settings.scanDynamicQRDescription', { count: pubkyKeys.length })}
+				</Text>
+			</View>
 
-					{renderContent()}
-
-					<View style={styles.footer}>
-						<View style={styles.buttonContainer}>
-							<Button text={t('common.close')} style={styles.button} onPress={onClose} />
-						</View>
-					</View>
-				</View>
-			</SkiaGradient>
-		</ActionSheetContainer>
+			{renderContent()}
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	gradientContainer: {
-		height: '100%',
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		paddingHorizontal: 24,
-	},
-	container: {
-		flex: 1,
+	textContainer: {
+		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
-	title: {
-		...textStyles.bodyMB,
-		alignSelf: 'center',
-		marginBottom: 16,
-	},
-	card: {
-		marginBottom: 16,
-		borderRadius: 16,
-		overflow: 'hidden',
-		padding: 16,
-		backgroundColor: 'transparent',
-	},
-	cardLabel: {
+	label: {
 		...textStyles.caption,
 		color: 'rgba(255, 255, 255, 0.64)',
 	},
-	cardDescription: {
+	description: {
 		...textStyles.bodyM,
 		marginTop: 10,
 		color: 'rgba(255, 255, 255, 0.8)',
@@ -223,7 +181,6 @@ const styles = StyleSheet.create({
 		flex: 1,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: 'transparent',
 	},
 	loadingText: {
 		...textStyles.bodyS,
@@ -234,21 +191,6 @@ const styles = StyleSheet.create({
 		...textStyles.bodyMSB,
 		color: '#888',
 		textAlign: 'center',
-	},
-	footer: {
-		flex: 1,
-		justifyContent: 'flex-end',
-		backgroundColor: 'transparent',
-	},
-	buttonContainer: {
-		width: '100%',
-		alignItems: 'center',
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
-	},
-	button: {
-		width: '100%',
-		minHeight: 56,
 	},
 });
 

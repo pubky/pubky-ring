@@ -1,25 +1,11 @@
-import React, { memo, ReactElement, useCallback, useState, useRef, useEffect, useMemo } from 'react';
-import { StyleSheet, TextInput, Linking, Keyboard, Image, Platform, Dimensions } from 'react-native';
-import {
-	View,
-	Text,
-	SessionText,
-	RadialGradient,
-	TouchableOpacity,
-	AnimatedView,
-	Gift,
-	Check,
-} from '../../theme/components.ts';
+import React, { memo, ReactElement, useCallback, useState, useRef, useEffect } from 'react';
+import { StyleSheet, TextInput, Linking, Keyboard, View } from 'react-native';
+import { Text, AnimatedView, Gift, Check } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
-import ModalIndicator from '../ModalIndicator.tsx';
 import DashedBorder from '../DashedBorder.tsx';
-import { formatSignupToken, isSmallScreen, isValidSignupTokenFormat } from '../../utils/helpers.ts';
-import { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import {
-	DEFAULT_HOMESERVER,
-	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
-	INVITE_CODE_GRADIENT,
-} from '../../utils/constants.ts';
+import { formatSignupToken, isValidSignupTokenFormat } from '../../utils/helpers.ts';
+import { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { DEFAULT_HOMESERVER, ACCENTS } from '../../utils/constants.ts';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver } from '../../utils/pubky.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../types';
@@ -28,9 +14,6 @@ import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
 import i18n from '../../i18n';
 import { textStyles } from '../../theme/utils';
 import Button from '../Button.tsx';
-const { height: SCREEN_HEIGHT } = Dimensions.get('window');
-
-const smallScreen = isSmallScreen();
 
 const InviteCode = ({
 	payload,
@@ -42,83 +25,39 @@ const InviteCode = ({
 	};
 }): ReactElement => {
 	const dispatch = useDispatch();
-	const { pubky } = payload;
+	const { onContinue, onRequestInvite, pubky } = payload;
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const [inviteCode, setInviteCode] = useState('');
 	const [isValid, setIsValid] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState('');
-	const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null);
-
-	// Animation values
-	const checkOpacity = useSharedValue(0);
-	const checkScale = useSharedValue(0.2);
-	const gradientOpacity = useSharedValue(0);
-	const isErrorAnimation = useSharedValue(0); // 0 for success, 1 for error
+	const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
 	const closeSheet = useCallback(async (): Promise<void> => {
 		return SheetManager.hide('new-pubky-setup');
 	}, []);
 
-	// Cleanup effect for timers
 	useEffect(() => {
 		return (): void => {
-			if (fadeOutTimerRef.current) {
-				clearTimeout(fadeOutTimerRef.current);
+			if (transitionTimerRef.current) {
+				clearTimeout(transitionTimerRef.current);
 			}
 		};
 	}, []);
 
-	const showCheckAnimation = useCallback(
-		({ success }: { success: boolean }) => {
-			// Clear any existing timers to prevent conflicting animations
-			if (fadeOutTimerRef.current) {
-				clearTimeout(fadeOutTimerRef.current);
-				fadeOutTimerRef.current = null;
+	const goToNextScreen = useCallback(() => {
+		if (transitionTimerRef.current) {
+			clearTimeout(transitionTimerRef.current);
+		}
+
+		transitionTimerRef.current = setTimeout(() => {
+			if (onContinue) {
+				onContinue();
+			} else {
+				closeSheet();
 			}
-
-			// Set error state for animation
-			isErrorAnimation.value = success ? 0 : 1;
-
-			// Show the animation
-			checkOpacity.value = withTiming(1, { duration: 300 });
-			gradientOpacity.value = withTiming(1, { duration: 300 });
-			checkScale.value = withSpring(1, {
-				damping: 12,
-				stiffness: 150,
-			});
-
-			if (success) {
-				// Set a new timer for fade out and transition
-				fadeOutTimerRef.current = setTimeout(() => {
-					// After success animation, transition to next screen
-					if (payload?.onContinue) {
-						payload.onContinue();
-					} else {
-						closeSheet();
-					}
-				}, 600);
-			}
-		},
-		[checkOpacity, checkScale, gradientOpacity, isErrorAnimation, payload, closeSheet],
-	);
-
-	const checkStyle = useAnimatedStyle(() => ({
-		opacity: checkOpacity.value,
-		transform: [{ scale: checkScale.value }],
-	}));
-
-	const gradientStyle = useAnimatedStyle(() => ({
-		opacity: gradientOpacity.value,
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		pointerEvents: 'none',
-	}));
+		}, 600);
+	}, [onContinue, closeSheet]);
 
 	const handleContinue = useCallback(async () => {
 		try {
@@ -128,37 +67,22 @@ const InviteCode = ({
 			}
 			setLoading(true);
 
-			// Reset to neutral state if there was a previous error
 			if (error) {
-				// Fade out any visible animations first
-				if (checkOpacity.value > 0 || gradientOpacity.value > 0) {
-					checkOpacity.value = withTiming(0, { duration: 200 });
-					gradientOpacity.value = withTiming(0, { duration: 200 });
-					// Wait for fade out to complete
-					await new Promise((resolve): void => {
-						setTimeout(resolve, 250);
-					});
-				}
-				// Then reset everything to neutral
 				setError('');
-				checkScale.value = 0;
-				isErrorAnimation.value = 0; // Reset to success state
 			}
 
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
 				setError(i18n.t('pubkyErrors.unableToGetSecretKey'));
-				showCheckAnimation({ success: false });
 				return;
 			}
 			const secretKey = secretKeyRes.value.secretKey;
 
-			// Use DEFAULT_HOMESERVER
 			const homeserver = DEFAULT_HOMESERVER;
 
-			let newData = {
+			const newData = {
 				name: storedPubkyData?.name || '',
-				homeserver: homeserver,
+				homeserver,
 				signupToken: inviteCode,
 			};
 
@@ -176,7 +100,7 @@ const InviteCode = ({
 				});
 				if (signupRes.isErr()) {
 					// The pubky might be an import that can successfully login.
-					if (!storedPubkyData.homeserver || storedPubkyData.homeserver === homeserver) {
+					if (!storedPubkyData?.homeserver || storedPubkyData.homeserver === homeserver) {
 						// Attempt sign-in
 						const signinRes = await signInToHomeserver({
 							pubky,
@@ -186,13 +110,11 @@ const InviteCode = ({
 						});
 						if (signinRes.isErr()) {
 							setError(i18n.t('pubkyErrors.invalidInviteCode'));
-							showCheckAnimation({ success: false });
 							return;
 						}
 						signedIn = true;
 					} else {
 						setError(i18n.t('pubkyErrors.invalidInviteCode'));
-						showCheckAnimation({ success: false });
 						return;
 					}
 				}
@@ -208,7 +130,6 @@ const InviteCode = ({
 				});
 				if (signinRes.isErr()) {
 					setError(i18n.t('pubkyErrors.unableToSignIn', { error: signinRes.error.message }));
-					showCheckAnimation({ success: false });
 					return;
 				}
 			}
@@ -222,26 +143,14 @@ const InviteCode = ({
 			);
 
 			setError('');
-			showCheckAnimation({ success: true });
+			goToNextScreen();
 		} catch (err) {
 			console.error('Error during continue:', err);
 			setError(i18n.t('pubkyErrors.unexpectedError'));
-			showCheckAnimation({ success: false });
 		} finally {
 			setLoading(false);
 		}
-	}, [
-		pubky,
-		inviteCode,
-		storedPubkyData,
-		dispatch,
-		showCheckAnimation,
-		error,
-		checkOpacity,
-		gradientOpacity,
-		checkScale,
-		isErrorAnimation,
-	]);
+	}, [pubky, inviteCode, storedPubkyData, dispatch, goToNextScreen, error]);
 
 	const handleInviteCodeChange = useCallback((text: string) => {
 		const formatted = formatSignupToken(text);
@@ -250,241 +159,127 @@ const InviteCode = ({
 	}, []);
 
 	const handleNeedInvite = useCallback(() => {
-		if (payload?.onRequestInvite) {
-			payload.onRequestInvite();
+		if (onRequestInvite) {
+			onRequestInvite();
 		} else {
 			// Fallback: Open link to get invite code
 			Linking.openURL('https://synonym.to/invite');
 		}
-	}, [payload]);
+	}, [onRequestInvite]);
 
-	// Use memoized values for gradient and image based on error state
-	const checkMarkGradient = useMemo(() => {
-		return error ? ONBOARDING_KEY_ERROR_RADIAL_GRADIENT : INVITE_CODE_GRADIENT;
-	}, [error]);
-
-	const checkMarkImage = useMemo(() => {
-		return error ? require('../../images/cross.png') : require('../../images/check.png');
-	}, [error]);
-
-	// Animated style for the input checkmark
 	const inputCheckmarkStyle = useAnimatedStyle(() => ({
 		opacity: withTiming(isValid ? 1 : 0, { duration: 300 }),
 		transform: [{ scale: withTiming(isValid ? 1 : 0.8, { duration: 300 }) }],
 	}));
 
 	return (
-		<View style={styles.container}>
-			<View style={styles.gradientContainer}>
-				<RadialGradient
-					style={styles.backgroundGradient}
-					colors={INVITE_CODE_GRADIENT}
-					center={{ x: 0.5, y: 0.4 }}
+		<View style={styles.keyboardAvoidingView}>
+			<Text style={styles.headerText}>{i18n.t('inviteCode.title')}</Text>
+			<Text style={styles.message}>{i18n.t('inviteCode.description')}</Text>
+
+			<DashedBorder
+				style={styles.inputContainer}
+				borderColor={inviteCode ? ACCENTS.pubkyRing : 'rgba(255, 255, 255, 0.32)'}
+				borderWidth={1}
+				borderRadius={16}
+				dashWidth={2}
+				dashGap={2}
+			>
+				<TextInput
+					testID="InviteCodeInput"
+					style={styles.input}
+					value={inviteCode}
+					onChangeText={handleInviteCodeChange}
+					onSubmitEditing={handleContinue}
+					placeholder="XXXX-XXXX-XXXX"
+					placeholderTextColor="rgba(255, 255, 255, 0.2)"
+					autoCapitalize="characters"
+					autoCorrect={false}
+					maxLength={14}
+					editable={!loading}
+					autoFocus={true}
 				/>
-				<AnimatedView style={gradientStyle}>
-					<RadialGradient
-						style={styles.radialGradient}
-						colors={checkMarkGradient}
-						center={{ x: 0.5, y: 0.4 }}
-						positions={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-					/>
+				<AnimatedView style={[styles.checkmark, inputCheckmarkStyle]}>
+					<Check color={ACCENTS.pubkyRing} size={16} />
 				</AnimatedView>
+			</DashedBorder>
+
+			<View style={styles.needInviteRow}>
+				<Button
+					text={i18n.t('inviteCode.needInviteCode')}
+					size="small"
+					icon={<Gift color="rgba(255, 255, 255, 0.8)" size={18} />}
+					onPress={handleNeedInvite}
+				/>
 			</View>
-			<View style={styles.keyboardAvoidingView}>
-				<View style={styles.content}>
-					<ModalIndicator />
-					<View style={styles.titleContainer}>
-						<Text testID="InviteCodeTitle" style={styles.title}>
-							{i18n.t('welcome.defaultHomeserver')}
-						</Text>
-					</View>
-					<Text style={styles.headerText}>{i18n.t('inviteCode.title')}</Text>
-					<SessionText style={styles.message}>{i18n.t('inviteCode.description')}</SessionText>
 
-					<DashedBorder
-						borderColor="rgba(173, 255, 47, 0.3)"
-						borderWidth={2}
-						borderRadius={12}
-						dashWidth={3}
-						dashGap={3}
-						style={styles.inputContainer}
-					>
-						<TextInput
-							testID="InviteCodeInput"
-							style={styles.input}
-							value={inviteCode}
-							onChangeText={handleInviteCodeChange}
-							onSubmitEditing={handleContinue}
-							placeholder="XXXX-XXXX-XXXX"
-							placeholderTextColor="rgba(255, 255, 255, 0.2)"
-							autoCapitalize="characters"
-							autoCorrect={false}
-							maxLength={14}
-							editable={!loading}
-							autoFocus={true}
-						/>
-						<AnimatedView style={[styles.checkmark, inputCheckmarkStyle]}>
-							<Check color="rgba(173, 255, 47, 1)" size={16} />
-						</AnimatedView>
-					</DashedBorder>
+			{error ? (
+				<Text testID="InviteCodeErrorText" style={styles.errorText}>
+					{error}
+				</Text>
+			) : null}
 
-					<View style={styles.needInviteRow}>
-						<Button
-							text={i18n.t('inviteCode.needInviteCode')}
-							size="small"
-							icon={<Gift color="rgba(255, 255, 255, 0.8)" size={18} />}
-							onPress={handleNeedInvite}
-						/>
-					</View>
-
-					{error ? (
-						<Text testID="InviteCodeErrorText" style={styles.errorText}>
-							{error}
-						</Text>
-					) : null}
-					{!smallScreen && (
-						<View style={styles.imageContainer}>
-							<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-								<Image source={checkMarkImage} style={styles.checkImage} resizeMode="contain" />
-							</AnimatedView>
-						</View>
-					)}
-
-					<View style={styles.footer}>
-						<Button
-							text={loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}
-							size="large"
-							variant="secondary"
-							loading={loading}
-							disabled={!isValid}
-							testID="InviteCodeContinueButton"
-							onPress={handleContinue}
-						/>
-					</View>
-				</View>
+			<View style={styles.footer}>
+				<Button
+					text={loading ? i18n.t('inviteCode.processing') : i18n.t('common.continue')}
+					size="large"
+					variant="secondary"
+					loading={loading}
+					disabled={!isValid}
+					testID="InviteCodeContinueButton"
+					onPress={handleContinue}
+				/>
 			</View>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
-	gradientContainer: {
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		height: SCREEN_HEIGHT,
-		zIndex: 0,
-	},
-	backgroundGradient: {
-		flex: 1,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-	},
 	keyboardAvoidingView: {
 		flex: 1,
 		zIndex: 1,
-		backgroundColor: 'transparent',
-	},
-	content: {
-		flex: 1,
-		paddingHorizontal: 20,
-		paddingBottom: 20,
-		backgroundColor: 'transparent',
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		color: '#FFFFFF',
-		backgroundColor: 'transparent',
 	},
 	headerText: {
 		...textStyles.display,
-		marginTop: 24,
-		marginBottom: 16,
-		backgroundColor: 'transparent',
+		marginBottom: 20,
 	},
 	message: {
 		...textStyles.bodyM,
-		marginBottom: 40,
-		color: '#FFFFFF',
-		backgroundColor: 'transparent',
+		marginBottom: 24,
+		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	inputContainer: {
-		paddingHorizontal: 20,
-		paddingVertical: 30,
-		marginBottom: 24,
 		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
-		justifyContent: 'center',
+		paddingHorizontal: 24,
+		paddingVertical: 24,
+		marginBottom: 24,
 	},
 	input: {
 		...textStyles.bodyMSpaced,
 		flex: 1,
-		color: 'rgba(173, 255, 47, 0.8)',
-		textAlign: 'left',
-		top: -5,
+		color: ACCENTS.pubkyRing,
 	},
 	checkmark: {
-		position: 'absolute',
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-		right: 20,
-		borderRadius: 100,
-		borderWidth: 3,
-		borderColor: 'rgba(173, 255, 47, 0.8)',
+		backgroundColor: 'rgba(0, 133, 255, 0.2)',
+		borderRadius: '50%',
+		borderWidth: 2,
+		borderColor: ACCENTS.pubkyRing,
 		padding: 2,
-		marginBottom: 10,
 	},
 	needInviteRow: {
 		alignItems: 'flex-start',
-		backgroundColor: 'transparent',
-	},
-	giftIcon: {
-		marginRight: 6,
-	},
-	needInviteText: {
-		...textStyles.captionSBSpaced,
-	},
-	radialGradient: {
-		width: '100%',
-		height: '100%',
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
+		marginBottom: 24,
 	},
 	errorText: {
 		...textStyles.bodyS,
 		color: '#dc2626',
-		textAlign: 'center',
 		marginBottom: 16,
 	},
-	imageContainer: {
-		height: 160,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'transparent',
-	},
-	imageWrapper: {
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'transparent',
-	},
-	checkImage: {
-		width: 150,
-		height: 150,
-	},
 	footer: {
+		flexDirection: 'row',
+		alignItems: 'center',
 		marginTop: 'auto',
-		backgroundColor: 'transparent',
-		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 });
 

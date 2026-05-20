@@ -141,9 +141,7 @@ const RadialGradient: React.FC<RadialGradientProps> = memo(
 
 const styles = StyleSheet.create({
 	container: {
-		position: 'relative',
-		overflow: 'hidden',
-		minHeight: 100,
+		flex: 1,
 	},
 	canvas: {
 		position: 'absolute',

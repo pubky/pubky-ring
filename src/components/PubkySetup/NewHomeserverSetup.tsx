@@ -1,23 +1,18 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Image, Platform } from 'react-native';
+import { StyleSheet, Image, Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import {
-	View,
 	Text,
-	SessionText,
-	RadialGradient,
 	TouchableOpacity,
 	BoldText,
 } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
-import ModalIndicator from '../ModalIndicator.tsx';
-import { BLUE_RADIAL_GRADIENT } from '../../utils/constants.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import { defaultPubkyState } from '../../store/shapes/pubky.ts';
 import { textStyles } from '../../theme/utils';
 import Button from '../Button.tsx';
 
-export enum HomeserverOption {
+enum HomeserverOption {
 	default = 'default',
 	custom = 'custom',
 }
@@ -72,15 +67,11 @@ const NewHomeserverSetup = ({
 	}, [pubky]);
 
 	return (
-		<RadialGradient style={styles.content} colors={BLUE_RADIAL_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
-			<ModalIndicator />
-			<View style={styles.titleContainer}>
-				<Text style={styles.title}>{t('homeserver.title')}</Text>
-			</View>
+		<>
 			<Text style={styles.headerText}>{t('homeserver.dataHosting')}</Text>
-			<SessionText style={styles.message}>
+			<Text style={styles.message}>
 				{t('homeserver.chooseMessage')} <BoldText>{truncatedPubky}</BoldText>
-			</SessionText>
+			</Text>
 
 			<View style={styles.optionsContainer}>
 				<Text style={styles.optionLabel}>{t('homeserver.label')}</Text>
@@ -108,10 +99,10 @@ const NewHomeserverSetup = ({
 				</TouchableOpacity>
 
 				<TouchableOpacity
-					testID="HomeserverCustomOption"
 					style={styles.optionRow}
-					onPress={() => setSelectedOption(HomeserverOption.custom)}
 					activeOpacity={0.7}
+					testID="HomeserverCustomOption"
+					onPress={() => setSelectedOption(HomeserverOption.custom)}
 				>
 					<View
 						style={[
@@ -144,56 +135,27 @@ const NewHomeserverSetup = ({
 					/>
 				</View>
 			</View>
-		</RadialGradient>
+		</>
 	);
 };
 
 const styles = StyleSheet.create({
-	content: {
-		flex: 1,
-		paddingHorizontal: 20,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		paddingBottom: 20,
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		marginBottom: 24,
-		backgroundColor: 'transparent',
-		zIndex: 1,
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		color: '#FFFFFF',
-		backgroundColor: 'transparent',
-	},
 	headerText: {
 		...textStyles.display,
-		marginBottom: 16,
-		color: '#FFFFFF',
-		backgroundColor: 'transparent',
-		zIndex: 1,
+		marginBottom: 20,
 	},
 	message: {
 		...textStyles.bodyM,
-		marginBottom: 30,
-		color: '#FFFFFF',
-		backgroundColor: 'transparent',
-		zIndex: 1,
+		marginBottom: 24,
+		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	optionsContainer: {
-		marginBottom: 20,
-		backgroundColor: 'transparent',
-		zIndex: 1,
+		zIndex: 10,
 	},
 	optionLabel: {
 		...textStyles.caption,
-		color: '#FFFFFF',
-		opacity: 0.6,
+		color: 'rgba(255, 255, 255, 0.64)',
 		marginBottom: 12,
-		backgroundColor: 'transparent',
 	},
 	optionRow: {
 		flexDirection: 'row',
@@ -223,18 +185,15 @@ const styles = StyleSheet.create({
 	},
 	optionText: {
 		...textStyles.bodySSB,
-		color: '#FFFFFF',
 	},
 	optionSubtext: {
 		...textStyles.bodySSpaced,
-		opacity: 0.6,
+		color: 'rgba(255, 255, 255, 0.80)',
 	},
 	bottomSection: {
 		flex: 1,
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 		marginTop: 'auto',
-		marginBottom: Platform.select({ ios: 0, android: 20 }),
 	},
 	deviceImage: {
 		width: 480,
@@ -247,7 +206,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		gap: 16,
 		marginTop: 'auto',
-		backgroundColor: 'transparent',
 	},
 	continueButton: {
 		zIndex: 1,

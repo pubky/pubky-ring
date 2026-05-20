@@ -95,7 +95,6 @@ const ScanInviteButton = memo(() => {
 						resolve();
 					},
 					onClose: () => {
-						SheetManager.hide('camera');
 						isProcessingInvite.current = false;
 						resolve();
 					},

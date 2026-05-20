@@ -1,49 +1,21 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { Image, Platform, StyleSheet, Keyboard } from 'react-native';
-import {
-	ActionSheetContainer,
-	Text,
-	TextInput,
-	View,
-	SkiaGradient,
-	AnimatedView,
-	RadialGradient,
-} from '../theme/components.ts';
+import { Platform, StyleSheet, Keyboard, View } from 'react-native';
+import { Text, TextInput } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver, truncatePubky } from '../utils/pubky.ts';
 import { formatSignupToken } from '../utils/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { setPubkyData } from '../store/slices/pubkysSlice.ts';
-import ModalIndicator from './ModalIndicator.tsx';
 import { SheetManager, ScrollView as ActionSheetScrollView } from 'react-native-actions-sheet';
 import { err } from '@synonymdev/result';
-import { useAnimatedStyle, useSharedValue, withSpring, withTiming } from 'react-native-reanimated';
-import {
-	DEFAULT_HOMESERVER,
-	ONBOARDING_KEY_ERROR_RADIAL_GRADIENT,
-	BLUE_RADIAL_GRADIENT,
-	STAGING_HOMESERVER,
-	ACTION_SHEET_HEIGHT,
-} from '../utils/constants.ts';
+import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
-import { FlashList } from '@shopify/flash-list';
 import i18n from '../i18n';
 import { textStyles } from '../theme/utils';
-
-type InputDataItem = {
-	testID?: string;
-	id: 'name' | 'homeserver' | 'signuptoken';
-	value: string;
-	onChange: (text: string) => void;
-	placeholder: string;
-	error: string;
-	autoFocus: boolean;
-};
+import Sheet from './Sheet.tsx';
 
 const MAX_NAME_LENGTH = 50;
-const TITLE = '';
 
 const InputItemComponent = ({
 	testID,
@@ -100,7 +72,6 @@ const EditPubky = ({
 		pubky: string;
 	};
 }): ReactElement => {
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const { pubky } = useMemo(() => payload, [payload]);
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const [loading, setLoading] = useState(false);
@@ -112,35 +83,12 @@ const EditPubky = ({
 		pubkyNameLength > 20 ? `${MAX_NAME_LENGTH - pubkyNameLength} / ${MAX_NAME_LENGTH}` : '',
 	);
 	const dispatch = useDispatch();
-	const checkOpacity = useSharedValue(0);
-	const checkScale = useSharedValue(0.2);
 	const [error, setError] = useState('');
-	const fadeOutTimerRef = useRef<NodeJS.Timeout | null>(null);
 	const signupTokenInputRef = useRef<any>(null);
-
-	const gradientOpacity = useSharedValue(0);
-
-	const signupTokenOpacity = useSharedValue(
-		storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '') ? 1 : 0,
-	);
 
 	const isSignupTokenInputVisible = useMemo(() => {
 		return storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
 	}, [storedPubkyData?.signedUp, storedPubkyData.homeserver, homeServer]);
-
-	const textInputTitleText = useMemo(
-		() => ({
-			name: i18n.t('editPubkySheet.pubkyNameLabel'),
-			homeserver: i18n.t('editPubky.homeserver'),
-			signuptoken: i18n.t('editPubkySheet.inviteCodeOptional'),
-		}),
-		[],
-	);
-
-	// Whether signupToken TextInput should be visible
-	useEffect(() => {
-		signupTokenOpacity.value = withTiming(isSignupTokenInputVisible ? 1 : 0, { duration: 300 });
-	}, [isSignupTokenInputVisible, signupTokenOpacity]);
 
 	const formatSignupTokenForHomeserver = useCallback(
 		(text: string) => {
@@ -156,97 +104,9 @@ const EditPubky = ({
 
 	const clearErrorState = useCallback(() => {
 		if (error) {
-			// Ensure any existing animations are cleared
-			if (fadeOutTimerRef.current) {
-				clearTimeout(fadeOutTimerRef.current);
-				fadeOutTimerRef.current = null;
-			}
-			// If animations are visible, fade them out first
-			if (checkOpacity.value > 0) {
-				// Start fading out the error state
-				checkOpacity.value = withTiming(0, { duration: 500 });
-				gradientOpacity.value = withTiming(0, { duration: 500 });
-
-				// Clear the error after the fade starts, giving time for smooth transition
-				setTimeout(() => {
-					setError('');
-					checkScale.value = 0;
-				}, 250);
-			} else {
-				// If no animations are visible, just clear the error
-				setError('');
-			}
+			setError('');
 		}
-	}, [error, checkOpacity, gradientOpacity, checkScale]);
-
-	const showCheckAnimation = useCallback(
-		({ success }: { success: boolean }) => {
-			// Clear any existing timers to prevent conflicting animations
-			if (fadeOutTimerRef.current) {
-				clearTimeout(fadeOutTimerRef.current);
-				fadeOutTimerRef.current = null;
-			}
-
-			// If transitioning from visible error to success, fade out first
-			if (checkOpacity.value > 0 && error && success) {
-				// Fade out current state
-				checkOpacity.value = withTiming(0, { duration: 300 });
-				gradientOpacity.value = withTiming(0, { duration: 300 });
-
-				// Then show new state after brief pause
-				setTimeout(() => {
-					checkOpacity.value = withTiming(1, { duration: 500 });
-					gradientOpacity.value = withTiming(1, { duration: 500 });
-					checkScale.value = withSpring(1, {
-						damping: 10,
-						stiffness: 100,
-					});
-				}, 350);
-			} else {
-				// Show animation immediately if not transitioning
-				checkOpacity.value = withTiming(1, { duration: 500 });
-				gradientOpacity.value = withTiming(1, { duration: 500 });
-				checkScale.value = withSpring(1, {
-					damping: 10,
-					stiffness: 100,
-				});
-			}
-
-			if (success) {
-				// Set a new timer for fade out
-				const delay = checkOpacity.value > 0 && error ? 2150 : 1800; // Add extra time if transitioning
-				fadeOutTimerRef.current = setTimeout(() => {
-					// Hide both check and gradient
-					checkOpacity.value = withTiming(0, { duration: 3000 });
-					gradientOpacity.value = withTiming(0, { duration: 3000 });
-
-					// Store reference to reset the scale after opacity animation
-					fadeOutTimerRef.current = setTimeout(() => {
-						checkScale.value = 0;
-						fadeOutTimerRef.current = null;
-					}, 3005);
-				}, delay);
-			}
-		},
-		[checkOpacity, checkScale, gradientOpacity, error],
-	);
-
-	const checkStyle = useAnimatedStyle(() => ({
-		opacity: checkOpacity.value,
-		transform: [{ scale: checkScale.value }],
-	}));
-
-	const gradientStyle = useAnimatedStyle(() => ({
-		opacity: gradientOpacity.value,
-		position: 'absolute',
-		top: 0,
-		left: 0,
-		right: 0,
-		bottom: 0,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		pointerEvents: 'none',
-	}));
+	}, [error]);
 
 	const updateName = useCallback(() => {
 		if (storedPubkyData.name !== newPubkyName.trim()) {
@@ -261,6 +121,10 @@ const EditPubky = ({
 			);
 		}
 	}, [dispatch, newPubkyName, pubky, storedPubkyData]);
+
+	const onClose = useCallback(() => {
+		SheetManager.hide('edit-pubky');
+	}, []);
 
 	const handleSubmit = useCallback(async () => {
 		try {
@@ -308,14 +172,12 @@ const EditPubky = ({
 							if (signinRes.isErr()) {
 								updateName(); // No need to prevent updating the name if we can.
 								setError(i18n.t('editPubkySheet.unableToSignUp'));
-								showCheckAnimation({ success: false });
 								return;
 							}
 							signedIn = true;
 						} else {
 							updateName(); // No need to prevent updating the name if we can.
 							setError(i18n.t('editPubkySheet.unableToSignUp'));
-							showCheckAnimation({ success: false });
 							return;
 						}
 					}
@@ -335,7 +197,6 @@ const EditPubky = ({
 					if (signinRes.isErr()) {
 						updateName(); // No need to prevent updating the name if we can.
 						setError(i18n.t('editPubkySheet.unableToSignIn', { error: signinRes.error.message }));
-						showCheckAnimation({ success: false });
 						return;
 					}
 				}
@@ -348,7 +209,7 @@ const EditPubky = ({
 				}),
 			);
 			setError('');
-			showCheckAnimation({ success: true });
+			onClose();
 		} finally {
 			setLoading(false);
 		}
@@ -361,8 +222,8 @@ const EditPubky = ({
 		storedPubkyData.homeserver,
 		signupToken,
 		dispatch,
-		showCheckAnimation,
 		updateName,
+		onClose,
 	]);
 
 	const handleChangeText = useCallback((text: string) => {
@@ -438,43 +299,11 @@ const EditPubky = ({
 	}, [loading, homeServer, storedPubkyData.homeserver, storedPubkyData?.signedUp]);
 
 	const title = useMemo(() => {
-		return `${payload?.title} ${truncatePubky(pubky)}` ?? TITLE;
+		return [payload?.title, truncatePubky(pubky)].filter(Boolean).join(' ');
 	}, [payload?.title, pubky]);
-
-	const onClose = useCallback(() => {
-		SheetManager.hide('edit-pubky');
-	}, []);
-
-	const checkMarkGradient = useMemo(() => {
-		return error ? ONBOARDING_KEY_ERROR_RADIAL_GRADIENT : BLUE_RADIAL_GRADIENT;
-	}, [error]);
-
-	const checkMarkImage = useMemo(() => {
-		return error ? require('../images/cross.png') : require('../images/check.png');
-	}, [error]);
-
-	const checkMarkTestID = useMemo(() => {
-		return error ? 'EditPubkyErrorCheckMarkImage' : 'EditPubkySuccessCheckMarkImage';
-	}, [error]);
 
 	const onReset = useCallback(() => {
 		try {
-			// Clear any active timers
-			if (fadeOutTimerRef.current) {
-				clearTimeout(fadeOutTimerRef.current);
-				fadeOutTimerRef.current = null;
-			}
-
-			if (checkOpacity?.value) {
-				checkOpacity.value = withTiming(0, { duration: 0 });
-			}
-			if (gradientOpacity?.value) {
-				gradientOpacity.value = withTiming(0, { duration: 0 });
-			}
-			if (checkScale?.value) {
-				checkScale.value = withSpring(0, { duration: 0 });
-			}
-
 			setError('');
 			setHomeServer(storedPubkyData?.homeserver ?? '');
 			setNewPubkyName(storedPubkyData?.name ?? '');
@@ -482,23 +311,14 @@ const EditPubky = ({
 		} catch (e) {
 			console.log('Reset error:', e);
 		}
-	}, [checkOpacity, checkScale, gradientOpacity, storedPubkyData]);
+	}, [storedPubkyData]);
 
 	// Clear error state when save button becomes disabled (fields revert to original values)
 	useEffect(() => {
 		if (storedPubkyData?.signedUp && !haveFieldsChanged && error) {
 			onReset();
 		}
-	}, [storedPubkyData?.signedUp, haveFieldsChanged, error, clearErrorState, onReset]);
-
-	// Add a cleanup effect to clear timers when component unmounts
-	useEffect(() => {
-		return (): void => {
-			if (fadeOutTimerRef.current) {
-				clearTimeout(fadeOutTimerRef.current);
-			}
-		};
-	}, []);
+	}, [storedPubkyData?.signedUp, haveFieldsChanged, error, onReset]);
 
 	const handleSignupTokenChange = useCallback(
 		(text: string) => {
@@ -507,85 +327,6 @@ const EditPubky = ({
 		},
 		[formatSignupTokenForHomeserver],
 	);
-
-	const inputData = useMemo(() => {
-		const items: InputDataItem[] = [
-			{
-				testID: 'EditPubkyNameInput',
-				id: 'name' as const,
-				value: newPubkyName,
-				onChange: handleChangeText,
-				placeholder: i18n.t('editPubkySheet.pubkyNamePlaceholder'),
-				error: nameError,
-				autoFocus: true,
-			},
-		];
-
-		if (isSignupTokenInputVisible) {
-			items.push({
-				testID: 'EditPubkyInviteCodeInput',
-				id: 'signuptoken' as const,
-				value: signupToken,
-				onChange: handleSignupTokenChange,
-				placeholder: i18n.t('editPubkySheet.inviteCodePlaceholder'),
-				error: '',
-				autoFocus: false,
-			});
-		}
-
-		items.push({
-			testID: 'EditPubkyHomeserverInput',
-			id: 'homeserver' as const,
-			value: homeServer,
-			onChange: setHomeServer,
-			placeholder: i18n.t('editPubky.homeserver'),
-			error: '',
-			autoFocus: false,
-		});
-
-		return items;
-	}, [
-		newPubkyName,
-		handleChangeText,
-		nameError,
-		isSignupTokenInputVisible,
-		homeServer,
-		signupToken,
-		handleSignupTokenChange,
-	]);
-
-	const renderListHeader = useCallback(() => {
-		return (
-			<>
-				<ModalIndicator />
-				<Text testID="EditPubkyTitle" style={styles.title}>
-					{title}
-				</Text>
-			</>
-		);
-	}, [title]);
-
-	const footerTop = useMemo(() => {
-		return null;
-	}, []);
-
-	const renderListFooter = useCallback(() => {
-		return (
-			<View style={[styles.footerContainer, { top: footerTop }]}>
-				{error ? <Text style={styles.errorText}>{error}</Text> : null}
-				<View style={styles.imageContainer}>
-					<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-						<Image
-							testID={checkMarkTestID}
-							source={checkMarkImage}
-							style={styles.checkImage}
-							resizeMode="contain"
-						/>
-					</AnimatedView>
-				</View>
-			</View>
-		);
-	}, [error, checkStyle, checkMarkImage, checkMarkTestID, footerTop]);
 
 	const leftButtonText = useMemo(() => {
 		if (storedPubkyData.homeserver && haveFieldsChanged) {
@@ -601,21 +342,31 @@ const EditPubky = ({
 		return onClose();
 	}, [storedPubkyData.homeserver, haveFieldsChanged, loading, onClose, onReset]);
 
-	// eslint-disable-next-line react/no-unused-prop-types
-	const renderInputItem = useCallback(
-		({ item }: { item: InputDataItem }) => {
-			if (item.id === 'signuptoken') {
-				return (
+	return (
+		<Sheet id="edit-pubky" title={title} keyboardHandlerEnabled={false}>
+			<ActionSheetScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+				<Text style={styles.textInputTitle}>{i18n.t('editPubkySheet.pubkyNameLabel')}</Text>
+				<InputItemComponent
+					testID="EditPubkyNameInput"
+					value={newPubkyName}
+					onChangeText={handleChangeText}
+					placeholder={i18n.t('editPubkySheet.pubkyNamePlaceholder')}
+					error={nameError}
+					autoFocus={true}
+					onSubmitEditing={handleNameSubmit}
+				/>
+
+				{isSignupTokenInputVisible && (
 					<>
-						<Text style={styles.textInputTitle}>{textInputTitleText?.signuptoken}</Text>
+						<Text style={styles.textInputTitle}>{i18n.t('editPubkySheet.inviteCodeOptional')}</Text>
 						<InputItemComponent
-							testID={item.testID}
+							testID="EditPubkyInviteCodeInput"
 							inputRef={signupTokenInputRef}
-							value={item.value}
-							onChangeText={item.onChange}
-							placeholder={item.placeholder}
-							error={item.error}
-							autoFocus={item.autoFocus}
+							value={signupToken}
+							onChangeText={handleSignupTokenChange}
+							placeholder={i18n.t('editPubkySheet.inviteCodePlaceholder')}
+							error=""
+							autoFocus={false}
 							onSubmitEditing={() => {
 								if (haveFieldsChanged || !storedPubkyData?.signedUp) {
 									handleSubmit();
@@ -626,141 +377,41 @@ const EditPubky = ({
 							editable={isSignupTokenEditable}
 						/>
 					</>
-				);
-			}
+				)}
 
-			if (item.id === 'name') {
-				return (
-					<>
-						<Text style={styles.textInputTitle}>{textInputTitleText[item.id]}</Text>
-						<InputItemComponent
-							testID={item.testID}
-							value={item.value}
-							onChangeText={item.onChange}
-							placeholder={item.placeholder}
-							error={item.error}
-							autoFocus={item.autoFocus}
-							onSubmitEditing={handleNameSubmit}
-						/>
-					</>
-				);
-			}
+				<Text style={styles.textInputTitle}>{i18n.t('editPubky.homeserver')}</Text>
+				<InputItemComponent
+					testID="EditPubkyHomeserverInput"
+					value={homeServer}
+					onChangeText={setHomeServer}
+					placeholder={i18n.t('editPubky.homeserver')}
+					error=""
+					autoFocus={false}
+					onSubmitEditing={handleHomeserverSubmit}
+				/>
 
-			// For homeserver input
-			return (
-				<>
-					<Text style={styles.textInputTitle}>{textInputTitleText[item.id]}</Text>
-					<InputItemComponent
-						testID={item.testID}
-						value={item.value}
-						onChangeText={item.onChange}
-						placeholder={item.placeholder}
-						error={item.error}
-						autoFocus={item.autoFocus}
-						onSubmitEditing={handleHomeserverSubmit}
-					/>
-				</>
-			);
-		},
-		[
-			isSignupTokenEditable,
-			handleSubmit,
-			handleNameSubmit,
-			handleHomeserverSubmit,
-			haveFieldsChanged,
-			storedPubkyData?.signedUp,
-			clearErrorState,
-			textInputTitleText,
-		],
-	);
-
-	return (
-		<ActionSheetContainer
-			id="edit-pubky"
-			navigationAnimation={navigationAnimation}
-			keyboardHandlerEnabled={false}
-			isModal={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={ACTION_SHEET_HEIGHT}
-		>
-			<SkiaGradient modal={true} style={styles.content}>
-				<View style={[styles.content, styles.container]}>
-					<AnimatedView style={gradientStyle}>
-						<RadialGradient
-							style={styles.radialGradient}
-							colors={checkMarkGradient}
-							center={{ x: 0.5, y: 0.5 }}
-							positions={[0, 0.2, 0.4, 0.6, 0.8, 1]}
-						/>
-					</AnimatedView>
-
-					<View style={styles.flatListWrapper}>
-						<FlashList
-							data={inputData}
-							renderItem={renderInputItem}
-							renderScrollComponent={ActionSheetScrollView}
-							keyExtractor={item => item.id}
-							showsVerticalScrollIndicator={false}
-							ListHeaderComponent={renderListHeader}
-							ListFooterComponent={renderListFooter}
-							ListFooterComponentStyle={styles.listFooter}
-							keyboardShouldPersistTaps="handled"
-						/>
-
-						<View style={styles.buttonContainer}>
-							<Button
-								testID="EditPubkyLeftButton"
-								text={leftButtonText}
-								style={styles.button}
-								onPress={leftButtonOnPress}
-							/>
-							<Button
-								testID="EditPubkySaveButton"
-								text={i18n.t('common.save')}
-								loading={loading}
-								style={[styles.button, styles.submitButton]}
-								onPress={handleSubmit}
-								disabled={storedPubkyData?.signedUp && !haveFieldsChanged}
-							/>
-						</View>
-					</View>
+				<View style={styles.footerContainer}>
+					{error ? <Text style={styles.errorText}>{error}</Text> : null}
 				</View>
-			</SkiaGradient>
-		</ActionSheetContainer>
+			</ActionSheetScrollView>
+
+			<View style={styles.buttonContainer}>
+				<Button text={leftButtonText} size="large" testID="EditPubkyLeftButton" onPress={leftButtonOnPress} />
+				<Button
+					text={i18n.t('common.save')}
+					size="large"
+					variant="secondary"
+					loading={loading}
+					disabled={storedPubkyData?.signedUp && !haveFieldsChanged}
+					testID="EditPubkySaveButton"
+					onPress={handleSubmit}
+				/>
+			</View>
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	content: {
-		paddingBottom: 24,
-		minHeight: '40%',
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		height: '100%',
-		flexDirection: 'column',
-		backgroundColor: 'transparent',
-	},
-	container: {
-		backgroundColor: 'transparent',
-	},
-	flatListWrapper: {
-		height: '100%',
-		backgroundColor: 'transparent',
-		paddingHorizontal: 24,
-		zIndex: 1,
-		position: 'relative',
-	},
-	radialGradient: {
-		width: '100%',
-		height: '100%',
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-	},
-	title: {
-		...textStyles.bodyMB,
-		marginBottom: 24,
-		alignSelf: 'center',
-	},
 	textInputTitle: {
 		...textStyles.caption,
 		alignItems: 'center',
@@ -768,7 +419,6 @@ const styles = StyleSheet.create({
 	inputWrapper: {
 		marginTop: 8,
 		marginBottom: 12,
-		backgroundColor: 'transparent',
 	},
 	inputContainer: {
 		flexDirection: 'row',
@@ -778,7 +428,6 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		borderStyle: 'dashed',
 		height: 74,
-		backgroundColor: 'transparent',
 	},
 	input: {
 		...textStyles.bodyM,
@@ -794,6 +443,10 @@ const styles = StyleSheet.create({
 	inputError: {
 		borderColor: '#dc2626',
 	},
+	footerContainer: {
+		paddingBottom: 16,
+		alignItems: 'center',
+	},
 	errorText: {
 		...textStyles.bodyS,
 		color: '#dc2626',
@@ -802,42 +455,9 @@ const styles = StyleSheet.create({
 	},
 	buttonContainer: {
 		flexDirection: 'row',
-		width: '100%',
-		justifyContent: 'space-around',
 		alignItems: 'center',
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
-	},
-	button: {
-		width: '47%',
-		minHeight: 64,
-	},
-	submitButton: {
-		borderWidth: 1,
-	},
-	footerContainer: {
-		paddingBottom: 16,
-		alignItems: 'center',
-		backgroundColor: 'transparent',
-	},
-	listFooter: {
-		marginBottom: 16,
-	},
-	imageContainer: {
-		height: 160,
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'transparent',
-		marginTop: 10,
-	},
-	imageWrapper: {
-		justifyContent: 'center',
-		alignItems: 'center',
-		backgroundColor: 'transparent',
-	},
-	checkImage: {
-		width: 150,
-		height: 150,
+		gap: 16,
+		marginTop: 'auto',
 	},
 });
 

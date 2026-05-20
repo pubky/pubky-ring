@@ -48,7 +48,6 @@ export const openCameraForRetry = (dispatch: Dispatch): void => {
 					await routeInput(parsed, { dispatch });
 				}
 			},
-			onClose: () => SheetManager.hide('camera'),
 		},
 	});
 };

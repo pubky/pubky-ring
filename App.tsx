@@ -19,7 +19,7 @@ import { parseInput } from './src/utils/inputParser.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 
-const _toastConfig = toastConfig();
+const appToastConfig = toastConfig();
 
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
@@ -122,7 +122,7 @@ function App(): React.JSX.Element {
 				<SafeAreaView edges={['top', 'left', 'right']}>
 					<SheetProvider>
 						<RootNavigator />
-						<Toast config={_toastConfig} />
+						<Toast config={appToastConfig} />
 					</SheetProvider>
 				</SafeAreaView>
 			</SafeAreaProvider>

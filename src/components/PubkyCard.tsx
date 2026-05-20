@@ -3,6 +3,7 @@ import { Card, LinearGradient, Text } from '../theme/components.ts';
 import React, { memo, ReactElement } from 'react';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { textStyles } from '../theme/utils';
+import { truncatePubky } from '../utils/pubky.ts';
 
 interface PubkyCardProps {
 	name?: string;
@@ -34,7 +35,7 @@ const PubkyCard = ({
 				<Card style={styles.pubkyTextContainer}>
 					{name && <Text style={[styles.pubkyName, nameStyle]}>{name}</Text>}
 					<Text style={[styles.pubkyText, pubkyTextStyle]} numberOfLines={2}>
-						{publicKey}
+						{truncatePubky(publicKey)}
 					</Text>
 				</Card>
 			</Card>
@@ -45,8 +46,7 @@ const PubkyCard = ({
 const styles = StyleSheet.create({
 	pubkyCard: {
 		borderRadius: 16,
-		marginBottom: 24,
-		minHeight: 88,
+		minHeight: 96,
 	},
 	pubkyRow: {
 		flex: 1,
@@ -54,13 +54,15 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		alignSelf: 'center',
 		justifyContent: 'center',
-		paddingHorizontal: 16,
+		paddingHorizontal: 24,
 		backgroundColor: 'transparent',
 	},
 	iconContainer: {
 		width: 38,
 		height: 38,
 		marginRight: 12,
+		borderRadius: '50%',
+		// overflow: 'hidden',
 	},
 	pubkyTextContainer: {
 		flex: 1,

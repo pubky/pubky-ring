@@ -49,14 +49,14 @@ describe('create a pubky with a custom homeserver (stag) with valid invite code'
 		expect(await elementById('EditPubkyInviteCodeInput').getText()).to.equal(inviteCode);
 
 		// Replace default homeserver pubky with staging homeserver pubky 
-		await dismissKeyboard(elementById('EditPubkyTitle'));
+		await dismissKeyboard(elementById('edit-pubky-title'));
 		const homeserverInput = await waitForDisplayed(elementById('EditPubkyHomeserverInput'));
 		await homeserverInput.click();
 		await waitForKeyboardToBeShown();
 		await homeserverInput.clearValue();
 		await driver.sendKeys([stagingHomeserver]);
 		expect(await elementById('EditPubkyHomeserverInput').getText()).to.equal(stagingHomeserver);
-		await dismissKeyboard(elementById('EditPubkyTitle'));
+		await dismissKeyboard(elementById('edit-pubky-title'));
 
 		// Tap 'Save' button on Edit Pubky page
 		const saveButton = await waitForDisplayed(elementById('EditPubkySaveButton'));

@@ -247,7 +247,6 @@ export const useInputHandler = (options: UseInputHandlerOptions = {}): UseInputH
 						onClose: () => {
 							// Handle any partial migration (shows summary if keys were imported, then resets)
 							handleMigrationScannerClose();
-							SheetManager.hide('camera');
 							resolve();
 						},
 					},

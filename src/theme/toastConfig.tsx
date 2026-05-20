@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { StyleSheet, StyleProp, ViewStyle, TextStyle, Platform } from 'react-native';
+import { StyleSheet, StyleProp, TextStyle, ViewStyle } from 'react-native';
 import styled from 'styled-components/native';
 import { BaseToast, ErrorToast, InfoToast, SuccessToast, ToastProps } from 'react-native-toast-message';
 import { useTheme } from 'styled-components/native';
@@ -7,30 +7,26 @@ import { Theme } from './';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { textStyles } from './utils';
 
-type ToastConfigStyle = {
-	style?: StyleProp<ViewStyle>;
-};
-
 interface ThemedProps {
 	theme: Theme;
 }
 
-const StyledBaseToast = styled(BaseToast)<ThemedProps>`
+const StyledBaseToast = styled(BaseToast) <ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: ${(props: ThemedProps): string => props.theme.colors.border};
 `;
 
-const StyledErrorToast = styled(ErrorToast)<ThemedProps>`
+const StyledErrorToast = styled(ErrorToast) <ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: #dc2626;
 `;
 
-const StyledSuccessToast = styled(SuccessToast)<ThemedProps>`
+const StyledSuccessToast = styled(SuccessToast) <ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: #16a34a;
 `;
 
-const StyledInfoToast = styled(InfoToast)<ThemedProps>`
+const StyledInfoToast = styled(InfoToast) <ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: #2563eb;
 `;
@@ -67,13 +63,10 @@ const createThemedToast = (
 					},
 					// eslint-disable-next-line react-native/no-unused-styles
 					toastContainer: {
-						marginTop: Platform.select({
-							ios: insets.top - 50,
-							android: insets.top,
-						}),
+						marginTop: insets.top,
 					},
 				}),
-			[theme.colors.text, theme.colors.sessionText, insets],
+			[theme.colors.text, theme.colors.sessionText, insets.top],
 		);
 
 		return (
@@ -88,18 +81,28 @@ const createThemedToast = (
 	});
 };
 
-const ThemedSuccessToast = createThemedToast(StyledSuccessToast);
-const ThemedErrorToast = createThemedToast(StyledErrorToast);
-const ThemedInfoToast = createThemedToast(StyledInfoToast);
-const ThemedBaseToast = createThemedToast(StyledBaseToast);
+const ThemedSuccessToast = createThemedToast(
+	StyledSuccessToast as unknown as React.ComponentType<ToastComponentProps>,
+);
+const ThemedErrorToast = createThemedToast(
+	StyledErrorToast as unknown as React.ComponentType<ToastComponentProps>,
+);
+const ThemedInfoToast = createThemedToast(
+	StyledInfoToast as unknown as React.ComponentType<ToastComponentProps>,
+);
+const ThemedBaseToast = createThemedToast(
+	StyledBaseToast as unknown as React.ComponentType<ToastComponentProps>,
+);
 
 type ToastConfigReturn = {
 	[key in 'success' | 'error' | 'info' | 'any']: (props: ToastProps) => React.ReactElement;
 };
 
-export const toastConfig = ({ style = {} }: ToastConfigStyle = {}): ToastConfigReturn => ({
-	success: (props: ToastProps): React.ReactElement => <ThemedSuccessToast {...props} style={style} />,
-	error: (props: ToastProps): React.ReactElement => <ThemedErrorToast {...props} style={style} />,
-	info: (props: ToastProps): React.ReactElement => <ThemedInfoToast {...props} style={style} />,
-	any: (props: ToastProps): React.ReactElement => <ThemedBaseToast {...props} style={style} />,
-});
+export const toastConfig = (): ToastConfigReturn => {
+	return {
+		success: (props: ToastProps): React.ReactElement => <ThemedSuccessToast {...props} />,
+		error: (props: ToastProps): React.ReactElement => <ThemedErrorToast {...props} />,
+		info: (props: ToastProps): React.ReactElement => <ThemedInfoToast {...props} />,
+		any: (props: ToastProps): React.ReactElement => <ThemedBaseToast {...props} />,
+	};
+};

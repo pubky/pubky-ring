@@ -213,8 +213,9 @@
 		"chooseBackupMethod": "Choose the backup method you used.",
 		"enterRecoveryWords": "Enter the 12 words from your recovery \nphrase to import or restore your pubky.",
 		"importPubkyButton": "Import pubky",
-		"newPubkyButton": "New pubky",
-		"scanQrToImport": "Scan QR to import"
+		"scanSignupQr": "Scan signup QR",
+		"newPubkyButton": "Set up manually",
+		"scanQrToImport": "Scan import QR"
 	},
 	"editPubkySheet": {
 		"pubkyNameLabel": "Pubky name (label)",
@@ -252,7 +253,7 @@
 	"clipboard": {
 		"pubkyCopied": "Pubky copied",
 		"pubkyCopiedDescription": "Your Pubky has been copied to the clipboard",
-		"pasteLink": "Paste Link"
+		"pasteLink": "Paste QR or link"
 	},
 	"pubkyErrors": {
 		"failedToDelete": "Failed to delete Pubky",

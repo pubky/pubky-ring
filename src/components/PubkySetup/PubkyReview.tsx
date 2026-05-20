@@ -1,8 +1,6 @@
 import React, { ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, SessionText, RadialGradient, ForegroundView } from '../../theme/components.ts';
-import ModalIndicator from '../ModalIndicator.tsx';
-import { AUTHORIZE_KEY_GRADIENT } from '../../utils/constants.ts';
+import { Text, ForegroundView } from '../../theme/components.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { PubkyData } from '../../navigation/types.ts';
 import i18n from '../../i18n';
@@ -10,7 +8,6 @@ import { textStyles } from '../../theme/utils';
 import Button from '../Button.tsx';
 
 interface PubkyReviewProps {
-	modalTitle: string;
 	headerText?: string;
 	description: string;
 	pubky: string;
@@ -19,7 +16,6 @@ interface PubkyReviewProps {
 }
 
 const PubkyReview = ({
-	modalTitle,
 	headerText,
 	description,
 	pubky,
@@ -27,13 +23,9 @@ const PubkyReview = ({
 	onContinue,
 }: PubkyReviewProps): ReactElement => {
 	return (
-		<RadialGradient style={styles.content} colors={AUTHORIZE_KEY_GRADIENT} center={{ x: 0.5, y: 0.5 }}>
-			<ModalIndicator />
-			<View style={styles.titleContainer}>
-				<Text style={styles.title}>{modalTitle}</Text>
-			</View>
+		<View style={styles.content}>
 			{headerText && <Text style={styles.headerText}>{headerText}</Text>}
-			<SessionText style={styles.message}>{description}</SessionText>
+			<Text style={styles.message}>{description}</Text>
 			<ForegroundView style={styles.profileCard}>
 				<PubkyProfile pubky={pubky} pubkyData={pubkyData} hideButton={true} />
 			</ForegroundView>
@@ -46,33 +38,17 @@ const PubkyReview = ({
 					onPress={onContinue}
 				/>
 			</View>
-		</RadialGradient>
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	content: {
 		flex: 1,
-		paddingHorizontal: 20,
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		paddingBottom: 20,
-	},
-	titleContainer: {
-		flexDirection: 'row',
-		justifyContent: 'center',
-		backgroundColor: 'transparent',
 	},
 	headerText: {
 		...textStyles.display,
-		marginBottom: 16,
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		textTransform: 'capitalize',
-		marginBottom: 24,
-		backgroundColor: 'transparent',
+		marginBottom: 20,
 	},
 	message: {
 		...textStyles.bodyM,

@@ -4,7 +4,6 @@ import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { getPubkySecretKey } from './pubky.ts';
 import { showToast, generateBackupFileName } from './helpers.ts';
 import { getBackupPreference, getStore } from './store-helpers.ts';
-import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
 import { backupPubky } from './rnfs.ts';
 import { err, ok } from '@synonymdev/result';
@@ -64,14 +63,12 @@ export const showImportSuccessSheet = ({
 	description,
 	isNewPubky = true,
 	pubky,
-	data = { ...defaultPubkyState },
 	onContinue = (): void => {},
 }: {
 	modalTitle?: string;
 	description?: string;
 	isNewPubky?: boolean;
 	pubky: string;
-	data?: Pubky;
 	onContinue?: () => void;
 }): void => {
 	SheetManager.show('import-success', {
@@ -80,7 +77,6 @@ export const showImportSuccessSheet = ({
 			description,
 			isNewPubky,
 			pubky,
-			data,
 			onContinue,
 		},
 		onClose: () => SheetManager.hide('import-success'),
@@ -103,6 +99,11 @@ export const showImportSuccessUI = (pubky: string, isNewPubky: boolean): void =>
 		});
 	}, SHEET_ANIMATION_DELAY);
 };
+
+export enum EBackupPromptViewId {
+	backup = 'backup',
+	import = 'import',
+}
 
 export const showBackupPrompt = async ({
 	pubky,

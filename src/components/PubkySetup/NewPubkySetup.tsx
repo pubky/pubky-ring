@@ -1,10 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Platform, StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { ActionSheetContainer, View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useSelector } from 'react-redux';
-import { getNavigationAnimation } from '../../store/selectors/settingsSelectors.ts';
 import { PubkyData } from '../../navigation/types.ts';
 import { Pubky } from '../../types/pubky.ts';
 import NewHomeserverSetup from './NewHomeserverSetup.tsx';
@@ -13,17 +9,7 @@ import RequestInviteCode from './RequestInviteCode.tsx';
 import Welcome from './Welcome.tsx';
 import PubkyReview from './PubkyReview.tsx';
 import { defaultPubkyState } from '../../store/shapes/pubky.ts';
-import {
-	ACTION_SHEET_HEIGHT,
-	ACTION_SHEET_HEIGHT_TEXTINPUT,
-	SMALL_SCREEN_ACTION_SHEET_HEIGHT,
-} from '../../utils/constants.ts';
-import { toastConfig } from '../../theme/toastConfig.tsx';
-import Toast from 'react-native-toast-message';
-import { getToastStyle, isSmallScreen } from '../../utils/helpers.ts';
-
-const toastStyle = getToastStyle();
-const smallScreen = isSmallScreen();
+import Sheet from '../Sheet.tsx';
 
 export enum ECurrentScreen {
 	main = 'main',
@@ -35,7 +21,6 @@ export enum ECurrentScreen {
 
 interface ContentProps {
 	currentScreen: ECurrentScreen;
-	title: string;
 	subTitle: string;
 	pubky: string;
 	pubkyData: PubkyData;
@@ -46,7 +31,6 @@ interface ContentProps {
 
 const Content = ({
 	currentScreen,
-	title,
 	subTitle,
 	pubky,
 	pubkyData,
@@ -58,61 +42,44 @@ const Content = ({
 	switch (currentScreen) {
 		case ECurrentScreen.main:
 			return (
-				<View style={styles.fullSize}>
-					<PubkyReview
-						modalTitle={title}
-						headerText={t('pubky.yourPubky')}
-						description={subTitle}
-						pubky={pubky}
-						pubkyData={pubkyData}
-						onContinue={() => setCurrentScreen(ECurrentScreen.homeserver)}
-					/>
-				</View>
+				<PubkyReview
+					headerText={t('pubky.yourPubky')}
+					description={subTitle}
+					pubky={pubky}
+					pubkyData={pubkyData}
+					onContinue={() => setCurrentScreen(ECurrentScreen.homeserver)}
+				/>
 			);
 		case ECurrentScreen.homeserver:
 			return (
-				<View style={styles.fullSize}>
-					<NewHomeserverSetup
-						payload={{
-							pubky,
-							onContinue: () => setCurrentScreen(ECurrentScreen.inviteCode),
-						}}
-					/>
-				</View>
+				<NewHomeserverSetup
+					payload={{
+						pubky,
+						onContinue: () => setCurrentScreen(ECurrentScreen.inviteCode),
+					}}
+				/>
 			);
 		case ECurrentScreen.inviteCode:
 			return (
-				<View style={styles.fullSize}>
-					<InviteCode
-						payload={{
-							pubky,
-							onContinue: () => setCurrentScreen(ECurrentScreen.welcome),
-							onRequestInvite: () => setCurrentScreen(ECurrentScreen.requestInvite),
-						}}
-					/>
-				</View>
+				<InviteCode
+					payload={{
+						pubky,
+						onContinue: () => setCurrentScreen(ECurrentScreen.welcome),
+						onRequestInvite: () => setCurrentScreen(ECurrentScreen.requestInvite),
+					}}
+				/>
 			);
 		case ECurrentScreen.requestInvite:
-			return (
-				<View style={styles.fullSize}>
-					<RequestInviteCode
-						payload={{
-							onBack: () => setCurrentScreen(ECurrentScreen.inviteCode),
-						}}
-					/>
-				</View>
-			);
+			return <RequestInviteCode />
 		case ECurrentScreen.welcome:
 			return (
-				<View style={styles.fullSize}>
-					<Welcome
-						payload={{
-							pubky,
-							onComplete: closeSheet,
-							isInvite,
-						}}
-					/>
-				</View>
+				<Welcome
+					payload={{
+						pubky,
+						isInvite,
+						onComplete: closeSheet,
+					}}
+				/>
 			);
 	}
 };
@@ -128,7 +95,6 @@ const NewPubkySetup = ({
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [currentScreen, setCurrentScreen] = useState<ECurrentScreen>(
 		payload?.currentScreen ?? ECurrentScreen.main,
 	);
@@ -145,32 +111,19 @@ const NewPubkySetup = ({
 			case ECurrentScreen.homeserver:
 				return t('homeserver.title');
 			case ECurrentScreen.inviteCode:
-				return t('newPubkySetup.pubkyHomeserver');
+				return t('welcome.defaultHomeserver');
+			case ECurrentScreen.requestInvite:
+				return t('welcome.defaultHomeserver');
 			case ECurrentScreen.welcome:
-				return t('newPubkySetup.pubkyHomeserver');
+				return t('welcome.defaultHomeserver');
 			default:
 				return t('addPubky.title');
 		}
 	}, [currentScreen, t]);
 
-	const acionSheetHeight = useMemo(() => {
-		switch (currentScreen) {
-			case ECurrentScreen.inviteCode:
-				return ACTION_SHEET_HEIGHT_TEXTINPUT;
-			case ECurrentScreen.welcome:
-				return smallScreen ? SMALL_SCREEN_ACTION_SHEET_HEIGHT : ACTION_SHEET_HEIGHT;
-			default:
-				return ACTION_SHEET_HEIGHT;
-		}
-	}, [currentScreen]);
-
-	// Disable keyboard handler for inviteCode screen to prevent button from jumping
-	const keyboardHandlerEnabled = useMemo(() => {
-		if (currentScreen === ECurrentScreen.inviteCode) {
-			return false;
-		}
-		return Platform.OS === 'ios';
-	}, [currentScreen]);
+	const handleBackPress = useCallback(() => {
+		setCurrentScreen(ECurrentScreen.inviteCode);
+	}, []);
 
 	const subTitle = useMemo(() => {
 		return t('newPubkySetup.newPubkyDescription');
@@ -182,17 +135,14 @@ const NewPubkySetup = ({
 	}, [payload.data, pubky]);
 
 	return (
-		<ActionSheetContainer
+		<Sheet
 			id="new-pubky-setup"
-			navigationAnimation={navigationAnimation}
-			keyboardHandlerEnabled={keyboardHandlerEnabled}
-			//isModal={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={acionSheetHeight}
+			title={title}
+			gradientType="brand"
+			onBackPress={currentScreen === ECurrentScreen.requestInvite ? handleBackPress : undefined}
 		>
 			<Content
 				currentScreen={currentScreen}
-				title={title}
 				subTitle={subTitle}
 				pubky={pubky}
 				pubkyData={pubkyData}
@@ -200,16 +150,8 @@ const NewPubkySetup = ({
 				setCurrentScreen={setCurrentScreen}
 				closeSheet={closeSheet}
 			/>
-			<Toast config={toastConfig({ style: toastStyle })} />
-		</ActionSheetContainer>
+		</Sheet>
 	);
 };
-
-const styles = StyleSheet.create({
-	fullSize: {
-		height: '100%',
-		width: '100%',
-	},
-});
 
 export default memo(NewPubkySetup);

@@ -1,33 +1,24 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Keyboard, Platform, StyleSheet } from 'react-native';
+import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import {
-	ActionSheetContainer,
 	Eye,
 	EyeOff,
 	KeyRound,
 	SessionText,
-	SkiaGradient,
 	Text,
 	TextInput,
 	TouchableOpacity,
-	View,
 } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncateStr } from '../utils/pubky.ts';
-import { useSelector } from 'react-redux';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { Result } from '@synonymdev/result';
-import ModalIndicator from './ModalIndicator.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
-import { ACTION_SHEET_HEIGHT_TEXTINPUT, BACKUP_PASSWORD_CHAR_MIN } from '../utils/constants.ts';
+import { BACKUP_PASSWORD_CHAR_MIN } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
-
-export enum EBackupPromptViewId {
-	backup = 'backup',
-	import = 'import',
-}
+import Sheet from './Sheet.tsx';
+import { EBackupPromptViewId } from '../utils/sheetHelpers.ts';
 
 const formatDate = (date: Date): string => {
 	const day = date.getDate().toString().padStart(2, '0');
@@ -52,7 +43,6 @@ const BackupPrompt = ({
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
-	const navigationAnimation = useSelector(getNavigationAnimation);
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
 	const [error, setError] = useState<string>('');
@@ -131,8 +121,8 @@ const BackupPrompt = ({
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
 				return (
-					<Text numberOfLines={1} ellipsizeMode="middle" style={styles.message}>
-						<Text style={[styles.message, styles.passphraseText]}>{t('backup.passphraseFor')}</Text>
+					<Text numberOfLines={1} ellipsizeMode="middle">
+						<Text style={styles.passphraseText}>{t('backup.passphraseFor')}</Text>
 						<Text style={styles.boldPubky}>{truncatedPubky}</Text>
 					</Text>
 				);
@@ -154,105 +144,77 @@ const BackupPrompt = ({
 	}, [fileDate, fileName, t, truncatedPubky, viewId]);
 
 	return (
-		<ActionSheetContainer
+		<Sheet
 			id="backup-prompt"
-			navigationAnimation={navigationAnimation}
+			title={title}
+			keyboardHandlerEnabled={true}
 			onClose={() => {
 				onClose();
 				setPassword('');
 				setError('');
 			}}
-			keyboardHandlerEnabled={true}
-			isModal={Platform.OS === 'ios'}
-			CustomHeaderComponent={<></>}
-			height={ACTION_SHEET_HEIGHT_TEXTINPUT}
 		>
-			<SkiaGradient modal={true} style={styles.content}>
-				<ModalIndicator />
-				<Text style={styles.title}>{title}</Text>
-				<View style={styles.messageContainer}>
-					<Text style={styles.message}>{message}</Text>
-				</View>
-				{content}
-				<View style={styles.inputContainer}>
-					<TextInput
-						autoComplete="off"
-						style={[styles.input, error ? styles.inputError : null]}
-						secureTextEntry={!showPassword}
-						value={password}
-						onChangeText={text => {
-							setPassword(text);
-							if (error) setError('');
-						}}
-						placeholder={t('backup.enterPassphrase')}
-						placeholderTextColor="#999"
-						autoFocus
-						onSubmitEditing={handleSubmit}
-						autoCapitalize="none"
-						autoCorrect={false}
-						textContentType="none"
-						importantForAutofill="no"
-						spellCheck={false}
-					/>
-					<TouchableOpacity
-						style={styles.eyeButton}
-						onPress={() => setShowPassword(!showPassword)}
-						activeOpacity={0.7}
-					>
-						{showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-					</TouchableOpacity>
-				</View>
-				{error ? <Text style={styles.errorText}>{error}</Text> : null}
-				<View style={styles.buttonContainer}>
-					<Button
-						text={loading ? t('common.close') : t('common.cancel')}
-						style={styles.button}
-						onPress={onClose}
-					/>
-					<Button
-						text={submitButtonText}
-						loading={loading}
-						style={[styles.button, styles.submitButton]}
-						onPress={handleSubmit}
-						disabled={
-							!password.trim() ||
-							(viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN)
-						}
-					/>
-				</View>
-			</SkiaGradient>
-		</ActionSheetContainer>
+			<Text style={styles.message}>{message}</Text>
+			{content}
+			<View style={styles.inputContainer}>
+				<TextInput
+					autoComplete="off"
+					style={[styles.input, error ? styles.inputError : null]}
+					secureTextEntry={!showPassword}
+					value={password}
+					onChangeText={text => {
+						setPassword(text);
+						if (error) setError('');
+					}}
+					placeholder={t('backup.enterPassphrase')}
+					placeholderTextColor="#999"
+					autoFocus
+					onSubmitEditing={handleSubmit}
+					autoCapitalize="none"
+					autoCorrect={false}
+					textContentType="none"
+					importantForAutofill="no"
+					spellCheck={false}
+				/>
+				<TouchableOpacity
+					style={styles.eyeButton}
+					onPress={() => setShowPassword(!showPassword)}
+					activeOpacity={0.7}
+				>
+					{showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+				</TouchableOpacity>
+			</View>
+			{error ? <Text style={styles.errorText}>{error}</Text> : null}
+			<View style={styles.buttonContainer}>
+				<Button
+					text={loading ? t('common.close') : t('common.cancel')}
+					size="large"
+					onPress={onClose}
+				/>
+				<Button
+					text={submitButtonText}
+					size="large"
+					variant="secondary"
+					loading={loading}
+					onPress={handleSubmit}
+					disabled={
+						!password.trim() ||
+						(viewId === EBackupPromptViewId.backup && password.length < BACKUP_PASSWORD_CHAR_MIN)
+					}
+				/>
+			</View>
+		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	content: {
-		borderTopRightRadius: 20,
-		borderTopLeftRadius: 20,
-		minHeight: '40%',
-		paddingHorizontal: 24,
-		paddingBottom: 10,
-	},
-	title: {
-		...textStyles.bodyMB,
-		textAlign: 'center',
-		textTransform: 'capitalize',
-		marginBottom: 24,
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
-	},
-	messageContainer: {
-		marginBottom: 16,
-		backgroundColor: 'transparent',
-	},
 	message: {
-		...textStyles.bodyMSpaced,
-		alignItems: 'center',
+		...textStyles.bodyM,
+		marginBottom: 24,
 	},
 	passphraseText: {
 		...textStyles.caption,
 		color: 'rgba(255, 255, 255, 0.5)',
-		textTransform: 'uppercase',
 	},
 	inputContainer: {
 		flexDirection: 'row',
@@ -260,11 +222,9 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: '#5D5D5D',
 		borderRadius: 16,
-		marginTop: 16,
-		marginBottom: 8,
+		marginTop: 8,
 		borderStyle: 'dashed',
 		minHeight: 74,
-		backgroundColor: 'transparent',
 	},
 	input: {
 		...textStyles.heading,
@@ -289,22 +249,7 @@ const styles = StyleSheet.create({
 	eyeButton: {
 		padding: 12,
 		marginHorizontal: 5,
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		marginTop: 24,
-		width: '100%',
-		justifyContent: 'space-around',
-		alignItems: 'center',
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
-	},
-	button: {
-		width: '47%',
-		minHeight: 64,
-	},
-	submitButton: {
-		borderWidth: 1,
+		backgroundColor: 'transparent'
 	},
 	row: {
 		flexDirection: 'row',
@@ -335,6 +280,12 @@ const styles = StyleSheet.create({
 	},
 	dateText: {
 		...textStyles.caption,
+	},
+	buttonContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 16,
+		marginTop: 24,
 	},
 });
 

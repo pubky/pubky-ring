@@ -32,7 +32,7 @@ const DashedBorder = ({
 				x: halfBorder,
 				y: halfBorder,
 				width: width - borderWidth,
-				height: height - borderRadius,
+				height: height - borderWidth,
 			},
 			rx: borderRadius,
 			ry: borderRadius,

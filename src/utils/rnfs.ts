@@ -8,7 +8,9 @@ import { err, ok, Result } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import Share from 'react-native-share';
 import { SheetManager } from 'react-native-actions-sheet';
-import { EBackupPromptViewId } from '../components/BackupPrompt.tsx';
+import { EBackupPromptViewId } from './sheetHelpers.ts';
+
+
 const Buffer = require('buffer').Buffer;
 
 /**

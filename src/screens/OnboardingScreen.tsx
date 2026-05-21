@@ -1,17 +1,16 @@
 import React, { ReactElement, Suspense } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import LoadingScreen from './LoadingScreen.tsx';
-import SafeAreaView from '../components/SafeAreaView.tsx';
 
 const OnboardingContent = React.lazy(() => Promise.resolve(require('../components/OnboardingContent')));
 
 const OnboardingScreen = (): ReactElement => {
 	return (
-		<SafeAreaView style={styles.container} edges={['bottom']}>
+		<View style={styles.container}>
 			<Suspense fallback={<LoadingScreen />}>
 				<OnboardingContent />
 			</Suspense>
-		</SafeAreaView>
+		</View>
 	);
 };
 

@@ -10,12 +10,12 @@ import {
 	View,
 } from 'react-native';
 import * as bip39 from 'bip39';
-import { TextInput, Text } from '../theme/components.ts';
+import { TextInput } from '../theme/components.ts';
 import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
 import { Result } from '@synonymdev/result';
 import i18n from '../i18n';
-import { textStyles } from '../theme/utils';
+import { BodyMText } from '../theme/typography';
 
 interface MnemonicFormProps {
 	onCancel: () => void;
@@ -215,7 +215,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				onSubmitEditing={handleSubmitEditing}
 				onKeyPress={handleKeyPress}
 				placeholder={`${index + 1}.`}
-				placeholderTextColor="#666"
+				placeholderTextColor="rgba(255, 255, 255, 0.32)"
 				autoCapitalize="none"
 				autoCorrect={false}
 				autoComplete="off"
@@ -243,7 +243,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				showsVerticalScrollIndicator={false}
 				bounces={false}
 			>
-				<Text style={styles.message}>{i18n.t('addPubky.enterRecoveryWords')}</Text>
+				<BodyMText style={styles.message}>{i18n.t('addPubky.enterRecoveryWords')}</BodyMText>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
 						<View style={styles.mnemonicColumn}>
@@ -286,7 +286,6 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 	},
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	keyContainer: {
@@ -301,22 +300,20 @@ const styles = StyleSheet.create({
 	},
 	mnemonicColumn: {
 		flex: 1,
+		gap: 6,
 	},
 	mnemonicInput: {
-		...textStyles.bodyM,
 		borderWidth: 1,
-		borderColor: '#444',
+		borderColor: 'rgba(255, 255, 255, 0.32)',
 		borderStyle: 'dashed',
 		borderRadius: 8,
-		paddingVertical: 10,
-		paddingHorizontal: 12,
-		minHeight: 42,
-		marginBottom: 8,
-		backgroundColor: 'transparent',
+		paddingLeft: 12,
+		paddingRight: 12,
+		height: 46,
 	},
 	invalidInput: {
-		borderColor: '#ff4444',
-		color: '#ff4444',
+		borderColor: '#ff0000',
+		color: '#ff0000',
 	},
 	disabledInput: {
 		opacity: 0.8,

@@ -2,8 +2,8 @@ import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
-import { textStyles } from '../../theme/utils';
-import { SessionView, Text, TouchableOpacity, SessionText, SessionBox } from '../../theme/components.ts';
+import { BodySSBText, BodySText, CaptionSBSpacedText } from '../../theme/typography';
+import { SessionView, TouchableOpacity, SessionBox } from '../../theme/components.ts';
 
 const formatTimestamp = (timestamp: number): string => {
 	const date = new Date(timestamp);
@@ -37,25 +37,27 @@ const SessionItem = ({
 		<SessionBox style={styles.sessionCard}>
 			<SessionView style={styles.headerRow}>
 				<SessionView style={styles.infoContainer}>
-					<Text style={styles.pubkyText} numberOfLines={1}>
+					<BodySSBText style={styles.pubkyText} numberOfLines={1}>
 						{session.pubky}
-					</Text>
-					<SessionText style={styles.dateText}>{formattedDate}</SessionText>
+					</BodySSBText>
+					<BodySText colorName="textTertiary" style={styles.dateText}>
+						{formattedDate}
+					</BodySText>
 				</SessionView>
 				<TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
-					<Text style={styles.signOutText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+					<CaptionSBSpacedText colorName="danger" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
 						{t('sessionItem.signOut')}
-					</Text>
+					</CaptionSBSpacedText>
 				</TouchableOpacity>
 			</SessionView>
 
 			{session.capabilities?.length > 0 && (
 				<SessionView style={styles.capsContainer}>
-					<Text style={styles.capsTitle}>{t('sessionItem.capabilities')}</Text>
+					<CaptionSBSpacedText style={styles.capsTitle}>{t('sessionItem.capabilities')}</CaptionSBSpacedText>
 					<SessionView style={styles.capsWrapper}>
 						{session.capabilities.map(cap => (
 							<SessionView key={cap} style={styles.capChip}>
-								<Text style={styles.capText}>{cap}</Text>
+								<BodySText>{cap}</BodySText>
 							</SessionView>
 						))}
 					</SessionView>
@@ -83,10 +85,6 @@ const styles = StyleSheet.create({
 		minWidth: 100,
 		justifyContent: 'center',
 	},
-	signOutText: {
-		...textStyles.captionSBSpaced,
-		color: '#ff4444',
-	},
 	headerRow: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',
@@ -98,18 +96,15 @@ const styles = StyleSheet.create({
 		marginRight: 12,
 	},
 	pubkyText: {
-		...textStyles.bodySSB,
 		marginBottom: 4,
 	},
 	dateText: {
-		...textStyles.bodyS,
 		fontStyle: 'italic',
 	},
 	capsContainer: {
 		marginTop: 8,
 	},
 	capsTitle: {
-		...textStyles.captionSBSpaced,
 		marginBottom: 8,
 	},
 	capsWrapper: {
@@ -122,10 +117,6 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		paddingHorizontal: 12,
 		paddingVertical: 6,
-	},
-	capText: {
-		...textStyles.bodyS,
-		color: '#666',
 	},
 });
 

@@ -5,10 +5,9 @@ import PubkyCard from './PubkyCard.tsx';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { useSelector } from 'react-redux';
 import { RootState } from '../store';
-import { Text } from '../theme/components.ts';
 import Button from './Button.tsx';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils';
+import { BodyMText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 
 const DeletePubky = ({
@@ -30,12 +29,8 @@ const DeletePubky = ({
 	}, []);
 
 	return (
-		<Sheet
-			id="delete-pubky"
-			title={t('pubky.deletePubky')}
-			gradientType="brand"
-		>
-			<Text style={styles.message}>{t('pubky.deleteConfirm')}</Text>
+		<Sheet id="delete-pubky" title={t('pubky.deletePubky')} gradientType="brand">
+			<BodyMText style={styles.message}>{t('pubky.deleteConfirm')}</BodyMText>
 			<PubkyCard
 				name={pubkyName}
 				publicKey={publicKey}
@@ -57,7 +52,6 @@ const DeletePubky = ({
 
 const styles = StyleSheet.create({
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	pubkyContainer: {
@@ -70,7 +64,6 @@ const styles = StyleSheet.create({
 		marginRight: 16,
 	},
 	pubkyName: {
-		...textStyles.heading,
 		marginBottom: 2,
 	},
 	imageContainer: {

@@ -1,10 +1,10 @@
 import React, { ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Text, ForegroundView } from '../../theme/components.ts';
+import { ForegroundView } from '../../theme/components.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { PubkyData } from '../../navigation/types.ts';
 import i18n from '../../i18n';
-import { textStyles } from '../../theme/utils';
+import { BodyMText, DisplayText } from '../../theme/typography';
 import Button from '../Button.tsx';
 
 interface PubkyReviewProps {
@@ -24,8 +24,8 @@ const PubkyReview = ({
 }: PubkyReviewProps): ReactElement => {
 	return (
 		<View style={styles.content}>
-			{headerText && <Text style={styles.headerText}>{headerText}</Text>}
-			<Text style={styles.message}>{description}</Text>
+			{headerText && <DisplayText style={styles.headerText}>{headerText}</DisplayText>}
+			<BodyMText style={styles.message}>{description}</BodyMText>
 			<ForegroundView style={styles.profileCard}>
 				<PubkyProfile pubky={pubky} pubkyData={pubkyData} hideButton={true} />
 			</ForegroundView>
@@ -47,11 +47,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
 	},
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	profileCard: {

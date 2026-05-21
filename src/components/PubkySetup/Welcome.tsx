@@ -1,12 +1,11 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, Image, Linking, View } from 'react-native';
-import { BoldText, Text } from '../../theme/components.ts';
 // @ts-ignore
 import PubkyRingLogo from '../../images/pubky-app-logo.png';
 import { PUBKY_APP_URL } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../../theme/utils';
+import { BodyMText, BoldText, DisplayText } from '../../theme/typography';
 import Button from '../Button.tsx';
 
 const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
@@ -53,11 +52,11 @@ const Welcome = ({
 
 	return (
 		<View style={styles.content}>
-			<Text style={styles.headerText}>{t('welcome.welcome')}</Text>
-			<Text style={styles.message}>
+			<DisplayText style={styles.headerText}>{t('welcome.welcome')}</DisplayText>
+			<BodyMText style={styles.message}>
 				{t('welcome.homeserverMessageStart')} <BoldText>{truncatedPubky}</BoldText>{' '}
 				{t('welcome.homeserverMessageEnd')}
-			</Text>
+			</BodyMText>
 
 			<View style={styles.tagContainer}>
 				<Image
@@ -86,11 +85,9 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
 	},
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	tagContainer: {

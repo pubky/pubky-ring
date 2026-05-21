@@ -2,7 +2,7 @@ import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react
 import { Alert, StyleSheet, Switch, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { View, Text, Card, SessionText } from '../theme/components.ts';
+import { View, Card } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -21,7 +21,7 @@ import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useInputHandler } from '../hooks/useInputHandler.ts';
-import { textStyles } from '../theme/utils';
+import { BodyMSBText, BodyMText, BodySText, CaptionText } from '../theme/typography';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
@@ -162,17 +162,17 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
                  TODO: Adjust light-mode gradient colors.
                  <Card style={styles.section}>
                  <TouchableOpacity onPress={handleThemePress} style={styles.themeButton}>
-                 <Text style={styles.settingTitle}>Theme</Text>
-                 <SessionText style={styles.themeValue}>
+                 <BodyMSBText>Theme</BodyMSBText>
+                 <BodySText colorName="textTertiary">
                  {themeDisplayText}
-                 </SessionText>
+                 </BodySText>
                  </TouchableOpacity>
                  </Card>
                  **/}
 
 				<Card style={styles.textSection}>
-					<Text style={styles.textSettingTitle}>{t('settings.migrateToOtherDevice')}</Text>
-					<Text style={styles.textSettingValue}>{t('settings.migrateDescription')}</Text>
+					<CaptionText>{t('settings.migrateToOtherDevice')}</CaptionText>
+					<BodyMText style={styles.textSettingValue}>{t('settings.migrateDescription')}</BodyMText>
 				</Card>
 
 				<View style={styles.buttonContainer}>
@@ -202,8 +202,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							onPress={handleNavigationAnimationPress}
 							style={styles.navigationAnimationButton}
 						>
-							<Text style={styles.settingTitle}>{t('settings.navigationAnimation')}</Text>
-							<SessionText style={styles.themeValue}>{navigationAnimationText}</SessionText>
+							<BodyMSBText>{t('settings.navigationAnimation')}</BodyMSBText>
+							<BodySText colorName="textTertiary">{navigationAnimationText}</BodySText>
 						</TouchableOpacity>
 					</Card>
 				)}
@@ -211,7 +211,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				{showSecretSettings && (
 					<Card style={styles.section}>
 						<TouchableOpacity onPress={handleAutoAuthToggle} style={styles.toggleRow}>
-							<Text style={styles.settingTitle}>{t('settings.autoAuth')}</Text>
+							<BodyMSBText>{t('settings.autoAuth')}</BodyMSBText>
 							<View style={styles.switchContainer}>
 								<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
 							</View>
@@ -222,7 +222,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				{showSecretSettings && (
 					<Card style={styles.section}>
 						<TouchableOpacity onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
-							<Text style={styles.settingTitle}>{t('settings.showOnboarding')}</Text>
+							<BodyMSBText>{t('settings.showOnboarding')}</BodyMSBText>
 						</TouchableOpacity>
 					</Card>
 				)}
@@ -230,7 +230,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				{showSecretSettings && (
 					<Card style={styles.section}>
 						<TouchableOpacity onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
-							<Text style={styles.settingTitle}>{t('settings.wipePubkyRing')}</Text>
+							<BodyMSBText>{t('settings.wipePubkyRing')}</BodyMSBText>
 						</TouchableOpacity>
 					</Card>
 				)}
@@ -242,7 +242,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 						onPress={handleBackupPress}
 						style={styles.backupButton}
 					>
-						<Text style={styles.settingTitle}>Backup All Pubkys</Text>
+						<BodyMSBText>Backup All Pubkys</BodyMSBText>
 					</TouchableOpacity>
 				</Card>
 				*/}
@@ -268,17 +268,8 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 		overflow: 'hidden',
 	},
-	textSettingTitle: {
-		...textStyles.caption,
-		color: 'rgba(255, 255, 255, 0.64)',
-	},
 	textSettingValue: {
-		...textStyles.bodyM,
 		marginTop: 10,
-		color: 'rgba(255, 255, 255, 0.8)',
-	},
-	settingTitle: {
-		...textStyles.bodyMSB,
 	},
 	switchContainer: {
 		justifyContent: 'center',
@@ -300,9 +291,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		paddingHorizontal: 16,
 		height: 60,
-	},
-	themeValue: {
-		...textStyles.bodyS,
 	},
 	toggleRow: {
 		flexDirection: 'row',

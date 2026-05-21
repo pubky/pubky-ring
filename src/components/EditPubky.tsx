@@ -1,6 +1,6 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { Platform, StyleSheet, Keyboard, View } from 'react-native';
-import { Text, TextInput } from '../theme/components.ts';
+import { StyleSheet, Keyboard, View } from 'react-native';
+import { TextInput } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver, truncatePubky } from '../utils/pubky.ts';
 import { formatSignupToken } from '../utils/helpers.ts';
@@ -12,7 +12,7 @@ import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import i18n from '../i18n';
-import { textStyles } from '../theme/utils';
+import { BodySText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 
 const MAX_NAME_LENGTH = 50;
@@ -44,21 +44,25 @@ const InputItemComponent = ({
 		<View style={[styles.inputWrapper, style]}>
 			<View style={[styles.inputContainer, error ? styles.inputError : null]}>
 				<TextInput
+					style={styles.input}
 					testID={testID}
 					// @ts-ignore
 					ref={inputRef}
-					style={styles.input}
 					value={value}
 					onChangeText={onChangeText}
 					placeholder={placeholder}
-					placeholderTextColor="#999"
+					placeholderTextColor="rgba(255, 255, 255, 0.32)"
 					autoFocus={autoFocus}
 					onSubmitEditing={onSubmitEditing}
 					autoCapitalize="none"
 					editable={editable}
 				/>
 			</View>
-			{error ? <Text style={styles.errorText}>{error}</Text> : null}
+			{error ? (
+				<BodySText colorName="danger" style={styles.errorText}>
+					{error}
+				</BodySText>
+			) : null}
 		</View>
 	);
 };
@@ -345,7 +349,7 @@ const EditPubky = ({
 	return (
 		<Sheet id="edit-pubky" title={title} keyboardHandlerEnabled={false}>
 			<ActionSheetScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-				<Text style={styles.textInputTitle}>{i18n.t('editPubkySheet.pubkyNameLabel')}</Text>
+				<CaptionText>{i18n.t('editPubkySheet.pubkyNameLabel')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyNameInput"
 					value={newPubkyName}
@@ -358,7 +362,9 @@ const EditPubky = ({
 
 				{isSignupTokenInputVisible && (
 					<>
-						<Text style={styles.textInputTitle}>{i18n.t('editPubkySheet.inviteCodeOptional')}</Text>
+						<CaptionText>
+							{i18n.t('editPubkySheet.inviteCodeOptional')}
+						</CaptionText>
 						<InputItemComponent
 							testID="EditPubkyInviteCodeInput"
 							inputRef={signupTokenInputRef}
@@ -379,7 +385,7 @@ const EditPubky = ({
 					</>
 				)}
 
-				<Text style={styles.textInputTitle}>{i18n.t('editPubky.homeserver')}</Text>
+				<CaptionText>{i18n.t('editPubky.homeserver')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyHomeserverInput"
 					value={homeServer}
@@ -391,7 +397,11 @@ const EditPubky = ({
 				/>
 
 				<View style={styles.footerContainer}>
-					{error ? <Text style={styles.errorText}>{error}</Text> : null}
+					{error ? (
+						<BodySText colorName="danger" style={styles.errorText}>
+							{error}
+						</BodySText>
+					) : null}
 				</View>
 			</ActionSheetScrollView>
 
@@ -412,46 +422,32 @@ const EditPubky = ({
 };
 
 const styles = StyleSheet.create({
-	textInputTitle: {
-		...textStyles.caption,
-		alignItems: 'center',
-	},
 	inputWrapper: {
 		marginTop: 8,
-		marginBottom: 12,
+		marginBottom: 24,
 	},
 	inputContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		borderWidth: 1,
-		borderColor: '#5D5D5D',
+		borderColor: 'rgba(255, 255, 255, 0.32)',
 		borderRadius: 16,
 		borderStyle: 'dashed',
-		height: 74,
+		height: 70,
 	},
 	input: {
-		...textStyles.bodyM,
 		flex: 1,
-		paddingLeft: 16,
-		textAlignVertical: 'center',
-		left: Platform.select({
-			android: 4,
-			ios: 0,
-		}),
-		backgroundColor: 'transparent',
 	},
 	inputError: {
-		borderColor: '#dc2626',
+		borderColor: '#FF0000',
+	},
+	errorText: {
+		textAlign: 'center',
+		marginTop: 4,
 	},
 	footerContainer: {
 		paddingBottom: 16,
 		alignItems: 'center',
-	},
-	errorText: {
-		...textStyles.bodyS,
-		color: '#dc2626',
-		textAlign: 'center',
-		marginTop: 4,
 	},
 	buttonContainer: {
 		flexDirection: 'row',

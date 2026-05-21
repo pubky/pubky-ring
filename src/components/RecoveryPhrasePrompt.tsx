@@ -1,6 +1,6 @@
 import React, { memo, ReactElement, useMemo, useState } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
-import { Text, View } from '../theme/components.ts';
+import { View } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { useSelector } from 'react-redux';
 import BlurView from './BlurView.tsx';
@@ -10,7 +10,7 @@ import { RootState } from '../types';
 import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils';
+import { BodyMText, BodyMSBText, BodySSBText, BodySText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 
 const RecoveryPhrasePrompt = ({
@@ -48,30 +48,26 @@ const RecoveryPhrasePrompt = ({
 
 	return (
 		<Sheet id="recovery-phrase-prompt" title={title}>
-			<Text style={styles.message}>{message}</Text>
+			<BodyMText style={styles.message}>{message}</BodyMText>
 
 			<View style={styles.mnemonicContainer}>
 				<View style={styles.columnContainer}>
 					{mnemonicWords.slice(0, 6).map((word, index) => (
 						<View key={index} style={styles.wordItem}>
-							<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
+							<BodyMSBText colorName="textTertiary" style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
 								{index + 1}.
-							</Text>
-							<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>
-								{word}
-							</Text>
+							</BodyMSBText>
+							<BodyMSBText maxFontSizeMultiplier={1.2}>{word}</BodyMSBText>
 						</View>
 					))}
 				</View>
 				<View style={styles.columnContainer}>
 					{mnemonicWords.slice(6, 12).map((word, index) => (
 						<View key={index + 6} style={styles.wordItem}>
-							<Text style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
+							<BodyMSBText colorName="textTertiary" style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
 								{index + 7}.
-							</Text>
-							<Text style={styles.wordText} maxFontSizeMultiplier={1.2}>
-								{word}
-							</Text>
+							</BodyMSBText>
+							<BodyMSBText maxFontSizeMultiplier={1.2}>{word}</BodyMSBText>
 						</View>
 					))}
 				</View>
@@ -80,14 +76,14 @@ const RecoveryPhrasePrompt = ({
 					<>
 						<BlurView style={styles.blurOverlay} />
 						<TouchableOpacity style={styles.revealButton} onPress={handleConfirmBackup}>
-							<Text
+							<BodySSBText
 								style={styles.tapToRevealText}
 								numberOfLines={1}
 								adjustsFontSizeToFit
 								minimumFontScale={0.8}
 							>
 								{t('backup.tapToReveal')}
-							</Text>
+							</BodySSBText>
 						</TouchableOpacity>
 					</>
 				)}
@@ -95,7 +91,9 @@ const RecoveryPhrasePrompt = ({
 
 			<PubkyCard name={pubkyName} publicKey={payload.pubky} />
 
-			<Text style={styles.warningText}>{t('backup.recoveryWarning')}</Text>
+			<BodySText colorName="textTertiary" style={styles.warningText}>
+				{t('backup.recoveryWarning')}
+			</BodySText>
 
 			<View style={styles.buttonContainer}>
 				<Button
@@ -111,7 +109,6 @@ const RecoveryPhrasePrompt = ({
 
 const styles = StyleSheet.create({
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	mnemonicContainer: {
@@ -142,9 +139,7 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
-	tapToRevealText: {
-		...textStyles.bodySSB,
-	},
+	tapToRevealText: {},
 	columnContainer: {
 		flex: 1,
 		gap: 8,
@@ -156,16 +151,9 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	wordNumber: {
-		...textStyles.bodyMSB,
-		color: 'rgba(255, 255, 255, 0.64)',
 		marginRight: 8,
 	},
-	wordText: {
-		...textStyles.bodyMSB,
-	},
 	warningText: {
-		...textStyles.bodyS,
-		color: 'rgba(255, 255, 255, 0.64)',
 		marginTop: 24,
 	},
 	buttonContainer: {

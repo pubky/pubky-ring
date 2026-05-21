@@ -1,8 +1,7 @@
 import React, { memo, ReactElement } from 'react';
 import { StyleSheet, Image, Linking, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { Text } from '../../theme/components.ts';
-import { textStyles } from '../../theme/utils';
+import { BodyMText, DisplayText } from '../../theme/typography';
 import { isSmallScreen } from '../../utils/helpers.ts';
 import { Mail, Telegram, XLogo } from '../../icons/index.ts';
 
@@ -19,8 +18,8 @@ const RequestInviteCode = (): ReactElement => {
 
 	return (
 		<View style={styles.content}>
-			<Text style={styles.headerText}>{t('requestInvite.needInvite')}</Text>
-			<Text style={styles.message}>{t('requestInvite.askTeam')}</Text>
+			<DisplayText style={styles.headerText}>{t('requestInvite.needInvite')}</DisplayText>
+			<BodyMText>{t('requestInvite.askTeam')}</BodyMText>
 
 			<View style={styles.contactOptions}>
 				<TouchableOpacity activeOpacity={0.7} onPress={() => Linking.openURL(CONTACT_LINKS.email)}>
@@ -52,12 +51,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
-	},
-	message: {
-		...textStyles.bodyM,
-		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	contactOptions: {
 		flexDirection: 'row',

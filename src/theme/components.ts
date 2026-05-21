@@ -1,26 +1,40 @@
 import styled from 'styled-components/native';
-import { Theme } from './index';
+import { Theme, ThemeColorName } from './index';
 import Animated from 'react-native-reanimated';
-import { RadialGradient as _RadialGradient } from '../components/LinearGradient.tsx';
 import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
-import { SafeAreaView as _SafeAreaView } from 'react-native-safe-area-context';
 import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
 import { fontFamily } from './fonts';
 
-export const TextInput = styled.TextInput<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.background};
-	color: ${(props): string => props.theme.colors.text};
-	font-family: ${fontFamily};
+interface BackgroundColorProps {
+	colorName?: ThemeColorName;
+}
+
+const backgroundColor =
+	(defaultColorName: ThemeColorName) =>
+	({ colorName, theme }: BackgroundColorProps & { theme: Theme }): string => {
+		return theme.colors[colorName ?? defaultColorName];
+	};
+
+export const View = styled.View<BackgroundColorProps>`
+	background-color: ${backgroundColor('background')};
+	border-color: ${(props): string => props.theme.colors.textPrimary};
 `;
 
-export const View = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.background};
-	border-color: ${(props): string => props.theme.colors.text};
+export const TextInput = styled.TextInput<{ theme: Theme }>`
+	color: ${(props): string => props.theme.colors.textSecondary};
+	font-family: ${fontFamily};
+	font-size: 17px;
+	font-weight: 400;
+	line-height: 22px;
+	letter-spacing: 0.4px;
+	padding-left: 24px;
+	padding-right: 24px;
+	include-font-padding: false;
 `;
 
 export const AnimatedView = styled(Animated.View)<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};
-	border-color: ${(props): string => props.theme.colors.text};
+	border-color: ${(props): string => props.theme.colors.textPrimary};
 `;
 
 export const TouchableOpacity = styled.TouchableOpacity<{ theme: Theme }>`
@@ -31,23 +45,8 @@ export const NavView = styled.View<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.navButton};
 `;
 
-export const SafeAreaView = styled(_SafeAreaView)<{ theme: Theme }>`
-	flex: 1;
-	background-color: ${(props): string => props.theme.colors.background};
-`;
-
-export const SafeAreaProvider = styled(_SafeAreaProvider)<{ theme: Theme }>`
-	flex: 1;
-	background-color: ${(props): string => props.theme.colors.background};
-`;
-
 export const ScrollView = styled.ScrollView<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};
-`;
-
-export const Text = styled.Text<{ theme: Theme }>`
-	color: ${(props): string => props.theme.colors.text};
-	font-family: ${fontFamily};
 `;
 
 export const SessionBox = styled.View<{ theme: Theme }>`
@@ -69,17 +68,6 @@ export const SessionView = styled.View<{ theme: Theme }>`
 	border-color: ${(props): string => props.theme.colors.border};
 `;
 
-export const SessionText = styled.Text<{ theme: Theme }>`
-	color: ${(props): string => props.theme.colors.sessionText};
-	font-family: ${fontFamily};
-`;
-
-export const BoldText = styled.Text<{ theme: Theme }>`
-	color: ${(props): string => props.theme.colors.text};
-	font-weight: bold;
-	font-family: ${fontFamily};
-`;
-
 export const Box = styled.TouchableOpacity<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.foreground};
 	border-color: ${(props): string => props.theme.colors.border};
@@ -95,7 +83,13 @@ export const AvatarRing = styled.View<{ theme: Theme }>`
 `;
 
 export const ActivityIndicator = styled.ActivityIndicator<{ theme: Theme }>`
-	color: ${(props): string => props.theme.colors.sessionText};
+	color: ${(props): string => props.theme.colors.textTertiary};
+`;
+
+export const Divider = styled.View<BackgroundColorProps>`
+	background-color: 'rgba(255, 255, 255, 0.16)';
+	height: 1px;
+	width: 100%;
 `;
 
 interface LinearGradientProps {
@@ -108,24 +102,3 @@ export const LinearGradient = styled(_LinearGradient).attrs<LinearGradientProps>
 	colors:
 		props.colors || (props.modal ? props.theme.colors.defaultGradient : props.theme.colors.defaultGradient),
 }))``;
-
-interface RadialGradientProps {
-	colors?: string[];
-	center?: { x: number; y: number };
-	radius?: number;
-	modal?: boolean;
-	positions?: number[];
-	theme: Theme;
-}
-
-export const RadialGradient = styled(_RadialGradient).attrs<RadialGradientProps>(props => {
-	const resolvedColors =
-		props.colors || (props.modal ? props.theme.colors.modalGradient : props.theme.colors.gradient);
-	return {
-		colors: resolvedColors,
-		center: props.center || { x: 0.5, y: 0.5 },
-		radius: props.radius || 1,
-		positions:
-			props.positions || resolvedColors.map((_: any, index: number) => index / (resolvedColors.length - 1)),
-	};
-})``;

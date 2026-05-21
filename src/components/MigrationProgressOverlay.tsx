@@ -8,11 +8,11 @@ import Animated, {
 	Easing,
 	interpolate,
 } from 'react-native-reanimated';
-import { View, Text } from '../theme/components';
+import { View } from '../theme/components';
 import { subscribeMigrationProgress, MigrationProgress } from '../utils/actions/migrateAction';
 import { useTranslation } from 'react-i18next';
-import { ACCENTS } from '../utils/constants';
-import { textStyles } from '../theme/utils';
+import { BodyMBText, BodySSBText } from '../theme/typography';
+import { accentColors } from '../theme';
 
 const MigrationProgressOverlay = (): React.ReactElement | null => {
 	const { t } = useTranslation();
@@ -75,10 +75,10 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 		<Animated.View style={[styles.container, containerAnimatedStyle]}>
 			<View style={styles.contentContainer}>
 				<View style={styles.textContainer}>
-					<Text style={styles.title}>{t('migrate.scanning')}</Text>
-					<Text style={styles.progressText}>
+					<BodySSBText>{t('migrate.scanning')}</BodySSBText>
+					<BodyMBText colorName="pubkyRing">
 						{progress.current} / {progress.total}
-					</Text>
+					</BodyMBText>
 				</View>
 
 				<View style={styles.progressBarContainer}>
@@ -110,14 +110,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		marginBottom: 12,
 	},
-	title: {
-		...textStyles.bodySSB,
-		color: 'rgba(255, 255, 255, 0.9)',
-	},
-	progressText: {
-		...textStyles.bodyMB,
-		color: ACCENTS.pubkyRing,
-	},
 	progressBarContainer: {
 		height: 8,
 		backgroundColor: 'rgba(255, 255, 255, 0.15)',
@@ -129,7 +121,7 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 0,
 		height: '100%',
-		backgroundColor: ACCENTS.pubkyRing,
+		backgroundColor: accentColors.pubkyRing,
 		borderRadius: 4,
 	},
 });

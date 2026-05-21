@@ -4,7 +4,7 @@ import type { SvgProps } from 'react-native-svg';
 import type { IconProps } from './types';
 
 export const createIcon = (SvgIcon: ComponentType<SvgProps>): React.NamedExoticComponent<IconProps> => {
-	const Icon = ({ color, colorName = 'text', size = 24, ...props }: IconProps): React.ReactElement => {
+	const Icon = ({ color, colorName = 'textPrimary', size = 24, ...props }: IconProps): React.ReactElement => {
 		const theme = useTheme();
 		const iconColor = color ?? theme.colors[colorName];
 

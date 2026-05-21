@@ -1,11 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Keyboard, Platform, StyleSheet, View } from 'react-native';
-import {
-	SessionText,
-	Text,
-	TextInput,
-	TouchableOpacity,
-} from '../theme/components.ts';
+import { Keyboard, StyleSheet, View } from 'react-native';
+import { TextInput, TouchableOpacity } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncateStr } from '../utils/pubky.ts';
 import { Result } from '@synonymdev/result';
@@ -13,7 +8,7 @@ import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { BACKUP_PASSWORD_CHAR_MIN } from '../utils/constants.ts';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils';
+import { BodyMText, BodyMSBText, BodySText, CaptionBText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 import { EBackupPromptViewId } from '../utils/sheetHelpers.ts';
 import { Eye, EyeOff, Key } from '../icons/index.ts';
@@ -119,10 +114,10 @@ const BackupPrompt = ({
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
 				return (
-					<Text style={styles.inputLabel} numberOfLines={1} ellipsizeMode="middle">
-						<Text style={styles.passphraseText}>{t('backup.passphraseFor')}</Text>
-						<Text style={styles.boldPubky}>{truncatedPubky}</Text>
-					</Text>
+					<CaptionText style={styles.inputLabel} numberOfLines={1} ellipsizeMode="middle">
+						{t('backup.passphraseFor')}
+						<CaptionBText>{truncatedPubky}</CaptionBText>
+					</CaptionText>
 				);
 			case EBackupPromptViewId.import:
 				return (
@@ -131,10 +126,10 @@ const BackupPrompt = ({
 							<Key />
 						</View>
 						<View style={styles.fileInfoContainer}>
-							<Text numberOfLines={1} ellipsizeMode="middle" style={styles.fileText}>
+							<BodyMSBText numberOfLines={1} ellipsizeMode="middle">
 								{fileName}
-							</Text>
-							{fileDate && <SessionText style={styles.dateText}>{fileDate.toUpperCase()}</SessionText>}
+							</BodyMSBText>
+							{fileDate && <CaptionText colorName="textTertiary">{fileDate.toUpperCase()}</CaptionText>}
 						</View>
 					</View>
 				);
@@ -152,12 +147,12 @@ const BackupPrompt = ({
 				setError('');
 			}}
 		>
-			<Text style={styles.message}>{message}</Text>
+			<BodyMText style={styles.message}>{message}</BodyMText>
 			{content}
-			<View style={styles.inputContainer}>
+			<View style={[styles.inputContainer, error ? styles.inputError : null]}>
 				<TextInput
+					style={styles.input}
 					autoComplete="off"
-					style={[styles.input, error ? styles.inputError : null]}
 					secureTextEntry={!showPassword}
 					value={password}
 					onChangeText={text => {
@@ -165,7 +160,7 @@ const BackupPrompt = ({
 						if (error) setError('');
 					}}
 					placeholder={t('backup.enterPassphrase')}
-					placeholderTextColor="#999"
+					placeholderTextColor="rgba(255, 255, 255, 0.32)"
 					autoFocus
 					onSubmitEditing={handleSubmit}
 					autoCapitalize="none"
@@ -182,13 +177,13 @@ const BackupPrompt = ({
 					{showPassword ? <Eye size={24} /> : <EyeOff size={24} />}
 				</TouchableOpacity>
 			</View>
-			{error ? <Text style={styles.errorText}>{error}</Text> : null}
+			{error ? (
+				<BodySText colorName="danger" style={styles.errorText}>
+					{error}
+				</BodySText>
+			) : null}
 			<View style={styles.buttonContainer}>
-				<Button
-					text={loading ? t('common.close') : t('common.cancel')}
-					size="large"
-					onPress={onClose}
-				/>
+				<Button text={loading ? t('common.close') : t('common.cancel')} size="large" onPress={onClose} />
 				<Button
 					text={submitButtonText}
 					size="large"
@@ -207,48 +202,33 @@ const BackupPrompt = ({
 
 const styles = StyleSheet.create({
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	inputLabel: {
 		marginBottom: 8,
 	},
-	passphraseText: {
-		...textStyles.caption,
-		color: 'rgba(255, 255, 255, 0.5)',
-	},
 	inputContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		borderWidth: 1,
-		borderColor: '#5D5D5D',
+		borderColor: 'rgba(255, 255, 255, 0.32)',
 		borderRadius: 16,
 		borderStyle: 'dashed',
-		minHeight: 74,
+		height: 70,
 	},
 	input: {
-		...textStyles.heading,
 		flex: 1,
-		paddingLeft: 16,
-		textAlignVertical: 'center',
-		left: Platform.select({
-			android: 4,
-			ios: 0,
-		}),
-		backgroundColor: 'transparent',
 	},
 	inputError: {
-		borderColor: '#dc2626',
+		borderColor: '#FF0000',
 	},
 	errorText: {
-		...textStyles.bodyS,
-		color: '#dc2626',
 		marginTop: 16,
 	},
 	eyeButton: {
 		padding: 12,
 		marginHorizontal: 5,
-		backgroundColor: 'transparent'
+		backgroundColor: 'transparent',
 	},
 	row: {
 		flexDirection: 'row',
@@ -268,16 +248,6 @@ const styles = StyleSheet.create({
 	fileInfoContainer: {
 		flex: 1,
 		marginRight: 8,
-	},
-	boldPubky: {
-		...textStyles.captionB,
-		color: 'white',
-	},
-	fileText: {
-		...textStyles.bodyMSB,
-	},
-	dateText: {
-		...textStyles.caption,
 	},
 	buttonContainer: {
 		flexDirection: 'row',

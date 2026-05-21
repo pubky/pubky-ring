@@ -1,9 +1,9 @@
 import React, { memo, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { Text, View, AnimatedView } from '../theme/components.ts';
+import { View, AnimatedView } from '../theme/components.ts';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils';
+import { BodySMText } from '../theme/typography';
 import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { ChevronLeft, ChevronRight } from '../icons/index.ts';
 
@@ -164,10 +164,11 @@ const AnimatedQR = ({
 					)}
 				</Pressable>
 			</View>
+
 			{isPaused && (
-				<Text style={styles.progressText}>
+				<BodySMText colorName="textSecondary" style={styles.progressText}>
 					{t('settings.keyProgress', { current: currentIndex + 1, total: data.length })}
-				</Text>
+				</BodySMText>
 			)}
 		</>
 	);
@@ -203,9 +204,7 @@ const styles = StyleSheet.create({
 		right: -40,
 	},
 	progressText: {
-		...textStyles.bodySM,
 		textAlign: 'center',
-		color: '#888',
 		marginBottom: 16,
 	},
 });

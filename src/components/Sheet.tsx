@@ -3,7 +3,7 @@ import { Platform, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle }
 import ActionSheet from 'react-native-actions-sheet';
 import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
-import { ArrowLeft, RadialGradient, Text } from '../theme/components.ts';
+import { RadialGradient, Text } from '../theme/components.ts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import { BLUE_RADIAL_GRADIENT, RED_RADIAL_GRADIENT } from '../utils/constants.ts';
@@ -15,6 +15,7 @@ import { LinearGradient } from './LinearGradient.tsx';
 import { textStyles } from '../theme/utils.ts';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { HEADER_HEIGHT } from './AppHeader.tsx';
+import { ArrowLeft } from '../icons/index.ts';
 
 type GradientType = 'none' | 'brand' | 'danger';
 

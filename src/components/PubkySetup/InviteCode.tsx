@@ -1,10 +1,10 @@
 import React, { memo, ReactElement, useCallback, useState, useRef, useEffect } from 'react';
 import { StyleSheet, TextInput, Linking, Keyboard, View } from 'react-native';
-import { Text, AnimatedView, Gift, Check } from '../../theme/components.ts';
+import { Text } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import DashedBorder from '../DashedBorder.tsx';
 import { formatSignupToken, isValidSignupTokenFormat } from '../../utils/helpers.ts';
-import { useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
 import { DEFAULT_HOMESERVER, ACCENTS } from '../../utils/constants.ts';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver } from '../../utils/pubky.ts';
 import { useDispatch, useSelector } from 'react-redux';
@@ -14,6 +14,7 @@ import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
 import i18n from '../../i18n';
 import { textStyles } from '../../theme/utils';
 import Button from '../Button.tsx';
+import { CheckCircle, Gift } from '../../icons/index.ts';
 
 const InviteCode = ({
 	payload,
@@ -199,16 +200,16 @@ const InviteCode = ({
 					editable={!loading}
 					autoFocus={true}
 				/>
-				<AnimatedView style={[styles.checkmark, inputCheckmarkStyle]}>
-					<Check color={ACCENTS.pubkyRing} size={16} />
-				</AnimatedView>
+				<Animated.View style={[styles.checkmark, inputCheckmarkStyle]}>
+					<CheckCircle color={ACCENTS.pubkyRing} size={32} />
+				</Animated.View>
 			</DashedBorder>
 
 			<View style={styles.needInviteRow}>
 				<Button
 					text={i18n.t('inviteCode.needInviteCode')}
 					size="small"
-					icon={<Gift color="rgba(255, 255, 255, 0.8)" size={18} />}
+					icon={<Gift size={20} />}
 					onPress={handleNeedInvite}
 				/>
 			</View>
@@ -252,8 +253,9 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		paddingHorizontal: 24,
-		paddingVertical: 24,
+		paddingRight: 20,
 		marginBottom: 24,
+		height: 70,
 	},
 	input: {
 		...textStyles.bodyMSpaced,
@@ -261,11 +263,11 @@ const styles = StyleSheet.create({
 		color: ACCENTS.pubkyRing,
 	},
 	checkmark: {
-		backgroundColor: 'rgba(0, 133, 255, 0.2)',
-		borderRadius: '50%',
-		borderWidth: 2,
-		borderColor: ACCENTS.pubkyRing,
-		padding: 2,
+		// backgroundColor: 'rgba(0, 133, 255, 0.2)',
+		// borderRadius: '50%',
+		// borderWidth: 2,
+		// borderColor: ACCENTS.pubkyRing,
+		// padding: 2,
 	},
 	needInviteRow: {
 		alignItems: 'flex-start',

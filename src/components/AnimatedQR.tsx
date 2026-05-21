@@ -1,10 +1,11 @@
 import React, { memo, ReactElement, useCallback, useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
-import { Text, View, ChevronLeft, ChevronRight, AnimatedView } from '../theme/components.ts';
+import { Text, View, AnimatedView } from '../theme/components.ts';
 import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
 import { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import { ChevronLeft, ChevronRight } from '../icons/index.ts';
 
 const pubkyRingLogo = require('../images/pubky-ring.png');
 
@@ -144,7 +145,7 @@ const AnimatedQR = ({
 					{showControls && (
 						<>
 							<AnimatedView
-								style={[styles.chevronLeft, controlsAnimatedStyle]}
+								style={[styles.chevron, styles.chevronLeft, controlsAnimatedStyle]}
 								pointerEvents={isPaused ? 'auto' : 'none'}
 							>
 								<Pressable onPress={handlePrevious} hitSlop={CHEVRON_HIT_SLOP}>
@@ -152,7 +153,7 @@ const AnimatedQR = ({
 								</Pressable>
 							</AnimatedView>
 							<AnimatedView
-								style={[styles.chevronRight, controlsAnimatedStyle]}
+								style={[styles.chevron, styles.chevronRight, controlsAnimatedStyle]}
 								pointerEvents={isPaused ? 'auto' : 'none'}
 							>
 								<Pressable onPress={handleNext} hitSlop={CHEVRON_HIT_SLOP}>
@@ -189,17 +190,17 @@ const styles = StyleSheet.create({
 		padding: 16,
 		borderRadius: 16,
 	},
-	chevronLeft: {
+	chevron: {
 		position: 'absolute',
-		left: -40,
 		top: '50%',
 		transform: [{ translateY: -16 }],
+		backgroundColor: 'transparent',
+	},
+	chevronLeft: {
+		left: -40,
 	},
 	chevronRight: {
-		position: 'absolute',
 		right: -40,
-		top: '50%',
-		transform: [{ translateY: -16 }],
 	},
 	progressText: {
 		...textStyles.bodySM,

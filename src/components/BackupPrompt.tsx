@@ -1,9 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { Keyboard, Platform, StyleSheet, View } from 'react-native';
 import {
-	Eye,
-	EyeOff,
-	KeyRound,
 	SessionText,
 	Text,
 	TextInput,
@@ -19,6 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { textStyles } from '../theme/utils';
 import Sheet from './Sheet.tsx';
 import { EBackupPromptViewId } from '../utils/sheetHelpers.ts';
+import { Eye, EyeOff, Key } from '../icons/index.ts';
 
 const formatDate = (date: Date): string => {
 	const day = date.getDate().toString().padStart(2, '0');
@@ -121,7 +119,7 @@ const BackupPrompt = ({
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
 				return (
-					<Text numberOfLines={1} ellipsizeMode="middle">
+					<Text style={styles.inputLabel} numberOfLines={1} ellipsizeMode="middle">
 						<Text style={styles.passphraseText}>{t('backup.passphraseFor')}</Text>
 						<Text style={styles.boldPubky}>{truncatedPubky}</Text>
 					</Text>
@@ -130,7 +128,7 @@ const BackupPrompt = ({
 				return (
 					<View style={styles.row}>
 						<View style={styles.keyContainer}>
-							<KeyRound size={24} />
+							<Key />
 						</View>
 						<View style={styles.fileInfoContainer}>
 							<Text numberOfLines={1} ellipsizeMode="middle" style={styles.fileText}>
@@ -181,7 +179,7 @@ const BackupPrompt = ({
 					onPress={() => setShowPassword(!showPassword)}
 					activeOpacity={0.7}
 				>
-					{showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+					{showPassword ? <Eye size={24} /> : <EyeOff size={24} />}
 				</TouchableOpacity>
 			</View>
 			{error ? <Text style={styles.errorText}>{error}</Text> : null}
@@ -212,6 +210,9 @@ const styles = StyleSheet.create({
 		...textStyles.bodyM,
 		marginBottom: 24,
 	},
+	inputLabel: {
+		marginBottom: 8,
+	},
 	passphraseText: {
 		...textStyles.caption,
 		color: 'rgba(255, 255, 255, 0.5)',
@@ -222,7 +223,6 @@ const styles = StyleSheet.create({
 		borderWidth: 1,
 		borderColor: '#5D5D5D',
 		borderRadius: 16,
-		marginTop: 8,
 		borderStyle: 'dashed',
 		minHeight: 74,
 	},
@@ -243,8 +243,7 @@ const styles = StyleSheet.create({
 	errorText: {
 		...textStyles.bodyS,
 		color: '#dc2626',
-		marginBottom: 16,
-		marginLeft: 4,
+		marginTop: 16,
 	},
 	eyeButton: {
 		padding: 12,
@@ -254,22 +253,21 @@ const styles = StyleSheet.create({
 	row: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
+		marginBottom: 24,
 	},
 	keyContainer: {
 		borderWidth: 1,
 		borderRadius: 8,
+		borderColor: 'rgba(255, 255, 255, 0.16)',
 		height: 48,
 		width: 48,
-		marginRight: 12,
+		marginRight: 16,
 		alignItems: 'center',
 		justifyContent: 'center',
-		backgroundColor: 'transparent',
 	},
 	fileInfoContainer: {
 		flex: 1,
 		marginRight: 8,
-		backgroundColor: 'transparent',
 	},
 	boldPubky: {
 		...textStyles.captionB,

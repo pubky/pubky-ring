@@ -4,7 +4,7 @@ import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
-import { View, Plus } from '../theme/components';
+import { View } from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
@@ -19,6 +19,7 @@ import { useTranslation } from 'react-i18next';
 import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
+import { Plus } from '../icons/index.ts';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -71,8 +72,8 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 				style={styles.listFooterButton}
 				text={t('home.addPubky')}
 				size="large"
+				icon={<Plus size={24} />}
 				onPress={onAddPubkyPress}
-				icon={<Plus size={24} strokeWidth={1.5} />}
 			/>
 		</View>
 	);

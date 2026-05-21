@@ -3,14 +3,12 @@ import { Platform, StyleSheet } from 'react-native';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { useQRScanner } from '../hooks/useQRScanner';
 import {
-	ArrowRight,
 	Box,
 	Card,
 	CardView,
 	ForegroundView,
 	LinearGradient,
 	NavView,
-	Scan,
 	SessionText,
 	Text,
 	TouchableOpacity,
@@ -24,6 +22,7 @@ import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import i18n from '../i18n';
 import { ACCENTS } from '../utils/constants.ts';
 import Button from './Button.tsx';
+import { ChevronRight, Scan } from '../icons/index.ts';
 
 interface PubkyInfoProps {
 	pubkyName: string;
@@ -148,7 +147,7 @@ const PubkyBox = ({
 					/>
 
 					<ForegroundView style={styles.buttonArrow}>
-						<ArrowRight size={24} />
+						<ChevronRight size={24} colorName="textTertiary" />
 					</ForegroundView>
 				</Box>
 
@@ -158,7 +157,7 @@ const PubkyBox = ({
 					size="medium"
 					variant="secondary"
 					loading={isQRLoading || loading}
-					icon={pubkyData.signedUp ? <Scan size={16} /> : <></>}
+					icon={pubkyData.signedUp ? <Scan size={24} /> : <></>}
 					onPress={qrPress}
 					onLongPress={onLongPress}
 				/>

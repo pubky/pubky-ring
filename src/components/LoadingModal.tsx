@@ -1,7 +1,6 @@
 import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import Animated from 'react-native-reanimated';
-import { Text } from '../theme/components.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getLoadingModalState } from '../store/selectors/uiSelectors.ts';
 import { resetLoadingModal } from '../store/slices/uiSlice.ts';
@@ -16,7 +15,7 @@ import {
 	withTiming,
 } from 'react-native-reanimated';
 import { SheetManager } from 'react-native-actions-sheet';
-import { textStyles } from '../theme/utils';
+import { BodyMText, BodySSBText, DisplayText } from '../theme/typography';
 import Button from './Button.tsx';
 import Sheet from './Sheet.tsx';
 
@@ -176,8 +175,8 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 	return (
 		<Sheet id="loading" title={modalTitle} gradientType={isError ? 'danger' : 'brand'} onClose={onClose}>
 			<View style={styles.contentLayer}>
-				{title && <Text style={styles.headerText}>{title}</Text>}
-				<Text style={styles.message}>{description}</Text>
+				{title && <DisplayText style={styles.headerText}>{title}</DisplayText>}
+				<BodyMText>{description}</BodyMText>
 				<View style={styles.imageContainer}>
 					{showErrorImage ? (
 						<Animated.View style={keyAnimatedStyle}>
@@ -214,7 +213,7 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 						<Button text={t('loading.tryAgain')} size="large" variant="secondary" onPress={handleTryAgain} />
 					</View>
 				) : (
-					<Text style={styles.waitText}>{waitText}</Text>
+					<BodySSBText style={styles.waitText}>{waitText}</BodySSBText>
 				)}
 			</View>
 		</Sheet>
@@ -226,11 +225,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
-	},
-	message: {
-		...textStyles.bodyM,
 	},
 	imageContainer: {
 		flex: 1,
@@ -266,7 +261,6 @@ const styles = StyleSheet.create({
 		height: KEY_IMAGE_SIZE,
 	},
 	waitText: {
-		...textStyles.bodySSB,
 		textAlign: 'center',
 	},
 	buttonContainer: {

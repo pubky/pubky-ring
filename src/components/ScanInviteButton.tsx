@@ -10,7 +10,6 @@ import { useDispatch } from 'react-redux';
 import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import i18n from '../i18n';
-import { textStyles } from '../theme/utils';
 import Button from './Button.tsx';
 import { Scan } from '../icons/index.ts';
 
@@ -111,7 +110,6 @@ const ScanInviteButton = memo(() => {
 				rightIcon={<Image source={PubkyRingLogo} style={styles.logo} />}
 				size="large"
 				style={styles.button}
-				textStyle={styles.text}
 				onPress={handleInviteScan}
 			/>
 		</View>
@@ -126,9 +124,6 @@ const styles = StyleSheet.create({
 	button: {
 		width: '90%',
 		zIndex: 1,
-	},
-	text: {
-		...textStyles.bodySSB,
 	},
 	logo: {
 		height: 56,

@@ -2,11 +2,11 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { StyleSheet, TouchableOpacity } from 'react-native';
 import { copyToClipboard } from '../utils/clipboard';
 import { PubkyData } from '../navigation/types';
-import { View, Text, Card } from '../theme/components';
+import { View, Card } from '../theme/components';
 import { isSmallScreen, showToast } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
 import i18n from '../i18n';
-import { textStyles } from '../theme/utils';
+import { BodyMSBText, HeadingText } from '../theme/typography';
 import Button from './Button.tsx';
 
 interface PubkyProfileProps {
@@ -62,10 +62,10 @@ export const PubkyProfile = memo(
 						<ProfileAvatar pubky={pubky} size={96} />
 					</View>
 
-					<Text style={styles.nameText}>{pubkyName}</Text>
+					<HeadingText style={styles.nameText}>{pubkyName}</HeadingText>
 
 					<TouchableOpacity activeOpacity={0.7} onPress={handleCopyPubky}>
-						<Text style={styles.pubkyText}>{pubkyUri}</Text>
+						<BodyMSBText style={styles.pubkyText}>{pubkyUri}</BodyMSBText>
 					</TouchableOpacity>
 				</Card>
 
@@ -109,13 +109,11 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	nameText: {
-		...textStyles.heading,
 		paddingBottom: 12,
 		textAlign: 'center',
 		backgroundColor: 'transparent',
 	},
 	pubkyText: {
-		...textStyles.bodyMSB,
 		textAlign: 'center',
 		marginBottom: 8,
 	},

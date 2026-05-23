@@ -1,10 +1,9 @@
 import React, { ReactElement, memo } from 'react';
-import { StyleSheet } from 'react-native';
-import { View, Text } from '../theme/components.ts';
+import { StyleSheet, View } from 'react-native';
 import { Canvas, Path, Skia, StrokeCap, StrokeJoin } from '@shopify/react-native-skia';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils';
-import { ACCENTS } from '../utils/constants.ts';
+import { DisplayText } from '../theme/typography';
+import { accentColors } from '../theme/index.ts';
 
 const DashedArrow = (): ReactElement => {
 	// Curve rotated 45° clockwise - now goes top-left to bottom-right
@@ -20,7 +19,7 @@ const DashedArrow = (): ReactElement => {
 
 	// Dashed line paint
 	const dashedPaint = Skia.Paint();
-	dashedPaint.setColor(Skia.Color(ACCENTS.pubkyRing));
+	dashedPaint.setColor(Skia.Color(accentColors.pubkyRing));
 	dashedPaint.setStyle(1);
 	dashedPaint.setStrokeWidth(2);
 	dashedPaint.setStrokeCap(StrokeCap.Round);
@@ -28,7 +27,7 @@ const DashedArrow = (): ReactElement => {
 
 	// Solid arrow head paint
 	const solidPaint = Skia.Paint();
-	solidPaint.setColor(Skia.Color(ACCENTS.pubkyRing));
+	solidPaint.setColor(Skia.Color(accentColors.pubkyRing));
 	solidPaint.setStyle(1);
 	solidPaint.setStrokeWidth(2);
 	solidPaint.setStrokeCap(StrokeCap.Round);
@@ -47,7 +46,7 @@ const EmptyState = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
-			<Text style={textStyles.display}>{t('emptyState.heading')}</Text>
+			<DisplayText>{t('emptyState.heading')}</DisplayText>
 			<DashedArrow />
 		</View>
 	);
@@ -57,7 +56,6 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		justifyContent: 'flex-end',
-		backgroundColor: 'transparent',
 		paddingHorizontal: 24,
 	},
 	canvas: {

@@ -9,18 +9,16 @@ import {
 	ForegroundView,
 	LinearGradient,
 	NavView,
-	SessionText,
-	Text,
 	TouchableOpacity,
 	View,
 } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { shadowStyles, textStyles } from '../theme/utils';
+import { BodySSBText, HeadingText } from '../theme/typography';
+import { shadowStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import i18n from '../i18n';
-import { ACCENTS } from '../utils/constants.ts';
 import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
 
@@ -37,21 +35,21 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 	}, [publicKey]);
 	return (
 		<View style={styles.contentContainer}>
-			<Text style={[textStyles.heading, styles.nameText]} numberOfLines={1}>
+			<HeadingText style={styles.nameText} numberOfLines={1}>
 				{pubkyName}
-			</Text>
+			</HeadingText>
 			<Card style={styles.row}>
-				<Text style={textStyles.bodySSB} numberOfLines={1} ellipsizeMode="middle">
+				<BodySSBText numberOfLines={1} ellipsizeMode="middle">
 					{truncateStr(publicKey)}
-				</Text>
+				</BodySSBText>
 				{!isBackedUp && (
 					<TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}>
-						<Text style={{ color: ACCENTS.pubkyRing }}>{i18n.t('pubkyProfile.backupReminder')}</Text>
+						<BodySSBText colorName="pubkyRing">{i18n.t('pubkyProfile.backupReminder')}</BodySSBText>
 					</TouchableOpacity>
 				)}
 				{sessionsCount > 0 && (
 					<CardView style={styles.sessionsButton}>
-						<SessionText style={textStyles.bodySSB}>{sessionsCount}</SessionText>
+						<BodySSBText colorName="textTertiary">{sessionsCount}</BodySSBText>
 					</CardView>
 				)}
 			</Card>

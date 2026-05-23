@@ -1,7 +1,6 @@
 import React, { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
-import { Text } from '../theme/components.ts';
 import { useSelector } from 'react-redux';
 import { getPubkyKeys, getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
@@ -10,7 +9,7 @@ import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 import AnimatedQR from './AnimatedQR.tsx';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils';
+import { BodyMText, BodyMSBText, BodySText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 
 interface KeyData {
@@ -30,7 +29,7 @@ const MigrateModal = ({
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const [keysData, setKeysData] = useState<KeyData[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const onClose = useMemo(() => payload?.onClose ?? ((): void => { }), [payload]);
+	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
 	const rootState = useSelector((s: RootState) => s);
 	const originalBrightnessRef = useRef<number | null>(null);
 
@@ -122,7 +121,7 @@ const MigrateModal = ({
 			return (
 				<View style={styles.centerContent}>
 					<ActivityIndicator size="large" color="#FFFFFF" />
-					<Text style={styles.loadingText}>{t('common.loading')}</Text>
+					<BodySText style={styles.loadingText}>{t('common.loading')}</BodySText>
 				</View>
 			);
 		}
@@ -130,7 +129,9 @@ const MigrateModal = ({
 		if (keysData.length === 0) {
 			return (
 				<View style={styles.centerContent}>
-					<Text style={styles.noKeysText}>{t('settings.noKeysToDisplay')}</Text>
+					<BodyMSBText colorName="textTertiary" style={styles.noKeysText}>
+						{t('settings.noKeysToDisplay')}
+					</BodyMSBText>
 				</View>
 			);
 		}
@@ -146,16 +147,12 @@ const MigrateModal = ({
 	};
 
 	return (
-		<Sheet
-			id="migrate-modal"
-			title={t('settings.migrateKeys')}
-			onClose={onClose}
-		>
+		<Sheet id="migrate-modal" title={t('settings.migrateKeys')} onClose={onClose}>
 			<View style={styles.textContainer}>
-				<Text style={styles.label}>{t('settings.scanDynamicQR')}</Text>
-				<Text style={styles.description}>
+				<CaptionText>{t('settings.scanDynamicQR')}</CaptionText>
+				<BodyMText style={styles.description}>
 					{t('settings.scanDynamicQRDescription', { count: pubkyKeys.length })}
-				</Text>
+				</BodyMText>
 			</View>
 
 			{renderContent()}
@@ -168,14 +165,8 @@ const styles = StyleSheet.create({
 		marginBottom: 24,
 		backgroundColor: 'transparent',
 	},
-	label: {
-		...textStyles.caption,
-		color: 'rgba(255, 255, 255, 0.64)',
-	},
 	description: {
-		...textStyles.bodyM,
 		marginTop: 10,
-		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	centerContent: {
 		flex: 1,
@@ -183,13 +174,9 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	loadingText: {
-		...textStyles.bodyS,
 		marginTop: 16,
-		color: '#E0E0E0',
 	},
 	noKeysText: {
-		...textStyles.bodyMSB,
-		color: '#888',
 		textAlign: 'center',
 	},
 });

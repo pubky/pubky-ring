@@ -2,8 +2,8 @@ import React, { memo, useMemo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from 'styled-components/native';
 import { Theme } from '../theme';
-import { textStyles } from '../theme/utils';
-import { Text, ActivityIndicator } from '../theme/components.ts';
+import { BodySSBText, CaptionSBText } from '../theme/typography';
+import { ActivityIndicator } from '../theme/components.ts';
 
 enum EButtonSize {
 	large = 'large',
@@ -46,6 +46,8 @@ const Button = ({
 }): React.ReactElement => {
 	const theme = useTheme() as Theme;
 	const disabledStyle = useMemo(() => (disabled || loading ? styles.disabled : null), [disabled, loading]);
+	const ButtonText = size === EButtonSize.small ? CaptionSBText : BodySSBText;
+
 	const variantStyle = useMemo(() => {
 		if (variant !== 'secondary') {
 			return {
@@ -89,15 +91,15 @@ const Button = ({
 			) : (
 				<View style={styles.content}>
 					{icon && icon}
-					<Text
-						testID={`${testID}-Text`}
+					<ButtonText
+						style={[styles.text, textStyle]}
 						numberOfLines={1}
 						adjustsFontSizeToFit
 						minimumFontScale={0.8}
-						style={[styles.text, buttonTextSizeStyles[size], textStyle]}
+						testID={`${testID}-Text`}
 					>
 						{text}
-					</Text>
+					</ButtonText>
 					{rightIcon && rightIcon}
 				</View>
 			)}
@@ -141,7 +143,6 @@ const styles = StyleSheet.create({
 		opacity: 0.32,
 	},
 	text: {
-		...textStyles.bodySSB,
 		alignSelf: 'center',
 		flexShrink: 1,
 		textAlign: 'center',
@@ -152,12 +153,6 @@ const buttonSizeStyles = {
 	[EButtonSize.large]: styles.large,
 	[EButtonSize.medium]: styles.medium,
 	[EButtonSize.small]: styles.small,
-};
-
-const buttonTextSizeStyles = {
-	[EButtonSize.large]: textStyles.bodySSB,
-	[EButtonSize.medium]: textStyles.bodySSB,
-	[EButtonSize.small]: textStyles.captionSB,
 };
 
 export default memo(Button);

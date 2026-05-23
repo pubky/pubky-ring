@@ -1,20 +1,21 @@
 import React, { memo, ReactElement, useCallback, useState, useRef, useEffect } from 'react';
-import { StyleSheet, TextInput, Linking, Keyboard, View } from 'react-native';
-import { Text } from '../../theme/components.ts';
+import { StyleSheet, Linking, Keyboard, View } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
 import DashedBorder from '../DashedBorder.tsx';
 import { formatSignupToken, isValidSignupTokenFormat } from '../../utils/helpers.ts';
 import Animated, { useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { DEFAULT_HOMESERVER, ACCENTS } from '../../utils/constants.ts';
+import { DEFAULT_HOMESERVER } from '../../utils/constants.ts';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver } from '../../utils/pubky.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../../types';
 import { getPubky } from '../../store/selectors/pubkySelectors.ts';
 import { setPubkyData } from '../../store/slices/pubkysSlice.ts';
 import i18n from '../../i18n';
-import { textStyles } from '../../theme/utils';
+import { BodyMText, BodySText, DisplayText } from '../../theme/typography';
 import Button from '../Button.tsx';
 import { CheckCircle, Gift } from '../../icons/index.ts';
+import { accentColors } from '../../theme/index.ts';
+import { TextInput } from '../../theme/components.ts';
 
 const InviteCode = ({
 	payload,
@@ -175,33 +176,33 @@ const InviteCode = ({
 
 	return (
 		<View style={styles.keyboardAvoidingView}>
-			<Text style={styles.headerText}>{i18n.t('inviteCode.title')}</Text>
-			<Text style={styles.message}>{i18n.t('inviteCode.description')}</Text>
+			<DisplayText style={styles.headerText}>{i18n.t('inviteCode.title')}</DisplayText>
+			<BodyMText style={styles.message}>{i18n.t('inviteCode.description')}</BodyMText>
 
 			<DashedBorder
 				style={styles.inputContainer}
-				borderColor={inviteCode ? ACCENTS.pubkyRing : 'rgba(255, 255, 255, 0.32)'}
+				borderColor={inviteCode ? accentColors.pubkyRing : 'rgba(255, 255, 255, 0.32)'}
 				borderWidth={1}
 				borderRadius={16}
 				dashWidth={2}
 				dashGap={2}
 			>
 				<TextInput
-					testID="InviteCodeInput"
 					style={styles.input}
+					testID="InviteCodeInput"
 					value={inviteCode}
 					onChangeText={handleInviteCodeChange}
 					onSubmitEditing={handleContinue}
 					placeholder="XXXX-XXXX-XXXX"
-					placeholderTextColor="rgba(255, 255, 255, 0.2)"
+					placeholderTextColor="rgba(255, 255, 255, 0.32)"
 					autoCapitalize="characters"
 					autoCorrect={false}
 					maxLength={14}
 					editable={!loading}
 					autoFocus={true}
 				/>
-				<Animated.View style={[styles.checkmark, inputCheckmarkStyle]}>
-					<CheckCircle color={ACCENTS.pubkyRing} size={32} />
+				<Animated.View style={inputCheckmarkStyle}>
+					<CheckCircle colorName="pubkyRing" size={32} />
 				</Animated.View>
 			</DashedBorder>
 
@@ -215,9 +216,9 @@ const InviteCode = ({
 			</View>
 
 			{error ? (
-				<Text testID="InviteCodeErrorText" style={styles.errorText}>
+				<BodySText testID="InviteCodeErrorText" colorName="danger" style={styles.errorText}>
 					{error}
-				</Text>
+				</BodySText>
 			) : null}
 
 			<View style={styles.footer}>
@@ -241,13 +242,10 @@ const styles = StyleSheet.create({
 		zIndex: 1,
 	},
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
 	},
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
-		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	inputContainer: {
 		flexDirection: 'row',
@@ -258,24 +256,15 @@ const styles = StyleSheet.create({
 		height: 70,
 	},
 	input: {
-		...textStyles.bodyMSpaced,
 		flex: 1,
-		color: ACCENTS.pubkyRing,
-	},
-	checkmark: {
-		// backgroundColor: 'rgba(0, 133, 255, 0.2)',
-		// borderRadius: '50%',
-		// borderWidth: 2,
-		// borderColor: ACCENTS.pubkyRing,
-		// padding: 2,
+		color: accentColors.pubkyRing,
+		paddingLeft: 0,
 	},
 	needInviteRow: {
 		alignItems: 'flex-start',
 		marginBottom: 24,
 	},
 	errorText: {
-		...textStyles.bodyS,
-		color: '#dc2626',
 		marginBottom: 16,
 	},
 	footer: {

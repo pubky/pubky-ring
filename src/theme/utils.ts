@@ -1,5 +1,4 @@
-import { ViewStyle, TextStyle } from 'react-native';
-import { fontFamily } from './fonts';
+import { ViewStyle } from 'react-native';
 
 export const shadowStyles = {
 	small: {
@@ -23,111 +22,6 @@ export const shadowStyles = {
 		shadowRadius: 8,
 		elevation: 8,
 	} as ViewStyle,
-};
-
-export const textStyles = {
-	display: {
-		fontSize: 48,
-		fontWeight: '700' as const,
-		lineHeight: 58,
-		letterSpacing: 0,
-		fontFamily,
-		color: 'white',
-	} as TextStyle,
-	heading: {
-		fontSize: 26,
-		fontWeight: '300' as const,
-		lineHeight: 32,
-		letterSpacing: 0,
-		fontFamily,
-	} as TextStyle,
-	bodyM: {
-		fontSize: 17,
-		fontWeight: '400' as const,
-		lineHeight: 22,
-		letterSpacing: 0,
-		fontFamily,
-		color: 'rgba(255, 255, 255, 0.80)',
-	} as TextStyle,
-	bodyMSpaced: {
-		fontSize: 17,
-		fontWeight: '400' as const,
-		lineHeight: 22,
-		letterSpacing: 0.4,
-		fontFamily,
-	} as TextStyle,
-	bodyMSB: {
-		fontSize: 17,
-		fontWeight: '600' as const,
-		lineHeight: 22,
-		letterSpacing: 0.4,
-		fontFamily,
-	} as TextStyle,
-	bodyMB: {
-		fontSize: 17,
-		fontWeight: '700' as const,
-		lineHeight: 22,
-		letterSpacing: 0.4,
-		fontFamily,
-	} as TextStyle,
-	bodyS: {
-		fontSize: 15,
-		fontWeight: '400' as const,
-		lineHeight: 20,
-		letterSpacing: 0,
-		fontFamily,
-	} as TextStyle,
-	bodySSpaced: {
-		fontSize: 15,
-		fontWeight: '400' as const,
-		lineHeight: 20,
-		letterSpacing: 0.4,
-		fontFamily,
-	} as TextStyle,
-	bodySM: {
-		fontSize: 15,
-		fontWeight: '500' as const,
-		lineHeight: 20,
-		fontFamily,
-	} as TextStyle,
-	bodySSB: {
-		fontSize: 15,
-		fontWeight: '600' as const,
-		lineHeight: 20,
-		letterSpacing: 0.4,
-		fontFamily,
-	} as TextStyle,
-	caption: {
-		fontSize: 13,
-		fontWeight: '500' as const,
-		lineHeight: 18,
-		letterSpacing: 1,
-		textTransform: 'uppercase',
-		fontFamily,
-		color: 'rgba(255, 255, 255, 0.50)',
-	} as TextStyle,
-	captionSB: {
-		fontSize: 13,
-		fontWeight: '600' as const,
-		lineHeight: 18,
-		letterSpacing: 0,
-		fontFamily,
-	} as TextStyle,
-	captionSBSpaced: {
-		fontSize: 13,
-		fontWeight: '600' as const,
-		lineHeight: 18,
-		letterSpacing: 0.2,
-		fontFamily,
-	} as TextStyle,
-	captionB: {
-		fontSize: 13,
-		fontWeight: '700' as const,
-		lineHeight: 18,
-		letterSpacing: 1,
-		textTransform: 'uppercase',
-		fontFamily,
-	} as TextStyle,
 };
 
 export const spacing = {

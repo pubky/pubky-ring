@@ -5,28 +5,28 @@ import { BaseToast, ErrorToast, InfoToast, SuccessToast, ToastProps } from 'reac
 import { useTheme } from 'styled-components/native';
 import { Theme } from './';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { textStyles } from './utils';
+import { fontFamily } from './fonts';
 
 interface ThemedProps {
 	theme: Theme;
 }
 
-const StyledBaseToast = styled(BaseToast) <ThemedProps>`
+const StyledBaseToast = styled(BaseToast)<ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: ${(props: ThemedProps): string => props.theme.colors.border};
 `;
 
-const StyledErrorToast = styled(ErrorToast) <ThemedProps>`
+const StyledErrorToast = styled(ErrorToast)<ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
-	border-left-color: #dc2626;
+	border-left-color: #FF0000;
 `;
 
-const StyledSuccessToast = styled(SuccessToast) <ThemedProps>`
+const StyledSuccessToast = styled(SuccessToast)<ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: #16a34a;
 `;
 
-const StyledInfoToast = styled(InfoToast) <ThemedProps>`
+const StyledInfoToast = styled(InfoToast)<ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
 	border-left-color: #2563eb;
 `;
@@ -49,13 +49,21 @@ const createThemedToast = (
 				StyleSheet.create({
 					// eslint-disable-next-line react-native/no-unused-styles
 					text1: {
-						...textStyles.bodySSB,
-						color: theme.colors.text,
+						fontFamily,
+						fontSize: 15,
+						fontWeight: '600',
+						lineHeight: 20,
+						letterSpacing: 0.4,
+						color: theme.colors.textPrimary,
 					},
 					// eslint-disable-next-line react-native/no-unused-styles
 					text2: {
-						...textStyles.bodyS,
-						color: theme.colors.sessionText,
+						fontFamily,
+						fontSize: 15,
+						fontWeight: '400',
+						lineHeight: 20,
+						letterSpacing: 0,
+						color: theme.colors.textSecondary,
 					},
 					// eslint-disable-next-line react-native/no-unused-styles
 					contentContainer: {
@@ -66,7 +74,7 @@ const createThemedToast = (
 						marginTop: insets.top,
 					},
 				}),
-			[theme.colors.text, theme.colors.sessionText, insets.top],
+			[theme.colors.textPrimary, theme.colors.textSecondary, insets.top],
 		);
 
 		return (

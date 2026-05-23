@@ -12,8 +12,7 @@ import { parseInput } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import Button from './Button.tsx';
 import Sheet from './Sheet.tsx';
-import { Text } from '../theme/components.ts';
-import { textStyles } from '../theme/utils.ts';
+import { BodyMText } from '../theme/typography.ts';
 
 type PubkyItem = { key: string; value: Pubky };
 const ROUTE_AFTER_CLOSE_DELAY = 100;
@@ -67,7 +66,7 @@ const SelectPubky = ({
 
 	return (
 		<Sheet id="select-pubky" title={t('pubky.selectPubky')} onClose={clearDeepLink}>
-			<Text style={styles.message}>{message}</Text>
+			<BodyMText>{message}</BodyMText>
 			<View style={styles.listContainer}>
 				<FlashList<PubkyItem>
 					data={pubkyArray}
@@ -90,9 +89,6 @@ const SelectPubky = ({
 };
 
 const styles = StyleSheet.create({
-	message: {
-		...textStyles.bodyM,
-	},
 	listContainer: {
 		flex: 1,
 		marginTop: 24,

@@ -1,9 +1,10 @@
 import React, { memo, useCallback } from 'react';
-import { Image, Linking, StyleSheet } from 'react-native';
-import { View, Text, ScrollView, RadialGradient } from '../theme/components.ts';
+import { Image, Linking, StyleSheet, View, ScrollView } from 'react-native';
+import { View as ThemedView, Divider } from '../theme/components.ts';
 import LinearGradient from 'react-native-linear-gradient';
+import { RadialGradient } from '../components/LinearGradient.tsx';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
-import { ACCENTS, BLUE_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
+import { BLUE_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
 import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
@@ -13,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import Button from '../components/Button.tsx';
 import TermsOfUseContent from '../components/TermsOfUseContent.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
-import { textStyles } from '../theme/utils';
+import { BodyMSBText, BodySSBText } from '../theme/typography';
 
 const TermsOfUse = (): React.ReactElement => {
 	const { t } = useTranslation();
@@ -48,7 +49,7 @@ const TermsOfUse = (): React.ReactElement => {
 					</View>
 				</ScrollView>
 
-				<View style={styles.footer}>
+				<ThemedView style={styles.footer}>
 					<LinearGradient
 						style={styles.fadeOverlay}
 						colors={['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)']}
@@ -57,22 +58,22 @@ const TermsOfUse = (): React.ReactElement => {
 						pointerEvents="none"
 					/>
 
-					<View style={styles.footerItem}>
-						<Text style={styles.footerHeaderText}>{t('terms.termsOfUse')}</Text>
-						<Text style={styles.footerText}>{t('terms.acceptTerms')}</Text>
+					<View>
+						<BodyMSBText style={styles.footerHeaderText}>{t('terms.termsOfUse')}</BodyMSBText>
+						<BodySSBText colorName="textTertiary">{t('terms.acceptTerms')}</BodySSBText>
 					</View>
 
-					<View style={styles.divider} />
+					<Divider style={styles.divider} />
 
-					<View style={styles.footerItem}>
-						<Text style={styles.footerHeaderText}>{t('terms.privacyPolicy')}</Text>
-						<Text style={styles.footerText}>
+					<View>
+						<BodyMSBText style={styles.footerHeaderText}>{t('terms.privacyPolicy')}</BodyMSBText>
+						<BodySSBText colorName="textTertiary">
 							{t('terms.acceptPrivacy')}
-							<Text style={styles.linkText} onPress={onPrivacyFormPress}>
+							<BodySSBText colorName="pubkyRing" style={styles.linkText} onPress={onPrivacyFormPress}>
 								{t('terms.privacyPolicy')}
-							</Text>
+							</BodySSBText>
 							.
-						</Text>
+						</BodySSBText>
 					</View>
 
 					<Button
@@ -84,7 +85,7 @@ const TermsOfUse = (): React.ReactElement => {
 					/>
 
 					<SafeAreaInset edge="bottom" />
-				</View>
+				</ThemedView>
 			</View>
 		</View>
 	);
@@ -97,17 +98,14 @@ const styles = StyleSheet.create({
 	contentContainer: {
 		flex: 1,
 		position: 'relative',
-		backgroundColor: 'transparent',
 	},
 	scrollView: {
 		flex: 1,
-		backgroundColor: 'transparent',
 		paddingHorizontal: 24,
 	},
 	textContainer: {
 		paddingTop: HEADER_HEIGHT + 16,
 		paddingBottom: 320, // Extra space to allow scrolling past the footer
-		backgroundColor: 'transparent',
 	},
 	background: {
 		...StyleSheet.absoluteFill,
@@ -119,7 +117,7 @@ const styles = StyleSheet.create({
 	},
 	fadeOverlay: {
 		position: 'absolute',
-		top: -150,
+		top: -149,
 		left: 0,
 		right: 0,
 		height: 150,
@@ -132,29 +130,15 @@ const styles = StyleSheet.create({
 		right: 0,
 		paddingHorizontal: 24,
 		zIndex: 2, // Ensure footer appears above the fade overlay
-		backgroundColor: '#000000',
 	},
 	footerHeaderText: {
-		...textStyles.bodyMSB,
-		color: 'white',
 		marginBottom: 2,
 	},
-	footerText: {
-		...textStyles.bodySSB,
-		color: '#a3a3a3',
-	},
 	linkText: {
-		color: ACCENTS.pubkyRing,
 		textTransform: 'lowercase',
-	},
-	footerItem: {
-		backgroundColor: 'transparent',
 	},
 	divider: {
 		marginVertical: 12,
-		height: 1,
-		width: '100%',
-		backgroundColor: '#2a2a2a',
 	},
 	button: {
 		marginTop: 24,

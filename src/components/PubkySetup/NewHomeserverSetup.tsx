@@ -1,15 +1,18 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Image, Platform, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import {
-	Text,
-	TouchableOpacity,
-	BoldText,
-} from '../../theme/components.ts';
+import { TouchableOpacity } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import { defaultPubkyState } from '../../store/shapes/pubky.ts';
-import { textStyles } from '../../theme/utils';
+import {
+	BodyMText,
+	BodySSBText,
+	BodySSpacedText,
+	BoldText,
+	CaptionText,
+	DisplayText,
+} from '../../theme/typography';
 import Button from '../Button.tsx';
 
 enum HomeserverOption {
@@ -68,13 +71,13 @@ const NewHomeserverSetup = ({
 
 	return (
 		<>
-			<Text style={styles.headerText}>{t('homeserver.dataHosting')}</Text>
-			<Text style={styles.message}>
+			<DisplayText style={styles.headerText}>{t('homeserver.dataHosting')}</DisplayText>
+			<BodyMText style={styles.message}>
 				{t('homeserver.chooseMessage')} <BoldText>{truncatedPubky}</BoldText>
-			</Text>
+			</BodyMText>
 
 			<View style={styles.optionsContainer}>
-				<Text style={styles.optionLabel}>{t('homeserver.label')}</Text>
+				<CaptionText style={styles.optionLabel}>{t('homeserver.label')}</CaptionText>
 
 				<TouchableOpacity
 					testID="HomeserverDefaultOption"
@@ -92,10 +95,9 @@ const NewHomeserverSetup = ({
 							<View testID="HomeserverDefaultRadioInner" style={styles.radioInner} />
 						)}
 					</View>
-					<Text style={styles.optionText}>
-						{t('homeserver.default')}{' '}
-						<Text style={styles.optionSubtext}>{t('homeserver.requiresInvite')}</Text>
-					</Text>
+					<BodySSBText>
+						{t('homeserver.default')} <BodySSpacedText>{t('homeserver.requiresInvite')}</BodySSpacedText>
+					</BodySSBText>
 				</TouchableOpacity>
 
 				<TouchableOpacity
@@ -114,7 +116,7 @@ const NewHomeserverSetup = ({
 							<View testID="HomeserverCustomRadioInner" style={styles.radioInner} />
 						)}
 					</View>
-					<Text style={styles.optionText}>{t('homeserver.custom')}</Text>
+					<BodySSBText>{t('homeserver.custom')}</BodySSBText>
 				</TouchableOpacity>
 			</View>
 
@@ -141,20 +143,15 @@ const NewHomeserverSetup = ({
 
 const styles = StyleSheet.create({
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
 	},
 	message: {
-		...textStyles.bodyM,
 		marginBottom: 24,
-		color: 'rgba(255, 255, 255, 0.8)',
 	},
 	optionsContainer: {
 		zIndex: 10,
 	},
 	optionLabel: {
-		...textStyles.caption,
-		color: 'rgba(255, 255, 255, 0.64)',
 		marginBottom: 12,
 	},
 	optionRow: {
@@ -168,27 +165,21 @@ const styles = StyleSheet.create({
 		height: 32,
 		borderRadius: 100,
 		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 1)',
-		backgroundColor: 'rgba(255, 255, 255, 0.32)',
+		borderColor: 'rgba(255, 255, 255, 0.32)',
+		backgroundColor: 'rgba(255, 255, 255, 0.10)',
 		marginRight: 10,
 		alignItems: 'center',
 		justifyContent: 'center',
 	},
 	radioOuterSelected: {
 		borderColor: '#FFFFFF',
+		backgroundColor: 'rgba(255, 255, 255, 0.32)',
 	},
 	radioInner: {
 		width: 16,
 		height: 16,
 		borderRadius: 100,
 		backgroundColor: '#FFFFFF',
-	},
-	optionText: {
-		...textStyles.bodySSB,
-	},
-	optionSubtext: {
-		...textStyles.bodySSpaced,
-		color: 'rgba(255, 255, 255, 0.80)',
 	},
 	bottomSection: {
 		flex: 1,

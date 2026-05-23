@@ -1,8 +1,8 @@
 import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { Card, LinearGradient, Text } from '../theme/components.ts';
+import { Card, LinearGradient } from '../theme/components.ts';
 import React, { memo, ReactElement } from 'react';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { textStyles } from '../theme/utils';
+import { BodySSBText, HeadingText } from '../theme/typography';
 import { truncatePubky } from '../utils/pubky.ts';
 
 interface PubkyCardProps {
@@ -33,10 +33,10 @@ const PubkyCard = ({
 					<ProfileAvatar pubky={publicKey} size={avatarSize} />
 				</Card>
 				<Card style={styles.pubkyTextContainer}>
-					{name && <Text style={[styles.pubkyName, nameStyle]}>{name}</Text>}
-					<Text style={[styles.pubkyText, pubkyTextStyle]} numberOfLines={2}>
+					{name && <HeadingText style={nameStyle}>{name}</HeadingText>}
+					<BodySSBText style={pubkyTextStyle} numberOfLines={2}>
 						{truncatePubky(publicKey)}
-					</Text>
+					</BodySSBText>
 				</Card>
 			</Card>
 		</LinearGradient>
@@ -60,19 +60,13 @@ const styles = StyleSheet.create({
 	iconContainer: {
 		width: 38,
 		height: 38,
-		marginRight: 12,
+		marginRight: 16,
 		borderRadius: '50%',
 		// overflow: 'hidden',
 	},
 	pubkyTextContainer: {
 		flex: 1,
 		backgroundColor: 'transparent',
-	},
-	pubkyName: {
-		...textStyles.heading,
-	},
-	pubkyText: {
-		...textStyles.bodySSB,
 	},
 });
 

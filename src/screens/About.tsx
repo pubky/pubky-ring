@@ -1,16 +1,16 @@
 import React, { memo, ReactElement } from 'react';
 import { Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
-import { View, Text, ScrollView } from '../theme/components.ts';
+import { View, ScrollView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import { version } from '../../package.json';
 // @ts-ignore
 import PubkyRingLogo from '../images/pubky-app-logo.png';
 import BrandEndoresment from '../images/brand-endorsement.png';
-import { ACCENTS, PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
+import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
-import { textStyles } from '../theme/utils.ts';
+import { BodyMSBText, BodyMSpacedText, BodyMText, DisplayText } from '../theme/typography.ts';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { ChevronRight } from '../icons/index.ts';
 
@@ -52,24 +52,24 @@ const About = (): ReactElement => {
 			<AppHeader />
 
 			<ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-				<Text style={styles.title}>{t('about.keychainFor')}</Text>
-				<Text style={styles.lowerTitle}>{t('about.theNextWeb')}</Text>
-				<Text style={styles.subtitle}>{t('about.description')}</Text>
-				<Text style={styles.subtitle}>{t('about.craftedBy')}</Text>
+				<DisplayText>{t('about.keychainFor')}</DisplayText>
+				<DisplayText style={styles.lowerTitle}>{t('about.theNextWeb')}</DisplayText>
+				<BodyMText style={styles.subtitle}>{t('about.description')}</BodyMText>
+				<BodyMText style={styles.subtitle}>{t('about.craftedBy')}</BodyMText>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
-					<Text style={styles.rowTitle}>{t('about.legal')}</Text>
+					<BodyMSpacedText>{t('about.legal')}</BodyMSpacedText>
 					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
-					<Text style={styles.rowTitle}>{t('common.share')}</Text>
+					<BodyMSpacedText>{t('common.share')}</BodyMSpacedText>
 					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
-					<Text style={styles.rowTitle}>{t('about.version')}</Text>
-					<Text style={styles.rowValue}>{version}</Text>
+					<BodyMSpacedText>{t('about.version')}</BodyMSpacedText>
+					<BodyMSpacedText colorName="textTertiary">{version}</BodyMSpacedText>
 				</TouchableOpacity>
 
 				<Image source={BrandEndoresment} style={styles.brandLogo} />
@@ -77,7 +77,9 @@ const About = (): ReactElement => {
 				<TouchableOpacity style={styles.footer} activeOpacity={0.8} onPress={onFooterPress}>
 					<View style={styles.logo}>
 						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
-						<Text style={styles.footerText}>{t('about.joinWithPubkyRing')}</Text>
+						<BodyMSBText colorName="pubkyApp" style={styles.footerText}>
+							{t('about.joinWithPubkyRing')}
+						</BodyMSBText>
 					</View>
 					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
@@ -98,15 +100,10 @@ const styles = StyleSheet.create({
 		paddingTop: HEADER_HEIGHT + 24,
 		backgroundColor: 'transparent',
 	},
-	title: {
-		...textStyles.display,
-	},
 	lowerTitle: {
-		...textStyles.display,
 		marginBottom: 8,
 	},
 	subtitle: {
-		...textStyles.bodyM,
 		marginBottom: 24,
 	},
 	row: {
@@ -120,13 +117,6 @@ const styles = StyleSheet.create({
 	},
 	logo: {
 		backgroundColor: 'transparent',
-	},
-	rowTitle: {
-		...textStyles.bodyMSpaced,
-	},
-	rowValue: {
-		...textStyles.bodyMSpaced,
-		color: 'rgba(255, 255, 255, 0.5)',
 	},
 	footer: {
 		flexDirection: 'row',
@@ -149,9 +139,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	footerText: {
-		...textStyles.bodyMSB,
 		letterSpacing: 0,
-		color: ACCENTS.pubkyApp,
 		marginTop: 12,
 	},
 	pubkyLogo: {

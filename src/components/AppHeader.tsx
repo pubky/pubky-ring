@@ -1,12 +1,11 @@
-import { Image, StyleSheet } from 'react-native';
+import { Image, StyleSheet, View, TouchableOpacity } from 'react-native';
 import React, { memo, ReactElement, useCallback, useRef } from 'react';
-import { Text, TouchableOpacity, View } from '../theme/components.ts';
 import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import LinearGradient from 'react-native-linear-gradient';
-import { textStyles } from '../theme/utils';
+import { HeadingText } from '../theme/typography';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { ArrowLeft } from '../icons/index.ts';
 
@@ -24,11 +23,11 @@ type AppHeaderProps = {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const LogoButton = memo(({ onLongPress, onPress }: { onLongPress: () => void; onPress: () => void }) => (
 	<TouchableOpacity
+		style={styles.logoWrapper}
 		activeOpacity={1}
 		// TODO: Adjust light-mode gradient colors.
 		//onLongPress={onLongPress}
 		onPress={onPress}
-		style={styles.logoWrapper}
 	>
 		<Image source={PubkyRingLogo} style={styles.logo} />
 	</TouchableOpacity>
@@ -85,7 +84,7 @@ const AppHeader = memo(
 				{resolvedLeftButton}
 
 				{title ? (
-					<Text style={styles.title}>{title}</Text>
+					<HeadingText>{title}</HeadingText>
 				) : (
 					<LogoButton onLongPress={toggleTheme} onPress={handleDoubleTap} />
 				)}
@@ -100,9 +99,8 @@ const styles = StyleSheet.create({
 	container: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		alignContent: 'center',
+		justifyContent: 'space-between',
 		paddingHorizontal: 16,
-		backgroundColor: 'transparent',
 		position: 'absolute',
 		top: 0,
 		left: 0,
@@ -114,18 +112,12 @@ const styles = StyleSheet.create({
 		...StyleSheet.absoluteFill,
 	},
 	logoWrapper: {
-		alignItems: 'center',
-		backgroundColor: 'transparent',
 		flex: 1,
+		alignItems: 'center',
 	},
 	logo: {
 		height: 36,
 		resizeMode: 'contain',
-	},
-	title: {
-		...textStyles.heading,
-		textAlign: 'center',
-		flex: 1,
 	},
 });
 

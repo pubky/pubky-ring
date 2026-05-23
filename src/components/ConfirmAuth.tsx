@@ -1,7 +1,7 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
 import { Alert, Platform, StyleSheet } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import { AnimatedView, SessionText, Text, View } from '../theme/components';
+import { AnimatedView, View } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
@@ -9,7 +9,7 @@ import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
 import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
-import { textStyles } from '../theme/utils';
+import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import ProgressBar from './ProgressBar.tsx';
@@ -21,7 +21,6 @@ import Button from './Button.tsx';
 import Sheet from './Sheet.tsx';
 import SafeAreaInset from './SafeAreaInset.tsx';
 import { CheckCircle, Folder } from '../icons/index.ts';
-import { ACCENTS } from '../utils/constants.ts';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -61,20 +60,16 @@ const Permission = memo(
 			<View style={styles.permissionRow}>
 				<Folder size={16} />
 				<View style={styles.pathContainer}>
-					<Text style={styles.pathText}>{capability.path}</Text>
+					<CaptionSBText>{capability.path}</CaptionSBText>
 				</View>
 				<View style={styles.permissionsContainer}>
 					{hasReadPermission && (
-						<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>
+						<CaptionText>
 							{t('common.read')}
 							{hasWritePermission ? ',' : ''}
-						</SessionText>
+						</CaptionText>
 					)}
-					{hasWritePermission && (
-						<SessionText style={isAuthorized ? styles.authorizedText : styles.unauthorizedText}>
-							{t('common.write')}
-						</SessionText>
-					)}
+					{hasWritePermission && <CaptionText>{t('common.write')}</CaptionText>}
 				</View>
 			</View>
 		);
@@ -199,19 +194,23 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 	return (
 		<Sheet id="confirm-auth" title={titleText} showBottomSafeAreaInset={false}>
 			<View style={styles.section}>
-				<SessionText style={styles.sectionTitle}>
+				<CaptionText style={styles.sectionTitle}>
 					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
-				</SessionText>
+				</CaptionText>
 				<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
 			</View>
 
 			<PubkyCard name={pubkyName} publicKey={pubky} avatarSize={48} avatarStyle={styles.avatarContainer} />
 
-			{!isAuthorized && <Text style={styles.warningText}>{t('auth.trustWarning')}</Text>}
+			{!isAuthorized && (
+				<BodySText style={styles.warningText} colorName="textTertiary">
+					{t('auth.trustWarning')}
+				</BodySText>
+			)}
 
 			<View style={styles.imageContainer}>
 				<AnimatedView style={[styles.imageWrapper, checkStyle]}>
-					<CheckCircle color={ACCENTS.pubkyApp} size={128} />
+					<CheckCircle colorName="pubkyApp" size={128} />
 				</AnimatedView>
 			</View>
 
@@ -275,13 +274,10 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	relayText: {
-		...textStyles.captionSB,
 		justifyContent: 'center',
 		marginLeft: 6,
 	},
 	warningText: {
-		...textStyles.bodyS,
-		color: 'rgba(255, 255, 255, 0.64)',
 		marginTop: 24,
 	},
 	permissionRow: {
@@ -295,10 +291,6 @@ const styles = StyleSheet.create({
 		marginLeft: 5,
 		justifyContent: 'center',
 		backgroundColor: 'transparent',
-	},
-	pathText: {
-		...textStyles.captionSB,
-		// backgroundColor: 'transparent',
 	},
 	permissionsContainer: {
 		flex: 1,
@@ -319,15 +311,7 @@ const styles = StyleSheet.create({
 		backgroundColor: 'transparent',
 	},
 	sectionTitle: {
-		...textStyles.caption,
 		marginBottom: 8,
-		backgroundColor: 'transparent',
-	},
-	unauthorizedText: {
-		...textStyles.caption,
-	},
-	authorizedText: {
-		...textStyles.caption,
 	},
 	avatarContainer: {
 		width: 48,

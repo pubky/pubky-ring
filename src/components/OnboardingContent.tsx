@@ -1,14 +1,15 @@
 import React, { ReactElement, useCallback } from 'react';
-import { View, Text, StyleSheet, Image } from 'react-native';
-import { RadialGradient } from '../theme/components.ts';
+import { View, StyleSheet, Image } from 'react-native';
+import { RadialGradient } from './LinearGradient.tsx';
 import { BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { useDispatch } from 'react-redux';
-import { textStyles } from '../theme/utils';
+import { BodyMText, DisplayText } from '../theme/typography';
 import { useTypedNavigation } from '../navigation/hooks';
 import { useTranslation } from 'react-i18next';
 import Button from './Button.tsx';
 import AppHeader from './AppHeader.tsx';
+import SafeAreaInset from './SafeAreaInset.tsx';
 
 const OnboardingContent = (): ReactElement => {
 	const { t } = useTranslation();
@@ -25,32 +26,28 @@ const OnboardingContent = (): ReactElement => {
 			<AppHeader disableBackNavigation />
 
 			<RadialGradient style={styles.background} colors={BLUE_RADIAL_GRADIENT} center={{ x: 1, y: 0.5 }}>
-				{/* Background image */}
 				<Image source={require('../images/circles.png')} style={styles.backgroundImage} />
 			</RadialGradient>
 
-			{/* Keys Image */}
 			<View style={styles.keysImageContainer}>
 				<Image source={require('../images/keyring.png')} style={styles.keysImage} />
 			</View>
 
-			{/* Content Block: Text and Buttons */}
-			<View style={[styles.contentBlock]}>
-				{/* Text */}
-				<Text style={styles.title}>{t('onboarding.title')}</Text>
-				<Text style={styles.subtitle}>{t('about.description')}</Text>
+			<View style={styles.contentBlock}>
+				<DisplayText style={styles.screenTitle}>{t('onboarding.title')}</DisplayText>
+				<BodyMText>{t('about.description')}</BodyMText>
 
-				{/* Buttons */}
 				<View style={styles.buttonContainer}>
 					<Button
-						testID="OnboardingGetStartedButton"
-						style={styles.buttonPrimary}
 						text={t('onboarding.getStarted')}
 						size="large"
+						testID="OnboardingGetStartedButton"
 						onPress={navigateHome}
 					/>
 				</View>
 			</View>
+
+			<SafeAreaInset edge="bottom" />
 		</View>
 	);
 };
@@ -97,19 +94,12 @@ const styles = StyleSheet.create({
 		justifyContent: 'flex-end',
 		paddingHorizontal: 24,
 	},
-	title: {
-		...textStyles.display,
-	},
-	subtitle: {
-		...textStyles.bodyM,
-		marginTop: 8,
+	screenTitle: {
+		marginBottom: 8,
 	},
 	buttonContainer: {
 		flexDirection: 'row',
 		marginTop: 24,
-	},
-	buttonPrimary: {
-		flex: 1,
 	},
 });
 

@@ -1,11 +1,3 @@
-// Accent colors
-
-export const ACCENTS = {
-	pubkyRing: '#0085FF',
-	pubkyApp: '#C8FF00',
-	red: '#e95164',
-};
-
 // Gradient definitions
 
 export const BLUE_RADIAL_GRADIENT = ['#0b2033', 'rgba(0, 0, 0, 0.1)'];

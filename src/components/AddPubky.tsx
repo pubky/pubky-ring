@@ -1,6 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import { Text } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useDispatch } from 'react-redux';
@@ -12,7 +11,7 @@ import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import { readFromClipboard } from '../utils/clipboard';
 import i18n from '../i18n';
-import { textStyles } from '../theme/utils';
+import { BodyMText, DisplayText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 import { FileText, Lock, Pencil, Scan, Upload } from '../icons/index.ts';
 
@@ -42,7 +41,7 @@ const AddPubky = ({
 			setTimeout(() => {
 				importPubky();
 			}, SCANNER_CLOSE_DELAY);
-		} catch { }
+		} catch {}
 	}, [importPubky, closeSheet]);
 
 	const onMnemonicPhrase = useCallback(() => {
@@ -153,9 +152,9 @@ const AddPubky = ({
 	const getHeaderText = useCallback(() => {
 		switch (currentScreen) {
 			case 'main':
-				return <Text style={styles.headerText}>{i18n.t('addPubky.yourKeysYourIdentity')}</Text>;
+				return <DisplayText style={styles.headerText}>{i18n.t('addPubky.yourKeysYourIdentity')}</DisplayText>;
 			case 'import-options':
-				return <Text style={styles.headerText}>{i18n.t('addPubky.restoreOrImport')}</Text>;
+				return <DisplayText style={styles.headerText}>{i18n.t('addPubky.restoreOrImport')}</DisplayText>;
 			default:
 				return <></>;
 		}
@@ -185,13 +184,33 @@ const AddPubky = ({
 						icon: <Scan />,
 						onPress: () => onScanQrPress(i18n.t('home.scanQR')),
 					},
-					{ id: 'NewPubkyButton', text: i18n.t('addPubky.newPubkyButton'), icon: <Pencil />, onPress: onCreatePubky },
-					{ id: 'ImportPubkyButton', text: i18n.t('addPubky.importPubkyButton'), icon: <Upload />, onPress: onImportPubky },
+					{
+						id: 'NewPubkyButton',
+						text: i18n.t('addPubky.newPubkyButton'),
+						icon: <Pencil />,
+						onPress: onCreatePubky,
+					},
+					{
+						id: 'ImportPubkyButton',
+						text: i18n.t('addPubky.importPubkyButton'),
+						icon: <Upload />,
+						onPress: onImportPubky,
+					},
 				];
 			case 'import-options':
 				return [
-					{ id: 'EncryptedFileButton', text: i18n.t('backup.encryptedFile'), icon: <Lock />, onPress: onUploadFile },
-					{ id: 'RecoveryPhraseButton', text: i18n.t('backup.recoveryPhrase'), icon: <FileText />, onPress: onMnemonicPhrase },
+					{
+						id: 'EncryptedFileButton',
+						text: i18n.t('backup.encryptedFile'),
+						icon: <Lock />,
+						onPress: onUploadFile,
+					},
+					{
+						id: 'RecoveryPhraseButton',
+						text: i18n.t('backup.recoveryPhrase'),
+						icon: <FileText />,
+						onPress: onMnemonicPhrase,
+					},
 					{
 						id: 'ScanQrButton',
 						text: i18n.t('addPubky.scanQrToImport'),
@@ -216,7 +235,7 @@ const AddPubky = ({
 		return (
 			<>
 				{getHeaderText()}
-				<Text style={styles.message}>{messageText}</Text>
+				<BodyMText>{messageText}</BodyMText>
 				<View style={styles.imageContainer}>{getImage()}</View>
 				<View style={styles.buttonContainer}>
 					{getButtonConfig().map(
@@ -275,11 +294,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	headerText: {
-		...textStyles.display,
 		marginBottom: 20,
-	},
-	message: {
-		...textStyles.bodyM,
 	},
 	importImage: {
 		width: 200,

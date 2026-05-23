@@ -3,7 +3,6 @@ import { Platform, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle }
 import ActionSheet from 'react-native-actions-sheet';
 import Toast from 'react-native-toast-message';
 import { useSelector } from 'react-redux';
-import { RadialGradient, Text } from '../theme/components.ts';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { toastConfig } from '../theme/toastConfig.tsx';
 import { BLUE_RADIAL_GRADIENT, RED_RADIAL_GRADIENT } from '../utils/constants.ts';
@@ -11,8 +10,8 @@ import { isSmallScreen } from '../utils/helpers.ts';
 import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';
 import SafeAreaInset from './SafeAreaInset.tsx';
-import { LinearGradient } from './LinearGradient.tsx';
-import { textStyles } from '../theme/utils.ts';
+import { LinearGradient, RadialGradient } from './LinearGradient.tsx';
+import { BodyMBText } from '../theme/typography.ts';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { HEADER_HEIGHT } from './AppHeader.tsx';
 import { ArrowLeft } from '../icons/index.ts';
@@ -95,9 +94,7 @@ const Sheet = ({
 						<HeaderNavButton style={styles.navButton} />
 					)}
 
-					<Text style={styles.title} testID={`${id}-title`}>
-						{title}
-					</Text>
+					<BodyMBText testID={`${id}-title`}>{title}</BodyMBText>
 
 					<HeaderNavButton style={styles.navButton} />
 				</View>
@@ -136,9 +133,6 @@ const styles = StyleSheet.create({
 		height: 24,
 		paddingHorizontal: 16,
 		marginBottom: 24,
-	},
-	title: {
-		...textStyles.bodyMB,
 	},
 	navButton: {
 		height: 24,

@@ -122,53 +122,30 @@ gpg --verify SHA256SUMS.asc
 sha256sum -c SHA256SUMS
 ```
 
-## E2E testing (Appium + WebdriverIO)
+## iOS E2E testing (Maestro)
 
-This project includes Appium/WebdriverIO E2E tests for Android emulators and iOS simulators.
+This project currently runs iOS simulator E2E tests with Maestro. Android CI is omitted while the iOS path is established.
 
 ### Prerequisites
-- Xcode with an iOS Simulator (e.g., "iPhone 15").
-- Android SDK with an AVD (e.g., "Pixel_7_Pro_API_35").
-- Java JDK 17+ and Node.js 18+.
-- App under test has been built or is installed in test environment (iOS simulator or AVD)
-
-### Install drivers (one-time)
-
-```bash
-yarn e2e:drivers
-```
+- Xcode with an iOS Simulator.
+- Maestro installed locally: `curl -Ls "https://get.maestro.mobile.dev" | bash`.
+- The Release app built and installed on the simulator.
 
 ### Run tests
-- Android:
-```bash
-yarn e2e:android
-```
-- iOS:
+
 ```bash
 yarn e2e:ios
 ```
 
 ### Environment overrides
-- ANDROID_APP: absolute path to the .apk
-- AVD: Android Virtual Device name (e.g. Pixel_6_API_34)
-- ANDROID_DEVICE_NAME / ANDROID_PLATFORM_VERSION
-- APP_PACKAGE / APP_ACTIVITY (defaults: to.pubky.ring / to.pubkyring.MainActivity)
-- IOS_APP: absolute path to the .app
-- IOS_SIM / IOS_PLATFORM_VERSION
-- IOS_BUNDLE_ID (default: app.pubkyring)
+- `HOMESERVER_ADMIN_PASSWORD`: required for the custom homeserver flow.
 
 ### Examples
 
 ```bash
-# Android (provide APK)
-ANDROID_APP=/absolute/path/app-debug.apk yarn e2e:android
+# Run all iOS flows against the installed app
+yarn e2e:ios
 
-# Android (attach to installed app on an emulator)
-AVD=Pixel_6_API_34 yarn e2e:android
-
-# iOS (provide .app)
-IOS_APP=/absolute/path/pubkyring.app yarn e2e:ios
-
-# iOS (attach to installed app on a simulator)
-IOS_SIM="iPhone 17" yarn e2e:ios
+# Run flows that request a staging invite code
+HOMESERVER_ADMIN_PASSWORD=... yarn e2e:ios
 ```

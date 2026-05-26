@@ -3,13 +3,6 @@
   "include": ["**/*.ts", "**/*.tsx"],
   "exclude": ["**/node_modules", "**/Pods"],
   "compilerOptions": {
-    "types": [
-      "jest",
-      "node",
-      "@wdio/globals/types",
-      "expect-webdriverio",
-      "@wdio/mocha-framework",
-      "@wdio/appium-service"
-    ],
+    "types": ["jest", "node"],
   }
 }

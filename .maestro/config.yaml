@@ -1,0 +1,10 @@
+appId: ${APP_ID}
+flows:
+  - flows/*.yaml
+testOutputDir: .maestro/results
+executionOrder:
+  continueOnFailure: false
+  flowsOrder:
+    - onboarding
+    - create-pubky-default-homeserver
+    - create-pubky-custom-homeserver

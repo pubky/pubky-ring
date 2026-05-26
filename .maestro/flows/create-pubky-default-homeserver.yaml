@@ -1,0 +1,26 @@
+appId: ${APP_ID}
+name: create-pubky-default-homeserver
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/start-new-pubky.yaml
+- assertVisible:
+    id: HomeserverDefaultRadioInner
+- assertNotVisible:
+    id: HomeserverCustomRadioInner
+- tapOn:
+    id: HomeserverContinueButton
+- assertVisible:
+    id: InviteCodeInput
+- assertVisible:
+    id: InviteCodeContinueButton
+- tapOn:
+    id: InviteCodeInput
+- inputText: ABCD1234EFGH
+- assertVisible: ABCD-1234-EFGH
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: InviteCodeErrorText
+    timeout: 120000

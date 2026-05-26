@@ -6,7 +6,7 @@ import { Dispatch } from 'redux';
 import { importPubky } from './pubky.ts';
 import { err, ok, Result } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
-import Share from 'react-native-share';
+import Share, { ShareOptions } from 'react-native-share';
 import { SheetManager } from 'react-native-actions-sheet';
 import { EBackupPromptViewId } from './sheetHelpers.ts';
 
@@ -221,8 +221,7 @@ export async function backupPubky(content: string, filename: string): Promise<Re
 			await RNFS.writeFile(tempPath, content, 'base64');
 
 			// Prepare share options for iOS
-			// @ts-ignore
-			const shareOptions: Share.OpenOptions = {
+			const shareOptions: ShareOptions = {
 				url: fileUrl,
 				type: 'application/octet-stream',
 				filename: fullFilename,

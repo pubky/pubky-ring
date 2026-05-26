@@ -8,6 +8,7 @@
     "lint": "eslint . --fix",
     "format": "prettier --write ./src",
     "format:check": "prettier --check ./src",
+    "typecheck": "tsc --noEmit",
     "start": "react-native start",
     "icons:build": "node scripts/build-icons.mjs",
     "optimize-images": "node scripts/optimize-images.js",

@@ -203,7 +203,6 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 		return (
 			<TextInput
 				key={index}
-				// @ts-ignore
 				ref={ref => {
 					inputRefs.current[index] = ref;
 				}}

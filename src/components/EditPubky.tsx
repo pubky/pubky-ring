@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
-import { StyleSheet, Keyboard, View } from 'react-native';
+import { StyleSheet, Keyboard, TextInput as NativeTextInput, View } from 'react-native';
 import { TextInput } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver, truncatePubky } from '../utils/pubky.ts';
@@ -38,7 +38,7 @@ const InputItemComponent = ({
 	onSubmitEditing?: () => void;
 	editable?: boolean;
 	style?: any;
-	inputRef?: React.RefObject<any>;
+	inputRef?: React.RefObject<NativeTextInput | null>;
 }): ReactElement => {
 	return (
 		<View style={[styles.inputWrapper, style]}>
@@ -46,7 +46,6 @@ const InputItemComponent = ({
 				<TextInput
 					style={styles.input}
 					testID={testID}
-					// @ts-ignore
 					ref={inputRef}
 					value={value}
 					onChangeText={onChangeText}
@@ -88,7 +87,7 @@ const EditPubky = ({
 	);
 	const dispatch = useDispatch();
 	const [error, setError] = useState('');
-	const signupTokenInputRef = useRef<any>(null);
+	const signupTokenInputRef = useRef<NativeTextInput>(null);
 
 	const isSignupTokenInputVisible = useMemo(() => {
 		return storedPubkyData?.signedUp === false || storedPubkyData.homeserver !== (homeServer?.trim() || '');
@@ -280,7 +279,7 @@ const EditPubky = ({
 
 	const handleHomeserverSubmit = useCallback(() => {
 		if (homeServer.trim() !== storedPubkyData?.homeserver && !signupToken) {
-			signupTokenInputRef.current.focus();
+			signupTokenInputRef.current?.focus();
 		} else if (haveFieldsChanged) {
 			handleSubmit();
 		} else if (storedPubkyData?.signedUp) {

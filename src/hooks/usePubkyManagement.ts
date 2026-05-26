@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { Alert } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Result, err, ok } from '@synonymdev/result';
@@ -121,8 +122,7 @@ export const usePubkyManagement = (): {
 						description: msg,
 						onPress: () => {
 							copyToClipboard(msg);
-							// eslint-disable-next-line no-alert
-							alert(t('errors.errorCopiedToClipboard'));
+							Alert.alert(t('errors.errorCopiedToClipboard'));
 						},
 						visibilityTime: 10000,
 					});

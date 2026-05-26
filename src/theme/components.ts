@@ -1,3 +1,5 @@
+import { ComponentType, RefAttributes } from 'react';
+import { TextInput as NativeTextInput, TextInputProps } from 'react-native';
 import styled from 'styled-components/native';
 import { Theme, ThemeColorName } from './index';
 import Animated from 'react-native-reanimated';
@@ -20,7 +22,7 @@ export const View = styled.View<BackgroundColorProps>`
 	border-color: ${(props): string => props.theme.colors.textPrimary};
 `;
 
-export const TextInput = styled.TextInput<{ theme: Theme }>`
+const StyledTextInput = styled.TextInput<{ theme: Theme }>`
 	color: ${(props): string => props.theme.colors.textSecondary};
 	font-family: ${fontFamily};
 	font-size: 17px;
@@ -31,6 +33,8 @@ export const TextInput = styled.TextInput<{ theme: Theme }>`
 	padding-right: 24px;
 	include-font-padding: false;
 `;
+
+export const TextInput = StyledTextInput as ComponentType<TextInputProps & RefAttributes<NativeTextInput>>;
 
 export const AnimatedView = styled(Animated.View)<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};

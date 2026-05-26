@@ -71,18 +71,6 @@ const Camera = ({ children, onBarCodeRead }: CameraProps): ReactElement => {
 		[onBarCodeRead],
 	);
 
-	const cameraKitProps = React.useMemo(
-		() => ({
-			style: styles.cameraView,
-			scanBarcode: true,
-			showFrame: false,
-			onReadCode: handleCodeRead,
-			cameraType: CameraType.Back,
-			resizeMode: 'cover',
-		}),
-		[handleCodeRead],
-	);
-
 	// Early return for loading state
 	if (cameraState.status === undefined) {
 		return <View style={styles.container} />;
@@ -96,7 +84,14 @@ const Camera = ({ children, onBarCodeRead }: CameraProps): ReactElement => {
 		return (
 			<View style={styles.container}>
 				<View style={styles.cameraWrapper}>
-					<CameraKit {...cameraKitProps} />
+					<CameraKit
+						style={styles.cameraView}
+						scanBarcode
+						showFrame={false}
+						onReadCode={handleCodeRead}
+						cameraType={CameraType.Back}
+						resizeMode="cover"
+					/>
 				</View>
 				{children}
 			</View>

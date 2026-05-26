@@ -1,6 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, Image, Linking, View } from 'react-native';
-// @ts-ignore
 import PubkyRingLogo from '../../images/pubky-app-logo.png';
 import { PUBKY_APP_URL } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';

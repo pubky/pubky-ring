@@ -3,7 +3,6 @@ import { Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
 import { View, ScrollView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import { version } from '../../package.json';
-// @ts-ignore
 import PubkyRingLogo from '../images/pubky-app-logo.png';
 import BrandEndoresment from '../images/brand-endorsement.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';

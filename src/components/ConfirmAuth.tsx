@@ -1,13 +1,12 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, StyleSheet } from 'react-native';
+import { Alert, Platform, StyleSheet, View } from 'react-native';
 import { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import { AnimatedView, View } from '../theme/components';
 import { SheetManager } from 'react-native-actions-sheet';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
-import { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
 import { RootState } from '../store';
@@ -34,22 +33,6 @@ interface Capability {
 	path: string;
 	permission: string;
 }
-
-const CapabilitiesList = memo(
-	({ capabilities, isAuthorized }: { capabilities: Capability[]; isAuthorized: boolean }): ReactElement => {
-		const capabilitiesCount = capabilities.length;
-		return (
-			<>
-				{capabilities.map((capability, index) => (
-					<View style={styles.permissionsSection} key={index}>
-						<Permission capability={capability} isAuthorized={isAuthorized} />
-						{index !== capabilitiesCount - 1 && <View style={styles.spacer} />}
-					</View>
-				))}
-			</>
-		);
-	},
-);
 
 const Permission = memo(
 	({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
@@ -197,10 +180,15 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				<CaptionText style={styles.sectionTitle}>
 					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
 				</CaptionText>
-				<CapabilitiesList capabilities={authDetailCapabilities} isAuthorized={isAuthorized} />
+
+				<View style={styles.permissions}>
+					{authDetailCapabilities.map((capability, index) => (
+						<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
+					))}
+				</View>
 			</View>
 
-			<PubkyCard name={pubkyName} publicKey={pubky} avatarSize={48} avatarStyle={styles.avatarContainer} />
+			<PubkyCard name={pubkyName} publicKey={pubky} />
 
 			{!isAuthorized && (
 				<BodySText style={styles.warningText} colorName="textTertiary">
@@ -209,9 +197,9 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 			)}
 
 			<View style={styles.imageContainer}>
-				<AnimatedView style={[styles.imageWrapper, checkStyle]}>
+				<Animated.View style={[styles.imageWrapper, checkStyle]}>
 					<CheckCircle colorName="pubkyApp" size={128} />
-				</AnimatedView>
+				</Animated.View>
 			</View>
 
 			<View style={styles.footerContainer}>
@@ -268,10 +256,12 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-start',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
-	permissionsSection: {
-		backgroundColor: 'transparent',
+	permissions: {
+		gap: 8,
+	},
+	sectionTitle: {
+		marginBottom: 8,
 	},
 	relayText: {
 		justifyContent: 'center',
@@ -284,54 +274,35 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
 	pathContainer: {
 		flex: 2,
 		marginLeft: 5,
 		justifyContent: 'center',
-		backgroundColor: 'transparent',
 	},
 	permissionsContainer: {
 		flex: 1,
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		gap: 8,
-		backgroundColor: 'transparent',
 	},
 	imageContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
 	imageWrapper: {
 		justifyContent: 'center',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
-	},
-	sectionTitle: {
-		marginBottom: 8,
-	},
-	avatarContainer: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
-		marginRight: 16,
-	},
-	spacer: {
-		marginBottom: 12,
 	},
 	footerContainer: {
 		marginTop: 'auto',
 		justifyContent: 'center',
-		backgroundColor: 'transparent',
 	},
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 16,
-		backgroundColor: 'transparent',
 	},
 	progressBarContainer: {
 		position: 'absolute',

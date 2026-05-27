@@ -1,16 +1,17 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useSelector } from 'react-redux';
-import PubkyReview from './PubkySetup/PubkyReview.tsx';
 import { getPubky, getPubkyCount } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 import Sheet from './Sheet.tsx';
 import { SHEET_TRANSITION_DELAY } from '../utils/constants.ts';
+import PubkyProfile from './PubkyProfile.tsx';
+import { BodyMText } from '../theme/typography.ts';
+import Button from './Button.tsx';
 
 interface ImportSuccessSheetPayload {
-	modalTitle?: string;
-	description?: string;
 	isNewPubky?: boolean;
 	pubky: string;
 	onContinue?: () => void;
@@ -19,13 +20,7 @@ interface ImportSuccessSheetPayload {
 const ImportSuccessSheet = ({ payload }: { payload: ImportSuccessSheetPayload }): ReactElement => {
 	const { t } = useTranslation();
 	const pubkyCount = useSelector(getPubkyCount);
-	const {
-		modalTitle: payloadModalTitle,
-		description: payloadDescription,
-		isNewPubky = false,
-		onContinue: onContinuePayload,
-		pubky,
-	} = payload;
+	const { isNewPubky = false, onContinue: onContinuePayload, pubky } = payload;
 
 	const pubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 
@@ -40,12 +35,8 @@ const ImportSuccessSheet = ({ payload }: { payload: ImportSuccessSheetPayload })
 		}, SHEET_TRANSITION_DELAY);
 	}, [isNewPubky, onContinuePayload]);
 
-	const modalTitle = !isNewPubky
-		? t('import.pubkyReImported')
-		: (payloadModalTitle ?? t('import.pubkyImported'));
-	const description = !isNewPubky
-		? t('import.reImportSuccess')
-		: (payloadDescription ?? t('import.importSuccess'));
+	const modalTitle = !isNewPubky ? t('import.pubkyReImported') : t('import.pubkyImported');
+	const description = !isNewPubky ? t('import.reImportSuccess') : t('import.importSuccess');
 
 	const data = useMemo(() => {
 		return { ...pubkyData, pubky, name: pubkyData.name || `pubky #${pubkyCount}` };
@@ -53,9 +44,29 @@ const ImportSuccessSheet = ({ payload }: { payload: ImportSuccessSheetPayload })
 
 	return (
 		<Sheet id="import-success" title={modalTitle} gradientType="brand">
-			<PubkyReview description={description} pubky={pubky} pubkyData={data} onContinue={onContinue} />
+			<BodyMText style={styles.message}>{description}</BodyMText>
+			<PubkyProfile pubky={pubky} pubkyData={data} />
+			<View style={styles.footer}>
+				<Button
+					text={t('common.continue')}
+					size="large"
+					testID="ImportSuccessButton"
+					onPress={onContinue}
+				/>
+			</View>
 		</Sheet>
 	);
 };
+
+const styles = StyleSheet.create({
+	message: {
+		marginBottom: 24,
+	},
+	footer: {
+		marginTop: 'auto',
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
+});
 
 export default memo(ImportSuccessSheet);

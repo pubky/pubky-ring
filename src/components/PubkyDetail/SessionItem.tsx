@@ -1,9 +1,11 @@
+// Currently not used
+
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
 import { BodySSBText, BodySText, CaptionSBSpacedText } from '../../theme/typography';
-import { SessionView, TouchableOpacity, SessionBox } from '../../theme/components.ts';
+import { TouchableOpacity, CardGradient } from '../../theme/components.ts';
 
 const formatTimestamp = (timestamp: number): string => {
 	const date = new Date(timestamp);
@@ -34,36 +36,41 @@ const SessionItem = ({
 	}, [onSignOut, session.session_secret]);
 
 	return (
-		<SessionBox style={styles.sessionCard}>
-			<SessionView style={styles.headerRow}>
-				<SessionView style={styles.infoContainer}>
+		<CardGradient style={styles.sessionCard}>
+			<View style={styles.headerRow}>
+				<View style={styles.infoContainer}>
 					<BodySSBText style={styles.pubkyText} numberOfLines={1}>
 						{session.pubky}
 					</BodySSBText>
 					<BodySText colorName="textTertiary" style={styles.dateText}>
 						{formattedDate}
 					</BodySText>
-				</SessionView>
+				</View>
 				<TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
-					<CaptionSBSpacedText colorName="danger" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+					<CaptionSBSpacedText
+						colorName="danger"
+						numberOfLines={1}
+						adjustsFontSizeToFit
+						minimumFontScale={0.8}
+					>
 						{t('sessionItem.signOut')}
 					</CaptionSBSpacedText>
 				</TouchableOpacity>
-			</SessionView>
+			</View>
 
 			{session.capabilities?.length > 0 && (
-				<SessionView style={styles.capsContainer}>
+				<View style={styles.capsContainer}>
 					<CaptionSBSpacedText style={styles.capsTitle}>{t('sessionItem.capabilities')}</CaptionSBSpacedText>
-					<SessionView style={styles.capsWrapper}>
+					<View style={styles.capsWrapper}>
 						{session.capabilities.map(cap => (
-							<SessionView key={cap} style={styles.capChip}>
+							<View key={cap} style={styles.capChip}>
 								<BodySText>{cap}</BodySText>
-							</SessionView>
+							</View>
 						))}
-					</SessionView>
-				</SessionView>
+					</View>
+				</View>
 			)}
-		</SessionBox>
+		</CardGradient>
 	);
 };
 

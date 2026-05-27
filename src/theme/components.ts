@@ -1,10 +1,8 @@
 import { ComponentType, RefAttributes } from 'react';
 import { TextInput as NativeTextInput, TextInputProps } from 'react-native';
 import styled from 'styled-components/native';
+import { LinearGradient } from 'react-native-linear-gradient';
 import { Theme, ThemeColorName } from './index';
-import Animated from 'react-native-reanimated';
-import { LinearGradient as _LinearGradient } from 'react-native-linear-gradient';
-import { SafeAreaProvider as _SafeAreaProvider } from 'react-native-safe-area-context';
 import { fontFamily } from './fonts';
 
 interface BackgroundColorProps {
@@ -36,54 +34,8 @@ const StyledTextInput = styled.TextInput<{ theme: Theme }>`
 
 export const TextInput = StyledTextInput as ComponentType<TextInputProps & RefAttributes<NativeTextInput>>;
 
-export const AnimatedView = styled(Animated.View)<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.background};
-	border-color: ${(props): string => props.theme.colors.textPrimary};
-`;
-
 export const TouchableOpacity = styled.TouchableOpacity<{ theme: Theme }>`
 	background-color: ${(props): string => props.theme.colors.background};
-`;
-
-export const NavView = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.navButton};
-`;
-
-export const ScrollView = styled.ScrollView<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.background};
-`;
-
-export const SessionBox = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.cardBackground};
-	border-color: ${(props): string => props.theme.colors.border};
-`;
-
-export const Card = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.buttonBackground};
-	border-color: ${(props): string => props.theme.colors.border};
-`;
-
-export const CardView = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.buttonBackground};
-`;
-
-export const SessionView = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.cardBackground};
-	border-color: ${(props): string => props.theme.colors.border};
-`;
-
-export const Box = styled.TouchableOpacity<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.foreground};
-	border-color: ${(props): string => props.theme.colors.border};
-`;
-
-export const ForegroundView = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.foreground};
-`;
-
-export const AvatarRing = styled.View<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.avatarRing};
-	border-color: ${(props): string => props.theme.colors.border};
 `;
 
 export const ActivityIndicator = styled.ActivityIndicator<{ theme: Theme }>`
@@ -96,13 +48,6 @@ export const Divider = styled.View<BackgroundColorProps>`
 	width: 100%;
 `;
 
-interface LinearGradientProps {
-	colors?: string[];
-	modal?: boolean;
-	theme: Theme;
-}
-
-export const LinearGradient = styled(_LinearGradient).attrs<LinearGradientProps>(props => ({
-	colors:
-		props.colors || (props.modal ? props.theme.colors.defaultGradient : props.theme.colors.defaultGradient),
+export const CardGradient = styled(LinearGradient).attrs<{ theme: Theme }>(props => ({
+	colors: props.theme.colors.cardGradient,
 }))``;

@@ -1,72 +1,71 @@
-import { StyleSheet, StyleProp, ViewStyle, TextStyle } from 'react-native';
-import { Card, LinearGradient } from '../theme/components.ts';
+import { StyleSheet, StyleProp, ViewStyle, View } from 'react-native';
+import { CardGradient } from '../theme/components.ts';
 import React, { memo, ReactElement } from 'react';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { BodySSBText, HeadingText } from '../theme/typography';
 import { truncatePubky } from '../utils/pubky.ts';
+import { ChevronRight } from '../icons/index.ts';
 
 interface PubkyCardProps {
-	name?: string;
 	publicKey: string;
+	name?: string;
 	style?: StyleProp<ViewStyle>;
-	containerStyle?: StyleProp<ViewStyle>;
-	nameStyle?: StyleProp<TextStyle>;
-	pubkyTextStyle?: StyleProp<TextStyle>;
 	avatarSize?: number;
-	avatarStyle?: StyleProp<ViewStyle>;
+	showChevron?: boolean;
 }
 
 const PubkyCard = ({
-	name,
 	publicKey,
+	name,
 	style,
-	containerStyle,
-	nameStyle,
-	pubkyTextStyle,
-	avatarSize = 38,
-	avatarStyle,
+	avatarSize = 48,
+	showChevron = false,
 }: PubkyCardProps): ReactElement => {
 	return (
-		<LinearGradient style={[styles.pubkyCard, style]}>
-			<Card style={[styles.pubkyRow, containerStyle]}>
-				<Card style={[styles.iconContainer, avatarStyle]}>
+		<CardGradient style={[styles.container, style]}>
+			<View style={styles.row}>
+				<View style={styles.avatar}>
 					<ProfileAvatar pubky={publicKey} size={avatarSize} />
-				</Card>
-				<Card style={styles.pubkyTextContainer}>
-					{name && <HeadingText style={nameStyle}>{name}</HeadingText>}
-					<BodySSBText style={pubkyTextStyle} numberOfLines={2}>
-						{truncatePubky(publicKey)}
-					</BodySSBText>
-				</Card>
-			</Card>
-		</LinearGradient>
+				</View>
+				<View style={styles.text}>
+					{name && (
+						<HeadingText style={styles.name} numberOfLines={1}>
+							{name}
+						</HeadingText>
+					)}
+					<BodySSBText numberOfLines={1}>{truncatePubky(publicKey)}</BodySSBText>
+				</View>
+
+				{showChevron && <ChevronRight colorName="textTertiary" />}
+			</View>
+		</CardGradient>
 	);
 };
 
 const styles = StyleSheet.create({
-	pubkyCard: {
+	container: {
 		borderRadius: 16,
 		minHeight: 96,
 	},
-	pubkyRow: {
+	row: {
 		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
-		alignSelf: 'center',
-		justifyContent: 'center',
 		paddingHorizontal: 24,
-		backgroundColor: 'transparent',
 	},
-	iconContainer: {
-		width: 38,
-		height: 38,
+	avatar: {
+		width: 48,
+		height: 48,
 		marginRight: 16,
 		borderRadius: '50%',
-		// overflow: 'hidden',
+		overflow: 'hidden',
 	},
-	pubkyTextContainer: {
+	text: {
 		flex: 1,
-		backgroundColor: 'transparent',
+		paddingRight: 16,
+	},
+	name: {
+		marginBottom: 2,
 	},
 });
 

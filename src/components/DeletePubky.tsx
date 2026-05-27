@@ -31,14 +31,7 @@ const DeletePubky = ({
 	return (
 		<Sheet id="delete-pubky" title={t('pubky.deletePubky')} gradientType="brand">
 			<BodyMText style={styles.message}>{t('pubky.deleteConfirm')}</BodyMText>
-			<PubkyCard
-				name={pubkyName}
-				publicKey={publicKey}
-				containerStyle={styles.pubkyContainer}
-				nameStyle={styles.pubkyName}
-				avatarSize={48}
-				avatarStyle={styles.avatarContainer}
-			/>
+			<PubkyCard name={pubkyName} publicKey={publicKey} />
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/trash.png')} style={styles.image} />
 			</View>
@@ -53,18 +46,6 @@ const DeletePubky = ({
 const styles = StyleSheet.create({
 	message: {
 		marginBottom: 24,
-	},
-	pubkyContainer: {
-		padding: 24,
-	},
-	avatarContainer: {
-		width: 48,
-		height: 48,
-		borderRadius: 24,
-		marginRight: 16,
-	},
-	pubkyName: {
-		marginBottom: 2,
 	},
 	imageContainer: {
 		flex: 1,

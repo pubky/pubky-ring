@@ -1,6 +1,5 @@
 import React, { memo, ReactElement } from 'react';
-import { Image, Linking, StyleSheet, TouchableOpacity } from 'react-native';
-import { View, ScrollView } from '../theme/components.ts';
+import { Image, Linking, StyleSheet, TouchableOpacity, ScrollView, View } from 'react-native';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import { version } from '../../package.json';
 import PubkyRingLogo from '../images/pubky-app-logo.png';
@@ -74,7 +73,7 @@ const About = (): ReactElement => {
 				<Image source={BrandEndoresment} style={styles.brandLogo} />
 
 				<TouchableOpacity style={styles.footer} activeOpacity={0.8} onPress={onFooterPress}>
-					<View style={styles.logo}>
+					<View>
 						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
 						<BodyMSBText colorName="pubkyApp" style={styles.footerText}>
 							{t('about.joinWithPubkyRing')}
@@ -97,7 +96,6 @@ const styles = StyleSheet.create({
 	scrollContent: {
 		flexGrow: 1,
 		paddingTop: HEADER_HEIGHT + 24,
-		backgroundColor: 'transparent',
 	},
 	lowerTitle: {
 		marginBottom: 8,
@@ -110,12 +108,8 @@ const styles = StyleSheet.create({
 		justifyContent: 'space-between',
 		alignItems: 'center',
 		height: 51,
-		backgroundColor: 'transparent',
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-	},
-	logo: {
-		backgroundColor: 'transparent',
 	},
 	footer: {
 		flexDirection: 'row',
@@ -145,14 +139,12 @@ const styles = StyleSheet.create({
 		height: 36,
 		width: 110,
 		resizeMode: 'contain',
-		backgroundColor: 'transparent',
 	},
 	brandLogo: {
 		height: 24,
 		width: 214,
 		alignSelf: 'flex-start',
 		resizeMode: 'contain',
-		backgroundColor: 'transparent',
 		marginVertical: 24,
 	},
 });

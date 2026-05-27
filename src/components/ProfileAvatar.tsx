@@ -12,29 +12,21 @@ interface ProfileAvatarProps {
 }
 
 const ProfileAvatar = ({ pubky, size = 32 }: ProfileAvatarProps): ReactElement => {
-	const publicKey = useMemo(() => {
-		if (!pubky) {
-			return '';
-		}
-		return pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
-	}, [pubky]);
-
+	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 	const imageUri = useSelector((state: RootState) => getPubkyImage(state, publicKey));
-
-	const borderRadius = useMemo(() => size / 2, [size]);
 
 	// Memoize style object to prevent unnecessary re-renders
 	const imageStyle = useMemo(
 		() => ({
 			width: size,
 			height: size,
-			borderRadius,
+			borderRadius: '50%',
 		}),
-		[size, borderRadius],
+		[size],
 	);
 
 	// Memoize SVG generation - expensive string operation
-	const svg = useMemo(() => jdenticon.toSvg(pubky, size), [pubky, size]);
+	const svg = useMemo(() => jdenticon.toSvg(pubky, size, { padding: 0 }), [pubky, size]);
 
 	if (imageUri) {
 		return <Image source={{ uri: imageUri }} style={imageStyle} />;

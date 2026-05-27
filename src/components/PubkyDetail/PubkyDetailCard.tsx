@@ -1,15 +1,14 @@
-import React, { memo, useCallback, useMemo, useState } from 'react';
-import { PixelRatio, StyleSheet } from 'react-native';
+import React, { memo, useCallback, useState } from 'react';
+import { PixelRatio, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkyData } from '../../navigation/types.ts';
-import { View, LinearGradient } from '../../theme/components.ts';
 import Button from '../Button.tsx';
 import { shareData } from '../../utils/helpers.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
 
-interface PubkyListHeaderProps {
+interface PubkyDetailCardProps {
 	index: number;
 	pubky: string;
 	pubkyData: PubkyData;
@@ -18,13 +17,13 @@ interface PubkyListHeaderProps {
 	onBackup: () => void;
 }
 
-export const PubkyListHeader = memo(
-	({ index, pubky, pubkyData, onQRPress, onDelete, onBackup }: PubkyListHeaderProps) => {
+export const PubkyDetailCard = memo(
+	({ index, pubky, pubkyData, onQRPress, onDelete, onBackup }: PubkyDetailCardProps) => {
 		const { t } = useTranslation();
 		const [fontScale] = useState(PixelRatio.getFontScale());
 		const [isQRLoading, setIsQRLoading] = useState(false);
 
-		const pubkyUri = useMemo(() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky), [pubky]);
+		const pubkyUri = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 		const onSharePress = useCallback(() => {
 			shareData(pubkyUri).then();
 		}, [pubkyUri]);
@@ -56,17 +55,15 @@ export const PubkyListHeader = memo(
 
 		return (
 			<View style={styles.container}>
-				<LinearGradient style={styles.profileSection}>
-					<PubkyProfile
-						index={index}
-						pubky={pubky}
-						pubkyData={pubkyData}
-						onButtonPress={handleButtonPress}
-						buttonText={buttonText}
-						buttonIcon={buttonIcon}
-						isButtonLoading={isQRLoading}
-					/>
-				</LinearGradient>
+				<PubkyProfile
+					index={index}
+					pubky={pubky}
+					pubkyData={pubkyData}
+					buttonText={buttonText}
+					buttonIcon={buttonIcon}
+					isButtonLoading={isQRLoading}
+					onButtonPress={handleButtonPress}
+				/>
 
 				<View style={styles.actionButtonRow}>
 					<Button
@@ -96,22 +93,16 @@ export const PubkyListHeader = memo(
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		alignItems: 'center',
-		marginHorizontal: 20,
+		marginHorizontal: 24,
 	},
 	actionButtonRow: {
 		flexDirection: 'row',
 		gap: 6,
 		marginTop: 24,
-		width: '100%',
 	},
 	actionButton: {
 		flex: 1,
 	},
-	profileSection: {
-		width: '100%',
-		borderRadius: 16,
-	},
 });
 
-export default PubkyListHeader;
+export default PubkyDetailCard;

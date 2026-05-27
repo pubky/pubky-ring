@@ -1,11 +1,11 @@
-import React, { memo, useCallback, useMemo } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
+import React, { memo, useCallback } from 'react';
+import { StyleProp, StyleSheet, View, TouchableOpacity, ViewStyle } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { copyToClipboard } from '../utils/clipboard';
 import { PubkyData } from '../navigation/types';
-import { View, Card } from '../theme/components';
+import { CardGradient } from '../theme/components';
 import { isSmallScreen, showToast } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
-import i18n from '../i18n';
 import { BodyMSBText, HeadingText } from '../theme/typography';
 import Button from './Button.tsx';
 
@@ -13,11 +13,12 @@ interface PubkyProfileProps {
 	index?: number;
 	pubky: string;
 	pubkyData: PubkyData;
-	onButtonPress?: () => void;
 	hideButton?: boolean;
 	buttonText?: string;
 	buttonIcon?: React.ReactNode;
 	isButtonLoading?: boolean;
+	style?: StyleProp<ViewStyle>;
+	onButtonPress?: () => void;
 }
 
 const smallScreen = isSmallScreen();
@@ -28,36 +29,33 @@ export const PubkyProfile = memo(
 		index,
 		pubky,
 		pubkyData,
-		onButtonPress,
-		hideButton = false,
 		buttonText,
 		buttonIcon,
 		isButtonLoading = false,
+		style,
+		onButtonPress,
 	}: PubkyProfileProps) => {
+		const { t } = useTranslation();
+
 		const handleCopyPubky = useCallback(() => {
 			copyToClipboard(pubky);
 			showToast({
 				type: 'info',
-				title: i18n.t('clipboard.pubkyCopied'),
-				description: i18n.t('clipboard.pubkyCopiedDescription'),
+				title: t('clipboard.pubkyCopied'),
+				description: t('clipboard.pubkyCopiedDescription'),
 			});
 		}, [pubky]);
 
-		const pubkyUri = useMemo(() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky), [pubky]);
-
-		const pubkyName = useMemo(() => {
-			if (pubkyData?.name) {
-				return pubkyData.name;
-			}
-			if (index !== undefined) {
-				return `${i18n.t('emptyState.placeholderName')} #${index + 1}`;
-			}
-			return i18n.t('emptyState.placeholderName');
-		}, [index, pubkyData.name]);
+		const pubkyUri = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
+		const pubkyName =
+			pubkyData.name ||
+			(index !== undefined
+				? `${t('emptyState.placeholderName')} #${index + 1}`
+				: t('emptyState.placeholderName'));
 
 		return (
-			<View style={[styles.profileContainer, smallScreenStyle]}>
-				<Card style={styles.profile}>
+			<CardGradient style={[styles.gradient, style]}>
+				<View style={[styles.profileContainer, smallScreenStyle]}>
 					<View style={styles.avatarContainer}>
 						<ProfileAvatar pubky={pubky} size={96} />
 					</View>
@@ -67,55 +65,51 @@ export const PubkyProfile = memo(
 					<TouchableOpacity activeOpacity={0.7} onPress={handleCopyPubky}>
 						<BodyMSBText style={styles.pubkyText}>{pubkyUri}</BodyMSBText>
 					</TouchableOpacity>
-				</Card>
 
-				{!hideButton && (
-					<Button
-						text={buttonText ?? ''}
-						size="large"
-						variant="secondary"
-						icon={buttonIcon}
-						loading={isButtonLoading}
-						onPress={onButtonPress}
-					/>
-				)}
-			</View>
+					{onButtonPress && (
+						<Button
+							style={styles.button}
+							text={buttonText ?? ''}
+							size="large"
+							variant="secondary"
+							icon={buttonIcon}
+							loading={isButtonLoading}
+							onPress={onButtonPress}
+						/>
+					)}
+				</View>
+			</CardGradient>
 		);
 	},
 );
 
 const styles = StyleSheet.create({
-	container: {
-		alignItems: 'center',
+	gradient: {
 		borderRadius: 16,
 	},
 	profileContainer: {
+		alignItems: 'center',
 		padding: 36,
-		backgroundColor: 'transparent',
-	},
-	profile: {
-		paddingBottom: 16,
-		backgroundColor: 'transparent',
 	},
 	avatarContainer: {
 		width: 96,
 		height: 96,
-		borderRadius: 60,
+		borderRadius: '50%',
 		overflow: 'hidden',
 		justifyContent: 'center',
 		alignItems: 'center',
-		alignSelf: 'center',
-		backgroundColor: 'transparent',
 		marginBottom: 16,
 	},
 	nameText: {
-		paddingBottom: 12,
+		paddingBottom: 16,
 		textAlign: 'center',
-		backgroundColor: 'transparent',
 	},
 	pubkyText: {
 		textAlign: 'center',
-		marginBottom: 8,
+	},
+	button: {
+		width: '100%',
+		marginTop: 16,
 	},
 });
 

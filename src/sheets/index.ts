@@ -37,7 +37,6 @@ declare module 'react-native-actions-sheet' {
 			payload: {
 				pubky: string;
 				mnemonic: string;
-				onClose: () => void;
 			};
 		}>;
 		'confirm-auth': SheetDefinition;

@@ -150,7 +150,6 @@ const showAuthConfirmation = async ({
 				},
 				onClose: () => {
 					SystemNavigationBar.navigationShow().then();
-					SheetManager.hide('confirm-auth');
 				},
 			});
 		}, AUTH_SHEET_DELAY);

@@ -133,11 +133,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	// }, []);
 
 	const handleShowQRPress = useCallback(async () => {
-		await SheetManager.show('migrate-modal', {
-			payload: {
-				onClose: () => SheetManager.hide('migrate-modal'),
-			},
-		});
+		await SheetManager.show('migrate-modal');
 	}, []);
 
 	const handleScanQRPress = useCallback(async () => {

@@ -12,6 +12,7 @@ import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { useTranslation } from 'react-i18next';
 import { BodyMText, BodyMSBText, BodySSBText, BodySText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
+import { SheetManager } from 'react-native-actions-sheet';
 
 const RecoveryPhrasePrompt = ({
 	payload,
@@ -19,12 +20,10 @@ const RecoveryPhrasePrompt = ({
 	payload: {
 		pubky: string;
 		mnemonic: string;
-		onClose: () => void;
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
 	const [isBlurred, setIsBlurred] = useState<boolean>(true);
-	const onClose = payload.onClose;
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, payload.pubky, 12));
 	const { confirmPubkyBackup } = usePubkyManagement();
 	const title = t('backup.recoveryPhrase');
@@ -43,7 +42,7 @@ const RecoveryPhrasePrompt = ({
 
 	const handleFinishBackup = (): void => {
 		confirmPubkyBackup(payload.pubky, EBackupPreference.recoveryPhrase);
-		onClose();
+		SheetManager.hide('recovery-phrase-prompt');
 	};
 
 	return (

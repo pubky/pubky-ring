@@ -199,7 +199,6 @@ export const showImportPrompt = ({
 				},
 				onClose: () => {
 					resolve(err(''));
-					SheetManager.hide('backup-prompt');
 				},
 			},
 		});

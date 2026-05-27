@@ -8,6 +8,7 @@ import Animated, {
 	Easing,
 	interpolate,
 } from 'react-native-reanimated';
+import { scheduleOnRN } from 'react-native-worklets';
 import { View } from '../theme/components';
 import { subscribeMigrationProgress, MigrationProgress } from '../utils/actions/migrateAction';
 import { useTranslation } from 'react-i18next';
@@ -22,6 +23,7 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 		isActive: false,
 		isImporting: false,
 	});
+	const [isVisible, setIsVisible] = useState(false);
 
 	// Animation values
 	const containerOpacity = useSharedValue(0);
@@ -35,10 +37,23 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 	// Handle visibility animation
 	useEffect(() => {
 		const shouldShow = progress.isActive || progress.isImporting;
-		containerOpacity.value = withTiming(shouldShow ? 1 : 0, {
-			duration: 300,
-			easing: Easing.ease,
-		});
+
+		if (shouldShow) {
+			setIsVisible(true);
+		}
+
+		containerOpacity.value = withTiming(
+			shouldShow ? 1 : 0,
+			{
+				duration: 300,
+				easing: Easing.ease,
+			},
+			finished => {
+				if (finished && !shouldShow) {
+					scheduleOnRN(setIsVisible, false);
+				}
+			},
+		);
 	}, [progress.isActive, progress.isImporting, containerOpacity]);
 
 	// Handle progress bar animation
@@ -67,7 +82,7 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 	}));
 
 	// Don't render if not active
-	if (!progress.isActive && !progress.isImporting && containerOpacity.value === 0) {
+	if (!progress.isActive && !progress.isImporting && !isVisible) {
 		return null;
 	}
 

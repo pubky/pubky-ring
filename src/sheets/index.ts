@@ -37,7 +37,6 @@ declare module 'react-native-actions-sheet' {
 			payload: {
 				pubky: string;
 				mnemonic: string;
-				onClose: () => void;
 			};
 		}>;
 		'confirm-auth': SheetDefinition;
@@ -48,11 +47,7 @@ declare module 'react-native-actions-sheet' {
 		'add-pubky': SheetDefinition;
 		'select-pubky': SheetDefinition;
 		'import-success': SheetDefinition;
-		'migrate-modal': SheetDefinition<{
-			payload: {
-				onClose: () => void;
-			};
-		}>;
+		'migrate-modal': SheetDefinition;
 		loading: SheetDefinition<{
 			payload?: {
 				modalTitle?: string;

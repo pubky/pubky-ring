@@ -51,9 +51,6 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 				publicKey,
 				onDelete,
 			},
-			onClose: () => {
-				SheetManager.hide('delete-pubky');
-			},
 		});
 	}, [onDelete, publicKey]);
 

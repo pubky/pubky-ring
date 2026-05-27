@@ -15,7 +15,6 @@ import {
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { BodySSBText, HeadingText } from '../theme/typography';
-import { shadowStyles } from '../theme/utils';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import i18n from '../i18n';
@@ -166,7 +165,6 @@ const PubkyBox = ({
 
 const styles = StyleSheet.create({
 	container: {
-		...shadowStyles.small,
 		borderRadius: 16,
 		marginBottom: 24,
 		marginHorizontal: 24,

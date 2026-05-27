@@ -23,11 +23,10 @@ const DashedBorder = ({
 }: DashedBorderProps): ReactElement => {
 	// Create the rounded rectangle path
 	const createPath = (width: number, height: number): SkPath => {
-		const path = Skia.Path.Make();
 		const halfBorder = borderWidth / 2;
 
 		// Create rounded rectangle path
-		path.addRRect({
+		return Skia.Path.RRect({
 			rect: {
 				x: halfBorder,
 				y: halfBorder,
@@ -37,8 +36,6 @@ const DashedBorder = ({
 			rx: borderRadius,
 			ry: borderRadius,
 		});
-
-		return path;
 	};
 
 	const [dimensions, setDimensions] = React.useState({ width: 0, height: 0 });

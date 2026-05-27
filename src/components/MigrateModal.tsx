@@ -2,8 +2,7 @@ import React, { memo, ReactElement, useEffect, useMemo, useRef, useState } from 
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
 import { useSelector } from 'react-redux';
-import { getPubkyKeys, getPubkyName } from '../store/selectors/pubkySelectors.ts';
-import { RootState } from '../types';
+import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { getPubkySecretKey } from '../utils/pubky.ts';
 import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
@@ -12,26 +11,13 @@ import { useTranslation } from 'react-i18next';
 import { BodyMText, BodyMSBText, BodySText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 
-interface KeyData {
-	pubky: string;
-	value: string;
-	name: string;
-}
-
-const MigrateModal = ({
-	payload,
-}: {
-	payload: {
-		onClose: () => void;
-	};
-}): ReactElement => {
+const MigrateModal = (): ReactElement => {
 	const { t } = useTranslation();
 	const pubkyKeys = useSelector(getPubkyKeys);
-	const [keysData, setKeysData] = useState<KeyData[]>([]);
+	const [keyValues, setKeyValues] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
-	const onClose = useMemo(() => payload?.onClose ?? ((): void => {}), [payload]);
-	const rootState = useSelector((s: RootState) => s);
 	const originalBrightnessRef = useRef<number | null>(null);
+	const displayedKeyCount = isLoading ? pubkyKeys.length : keyValues.length;
 
 	// Manage screen brightness for better QR scanning
 	useEffect(() => {
@@ -64,7 +50,7 @@ const MigrateModal = ({
 		let mounted = true;
 
 		const loadKeys = async (): Promise<void> => {
-			const data: KeyData[] = [];
+			const values: string[] = [];
 
 			for (const pubky of pubkyKeys) {
 				const keyDataResult = await getPubkySecretKey(pubky);
@@ -89,13 +75,12 @@ const MigrateModal = ({
 				}
 
 				if (value) {
-					const name = getPubkyName(rootState, pubky, 20);
-					data.push({ pubky, value, name });
+					values.push(value);
 				}
 			}
 
 			if (mounted) {
-				setKeysData(data);
+				setKeyValues(values);
 				setIsLoading(false);
 			}
 		};
@@ -105,33 +90,29 @@ const MigrateModal = ({
 		return (): void => {
 			mounted = false;
 		};
-	}, [pubkyKeys, rootState]);
+	}, [pubkyKeys]);
 
 	// Format keys data for migration QR codes with deeplink format
 	const migrateFormattedData = useMemo(() => {
-		return keysData.map((keyData, index) => ({
-			value: `pubkyring://migrate?index=${index}&total=${keysData.length}&key=${encodeURIComponent(
-				keyData.value,
-			)}`,
+		return keyValues.map((value, index) => ({
+			value: `pubkyring://migrate?index=${index}&total=${keyValues.length}&key=${encodeURIComponent(value)}`,
 		}));
-	}, [keysData]);
+	}, [keyValues]);
 
 	const renderContent = (): ReactElement => {
 		if (isLoading) {
 			return (
 				<View style={styles.centerContent}>
 					<ActivityIndicator size="large" color="#FFFFFF" />
-					<BodySText style={styles.loadingText}>{t('common.loading')}</BodySText>
+					<BodyMText style={styles.loadingText}>{t('common.loading')}</BodyMText>
 				</View>
 			);
 		}
 
-		if (keysData.length === 0) {
+		if (keyValues.length === 0) {
 			return (
 				<View style={styles.centerContent}>
-					<BodyMSBText colorName="textTertiary" style={styles.noKeysText}>
-						{t('settings.noKeysToDisplay')}
-					</BodyMSBText>
+					<BodyMSBText colorName="textTertiary">{t('settings.noKeysToDisplay')}</BodyMSBText>
 				</View>
 			);
 		}
@@ -147,11 +128,11 @@ const MigrateModal = ({
 	};
 
 	return (
-		<Sheet id="migrate-modal" title={t('settings.migrateKeys')} onClose={onClose}>
+		<Sheet id="migrate-modal" title={t('settings.migrateKeys')}>
 			<View style={styles.textContainer}>
 				<CaptionText>{t('settings.scanDynamicQR')}</CaptionText>
 				<BodyMText style={styles.description}>
-					{t('settings.scanDynamicQRDescription', { count: pubkyKeys.length })}
+					{t('settings.scanDynamicQRDescription', { count: displayedKeyCount })}
 				</BodyMText>
 			</View>
 
@@ -163,10 +144,9 @@ const MigrateModal = ({
 const styles = StyleSheet.create({
 	textContainer: {
 		marginBottom: 24,
-		backgroundColor: 'transparent',
 	},
 	description: {
-		marginTop: 10,
+		marginTop: 12,
 	},
 	centerContent: {
 		flex: 1,
@@ -174,10 +154,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	loadingText: {
-		marginTop: 16,
-	},
-	noKeysText: {
-		textAlign: 'center',
+		marginTop: 12,
 	},
 });
 

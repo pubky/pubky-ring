@@ -16,7 +16,6 @@ export const showAddPubkySheet = (
 ): void => {
 	SheetManager.show('add-pubky', {
 		payload: { createPubky, importPubky },
-		onClose: () => SheetManager.hide('add-pubky'),
 	});
 };
 
@@ -32,7 +31,6 @@ export const showNewPubkySetupSheet = ({
 			pubky,
 			data,
 		},
-		onClose: () => SheetManager.hide('new-pubky-setup'),
 	});
 };
 
@@ -54,7 +52,6 @@ export const showEditPubkySheet = ({
 			pubky,
 			data,
 		},
-		onClose: () => SheetManager.hide('edit-pubky'),
 	});
 };
 
@@ -79,7 +76,6 @@ export const showImportSuccessSheet = ({
 			pubky,
 			onContinue,
 		},
-		onClose: () => SheetManager.hide('import-success'),
 	});
 };
 
@@ -142,7 +138,6 @@ export const showBackupPrompt = async ({
 			payload: {
 				pubky,
 				mnemonic: secretKeyResponse.value.mnemonic,
-				onClose: () => SheetManager.hide('recovery-phrase-prompt'),
 			},
 		});
 		return;
@@ -209,7 +204,6 @@ export const showBackupPrompt = async ({
 					return err(i18n.t('backup.failedToCreateBackup'));
 				}
 			},
-			onClose: () => SheetManager.hide('backup-prompt'),
 		},
 	});
 };

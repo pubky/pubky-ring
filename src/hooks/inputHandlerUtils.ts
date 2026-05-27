@@ -104,7 +104,6 @@ export const showPubkySelectionSheet = async (
 				},
 			},
 			onClose: (): void => {
-				SheetManager.hide('select-pubky');
 				if (source === 'deeplink') {
 					dispatch(setDeepLink(''));
 				}

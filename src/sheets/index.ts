@@ -47,11 +47,7 @@ declare module 'react-native-actions-sheet' {
 		'add-pubky': SheetDefinition;
 		'select-pubky': SheetDefinition;
 		'import-success': SheetDefinition;
-		'migrate-modal': SheetDefinition<{
-			payload: {
-				onClose: () => void;
-			};
-		}>;
+		'migrate-modal': SheetDefinition;
 		loading: SheetDefinition<{
 			payload?: {
 				modalTitle?: string;

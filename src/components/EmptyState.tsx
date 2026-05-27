@@ -7,15 +7,14 @@ import { accentColors } from '../theme/index.ts';
 
 const DashedArrow = (): ReactElement => {
 	// Curve rotated 45° clockwise - now goes top-left to bottom-right
-	const curvePath = Skia.Path.Make();
-	curvePath.moveTo(4, 0);
-	curvePath.quadTo(4, 32, 39, 60);
+	const curvePath = Skia.PathBuilder.Make().moveTo(4, 0).quadTo(4, 32, 39, 60).build();
 
 	// Arrowhead chevron pointing down-right
-	const arrowPath = Skia.Path.Make();
-	arrowPath.moveTo(33, 64); // Left tip
-	arrowPath.lineTo(42, 62); // Middle tip
-	arrowPath.lineTo(40, 53); // Right tip
+	const arrowPath = Skia.PathBuilder.Make()
+		.moveTo(33, 64) // Left tip
+		.lineTo(42, 62) // Middle tip
+		.lineTo(40, 53) // Right tip
+		.build();
 
 	// Dashed line paint
 	const dashedPaint = Skia.Paint();

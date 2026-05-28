@@ -86,7 +86,7 @@ jobs:
   ios-e2e:
     runs-on: macos-26
     needs: build
-    # timeout-minutes: 90
+    timeout-minutes: 90
 
     steps:
     - name: Checkout code
@@ -123,11 +123,11 @@ jobs:
         ls -la
 
     - name: Run E2E tests
-      # timeout-minutes: 45
+      timeout-minutes: 45
       env:
         IOS_APP: ./artifacts/pubkyring.app
         IOS_SIM: iPhone 17
-        IOS_PLATFORM_VERSION: 26.2
+        RECORD_VIDEO: 'true'
         HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
       run: yarn e2e:ios
 

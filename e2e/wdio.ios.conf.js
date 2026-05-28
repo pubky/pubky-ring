@@ -8,8 +8,8 @@ exports.config = {
 	capabilities: [
 		{
 			platformName: 'iOS',
+			'wdio:maxInstances': 1,
 			'appium:automationName': 'XCUITest',
-			'appium:platformVersion': process.env.IOS_PLATFORM_VERSION || '17.5',
 			'appium:deviceName': iosSimName,
 			'appium:newCommandTimeout': 300,
 			'appium:useNewWDA': false,

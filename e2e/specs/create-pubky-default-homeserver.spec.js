@@ -1,13 +1,18 @@
 const { expect } = require('chai');
-const { elementById, waitForDisplayed, completeOnboardingFlow, dismissKeyboard, waitForKeyboardToBeShown, sendReturnKey } = require('../helpers/actions');
-
+const {
+	elementById,
+	waitForDisplayed,
+	completeOnboardingFlow,
+	dismissKeyboard,
+	enterText,
+	sendReturnKey,
+} = require('../helpers/actions');
 
 before(async () => {
 	await completeOnboardingFlow();
 });
 
 describe('create a pubky with default (prod) homeserver without proceeding to input invite code', () => {
-
 	it('can go to create a pubky with default (prod) homeserver without proceeding to input invite code', async () => {
 		// Tap 'Add pubky' button on Home page
 		(await waitForDisplayed(elementById('AddPubkyButton'))).click();
@@ -21,7 +26,7 @@ describe('create a pubky with default (prod) homeserver without proceeding to in
 		(await waitForDisplayed(elementById('NewPubkyContinueButton'))).click();
 
 		// Assert that 'Default' option is selected on Homeserver page
-		(await waitForDisplayed(elementById('HomeserverDefaultRadioInner')));
+		await waitForDisplayed(elementById('HomeserverDefaultRadioInner'));
 		expect(await elementById('HomeserverCustomRadioInner').isExisting()).to.be.false;
 
 		// Tap 'Continue' button on Homeserver page
@@ -35,16 +40,14 @@ describe('create a pubky with default (prod) homeserver without proceeding to in
 		// TODO: consider testing input validation with invalid and partial input invite code
 
 		// Input an invite code on Default Homeserver page
-		(await waitForDisplayed(elementById('InviteCodeInput'))).click();
-		await waitForKeyboardToBeShown();
-		driver.sendKeys(['ABCD1234EFGH']);
+		await enterText(elementById('InviteCodeInput'), 'ABCD1234EFGH', 'ABCD-1234-EFGH');
 		expect(await elementById('InviteCodeInput').getText()).to.equal('ABCD-1234-EFGH');
 
 		// note: unable to assert that 'Continue' button is enabled because keyboard dismissal uses return key on iOS and that submits the form
 		await sendReturnKey();
 
 		// Assert for error because we input an invalid invite code for prod homeserver
-		(await waitForDisplayed(elementById('InviteCodeErrorText'), 120_000));
+		await waitForDisplayed(elementById('InviteCodeErrorText'), 120_000);
 		expect(await elementById('InviteCodeErrorText').getText()).to.contain('Invalid invite code');
 	});
 });

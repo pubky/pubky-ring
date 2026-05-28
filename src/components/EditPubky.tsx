@@ -348,7 +348,7 @@ const EditPubky = ({
 	return (
 		<Sheet id="edit-pubky" title={title} keyboardHandlerEnabled={false}>
 			<ActionSheetScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-				<CaptionText>{i18n.t('editPubkySheet.pubkyNameLabel')}</CaptionText>
+				<CaptionText testID="edit-pubky-label">{i18n.t('editPubkySheet.pubkyNameLabel')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyNameInput"
 					value={newPubkyName}

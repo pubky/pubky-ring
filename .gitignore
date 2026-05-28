@@ -69,6 +69,9 @@ yarn-error.log
 
 # testing
 /coverage
+e2e/results
+e2e/artefacts
+e2e/wdio-logs
 
 # Yarn
 .yarn/*

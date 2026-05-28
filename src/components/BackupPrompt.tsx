@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
+import { SheetManager } from 'react-native-actions-sheet';
 import { TextInput, TouchableOpacity } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncateStr } from '../utils/pubky.ts';
@@ -32,7 +33,7 @@ const BackupPrompt = ({
 		fileDate?: Date;
 		viewId: EBackupPromptViewId;
 		onSubmit: (password: string) => Promise<Result<any>>;
-		onClose: () => void;
+		onClose?: () => void;
 	};
 }): ReactElement => {
 	const { t } = useTranslation();
@@ -50,6 +51,10 @@ const BackupPrompt = ({
 		const res = truncateStr(pubky);
 		return res.startsWith('pk:') ? res.slice(3) : res;
 	}, [pubky]);
+
+	const handleClose = useCallback(() => {
+		SheetManager.hide('backup-prompt');
+	}, []);
 
 	const handleSubmit = useCallback(async () => {
 		try {
@@ -142,7 +147,7 @@ const BackupPrompt = ({
 			title={title}
 			keyboardHandlerEnabled={true}
 			onClose={() => {
-				onClose();
+				onClose?.();
 				setPassword('');
 				setError('');
 			}}
@@ -183,7 +188,7 @@ const BackupPrompt = ({
 				</BodySText>
 			) : null}
 			<View style={styles.buttonContainer}>
-				<Button text={loading ? t('common.close') : t('common.cancel')} size="large" onPress={onClose} />
+				<Button text={loading ? t('common.close') : t('common.cancel')} size="large" onPress={handleClose} />
 				<Button
 					text={submitButtonText}
 					size="large"

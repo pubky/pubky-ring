@@ -1,8 +1,8 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, Switch, TouchableOpacity } from 'react-native';
+import { Alert, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { View, Card } from '../theme/components.ts';
+import { View as ThemedView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
@@ -156,20 +156,20 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			<View style={styles.content}>
 				{/**
                  TODO: Adjust light-mode gradient colors.
-                 <Card style={styles.section}>
+                 <ThemedView style={styles.section} colorName="buttonBackground">
                  <TouchableOpacity onPress={handleThemePress} style={styles.themeButton}>
                  <BodyMSBText>Theme</BodyMSBText>
                  <BodySText colorName="textTertiary">
                  {themeDisplayText}
                  </BodySText>
                  </TouchableOpacity>
-                 </Card>
+                 </ThemedView>
                  **/}
 
-				<Card style={styles.textSection}>
+				<View style={styles.textSection}>
 					<CaptionText>{t('settings.migrateToOtherDevice')}</CaptionText>
 					<BodyMText style={styles.textSettingValue}>{t('settings.migrateDescription')}</BodyMText>
-				</Card>
+				</View>
 
 				<View style={styles.buttonContainer}>
 					{hasPubkys && (
@@ -193,7 +193,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				</View>
 
 				{showSecretSettings && (
-					<Card style={styles.section}>
+					<ThemedView style={styles.section} colorName="buttonBackground">
 						<TouchableOpacity
 							onPress={handleNavigationAnimationPress}
 							style={styles.navigationAnimationButton}
@@ -201,46 +201,46 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							<BodyMSBText>{t('settings.navigationAnimation')}</BodyMSBText>
 							<BodySText colorName="textTertiary">{navigationAnimationText}</BodySText>
 						</TouchableOpacity>
-					</Card>
+					</ThemedView>
 				)}
 
 				{showSecretSettings && (
-					<Card style={styles.section}>
+					<ThemedView style={styles.section} colorName="buttonBackground">
 						<TouchableOpacity onPress={handleAutoAuthToggle} style={styles.toggleRow}>
 							<BodyMSBText>{t('settings.autoAuth')}</BodyMSBText>
 							<View style={styles.switchContainer}>
 								<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
 							</View>
 						</TouchableOpacity>
-					</Card>
+					</ThemedView>
 				)}
 
 				{showSecretSettings && (
-					<Card style={styles.section}>
+					<ThemedView style={styles.section} colorName="buttonBackground">
 						<TouchableOpacity onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
 							<BodyMSBText>{t('settings.showOnboarding')}</BodyMSBText>
 						</TouchableOpacity>
-					</Card>
+					</ThemedView>
 				)}
 
 				{showSecretSettings && (
-					<Card style={styles.section}>
+					<ThemedView style={styles.section} colorName="buttonBackground">
 						<TouchableOpacity onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
 							<BodyMSBText>{t('settings.wipePubkyRing')}</BodyMSBText>
 						</TouchableOpacity>
-					</Card>
+					</ThemedView>
 				)}
 
 				{/* Backup all pubkys */}
 				{/* TODO: Consider implementing a "Backup All Pubkys" feature. Backs up all pubkys with same passphrase and saves as zip file for future import
-				<Card style={styles.section}>
+				<ThemedView style={styles.section} colorName="buttonBackground">
 					<TouchableOpacity
 						onPress={handleBackupPress}
 						style={styles.backupButton}
 					>
 						<BodyMSBText>Backup All Pubkys</BodyMSBText>
 					</TouchableOpacity>
-				</Card>
+				</ThemedView>
 				*/}
 			</View>
 		</SafeAreaView>
@@ -257,7 +257,6 @@ const styles = StyleSheet.create({
 	},
 	textSection: {
 		marginBottom: 12,
-		backgroundColor: 'transparent',
 	},
 	section: {
 		marginBottom: 16,
@@ -269,7 +268,6 @@ const styles = StyleSheet.create({
 	},
 	switchContainer: {
 		justifyContent: 'center',
-		backgroundColor: 'transparent',
 	},
 	// eslint-disable-next-line react-native/no-unused-styles
 	themeButton: {

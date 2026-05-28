@@ -1,23 +1,14 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import React, { memo, ReactElement, useCallback } from 'react';
+import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { useQRScanner } from '../hooks/useQRScanner';
-import {
-	Box,
-	Card,
-	CardView,
-	ForegroundView,
-	LinearGradient,
-	NavView,
-	TouchableOpacity,
-	View,
-} from '../theme/components.ts';
+import { CardGradient } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { BodySSBText, HeadingText } from '../theme/typography';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
-import i18n from '../i18n';
 import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
 
@@ -29,29 +20,34 @@ interface PubkyInfoProps {
 }
 
 const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: PubkyInfoProps) => {
+	const { t } = useTranslation();
+
 	const handleBackupPress = useCallback(() => {
 		showBackupPrompt({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
 	}, [publicKey]);
+
 	return (
 		<View style={styles.contentContainer}>
 			<HeadingText style={styles.nameText} numberOfLines={1}>
 				{pubkyName}
 			</HeadingText>
-			<Card style={styles.row}>
+			<View style={styles.row}>
 				<BodySSBText numberOfLines={1} ellipsizeMode="middle">
 					{truncateStr(publicKey)}
 				</BodySSBText>
 				{!isBackedUp && (
 					<TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}>
-						<BodySSBText colorName="pubkyRing">{i18n.t('pubkyProfile.backupReminder')}</BodySSBText>
+						<BodySSBText style={styles.backupText} colorName="pubkyRing">
+							{t('pubkyProfile.backupReminder')}
+						</BodySSBText>
 					</TouchableOpacity>
 				)}
 				{sessionsCount > 0 && (
-					<CardView style={styles.sessionsButton}>
+					<View style={styles.sessionsButton}>
 						<BodySSBText colorName="textTertiary">{sessionsCount}</BodySSBText>
-					</CardView>
+					</View>
 				)}
-			</Card>
+			</View>
 		</View>
 	);
 });
@@ -75,6 +71,7 @@ const PubkyBox = ({
 	disabled,
 	loading = false,
 }: PubkyBoxProps): ReactElement => {
+	const { t } = useTranslation();
 	const { handleQRPress, isQRLoading } = useQRScanner();
 	const { onQRPress, onPubkyPress } = usePubkyHandlers();
 
@@ -86,20 +83,17 @@ const PubkyBox = ({
 		onPubkyPress(pubky, index ?? 0);
 	}, [index, onPubkyPress, pubky]);
 
-	const publicKey = useMemo(() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky), [pubky]);
-
-	const pubkyName = useMemo(() => {
-		return (
-			truncateStr(pubkyData.name, 8) || `${i18n.t('emptyState.placeholderName')} #${index ? index + 1 : 1}`
-		);
-	}, [index, pubkyData.name]);
+	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
+	const pubkyName =
+		truncateStr(pubkyData.name, 8) ||
+		`${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
 
 	const qrPress = useCallback(() => {
 		if (pubkyData.signedUp) {
 			handleQRAction();
 		} else {
 			showEditPubkySheet({
-				title: i18n.t('pubky.setup'),
+				title: t('pubky.setup'),
 				description: '',
 				pubky: pubky,
 				data: pubkyData,
@@ -108,33 +102,29 @@ const PubkyBox = ({
 	}, [handleQRAction, pubky, pubkyData]);
 
 	// testId example: PubkyBox-StagingTestPubky-0
-	const pubkyBoxTestID = useMemo(() => {
-		const sanitizedName = pubkyData.name.replace(/[^a-zA-Z0-9]/g, '');
-		const indexStr = index !== undefined ? `-${index}` : '';
-		return `PubkyBox-${sanitizedName}${indexStr}`;
-	}, [pubkyData.name, index]);
+	const sanitizedName = pubkyData.name.replace(/[^a-zA-Z0-9]/g, '');
+	const indexStr = index !== undefined ? `-${index}` : '';
+	const pubkyBoxTestID = `PubkyBox-${sanitizedName}${indexStr}`;
 
 	return (
-		<LinearGradient testID={pubkyBoxTestID} style={styles.container}>
+		<CardGradient testID={pubkyBoxTestID} style={styles.container}>
 			<TouchableOpacity
 				style={styles.wrapper}
 				activeOpacity={0.7}
 				onPress={handleOnPress}
 				onLongPress={onLongPress}
 			>
-				<Box
-					onPress={handleOnPress}
-					onLongPress={onLongPress}
+				<TouchableOpacity
+					style={styles.box}
 					disabled={disabled}
 					hitSlop={40}
-					style={styles.box}
 					activeOpacity={0.7}
+					onPress={handleOnPress}
+					onLongPress={onLongPress}
 				>
-					<ForegroundView style={styles.profileImageContainer}>
-						<NavView style={styles.profileImage}>
-							<ProfileAvatar pubky={publicKey} size={48} />
-						</NavView>
-					</ForegroundView>
+					<View style={styles.profileImage}>
+						<ProfileAvatar pubky={publicKey} size={48} />
+					</View>
 
 					<PubkyInfo
 						pubkyName={pubkyName}
@@ -143,14 +133,14 @@ const PubkyBox = ({
 						sessionsCount={sessionsCount}
 					/>
 
-					<ForegroundView style={styles.buttonArrow}>
+					<View style={styles.iconContainer}>
 						<ChevronRight size={24} colorName="textTertiary" />
-					</ForegroundView>
-				</Box>
+					</View>
+				</TouchableOpacity>
 
 				<Button
 					style={styles.button}
-					text={pubkyData.signedUp ? i18n.t('auth.authorize') : i18n.t('pubky.setup')}
+					text={pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup')}
 					size="medium"
 					variant="secondary"
 					loading={isQRLoading || loading}
@@ -159,7 +149,7 @@ const PubkyBox = ({
 					onLongPress={onLongPress}
 				/>
 			</TouchableOpacity>
-		</LinearGradient>
+		</CardGradient>
 	);
 };
 
@@ -171,64 +161,54 @@ const styles = StyleSheet.create({
 	},
 	wrapper: {
 		padding: 24,
-		backgroundColor: 'transparent',
 	},
 	box: {
-		backgroundColor: 'transparent',
 		flexDirection: 'row',
 		alignItems: 'center',
-	},
-	profileImageContainer: {
-		marginRight: 16,
-		backgroundColor: 'transparent',
 	},
 	profileImage: {
 		width: 48,
 		height: 48,
-		borderRadius: 30,
+		borderRadius: '50%',
 		overflow: 'hidden',
 		justifyContent: 'center',
 		alignItems: 'center',
+		marginRight: 16,
 	},
 	contentContainer: {
 		flex: 1,
 		justifyContent: 'center',
 		alignItems: 'flex-start',
-		backgroundColor: 'transparent',
 	},
 	nameText: {
-		...Platform.select({
-			android: {
-				paddingBottom: 4,
-			},
-		}),
+		paddingRight: 16,
 	},
-	buttonArrow: {
-		backgroundColor: 'transparent',
-		display: 'flex',
+	iconContainer: {
 		justifyContent: 'center',
 		marginLeft: 'auto',
 	},
 	sessionsButton: {
-		borderRadius: 100,
+		alignItems: 'center',
 		height: 20,
 		width: 20,
-		alignContent: 'center',
-		justifyContent: 'center',
-		marginLeft: 4,
+		borderRadius: '50%',
+		marginLeft: 8,
+		backgroundColor: 'rgba(255, 255, 255, 0.16)',
 	},
 	row: {
 		flexDirection: 'row',
-		backgroundColor: 'transparent',
 		flexWrap: 'nowrap',
 	},
 	backupContainer: {
-		paddingHorizontal: 8,
-		paddingVertical: 2,
+		alignItems: 'center',
 		backgroundColor: 'rgba(0, 133, 255, 0.16)',
 		borderRadius: 16,
-		marginLeft: 5,
-		alignSelf: 'center',
+		paddingHorizontal: 8,
+		marginLeft: 8,
+		height: 20,
+	},
+	backupText: {
+		letterSpacing: 0,
 	},
 	button: {
 		marginTop: 24,

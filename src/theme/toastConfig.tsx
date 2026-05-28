@@ -12,22 +12,22 @@ interface ThemedProps {
 }
 
 const StyledBaseToast = styled(BaseToast)<ThemedProps>`
-	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
-	border-left-color: ${(props: ThemedProps): string => props.theme.colors.border};
+	background-color: ${(props: ThemedProps): string => props.theme.colors.toastBackground};
+	border-left-color: ${(props: ThemedProps): string => props.theme.colors.toastBorder};
 `;
 
 const StyledErrorToast = styled(ErrorToast)<ThemedProps>`
-	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	background-color: ${(props: ThemedProps): string => props.theme.colors.toastBackground};
 	border-left-color: #FF0000;
 `;
 
 const StyledSuccessToast = styled(SuccessToast)<ThemedProps>`
-	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	background-color: ${(props: ThemedProps): string => props.theme.colors.toastBackground};
 	border-left-color: #16a34a;
 `;
 
 const StyledInfoToast = styled(InfoToast)<ThemedProps>`
-	background-color: ${(props: ThemedProps): string => props.theme.colors.cardBackground};
+	background-color: ${(props: ThemedProps): string => props.theme.colors.toastBackground};
 	border-left-color: #2563eb;
 `;
 

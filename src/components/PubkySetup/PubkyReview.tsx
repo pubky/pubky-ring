@@ -1,14 +1,13 @@
 import React, { ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { ForegroundView } from '../../theme/components.ts';
+import { useTranslation } from 'react-i18next';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { PubkyData } from '../../navigation/types.ts';
-import i18n from '../../i18n';
 import { BodyMText, DisplayText } from '../../theme/typography';
 import Button from '../Button.tsx';
 
 interface PubkyReviewProps {
-	headerText?: string;
+	headerText: string;
 	description: string;
 	pubky: string;
 	pubkyData: PubkyData;
@@ -22,16 +21,16 @@ const PubkyReview = ({
 	pubkyData,
 	onContinue,
 }: PubkyReviewProps): ReactElement => {
+	const { t } = useTranslation();
+
 	return (
 		<View style={styles.content}>
-			{headerText && <DisplayText style={styles.headerText}>{headerText}</DisplayText>}
+			<DisplayText style={styles.headerText}>{headerText}</DisplayText>
 			<BodyMText style={styles.message}>{description}</BodyMText>
-			<ForegroundView style={styles.profileCard}>
-				<PubkyProfile pubky={pubky} pubkyData={pubkyData} hideButton={true} />
-			</ForegroundView>
+			<PubkyProfile pubky={pubky} pubkyData={pubkyData} />
 			<View style={styles.footer}>
 				<Button
-					text={i18n.t('common.continue')}
+					text={t('common.continue')}
 					size="large"
 					variant="secondary"
 					testID="NewPubkyContinueButton"
@@ -51,12 +50,6 @@ const styles = StyleSheet.create({
 	},
 	message: {
 		marginBottom: 24,
-	},
-	profileCard: {
-		alignItems: 'center',
-		justifyContent: 'center',
-		borderRadius: 24,
-		backgroundColor: 'rgba(255, 255, 255, 0.05)',
 	},
 	footer: {
 		marginTop: 'auto',

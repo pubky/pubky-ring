@@ -72,12 +72,12 @@ const SelectPubky = ({
 					data={pubkyArray}
 					renderItem={({ item }) => (
 						<TouchableOpacity style={styles.card} onPress={() => onPubkyPress(item.key)}>
-							<PubkyCard publicKey={item.key} name={item.value.name} />
+							<PubkyCard publicKey={item.key} name={item.value.name} showChevron={true} />
 						</TouchableOpacity>
 					)}
 					renderScrollComponent={ActionSheetScrollView}
 					keyExtractor={item => item.key}
-					showsVerticalScrollIndicator={true}
+					showsVerticalScrollIndicator={false}
 				/>
 			</View>
 

@@ -1,5 +1,4 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
 import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import { useSelector } from 'react-redux';
@@ -48,13 +47,5 @@ const PubkyDetailScreen = (): ReactElement => {
 		</SafeAreaView>
 	);
 };
-
-const styles = StyleSheet.create({
-	pencilIcon: {
-		width: 24,
-		height: 24,
-		alignSelf: 'center',
-	},
-});
 
 export default memo(PubkyDetailScreen);

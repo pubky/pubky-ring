@@ -1,8 +1,8 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { deletePubky, signOutOfHomeserver } from '../../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
-import PubkyListHeader from './PubkyListHeader.tsx';
+import PubkyDetailCard from './PubkyDetailCard';
 import { PubkyData } from '../../navigation/types.ts';
 import { showToast } from '../../utils/helpers.ts';
 import { showBackupPrompt } from '../../utils/sheetHelpers.ts';
@@ -20,7 +20,7 @@ export interface PubkyDetailProps {
 
 export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
 	const { pubky, sessions } = pubkyData;
-	const publicKey = useMemo(() => (pubky.startsWith('pk:') ? pubky.slice(3) : pubky), [pubky]);
+	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 	const dispatch = useDispatch();
 	const navigation = useTypedNavigation();
 
@@ -67,7 +67,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 		}
 	}, [pubky, pubkyData.backupPreference]);
 
-	const sessionsLength = useMemo(() => (sessions && sessions?.length > 0 ? sessions.length : 1), [sessions]);
+	const sessionsLength = sessions?.length > 0 ? sessions.length : 1;
 
 	return (
 		<View style={styles.container}>
@@ -77,7 +77,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 				bounces={false}
 				nestedScrollEnabled={true}
 			>
-				<PubkyListHeader
+				<PubkyDetailCard
 					index={index}
 					pubky={pubky}
 					pubkyData={pubkyData}

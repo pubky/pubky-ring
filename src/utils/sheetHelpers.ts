@@ -56,22 +56,16 @@ export const showEditPubkySheet = ({
 };
 
 export const showImportSuccessSheet = ({
-	modalTitle = i18n.t('import.pubkyImported'),
-	description,
 	isNewPubky = true,
 	pubky,
 	onContinue = (): void => {},
 }: {
-	modalTitle?: string;
-	description?: string;
 	isNewPubky?: boolean;
 	pubky: string;
 	onContinue?: () => void;
 }): void => {
 	SheetManager.show('import-success', {
 		payload: {
-			modalTitle,
-			description,
 			isNewPubky,
 			pubky,
 			onContinue,

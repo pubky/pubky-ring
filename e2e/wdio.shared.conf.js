@@ -4,6 +4,7 @@ const path = require('path');
 
 const artefactsDir = path.resolve(__dirname, 'artefacts');
 const resultsDir = path.resolve(__dirname, 'results');
+const wdioLogsDir = path.resolve(__dirname, 'wdio-logs');
 
 function safeName(value) {
 	return (
@@ -19,6 +20,7 @@ exports.config = {
 	specs: [path.resolve(__dirname, 'specs/**/*.spec.js')],
 	maxInstances: 1,
 	logLevel: 'debug',
+	outputDir: wdioLogsDir,
 	bail: 0,
 	baseUrl: 'http://localhost',
 	waitforTimeout: 20_000,

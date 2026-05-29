@@ -1,4 +1,7 @@
+import { TextInputProps } from 'react-native';
+
 export interface Theme {
+	keyboardAppearance: NonNullable<TextInputProps['keyboardAppearance']>;
 	colors: {
 		// Accent colors
 		pubkyRing: string;
@@ -31,6 +34,7 @@ export const accentColors = {
 };
 
 export const lightTheme: Theme = {
+	keyboardAppearance: 'light',
 	colors: {
 		...accentColors,
 		background: '#fff',
@@ -46,6 +50,7 @@ export const lightTheme: Theme = {
 };
 
 export const darkTheme: Theme = {
+	keyboardAppearance: 'dark',
 	colors: {
 		...accentColors,
 		background: '#000',

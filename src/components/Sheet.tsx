@@ -94,7 +94,17 @@ const Sheet = ({
 						<HeaderNavButton style={styles.navButton} />
 					)}
 
-					<BodyMBText testID={`${id}-title`}>{title}</BodyMBText>
+					<View style={styles.titleTextContainer}>
+						<BodyMBText
+							testID={`${id}-title`}
+							style={styles.titleText}
+							numberOfLines={1}
+							adjustsFontSizeToFit
+							minimumFontScale={0.8}
+						>
+							{title}
+						</BodyMBText>
+					</View>
 
 					<HeaderNavButton style={styles.navButton} />
 				</View>
@@ -130,9 +140,17 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'space-between',
 		alignItems: 'center',
-		height: 24,
+		minHeight: 24,
 		paddingHorizontal: 16,
 		marginBottom: 24,
+	},
+	titleTextContainer: {
+		flex: 1,
+		minWidth: 0,
+		marginHorizontal: 8,
+	},
+	titleText: {
+		textAlign: 'center',
 	},
 	navButton: {
 		height: 24,

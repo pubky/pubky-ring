@@ -1,5 +1,5 @@
 import React, { memo, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import { Platform, Pressable, StyleSheet, View } from 'react-native';
 import { useTheme } from 'styled-components/native';
 import { Theme } from '../theme';
 import { BodySSBText, CaptionSBText } from '../theme/typography';
@@ -13,6 +13,10 @@ enum EButtonSize {
 
 type ButtonSize = `${EButtonSize}`;
 type ButtonVariant = 'primary' | 'secondary';
+
+const CONTENT_GAP = 6;
+
+const toSingleLineLabel = (label: string): string => label.replace(/ /g, '\u00A0');
 
 const Button = ({
 	testID,
@@ -47,6 +51,7 @@ const Button = ({
 	const theme = useTheme() as Theme;
 	const disabledStyle = useMemo(() => (disabled || loading ? styles.disabled : null), [disabled, loading]);
 	const ButtonText = size === EButtonSize.small ? CaptionSBText : BodySSBText;
+	const displayText = useMemo(() => toSingleLineLabel(text), [text]);
 
 	const variantStyle = useMemo(() => {
 		if (variant !== 'secondary') {
@@ -88,17 +93,32 @@ const Button = ({
 		>
 			{loading ? (
 				<ActivityIndicator size="small" />
+			) : size === EButtonSize.large ? (
+				<View style={[styles.content, styles.contentLarge]}>
+					<View style={styles.contentLargeInner}>
+						{icon && <View style={styles.iconSlot}>{icon}</View>}
+						<ButtonText
+							includeFontPadding={false}
+							style={[styles.text, styles.textLarge, textStyle]}
+							testID={`${testID}-Text`}
+						>
+							{displayText}
+						</ButtonText>
+						{rightIcon && <View style={styles.iconSlot}>{rightIcon}</View>}
+					</View>
+				</View>
 			) : (
 				<View style={styles.content}>
 					{icon && icon}
 					<ButtonText
+						includeFontPadding={false}
 						style={[styles.text, textStyle]}
 						numberOfLines={1}
 						adjustsFontSizeToFit
 						minimumFontScale={0.8}
 						testID={`${testID}-Text`}
 					>
-						{text}
+						{displayText}
 					</ButtonText>
 					{rightIcon && rightIcon}
 				</View>
@@ -112,13 +132,28 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		gap: 6,
+		gap: CONTENT_GAP,
 	},
 	content: {
 		flexDirection: 'row',
 		alignItems: 'center',
 		justifyContent: 'center',
-		gap: 6,
+		gap: CONTENT_GAP,
+	},
+	contentLarge: {
+		flex: 1,
+		minWidth: 0,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	contentLargeInner: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		justifyContent: 'center',
+		gap: CONTENT_GAP,
+	},
+	iconSlot: {
+		flexShrink: 0,
 	},
 	large: {
 		flex: 1,
@@ -145,6 +180,12 @@ const styles = StyleSheet.create({
 	text: {
 		alignSelf: 'center',
 		flexShrink: 1,
+		textAlign: 'center',
+		letterSpacing: 0,
+		...(Platform.OS === 'android' ? { paddingRight: 2 } : null),
+	},
+	textLarge: {
+		flexShrink: 0,
 		textAlign: 'center',
 	},
 });

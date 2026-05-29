@@ -98,7 +98,6 @@ const Button = ({
 					<View style={styles.contentLargeInner}>
 						{icon && <View style={styles.iconSlot}>{icon}</View>}
 						<ButtonText
-							includeFontPadding={false}
 							style={[styles.text, styles.textLarge, textStyle]}
 							testID={`${testID}-Text`}
 						>
@@ -111,7 +110,6 @@ const Button = ({
 				<View style={styles.content}>
 					{icon && icon}
 					<ButtonText
-						includeFontPadding={false}
 						style={[styles.text, textStyle]}
 						numberOfLines={1}
 						adjustsFontSizeToFit

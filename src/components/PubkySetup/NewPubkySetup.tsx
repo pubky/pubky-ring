@@ -70,7 +70,7 @@ const Content = ({
 				/>
 			);
 		case ECurrentScreen.requestInvite:
-			return <RequestInviteCode />
+			return <RequestInviteCode />;
 		case ECurrentScreen.welcome:
 			return (
 				<Welcome

@@ -6,7 +6,12 @@ import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
+import Animated, {
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+	withSequence,
+} from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
 import { RootState } from '../store';

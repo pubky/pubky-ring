@@ -361,9 +361,7 @@ const EditPubky = ({
 
 				{isSignupTokenInputVisible && (
 					<>
-						<CaptionText>
-							{i18n.t('editPubkySheet.inviteCodeOptional')}
-						</CaptionText>
+						<CaptionText>{i18n.t('editPubkySheet.inviteCodeOptional')}</CaptionText>
 						<InputItemComponent
 							testID="EditPubkyInviteCodeInput"
 							inputRef={signupTokenInputRef}

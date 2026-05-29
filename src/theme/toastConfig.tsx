@@ -18,7 +18,7 @@ const StyledBaseToast = styled(BaseToast)<ThemedProps>`
 
 const StyledErrorToast = styled(ErrorToast)<ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.toastBackground};
-	border-left-color: #FF0000;
+	border-left-color: #ff0000;
 `;
 
 const StyledSuccessToast = styled(SuccessToast)<ThemedProps>`

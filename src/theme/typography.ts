@@ -8,7 +8,11 @@ interface TypographyProps {
 	colorName?: ThemeColorName;
 }
 
-const textColor = ({ color, colorName = 'textPrimary', theme }: TypographyProps & { theme: Theme }): string => {
+const textColor = ({
+	color,
+	colorName = 'textPrimary',
+	theme,
+}: TypographyProps & { theme: Theme }): string => {
 	return color ?? theme.colors[colorName];
 };
 

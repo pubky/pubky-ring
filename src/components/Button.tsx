@@ -1,5 +1,6 @@
-import React, { memo, useMemo } from 'react';
-import { Pressable, StyleSheet, View } from 'react-native';
+import React, { memo } from 'react';
+import { Pressable, StyleSheet } from 'react-native';
+import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from 'styled-components/native';
 import { Theme } from '../theme';
 import { BodySSBText, CaptionSBText } from '../theme/typography';
@@ -14,68 +15,51 @@ enum EButtonSize {
 type ButtonSize = `${EButtonSize}`;
 type ButtonVariant = 'primary' | 'secondary';
 
-const Button = ({
-	testID,
-	text,
-	loading = false,
-	size = EButtonSize.medium,
-	variant = 'primary',
-	icon = undefined,
-	rightIcon = undefined,
-	style = {},
-	textStyle = {},
-	disabled = false,
-	onPress = (): null => null,
-	onPressIn = (): null => null,
-	onLongPress = (): null => null,
-}: {
-	testID?: string;
+type ButtonProps = {
 	text: string;
-	loading?: boolean;
 	size?: ButtonSize;
 	variant?: ButtonVariant;
 	icon?: React.ReactNode;
 	rightIcon?: React.ReactNode;
-	style?: object;
-	textStyle?: object;
-	activeOpacity?: number;
-	disabled?: boolean;
-	onPress?: () => void;
-	onPressIn?: () => void;
-	onLongPress?: () => void;
-}): React.ReactElement => {
+	loading?: boolean;
+	disabled?: PressableProps['disabled'];
+	style?: StyleProp<ViewStyle>;
+	testID?: PressableProps['testID'];
+	onPress?: PressableProps['onPress'];
+	onPressIn?: PressableProps['onPressIn'];
+	onLongPress?: PressableProps['onLongPress'];
+};
+
+const Button = ({
+	text,
+	size = EButtonSize.medium,
+	variant = 'primary',
+	icon,
+	rightIcon,
+	loading = false,
+	disabled = false,
+	style,
+	testID,
+	onPress,
+	onPressIn,
+	onLongPress,
+}: ButtonProps): React.ReactElement => {
 	const theme = useTheme() as Theme;
-	const disabledStyle = useMemo(() => (disabled || loading ? styles.disabled : null), [disabled, loading]);
+
 	const ButtonText = size === EButtonSize.small ? CaptionSBText : BodySSBText;
 
-	const variantStyle = useMemo(() => {
-		if (variant !== 'secondary') {
-			return {
-				backgroundColor: theme.colors.buttonBackground,
-			};
-		}
-
-		return {
-			backgroundColor: theme.colors.buttonBackground,
-			borderColor: theme.colors.buttonBorder,
-			borderWidth: 1,
-		};
-	}, [theme.colors.buttonBackground, theme.colors.buttonBorder, variant]);
-
-	const pressedStyle = useMemo(
-		() => ({
-			backgroundColor: 'rgba(255, 255, 255, 0.16)',
-			borderColor: theme.colors.buttonBorder,
-		}),
-		[theme.colors.buttonBorder],
-	);
+	const disabledStyle = disabled || loading ? styles.disabled : null;
+	const pressedStyle = { backgroundColor: 'rgba(255, 255, 255, 0.16)' };
+	const secondaryStyle =
+		variant === 'secondary' ? { borderWidth: 1, borderColor: theme.colors.buttonBorder } : null;
 
 	return (
 		<Pressable
 			style={({ pressed }) => [
 				styles.container,
 				buttonSizeStyles[size],
-				variantStyle,
+				{ backgroundColor: theme.colors.buttonBackground },
+				secondaryStyle,
 				pressed && pressedStyle,
 				disabledStyle,
 				style,
@@ -89,19 +73,13 @@ const Button = ({
 			{loading ? (
 				<ActivityIndicator size="small" />
 			) : (
-				<View style={styles.content}>
+				<>
 					{icon && icon}
-					<ButtonText
-						style={[styles.text, textStyle]}
-						numberOfLines={1}
-						adjustsFontSizeToFit
-						minimumFontScale={0.8}
-						testID={`${testID}-Text`}
-					>
+					<ButtonText style={styles.text} numberOfLines={1} testID={`${testID}-Text`}>
 						{text}
 					</ButtonText>
 					{rightIcon && rightIcon}
-				</View>
+				</>
 			)}
 		</Pressable>
 	);
@@ -112,12 +90,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		gap: 6,
-	},
-	content: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		justifyContent: 'center',
 		gap: 6,
 	},
 	large: {
@@ -143,9 +115,7 @@ const styles = StyleSheet.create({
 		opacity: 0.32,
 	},
 	text: {
-		alignSelf: 'center',
 		flexShrink: 1,
-		textAlign: 'center',
 	},
 });
 

@@ -20,7 +20,9 @@ export const View = styled.View<BackgroundColorProps>`
 	border-color: ${(props): string => props.theme.colors.textPrimary};
 `;
 
-const StyledTextInput = styled.TextInput<{ theme: Theme }>`
+const StyledTextInput = styled.TextInput.attrs<{ theme: Theme }>(props => ({
+	keyboardAppearance: props.theme.keyboardAppearance,
+}))`
 	color: ${(props): string => props.theme.colors.textSecondary};
 	font-family: ${fontFamily};
 	font-size: 17px;

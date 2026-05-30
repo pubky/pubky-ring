@@ -1,14 +1,16 @@
-name: TypeScript Check
+name: Unit Checks
 
 on:
+  push:
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
 jobs:
-  typecheck:
+  checks:
     runs-on: ubuntu-latest
     concurrency:
-      group: typecheck-${{ github.head_ref }}
+      group: unit-checks-${{ github.head_ref || github.ref }}
       cancel-in-progress: true
 
     steps:
@@ -26,3 +28,6 @@ jobs:
 
     - name: Run TypeScript check
       run: yarn typecheck
+
+    - name: Run Jest tests
+      run: yarn test

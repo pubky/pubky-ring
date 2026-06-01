@@ -17,7 +17,8 @@
     "e2e:ios": "APPIUM_HOME=./e2e/.appium wdio ./e2e/wdio.ios.conf.js",
     "e2e:drivers": "APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install uiautomator2 && APPIUM_HOME=./e2e/.appium npm_config_legacy_peer_deps=true npx -y appium@latest driver install xcuitest",
     "tx:push": "./tx push -s",
-    "tx:pull": "./tx pull -a"
+    "tx:pull": "./tx pull -a",
+    "postinstall": "patch-package"
   },
   "dependencies": {
     "@adrianso/react-native-device-brightness": "^1.2.7",
@@ -89,6 +90,7 @@
     "chai": "5.1.2",
     "eslint": "9.26.0",
     "jest": "^29.6.3",
+    "patch-package": "^8.0.1",
     "prettier": "3.8.3",
     "react-test-renderer": "19.2.3",
     "redux-logger": "^3.0.6",

@@ -1,0 +1,33 @@
+diff --git a/node_modules/@react-native-community/blur/ios/BlurEffectWithAmount.m b/node_modules/@react-native-community/blur/ios/BlurEffectWithAmount.m
+index e8aa311..75f5b8e 100644
+--- a/node_modules/@react-native-community/blur/ios/BlurEffectWithAmount.m
++++ b/node_modules/@react-native-community/blur/ios/BlurEffectWithAmount.m
+@@ -15,6 +15,15 @@
+ @implementation BlurEffectWithAmount
+ @dynamic blurAmount;
+ 
++static void setEffectSettingValue(id settings, NSString *key, id value)
++{
++  @try {
++    [settings setValue:value forKey:key];
++  } @catch (NSException *exception) {
++    // UIKit's backdrop setting keys are private and can vary between iOS versions.
++  }
++}
++
+ + (instancetype)effectWithStyle:(UIBlurEffectStyle)style
+ {
+   id instance = [super effectWithStyle:style];
+@@ -45,7 +54,11 @@ - (id)effectSettings
+     id settings = [super effectSettings];
+     NSNumber *blurAmount = self.blurAmount;
+     if (blurAmount) {
+-      [settings setValue:blurAmount forKey:@"blurRadius"];
++      setEffectSettingValue(settings, @"blurRadius", blurAmount);
+     }
++    setEffectSettingValue(settings, @"colorTintAlpha", @0);
++    setEffectSettingValue(settings, @"darkeningTintAlpha", @0);
++    setEffectSettingValue(settings, @"grayscaleTintAlpha", @0);
++    setEffectSettingValue(settings, @"saturationDeltaFactor", @1);
+     return settings;
+ }

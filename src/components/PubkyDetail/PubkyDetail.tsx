@@ -6,7 +6,6 @@ import PubkyDetailCard from './PubkyDetailCard';
 import { PubkyData } from '../../navigation/types.ts';
 import { showToast } from '../../utils/helpers.ts';
 import { showBackupPrompt } from '../../utils/sheetHelpers.ts';
-import { View } from '../../theme/components.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import { useTypedNavigation } from '../../navigation/hooks';
 import i18n from '../../i18n';
@@ -70,30 +69,25 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 	const sessionsLength = sessions?.length > 0 ? sessions.length : 1;
 
 	return (
-		<View style={styles.container}>
-			<ScrollView
-				contentContainerStyle={styles.scrollContent}
-				showsVerticalScrollIndicator={true}
-				bounces={false}
-				nestedScrollEnabled={true}
-			>
-				<PubkyDetailCard
-					index={index}
-					pubky={pubky}
-					pubkyData={pubkyData}
-					onQRPress={onQRPress}
-					onDelete={handleDelete}
-					onBackup={handleBackup}
-				/>
-			</ScrollView>
-		</View>
+		<ScrollView
+			contentContainerStyle={styles.scrollContent}
+			showsVerticalScrollIndicator={true}
+			bounces={false}
+			nestedScrollEnabled={true}
+		>
+			<PubkyDetailCard
+				index={index}
+				pubky={pubky}
+				pubkyData={pubkyData}
+				onQRPress={onQRPress}
+				onDelete={handleDelete}
+				onBackup={handleBackup}
+			/>
+		</ScrollView>
 	);
 };
 
 const styles = StyleSheet.create({
-	container: {
-		flex: 1,
-	},
 	scrollContent: {
 		paddingTop: HEADER_HEIGHT + 24,
 	},

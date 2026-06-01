@@ -1,10 +1,9 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
-import { View } from '../theme/components';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
@@ -131,7 +130,7 @@ const HomeScreen = (): ReactElement => {
 			<SafeAreaView style={styles.container} edges={['bottom']}>
 				<HomeHeader />
 				<EmptyState />
-				<View style={styles.emptyFooterContainer}>
+				<View>
 					<ListFooter createPubky={createPubky} importPubky={importPubky} />
 				</View>
 			</SafeAreaView>
@@ -169,10 +168,6 @@ const HomeScreen = (): ReactElement => {
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		backgroundColor: 'transparent',
-	},
-	emptyFooterContainer: {
-		backgroundColor: 'transparent',
 	},
 	listContent: {
 		paddingTop: HEADER_HEIGHT + 24,
@@ -201,7 +196,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		gap: 16,
 		paddingHorizontal: 24,
-		backgroundColor: 'transparent',
 	},
 	listFooterButton: {
 		flex: 1,

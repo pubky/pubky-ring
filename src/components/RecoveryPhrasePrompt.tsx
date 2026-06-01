@@ -1,6 +1,5 @@
 import React, { memo, ReactElement, useMemo, useState } from 'react';
-import { StyleSheet, TouchableOpacity } from 'react-native';
-import { View } from '../theme/components.ts';
+import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Button from '../components/Button.tsx';
 import { useSelector } from 'react-redux';
 import BlurView from './BlurView.tsx';
@@ -13,6 +12,8 @@ import { useTranslation } from 'react-i18next';
 import { BodyMText, BodyMSBText, BodySSBText, BodySText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 import { SheetManager } from 'react-native-actions-sheet';
+
+const dummyMnemonicWords = Array.from({ length: 12 }, () => 'secret');
 
 const RecoveryPhrasePrompt = ({
 	payload,
@@ -36,6 +37,8 @@ const RecoveryPhrasePrompt = ({
 		return payload.mnemonic.split(' ');
 	}, [payload?.mnemonic]);
 
+	const mnemonicWordsToShow = Platform.OS === 'android' && isBlurred ? dummyMnemonicWords : mnemonicWords;
+
 	const handleConfirmBackup = (): void => {
 		setIsBlurred(false);
 	};
@@ -51,7 +54,7 @@ const RecoveryPhrasePrompt = ({
 
 			<View style={styles.mnemonicContainer}>
 				<View style={styles.columnContainer}>
-					{mnemonicWords.slice(0, 6).map((word, index) => (
+					{mnemonicWordsToShow.slice(0, 6).map((word, index) => (
 						<View key={index} style={styles.wordItem}>
 							<BodyMSBText colorName="textTertiary" style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
 								{index + 1}.
@@ -61,7 +64,7 @@ const RecoveryPhrasePrompt = ({
 					))}
 				</View>
 				<View style={styles.columnContainer}>
-					{mnemonicWords.slice(6, 12).map((word, index) => (
+					{mnemonicWordsToShow.slice(6, 12).map((word, index) => (
 						<View key={index + 6} style={styles.wordItem}>
 							<BodyMSBText colorName="textTertiary" style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
 								{index + 7}.
@@ -73,8 +76,8 @@ const RecoveryPhrasePrompt = ({
 
 				{isBlurred && (
 					<>
-						<BlurView style={styles.blurOverlay} />
-						<TouchableOpacity style={styles.revealButton} onPress={handleConfirmBackup}>
+						<BlurView style={styles.blurOverlay} tintEnabled={true} />
+						<TouchableOpacity style={styles.revealButton} activeOpacity={0.7} onPress={handleConfirmBackup}>
 							<BodySSBText
 								style={styles.tapToRevealText}
 								numberOfLines={1}
@@ -117,11 +120,10 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		gap: 24,
 		marginBottom: 24,
-		position: 'relative',
+		overflow: 'hidden',
 	},
 	blurOverlay: {
 		...StyleSheet.absoluteFill,
-		borderRadius: 16,
 	},
 	revealButton: {
 		position: 'absolute',
@@ -142,12 +144,10 @@ const styles = StyleSheet.create({
 	columnContainer: {
 		flex: 1,
 		gap: 8,
-		backgroundColor: 'transparent',
 	},
 	wordItem: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: 'transparent',
 	},
 	wordNumber: {
 		marginRight: 8,

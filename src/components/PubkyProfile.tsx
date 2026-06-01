@@ -3,17 +3,16 @@ import { StyleProp, StyleSheet, View, TouchableOpacity, ViewStyle } from 'react-
 import { useTranslation } from 'react-i18next';
 import { copyToClipboard } from '../utils/clipboard';
 import { PubkyData } from '../navigation/types';
-import { CardGradient } from '../theme/components';
 import { isSmallScreen, showToast } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
 import { BodyMSBText, HeadingText } from '../theme/typography';
 import Button from './Button.tsx';
+import Card from './Card.tsx';
 
 interface PubkyProfileProps {
 	index?: number;
 	pubky: string;
 	pubkyData: PubkyData;
-	hideButton?: boolean;
 	buttonText?: string;
 	buttonIcon?: React.ReactNode;
 	isButtonLoading?: boolean;
@@ -22,7 +21,7 @@ interface PubkyProfileProps {
 }
 
 const smallScreen = isSmallScreen();
-const smallScreenStyle = smallScreen ? { padding: 15 } : {};
+const containerStyle = { padding: smallScreen ? 15 : 36 };
 
 export const PubkyProfile = memo(
 	({
@@ -54,42 +53,36 @@ export const PubkyProfile = memo(
 				: t('emptyState.placeholderName'));
 
 		return (
-			<CardGradient style={[styles.gradient, style]}>
-				<View style={[styles.profileContainer, smallScreenStyle]}>
-					<View style={styles.avatarContainer}>
-						<ProfileAvatar pubky={pubky} size={96} />
-					</View>
-
-					<HeadingText style={styles.nameText}>{pubkyName}</HeadingText>
-
-					<TouchableOpacity activeOpacity={0.7} onPress={handleCopyPubky}>
-						<BodyMSBText style={styles.pubkyText}>{pubkyUri}</BodyMSBText>
-					</TouchableOpacity>
-
-					{onButtonPress && (
-						<Button
-							style={styles.button}
-							text={buttonText ?? ''}
-							size="large"
-							variant="secondary"
-							icon={buttonIcon}
-							loading={isButtonLoading}
-							onPress={onButtonPress}
-						/>
-					)}
+			<Card style={[styles.container, containerStyle, style]}>
+				<View style={styles.avatarContainer}>
+					<ProfileAvatar pubky={pubky} size={96} />
 				</View>
-			</CardGradient>
+
+				<HeadingText style={styles.nameText}>{pubkyName}</HeadingText>
+
+				<TouchableOpacity activeOpacity={0.7} onPress={handleCopyPubky}>
+					<BodyMSBText style={styles.pubkyText}>{pubkyUri}</BodyMSBText>
+				</TouchableOpacity>
+
+				{onButtonPress && (
+					<Button
+						style={styles.button}
+						text={buttonText ?? ''}
+						size="large"
+						variant="secondary"
+						icon={buttonIcon}
+						loading={isButtonLoading}
+						onPress={onButtonPress}
+					/>
+				)}
+			</Card>
 		);
 	},
 );
 
 const styles = StyleSheet.create({
-	gradient: {
-		borderRadius: 16,
-	},
-	profileContainer: {
+	container: {
 		alignItems: 'center',
-		padding: 36,
 	},
 	avatarContainer: {
 		width: 96,

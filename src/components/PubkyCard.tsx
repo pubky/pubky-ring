@@ -1,10 +1,10 @@
 import { StyleSheet, StyleProp, ViewStyle, View } from 'react-native';
-import { CardGradient } from '../theme/components.ts';
 import React, { memo, ReactElement } from 'react';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { BodySSBText, HeadingText } from '../theme/typography';
 import { truncatePubky } from '../utils/pubky.ts';
 import { ChevronRight } from '../icons/index.ts';
+import Card from './Card.tsx';
 
 interface PubkyCardProps {
 	publicKey: string;
@@ -22,36 +22,30 @@ const PubkyCard = ({
 	showChevron = false,
 }: PubkyCardProps): ReactElement => {
 	return (
-		<CardGradient style={[styles.container, style]}>
-			<View style={styles.row}>
-				<View style={styles.avatar}>
-					<ProfileAvatar pubky={publicKey} size={avatarSize} />
-				</View>
-				<View style={styles.text}>
-					{name && (
-						<HeadingText style={styles.name} numberOfLines={1}>
-							{name}
-						</HeadingText>
-					)}
-					<BodySSBText numberOfLines={1}>{truncatePubky(publicKey)}</BodySSBText>
-				</View>
-
-				{showChevron && <ChevronRight colorName="textTertiary" />}
+		<Card style={[styles.container, style]}>
+			<View style={styles.avatar}>
+				<ProfileAvatar pubky={publicKey} size={avatarSize} />
 			</View>
-		</CardGradient>
+
+			<View style={styles.text}>
+				{name && (
+					<HeadingText style={styles.name} numberOfLines={1}>
+						{name}
+					</HeadingText>
+				)}
+				<BodySSBText numberOfLines={1}>{truncatePubky(publicKey)}</BodySSBText>
+			</View>
+
+			{showChevron && <ChevronRight colorName="textTertiary" />}
+		</Card>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		borderRadius: 16,
-		minHeight: 96,
-	},
-	row: {
-		flex: 1,
 		flexDirection: 'row',
 		alignItems: 'center',
-		paddingHorizontal: 24,
+		minHeight: 96,
 	},
 	avatar: {
 		width: 48,

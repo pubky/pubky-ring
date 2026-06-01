@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useRef, useState } from 'react';
-import { StyleSheet, ViewStyle } from 'react-native';
+import { StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, {
 	Easing,
 	cancelAnimation,
@@ -8,7 +8,6 @@ import Animated, {
 	withTiming,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { View } from '../theme/components.ts';
 
 type ProgressBarProps = {
 	duration?: number; // ms
@@ -115,7 +114,7 @@ const ProgressBar = ({
 				style={[
 					styles.container,
 					//eslint-disable-next-line react-native/no-inline-styles
-					{ backgroundColor: 'transparent', height, borderRadius },
+					{ height, borderRadius },
 					style,
 				]}
 			/>

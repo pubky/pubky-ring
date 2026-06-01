@@ -1,7 +1,6 @@
 import { ComponentType, RefAttributes } from 'react';
 import { TextInput as NativeTextInput, TextInputProps } from 'react-native';
 import styled from 'styled-components/native';
-import { LinearGradient } from 'react-native-linear-gradient';
 import { Theme, ThemeColorName } from './index';
 import { fontFamily } from './fonts';
 
@@ -49,7 +48,3 @@ export const Divider = styled.View<BackgroundColorProps>`
 	height: 1px;
 	width: 100%;
 `;
-
-export const CardGradient = styled(LinearGradient).attrs<{ theme: Theme }>(props => ({
-	colors: props.theme.colors.cardGradient,
-}))``;

@@ -1,7 +1,6 @@
 import React, { memo, ReactElement } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import { View } from '../theme/components.ts';
 import { BodyMText, DisplayText } from '../theme/typography';
 
 const TermsOfUseContent = (): ReactElement => {
@@ -679,7 +678,6 @@ const styles = StyleSheet.create({
 	},
 	subtitleContainer: {
 		marginBottom: 16,
-		backgroundColor: 'transparent',
 	},
 	subtitle: {
 		marginBottom: 16,
@@ -703,7 +701,6 @@ const styles = StyleSheet.create({
 	bulletContainer: {
 		marginLeft: 8,
 		marginBottom: 16,
-		backgroundColor: 'transparent',
 	},
 	bulletMain: {
 		marginBottom: 8,

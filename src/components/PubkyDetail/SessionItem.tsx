@@ -5,7 +5,8 @@ import { StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
 import { BodySSBText, BodySText, CaptionSBSpacedText } from '../../theme/typography';
-import { TouchableOpacity, CardGradient } from '../../theme/components.ts';
+import { TouchableOpacity } from '../../theme/components.ts';
+import Card from '../Card.tsx';
 
 const formatTimestamp = (timestamp: number): string => {
 	const date = new Date(timestamp);
@@ -36,7 +37,7 @@ const SessionItem = ({
 	}, [onSignOut, session.session_secret]);
 
 	return (
-		<CardGradient style={styles.sessionCard}>
+		<Card style={styles.sessionCard}>
 			<View style={styles.headerRow}>
 				<View style={styles.infoContainer}>
 					<BodySSBText style={styles.pubkyText} numberOfLines={1}>
@@ -70,17 +71,14 @@ const SessionItem = ({
 					</View>
 				</View>
 			)}
-		</CardGradient>
+		</Card>
 	);
 };
 
 const styles = StyleSheet.create({
 	sessionCard: {
-		borderRadius: 24,
-		padding: 16,
 		marginBottom: 12,
 		marginHorizontal: 24,
-		borderWidth: 1,
 	},
 	signOutButton: {
 		flexDirection: 'row',

@@ -1,9 +1,8 @@
 import React, { memo, ReactElement, useCallback } from 'react';
-import { Platform, StyleSheet, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { useQRScanner } from '../hooks/useQRScanner';
-import { CardGradient } from '../theme/components.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { BodySSBText, HeadingText } from '../theme/typography';
@@ -11,6 +10,7 @@ import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
+import Card from './Card.tsx';
 
 interface PubkyInfoProps {
 	pubkyName: string;
@@ -107,21 +107,16 @@ const PubkyBox = ({
 	const pubkyBoxTestID = `PubkyBox-${sanitizedName}${indexStr}`;
 
 	return (
-		<CardGradient testID={pubkyBoxTestID} style={styles.container}>
-			<TouchableOpacity
-				style={styles.wrapper}
-				activeOpacity={0.7}
-				onPress={handleOnPress}
-				onLongPress={onLongPress}
-			>
-				<TouchableOpacity
-					style={styles.box}
-					disabled={disabled}
-					hitSlop={40}
-					activeOpacity={0.7}
-					onPress={handleOnPress}
-					onLongPress={onLongPress}
-				>
+		<TouchableOpacity
+			style={styles.container}
+			disabled={disabled}
+			activeOpacity={0.7}
+			testID={pubkyBoxTestID}
+			onPress={handleOnPress}
+			onLongPress={onLongPress}
+		>
+			<Card>
+				<View style={styles.content}>
 					<View style={styles.profileImage}>
 						<ProfileAvatar pubky={publicKey} size={48} />
 					</View>
@@ -136,7 +131,7 @@ const PubkyBox = ({
 					<View style={styles.iconContainer}>
 						<ChevronRight size={24} colorName="textTertiary" />
 					</View>
-				</TouchableOpacity>
+				</View>
 
 				<Button
 					style={styles.button}
@@ -148,21 +143,17 @@ const PubkyBox = ({
 					onPress={qrPress}
 					onLongPress={onLongPress}
 				/>
-			</TouchableOpacity>
-		</CardGradient>
+			</Card>
+		</TouchableOpacity>
 	);
 };
 
 const styles = StyleSheet.create({
 	container: {
-		borderRadius: 16,
 		marginBottom: 24,
 		marginHorizontal: 24,
 	},
-	wrapper: {
-		padding: 24,
-	},
-	box: {
+	content: {
 		flexDirection: 'row',
 		alignItems: 'center',
 	},

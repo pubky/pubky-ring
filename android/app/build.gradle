@@ -78,6 +78,13 @@ android {
     compileSdk rootProject.ext.compileSdkVersion
 
     namespace "to.pubkyring"
+
+    // Keep the Hermes bytecode bundle uncompressed so it can be memory-mapped
+    // (mmap) at startup instead of decompressed into memory, improving TTI.
+    androidResources {
+        noCompress += ['bundle']
+    }
+
     defaultConfig {
         applicationId "to.pubky.ring"
         minSdkVersion rootProject.ext.minSdkVersion

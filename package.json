@@ -87,6 +87,7 @@
     "@wdio/mocha-framework": "^9.19.1",
     "@wdio/spec-reporter": "^9.19.1",
     "appium": "^2.19.0",
+    "babel-plugin-react-compiler": "^1.0.0",
     "chai": "5.1.2",
     "eslint": "9.26.0",
     "jest": "^29.6.3",

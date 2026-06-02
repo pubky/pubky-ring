@@ -28,6 +28,11 @@
 		"addPubky": "Añadir pubky",
 		"scanQR": "Escanear QR"
 	},
+	"scanner": {
+		"imageDecodeError": "No se puede leer esta imagen.",
+		"imagePickerError": "No se puede abrir esta imagen.",
+		"noQrFound": "No se encontró ningún código QR en esta imagen."
+	},
 	"settings": {
 		"title": "Ajustes",
 		"navigationAnimation": "Animación de la navegación",
@@ -325,7 +330,10 @@
 	},
 	"permissions": {
 		"cameraTitle": "Permiso para utilizar la cámara",
-		"cameraMessage": "Pubky Ring necesita permiso para usar su cámara"
+		"cameraMessage": "Pubky Ring necesita permiso para usar su cámara",
+		"cameraDeniedTitle": "El acceso a la cámara está desactivado",
+		"cameraDeniedMessage": "Active el acceso a la cámara en los ajustes del dispositivo para escanear códigos QR.",
+		"openSettings": "Abrir ajustes"
 	},
 	"keychain": {
 		"failedToGetValue": "Fallo al obtener el valor del llavero",

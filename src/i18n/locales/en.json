@@ -28,6 +28,11 @@
 		"addPubky": "Add pubky",
 		"scanQR": "Scan QR"
 	},
+	"scanner": {
+		"imageDecodeError": "Unable to read this image.",
+		"imagePickerError": "Unable to open this image.",
+		"noQrFound": "No QR code was found in this image."
+	},
 	"settings": {
 		"title": "Settings",
 		"navigationAnimation": "Navigation Animation",
@@ -324,7 +329,10 @@
 	},
 	"permissions": {
 		"cameraTitle": "Permission to use camera",
-		"cameraMessage": "Pubky Ring needs permission to use your camera"
+		"cameraMessage": "Pubky Ring needs permission to use your camera",
+		"cameraDeniedTitle": "Camera access is off",
+		"cameraDeniedMessage": "Enable camera access in your device settings to scan QR codes.",
+		"openSettings": "Open Settings"
 	},
 	"keychain": {
 		"failedToGetValue": "Failed to get keychain value",

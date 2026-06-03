@@ -1,16 +1,17 @@
-import React, { ReactElement, useState, useEffect, memo, useCallback } from 'react';
+import React, { ReactElement, ReactNode, useState, useEffect, memo, useCallback } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Camera as CameraKit, CameraType } from 'react-native-camera-kit';
 import CameraNoAuth from './CameraNoAuth';
 import { requestCameraPermission } from '../../utils/permissions';
 
 interface CameraProps {
-	children?: ReactElement;
+	children?: ReactNode;
 	bottomSheet?: boolean;
+	torchMode?: boolean;
 	onBarCodeRead: (data: string) => void;
 }
 
-const Camera = ({ children, onBarCodeRead }: CameraProps): ReactElement => {
+const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): ReactElement => {
 	const prevDataRef = React.useRef<string>('');
 
 	const [cameraState, setCameraState] = useState<{
@@ -90,6 +91,7 @@ const Camera = ({ children, onBarCodeRead }: CameraProps): ReactElement => {
 						showFrame={false}
 						onReadCode={handleCodeRead}
 						cameraType={CameraType.Back}
+						torchMode={torchMode ? 'on' : 'off'}
 						resizeMode="cover"
 					/>
 				</View>

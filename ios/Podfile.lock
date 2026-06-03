@@ -1481,6 +1481,28 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - react-native-image-picker (8.2.1):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
   - react-native-netinfo (12.0.1):
     - hermes-engine
     - RCTRequired
@@ -2157,6 +2179,29 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - RNQrGenerator (2.0.0):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
+    - ZXingObjC
   - RNReanimated (4.3.0):
     - hermes-engine
     - RCTRequired
@@ -2417,6 +2462,9 @@ PODS:
     - ReactNativeDependencies
     - Yoga
   - Yoga (0.0.0)
+  - ZXingObjC (3.6.9):
+    - ZXingObjC/All (= 3.6.9)
+  - ZXingObjC/All (3.6.9)
 
 DEPENDENCIES:
   - "AsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
@@ -2465,6 +2513,7 @@ DEPENDENCIES:
   - "react-native-blur (from `../node_modules/@react-native-community/blur`)"
   - "react-native-device-brightness (from `../node_modules/@adrianso/react-native-device-brightness`)"
   - "react-native-document-picker (from `../node_modules/@react-native-documents/picker`)"
+  - react-native-image-picker (from `../node_modules/react-native-image-picker`)
   - "react-native-netinfo (from `../node_modules/@react-native-community/netinfo`)"
   - "react-native-pubky (from `../node_modules/@synonymdev/react-native-pubky`)"
   - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
@@ -2510,6 +2559,7 @@ DEPENDENCIES:
   - RNKeychain (from `../node_modules/react-native-keychain`)
   - RNLocalize (from `../node_modules/react-native-localize`)
   - RNPermissions (from `../node_modules/react-native-permissions`)
+  - RNQrGenerator (from `../node_modules/rn-qr-generator`)
   - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNScreens (from `../node_modules/react-native-screens`)
   - RNShare (from `../node_modules/react-native-share`)
@@ -2520,6 +2570,7 @@ DEPENDENCIES:
 SPEC REPOS:
   trunk:
     - MMKVCore
+    - ZXingObjC
 
 EXTERNAL SOURCES:
   AsyncStorage:
@@ -2613,6 +2664,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@adrianso/react-native-device-brightness"
   react-native-document-picker:
     :path: "../node_modules/@react-native-documents/picker"
+  react-native-image-picker:
+    :path: "../node_modules/react-native-image-picker"
   react-native-netinfo:
     :path: "../node_modules/@react-native-community/netinfo"
   react-native-pubky:
@@ -2703,6 +2756,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-localize"
   RNPermissions:
     :path: "../node_modules/react-native-permissions"
+  RNQrGenerator:
+    :path: "../node_modules/rn-qr-generator"
   RNReanimated:
     :path: "../node_modules/react-native-reanimated"
   RNScreens:
@@ -2763,6 +2818,7 @@ SPEC CHECKSUMS:
   react-native-blur: ea6c78ddeaa7aa0fce36ea29d1f81dd23063032a
   react-native-device-brightness: 1a997350d060c3df9f303b1df84a4f7c5cbeb924
   react-native-document-picker: 15cca2d1a6bfb6d0d3ff0283bd9b903e57cb028b
+  react-native-image-picker: 23540feacc79c63c60857f318fdfa8477c26e70a
   react-native-netinfo: 2f906d5d9a639090ed1c079135d6485a95f749f1
   react-native-pubky: 00b58b546df1d7dd45dbb0b1a1d91d82836b32c0
   react-native-safe-area-context: 6b4966397ada0f7dd481e4486a2ef936834861a1
@@ -2808,12 +2864,14 @@ SPEC CHECKSUMS:
   RNKeychain: 6778b35b5bd067c322f8479526ac09b1d61f31d0
   RNLocalize: f370284ea42c48f29f0d8dd3a7bcc28a04f82155
   RNPermissions: efe8a25c61593f06e89868940d9c08b21e0d6001
+  RNQrGenerator: c8b09365c7912af4184481b182af205f51c4897f
   RNReanimated: c4e6659e58b793885ae6da476cb514fc913e7b85
   RNScreens: 01b065ded2dfe7987bcce770ff3a196be417ff41
   RNShare: 7344a3a7d4e5df58c356ad0f79e4a3ef1325c635
   RNSVG: 04044c3abcf177fd674a1a3d13097efa1adebcbe
   RNWorklets: 4931990f73bc8f347586918b2e13f11dfadf3b75
   Yoga: 04bb4bfeb02c0000b940c1e6e89e856cd8de5a71
+  ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
 PODFILE CHECKSUM: f4a63f96e757c2de0d8f9bab4bdb629d23afd5ac
 

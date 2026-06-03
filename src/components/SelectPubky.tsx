@@ -17,6 +17,20 @@ import { BodyMText } from '../theme/typography.ts';
 type PubkyItem = { key: string; value: Pubky };
 const ROUTE_AFTER_CLOSE_DELAY = 100;
 
+const PubkyRow = memo(
+	({
+		item,
+		onPress,
+	}: {
+		item: PubkyItem;
+		onPress: (key: string) => void;
+	}): ReactElement => (
+		<TouchableOpacity style={styles.card} onPress={() => onPress(item.key)}>
+			<PubkyCard publicKey={item.key} name={item.value.name} showChevron={true} />
+		</TouchableOpacity>
+	),
+);
+
 const SelectPubky = ({
 	payload: { deepLink },
 }: {
@@ -64,19 +78,24 @@ const SelectPubky = ({
 		return pubkyArray.length > 0 ? t('pubky.selectPubkyMessage') : t('pubky.noPubkysAvailable');
 	}, [pubkyArray.length, t]);
 
+	const renderItem = useCallback(
+		(info: { item: PubkyItem }): ReactElement => (
+			<PubkyRow item={info.item} onPress={onPubkyPress} />
+		),
+		[onPubkyPress],
+	);
+
+	const keyExtractor = useCallback((item: PubkyItem): string => item.key, []);
+
 	return (
 		<Sheet id="select-pubky" title={t('pubky.selectPubky')} onClose={clearDeepLink}>
 			<BodyMText>{message}</BodyMText>
 			<View style={styles.listContainer}>
 				<FlashList<PubkyItem>
 					data={pubkyArray}
-					renderItem={({ item }) => (
-						<TouchableOpacity style={styles.card} onPress={() => onPubkyPress(item.key)}>
-							<PubkyCard publicKey={item.key} name={item.value.name} showChevron={true} />
-						</TouchableOpacity>
-					)}
+					renderItem={renderItem}
 					renderScrollComponent={ActionSheetScrollView}
-					keyExtractor={item => item.key}
+					keyExtractor={keyExtractor}
 					showsVerticalScrollIndicator={false}
 				/>
 			</View>

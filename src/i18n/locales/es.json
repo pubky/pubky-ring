@@ -124,7 +124,7 @@
 		"createBackup": "Crear copia de seguridad",
 		"backupMessage": "Introduzca una contraseña o frase de contraseña para encriptar y asegurar su copia de seguridad. Manténgala a salvo, la necesitará para restaurar su pubky.",
 		"importMessage": "Introduzca su contraseña o frase de contraseña para descifrar su copia de seguridad pubky.",
-		"passphraseFor": "Frase de contraseña para ",
+		"passphraseFor": "Frase de contraseña para <accent>{{pubky}}</accent>",
 		"enterPassphrase": "Introduzca la contraseña",
 		"passwordMinLength": "La contraseña debe tener una longitud mínima de {{min}} {{chars}} ",
 		"character": "carácter",
@@ -136,7 +136,13 @@
 		"finishBackup": "Finalizar la copia de seguridad",
 		"couldNotRetrieveSecretKey": "No se ha podido recuperar la clave secreta para la copia de seguridad",
 		"backupCreated": "Copia de seguridad creada",
-		"failedToCreateBackup": "Fallo al crear el archivo de copia de seguridad"
+		"failedToCreateBackup": "Fallo al crear el archivo de copia de seguridad",
+		"file": {
+			"navTitle": "Archivo cifrado"
+		},
+		"mnemonic": {
+			"navTitle": "Frase de recuperación"
+		}
 	},
 	"onboarding": {
 		"title": "Llavero para la próxima web.",
@@ -150,8 +156,7 @@
 	"welcome": {
 		"defaultHomeserver": "Servidor doméstico predeterminado",
 		"welcome": "Bienvenida.",
-		"homeserverMessageStart": "Su código de invitación es válido. Su pubky",
-		"homeserverMessageEnd": "está ahora configurado para utilizar el servidor doméstico de Synonym para el alojamiento de datos.",
+		"message": "Su código de invitación es válido. Su pubky <accent>{{pubky}}</accent> está configurado para usar el homeserver de Synonym para alojar sus datos.",
 		"openButton": "Abra {{domain}}"
 	},
 	"session": {
@@ -189,8 +194,8 @@
 	},
 	"terms": {
 		"title": "Condiciones de uso.",
-		"acceptTerms": "Declaro que he leído y acepto las condiciones de uso.",
-		"acceptPrivacy": "Declaro que he leído y acepto el ",
+		"acceptTerms": "Al continuar, declara que ha leído y acepta las condiciones de uso.",
+		"acceptPrivacy": "Al continuar, declara que ha leído y acepta la <accent>política de privacidad.</accent>",
 		"termsOfUse": "Condiciones de uso",
 		"privacyPolicy": "Política de privacidad"
 	},
@@ -215,11 +220,14 @@
 		"title": "Añadir Pubky",
 		"yourKeysYourIdentity": "Sus llaves,\nsu identidad.",
 		"restoreOrImport": "Restaurar o\nimportar pubky.",
-		"createOrImportQuestion": "¿Desea crear un nuevo pubky o importar uno existente?",
+		"createOrImportQuestion": "Escanee un QR de registro para empezar al instante, añada un pubky manualmente o importe uno.",
 		"chooseBackupMethod": "Elija el método de copia de seguridad utilizado.",
 		"enterRecoveryWords": "Introduzca las 12 palabras de su recuperación \nfrase para importar o restaurar su pubky.",
-		"importPubkyButton": "Importar pubky",
-		"newPubkyButton": "Nuevo pubky",
+		"importPubkyButton": "Importar existente",
+		"scanSignupQr": "Escanear QR de registro",
+		"newPubkyButton": "Configurar manualmente",
+		"encryptedFile": "Archivo cifrado",
+		"recoveryPhrase": "Frase de recuperación",
 		"scanQrToImport": "Escanear QR para importar"
 	},
 	"editPubkySheet": {
@@ -240,7 +248,7 @@
 	"selectBackup": {
 		"title": "Copia de seguridad Pubky",
 		"header": "Haga una copia de seguridad segura\nde su pubky.",
-		"message": "Elija el método de copia de seguridad que prefiera para pubky {{pubky}} para restaurar el acceso si pierde su teléfono o sus datos."
+		"message": "Elija el método de copia de seguridad que prefiera para pubky <accent>{{pubky}}</accent> y restaure el acceso si pierde el teléfono o los datos."
 	},
 	"router": {
 		"importSuccessful": "Importación correcta",
@@ -296,7 +304,7 @@
 	"homeserver": {
 		"title": "Homeserver",
 		"dataHosting": "Alojamiento de datos.",
-		"chooseMessage": "Elija un servidor doméstico para alojar sus datos para pubky",
+		"message": "Elija un homeserver para alojar los datos de pubky <accent>{{pubky}}</accent>",
 		"label": "HOMESERVER",
 		"default": "Por defecto",
 		"requiresInvite": "(requiere código de invitación)",

@@ -201,13 +201,13 @@ const AddPubky = ({
 				return [
 					{
 						id: 'EncryptedFileButton',
-						text: i18n.t('backup.encryptedFile'),
+						text: i18n.t('addPubky.encryptedFile'),
 						icon: <Lock />,
 						onPress: onUploadFile,
 					},
 					{
 						id: 'RecoveryPhraseButton',
-						text: i18n.t('backup.recoveryPhrase'),
+						text: i18n.t('addPubky.recoveryPhrase'),
 						icon: <FileText />,
 						onPress: onMnemonicPhrase,
 					},

@@ -1,20 +1,19 @@
 import React, { memo, ReactElement } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
-import Button from '../components/Button.tsx';
+import { Trans, useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
+import Button from '../components/Button.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
 import { showBackupPrompt } from '../utils/sheetHelpers.ts';
 import { truncateStr } from '../utils/pubky.ts';
-import { BodyMText, DisplayText } from '../theme/typography';
+import { BodyMBText, BodyMText, DisplayText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
-import { useTranslation } from 'react-i18next';
 
 const BACKUP_PROMPT_DELAY = 250;
 
 const SelectBackupPreference = ({ payload: { pubky } }: { payload: { pubky: string } }): ReactElement => {
 	const { t } = useTranslation();
 	const truncatedPubky = truncateStr(pubky).replace(/^pk:/, '');
-	const messageText = t('selectBackup.message', { pubky: truncatedPubky });
 
 	const selectPreference = (backupPreference: EBackupPreference): void => {
 		void SheetManager.hide('select-backup-preference');
@@ -34,7 +33,15 @@ const SelectBackupPreference = ({ payload: { pubky } }: { payload: { pubky: stri
 	return (
 		<Sheet id="select-backup-preference" gradientType="brand" title={t('selectBackup.title')}>
 			<DisplayText style={styles.headerText}>{t('selectBackup.header')}</DisplayText>
-			<BodyMText>{messageText}</BodyMText>
+
+			<Trans
+				t={t}
+				i18nKey="selectBackup.message"
+				parent={BodyMText}
+				components={{ accent: <BodyMBText colorName="textPrimary" /> }}
+				values={{ pubky: truncatedPubky }}
+			/>
+
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/shield.png')} style={styles.image} />
 			</View>

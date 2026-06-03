@@ -1,10 +1,10 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, Image, Linking, View } from 'react-native';
+import { Trans, useTranslation } from 'react-i18next';
 import PubkyRingLogo from '../../images/pubky-app-logo.png';
 import { PUBKY_APP_URL } from '../../utils/constants.ts';
 import { isSmallScreen } from '../../utils/helpers.ts';
-import { useTranslation } from 'react-i18next';
-import { BodyMText, BoldText, DisplayText } from '../../theme/typography';
+import { BodyMBText, BodyMText, DisplayText } from '../../theme/typography';
 import Button from '../Button.tsx';
 
 const BUTTON_TEXT = PUBKY_APP_URL.replace('https://', '');
@@ -52,9 +52,14 @@ const Welcome = ({
 	return (
 		<View style={styles.content}>
 			<DisplayText style={styles.headerText}>{t('welcome.welcome')}</DisplayText>
+
 			<BodyMText style={styles.message}>
-				{t('welcome.homeserverMessageStart')} <BoldText>{truncatedPubky}</BoldText>{' '}
-				{t('welcome.homeserverMessageEnd')}
+				<Trans
+					t={t}
+					i18nKey="welcome.message"
+					components={{ accent: <BodyMBText colorName="textPrimary" /> }}
+					values={{ pubky: truncatedPubky }}
+				/>
 			</BodyMText>
 
 			<View style={styles.tagContainer}>

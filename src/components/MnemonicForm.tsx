@@ -1,33 +1,67 @@
 import React, { memo, ReactElement, useCallback, useState, useRef, useMemo, useEffect } from 'react';
 import {
 	StyleSheet,
-	NativeSyntheticEvent,
 	TextInput as NativeTextInput,
-	TextInputKeyPressEventData,
+	TextInputKeyPressEvent,
 	Keyboard,
-	KeyboardAvoidingView,
+	KeyboardEvent,
 	Platform,
 	View,
+	ScrollView,
 } from 'react-native';
 import * as bip39 from 'bip39';
 import { TextInput } from '../theme/components.ts';
-import { ScrollView } from 'react-native';
 import Button from '../components/Button.tsx';
 import { Result } from '@synonymdev/result';
 import i18n from '../i18n';
 import { BodyMText } from '../theme/typography';
+import MnemonicSuggestionPill from './MnemonicSuggestionPill.tsx';
+import SafeAreaInset from './SafeAreaInset.tsx';
 
 interface MnemonicFormProps {
 	onCancel: () => void;
 	onImport: (mnemonicPhrase: string) => Promise<Result<string>>;
 }
 
+const MNEMONIC_WORD_COUNT = 12;
+const MNEMONIC_COLUMN_WORD_COUNT = MNEMONIC_WORD_COUNT / 2;
+const MIN_SUGGESTION_PREFIX_LENGTH = 2;
+const MAX_SUGGESTIONS = 3;
+
+const createEmptyMnemonicWords = (): string[] => Array(MNEMONIC_WORD_COUNT).fill('');
+const createValidWordState = (): boolean[] => Array(MNEMONIC_WORD_COUNT).fill(true);
+
+const cleanMnemonicWord = (word: string): string => {
+	return word
+		.replace(/^\d+\.\s*/, '')
+		.toLowerCase()
+		.trim();
+};
+
 const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement => {
-	const [mnemonicWords, setMnemonicWords] = useState<string[]>(Array(12).fill(''));
-	const [validWords, setValidWords] = useState<boolean[]>(Array(12).fill(true));
+	const [mnemonicWords, setMnemonicWords] = useState<string[]>(createEmptyMnemonicWords);
+	const [validWords, setValidWords] = useState<boolean[]>(createValidWordState);
 	const [focused, setFocused] = useState<number | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
-	const inputRefs = useRef<(NativeTextInput | null)[]>(Array(12).fill(null));
+	const inputRefs = useRef<(NativeTextInput | null)[]>(Array(MNEMONIC_WORD_COUNT).fill(null));
+	const suggestionRef = useRef<View | null>(null);
+	const keyboardScreenYRef = useRef<number | null>(null);
+	const androidSuggestionInsetRef = useRef<number>(0);
+	const [androidSuggestionInset, setAndroidSuggestionInset] = useState<number>(0);
+
+	const suggestions = useMemo(() => {
+		if (focused === null) {
+			return [];
+		}
+
+		const currentWord = cleanMnemonicWord(mnemonicWords[focused]);
+
+		if (currentWord.length < MIN_SUGGESTION_PREFIX_LENGTH || bip39.wordlists.english.includes(currentWord)) {
+			return [];
+		}
+
+		return bip39.wordlists.english.filter(word => word.startsWith(currentWord)).slice(0, MAX_SUGGESTIONS);
+	}, [focused, mnemonicWords]);
 
 	// Auto-focus first input when component mounts
 	useEffect(() => {
@@ -39,17 +73,60 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 		return (): void => clearTimeout(timer);
 	}, []);
 
+	const measureAndroidSuggestionInset = useCallback(() => {
+		const keyboardTop = keyboardScreenYRef.current;
+		if (Platform.OS !== 'android' || keyboardTop === null) {
+			return;
+		}
+
+		requestAnimationFrame(() => {
+			suggestionRef.current?.measureInWindow((_x, y, _width, height) => {
+				const naturalBottom = y + height + androidSuggestionInsetRef.current;
+				const nextInset = Math.max(0, naturalBottom - keyboardTop);
+				if (nextInset === androidSuggestionInsetRef.current) {
+					return;
+				}
+
+				androidSuggestionInsetRef.current = nextInset;
+				setAndroidSuggestionInset(nextInset);
+			});
+		});
+	}, []);
+
+	useEffect(() => {
+		if (Platform.OS !== 'android') {
+			return;
+		}
+
+		const showSubscription = Keyboard.addListener('keyboardDidShow', (event: KeyboardEvent) => {
+			keyboardScreenYRef.current = event.endCoordinates.screenY;
+			androidSuggestionInsetRef.current = 0;
+			setAndroidSuggestionInset(0);
+			measureAndroidSuggestionInset();
+		});
+		const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
+			keyboardScreenYRef.current = null;
+			androidSuggestionInsetRef.current = 0;
+			setAndroidSuggestionInset(0);
+		});
+
+		return (): void => {
+			showSubscription.remove();
+			hideSubscription.remove();
+		};
+	}, [measureAndroidSuggestionInset]);
+
+	useEffect(() => {
+		measureAndroidSuggestionInset();
+	}, [measureAndroidSuggestionInset, suggestions]);
+
 	// BIP39 word validation using official wordlist
 	const isValidWord = useCallback((word: string): boolean => {
 		if (!word) {
 			return true;
 		} // Allow empty words
 
-		// Remove number prefix if it exists for validation
-		const cleanWord = word
-			.replace(/^\d+\.\s*/, '')
-			.toLowerCase()
-			.trim();
+		const cleanWord = cleanMnemonicWord(word);
 		if (!cleanWord) {
 			return true;
 		}
@@ -66,11 +143,12 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 
 	const updateMnemonicWord = useCallback(
 		(index: number, text: string) => {
+			setFocused(index);
 			text = text.trim();
 
 			// Detect if user pastes whole seed in any input
-			if (text.split(' ').length === 12) {
-				const words = text.split(' ').map(w => w.toLowerCase());
+			if (text.split(' ').length === MNEMONIC_WORD_COUNT) {
+				const words = text.split(' ').map(cleanMnemonicWord);
 				setMnemonicWords(words);
 				setValidWords(words.map(word => isValidWord(word)));
 				Keyboard.dismiss();
@@ -129,7 +207,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 
 	const handleBlur = useCallback(
 		(index: number) => {
-			setFocused(null);
+			setFocused(currentFocused => (currentFocused === index ? null : currentFocused));
 			// Validate word when user leaves the input (like reference code)
 			setValidWords(prev => {
 				const newValidWords = [...prev];
@@ -146,14 +224,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 		try {
 			setLoading(true);
 			if (enableImport) {
-				// Clean the words: remove any number prefixes and extra whitespace
-				const cleanedWords = mnemonicWords.map(word => {
-					// Remove number prefix if present (e.g., "1. word" -> "word")
-					return word
-						.replace(/^\d+\.\s*/, '')
-						.toLowerCase()
-						.trim();
-				});
+				const cleanedWords = mnemonicWords.map(cleanMnemonicWord);
 
 				// Join the cleaned words into a single string separated by spaces
 				const mnemonicPhrase = cleanedWords.join(' ');
@@ -166,19 +237,22 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 		}
 	}, [mnemonicWords, onImport, enableImport]);
 
-	const handleSubmitEditing = useCallback(() => {
-		if (focused === null || focused > 10) {
-			// Last input or invalid focus
-			if (enableImport) {
-				handleImport();
+	const handleSubmitEditing = useCallback(
+		(index: number) => {
+			if (index >= MNEMONIC_WORD_COUNT - 1) {
+				// Last input or invalid focus
+				if (enableImport) {
+					handleImport();
+				}
+				return;
 			}
-			return;
-		}
-		inputRefs.current[focused + 1]?.focus();
-	}, [focused, enableImport, handleImport]);
+			inputRefs.current[index + 1]?.focus();
+		},
+		[enableImport, handleImport],
+	);
 
 	const handleKeyPress = useCallback(
-		({ nativeEvent }: NativeSyntheticEvent<TextInputKeyPressEventData>) => {
+		({ nativeEvent }: TextInputKeyPressEvent) => {
 			if (nativeEvent.key !== 'Backspace' || focused === null || mnemonicWords[focused]) {
 				return;
 			}
@@ -190,9 +264,35 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 		[focused, mnemonicWords],
 	);
 
+	const handleSuggestionPress = useCallback(
+		(word: string) => {
+			if (focused === null) {
+				return;
+			}
+
+			setMnemonicWords(prev => {
+				const newWords = [...prev];
+				newWords[focused] = word;
+				return newWords;
+			});
+			setValidWords(prev => {
+				const newValidWords = [...prev];
+				newValidWords[focused] = true;
+				return newValidWords;
+			});
+
+			if (focused < MNEMONIC_WORD_COUNT - 1) {
+				inputRefs.current[focused + 1]?.focus();
+			} else {
+				Keyboard.dismiss();
+			}
+		},
+		[focused],
+	);
+
 	const handleCancel = useCallback(() => {
-		setMnemonicWords(Array(12).fill(''));
-		setValidWords(Array(12).fill(true));
+		setMnemonicWords(createEmptyMnemonicWords());
+		setValidWords(createValidWordState());
 		setFocused(null);
 		onCancel();
 	}, [onCancel]);
@@ -211,7 +311,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				onChangeText={text => updateMnemonicWord(index, text)}
 				onFocus={() => handleFocus(index)}
 				onBlur={() => handleBlur(index)}
-				onSubmitEditing={handleSubmitEditing}
+				onSubmitEditing={() => handleSubmitEditing(index)}
 				onKeyPress={handleKeyPress}
 				placeholder={`${index + 1}.`}
 				placeholderTextColor="rgba(255, 255, 255, 0.32)"
@@ -223,18 +323,32 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				spellCheck={false}
 				secureTextEntry={false}
 				returnKeyType={index === 11 ? 'done' : 'next'}
-				blurOnSubmit={false}
+				submitBehavior="submit"
 				editable={!loading}
 			/>
 		);
 	};
 
+	const renderSuggestionContainer = (): ReactElement | null => {
+		if (suggestions.length === 0) {
+			return null;
+		}
+
+		return (
+			<View
+				ref={suggestionRef}
+				style={[styles.suggestionContainer, { marginBottom: androidSuggestionInset }]}
+				onLayout={measureAndroidSuggestionInset}
+			>
+				{suggestions.map(word => (
+					<MnemonicSuggestionPill key={word} word={word} onPress={handleSuggestionPress} />
+				))}
+			</View>
+		);
+	};
+
 	return (
-		<KeyboardAvoidingView
-			style={styles.scrollViewWrapper}
-			behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-			keyboardVerticalOffset={Platform.OS === 'ios' ? 0 : 100}
-		>
+		<View style={styles.wrapper}>
 			<ScrollView
 				style={styles.container}
 				contentContainerStyle={styles.scrollContent}
@@ -246,13 +360,16 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
 						<View style={styles.mnemonicColumn}>
-							{Array.from({ length: 6 }, (_, index) => renderMnemonicInput(index))}
+							{Array.from({ length: MNEMONIC_COLUMN_WORD_COUNT }, (_, index) => renderMnemonicInput(index))}
 						</View>
 						<View style={styles.mnemonicColumn}>
-							{Array.from({ length: 6 }, (_, index) => renderMnemonicInput(index + 6))}
+							{Array.from({ length: MNEMONIC_COLUMN_WORD_COUNT }, (_, index) =>
+								renderMnemonicInput(index + MNEMONIC_COLUMN_WORD_COUNT),
+							)}
 						</View>
 					</View>
 				</View>
+
 				<View style={styles.buttonContainer}>
 					<Button text={i18n.t('common.cancel')} size="large" onPress={handleCancel} />
 					<Button
@@ -264,13 +381,17 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 						onPress={handleImport}
 					/>
 				</View>
+
+				<SafeAreaInset edge="bottom" />
 			</ScrollView>
-		</KeyboardAvoidingView>
+
+			{renderSuggestionContainer()}
+		</View>
 	);
 };
 
 const styles = StyleSheet.create({
-	scrollViewWrapper: {
+	wrapper: {
 		height: '100%',
 		zIndex: 1,
 		position: 'relative',
@@ -322,6 +443,13 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 16,
+	},
+	suggestionContainer: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+		paddingVertical: 8,
+		zIndex: 2,
 	},
 });
 

@@ -225,10 +225,11 @@ const AddPubky = ({
 		}
 	}, [currentScreen, onCreatePubky, onImportPubky, onMnemonicPhrase, onUploadFile]);
 
+	const isMnemonicForm = currentScreen === 'mnemonic-form';
 	const shouldShowBackButton = currentScreen !== 'main';
 
 	const getContent = useCallback(() => {
-		if (currentScreen === 'mnemonic-form') {
+		if (isMnemonicForm) {
 			return <MnemonicForm onCancel={onMnemonicCancel} onImport={importPubky} />;
 		}
 
@@ -271,6 +272,7 @@ const AddPubky = ({
 		getHeaderText,
 		getImage,
 		importPubky,
+		isMnemonicForm,
 		messageText,
 		onMnemonicCancel,
 		onScanQrPress,
@@ -280,7 +282,9 @@ const AddPubky = ({
 		<Sheet
 			id="add-pubky"
 			title={sheetTitle}
-			gradientType="brand"
+			gradientType={!isMnemonicForm ? 'brand' : undefined}
+			showBottomSafeAreaInset={!isMnemonicForm}
+			keyboardHandlerEnabled={isMnemonicForm ? true : undefined}
 			onBackPress={shouldShowBackButton ? goBack : undefined}
 		>
 			{getContent()}

@@ -1,15 +1,15 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Image, Platform, View } from 'react-native';
-import { useTranslation } from 'react-i18next';
-import { TouchableOpacity } from '../../theme/components.ts';
+import { Trans, useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
+import { TouchableOpacity } from '../../theme/components.ts';
 import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
 import { defaultPubkyState } from '../../store/shapes/pubky.ts';
 import {
+	BodyMBText,
 	BodyMText,
 	BodySSBText,
 	BodySSpacedText,
-	BoldText,
 	CaptionText,
 	DisplayText,
 } from '../../theme/typography';
@@ -72,8 +72,14 @@ const NewHomeserverSetup = ({
 	return (
 		<>
 			<DisplayText style={styles.headerText}>{t('homeserver.dataHosting')}</DisplayText>
+
 			<BodyMText style={styles.message}>
-				{t('homeserver.chooseMessage')} <BoldText>{truncatedPubky}</BoldText>
+				<Trans
+					t={t}
+					i18nKey="homeserver.message"
+					components={{ accent: <BodyMBText colorName="textPrimary" /> }}
+					values={{ pubky: truncatedPubky }}
+				/>
 			</BodyMText>
 
 			<View style={styles.optionsContainer}>

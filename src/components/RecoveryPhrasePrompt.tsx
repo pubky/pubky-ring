@@ -27,8 +27,6 @@ const RecoveryPhrasePrompt = ({
 	const [isBlurred, setIsBlurred] = useState<boolean>(true);
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, payload.pubky, 12));
 	const { confirmPubkyBackup } = usePubkyManagement();
-	const title = t('backup.recoveryPhrase');
-	const message = t('backup.recoveryPhraseMessage');
 
 	const mnemonicWords = useMemo(() => {
 		if (!payload?.mnemonic) {
@@ -49,8 +47,8 @@ const RecoveryPhrasePrompt = ({
 	};
 
 	return (
-		<Sheet id="recovery-phrase-prompt" title={title}>
-			<BodyMText style={styles.message}>{message}</BodyMText>
+		<Sheet id="recovery-phrase-prompt" title={t('backup.mnemonic.navTitle')}>
+			<BodyMText style={styles.message}>{t('backup.recoveryPhraseMessage')}</BodyMText>
 
 			<View style={styles.mnemonicContainer}>
 				<View style={styles.columnContainer}>

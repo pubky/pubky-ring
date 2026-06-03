@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
+import { Trans, useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
 import { TextInput, TouchableOpacity } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
@@ -8,7 +9,6 @@ import { Result } from '@synonymdev/result';
 import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { BACKUP_PASSWORD_CHAR_MIN } from '../utils/constants.ts';
-import { useTranslation } from 'react-i18next';
 import { BodyMText, BodyMSBText, BodySText, CaptionBText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 import { EBackupPromptViewId } from '../utils/sheetHelpers.ts';
@@ -85,7 +85,7 @@ const BackupPrompt = ({
 	const title = useMemo(() => {
 		switch (viewId) {
 			case EBackupPromptViewId.backup:
-				return t('backup.encryptedFile');
+				return t('backup.file.navTitle');
 			case EBackupPromptViewId.import:
 				return t('import.title');
 			default:
@@ -120,8 +120,12 @@ const BackupPrompt = ({
 			case EBackupPromptViewId.backup:
 				return (
 					<CaptionText style={styles.inputLabel} numberOfLines={1} ellipsizeMode="middle">
-						{t('backup.passphraseFor')}
-						<CaptionBText>{truncatedPubky}</CaptionBText>
+						<Trans
+							t={t}
+							i18nKey="backup.passphraseFor"
+							components={{ accent: <CaptionBText colorName="textPrimary" /> }}
+							values={{ pubky: truncatedPubky }}
+						/>
 					</CaptionText>
 				);
 			case EBackupPromptViewId.import:

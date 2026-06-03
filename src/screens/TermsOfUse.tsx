@@ -10,7 +10,7 @@ import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
 import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
 import { getShowOnboarding } from '../store/selectors/settingsSelectors.ts';
 import { useTypedNavigation } from '../navigation/hooks';
-import { useTranslation } from 'react-i18next';
+import { Trans, useTranslation } from 'react-i18next';
 import Button from '../components/Button.tsx';
 import TermsOfUseContent from '../components/TermsOfUseContent.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
@@ -68,11 +68,11 @@ const TermsOfUse = (): React.ReactElement => {
 					<View>
 						<BodyMSBText style={styles.footerHeaderText}>{t('terms.privacyPolicy')}</BodyMSBText>
 						<BodySSBText colorName="textTertiary">
-							{t('terms.acceptPrivacy')}
-							<BodySSBText colorName="pubkyRing" style={styles.linkText} onPress={onPrivacyFormPress}>
-								{t('terms.privacyPolicy')}
-							</BodySSBText>
-							.
+							<Trans
+								t={t}
+								i18nKey="terms.acceptPrivacy"
+								components={{ accent: <BodySSBText colorName="pubkyRing" onPress={onPrivacyFormPress} /> }}
+							/>
 						</BodySSBText>
 					</View>
 

@@ -11,10 +11,6 @@ name: create-pubky-default-homeserver
     id: HomeserverCustomRadioInner
 - tapOn:
     id: HomeserverContinueButton
-- assertVisible:
-    id: InviteCodeInput
-- assertVisible:
-    id: InviteCodeContinueButton
 - tapOn:
     id: InviteCodeInput
 - inputText: ABCD1234EFGH

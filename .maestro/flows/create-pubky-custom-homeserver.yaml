@@ -23,20 +23,19 @@ env:
     timeout: 30000
 - tapOn:
     id: EditPubkyNameInput
-- eraseText: 100
 - inputText: ${PUBKY_NAME}
 - assertVisible: ${PUBKY_NAME}
 - tapOn:
     id: EditPubkyInviteCodeInput
-- eraseText: 100
 - inputText: ${output.INVITE_CODE_WITHOUT_HYPHENS}
-- assertVisible:
-    id: EditPubkyInviteCodeInput
+- runFlow:
+    file: ../shared/clearInputText.yaml
+    env:
+      INPUT_ID: EditPubkyHomeserverInput
+- setClipboard: ${STAGING_HOMESERVER}
+- pasteText
 - tapOn:
-    id: EditPubkyHomeserverInput
-- eraseText: 100
-- inputText: ${STAGING_HOMESERVER}
-- hideKeyboard
+    id: EditPubkyNameLabel # hide keyboard
 - tapOn:
     id: EditPubkySaveButton
 - assertVisible:

@@ -122,19 +122,21 @@ gpg --verify SHA256SUMS.asc
 sha256sum -c SHA256SUMS
 ```
 
-## iOS E2E testing (Maestro)
+## E2E testing (Maestro)
 
-This project currently runs iOS simulator E2E tests with Maestro. Android CI is omitted while the iOS path is established.
+This project runs iOS simulator and Android emulator E2E tests with Maestro.
 
 ### Prerequisites
 - Xcode with an iOS Simulator.
+- Android SDK with an emulator.
 - Maestro installed locally: `curl -Ls "https://get.maestro.mobile.dev" | bash`.
-- The Release app built and installed on the simulator.
+- The app built and installed on the target simulator or emulator.
 
 ### Run tests
 
 ```bash
 yarn e2e:ios
+yarn e2e:android
 ```
 
 ### Environment overrides
@@ -146,6 +148,10 @@ yarn e2e:ios
 # Run all iOS flows against the installed app
 yarn e2e:ios
 
+# Run all Android flows against the installed app
+yarn e2e:android
+
 # Run flows that request a staging invite code
 HOMESERVER_ADMIN_PASSWORD=... yarn e2e:ios
+HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
 ```

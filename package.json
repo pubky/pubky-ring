@@ -13,6 +13,7 @@
     "icons:build": "node scripts/build-icons.mjs",
     "optimize-images": "node scripts/optimize-images.js",
     "test": "jest",
+    "e2e:android": "MAESTRO_CLI_NO_ANALYTICS=true MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true maestro --platform=android test -e APP_ID=to.pubky.ring -e HOMESERVER_ADMIN_PASSWORD=\"$HOMESERVER_ADMIN_PASSWORD\" .maestro",
     "e2e:ios": "MAESTRO_CLI_NO_ANALYTICS=true MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true maestro --platform=ios test -e APP_ID=app.pubkyring -e HOMESERVER_ADMIN_PASSWORD=\"$HOMESERVER_ADMIN_PASSWORD\" .maestro",
     "tx:push": "./tx push -s",
     "tx:pull": "./tx pull -a",

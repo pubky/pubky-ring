@@ -6,13 +6,14 @@ import {
 	PAUSE,
 	PERSIST,
 	PersistConfig,
+	Persistor,
 	persistReducer,
 	persistStore,
 	PURGE,
 	REGISTER,
 	REHYDRATE,
 } from 'redux-persist';
-import { reduxStorage } from './mmkv-storage';
+import { initReduxStorage, reduxStorage } from './mmkv-storage';
 import pubkyReducer from './slices/pubkysSlice.ts';
 import { initialState as pubkyInitialState } from './shapes/pubky';
 import settingsReducer from './slices/settingsSlice.ts';
@@ -61,7 +62,21 @@ export const store = configureStore({
 	devTools: __DEV__ ? { name: 'pubkyring', trace: true, traceLimit: 25 } : false,
 });
 
-export const persistor = persistStore(store);
+let persistorInstance: Persistor | null = null;
+
+/**
+ * Initialises the encrypted MMKV storage and creates the persistor. Must be
+ * awaited (e.g. at app boot) before rendering PersistGate, because the
+ * encryption key is read asynchronously from the secure keystore.
+ */
+export const initializeStore = async (): Promise<Persistor> => {
+	if (persistorInstance) {
+		return persistorInstance;
+	}
+	await initReduxStorage();
+	persistorInstance = persistStore(store);
+	return persistorInstance;
+};
 
 // Type inference
 export type RootState = ReturnType<typeof store.getState>;

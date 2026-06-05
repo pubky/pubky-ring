@@ -26,6 +26,7 @@ interface SheetProps {
 	contentStyle?: StyleProp<ViewStyle>;
 	keyboardHandlerEnabled?: boolean;
 	showBottomSafeAreaInset?: boolean;
+	headerRight?: ReactNode;
 	onBackPress?: () => void;
 	onClose?: () => void;
 }
@@ -48,6 +49,7 @@ const Sheet = ({
 	contentStyle,
 	keyboardHandlerEnabled = Platform.OS === 'ios',
 	showBottomSafeAreaInset = true,
+	headerRight,
 	onBackPress,
 	onClose,
 }: SheetProps): ReactElement => {
@@ -96,7 +98,7 @@ const Sheet = ({
 
 					<BodyMBText testID={`${id}-title`}>{title}</BodyMBText>
 
-					<HeaderNavButton style={styles.navButton} />
+					<View style={styles.navButton}>{headerRight}</View>
 				</View>
 
 				<View style={[styles.content, contentStyle]}>{children}</View>

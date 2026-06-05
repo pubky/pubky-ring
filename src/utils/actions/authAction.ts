@@ -8,7 +8,6 @@
 import { Result, ok, err } from '@synonymdev/result';
 import { parseAuthUrl, PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import { SheetManager } from 'react-native-actions-sheet';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
@@ -136,8 +135,6 @@ const showAuthConfirmation = async ({
 	xCallback?: XCallbackParams;
 }): Promise<Result<string>> => {
 	try {
-		SystemNavigationBar.navigationHide().then();
-
 		// Small timeout allows the sheet time to properly display
 		setTimeout(() => {
 			SheetManager.show('confirm-auth', {
@@ -147,9 +144,6 @@ const showAuthConfirmation = async ({
 					authDetails,
 					xCallback,
 					onComplete: async (): Promise<void> => {},
-				},
-				onClose: () => {
-					SystemNavigationBar.navigationShow().then();
 				},
 			});
 		}, AUTH_SHEET_DELAY);
@@ -163,7 +157,6 @@ const showAuthConfirmation = async ({
 			description,
 		});
 		console.log(`${description}:`, error);
-		SystemNavigationBar.navigationShow().then();
 		return err(description);
 	}
 };

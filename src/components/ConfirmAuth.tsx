@@ -12,7 +12,6 @@ import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import ProgressBar from './ProgressBar.tsx';
-import SystemNavigationBar from 'react-native-system-navigation-bar';
 import { useTranslation } from 'react-i18next';
 import { XCallbackParams } from '../utils/inputParser.ts';
 import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
@@ -20,6 +19,7 @@ import Button from './Button.tsx';
 import Sheet from './Sheet.tsx';
 import SafeAreaInset from './SafeAreaInset.tsx';
 import { CheckCircle, Folder } from '../icons/index.ts';
+import CircularProgressBar from './CircularProgressBar.tsx';
 
 interface ConfirmAuthProps {
 	pubky: string;
@@ -60,6 +60,7 @@ const Permission = memo(
 );
 
 const FADE_DURATION = 100;
+const CONFIRM_AUTH_TIMEOUT_MS = 60000;
 
 const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement => {
 	const { t } = useTranslation();
@@ -107,7 +108,6 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 
 	const handleClose = useCallback(() => {
 		SheetManager.hide('confirm-auth');
-		SystemNavigationBar.navigationShow();
 	}, []);
 
 	const handleDeny = useCallback(() => {
@@ -133,7 +133,6 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 				return;
 			}
 			setIsAuthorized(true);
-			SystemNavigationBar.navigationShow();
 			onComplete?.();
 			if (xCallback?.xSuccess) {
 				await sleep(FADE_DURATION + 300);
@@ -174,8 +173,18 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 			? t('auth.authorizeForApp', { appName: xCallback.xSource })
 			: t('auth.authorize');
 
+	const headerProgress =
+		Platform.OS === 'android' && !isAuthorized ? (
+			<CircularProgressBar
+				duration={CONFIRM_AUTH_TIMEOUT_MS}
+				size={20}
+				drain={true}
+				onComplete={handleDeny}
+			/>
+		) : undefined;
+
 	return (
-		<Sheet id="confirm-auth" title={titleText} showBottomSafeAreaInset={false}>
+		<Sheet id="confirm-auth" title={titleText} showBottomSafeAreaInset={false} headerRight={headerProgress}>
 			<View style={styles.section}>
 				<CaptionText style={styles.sectionTitle}>
 					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
@@ -226,12 +235,10 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 
 				<SafeAreaInset edge="bottom" />
 
-				{!isAuthorized && (
+				{Platform.OS === 'ios' && !isAuthorized && (
 					<ProgressBar
 						style={styles.progressBarContainer}
-						duration={60000}
-						//fadeIn={true}
-						//fadeInDuration={1000}
+						duration={CONFIRM_AUTH_TIMEOUT_MS}
 						unfilledColor="#333333"
 						height={5}
 						drain={true}
@@ -306,10 +313,9 @@ const styles = StyleSheet.create({
 	},
 	progressBarContainer: {
 		position: 'absolute',
-		bottom: 0,
+		bottom: 8,
 		width: 143,
 		alignSelf: 'center',
-		marginBottom: Platform.select({ ios: 8, android: 0 }),
 	},
 });
 

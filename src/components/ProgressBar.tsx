@@ -73,7 +73,7 @@ const ProgressBar = ({
 	}, [delayRender]);
 
 	useEffect(() => {
-		if (!shouldRender) return;
+		if (!shouldRender || dimensions.width === 0) return;
 
 		// restart animation whenever duration or delay changes
 		completedOnce.current = false;
@@ -106,7 +106,7 @@ const ProgressBar = ({
 			cancelAnimation(opacity);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [shouldRender, duration, delayStart, fadeIn, fadeInDuration, drain, onComplete]);
+	}, [shouldRender, dimensions.width, duration, delayStart, fadeIn, fadeInDuration, drain, onComplete]);
 
 	if (!shouldRender) {
 		return (

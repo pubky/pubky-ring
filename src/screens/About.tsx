@@ -1,7 +1,6 @@
 import React, { memo, ReactElement } from 'react';
 import { Image, Linking, StyleSheet, TouchableOpacity, ScrollView, View } from 'react-native';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
-import { version } from '../../package.json';
 import PubkyRingLogo from '../images/pubky-app-logo.png';
 import BrandEndoresment from '../images/brand-endorsement.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
@@ -11,6 +10,7 @@ import { useTranslation } from 'react-i18next';
 import { BodyMSBText, BodyMSpacedText, BodyMText, DisplayText } from '../theme/typography.ts';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { ChevronRight } from '../icons/index.ts';
+import { appVersion } from '../utils/appInfo.ts';
 
 const About = (): ReactElement => {
 	const { t } = useTranslation();
@@ -38,11 +38,11 @@ const About = (): ReactElement => {
 	};
 
 	const onCopyPress = (): void => {
-		copyToClipboard(version);
+		copyToClipboard(appVersion);
 		showToast({
 			type: 'info',
 			title: t('about.copiedVersion'),
-			description: `${t('about.version')}: ${version}`,
+			description: `${t('about.version')}: ${appVersion}`,
 		});
 	};
 	return (
@@ -67,7 +67,7 @@ const About = (): ReactElement => {
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
 					<BodyMSpacedText>{t('about.version')}</BodyMSpacedText>
-					<BodyMSpacedText colorName="textTertiary">{version}</BodyMSpacedText>
+					<BodyMSpacedText colorName="textTertiary">{appVersion}</BodyMSpacedText>
 				</TouchableOpacity>
 
 				<Image source={BrandEndoresment} style={styles.brandLogo} />

@@ -59,6 +59,13 @@ react {
  */
 def enableProguardInReleaseBuilds = false
 
+def enableSeparateBuildPerCPUArchitecture = true
+
+def reactNativeArchitectures() {
+    def value = project.getProperties().get("reactNativeArchitectures")
+    return value ? value.split(",") : ["armeabi-v7a", "arm64-v8a"]
+}
+
 /**
  * The preferred build flavor of JavaScriptCore (JSC)
  *
@@ -83,6 +90,15 @@ android {
     // (mmap) at startup instead of decompressed into memory, improving TTI.
     androidResources {
         noCompress += ['bundle']
+    }
+
+    splits {
+        abi {
+            reset()
+            enable enableSeparateBuildPerCPUArchitecture
+            universalApk true
+            include (*reactNativeArchitectures())
+        }
     }
 
     defaultConfig {

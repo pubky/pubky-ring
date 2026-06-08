@@ -70,18 +70,21 @@ export const PubkyDetailCard = memo(
 						style={styles.actionButton}
 						text={t('common.share')}
 						icon={shareIcon}
+						testID="PubkyDetailShareButton"
 						onPress={onSharePress}
 					/>
 					<Button
 						style={styles.actionButton}
 						text={t('backup.backup')}
 						icon={backupIcon}
+						testID="PubkyDetailBackupButton"
 						onPress={onBackup}
 					/>
 					<Button
 						style={styles.actionButton}
 						text={t('common.delete')}
 						icon={deleteIcon}
+						testID="PubkyDetailDeleteButton"
 						onPress={onDelete}
 					/>
 				</View>

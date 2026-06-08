@@ -36,8 +36,19 @@ const DeletePubky = ({
 				<Image source={require('../images/trash.png')} style={styles.image} />
 			</View>
 			<View style={styles.buttonContainer}>
-				<Button text={t('common.cancel')} size="large" onPress={closeSheet} />
-				<Button text={t('common.delete')} size="large" variant="secondary" onPress={onDelete} />
+				<Button
+					text={t('common.cancel')}
+					size="large"
+					testID="DeletePubkyCancelButton"
+					onPress={closeSheet}
+				/>
+				<Button
+					text={t('common.delete')}
+					size="large"
+					variant="secondary"
+					testID="DeletePubkyConfirmButton"
+					onPress={onDelete}
+				/>
 			</View>
 		</Sheet>
 	);

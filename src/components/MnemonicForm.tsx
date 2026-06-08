@@ -308,11 +308,6 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				}}
 				style={[styles.mnemonicInput, isInvalid && styles.invalidInput, loading && styles.disabledInput]}
 				value={getDisplayValue(index)}
-				onChangeText={text => updateMnemonicWord(index, text)}
-				onFocus={() => handleFocus(index)}
-				onBlur={() => handleBlur(index)}
-				onSubmitEditing={() => handleSubmitEditing(index)}
-				onKeyPress={handleKeyPress}
 				placeholder={`${index + 1}.`}
 				placeholderTextColor="rgba(255, 255, 255, 0.32)"
 				autoCapitalize="none"
@@ -325,6 +320,12 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				returnKeyType={index === 11 ? 'done' : 'next'}
 				submitBehavior="submit"
 				editable={!loading}
+				testID={`MnemonicWordInput-${index + 1}`}
+				onChangeText={text => updateMnemonicWord(index, text)}
+				onFocus={() => handleFocus(index)}
+				onBlur={() => handleBlur(index)}
+				onSubmitEditing={() => handleSubmitEditing(index)}
+				onKeyPress={handleKeyPress}
 			/>
 		);
 	};
@@ -371,13 +372,19 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				</View>
 
 				<View style={styles.buttonContainer}>
-					<Button text={i18n.t('common.cancel')} size="large" onPress={handleCancel} />
+					<Button
+						text={i18n.t('common.cancel')}
+						size="large"
+						testID="MnemonicCancelButton"
+						onPress={handleCancel}
+					/>
 					<Button
 						text={i18n.t('import.title')}
 						size="large"
 						variant="secondary"
 						loading={loading}
 						disabled={!enableImport}
+						testID="MnemonicImportButton"
 						onPress={handleImport}
 					/>
 				</View>

@@ -1,26 +1,15 @@
 appId: ${APP_ID}
-name: create-pubky-custom-homeserver
 env:
   STAGING_HOMESERVER: ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy
   PUBKY_NAME: Staging Test Pubky
 ---
 - runScript: ../scripts/request-invite-code.js
-- launchApp:
-    clearState: true
-- runFlow: ../shared/onboarding.yaml
-- runFlow: ../shared/start-new-pubky.yaml
-- tapOn:
-    id: HomeserverCustomOption
 - assertVisible:
-    id: HomeserverCustomRadioInner
-- assertNotVisible:
-    id: HomeserverDefaultRadioInner
+    id: PubkyBox--0-ActionButton
 - tapOn:
-    id: HomeserverContinueButton
-- extendedWaitUntil:
-    visible:
-      id: EditPubkyNameInput
-    timeout: 30000
+    id: PubkyBox--0-ActionButton
+- assertVisible:
+    id: EditPubkyNameInput
 - tapOn:
     id: EditPubkyNameInput
 - inputText: ${PUBKY_NAME}
@@ -29,14 +18,16 @@ env:
     id: EditPubkyInviteCodeInput
 - inputText: ${output.INVITE_CODE_WITHOUT_HYPHENS}
 - runFlow:
-    file: ../shared/clearInputText.yaml
+    file: clear-input-text.yaml
     env:
       INPUT_ID: EditPubkyHomeserverInput
 - setClipboard: ${STAGING_HOMESERVER}
 - pasteText
 - tapOn:
-    id: EditPubkyNameLabel # hide keyboard
+    id: EditPubkyHomeserverLabel
 - tapOn:
     id: EditPubkySaveButton
-- assertVisible:
-    id: PubkyBox-StagingTestPubky-0
+- extendedWaitUntil:
+    visible:
+      id: PubkyBox-StagingTestPubky-0
+    timeout: 120000

@@ -1,0 +1,20 @@
+appId: ${APP_ID}
+name: migrate-keys
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow:
+    file: ../shared/open-link.yaml
+    env:
+      URL: "pubkyring://migrate?index=0&total=2&key=abandon%20abandon%20abandon%20abandon%20abandon%20abandon%20abandon%20abandon%20abandon%20abandon%20abandon%20about"
+- runFlow:
+    file: ../shared/open-link.yaml
+    env:
+      URL: "pubkyring://migrate?index=1&total=2&key=legal%20winner%20thank%20year%20wave%20sausage%20worth%20useful%20legal%20winner%20thank%20yellow"
+- extendedWaitUntil:
+    visible:
+      id: PubkyBox--0
+    timeout: 120000
+- assertVisible:
+    id: PubkyBox--1

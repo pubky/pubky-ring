@@ -1,0 +1,33 @@
+appId: ${APP_ID}
+env:
+  STAGING_HOMESERVER: ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy
+  PUBKY_NAME: Staging Test Pubky
+---
+- runScript: ../scripts/request-invite-code.js
+- assertVisible:
+    id: PubkyBox--0-ActionButton
+- tapOn:
+    id: PubkyBox--0-ActionButton
+- assertVisible:
+    id: EditPubkyNameInput
+- tapOn:
+    id: EditPubkyNameInput
+- inputText: ${PUBKY_NAME}
+- assertVisible: ${PUBKY_NAME}
+- tapOn:
+    id: EditPubkyInviteCodeInput
+- inputText: ${output.INVITE_CODE_WITHOUT_HYPHENS}
+- runFlow:
+    file: clear-input-text.yaml
+    env:
+      INPUT_ID: EditPubkyHomeserverInput
+- setClipboard: ${STAGING_HOMESERVER}
+- pasteText
+- tapOn:
+    id: EditPubkyHomeserverLabel
+- tapOn:
+    id: EditPubkySaveButton
+- extendedWaitUntil:
+    visible:
+      id: PubkyBox-StagingTestPubky-0
+    timeout: 120000

@@ -348,7 +348,7 @@ const EditPubky = ({
 	return (
 		<Sheet id="edit-pubky" title={title} keyboardHandlerEnabled={false}>
 			<ActionSheetScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-				<CaptionText>{i18n.t('editPubkySheet.pubkyNameLabel')}</CaptionText>
+				<CaptionText testID="EditPubkyNameLabel">{i18n.t('editPubkySheet.pubkyNameLabel')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyNameInput"
 					value={newPubkyName}
@@ -361,9 +361,7 @@ const EditPubky = ({
 
 				{isSignupTokenInputVisible && (
 					<>
-						<CaptionText>
-							{i18n.t('editPubkySheet.inviteCodeOptional')}
-						</CaptionText>
+						<CaptionText>{i18n.t('editPubkySheet.inviteCodeOptional')}</CaptionText>
 						<InputItemComponent
 							testID="EditPubkyInviteCodeInput"
 							inputRef={signupTokenInputRef}
@@ -384,7 +382,7 @@ const EditPubky = ({
 					</>
 				)}
 
-				<CaptionText>{i18n.t('editPubky.homeserver')}</CaptionText>
+				<CaptionText testID="EditPubkyHomeserverLabel">{i18n.t('editPubky.homeserver')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyHomeserverInput"
 					value={homeServer}

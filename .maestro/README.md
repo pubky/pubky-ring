@@ -34,6 +34,8 @@ The custom homeserver flow also requires:
 HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
 ```
 
+The local `yarn e2e:*` scripts prepare the target simulator/emulator for reduced motion before Maestro runs. The app respects that platform accessibility setting, so sheet and navigation animations are disabled without requiring a special e2e build.
+
 ## Continuous Integration
 
 `.github/workflows/ios-e2e.yml` builds the iOS simulator app, installs Maestro, boots an iPhone 17 simulator, installs the app, and runs all flows in `.maestro`.

@@ -13,8 +13,10 @@
     "icons:build": "node scripts/build-icons.mjs",
     "optimize-images": "node scripts/optimize-images.js",
     "test": "jest",
-    "e2e:android": "MAESTRO_CLI_NO_ANALYTICS=true MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true maestro --platform=android test -e APP_ID=to.pubky.ring -e HOMESERVER_ADMIN_PASSWORD=\"$HOMESERVER_ADMIN_PASSWORD\" .maestro",
-    "e2e:ios": "MAESTRO_CLI_NO_ANALYTICS=true MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true maestro --platform=ios test -e APP_ID=app.pubkyring -e HOMESERVER_ADMIN_PASSWORD=\"$HOMESERVER_ADMIN_PASSWORD\" .maestro",
+    "e2e:android": "bash .maestro/scripts/run-local.sh android",
+    "e2e:ios": "bash .maestro/scripts/run-local.sh ios",
+    "e2e:restore-motion:android": "bash .maestro/scripts/restore-device-motion.sh android",
+    "e2e:restore-motion:ios": "bash .maestro/scripts/restore-device-motion.sh ios",
     "tx:push": "./tx push -s",
     "tx:pull": "./tx pull -a",
     "postinstall": "patch-package"

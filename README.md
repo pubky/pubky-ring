@@ -155,3 +155,5 @@ yarn e2e:android
 HOMESERVER_ADMIN_PASSWORD=... yarn e2e:ios
 HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
 ```
+
+The e2e scripts prepare the target simulator or emulator for reduced motion before Maestro runs. The app respects that platform accessibility setting, so sheet and navigation animations are disabled without requiring a special e2e build.

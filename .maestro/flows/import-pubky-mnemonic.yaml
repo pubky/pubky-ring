@@ -11,13 +11,11 @@ name: import-pubky-mnemonic
     id: add-pubky-title
 - tapOn:
     id: AddPubkyImport
-    # retryTapIfNoChange: true
 - waitForAnimationToEnd
 - assertVisible:
     id: RecoveryPhraseButton
 - tapOn:
     id: RecoveryPhraseButton
-    # retryTapIfNoChange: true
 - waitForAnimationToEnd
 - assertVisible:
     id: MnemonicWordInput-1

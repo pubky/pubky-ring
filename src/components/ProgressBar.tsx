@@ -1,4 +1,4 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect, useState } from 'react';
 import { StyleSheet, View, ViewStyle } from 'react-native';
 import Animated, {
 	Easing,
@@ -7,7 +7,6 @@ import Animated, {
 	useSharedValue,
 	withTiming,
 } from 'react-native-reanimated';
-import { scheduleOnRN } from 'react-native-worklets';
 
 type ProgressBarProps = {
 	duration?: number; // ms
@@ -21,7 +20,6 @@ type ProgressBarProps = {
 	borderRadius?: number;
 	reverse?: boolean; // if true, anchors progress to the right edge
 	drain?: boolean; // if true, progress starts full and drains to empty
-	onComplete?: () => void;
 	style?: ViewStyle | ViewStyle[];
 };
 
@@ -37,14 +35,12 @@ const ProgressBar = ({
 	borderRadius = 2,
 	reverse = false,
 	drain = false,
-	onComplete,
 	style,
 }: ProgressBarProps): React.ReactElement | null => {
 	const [shouldRender, setShouldRender] = useState(delayRender === 0);
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 	const progress = useSharedValue(drain ? 1 : 0);
 	const opacity = useSharedValue(fadeIn ? 0 : 1);
-	const completedOnce = useRef(false);
 
 	const containerStyle = useAnimatedStyle(() => ({
 		opacity: opacity.value,
@@ -76,7 +72,6 @@ const ProgressBar = ({
 		if (!shouldRender || dimensions.width === 0) return;
 
 		// restart animation whenever duration or delay changes
-		completedOnce.current = false;
 		cancelAnimation(progress);
 		cancelAnimation(opacity);
 		progress.value = drain ? 1 : 0;
@@ -92,12 +87,7 @@ const ProgressBar = ({
 
 		// Start progress animation after delay
 		const timer = setTimeout(() => {
-			progress.value = withTiming(drain ? 0 : 1, { duration, easing: Easing.linear }, finished => {
-				if (finished && onComplete && !completedOnce.current) {
-					completedOnce.current = true;
-					scheduleOnRN(onComplete);
-				}
-			});
+			progress.value = withTiming(drain ? 0 : 1, { duration, easing: Easing.linear });
 		}, delayStart);
 
 		return (): void => {
@@ -106,7 +96,7 @@ const ProgressBar = ({
 			cancelAnimation(opacity);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [shouldRender, dimensions.width, duration, delayStart, fadeIn, fadeInDuration, drain, onComplete]);
+	}, [shouldRender, dimensions.width, duration, delayStart, fadeIn, fadeInDuration, drain]);
 
 	if (!shouldRender) {
 		return (

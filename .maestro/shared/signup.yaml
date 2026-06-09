@@ -8,6 +8,7 @@ env:
     id: PubkyBox--0-ActionButton
 - tapOn:
     id: PubkyBox--0-ActionButton
+- waitForAnimationToEnd
 - assertVisible:
     id: EditPubkyNameInput
 - tapOn:

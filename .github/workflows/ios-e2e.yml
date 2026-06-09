@@ -6,104 +6,173 @@ on:
   workflow_dispatch:
     inputs:
       commit-sha:
-        description: 'Commit SHA to test (leave empty to use current branch head)'
+        description: 'Commit SHA to build/test (leave empty to use selected branch)'
         required: false
         type: string
 
+concurrency:
+  group: ios-e2e-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ios-e2e:
-    runs-on: macos-latest
-    concurrency:
-      group: ios-e2e-${{ github.head_ref }}
-      cancel-in-progress: true
+    runs-on: macos-26
+    timeout-minutes: 90
+    env:
+      MAESTRO_CLI_NO_ANALYTICS: "true"
+      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
+      CCACHE_DIR: ${{ github.workspace }}/.ccache
+      CCACHE_MAXSIZE: 2G
+      USE_CCACHE: "1"
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v4
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.inputs.commit-sha || github.ref }}
+
+    - name: Set up Xcode
+      uses: maxim-lobanov/setup-xcode@v1
+      with:
+        xcode-version: "26"
 
     - name: Set up Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v5
       with:
-        node-version: '22'
+        node-version: '24'
+        cache: 'yarn'
 
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
-    - name: Install Appium drivers
-      run: yarn e2e:drivers
+    - name: Cache CocoaPods
+      uses: actions/cache@v5
+      with:
+        path: ios/Pods
+        key: ${{ runner.os }}-pods-${{ hashFiles('ios/Podfile.lock', 'package.json', 'yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-pods-
+
+    - name: Install ccache
+      run: command -v ccache || brew install ccache
+
+    - name: Restore ccache
+      id: ccache-restore
+      uses: actions/cache/restore@v5
+      with:
+        path: .ccache
+        key: ${{ runner.os }}-xcode26-ccache-${{ hashFiles('ios/Podfile.lock', 'package.json', 'yarn.lock') }}-${{ github.run_id }}-${{ github.run_attempt }}
+        restore-keys: |
+          ${{ runner.os }}-xcode26-ccache-${{ hashFiles('ios/Podfile.lock', 'package.json', 'yarn.lock') }}-
+          ${{ runner.os }}-xcode26-ccache-
+
+    - name: Reset ccache statistics
+      run: ccache --zero-stats
 
     - name: Install iOS dependencies
       run: |
         cd ios
         pod install
 
-    - name: Wait for iOS Build
-      id: wait-ios-build
-      uses: ./.github/actions/wait-for-workflow
-      with:
-        workflow-name: 'iOS Build'
-        commit-sha: ${{ github.event.inputs.commit-sha || github.event.pull_request.head.sha || github.sha }}
-        max-attempts: '720'  # 2 hours with 10s intervals
+    - name: Boot iOS simulator
+      env:
+        IOS_SIM: iPhone 17
+      run: |
+        xcrun simctl list runtimes
+        xcrun simctl list devices available
+        SIM_UDID="$(
+          xcrun simctl list devices available --json | node -e '
+            const input = require("fs").readFileSync(0, "utf8");
+            const devices = JSON.parse(input).devices;
+            const runtimes = Object.keys(devices)
+              .filter((runtime) => runtime.includes("iOS"))
+              .sort()
+              .reverse();
+            const device = runtimes
+              .flatMap((runtime) => devices[runtime])
+              .find((candidate) => candidate.name === process.env.IOS_SIM);
+            if (device) process.stdout.write(device.udid);
+          '
+        )"
+        if [ -z "$SIM_UDID" ]; then
+          echo "Could not find an available ${IOS_SIM} simulator"
+          exit 1
+        fi
+        echo "SIM_UDID=$SIM_UDID" >> "$GITHUB_ENV"
+        xcrun simctl boot "$SIM_UDID" || true
+        xcrun simctl bootstatus "$SIM_UDID" -b
 
-    - name: Download iOS App
-      uses: dawidd6/action-download-artifact@v6
+    - name: Build iOS simulator app
+      run: |
+        cd ios
+        xcodebuild -workspace pubkyring.xcworkspace -scheme pubkyring -configuration Release -destination "id=$SIM_UDID" -derivedDataPath ./build ONLY_ACTIVE_ARCH=YES build
+
+    - name: Show ccache statistics
+      run: ccache --show-stats
+
+    - name: Save ccache
+      uses: actions/cache/save@v5
+      with:
+        path: .ccache
+        key: ${{ steps.ccache-restore.outputs.cache-primary-key }}
+
+    - name: Create app bundle zip
+      run: |
+        cd ios/build/Build/Products/Release-iphonesimulator
+        zip -r pubkyring.app.zip pubkyring.app
+
+    - name: Upload build artifact
+      uses: actions/upload-artifact@v7
       with:
         name: ios-release-app
-        path: ./artifacts
-        workflow: ios-build.yml
-        run_id: ${{ steps.wait-ios-build.outputs.workflow-run-id }}
+        path: ios/build/Build/Products/Release-iphonesimulator/pubkyring.app.zip
+        retention-days: 7
 
-    - name: Extract iOS App Bundle
+    - name: Install Maestro
       run: |
-        cd artifacts
-        unzip pubkyring.app.zip
-        ls -la
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
 
-    - name: Run E2E tests
+    - name: Install app on simulator
+      run: xcrun simctl install "$SIM_UDID" ios/build/Build/Products/Release-iphonesimulator/pubkyring.app
+
+    - name: Request staging invite code
       env:
-        IOS_APP: ./artifacts/pubkyring.app
-        IOS_SIM: iPhone 17
-        IOS_PLATFORM_VERSION: 26.2
         HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
-      run: yarn e2e:ios
+      run: |
+        INVITE_CODE="$(
+          curl --fail --silent --show-error \
+            -H "X-Admin-Password: $HOMESERVER_ADMIN_PASSWORD" \
+            -H "Content-Type: application/json" \
+            https://admin.homeserver.staging.pubky.app/generate_signup_token
+        )"
+        INVITE_CODE_COMPACT="${INVITE_CODE//-/}"
+        echo "::add-mask::$INVITE_CODE"
+        echo "::add-mask::$INVITE_CODE_COMPACT"
+        echo "INVITE_CODE=$INVITE_CODE" >> "$GITHUB_ENV"
 
-    - name: Upload Video
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ios-e2e-video
-        path: ./e2e/artefacts/
-        retention-days: 7
+    - name: Run Maestro flows
+      timeout-minutes: 30
+      run: maestro --platform=ios --device "$SIM_UDID" test -e APP_ID=app.pubkyring -e INVITE_CODE="$INVITE_CODE" .maestro
 
-    - name: Upload Logcat
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ios-e2e-logcat
-        path: ./logcat.txt
-        retention-days: 7
-
-    - name: Upload Simulator Logs
-      uses: actions/upload-artifact@v4
-      if: always()
-      with:
-        name: ios-e2e-simulator-logs
-        path: ./ios-simulator-logs.txt
-        retention-days: 7
-
-    - name: Upload Test Results
-      uses: actions/upload-artifact@v4
+    - name: Upload Maestro results
+      uses: actions/upload-artifact@v7
       if: always()
       with:
         name: ios-e2e-results
-        path: |
-          ./e2e/results/
+        path: .maestro/results/
+        if-no-files-found: ignore
         retention-days: 7
 
-    - name: Upload Appium Logs
-      uses: actions/upload-artifact@v4
-      if: always()
+    - name: Collect simulator logs
+      if: failure()
+      run: xcrun simctl spawn booted log show --last 30m > ios-simulator-logs.txt || true
+
+    - name: Upload Simulator Logs
+      uses: actions/upload-artifact@v7
+      if: failure()
       with:
-        name: ios-e2e-appium-logs
-        path: ./e2e/appium.log
+        name: ios-e2e-simulator-logs
+        path: ios-simulator-logs.txt
+        if-no-files-found: ignore
         retention-days: 7

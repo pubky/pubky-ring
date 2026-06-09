@@ -1,0 +1,6 @@
+appId: ${APP_ID}
+name: onboarding
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml

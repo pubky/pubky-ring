@@ -1,0 +1,13 @@
+appId: ${APP_ID}
+---
+- extendedWaitUntil:
+    visible:
+      id: TermsOfUseTitle
+    timeout: 60000
+- assertVisible: Terms of Use.
+- tapOn:
+    id: TermsContinueButton
+- tapOn:
+    id: OnboardingGetStartedButton
+- assertVisible:
+    id: AddPubkyButton

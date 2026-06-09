@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+name: create-pubky-and-authorize
+env:
+  AUTH_URL: pubkyauth://signin?caps=/pub/pubky.app/:rw&relay=https://httprelay.staging.pubky.app/inbox&secret=okIbCVEBmJJGU56jO4WPmeghdyLNun6VOp_xV-B5Yx0
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- runFlow: ../shared/signup.yaml
+- runFlow: ../shared/authorize.yaml

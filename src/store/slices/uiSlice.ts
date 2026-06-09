@@ -10,14 +10,20 @@ const uiSlice = createSlice({
 			action: PayloadAction<{
 				isError: boolean;
 				errorMessage?: string;
+				errorModalTitle?: string;
+				errorDescription?: string;
 			}>,
 		) => {
 			state.loadingModal.isError = action.payload.isError;
 			state.loadingModal.errorMessage = action.payload.errorMessage ?? '';
+			state.loadingModal.errorModalTitle = action.payload.errorModalTitle;
+			state.loadingModal.errorDescription = action.payload.errorDescription;
 		},
 		resetLoadingModal: state => {
 			state.loadingModal.isError = false;
 			state.loadingModal.errorMessage = '';
+			state.loadingModal.errorModalTitle = undefined;
+			state.loadingModal.errorDescription = undefined;
 		},
 	},
 });

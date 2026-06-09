@@ -70,7 +70,7 @@ const Content = ({
 				/>
 			);
 		case ECurrentScreen.requestInvite:
-			return <RequestInviteCode />
+			return <RequestInviteCode />;
 		case ECurrentScreen.welcome:
 			return (
 				<Welcome
@@ -139,6 +139,7 @@ const NewPubkySetup = ({
 			id="new-pubky-setup"
 			title={title}
 			gradientType="brand"
+			keyboardHandlerEnabled={false}
 			onBackPress={currentScreen === ECurrentScreen.requestInvite ? handleBackPress : undefined}
 		>
 			<Content

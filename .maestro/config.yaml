@@ -1,0 +1,4 @@
+appId: ${APP_ID}
+flows:
+  - flows/*.yaml
+testOutputDir: .maestro/results

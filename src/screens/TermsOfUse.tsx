@@ -43,7 +43,7 @@ const TermsOfUse = (): React.ReactElement => {
 			</RadialGradient>
 
 			<View style={styles.contentContainer}>
-				<ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+				<ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false} testID="TermsScrollView">
 					<View style={styles.textContainer}>
 						<TermsOfUseContent />
 					</View>

@@ -1,0 +1,20 @@
+appId: ${APP_ID}
+---
+- assertVisible:
+    id: TermsTitle
+- swipe:
+    start: 50%, 60%
+    end: 50%, 18%
+    duration: 700
+- swipe:
+    start: 50%, 60%
+    end: 50%, 18%
+    duration: 700
+- assertNotVisible:
+    id: TermsTitle
+- tapOn:
+    id: TermsContinueButton
+- tapOn:
+    id: OnboardingContinueButton
+- assertVisible:
+    id: AddPubkyButton

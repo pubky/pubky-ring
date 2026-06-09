@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { StyleSheet, Keyboard, TextInput as NativeTextInput, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { TextInput } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver, truncatePubky } from '../utils/pubky.ts';
@@ -11,9 +12,9 @@ import { err } from '@synonymdev/result';
 import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
-import i18n from '../i18n';
 import { BodySText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
+import { getSignupTokenErrorDescription } from '../utils/signupErrors.ts';
 
 const MAX_NAME_LENGTH = 50;
 
@@ -75,6 +76,7 @@ const EditPubky = ({
 		pubky: string;
 	};
 }): ReactElement => {
+	const { t } = useTranslation();
 	const { pubky } = useMemo(() => payload, [payload]);
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const [loading, setLoading] = useState(false);
@@ -163,6 +165,9 @@ const EditPubky = ({
 						dispatch,
 					});
 					if (signupRes.isErr()) {
+						const signupErrorMessage =
+							getSignupTokenErrorDescription(signupRes.error.message) ?? t('editPubkySheet.unableToSignUp');
+
 						// The pubky might be an import that can successfully login.
 						if (!storedPubkyData.homeserver || storedPubkyData.homeserver === homeServer.trim()) {
 							// Attempt sign-in
@@ -174,13 +179,13 @@ const EditPubky = ({
 							});
 							if (signinRes.isErr()) {
 								updateName(); // No need to prevent updating the name if we can.
-								setError(i18n.t('editPubkySheet.unableToSignUp'));
+								setError(signupErrorMessage);
 								return;
 							}
 							signedIn = true;
 						} else {
 							updateName(); // No need to prevent updating the name if we can.
-							setError(i18n.t('editPubkySheet.unableToSignUp'));
+							setError(signupErrorMessage);
 							return;
 						}
 					}
@@ -199,7 +204,7 @@ const EditPubky = ({
 					});
 					if (signinRes.isErr()) {
 						updateName(); // No need to prevent updating the name if we can.
-						setError(i18n.t('editPubkySheet.unableToSignIn', { error: signinRes.error.message }));
+						setError(t('editPubkySheet.unableToSignIn', { error: signinRes.error.message }));
 						return;
 					}
 				}
@@ -227,6 +232,7 @@ const EditPubky = ({
 		dispatch,
 		updateName,
 		onClose,
+		t,
 	]);
 
 	const handleChangeText = useCallback((text: string) => {
@@ -333,10 +339,10 @@ const EditPubky = ({
 
 	const leftButtonText = useMemo(() => {
 		if (storedPubkyData.homeserver && haveFieldsChanged) {
-			return loading ? i18n.t('common.close') : i18n.t('editPubkySheet.reset');
+			return loading ? t('common.close') : t('editPubkySheet.reset');
 		}
-		return i18n.t('common.close');
-	}, [storedPubkyData.homeserver, haveFieldsChanged, loading]);
+		return t('common.close');
+	}, [storedPubkyData.homeserver, haveFieldsChanged, loading, t]);
 
 	const leftButtonOnPress = useCallback(() => {
 		if (storedPubkyData.homeserver && haveFieldsChanged) {
@@ -348,12 +354,12 @@ const EditPubky = ({
 	return (
 		<Sheet id="edit-pubky" title={title} keyboardHandlerEnabled={false}>
 			<ActionSheetScrollView showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
-				<CaptionText>{i18n.t('editPubkySheet.pubkyNameLabel')}</CaptionText>
+				<CaptionText testID="EditPubkyNameLabel">{t('editPubkySheet.pubkyNameLabel')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyNameInput"
 					value={newPubkyName}
 					onChangeText={handleChangeText}
-					placeholder={i18n.t('editPubkySheet.pubkyNamePlaceholder')}
+					placeholder={t('editPubkySheet.pubkyNamePlaceholder')}
 					error={nameError}
 					autoFocus={true}
 					onSubmitEditing={handleNameSubmit}
@@ -361,15 +367,13 @@ const EditPubky = ({
 
 				{isSignupTokenInputVisible && (
 					<>
-						<CaptionText>
-							{i18n.t('editPubkySheet.inviteCodeOptional')}
-						</CaptionText>
+						<CaptionText>{t('editPubkySheet.inviteCodeOptional')}</CaptionText>
 						<InputItemComponent
 							testID="EditPubkyInviteCodeInput"
 							inputRef={signupTokenInputRef}
 							value={signupToken}
 							onChangeText={handleSignupTokenChange}
-							placeholder={i18n.t('editPubkySheet.inviteCodePlaceholder')}
+							placeholder={t('editPubkySheet.inviteCodePlaceholder')}
 							error=""
 							autoFocus={false}
 							onSubmitEditing={() => {
@@ -384,12 +388,12 @@ const EditPubky = ({
 					</>
 				)}
 
-				<CaptionText>{i18n.t('editPubky.homeserver')}</CaptionText>
+				<CaptionText testID="EditPubkyHomeserverLabel">{t('editPubky.homeserver')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyHomeserverInput"
 					value={homeServer}
 					onChangeText={setHomeServer}
-					placeholder={i18n.t('editPubky.homeserver')}
+					placeholder={t('editPubky.homeserver')}
 					error=""
 					autoFocus={false}
 					onSubmitEditing={handleHomeserverSubmit}
@@ -407,7 +411,7 @@ const EditPubky = ({
 			<View style={styles.buttonContainer}>
 				<Button text={leftButtonText} size="large" testID="EditPubkyLeftButton" onPress={leftButtonOnPress} />
 				<Button
-					text={i18n.t('common.save')}
+					text={t('common.save')}
 					size="large"
 					variant="secondary"
 					loading={loading}

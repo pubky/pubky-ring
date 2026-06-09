@@ -350,7 +350,11 @@
 		"failedToGenerateKeypair": "Failed to generate keypair",
 		"signupSuccessful": "Signup Successful",
 		"newPubkyCreated": "Your new Pubky has been created",
-		"failedToProcessSignup": "Failed to process signup"
+		"failedToProcessSignup": "Failed to process signup",
+		"invalidTitle": "Invite Code Invalid",
+		"invalidDescription": "Your new pubky could not be configured, because the invite code is not valid.",
+		"requiredDescription": "An invite code is required to use this homeserver.",
+		"alreadyUsedDescription": "Your new pubky could not be configured, because this invite code has already been used."
 	},
 	"invite": {
 		"unknownErrorProcessing": "Unknown error processing invite"

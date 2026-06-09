@@ -20,6 +20,7 @@ import { setLoadingModalError } from '../../store/slices/uiSlice';
 import { setStoredDispatch } from '../../store/shapes/ui';
 import i18n from '../../i18n';
 import { Dispatch } from 'redux';
+import { getSignupTokenErrorModalFields, LoadingErrorModalFields } from '../signupErrors';
 
 type InviteActionData = {
 	action: InputAction.Invite;
@@ -55,13 +56,18 @@ export const openCameraForRetry = (dispatch: Dispatch): void => {
 /**
  * Transitions the loading modal to error state via Redux
  */
-const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
+const showErrorState = (
+	errorMessage: string,
+	dispatch: Dispatch,
+	fields: LoadingErrorModalFields = {},
+): void => {
 	// Store dispatch for use in "Try again" button
 	setStoredDispatch(dispatch);
 	// Update Redux state to show error
 	dispatch(
 		setLoadingModalError({
 			isError: true,
+			...fields,
 			errorMessage: errorMessage,
 		}),
 	);
@@ -93,7 +99,7 @@ export const handleInviteAction = async (
 
 		if (createRes.isErr()) {
 			const errorMessage = getErrorMessage(createRes.error, i18n.t('errors.failedToCreatePubkyWithInvite'));
-			showErrorState(errorMessage, dispatch);
+			showErrorState(errorMessage, dispatch, getSignupTokenErrorModalFields(errorMessage));
 			await openXError(xCallback, 'INVITE_FAILED', errorMessage);
 			return err(errorMessage);
 		}

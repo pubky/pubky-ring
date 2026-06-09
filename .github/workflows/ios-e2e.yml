@@ -102,6 +102,9 @@ jobs:
         xcrun simctl boot "$SIM_UDID" || true
         xcrun simctl bootstatus "$SIM_UDID" -b
 
+    - name: Enable reduced motion
+      run: bash .maestro/scripts/prepare-device-motion.sh ios
+
     - name: Build iOS simulator app
       run: |
         cd ios

@@ -120,6 +120,18 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 		handleClose();
 	}, [xCallback, handleClose]);
 
+	useEffect(() => {
+		if (isAuthorized) {
+			return;
+		}
+
+		const timeout = setTimeout(handleDeny, CONFIRM_AUTH_TIMEOUT_MS);
+
+		return () => {
+			clearTimeout(timeout);
+		};
+	}, [handleDeny, isAuthorized]);
+
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
 		try {
@@ -180,12 +192,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 
 	const headerProgress =
 		Platform.OS === 'android' && !isAuthorized ? (
-			<CircularProgressBar
-				duration={CONFIRM_AUTH_TIMEOUT_MS}
-				size={20}
-				drain={true}
-				onComplete={handleDeny}
-			/>
+			<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={20} drain={true} />
 		) : undefined;
 
 	return (
@@ -258,7 +265,6 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 						unfilledColor="#333333"
 						height={5}
 						drain={true}
-						onComplete={handleDeny}
 					/>
 				)}
 			</View>

@@ -8,6 +8,8 @@ cd "$GITHUB_WORKSPACE/android"
 adb install -r app/build/outputs/apk/release/app-release.apk
 
 cd "$GITHUB_WORKSPACE"
+bash .maestro/scripts/prepare-device-motion.sh android
+
 INVITE_CODE="$(
   curl --fail --silent --show-error \
     -H "X-Admin-Password: $HOMESERVER_ADMIN_PASSWORD" \

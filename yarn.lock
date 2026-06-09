@@ -2180,10 +2180,10 @@
     deepmerge "^4.3.1"
     svgo "^3.0.2"
 
-"@synonymdev/react-native-pubky@0.11.3":
-  version "0.11.3"
-  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.11.3.tgz#e31e929ed03f4afdfa95bdb7c286d295b19dba8e"
-  integrity sha512-EdUggk00H7+oonqBsNy0zZOU1eBR7d5zAfgYy4GMfyd+LXAe/ksapJ0KHXPvUcF7wNd76LHIoG7ETlTkdvwpLA==
+"@synonymdev/react-native-pubky@0.11.4":
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.11.4.tgz#cac11d830e7d1b474aa3650166a5d8c9d3abc2ce"
+  integrity sha512-WscC5xx/y8D0ZbALnXoFF3Up1r3ZlIR8LHrd8AtBSJ9DvPVMJ+bNeSPo8EmeW/rKL8AEumbOPHCdK1j1kHRB+g==
   dependencies:
     "@synonymdev/result" "^0.0.2"
 

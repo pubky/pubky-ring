@@ -3,6 +3,8 @@ import { Dispatch } from 'redux';
 export interface LoadingModalState {
 	isError: boolean;
 	errorMessage: string;
+	errorModalTitle?: string;
+	errorDescription?: string;
 	onTryAgain: (() => void) | null;
 }
 
@@ -13,6 +15,8 @@ export interface UIState {
 export const initialLoadingModalState: LoadingModalState = {
 	isError: false,
 	errorMessage: '',
+	errorModalTitle: undefined,
+	errorDescription: undefined,
 	onTryAgain: null,
 };
 

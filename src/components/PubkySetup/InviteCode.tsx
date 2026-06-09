@@ -16,6 +16,7 @@ import Button from '../Button.tsx';
 import { CheckCircle, Gift } from '../../icons/index.ts';
 import { accentColors } from '../../theme/index.ts';
 import { TextInput } from '../../theme/components.ts';
+import { getSignupTokenErrorDescription } from '../../utils/signupErrors.ts';
 
 const InviteCode = ({
 	payload,
@@ -101,6 +102,9 @@ const InviteCode = ({
 					dispatch,
 				});
 				if (signupRes.isErr()) {
+					const signupErrorMessage =
+						getSignupTokenErrorDescription(signupRes.error.message) ?? i18n.t('pubkyErrors.invalidInviteCode');
+
 					// The pubky might be an import that can successfully login.
 					if (!storedPubkyData?.homeserver || storedPubkyData.homeserver === homeserver) {
 						// Attempt sign-in
@@ -111,12 +115,12 @@ const InviteCode = ({
 							dispatch,
 						});
 						if (signinRes.isErr()) {
-							setError(i18n.t('pubkyErrors.invalidInviteCode'));
+							setError(signupErrorMessage);
 							return;
 						}
 						signedIn = true;
 					} else {
-						setError(i18n.t('pubkyErrors.invalidInviteCode'));
+						setError(signupErrorMessage);
 						return;
 					}
 				}

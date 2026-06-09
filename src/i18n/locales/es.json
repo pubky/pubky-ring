@@ -352,7 +352,11 @@
 		"failedToGenerateKeypair": "Fallo al generar el par de claves",
 		"signupSuccessful": "Inscripción realizada con éxito",
 		"newPubkyCreated": "Su nuevo Pubky ha sido creado",
-		"failedToProcessSignup": "No se ha podido procesar la inscripción"
+		"failedToProcessSignup": "No se ha podido procesar la inscripción",
+		"invalidTitle": "Código de invitación no válido",
+		"invalidDescription": "Su nuevo pubky no se pudo configurar porque el código de invitación no es válido.",
+		"requiredDescription": "Se requiere un código de invitación para usar este homeserver.",
+		"alreadyUsedDescription": "Su nuevo pubky no se pudo configurar porque este código de invitación ya se ha usado."
 	},
 	"invite": {
 		"unknownErrorProcessing": "Unknown error processing invite"

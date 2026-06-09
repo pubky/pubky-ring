@@ -19,6 +19,7 @@ import { setStoredDispatch } from '../../store/shapes/ui';
 import { EBackupPreference } from '../../types/pubky';
 import { handleAuthAction } from './authAction';
 import { SHEET_ANIMATION_DELAY } from '../constants.ts';
+import { getSignupTokenErrorModalFields, LoadingErrorModalFields } from '../signupErrors';
 import i18n from '../../i18n';
 import { SheetManager } from 'react-native-actions-sheet';
 import { Dispatch } from 'redux';
@@ -27,7 +28,6 @@ import {
 	getPubkyKeyBySignupTokenFromStore,
 	getSignedUpPubkysFromStore,
 } from '../store-helpers';
-import { showPubkySelectionSheet } from '../../hooks/inputHandlerUtils';
 
 type SignupActionData = {
 	action: InputAction.Signup;
@@ -37,13 +37,18 @@ type SignupActionData = {
 /**
  * Transitions the loading modal to error state via Redux
  */
-const showErrorState = (errorMessage: string, dispatch: Dispatch): void => {
+const showErrorState = (
+	errorMessage: string,
+	dispatch: Dispatch,
+	fields: LoadingErrorModalFields = {},
+): void => {
 	// Store dispatch for use in "Try again" button
 	setStoredDispatch(dispatch);
 	// Update Redux state to show error
 	dispatch(
 		setLoadingModalError({
 			isError: true,
+			...fields,
 			errorMessage: errorMessage,
 		}),
 	);
@@ -184,7 +189,7 @@ export const handleSignupAction = async (
 
 			// No existing pubkys - show error as before
 			const errorMessage = getErrorMessage(signupRes.error, i18n.t('errors.signupFailedDescription'));
-			showErrorState(errorMessage, dispatch);
+			showErrorState(errorMessage, dispatch, getSignupTokenErrorModalFields(errorMessage));
 			await openXError(xCallback, 'SIGNUP_FAILED', errorMessage);
 			return err(errorMessage);
 		}

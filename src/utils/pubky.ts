@@ -162,7 +162,7 @@ export const createPubkyWithInviteCode = async (
 
 				if (signinRes.isErr()) {
 					console.error('Signin also failed:', signinRes.error);
-					return err(i18n.t('pubkyErrors.invalidInviteCode'));
+					return err(signupRes.error);
 				}
 				console.log('Signin succeeded');
 			} else {

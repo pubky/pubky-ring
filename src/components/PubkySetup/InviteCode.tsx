@@ -200,6 +200,7 @@ const InviteCode = ({
 					maxLength={14}
 					editable={!loading}
 					autoFocus={true}
+					returnKeyType="done"
 				/>
 				<Animated.View style={inputCheckmarkStyle}>
 					<CheckCircle colorName="pubkyRing" size={32} />

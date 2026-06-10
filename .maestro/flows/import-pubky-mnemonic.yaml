@@ -1,0 +1,64 @@
+appId: ${APP_ID}
+name: import-pubky-mnemonic
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- tapOn:
+    id: AddPubkyButton
+- waitForAnimationToEnd
+- assertVisible:
+    id: add-pubky-title
+- tapOn:
+    id: AddPubkyImport
+- waitForAnimationToEnd
+- assertVisible:
+    id: RecoveryPhraseButton
+- tapOn:
+    id: RecoveryPhraseButton
+- waitForAnimationToEnd
+- assertVisible:
+    id: MnemonicWordInput-1
+- tapOn:
+    id: MnemonicWordInput-1
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-2
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-3
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-4
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-5
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-6
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-7
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-8
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-9
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-10
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-11
+- inputText: abandon
+- tapOn:
+    id: MnemonicWordInput-12
+- inputText: about
+- pressKey: Enter
+- extendedWaitUntil:
+    visible:
+      id: import-success-title
+    timeout: 30000
+- tapOn:
+    id: ImportSuccessButton

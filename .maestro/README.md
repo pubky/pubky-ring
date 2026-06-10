@@ -1,6 +1,6 @@
 # Maestro E2E
 
-This is the iOS simulator E2E suite.
+This is the Maestro E2E suite for iOS simulators and Android emulators.
 
 ## Local iOS
 
@@ -18,8 +18,28 @@ The custom homeserver flow also requires:
 HOMESERVER_ADMIN_PASSWORD=... yarn e2e:ios
 ```
 
+## Local Android
+
+1. Install Maestro: `curl -Ls "https://get.maestro.mobile.dev" | bash`
+2. Build and install the Android app on an emulator.
+3. Run:
+
+```sh
+yarn e2e:android
+```
+
+The custom homeserver flow also requires:
+
+```sh
+HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
+```
+
+The local `yarn e2e:*` scripts prepare the target simulator/emulator for reduced motion before Maestro runs. The app respects that platform accessibility setting, so sheet and navigation animations are disabled without requiring a special e2e build.
+
 ## Continuous Integration
 
 `.github/workflows/ios-e2e.yml` builds the iOS simulator app, installs Maestro, boots an iPhone 17 simulator, installs the app, and runs all flows in `.maestro`.
 
-CI requests the staging invite code before invoking Maestro, so the homeserver admin password is not written into Maestro output.
+`.github/workflows/android-e2e.yml` builds the Android APK inside an emulator job, installs Maestro, installs the app, and runs the same flows in `.maestro`.
+
+CI requests the staging invite code before invoking Maestro, so the homeserver admin password is not written into Maestro output. Uploaded Maestro results can include the generated single-run invite code.

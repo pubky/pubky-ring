@@ -1,0 +1,28 @@
+# This helper flow clears the text from an input field reliably on both platforms.
+
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - longPressOn:
+          id: ${INPUT_ID}
+      - tapOn:
+          text: "Select All"
+          optional: true
+      - eraseText: 1
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - doubleTapOn:
+          id: ${INPUT_ID}
+          delay: 500
+      - tapOn:
+          text: "Cut"
+          optional: true
+      - tapOn:
+          text: "Select All"
+          optional: true
+      - eraseText: 1

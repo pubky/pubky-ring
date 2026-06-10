@@ -1,0 +1,99 @@
+name: Android E2E Tests
+
+on:
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      commit-sha:
+        description: 'Commit SHA to build/test (leave empty to use selected branch)'
+        required: false
+        type: string
+
+concurrency:
+  group: android-e2e-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  android-e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+      MAESTRO_CLI_NO_ANALYTICS: "true"
+      MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED: "true"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+      with:
+        ref: ${{ github.event.inputs.commit-sha || github.ref }}
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+        cache: 'yarn'
+
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Set up Gradle cache
+      uses: gradle/actions/setup-gradle@v5
+
+    - name: Install dependencies
+      run: yarn install --frozen-lockfile
+
+    - name: Enable KVM
+      run: |
+        echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+        sudo udevadm control --reload-rules
+        sudo udevadm trigger --name-match=kvm
+
+    - name: Install Maestro
+      run: |
+        curl -Ls "https://get.maestro.mobile.dev" | bash
+        echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
+
+    - name: Build app and run Maestro flows
+      uses: reactivecircus/android-emulator-runner@v2.35.0
+      env:
+        HOMESERVER_ADMIN_PASSWORD: ${{ secrets.HOMESERVER_ADMIN_PASSWORD }}
+      with:
+        api-level: 36
+        arch: x86_64
+        profile: pixel_7
+        ndk: 27.1.12297006
+        emulator-options: -no-window -gpu swangle -no-snapshot -noaudio -no-boot-anim -camera-back none -camera-front none
+        disable-animations: true
+        script: bash .github/scripts/android-e2e.sh
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: android-release-apk
+        path: android/app/build/outputs/apk/release/app-release.apk
+        if-no-files-found: ignore
+        retention-days: 7
+
+    - name: Upload Maestro results
+      uses: actions/upload-artifact@v7
+      if: always()
+      with:
+        name: android-e2e-results
+        path: .maestro/results/
+        if-no-files-found: ignore
+        retention-days: 7
+
+    - name: Upload Logcat
+      uses: actions/upload-artifact@v7
+      if: failure()
+      with:
+        name: android-e2e-logcat
+        path: android-logcat.txt
+        if-no-files-found: ignore
+        retention-days: 7

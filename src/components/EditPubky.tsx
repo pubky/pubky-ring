@@ -382,7 +382,7 @@ const EditPubky = ({
 					</>
 				)}
 
-				<CaptionText>{i18n.t('editPubky.homeserver')}</CaptionText>
+				<CaptionText testID="EditPubkyHomeserverLabel">{i18n.t('editPubky.homeserver')}</CaptionText>
 				<InputItemComponent
 					testID="EditPubkyHomeserverInput"
 					value={homeServer}

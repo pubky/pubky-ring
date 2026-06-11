@@ -20,5 +20,9 @@ appId: ${APP_ID}
           id: ${INPUT_ID}
           delay: 500
       - tapOn:
+          text: "Cut"
+          optional: true
+      - tapOn:
           text: "Select All"
+          optional: true
       - eraseText: 1

@@ -111,6 +111,7 @@ const PubkyBox = ({
 			style={styles.container}
 			disabled={disabled}
 			activeOpacity={0.7}
+			accessible={pubkyData.signedUp}
 			testID={pubkyBoxTestID}
 			onPress={handleOnPress}
 			onLongPress={onLongPress}
@@ -140,6 +141,7 @@ const PubkyBox = ({
 					variant="secondary"
 					loading={isQRLoading || loading}
 					icon={pubkyData.signedUp ? <Scan size={24} /> : <></>}
+					testID={`${pubkyBoxTestID}-ActionButton`}
 					onPress={qrPress}
 					onLongPress={onLongPress}
 				/>

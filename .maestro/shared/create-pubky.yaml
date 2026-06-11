@@ -1,0 +1,14 @@
+appId: ${APP_ID}
+---
+- tapOn:
+    id: AddPubkyButton
+- assertVisible:
+    id: add-pubky-title
+- assertVisible:
+    id: AddPubkyManual
+- tapOn:
+    id: AddPubkyManual
+- assertVisible:
+    id: NewPubkyContinueButton
+- tapOn:
+    id: NewPubkyContinueButton

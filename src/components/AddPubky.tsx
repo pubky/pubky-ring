@@ -185,13 +185,13 @@ const AddPubky = ({
 						onPress: () => onScanQrPress(i18n.t('home.scanQR')),
 					},
 					{
-						id: 'NewPubkyButton',
+						id: 'AddPubkyManual',
 						text: i18n.t('addPubky.newPubkyButton'),
 						icon: <Pencil />,
 						onPress: onCreatePubky,
 					},
 					{
-						id: 'ImportPubkyButton',
+						id: 'AddPubkyImport',
 						text: i18n.t('addPubky.importPubkyButton'),
 						icon: <Upload />,
 						onPress: onImportPubky,

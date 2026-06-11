@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+name: create-pubky-and-authorize
+env:
+  AUTH_URL: pubkyring://signin?relay=https%3A%2F%2Frelay.staging.pubky.app&secret=maestro-auth-secret&caps=%2Fpub%2Fpubky.app%2F%3Arw&x-source=Maestro
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- runFlow: ../shared/signup.yaml
+- runFlow: ../shared/authorize.yaml

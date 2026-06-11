@@ -7,7 +7,7 @@ import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData, showToast } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
-import { BodyMSBText, BodyMSpacedText, BodyMText, DisplayText } from '../theme/typography.ts';
+import { BodyMSBUnspacedText, BodyMSpacedText, BodyMText, DisplayText } from '../theme/typography.ts';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { ChevronRight } from '../icons/index.ts';
 import { appVersion } from '../utils/appInfo.ts';
@@ -75,9 +75,9 @@ const About = (): ReactElement => {
 				<TouchableOpacity style={styles.footer} activeOpacity={0.8} onPress={onFooterPress}>
 					<View>
 						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
-						<BodyMSBText colorName="pubkyApp" style={styles.footerText}>
+						<BodyMSBUnspacedText style={styles.footerText} colorName="pubkyApp">
 							{t('about.joinWithPubkyRing')}
-						</BodyMSBText>
+						</BodyMSBUnspacedText>
 					</View>
 					<ChevronRight colorName="textTertiary" />
 				</TouchableOpacity>
@@ -132,7 +132,6 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(255, 255, 255, 0.1)',
 	},
 	footerText: {
-		letterSpacing: 0,
 		marginTop: 12,
 	},
 	pubkyLogo: {

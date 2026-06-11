@@ -62,7 +62,6 @@ const createThemedToast = (
 						fontSize: 15,
 						fontWeight: '400',
 						lineHeight: 20,
-						letterSpacing: 0,
 						color: theme.colors.textSecondary,
 					},
 					// eslint-disable-next-line react-native/no-unused-styles

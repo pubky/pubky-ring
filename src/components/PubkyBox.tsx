@@ -5,7 +5,7 @@ import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { useQRScanner } from '../hooks/useQRScanner';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { BodySSBText, HeadingText } from '../theme/typography';
+import { BodySSBText, BodySSBUnspacedText, HeadingText } from '../theme/typography';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
 import Button from './Button.tsx';
@@ -37,9 +37,9 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 				</BodySSBText>
 				{!isBackedUp && (
 					<TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}>
-						<BodySSBText style={styles.backupText} colorName="pubkyRing">
+						<BodySSBUnspacedText colorName="pubkyRing">
 							{t('pubkyProfile.backupReminder')}
-						</BodySSBText>
+						</BodySSBUnspacedText>
 					</TouchableOpacity>
 				)}
 				{sessionsCount > 0 && (
@@ -197,9 +197,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		marginLeft: 8,
 		height: 20,
-	},
-	backupText: {
-		letterSpacing: 0,
 	},
 	button: {
 		marginTop: 24,

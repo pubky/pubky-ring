@@ -25,14 +25,12 @@ export const DisplayText = styled(BaseText)`
 	font-size: 48px;
 	font-weight: 700;
 	line-height: ${Platform.OS === 'ios' ? '48px' : '58px'};
-	letter-spacing: 0px;
 `;
 
 export const HeadingText = styled(BaseText)`
 	font-size: 26px;
 	font-weight: 300;
 	line-height: ${Platform.OS === 'ios' ? '26px' : '32px'};
-	letter-spacing: 0px;
 `;
 
 export const BodyMText = styled(BaseText).attrs<TypographyProps>(props => ({
@@ -41,7 +39,6 @@ export const BodyMText = styled(BaseText).attrs<TypographyProps>(props => ({
 	font-size: 17px;
 	font-weight: 400;
 	line-height: 22px;
-	letter-spacing: 0px;
 `;
 
 export const BodyMSpacedText = styled(BaseText)`
@@ -58,6 +55,12 @@ export const BodyMSBText = styled(BaseText)`
 	letter-spacing: 0.4px;
 `;
 
+export const BodyMSBUnspacedText = styled(BaseText)`
+	font-size: 17px;
+	font-weight: 600;
+	line-height: 22px;
+`;
+
 export const BodyMBText = styled(BaseText)`
 	font-size: 17px;
 	font-weight: 700;
@@ -69,7 +72,6 @@ export const BodySText = styled(BaseText)`
 	font-size: 15px;
 	font-weight: 400;
 	line-height: 20px;
-	letter-spacing: 0px;
 `;
 
 export const BodySSpacedText = styled(BaseText)`
@@ -92,6 +94,12 @@ export const BodySSBText = styled(BaseText)`
 	letter-spacing: 0.4px;
 `;
 
+export const BodySSBUnspacedText = styled(BaseText)`
+	font-size: 15px;
+	font-weight: 600;
+	line-height: 20px;
+`;
+
 export const CaptionText = styled(BaseText).attrs<TypographyProps>(props => ({
 	colorName: props.colorName ?? 'textTertiary',
 }))`
@@ -106,7 +114,6 @@ export const CaptionSBText = styled(BaseText)`
 	font-size: 13px;
 	font-weight: 600;
 	line-height: 18px;
-	letter-spacing: 0px;
 `;
 
 export const CaptionSBSpacedText = styled(BaseText)`

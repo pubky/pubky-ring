@@ -3,6 +3,7 @@ set -euo pipefail
 
 platform="${1:-}"
 flow="${2:-.maestro}"
+recovery_phrase="${RECOVERY_PHRASE:-abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about}"
 
 case "$platform" in
   android)
@@ -32,10 +33,12 @@ else
 fi
 
 bash .maestro/scripts/prepare-device-motion.sh "$platform"
+bash .maestro/scripts/set-system-clipboard.sh "$platform" "$recovery_phrase"
 
 MAESTRO_CLI_NO_ANALYTICS=true \
 MAESTRO_CLI_ANALYSIS_NOTIFICATION_DISABLED=true \
 maestro --platform="$platform" test \
   -e APP_ID="$app_id" \
   -e HOMESERVER_ADMIN_PASSWORD="${HOMESERVER_ADMIN_PASSWORD:-}" \
+  -e RECOVERY_PHRASE="$recovery_phrase" \
   "$flow_target"

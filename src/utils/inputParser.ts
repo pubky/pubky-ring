@@ -52,6 +52,13 @@ export interface AuthParams {
 	relay: string;
 	secret: string;
 	caps: string[];
+	// Auth intent from pubky 0.9.1 deep links. Legacy pubkyauth:///?... URLs
+	// are 'signin'. Well-formed signup links (with an hs param) are routed to
+	// InputAction.Signup instead, so 'signup' here means a malformed signup
+	// link that was missing its homeserver.
+	kind?: 'signin' | 'signup';
+	homeserver?: string;
+	signupToken?: string;
 	xCallback?: XCallbackParams;
 }
 
@@ -360,10 +367,12 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 
 	// 1. Check for signup deeplink
 	// Format: pubkyring://signup?... or pubkyauth://signup?...
+	// The signup token (st) is optional per the pubky 0.9.1 deep link spec —
+	// homeservers without invite requirements omit it.
 	if (urlWithoutProtocol.startsWith('signup?')) {
 		const queryString = urlWithoutProtocol.substring(7); // Remove "signup?"
 		const signupParams = parseSignupParams(queryString, rawEncodedQuery);
-		if (signupParams?.homeserver && signupParams?.inviteCode) {
+		if (signupParams?.homeserver) {
 			return {
 				action: InputAction.Signup,
 				data: { action: InputAction.Signup, params: signupParams },
@@ -403,14 +412,19 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		// (still-encoded) query so inner callback URLs round-trip verbatim.
 		const xCallback = extractXCallbackParams(rawEncodedQuery);
 
+		const details = authResult.value;
+
 		return {
 			action: InputAction.Auth,
 			data: {
 				action: InputAction.Auth,
 				params: {
-					relay: authResult.value.relay,
-					secret: authResult.value.secret,
-					caps: authResult.value.capabilities.map(c => `${c.path}:${c.permission}`),
+					relay: details.relay,
+					secret: details.secret,
+					caps: details.capabilities.map(c => `${c.path}:${c.permission}`),
+					kind: details.kind,
+					homeserver: details.homeserver,
+					signupToken: details.signup_token,
 					xCallback,
 				},
 				rawUrl: processedInput,

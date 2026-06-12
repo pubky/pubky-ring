@@ -494,7 +494,9 @@ export const signUpToHomeserver = async ({
 		}
 		secretKey = secretKeyRes.value.secretKey;
 	}
-	const signUpRes = await signUp(secretKey, homeserver, signupToken);
+	// Pass undefined rather than '' so the FFI receives no signup token
+	// (None) instead of an empty-string token.
+	const signUpRes = await signUp(secretKey, homeserver, signupToken || undefined);
 	if (signUpRes.isErr()) {
 		return err(getErrorMessage(signUpRes.error, i18n.t('errors.signupFailed')));
 	}

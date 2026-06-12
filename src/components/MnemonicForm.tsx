@@ -1,21 +1,22 @@
-import React, { memo, ReactElement, useCallback, useState, useRef, useMemo, useEffect } from 'react';
+import React, { memo, ReactElement, useCallback, useState, useRef, useMemo, useEffect, useId } from 'react';
 import {
 	StyleSheet,
 	TextInput as NativeTextInput,
 	TextInputKeyPressEvent,
 	Keyboard,
-	KeyboardEvent,
 	Platform,
 	View,
 	ScrollView,
 } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import * as bip39 from 'bip39';
 import { TextInput } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { Result } from '@synonymdev/result';
-import i18n from '../i18n';
 import { BodyMText } from '../theme/typography';
-import MnemonicSuggestionPill from './MnemonicSuggestionPill.tsx';
+import MnemonicSuggestionAccessory, {
+	getMnemonicSuggestionAccessoryId,
+} from './MnemonicSuggestionAccessory.tsx';
 import SafeAreaInset from './SafeAreaInset.tsx';
 
 interface MnemonicFormProps {
@@ -39,15 +40,14 @@ const cleanMnemonicWord = (word: string): string => {
 };
 
 const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement => {
+	const { t } = useTranslation();
 	const [mnemonicWords, setMnemonicWords] = useState<string[]>(createEmptyMnemonicWords);
 	const [validWords, setValidWords] = useState<boolean[]>(createValidWordState);
 	const [focused, setFocused] = useState<number | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
 	const inputRefs = useRef<(NativeTextInput | null)[]>(Array(MNEMONIC_WORD_COUNT).fill(null));
-	const suggestionRef = useRef<View | null>(null);
-	const keyboardScreenYRef = useRef<number | null>(null);
-	const androidSuggestionInsetRef = useRef<number>(0);
-	const [androidSuggestionInset, setAndroidSuggestionInset] = useState<number>(0);
+	const accessoryInstanceId = useId().replace(/:/g, '');
+	const keyboardVisible = focused !== null;
 
 	const suggestions = useMemo(() => {
 		if (focused === null) {
@@ -72,53 +72,6 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 
 		return (): void => clearTimeout(timer);
 	}, []);
-
-	const measureAndroidSuggestionInset = useCallback(() => {
-		const keyboardTop = keyboardScreenYRef.current;
-		if (Platform.OS !== 'android' || keyboardTop === null) {
-			return;
-		}
-
-		requestAnimationFrame(() => {
-			suggestionRef.current?.measureInWindow((_x, y, _width, height) => {
-				const naturalBottom = y + height + androidSuggestionInsetRef.current;
-				const nextInset = Math.max(0, naturalBottom - keyboardTop);
-				if (nextInset === androidSuggestionInsetRef.current) {
-					return;
-				}
-
-				androidSuggestionInsetRef.current = nextInset;
-				setAndroidSuggestionInset(nextInset);
-			});
-		});
-	}, []);
-
-	useEffect(() => {
-		if (Platform.OS !== 'android') {
-			return;
-		}
-
-		const showSubscription = Keyboard.addListener('keyboardDidShow', (event: KeyboardEvent) => {
-			keyboardScreenYRef.current = event.endCoordinates.screenY;
-			androidSuggestionInsetRef.current = 0;
-			setAndroidSuggestionInset(0);
-			measureAndroidSuggestionInset();
-		});
-		const hideSubscription = Keyboard.addListener('keyboardDidHide', () => {
-			keyboardScreenYRef.current = null;
-			androidSuggestionInsetRef.current = 0;
-			setAndroidSuggestionInset(0);
-		});
-
-		return (): void => {
-			showSubscription.remove();
-			hideSubscription.remove();
-		};
-	}, [measureAndroidSuggestionInset]);
-
-	useEffect(() => {
-		measureAndroidSuggestionInset();
-	}, [measureAndroidSuggestionInset, suggestions]);
 
 	// BIP39 word validation using official wordlist
 	const isValidWord = useCallback((word: string): boolean => {
@@ -151,6 +104,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				const words = text.split(' ').map(cleanMnemonicWord);
 				setMnemonicWords(words);
 				setValidWords(words.map(word => isValidWord(word)));
+				setFocused(null);
 				Keyboard.dismiss();
 				return;
 			}
@@ -284,6 +238,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 			if (focused < MNEMONIC_WORD_COUNT - 1) {
 				inputRefs.current[focused + 1]?.focus();
 			} else {
+				setFocused(null);
 				Keyboard.dismiss();
 			}
 		},
@@ -314,6 +269,7 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 				autoCorrect={false}
 				autoComplete="off"
 				textContentType="none"
+				inputAccessoryViewID={getMnemonicSuggestionAccessoryId(index, accessoryInstanceId)}
 				importantForAutofill="no"
 				spellCheck={false}
 				secureTextEntry={false}
@@ -330,34 +286,18 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 		);
 	};
 
-	const renderSuggestionContainer = (): ReactElement | null => {
-		if (suggestions.length === 0) {
-			return null;
-		}
-
-		return (
-			<View
-				ref={suggestionRef}
-				style={[styles.suggestionContainer, { marginBottom: androidSuggestionInset }]}
-				onLayout={measureAndroidSuggestionInset}
-			>
-				{suggestions.map(word => (
-					<MnemonicSuggestionPill key={word} word={word} onPress={handleSuggestionPress} />
-				))}
-			</View>
-		);
-	};
-
 	return (
 		<View style={styles.wrapper}>
 			<ScrollView
 				style={styles.container}
 				contentContainerStyle={styles.scrollContent}
+				automaticallyAdjustKeyboardInsets={Platform.OS === 'ios'}
 				keyboardShouldPersistTaps="handled"
+				keyboardDismissMode="interactive"
 				showsVerticalScrollIndicator={false}
 				bounces={false}
 			>
-				<BodyMText style={styles.message}>{i18n.t('addPubky.enterRecoveryWords')}</BodyMText>
+				<BodyMText style={styles.message}>{t('addPubky.enterRecoveryWords')}</BodyMText>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
 						<View style={styles.mnemonicColumn}>
@@ -371,46 +311,49 @@ const MnemonicForm = ({ onCancel, onImport }: MnemonicFormProps): ReactElement =
 					</View>
 				</View>
 
-				<View style={styles.buttonContainer}>
-					<Button
-						text={i18n.t('common.cancel')}
-						size="large"
-						testID="MnemonicCancelButton"
-						onPress={handleCancel}
-					/>
-					<Button
-						text={i18n.t('import.title')}
-						size="large"
-						variant="secondary"
-						loading={loading}
-						disabled={!enableImport}
-						testID="MnemonicImportButton"
-						onPress={handleImport}
-					/>
-				</View>
+				{!keyboardVisible && (
+					<>
+						<View style={styles.buttonContainer}>
+							<Button
+								text={t('common.cancel')}
+								size="large"
+								testID="MnemonicCancelButton"
+								onPress={handleCancel}
+							/>
+							<Button
+								text={t('import.title')}
+								size="large"
+								variant="secondary"
+								loading={loading}
+								disabled={!enableImport}
+								testID="MnemonicImportButton"
+								onPress={handleImport}
+							/>
+						</View>
 
-				<SafeAreaInset edge="bottom" />
+						<SafeAreaInset edge="bottom" />
+					</>
+				)}
 			</ScrollView>
 
-			{renderSuggestionContainer()}
+			<MnemonicSuggestionAccessory
+				suggestions={suggestions}
+				instanceId={accessoryInstanceId}
+				onSuggestionPress={handleSuggestionPress}
+			/>
 		</View>
 	);
 };
 
 const styles = StyleSheet.create({
 	wrapper: {
-		height: '100%',
-		zIndex: 1,
-		position: 'relative',
 		flex: 1,
-		justifyContent: 'space-between',
 	},
 	container: {
 		flex: 1,
 	},
 	scrollContent: {
 		flexGrow: 1,
-		justifyContent: 'space-between',
 	},
 	message: {
 		marginBottom: 24,
@@ -450,13 +393,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 16,
-	},
-	suggestionContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 8,
-		paddingVertical: 8,
-		zIndex: 2,
 	},
 });
 

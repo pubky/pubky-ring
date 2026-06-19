@@ -8,7 +8,7 @@ const TermsOfUseContent = (): ReactElement => {
 
 	return (
 		<>
-			<DisplayText style={styles.title} testID="TermsOfUseTitle">
+			<DisplayText style={styles.title} testID="TermsTitle">
 				{t('terms.title')}
 			</DisplayText>
 			<View style={styles.subtitleContainer}>

@@ -76,7 +76,7 @@ jobs:
       if: always()
       with:
         name: android-release-apk
-        path: android/app/build/outputs/apk/release/app-release.apk
+        path: android/app/build/outputs/apk/release/*.apk
         if-no-files-found: ignore
         retention-days: 7
 

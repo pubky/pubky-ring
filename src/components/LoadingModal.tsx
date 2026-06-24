@@ -63,6 +63,8 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 	// Get error state from Redux
 	const isError = loadingModalState.isError;
 	const errorMessage = loadingModalState.errorMessage;
+	const errorModalTitle = loadingModalState.errorModalTitle;
+	const errorDescription = loadingModalState.errorDescription;
 
 	// Reset loading modal state when component unmounts
 	useEffect(() => {
@@ -142,12 +144,16 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 	}));
 
 	const baseError = t('loading.errorDescription');
-	const modalTitle = isError ? t('loading.errorModalTitle') : (payloadModalTitle ?? t('loading.modalTitle'));
+	const modalTitle = isError
+		? (errorModalTitle ?? t('loading.errorModalTitle'))
+		: (payloadModalTitle ?? t('loading.modalTitle'));
 	const title = isError ? null : (payloadTitle ?? t('loading.title'));
 	const description = isError
-		? errorMessage
-			? `${baseError} ${errorMessage}`
-			: baseError
+		? errorDescription
+			? errorDescription
+			: errorMessage
+				? `${baseError} ${errorMessage}`
+				: baseError
 		: (payloadDescription ?? t('loading.description'));
 	const waitText = payloadWaitText ?? t('loading.pleaseWait');
 

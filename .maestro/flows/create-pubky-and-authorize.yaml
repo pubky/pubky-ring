@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 name: create-pubky-and-authorize
 env:
-  AUTH_URL: pubkyring://signin?relay=https%3A%2F%2Frelay.staging.pubky.app&secret=maestro-auth-secret&caps=%2Fpub%2Fpubky.app%2F%3Arw&x-source=Maestro
+  AUTH_URL: pubkyauth://signin?caps=/pub/pubky.app/:rw&relay=https://httprelay.staging.pubky.app/inbox&secret=okIbCVEBmJJGU56jO4WPmeghdyLNun6VOp_xV-B5Yx0
 ---
 - launchApp:
     clearState: true

@@ -4,7 +4,12 @@ import { RootState } from '../../types';
 import { truncateStr } from '../../utils/pubky.ts';
 
 /**
- * Get a specific pubky by its identifier
+ * Get a specific pubky by its identifier.
+ *
+ * The state map is typed as `{ [key: string]: Pubky }`, so this selector also
+ * returns `Pubky`. At runtime, a lookup for a missing or recently deleted pubky
+ * can still return `undefined`. Callers should only use this when the pubky is
+ * expected to exist, or handle the missing case explicitly at the call site.
  */
 export const getPubky = (state: RootState, pubky: string): Pubky => {
 	return state.pubky.pubkys[pubky];

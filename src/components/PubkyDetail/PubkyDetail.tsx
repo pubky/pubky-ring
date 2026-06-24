@@ -1,13 +1,12 @@
 import React, { memo, ReactElement, useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { deletePubky, signOutOfHomeserver } from '../../utils/pubky.ts';
+import { signOutOfHomeserver } from '../../utils/pubky.ts';
 import { useDispatch } from 'react-redux';
 import PubkyDetailCard from './PubkyDetailCard';
 import { PubkyData } from '../../navigation/types.ts';
 import { showToast } from '../../utils/helpers.ts';
 import { showBackupPrompt } from '../../utils/sheetHelpers.ts';
 import { SheetManager } from 'react-native-actions-sheet';
-import { useTypedNavigation } from '../../navigation/hooks';
 import i18n from '../../i18n';
 import { HEADER_HEIGHT } from '../AppHeader.tsx';
 
@@ -15,27 +14,13 @@ export interface PubkyDetailProps {
 	index: number;
 	pubkyData: PubkyData;
 	onQRPress: () => Promise<void>;
+	onDelete: () => Promise<void>;
 }
 
-export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
+export const PubkyDetail = ({ index, pubkyData, onQRPress, onDelete }: PubkyDetailProps): ReactElement => {
 	const { pubky, sessions } = pubkyData;
 	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 	const dispatch = useDispatch();
-	const navigation = useTypedNavigation();
-
-	const onDelete = useCallback(async () => {
-		const deleteRes = await deletePubky(pubky, dispatch);
-		if (deleteRes.isErr()) {
-			showToast({
-				type: 'error',
-				title: i18n.t('pubkyErrors.failedToDelete'),
-				description: i18n.t('pubkyErrors.deleteError'),
-			});
-			return;
-		}
-		SheetManager.hide('delete-pubky').then();
-		navigation.goBack();
-	}, [dispatch, navigation, pubky]);
 
 	const onSignOut = useCallback(
 		(sessionSecret: string) => {

@@ -1503,7 +1503,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-pubky (0.12.0):
+  - react-native-pubky (0.13.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2747,7 +2747,7 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
 SPEC CHECKSUMS:
-  BVLinearGradient: cb006ba232a1f3e4f341bb62c42d1098c284da70
+  BVLinearGradient: 880f91a7854faff2df62518f0281afb1c60d49a3
   FBLazyVector: 26fd21c75314e101f280d401e97f27d54f3f7064
   hermes-engine: 7c66bbc85e8d2fae57571be11c6b2e13eaff971b
   MMKVCore: 3d16ce9f7d411e135020915fde98a056859a1efa
@@ -2794,7 +2794,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: 1bf3e97a53c205191d34bc3a9bbcb57fbe1c77d5
   react-native-image-picker: 2146157d5d37a34c2063d1d2ed01081b56d0b87b
   react-native-netinfo: 723f91aea0c7b4a8701bc1ede8fc162c8b1cf282
-  react-native-pubky: 2475cd7547ca1d3b7755b77dcb99faef0fd81b6b
+  react-native-pubky: 052fd4a93b02de68bbbd91aa025428780b83eb2a
   react-native-safe-area-context: a2325922b8594ddd27f98fb13437aec126be2502
   react-native-skia: 9b9e78b85db9a89108afe1424d970386c64dfe97
   React-NativeModulesApple: 902ad35a8aa6c13085cad3a19f87c5c752aa0115

@@ -12,6 +12,13 @@ This is the Maestro E2E suite for iOS simulators and Android emulators.
 yarn e2e:ios
 ```
 
+To run a single flow locally, pass the flow name or path:
+
+```sh
+yarn e2e:ios onboarding
+yarn e2e:ios .maestro/flows/onboarding.yaml
+```
+
 The custom homeserver flow also requires:
 
 ```sh
@@ -28,11 +35,20 @@ HOMESERVER_ADMIN_PASSWORD=... yarn e2e:ios
 yarn e2e:android
 ```
 
+To run a single flow locally, pass the flow name or path:
+
+```sh
+yarn e2e:android onboarding
+yarn e2e:android .maestro/flows/onboarding.yaml
+```
+
 The custom homeserver flow also requires:
 
 ```sh
 HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
 ```
+
+The local `yarn e2e:*` scripts prepare the target simulator/emulator for reduced motion before Maestro runs. The app respects that platform accessibility setting, so sheet and navigation animations are disabled without requiring a special e2e build.
 
 ## Continuous Integration
 

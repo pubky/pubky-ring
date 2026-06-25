@@ -15,6 +15,7 @@ import { BodyMBText } from '../theme/typography.ts';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { HEADER_HEIGHT } from './AppHeader.tsx';
 import { ArrowLeft } from '../icons/index.ts';
+import { useReducedMotion } from '../hooks/useReducedMotion.ts';
 
 type GradientType = 'none' | 'brand' | 'danger';
 
@@ -56,6 +57,7 @@ const Sheet = ({
 	const { height: windowHeight } = useWindowDimensions();
 	const insets = useSafeAreaInsets();
 	const navigationAnimation = useSelector(getNavigationAnimation);
+	const reducedMotionEnabled = useReducedMotion();
 	const fullHeight = windowHeight - insets.top;
 	const sheetHeight = smallScreen ? fullHeight : fullHeight - HEADER_HEIGHT - 12;
 
@@ -65,7 +67,7 @@ const Sheet = ({
 			containerStyle={[styles.sheetContainer, { height: sheetHeight }]}
 			defaultOverlayOpacity={0.7}
 			gestureEnabled={true}
-			animated={true}
+			animated={!reducedMotionEnabled}
 			drawUnderStatusBar={false}
 			useBottomSafeAreaPadding={false}
 			keyboardHandlerEnabled={keyboardHandlerEnabled}

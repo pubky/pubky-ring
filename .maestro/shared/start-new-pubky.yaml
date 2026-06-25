@@ -1,8 +1,0 @@
-appId: ${APP_ID}
----
-- tapOn:
-    id: AddPubkyButton
-- tapOn:
-    id: NewPubkyButton
-- tapOn:
-    id: NewPubkyContinueButton

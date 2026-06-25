@@ -17,6 +17,7 @@ import TermsOfUse from '../screens/TermsOfUse.tsx';
 import About from '../screens/About.tsx';
 import { useTranslation } from 'react-i18next';
 import { NAVIGATION_ANIMATION_DURATION } from '../utils/constants';
+import { useReducedMotion } from '../hooks/useReducedMotion.ts';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -25,7 +26,9 @@ const RootNavigator = (): ReactElement => {
 	const showOnboarding = useSelector(getShowOnboarding);
 	const signedTermsOfUse = useSelector(getSignedTermsOfUse);
 	const navigationAnimation = useSelector(getNavigationAnimation);
+	const reducedMotionEnabled = useReducedMotion();
 	const theme = useTheme();
+
 	const initialRoute = useMemo(() => {
 		return !signedTermsOfUse ? 'TermsOfUse' : showOnboarding ? 'Onboarding' : 'Home';
 	}, [showOnboarding, signedTermsOfUse]);
@@ -49,8 +52,8 @@ const RootNavigator = (): ReactElement => {
 				initialRouteName={initialRoute}
 				screenOptions={{
 					headerShown: false,
-					animation: navigationAnimation,
-					animationDuration: NAVIGATION_ANIMATION_DURATION,
+					animation: reducedMotionEnabled ? 'none' : navigationAnimation,
+					animationDuration: reducedMotionEnabled ? 0 : NAVIGATION_ANIMATION_DURATION,
 				}}
 			>
 				<Stack.Screen

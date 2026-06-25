@@ -41,7 +41,7 @@ const OnboardingContent = (): ReactElement => {
 					<Button
 						text={t('onboarding.getStarted')}
 						size="large"
-						testID="OnboardingGetStartedButton"
+						testID="OnboardingContinueButton"
 						onPress={navigateHome}
 					/>
 				</View>

@@ -1,0 +1,24 @@
+appId: ${APP_ID}
+name: delete-pubky
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- extendedWaitUntil:
+    visible: 'pubky #1'
+    timeout: 30000
+- tapOn:
+    text: 'pubky #1'
+- assertVisible:
+    id: PubkyDetailDeleteButton
+- tapOn:
+    id: PubkyDetailDeleteButton
+- assertVisible:
+    id: delete-pubky-title
+- tapOn:
+    id: DeletePubkyConfirmButton
+- assertVisible:
+    id: AddPubkyButton
+- assertNotVisible: 'pubky #1'

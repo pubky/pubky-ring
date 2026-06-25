@@ -6,7 +6,12 @@ import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { showToast, sleep } from '../utils/helpers.ts';
 import PubkyCard from './PubkyCard.tsx';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, withSequence } from 'react-native-reanimated';
+import Animated, {
+	useAnimatedStyle,
+	useSharedValue,
+	withTiming,
+	withSequence,
+} from 'react-native-reanimated';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
 import { RootState } from '../store';
@@ -115,6 +120,18 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 		handleClose();
 	}, [xCallback, handleClose]);
 
+	useEffect(() => {
+		if (isAuthorized) {
+			return;
+		}
+
+		const timeout = setTimeout(handleDeny, CONFIRM_AUTH_TIMEOUT_MS);
+
+		return () => {
+			clearTimeout(timeout);
+		};
+	}, [handleDeny, isAuthorized]);
+
 	const handleAuth = useCallback(async () => {
 		setAuthorizing(true);
 		try {
@@ -175,18 +192,16 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 
 	const headerProgress =
 		Platform.OS === 'android' && !isAuthorized ? (
-			<CircularProgressBar
-				duration={CONFIRM_AUTH_TIMEOUT_MS}
-				size={20}
-				drain={true}
-				onComplete={handleDeny}
-			/>
+			<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={20} drain={true} />
 		) : undefined;
 
 	return (
 		<Sheet id="confirm-auth" title={titleText} showBottomSafeAreaInset={false} headerRight={headerProgress}>
 			<View style={styles.section}>
-				<CaptionText style={styles.sectionTitle}>
+				<CaptionText
+					style={styles.sectionTitle}
+					testID={isAuthorized ? 'ConfirmAuthGrantedPermissions' : 'ConfirmAuthRequestedPermissions'}
+				>
 					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
 				</CaptionText>
 
@@ -218,6 +233,7 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 							<Button
 								text={authorizing ? t('common.close') : t('common.cancel')}
 								size="large"
+								testID="ConfirmAuthCancelButton"
 								onPress={handleDeny}
 							/>
 							<Button
@@ -225,11 +241,18 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 								size="large"
 								variant="secondary"
 								disabled={authorizing}
+								testID="ConfirmAuthAuthorizeButton"
 								onPress={handleAuth}
 							/>
 						</>
 					) : (
-						<Button text={t('common.ok')} size="large" variant="secondary" onPress={handleClose} />
+						<Button
+							text={t('common.ok')}
+							size="large"
+							variant="secondary"
+							testID="ConfirmAuthSuccessButton"
+							onPress={handleClose}
+						/>
 					)}
 				</View>
 
@@ -242,7 +265,6 @@ const ConfirmAuth = ({ payload }: { payload: ConfirmAuthProps }): ReactElement =
 						unfilledColor="#333333"
 						height={5}
 						drain={true}
-						onComplete={handleDeny}
 					/>
 				)}
 			</View>

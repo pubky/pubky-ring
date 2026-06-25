@@ -5,9 +5,16 @@ trap 'adb logcat -d > "$GITHUB_WORKSPACE/android-logcat.txt" || true' EXIT
 
 cd "$GITHUB_WORKSPACE/android"
 ./gradlew :app:assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon
-adb install -r app/build/outputs/apk/release/app-release.apk
+APK_PATH="$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)"
+if [[ -z "$APK_PATH" ]]; then
+  echo "No release APK found in app/build/outputs/apk/release" >&2
+  exit 1
+fi
+adb install -r "$APK_PATH"
 
 cd "$GITHUB_WORKSPACE"
+bash .maestro/scripts/prepare-device-motion.sh android
+
 INVITE_CODE="$(
   curl --fail --silent --show-error \
     -H "X-Admin-Password: $HOMESERVER_ADMIN_PASSWORD" \

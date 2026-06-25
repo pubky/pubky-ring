@@ -1,0 +1,18 @@
+appId: ${APP_ID}
+---
+- runFlow:
+    file: open-link.yaml
+    env:
+      URL: ${AUTH_URL}
+- assertVisible:
+    id: confirm-auth-title
+- assertVisible:
+    id: ConfirmAuthRequestedPermissions
+- tapOn:
+    id: ConfirmAuthAuthorizeButton
+- extendedWaitUntil:
+    visible:
+      id: ConfirmAuthSuccessButton
+    timeout: 30000
+- tapOn:
+    id: ConfirmAuthSuccessButton

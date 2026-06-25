@@ -101,7 +101,7 @@ If you can't get this to work, see the [Troubleshooting](https://reactnative.dev
 
 # 🔐 Verifying Releases
 
-Ensure your `app-release.apk` is authentic and untampered by verifying its **GPG signature** and **SHA256 checksum**.
+Ensure the APK you downloaded is authentic and untampered by verifying its **GPG signature** and **SHA256 checksum**. Android releases may include a universal APK (for example, `app-universal-release.apk`) and/or ABI-specific APKs (for example, `app-arm64-v8a-release.apk`).
 
 ### 1. Import the Maintainer's GPG Key
 
@@ -112,7 +112,7 @@ gpg --import public-key.asc
 ### 2. Verify the APK Signature
 
 ```bash
-gpg --verify app-release.apk.asc app-release.apk
+gpg --verify <apk-file>.asc <apk-file>
 ```
 
 ### 3. Verify the Checksum
@@ -124,34 +124,4 @@ sha256sum -c SHA256SUMS
 
 ## E2E testing (Maestro)
 
-This project runs iOS simulator and Android emulator E2E tests with Maestro.
-
-### Prerequisites
-- Xcode with an iOS Simulator.
-- Android SDK with an emulator.
-- Maestro installed locally: `curl -Ls "https://get.maestro.mobile.dev" | bash`.
-- The app built and installed on the target simulator or emulator.
-
-### Run tests
-
-```bash
-yarn e2e:ios
-yarn e2e:android
-```
-
-### Environment overrides
-- `HOMESERVER_ADMIN_PASSWORD`: required for the custom homeserver flow.
-
-### Examples
-
-```bash
-# Run all iOS flows against the installed app
-yarn e2e:ios
-
-# Run all Android flows against the installed app
-yarn e2e:android
-
-# Run flows that request a staging invite code
-HOMESERVER_ADMIN_PASSWORD=... yarn e2e:ios
-HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
-```
+E2E tests use Maestro. See [`.maestro/README.md`](.maestro/README.md) for local and CI usage.

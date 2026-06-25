@@ -4,6 +4,7 @@ appId: ${APP_ID}
     id: TermsTitle
 - tapOn:
     id: TermsContinueButton
+    retryTapIfNoChange: true
 - tapOn:
     id: OnboardingContinueButton
 - assertVisible:

@@ -367,6 +367,13 @@
 		"partialSuccess": "Imported {{imported}} keys, {{failed}} failed",
 		"allFailed": "All keys failed to import"
 	},
+	"reuse": {
+		"title": "Reuse your pubky",
+		"description": "Found a pubky from Bitkit on this device. Add it to Pubky Ring to manage it here too.",
+		"source": "Saved in Bitkit",
+		"add": "Add",
+		"added": "Added"
+	},
 	"loading": {
 		"modalTitle": "Configuring Pubky",
 		"title": "Your keys,\nyour identity.",

@@ -18,6 +18,7 @@ import {
 	getAllKeychainKeys,
 	setSharedKeychainValue,
 	resetSharedKeychainValue,
+	getSharedKeychainValue,
 } from './keychain';
 import { Dispatch } from 'redux';
 import {
@@ -219,6 +220,48 @@ export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
 		}
 	}
 	return allKeys;
+};
+
+export interface ISharedIdentity {
+	pubky: string;
+	secretKey: string;
+	mnemonic: string;
+}
+
+/**
+ * Returns pubkys present in the shared keychain vault (e.g. created in Bitkit) that Ring does not yet
+ * know about. getAllGenericPasswordServices() spans every entitled access group and can't be scoped,
+ * so each candidate is read back from the shared group explicitly and deduped against knownPubkys.
+ */
+export const discoverSharedIdentities = async (knownPubkys: string[]): Promise<ISharedIdentity[]> => {
+	const known = new Set(knownPubkys);
+	let services: string[] = [];
+	try {
+		services = await getAllKeychainKeys();
+	} catch {
+		return [];
+	}
+
+	const candidates = Array.from(new Set(services)).filter(pubky => !known.has(pubky));
+	const identities: ISharedIdentity[] = [];
+
+	for (const pubky of candidates) {
+		const res = await getSharedKeychainValue({ key: pubky });
+		if (res.isErr()) {
+			continue;
+		}
+		try {
+			const parsed = JSON.parse(res.value) as IKeychainData;
+			if (parsed?.secretKey) {
+				identities.push({ pubky, secretKey: parsed.secretKey, mnemonic: parsed.mnemonic ?? '' });
+			}
+		} catch {
+			// Legacy raw-secret entries store the bare secret key with no JSON wrapper.
+			identities.push({ pubky, secretKey: res.value, mnemonic: '' });
+		}
+	}
+
+	return identities;
 };
 
 export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app'): Promise<Result<string>> => {

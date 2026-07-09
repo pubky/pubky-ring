@@ -11,6 +11,7 @@ import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-nativ
 import { getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
 import { usePubkyManagement } from '../hooks/usePubkyManagement';
+import { useSharedPubkyDiscovery } from '../hooks/useSharedPubkyDiscovery';
 import { showAddPubkySheet } from '../utils/sheetHelpers';
 import HomeHeader from '../components/HomeHeader';
 import { RootState } from '../store';
@@ -85,6 +86,7 @@ const HomeScreen = (): ReactElement => {
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
+	useSharedPubkyDiscovery();
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {

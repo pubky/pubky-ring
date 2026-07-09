@@ -1,7 +1,7 @@
 import { SheetManager } from 'react-native-actions-sheet';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
-import { getPubkySecretKey } from './pubky.ts';
+import { getPubkySecretKey, ISharedIdentity } from './pubky.ts';
 import { showToast, generateBackupFileName } from './helpers.ts';
 import { getBackupPreference, getStore } from './store-helpers.ts';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
@@ -16,6 +16,12 @@ export const showAddPubkySheet = (
 ): void => {
 	SheetManager.show('add-pubky', {
 		payload: { createPubky, importPubky },
+	});
+};
+
+export const showReuseSharedPubkySheet = ({ identities }: { identities: ISharedIdentity[] }): void => {
+	SheetManager.show('reuse-shared-pubky', {
+		payload: { identities },
 	});
 };
 

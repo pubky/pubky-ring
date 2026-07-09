@@ -11,7 +11,14 @@ import {
 	generateMnemonicPhraseAndKeypair,
 	mnemonicPhraseToKeypair,
 } from '@synonymdev/react-native-pubky';
-import { setKeychainValue, resetKeychainValue, getKeychainValue, getAllKeychainKeys } from './keychain';
+import {
+	setKeychainValue,
+	resetKeychainValue,
+	getKeychainValue,
+	getAllKeychainKeys,
+	setSharedKeychainValue,
+	resetSharedKeychainValue,
+} from './keychain';
 import { Dispatch } from 'redux';
 import {
 	addProcessing,
@@ -370,10 +377,11 @@ export const savePubky = async ({
 			secretKey,
 			mnemonic,
 		};
+		const serializedKeychainData = JSON.stringify(keychainData);
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
 		setKeychainValue({
 			key: pubky,
-			value: JSON.stringify(keychainData),
+			value: serializedKeychainData,
 		}).then(response => {
 			if (response.isErr()) {
 				console.error('Failed to save keychain value');
@@ -383,6 +391,13 @@ export const savePubky = async ({
 					description: response.error.message,
 				});
 				deletePubky(pubky, dispatch).then();
+			}
+		});
+		// Mirror into the shared vault so Bitkit can reuse this pubky. Best-effort — a failure
+		// here never affects Ring's own copy.
+		setSharedKeychainValue({ key: pubky, value: serializedKeychainData }).then(response => {
+			if (response.isErr()) {
+				console.warn('Failed to mirror pubky to shared vault');
 			}
 		});
 		return ok(pubky);
@@ -418,6 +433,8 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 				console.error('Failed to delete pubky from keychain');
 			}
 		});
+		// Also remove the shared-vault mirror so Bitkit stops offering it.
+		resetSharedKeychainValue({ key: pubky }).then();
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);

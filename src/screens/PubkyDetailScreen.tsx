@@ -35,13 +35,16 @@ const PubkyDetailScreen = (): ReactElement => {
 			title: data.signedUp ? t('common.edit') : t('pubky.setup'),
 			pubky,
 		});
-	}, [data, pubky]);
+	}, [data, pubky, t]);
 
 	const handleQRPress = useCallback(() => {
 		return showScanner({ pubky });
 	}, [showScanner, pubky]);
 
 	const handleDelete = useCallback(async () => {
+		await SheetManager.hide('delete-pubky');
+		navigation.goBack();
+
 		const deleteRes = await deletePubky(pubky, dispatch);
 		if (deleteRes.isErr()) {
 			showToast({
@@ -51,10 +54,7 @@ const PubkyDetailScreen = (): ReactElement => {
 			});
 			return;
 		}
-
-		await SheetManager.hide('delete-pubky');
-		navigation.goBack();
-	}, [dispatch, navigation, pubky]);
+	}, [dispatch, navigation, pubky, t]);
 
 	const rightButton = (
 		<HeaderNavButton onPressIn={onRightButtonPress}>

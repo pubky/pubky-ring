@@ -103,7 +103,8 @@ const InviteCode = ({
 				});
 				if (signupRes.isErr()) {
 					const signupErrorMessage =
-						getSignupTokenErrorDescription(signupRes.error.message) ?? i18n.t('pubkyErrors.invalidInviteCode');
+						getSignupTokenErrorDescription(signupRes.error.message) ??
+						i18n.t('pubkyErrors.invalidInviteCode');
 
 					// The pubky might be an import that can successfully login.
 					if (!storedPubkyData?.homeserver || storedPubkyData.homeserver === homeserver) {

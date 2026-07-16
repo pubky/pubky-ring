@@ -10,7 +10,6 @@ import Share, { ShareOptions } from 'react-native-share';
 import { SheetManager } from 'react-native-actions-sheet';
 import { EBackupPromptViewId } from './sheetHelpers.ts';
 
-
 const Buffer = require('buffer').Buffer;
 
 /**

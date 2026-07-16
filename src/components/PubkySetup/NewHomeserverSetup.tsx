@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { StyleSheet, Image, Platform, View } from 'react-native';
+import { StyleSheet, Image, View } from 'react-native';
 import { Trans, useTranslation } from 'react-i18next';
 import { SheetManager } from 'react-native-actions-sheet';
 import { TouchableOpacity } from '../../theme/components.ts';

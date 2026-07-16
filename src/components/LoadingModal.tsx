@@ -90,7 +90,6 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 			};
 		}
 
-		setShowErrorImage(false);
 		imageOpacity.value = withTiming(1, { duration: 300 });
 	}, [isError, imageOpacity]);
 
@@ -156,6 +155,7 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 				: baseError
 		: (payloadDescription ?? t('loading.description'));
 	const waitText = payloadWaitText ?? t('loading.pleaseWait');
+	const shouldShowErrorImage = isError && showErrorImage;
 
 	const handleCancel = useCallback(async () => {
 		dispatch(resetLoadingModal());
@@ -184,7 +184,7 @@ const LoadingModal = ({ payload }: { payload?: LoadingModalPayload }): ReactElem
 				{title && <DisplayText style={styles.headerText}>{title}</DisplayText>}
 				<BodyMText>{description}</BodyMText>
 				<View style={styles.imageContainer}>
-					{showErrorImage ? (
+					{shouldShowErrorImage ? (
 						<Animated.View style={keyAnimatedStyle}>
 							<Image source={require('../images/cross.png')} style={styles.image} resizeMode="contain" />
 						</Animated.View>

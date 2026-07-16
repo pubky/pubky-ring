@@ -29,11 +29,11 @@ const RecoveryPhrasePrompt = ({
 	const { confirmPubkyBackup } = usePubkyManagement();
 
 	const mnemonicWords = useMemo(() => {
-		if (!payload?.mnemonic) {
+		if (!payload.mnemonic) {
 			return [];
 		}
 		return payload.mnemonic.split(' ');
-	}, [payload?.mnemonic]);
+	}, [payload.mnemonic]);
 
 	const mnemonicWordsToShow = Platform.OS === 'android' && isBlurred ? dummyMnemonicWords : mnemonicWords;
 

@@ -43,7 +43,7 @@ export const PubkyProfile = memo(
 				title: t('clipboard.pubkyCopied'),
 				description: t('clipboard.pubkyCopiedDescription'),
 			});
-		}, [pubky]);
+		}, [pubky, t]);
 
 		const pubkyUri = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 		const pubkyName =

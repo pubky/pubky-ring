@@ -269,7 +269,6 @@ const styles = StyleSheet.create({
 	switchContainer: {
 		justifyContent: 'center',
 	},
-	// eslint-disable-next-line react-native/no-unused-styles
 	themeButton: {
 		flexDirection: 'row',
 		justifyContent: 'space-between',

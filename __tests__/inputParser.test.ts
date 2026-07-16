@@ -4,13 +4,13 @@ import { ok, err } from '@synonymdev/result';
 import * as Pubky from '@synonymdev/react-native-pubky';
 
 jest.mock('@synonymdev/react-native-pubky', () => {
-	const { err } = require('@synonymdev/result');
+	const { err: resultErr } = require('@synonymdev/result');
 
 	return {
 		__esModule: true,
-		parseAuthUrl: jest.fn(async () => err('not an auth url')),
-		mnemonicPhraseToKeypair: jest.fn(async () => err('not a mnemonic')),
-		getPublicKeyFromSecretKey: jest.fn(async () => err('not a secret key')),
+		parseAuthUrl: jest.fn(async () => resultErr('not an auth url')),
+		mnemonicPhraseToKeypair: jest.fn(async () => resultErr('not a mnemonic')),
+		getPublicKeyFromSecretKey: jest.fn(async () => resultErr('not a secret key')),
 	};
 });
 

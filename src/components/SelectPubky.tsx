@@ -18,13 +18,7 @@ type PubkyItem = { key: string; value: Pubky };
 const ROUTE_AFTER_CLOSE_DELAY = 100;
 
 const PubkyRow = memo(
-	({
-		item,
-		onPress,
-	}: {
-		item: PubkyItem;
-		onPress: (key: string) => void;
-	}): ReactElement => (
+	({ item, onPress }: { item: PubkyItem; onPress: (key: string) => void }): ReactElement => (
 		<TouchableOpacity style={styles.card} onPress={() => onPress(item.key)}>
 			<PubkyCard publicKey={item.key} name={item.value.name} showChevron={true} />
 		</TouchableOpacity>
@@ -79,9 +73,7 @@ const SelectPubky = ({
 	}, [pubkyArray.length, t]);
 
 	const renderItem = useCallback(
-		(info: { item: PubkyItem }): ReactElement => (
-			<PubkyRow item={info.item} onPress={onPubkyPress} />
-		),
+		(info: { item: PubkyItem }): ReactElement => <PubkyRow item={info.item} onPress={onPubkyPress} />,
 		[onPubkyPress],
 	);
 

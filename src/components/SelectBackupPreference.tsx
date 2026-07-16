@@ -16,9 +16,9 @@ const SelectBackupPreference = ({ payload: { pubky } }: { payload: { pubky: stri
 	const truncatedPubky = truncateStr(pubky).replace(/^pk:/, '');
 
 	const selectPreference = (backupPreference: EBackupPreference): void => {
-		void SheetManager.hide('select-backup-preference');
+		SheetManager.hide('select-backup-preference').then();
 		setTimeout(() => {
-			void showBackupPrompt({ pubky, backupPreference });
+			showBackupPrompt({ pubky, backupPreference });
 		}, BACKUP_PROMPT_DELAY);
 	};
 

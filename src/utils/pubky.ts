@@ -31,7 +31,13 @@ import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
 import { EBackupPreference, IKeychainData, TProfile } from '../types/pubky.ts';
-import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from './constants.ts';
+import {
+	DEFAULT_HOMESERVER,
+	PRODUCTION_APP_HOST,
+	PRODUCTION_HOMESERVER,
+	STAGING_APP_HOST,
+	STAGING_HOMESERVER,
+} from './constants.ts';
 import i18n from '../i18n';
 
 export const getSignupToken = ({
@@ -309,8 +315,8 @@ export const importPubky = async ({
 				dispatch(setHomeserver({ pubky, homeserver }));
 			}
 			// If they're using Synonym's default or staging homeserver, fetch the profile name and set it accordingly.
-			if (homeserver === DEFAULT_HOMESERVER || homeserver === STAGING_HOMESERVER) {
-				const app = homeserver === DEFAULT_HOMESERVER ? 'pubky.app' : 'staging.pubky.app';
+			if (homeserver === PRODUCTION_HOMESERVER || homeserver === STAGING_HOMESERVER) {
+				const app = homeserver === STAGING_HOMESERVER ? STAGING_APP_HOST : PRODUCTION_APP_HOST;
 				const profileInfo = await getProfileInfo(pubky, app);
 				if (profileInfo.isOk() && profileInfo.value.name) {
 					dispatch(

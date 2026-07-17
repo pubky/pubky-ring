@@ -55,7 +55,7 @@ export const PubkyProfile = memo(
 		return (
 			<Card style={[styles.container, containerStyle, style]}>
 				<View style={styles.avatarContainer}>
-					<ProfileAvatar pubky={pubky} size={96} />
+					<ProfileAvatar name={pubkyName} pubky={pubky} size={96} />
 				</View>
 
 				<HeadingText style={styles.nameText}>{pubkyName}</HeadingText>

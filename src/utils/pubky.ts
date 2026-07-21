@@ -52,6 +52,7 @@ import {
 } from './constants.ts';
 import { appApplicationId } from './appInfo.ts';
 import i18n from '../i18n';
+import { mirrorSharedPubky, removeSharedPubky } from './sharedPubky.ts';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
@@ -503,6 +504,7 @@ export const savePubky = async ({
 				deletePubky(pubky, dispatch).then();
 			}
 		});
+		mirrorSharedPubky(pubky, secretKey);
 		return ok(pubky);
 	} catch (e) {
 		console.error('Error saving pubky:', e);
@@ -541,6 +543,7 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 			.catch(error => {
 				console.error('Failed to delete pubky data from keychain', error);
 			});
+		removeSharedPubky(pubky);
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);

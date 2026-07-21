@@ -19,6 +19,7 @@ import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
+import { useSharedPubkyDiscovery } from '../hooks/useSharedPubkyDiscovery.ts';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -74,6 +75,8 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
+
+	useSharedPubkyDiscovery();
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {

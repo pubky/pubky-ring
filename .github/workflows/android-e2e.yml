@@ -75,8 +75,8 @@ jobs:
       uses: actions/upload-artifact@v7
       if: always()
       with:
-        name: android-release-apk
-        path: android/app/build/outputs/apk/release/*.apk
+        name: android-debug-apk
+        path: android/app/build/outputs/apk/debug/*.apk
         if-no-files-found: ignore
         retention-days: 7
 

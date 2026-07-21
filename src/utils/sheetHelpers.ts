@@ -5,10 +5,15 @@ import { getPubkySecretKey } from './pubky.ts';
 import { showToast, generateBackupFileName } from './helpers.ts';
 import { getBackupPreference, getStore } from './store-helpers.ts';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
+import { SharedPubkyIdentity } from './sharedPubky.ts';
 import { backupPubky } from './rnfs.ts';
 import { err, ok } from '@synonymdev/result';
 import i18n from '../i18n';
 import { SHEET_ANIMATION_DELAY, SHEET_TRANSITION_DELAY } from './constants';
+
+export const showReuseSharedPubkySheet = (identities: SharedPubkyIdentity[]): void => {
+	void SheetManager.show('reuse-shared-pubky', { payload: { identities } });
+};
 
 export const showAddPubkySheet = (
 	createPubky: () => void,

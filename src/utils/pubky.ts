@@ -39,6 +39,7 @@ import {
 	STAGING_HOMESERVER,
 } from './constants.ts';
 import i18n from '../i18n';
+import { mirrorSharedPubky, removeSharedPubky } from './sharedPubky.ts';
 
 export const getSignupToken = ({
 	homeserver,
@@ -391,6 +392,7 @@ export const savePubky = async ({
 				deletePubky(pubky, dispatch).then();
 			}
 		});
+		void mirrorSharedPubky(pubky, secretKey);
 		return ok(pubky);
 	} catch (e) {
 		console.error('Error saving pubky:', e);
@@ -424,6 +426,7 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 				console.error('Failed to delete pubky from keychain');
 			}
 		});
+		void removeSharedPubky(pubky);
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);

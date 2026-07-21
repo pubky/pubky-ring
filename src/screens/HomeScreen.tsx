@@ -22,6 +22,7 @@ import { Plus } from '../icons/index.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
+import { useSharedPubkyDiscovery } from '../hooks/useSharedPubkyDiscovery.ts';
 
 const REPLACEMENT_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=app.pubkyring';
 
@@ -91,6 +92,7 @@ const HomeScreen = (): ReactElement => {
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
+	useSharedPubkyDiscovery();
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {

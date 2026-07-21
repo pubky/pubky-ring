@@ -369,6 +369,13 @@
 		"partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
 		"allFailed": "Falló la importación de todas las claves"
 	},
+	"reuseSharedPubky": {
+		"title": "Reutiliza tu pubky",
+		"description": "Hay una pubky de Bitkit disponible en este dispositivo. Elige si quieres añadirla a Pubky Ring.",
+		"source": "Guardada en Bitkit",
+		"add": "Añadir",
+		"added": "Añadida"
+	},
 	"loading": {
 		"modalTitle": "Configuración de Pubky",
 		"title": "Sus llaves,\nsu identidad.",

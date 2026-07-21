@@ -377,19 +377,20 @@
 		"tryAgain": "Try again"
 	},
 	"legacySunset": {
-		"bannerTitle": "A new Pubky Ring is available",
-		"bannerDescription": "Move your identities to the new Android app.",
-		"dismiss": "Dismiss until next launch",
-		"sheetTitle": "Move to the new Ring",
-		"introduction": "Pubky Ring has moved to a new, securely signed Android app so it can work more seamlessly with Bitkit.",
-		"keepInstalledTitle": "Keep this app installed for now",
-		"keepInstalledDescription": "Do not uninstall this version until you have imported and checked every identity in the new app.",
-		"transferTitle": "Move each identity",
-		"transferStepOne": "1. In this app, open each identity and export an encrypted .pkarr backup or its recovery phrase.",
-		"transferStepTwo": "2. Install the new Pubky Ring from Google Play or download the signed APK.",
-		"transferStepThree": "3. Import every identity in the new app, then confirm each one is available before removing this app.",
-		"openPlayStore": "Get it on Google Play",
-		"downloadApk": "Download signed APK",
+		"bannerTitle": "Important Pubky Ring Update!",
+		"bannerDescription": "Move your pubky identities to the new app.",
+		"sheetTitle": "Pubky Ring Update",
+		"headline": "Safe migration",
+		"introduction": "Move your identities to the new Pubky Ring.",
+		"keepInstalledTitle": "Keep this version on your phone",
+		"keepInstalledDescription": "Do not remove this app until every identity is imported and tested in the new Android app.",
+		"transferStep1": "Backup each pubky identity from this app",
+		"transferStep2": "Install new Pubky Ring (Google Play or APK)",
+		"transferStep3": "Import each pubky in the new app",
+		"transferStep4": "Test authorization for each pubky",
+		"transferStep5": "Only then remove this app",
+		"openPlayStore": "Google Play",
+		"downloadApk": "Signed APK",
 		"viewRelease": "View release and verification files"
 	}
 }

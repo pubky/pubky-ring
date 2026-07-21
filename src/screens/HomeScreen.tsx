@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -88,7 +88,6 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
-	const [isSunsetBannerDismissed, setIsSunsetBannerDismissed] = useState(false);
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
@@ -143,10 +142,7 @@ const HomeScreen = (): ReactElement => {
 		});
 	}, [replacementRelease]);
 
-	const sunsetBanner =
-		replacementRelease && !isSunsetBannerDismissed ? (
-			<LegacySunsetBanner onPress={showSunsetDetails} onDismiss={() => setIsSunsetBannerDismissed(true)} />
-		) : null;
+	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
 
 	if (!hasPubkys) {
 		return (

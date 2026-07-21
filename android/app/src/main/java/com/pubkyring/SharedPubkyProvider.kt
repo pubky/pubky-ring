@@ -30,7 +30,9 @@ class SharedPubkyProvider : ContentProvider() {
   }
 
   private fun enforceCaller() {
-    if (callingPackage != BITKIT_PACKAGE) {
+    val allowedPackages =
+      if (BuildConfig.DEBUG) DEBUG_BITKIT_PACKAGES else setOf(PRODUCTION_BITKIT_PACKAGE)
+    if (callingPackage !in allowedPackages) {
       throw SecurityException("Caller is not authorized")
     }
   }
@@ -52,7 +54,9 @@ class SharedPubkyProvider : ContentProvider() {
   companion object {
     private const val AUTHORITY = "app.pubkyring.sharedpubky"
     private const val IDENTITIES_PATH = "/identities"
-    private const val BITKIT_PACKAGE = "to.bitkit"
+    private const val PRODUCTION_BITKIT_PACKAGE = "to.bitkit"
+    private val DEBUG_BITKIT_PACKAGES =
+      setOf(PRODUCTION_BITKIT_PACKAGE, "to.bitkit.dev", "to.bitkit.tnet")
     private val COLUMNS = arrayOf("pubky", "secret_key")
   }
 }

@@ -119,7 +119,7 @@ const PubkyBox = ({
 			<Card>
 				<View style={styles.content}>
 					<View style={styles.profileImage}>
-						<ProfileAvatar pubky={publicKey} size={48} />
+						<ProfileAvatar name={pubkyData.name || pubkyName} pubky={publicKey} size={48} />
 					</View>
 
 					<PubkyInfo

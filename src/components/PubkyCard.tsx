@@ -24,7 +24,7 @@ const PubkyCard = ({
 	return (
 		<Card style={[styles.container, style]}>
 			<View style={styles.avatar}>
-				<ProfileAvatar pubky={publicKey} size={avatarSize} />
+				<ProfileAvatar name={name} pubky={publicKey} size={avatarSize} />
 			</View>
 
 			<View style={styles.text}>

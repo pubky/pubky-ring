@@ -14,6 +14,7 @@ const RecoveryPhrasePrompt = lazy(() => import('../components/RecoveryPhraseProm
 const ImportSuccessSheet = lazy(() => import('../components/ImportSuccessSheet.tsx'));
 const MigrateModal = lazy(() => import('../components/MigrateModal.tsx'));
 const LoadingModal = lazy(() => import('../components/LoadingModal.tsx'));
+const LegacySunsetSheet = lazy(() => import('../components/LegacySunsetSheet.tsx'));
 
 registerSheet('camera', QRScanner as any);
 registerSheet('backup-prompt', BackupPrompt as any);
@@ -28,6 +29,7 @@ registerSheet('select-pubky', SelectPubky as any);
 registerSheet('import-success', ImportSuccessSheet as any);
 registerSheet('migrate-modal', MigrateModal as any);
 registerSheet('loading', LoadingModal as any);
+registerSheet('legacy-sunset', LegacySunsetSheet as any);
 
 declare module 'react-native-actions-sheet' {
 	interface Sheets {
@@ -56,6 +58,9 @@ declare module 'react-native-actions-sheet' {
 				waitText?: string;
 				onClose?: () => void;
 			};
+		}>;
+		'legacy-sunset': SheetDefinition<{
+			payload: import('../components/LegacySunsetSheet.tsx').LegacySunsetSheetPayload;
 		}>;
 	}
 }

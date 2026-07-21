@@ -257,7 +257,7 @@ export const isSmallScreen = (): boolean => {
 
 export const parseInviteCode = (url: string): string | null => {
 	// Pattern to match invite codes in format XXXX-XXXX-XXXX
-	const invitePattern = /\invite\/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/;
+	const invitePattern = /invite\/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/;
 	const match = url.match(invitePattern);
 	return match ? match[1] : null;
 };

@@ -18,7 +18,7 @@ const StyledBaseToast = styled(BaseToast)<ThemedProps>`
 
 const StyledErrorToast = styled(ErrorToast)<ThemedProps>`
 	background-color: ${(props: ThemedProps): string => props.theme.colors.toastBackground};
-	border-left-color: #FF0000;
+	border-left-color: #ff0000;
 `;
 
 const StyledSuccessToast = styled(SuccessToast)<ThemedProps>`
@@ -47,7 +47,6 @@ const createThemedToast = (
 		const styles = useMemo(
 			() =>
 				StyleSheet.create({
-					// eslint-disable-next-line react-native/no-unused-styles
 					text1: {
 						fontFamily,
 						fontSize: 15,
@@ -56,7 +55,6 @@ const createThemedToast = (
 						letterSpacing: 0.4,
 						color: theme.colors.textPrimary,
 					},
-					// eslint-disable-next-line react-native/no-unused-styles
 					text2: {
 						fontFamily,
 						fontSize: 15,
@@ -64,11 +62,9 @@ const createThemedToast = (
 						lineHeight: 20,
 						color: theme.colors.textSecondary,
 					},
-					// eslint-disable-next-line react-native/no-unused-styles
 					contentContainer: {
 						paddingHorizontal: 15,
 					},
-					// eslint-disable-next-line react-native/no-unused-styles
 					toastContainer: {
 						marginTop: insets.top,
 					},

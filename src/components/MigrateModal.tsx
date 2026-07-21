@@ -8,7 +8,7 @@ import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 import AnimatedQR from './AnimatedQR.tsx';
 import { useTranslation } from 'react-i18next';
-import { BodyMText, BodyMSBText, BodySText, CaptionText } from '../theme/typography';
+import { BodyMText, BodyMSBText, CaptionText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
 
 const MigrateModal = (): ReactElement => {

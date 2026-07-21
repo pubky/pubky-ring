@@ -47,12 +47,7 @@ const ImportSuccessSheet = ({ payload }: { payload: ImportSuccessSheetPayload })
 			<BodyMText style={styles.message}>{description}</BodyMText>
 			<PubkyProfile pubky={pubky} pubkyData={data} />
 			<View style={styles.footer}>
-				<Button
-					text={t('common.continue')}
-					size="large"
-					testID="ImportSuccessButton"
-					onPress={onContinue}
-				/>
+				<Button text={t('common.continue')} size="large" testID="ImportSuccessButton" onPress={onContinue} />
 			</View>
 		</Sheet>
 	);

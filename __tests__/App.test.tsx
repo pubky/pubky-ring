@@ -3,24 +3,25 @@ import React, { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react-native';
 
 jest.mock('react-native-actions-sheet', () => {
-	const React = require('react');
+	const ReactMock = require('react');
 
 	return {
 		__esModule: true,
-		default: ({ children }: { children?: ReactNode }) => React.createElement(React.Fragment, null, children),
+		default: ({ children }: { children?: ReactNode }) =>
+			ReactMock.createElement(ReactMock.Fragment, null, children),
 		registerSheet: jest.fn(),
 		SheetProvider: ({ children }: { children?: ReactNode }) =>
-			React.createElement(React.Fragment, null, children),
+			ReactMock.createElement(ReactMock.Fragment, null, children),
 	};
 });
 
 jest.mock('../src/navigation/RootNavigator.tsx', () => {
-	const React = require('react');
+	const ReactMock = require('react');
 	const { View } = require('react-native');
 
 	return {
 		__esModule: true,
-		default: () => React.createElement(View, { testID: 'RootNavigator' }),
+		default: () => ReactMock.createElement(View, { testID: 'RootNavigator' }),
 	};
 });
 
@@ -73,25 +74,25 @@ jest.mock('@react-native-community/netinfo', () => ({
 }));
 
 jest.mock('react-native-toast-message', () => {
-	const React = require('react');
+	const ReactMock = require('react');
 	const { View } = require('react-native');
 
 	return {
 		__esModule: true,
-		default: () => React.createElement(View, { testID: 'Toast' }),
+		default: () => ReactMock.createElement(View, { testID: 'Toast' }),
 	};
 });
 
 jest.mock('react-native-safe-area-context', () => {
-	const React = require('react');
+	const ReactMock = require('react');
 	const { View } = require('react-native');
 
 	return {
 		__esModule: true,
 		SafeAreaProvider: ({ children }: { children?: ReactNode }) =>
-			React.createElement(View, null, children),
+			ReactMock.createElement(View, null, children),
 		SafeAreaView: ({ children }: { children?: ReactNode }) =>
-			React.createElement(View, null, children),
+			ReactMock.createElement(View, null, children),
 		useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 		useSafeAreaFrame: () => ({ x: 0, y: 0, width: 320, height: 640 }),
 	};

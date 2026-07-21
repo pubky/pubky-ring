@@ -7,7 +7,7 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { SheetManager } from 'react-native-actions-sheet';
-import { InputAction, InviteParams, parseInput, XCallbackParams } from '../inputParser';
+import { InputAction, InviteParams, parseInput } from '../inputParser';
 import { ActionContext, routeInput } from '../inputRouter';
 import { createPubkyWithInviteCode } from '../pubky';
 import { getErrorMessage } from '../errorHandler';

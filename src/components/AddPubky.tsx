@@ -223,7 +223,7 @@ const AddPubky = ({
 			default:
 				return [];
 		}
-	}, [currentScreen, onCreatePubky, onImportPubky, onMnemonicPhrase, onUploadFile]);
+	}, [currentScreen, onCreatePubky, onImportPubky, onMnemonicPhrase, onScanQrPress, onUploadFile]);
 
 	const isMnemonicForm = currentScreen === 'mnemonic-form';
 	const shouldShowBackButton = currentScreen !== 'main';
@@ -266,17 +266,7 @@ const AddPubky = ({
 				</View>
 			</>
 		);
-	}, [
-		currentScreen,
-		getButtonConfig,
-		getHeaderText,
-		getImage,
-		importPubky,
-		isMnemonicForm,
-		messageText,
-		onMnemonicCancel,
-		onScanQrPress,
-	]);
+	}, [getButtonConfig, getHeaderText, getImage, importPubky, isMnemonicForm, messageText, onMnemonicCancel]);
 
 	return (
 		<Sheet

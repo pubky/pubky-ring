@@ -1,7 +1,5 @@
 import React, { memo, ReactElement, useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
-import { signOutOfHomeserver } from '../../utils/pubky.ts';
-import { useDispatch } from 'react-redux';
 import PubkyDetailCard from './PubkyDetailCard';
 import { PubkyData } from '../../navigation/types.ts';
 import { showToast } from '../../utils/helpers.ts';
@@ -18,16 +16,8 @@ export interface PubkyDetailProps {
 }
 
 export const PubkyDetail = ({ index, pubkyData, onQRPress, onDelete }: PubkyDetailProps): ReactElement => {
-	const { pubky, sessions } = pubkyData;
+	const { pubky } = pubkyData;
 	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
-	const dispatch = useDispatch();
-
-	const onSignOut = useCallback(
-		(sessionSecret: string) => {
-			signOutOfHomeserver(pubky, sessionSecret, dispatch);
-		},
-		[dispatch, pubky],
-	);
 
 	const handleDelete = useCallback(() => {
 		SheetManager.show('delete-pubky', {
@@ -50,8 +40,6 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress, onDelete }: PubkyDeta
 			});
 		}
 	}, [pubky, pubkyData.backupPreference]);
-
-	const sessionsLength = sessions?.length > 0 ? sessions.length : 1;
 
 	return (
 		<ScrollView

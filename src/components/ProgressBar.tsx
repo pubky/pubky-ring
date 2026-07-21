@@ -99,16 +99,7 @@ const ProgressBar = ({
 	}, [shouldRender, dimensions.width, duration, delayStart, fadeIn, fadeInDuration, drain]);
 
 	if (!shouldRender) {
-		return (
-			<View
-				style={[
-					styles.container,
-					//eslint-disable-next-line react-native/no-inline-styles
-					{ height, borderRadius },
-					style,
-				]}
-			/>
-		);
+		return <View style={[styles.container, { height, borderRadius }, style]} />;
 	}
 
 	return (
@@ -133,7 +124,6 @@ const ProgressBar = ({
 				<Animated.View
 					style={[
 						styles.progress,
-						//eslint-disable-next-line react-native/no-inline-styles
 						{ height: dimensions.height, borderRadius, backgroundColor: filledColor },
 						progressStyle,
 					]}

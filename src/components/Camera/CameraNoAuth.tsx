@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next';
 import Button from '../Button.tsx';
 import { Gear, Lock } from '../../icons/index.ts';
 import { BodyMBText, BodySText } from '../../theme/typography.ts';
-import { showToast } from '../../utils/helpers.ts';
 
 const CameraNoAuth = (): ReactElement => {
 	const { t } = useTranslation();

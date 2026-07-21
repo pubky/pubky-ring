@@ -39,30 +39,28 @@ interface Capability {
 	permission: string;
 }
 
-const Permission = memo(
-	({ capability, isAuthorized }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
-		const { t } = useTranslation();
-		const hasReadPermission = capability.permission.includes('r');
-		const hasWritePermission = capability.permission.includes('w');
-		return (
-			<View style={styles.permissionRow}>
-				<Folder size={16} />
-				<View style={styles.pathContainer}>
-					<CaptionSBText>{capability.path}</CaptionSBText>
-				</View>
-				<View style={styles.permissionsContainer}>
-					{hasReadPermission && (
-						<CaptionText>
-							{t('common.read')}
-							{hasWritePermission ? ',' : ''}
-						</CaptionText>
-					)}
-					{hasWritePermission && <CaptionText>{t('common.write')}</CaptionText>}
-				</View>
+const Permission = memo(({ capability }: { capability: Capability; isAuthorized: boolean }): ReactElement => {
+	const { t } = useTranslation();
+	const hasReadPermission = capability.permission.includes('r');
+	const hasWritePermission = capability.permission.includes('w');
+	return (
+		<View style={styles.permissionRow}>
+			<Folder size={16} />
+			<View style={styles.pathContainer}>
+				<CaptionSBText>{capability.path}</CaptionSBText>
 			</View>
-		);
-	},
-);
+			<View style={styles.permissionsContainer}>
+				{hasReadPermission && (
+					<CaptionText>
+						{t('common.read')}
+						{hasWritePermission ? ',' : ''}
+					</CaptionText>
+				)}
+				{hasWritePermission && <CaptionText>{t('common.write')}</CaptionText>}
+			</View>
+		</View>
+	);
+});
 
 const FADE_DURATION = 100;
 const CONFIRM_AUTH_TIMEOUT_MS = 60000;

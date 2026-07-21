@@ -99,7 +99,7 @@ const PubkyBox = ({
 				data: pubkyData,
 			});
 		}
-	}, [handleQRAction, pubky, pubkyData]);
+	}, [handleQRAction, pubky, pubkyData, t]);
 
 	// testId example: PubkyBox-StagingTestPubky-0
 	const sanitizedName = pubkyData.name.replace(/[^a-zA-Z0-9]/g, '');

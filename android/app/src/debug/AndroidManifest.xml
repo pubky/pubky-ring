@@ -1,3 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <package android:name="to.bitkit.dev" />
+        <package android:name="to.bitkit.tnet" />
+    </queries>
     <application android:usesCleartextTraffic="true" />
 </manifest>

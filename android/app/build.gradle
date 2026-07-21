@@ -2,6 +2,14 @@ apply plugin: "com.android.application"
 apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
+def bitkitSigningProperties = [
+    'BITKIT_APP_SIGNING_STORE_FILE',
+    'BITKIT_APP_SIGNING_STORE_PASSWORD',
+    'BITKIT_APP_SIGNING_KEY_ALIAS',
+    'BITKIT_APP_SIGNING_KEY_PASSWORD',
+]
+def hasBitkitAppSigning = bitkitSigningProperties.every { project.hasProperty(it) }
+
 /**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
@@ -102,11 +110,11 @@ android {
     }
 
     defaultConfig {
-        applicationId "to.pubky.ring"
+        applicationId "app.pubkyring"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "1.17"
+        versionCode 1
+        versionName "2.0"
     }
 
     signingConfigs {
@@ -117,11 +125,11 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE')) {
-                storeFile file(PUBKYRING_UPLOAD_STORE_FILE)
-                storePassword PUBKYRING_UPLOAD_STORE_PASSWORD
-                keyAlias PUBKYRING_UPLOAD_KEY_ALIAS
-                keyPassword PUBKYRING_UPLOAD_KEY_PASSWORD
+            if (hasBitkitAppSigning) {
+                storeFile file(BITKIT_APP_SIGNING_STORE_FILE)
+                storePassword BITKIT_APP_SIGNING_STORE_PASSWORD
+                keyAlias BITKIT_APP_SIGNING_KEY_ALIAS
+                keyPassword BITKIT_APP_SIGNING_KEY_PASSWORD
             }
         }
     }
@@ -130,9 +138,11 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug
+            // Never fall back to the debug certificate: an unsigned release is safer than an
+            // installable build that cannot use Bitkit's signature-protected provider.
+            if (hasBitkitAppSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }

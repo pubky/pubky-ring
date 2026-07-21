@@ -34,31 +34,43 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun discover(promise: Promise) {
     val results = Arguments.createArray()
-    try {
-      reactContext.contentResolver
-        .query(Uri.parse(BITKIT_URI), COLUMNS, null, null, null)
-        ?.use { cursor ->
-          val pubkyIndex = cursor.getColumnIndexOrThrow("pubky")
-          val secretKeyIndex = cursor.getColumnIndexOrThrow("secret_key")
-          while (cursor.moveToNext()) {
-            val pubky = cursor.getString(pubkyIndex) ?: continue
-            val secretKey = cursor.getString(secretKeyIndex) ?: continue
-            results.pushMap(
-              Arguments.createMap().apply {
-                putString("pubky", pubky)
-                putString("secretKey", secretKey)
-              },
-            )
+    val seen = mutableSetOf<String>()
+    val authorities =
+      if (BuildConfig.DEBUG) BITKIT_AUTHORITIES else listOf(PRODUCTION_BITKIT_AUTHORITY)
+    authorities.forEach { authority ->
+      try {
+        reactContext.contentResolver
+          .query(Uri.parse("content://$authority/identities"), COLUMNS, null, null, null)
+          ?.use { cursor ->
+            val pubkyIndex = cursor.getColumnIndexOrThrow("pubky")
+            val secretKeyIndex = cursor.getColumnIndexOrThrow("secret_key")
+            while (cursor.moveToNext()) {
+              val pubky = cursor.getString(pubkyIndex) ?: continue
+              val secretKey = cursor.getString(secretKeyIndex) ?: continue
+              if (!seen.add(pubky)) continue
+              results.pushMap(
+                Arguments.createMap().apply {
+                  putString("pubky", pubky)
+                  putString("secretKey", secretKey)
+                },
+              )
+            }
           }
-        }
-    } catch (_: Exception) {
-      // A missing provider or denied permission means Bitkit has no discoverable identities.
+      } catch (_: Exception) {
+        // A missing provider or denied permission must not hide results from another authority.
+      }
     }
     promise.resolve(results)
   }
 
   companion object {
-    private const val BITKIT_URI = "content://to.bitkit.sharedpubky/identities"
+    private const val PRODUCTION_BITKIT_AUTHORITY = "to.bitkit.sharedpubky"
+    private val BITKIT_AUTHORITIES =
+      listOf(
+        PRODUCTION_BITKIT_AUTHORITY,
+        "to.bitkit.dev.sharedpubky",
+        "to.bitkit.tnet.sharedpubky",
+      )
     private val COLUMNS = arrayOf("pubky", "secret_key")
   }
 }

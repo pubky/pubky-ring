@@ -1,10 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Platform } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
+import { appApplicationId } from '../utils/appInfo.ts';
 
 export const REPLACEMENT_APK_PREFIX = 'pubky-ring-app.pubkyring-';
-export const REPLACEMENT_RELEASE_ENDPOINT =
-	'https://api.github.com/repos/pubky/pubky-ring/releases/latest';
+export const REPLACEMENT_RELEASE_ENDPOINT = 'https://api.github.com/repos/pubky/pubky-ring/releases/latest';
+export const LEGACY_ANDROID_APPLICATION_ID = 'to.pubky.ring';
 
 const ACTIVATION_STORAGE_KEY = 'legacySunset.replacementRelease';
 const REQUEST_TIMEOUT_MS = 5_000;
@@ -90,9 +91,7 @@ export function parseReplacementRelease(payload: unknown): ReplacementRelease | 
 			isAllowedApkUrl(asset.browser_download_url),
 	);
 
-	return apk
-		? { releaseUrl: release.html_url, apkUrl: apk.browser_download_url as string }
-		: null;
+	return apk ? { releaseUrl: release.html_url, apkUrl: apk.browser_download_url as string } : null;
 }
 
 function readPersistedActivation(targetStorage: ReplacementReleaseStorage): ReplacementRelease | null {
@@ -141,7 +140,9 @@ export async function detectReplacementRelease(
 }
 
 export function getReplacementReleaseForSession(): Promise<ReplacementRelease | null> {
-	if (Platform.OS !== 'android') return Promise.resolve(null);
+	if (Platform.OS !== 'android' || appApplicationId !== LEGACY_ANDROID_APPLICATION_ID) {
+		return Promise.resolve(null);
+	}
 	if (!sessionCheck) sessionCheck = detectReplacementRelease();
 	return sessionCheck;
 }

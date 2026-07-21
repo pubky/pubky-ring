@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -19,6 +19,11 @@ import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { Plus } from '../icons/index.ts';
+import { SheetManager } from 'react-native-actions-sheet';
+import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
+import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
+
+const REPLACEMENT_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=app.pubkyring';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -82,6 +87,8 @@ const HomeScreen = (): ReactElement => {
 	const dispatch = useDispatch();
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
+	const { replacementRelease } = useReplacementRelease();
+	const [isSunsetBannerDismissed, setIsSunsetBannerDismissed] = useState(false);
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
@@ -125,10 +132,27 @@ const HomeScreen = (): ReactElement => {
 		return pubkyArray.length > 0;
 	}, [pubkyArray.length]);
 
+	const showSunsetDetails = useCallback(() => {
+		if (!replacementRelease) return;
+		void SheetManager.show('legacy-sunset', {
+			payload: {
+				playStoreUrl: REPLACEMENT_PLAY_STORE_URL,
+				apkUrl: replacementRelease.apkUrl,
+				releaseUrl: replacementRelease.releaseUrl,
+			},
+		});
+	}, [replacementRelease]);
+
+	const sunsetBanner =
+		replacementRelease && !isSunsetBannerDismissed ? (
+			<LegacySunsetBanner onPress={showSunsetDetails} onDismiss={() => setIsSunsetBannerDismissed(true)} />
+		) : null;
+
 	if (!hasPubkys) {
 		return (
 			<SafeAreaView style={styles.container} edges={['bottom']}>
 				<HomeHeader />
+				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
 				<EmptyState />
 				<View>
 					<ListFooter createPubky={createPubky} importPubky={importPubky} />
@@ -145,6 +169,7 @@ const HomeScreen = (): ReactElement => {
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
+				ListHeaderComponent={sunsetBanner}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
@@ -172,6 +197,9 @@ const styles = StyleSheet.create({
 	listContent: {
 		paddingTop: HEADER_HEIGHT + 24,
 		paddingBottom: 180,
+	},
+	emptyStateBanner: {
+		paddingTop: HEADER_HEIGHT + 16,
 	},
 	fadeOverlay: {
 		position: 'absolute',

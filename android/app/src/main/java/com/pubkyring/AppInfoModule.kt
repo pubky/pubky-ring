@@ -10,5 +10,6 @@ class AppInfoModule(reactContext: ReactApplicationContext) : ReactContextBaseJav
       mapOf(
           "version" to BuildConfig.VERSION_NAME,
           "buildNumber" to BuildConfig.VERSION_CODE.toString(),
+          "applicationId" to BuildConfig.APPLICATION_ID,
       )
 }

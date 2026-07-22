@@ -377,5 +377,22 @@
 		"errorModalTitle": "Configuración fallida",
 		"errorDescription": "Su nuevo pubky no ha podido ser configurado.",
 		"tryAgain": "Inténtelo de nuevo"
+	},
+	"legacySunset": {
+		"bannerTitle": "¡Actualización importante de Pubky Ring!",
+		"bannerDescription": "Traslada tus identidades pubky a la nueva aplicación.",
+		"sheetTitle": "Actualización de Pubky Ring",
+		"headline": "Migración segura",
+		"introduction": "Traslada tus identidades al nuevo Pubky Ring.",
+		"keepInstalledTitle": "Mantén esta versión en tu teléfono",
+		"keepInstalledDescription": "No elimines esta aplicación hasta que hayas importado y probado todas las identidades en la nueva aplicación para Android.",
+		"transferStep1": "Haz una copia de seguridad de cada identidad pubky de esta aplicación",
+		"transferStep2": "Instala el nuevo Pubky Ring (Google Play o APK)",
+		"transferStep3": "Importa cada pubky en la nueva aplicación",
+		"transferStep4": "Prueba la autorización de cada pubky",
+		"transferStep5": "Solo entonces elimina esta aplicación",
+		"openPlayStore": "Google Play",
+		"downloadApk": "APK firmado",
+		"viewRelease": "Ver la versión y los archivos de verificación"
 	}
 }

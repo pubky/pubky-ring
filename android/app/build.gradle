@@ -105,8 +105,8 @@ android {
         applicationId "to.pubky.ring"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 22
-        versionName "1.15"
+        versionCode 24
+        versionName "1.17"
     }
 
     signingConfigs {

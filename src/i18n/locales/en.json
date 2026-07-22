@@ -375,5 +375,22 @@
 		"errorModalTitle": "Configuration Failed",
 		"errorDescription": "Your new pubky could not be configured.",
 		"tryAgain": "Try again"
+	},
+	"legacySunset": {
+		"bannerTitle": "Important Pubky Ring Update!",
+		"bannerDescription": "Move your pubky identities to the new app.",
+		"sheetTitle": "Pubky Ring Update",
+		"headline": "Safe migration",
+		"introduction": "Move your identities to the new Pubky Ring.",
+		"keepInstalledTitle": "Keep this version on your phone",
+		"keepInstalledDescription": "Do not remove this app until every identity is imported and tested in the new Android app.",
+		"transferStep1": "Backup each pubky identity from this app",
+		"transferStep2": "Install new Pubky Ring (Google Play or APK)",
+		"transferStep3": "Import each pubky in the new app",
+		"transferStep4": "Test authorization for each pubky",
+		"transferStep5": "Only then remove this app",
+		"openPlayStore": "Google Play",
+		"downloadApk": "Signed APK",
+		"viewRelease": "View release and verification files"
 	}
 }

@@ -1,8 +1,9 @@
 appId: ${APP_ID}
 ---
 - openLink: ${URL}
+- waitForAnimationToEnd
 - runFlow:
     when:
-      visible: Open in.*Pubky Ring.*
+      visible: Open
     commands:
       - tapOn: Open

@@ -1,0 +1,7 @@
+appId: ${APP_ID}
+---
+- tapOn:
+    id: ${INPUT_ID}
+- longPressOn:
+    id: ${INPUT_ID}
+- tapOn: Paste

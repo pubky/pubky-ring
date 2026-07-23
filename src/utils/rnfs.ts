@@ -9,6 +9,7 @@ import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import Share, { ShareOptions } from 'react-native-share';
 import { SheetManager } from 'react-native-actions-sheet';
 import { EBackupPromptViewId } from './sheetHelpers.ts';
+import { NAVIGATION_ANIMATION_DURATION } from './constants.ts';
 
 const Buffer = require('buffer').Buffer;
 
@@ -162,6 +163,13 @@ export const showImportPrompt = ({
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
 	return new Promise(resolve => {
+		let completedResult: Result<string> | undefined;
+		const resolveAfterClose = (result: Result<string>): void => {
+			completedResult = result;
+			SheetManager.hide('backup-prompt').then(() => resolve(result));
+			setTimeout(() => resolve(result), NAVIGATION_ANIMATION_DURATION);
+		};
+
 		SheetManager.show('backup-prompt', {
 			payload: {
 				fileName,
@@ -187,9 +195,9 @@ export const showImportPrompt = ({
 						}
 
 						console.log('Successfully imported pubky from encrypted file');
-						SheetManager.hide('backup-prompt').then();
-						resolve(ok(pubky.value));
-						return ok(pubky.value);
+						const result = ok(pubky.value);
+						resolveAfterClose(result);
+						return result;
 					} catch (error) {
 						const errorMsg = `Unexpected error during import: ${JSON.stringify(error)}`;
 						resolve(err(errorMsg));
@@ -197,7 +205,7 @@ export const showImportPrompt = ({
 					}
 				},
 				onClose: () => {
-					resolve(err(''));
+					resolve(completedResult ?? err(''));
 				},
 			},
 		});
@@ -226,6 +234,7 @@ export async function backupPubky(content: string, filename: string): Promise<Re
 				subject: 'Pubky Backup',
 				title: 'Save Pubky Backup',
 				failOnCancel: false,
+				saveToFiles: true,
 			};
 
 			// Show the native share sheet

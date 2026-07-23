@@ -177,6 +177,7 @@ const BackupPrompt = ({
 					textContentType="none"
 					importantForAutofill="no"
 					spellCheck={false}
+					testID="BackupFilePassphraseInput"
 				/>
 				<TouchableOpacity
 					style={styles.eyeButton}
@@ -192,12 +193,18 @@ const BackupPrompt = ({
 				</BodySText>
 			) : null}
 			<View style={styles.buttonContainer}>
-				<Button text={loading ? t('common.close') : t('common.cancel')} size="large" onPress={handleClose} />
+				<Button
+					text={loading ? t('common.close') : t('common.cancel')}
+					size="large"
+					testID="BackupFileCancelButton"
+					onPress={handleClose}
+				/>
 				<Button
 					text={submitButtonText}
 					size="large"
 					variant="secondary"
 					loading={loading}
+					testID="BackupFileSubmitButton"
 					onPress={handleSubmit}
 					disabled={
 						!password.trim() ||

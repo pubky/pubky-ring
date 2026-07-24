@@ -15,6 +15,7 @@ const ImportSuccessSheet = lazy(() => import('../components/ImportSuccessSheet.t
 const MigrateModal = lazy(() => import('../components/MigrateModal.tsx'));
 const LoadingModal = lazy(() => import('../components/LoadingModal.tsx'));
 const LegacySunsetSheet = lazy(() => import('../components/LegacySunsetSheet.tsx'));
+const ReuseSharedPubky = lazy(() => import('../components/ReuseSharedPubky.tsx'));
 
 registerSheet('camera', QRScanner as any);
 registerSheet('backup-prompt', BackupPrompt as any);
@@ -30,6 +31,7 @@ registerSheet('import-success', ImportSuccessSheet as any);
 registerSheet('migrate-modal', MigrateModal as any);
 registerSheet('loading', LoadingModal as any);
 registerSheet('legacy-sunset', LegacySunsetSheet as any);
+registerSheet('reuse-shared-pubky', ReuseSharedPubky as any);
 
 declare module 'react-native-actions-sheet' {
 	interface Sheets {
@@ -61,6 +63,9 @@ declare module 'react-native-actions-sheet' {
 		}>;
 		'legacy-sunset': SheetDefinition<{
 			payload: import('../components/LegacySunsetSheet.tsx').LegacySunsetSheetPayload;
+		}>;
+		'reuse-shared-pubky': SheetDefinition<{
+			payload: { identities: import('../utils/sharedPubky.ts').SharedPubkyIdentity[] };
 		}>;
 	}
 }

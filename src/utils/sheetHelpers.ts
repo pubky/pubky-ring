@@ -5,17 +5,23 @@ import { getPubkySecretKey } from './pubky.ts';
 import { showToast, generateBackupFileName } from './helpers.ts';
 import { getBackupPreference, getStore } from './store-helpers.ts';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
+import { SharedPubkyIdentity } from './sharedPubky.ts';
 import { backupPubky } from './rnfs.ts';
 import { err, ok } from '@synonymdev/result';
 import i18n from '../i18n';
 import { SHEET_ANIMATION_DELAY, SHEET_TRANSITION_DELAY } from './constants';
 
+export const showReuseSharedPubkySheet = (identities: SharedPubkyIdentity[]): void => {
+	void SheetManager.show('reuse-shared-pubky', { payload: { identities } });
+};
+
 export const showAddPubkySheet = (
 	createPubky: () => void,
 	importPubky: (mnemonic?: string) => Promise<any>,
+	sharedIdentities: SharedPubkyIdentity[] = [],
 ): void => {
 	SheetManager.show('add-pubky', {
-		payload: { createPubky, importPubky },
+		payload: { createPubky, importPubky, sharedIdentities },
 	});
 };
 
@@ -104,6 +110,14 @@ export const showBackupPrompt = async ({
 	backupPreference?: EBackupPreference;
 	onComplete?: () => void;
 }): Promise<void> => {
+	if (getStore().pubky.pubkys[pubky]?.sourceApp === 'to.bitkit') {
+		showToast({
+			type: 'error',
+			title: i18n.t('common.error'),
+			description: i18n.t('reuseSharedPubky.source'),
+		});
+		return;
+	}
 	if (backupPreference === EBackupPreference.unknown) {
 		SheetManager.show('select-backup-preference', {
 			payload: {

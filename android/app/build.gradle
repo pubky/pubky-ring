@@ -3,6 +3,101 @@ apply plugin: "org.jetbrains.kotlin.android"
 apply plugin: "com.facebook.react"
 
 /**
+ * Ring's signature-protected provider is deliberately shared only with Bitkit.
+ *
+ * Production release builds therefore require all five properties below. The certificate
+ * fingerprint is the SHA-256 fingerprint of Bitkit's production app-signing certificate
+ * (64 hex characters, with or without colons), not an upload certificate unless they are
+ * the same certificate. Keep these values in protected Gradle/CI configuration.
+ */
+def bitkitSigningProperties = [
+    'BITKIT_APP_SIGNING_STORE_FILE',
+    'BITKIT_APP_SIGNING_STORE_PASSWORD',
+    'BITKIT_APP_SIGNING_KEY_ALIAS',
+    'BITKIT_APP_SIGNING_KEY_PASSWORD',
+    'BITKIT_APP_SIGNING_CERT_SHA256',
+]
+def bitkitSigningValue = { String propertyName ->
+    def value = project.findProperty(propertyName)
+    value == null ? null : value.toString().trim()
+}
+def missingBitkitSigningProperties = bitkitSigningProperties.findAll {
+    !bitkitSigningValue(it)
+}
+def hasBitkitAppSigning = missingBitkitSigningProperties.isEmpty()
+
+def normalizeCertificateSha256 = { Object value, String propertyName ->
+    def raw = value == null ? "" : value.toString().trim()
+    def compact = raw.replace(":", "").replaceAll(/\s/, "").toUpperCase(Locale.ROOT)
+    if (!(compact ==~ /[0-9A-F]{64}/)) {
+        throw new GradleException(
+            "${propertyName} must be a SHA-256 certificate fingerprint " +
+            "(64 hexadecimal characters, with or without colons)."
+        )
+    }
+    compact
+}
+
+def formatCertificateSha256 = { String compact ->
+    compact.replaceAll(/([0-9A-F]{2})(?=[0-9A-F])/, '$1:')
+}
+
+def sha256OfCertificate = { java.security.cert.Certificate certificate ->
+    java.security.MessageDigest.getInstance("SHA-256")
+        .digest(certificate.encoded)
+        .collect { String.format("%02X", it & 0xff) }
+        .join()
+}
+
+def certificateSha256FromKeystore = {
+    File storeFile,
+    String storePassword,
+    String keyAlias,
+    String keyPassword ->
+
+    // JKS and PKCS12 cover Android's supported release-keystore formats. Trying both
+    // avoids trusting a filename extension to select the parser.
+    for (String storeType : ["JKS", "PKCS12"]) {
+        try {
+            def keyStore = java.security.KeyStore.getInstance(storeType)
+            storeFile.withInputStream {
+                keyStore.load(it, storePassword.toCharArray())
+            }
+            if (!keyStore.isKeyEntry(keyAlias)) {
+                continue
+            }
+
+            // Reading the private key validates the alias-specific key password as well.
+            if (keyStore.getKey(keyAlias, keyPassword.toCharArray()) == null) {
+                continue
+            }
+            def certificate = keyStore.getCertificate(keyAlias)
+            if (certificate != null) {
+                return sha256OfCertificate(certificate)
+            }
+        } catch (Exception ignored) {
+            // Try the other supported keystore format, then report a non-secret-bearing error.
+        }
+    }
+
+    throw new GradleException(
+        "Unable to read BITKIT_APP_SIGNING_KEY_ALIAS from BITKIT_APP_SIGNING_STORE_FILE " +
+        "using the supplied store/key passwords (supported formats: JKS and PKCS12)."
+    )
+}
+
+// This is the checked-in Android debug certificate. Debug builds continue to use it, but a
+// copied/renamed debug keystore must never satisfy the production release gate.
+def androidDebugCertificateSha256 =
+    "FAC61745DC0903786FB9EDE62A962B399F7348F0BB6F899B8332667591033B9C"
+
+// Debug builds normally load JavaScript from Metro. CI E2E runs without Metro, so its
+// explicit Gradle property asks the React plugin to package the bundle into the debug APK.
+def bundleDebugJs = project.findProperty("RING_BUNDLE_DEBUG_JS")
+    ?.toString()
+    ?.toBoolean() ?: false
+
+/**
  * This is the configuration block to customize your React Native Android app.
  * By default you don't need to apply any configuration, just uncomment the lines you need.
  */
@@ -21,7 +116,7 @@ react {
     //   The list of variants to that are debuggable. For those we're going to
     //   skip the bundling of the JS bundle and the assets. Default is "debug", "debugOptimized".
     //   If you add flavors like lite, prod, etc. you'll have to list your debuggableVariants.
-    // debuggableVariants = ["liteDebug", "liteDebugOptimized", "prodDebug", "prodDebugOptimized"]
+    debuggableVariants = bundleDebugJs ? [] : ["debug", "debugOptimized"]
 
     /* Bundling */
     //   A list containing the node command and its flags. Default is just 'node'.
@@ -102,11 +197,11 @@ android {
     }
 
     defaultConfig {
-        applicationId "to.pubky.ring"
+        applicationId "app.pubkyring"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "1.17"
+        versionCode 1
+        versionName "2.0"
     }
 
     signingConfigs {
@@ -117,11 +212,11 @@ android {
             keyPassword 'android'
         }
         release {
-            if (project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE')) {
-                storeFile file(PUBKYRING_UPLOAD_STORE_FILE)
-                storePassword PUBKYRING_UPLOAD_STORE_PASSWORD
-                keyAlias PUBKYRING_UPLOAD_KEY_ALIAS
-                keyPassword PUBKYRING_UPLOAD_KEY_PASSWORD
+            if (hasBitkitAppSigning) {
+                storeFile file(bitkitSigningValue('BITKIT_APP_SIGNING_STORE_FILE'))
+                storePassword bitkitSigningValue('BITKIT_APP_SIGNING_STORE_PASSWORD')
+                keyAlias bitkitSigningValue('BITKIT_APP_SIGNING_KEY_ALIAS')
+                keyPassword bitkitSigningValue('BITKIT_APP_SIGNING_KEY_PASSWORD')
             }
         }
     }
@@ -130,11 +225,301 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug
+            // Never fall back to the debug certificate: an unsigned release is safer than an
+            // installable build that cannot use Bitkit's signature-protected provider.
+            if (hasBitkitAppSigning) {
+                signingConfig signingConfigs.release
+            }
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+def verifyBitkitReleaseSigning = tasks.register("verifyBitkitReleaseSigning") {
+    group = "verification"
+    description = "Verifies that Ring release builds use Bitkit's pinned production certificate."
+
+    doLast {
+        if (!hasBitkitAppSigning) {
+            throw new GradleException(
+                "Ring release packaging is disabled without Bitkit's production signer. " +
+                "Missing Gradle properties: ${missingBitkitSigningProperties.join(', ')}"
+            )
+        }
+
+        def configuredStore = android.signingConfigs.release.storeFile
+        if (configuredStore == null || !configuredStore.isFile()) {
+            throw new GradleException(
+                "BITKIT_APP_SIGNING_STORE_FILE does not point to a readable keystore."
+            )
+        }
+
+        if (configuredStore.canonicalFile == file("debug.keystore").canonicalFile) {
+            throw new GradleException(
+                "Ring release packaging cannot use the Android debug keystore."
+            )
+        }
+
+        def expectedSha256 = normalizeCertificateSha256(
+            bitkitSigningValue('BITKIT_APP_SIGNING_CERT_SHA256'),
+            'BITKIT_APP_SIGNING_CERT_SHA256'
+        )
+        if (expectedSha256 == androidDebugCertificateSha256) {
+            throw new GradleException(
+                "BITKIT_APP_SIGNING_CERT_SHA256 is the Android debug certificate, " +
+                "not Bitkit's production app-signing certificate."
+            )
+        }
+
+        def configuredSha256 = certificateSha256FromKeystore(
+            configuredStore,
+            bitkitSigningValue('BITKIT_APP_SIGNING_STORE_PASSWORD'),
+            bitkitSigningValue('BITKIT_APP_SIGNING_KEY_ALIAS'),
+            bitkitSigningValue('BITKIT_APP_SIGNING_KEY_PASSWORD')
+        )
+        if (configuredSha256 == androidDebugCertificateSha256) {
+            throw new GradleException(
+                "Ring release packaging cannot use the Android debug certificate, " +
+                "even from a copied or renamed keystore."
+            )
+        }
+        if (configuredSha256 != expectedSha256) {
+            throw new GradleException(
+                "Ring release signer mismatch. Keystore certificate SHA-256 is " +
+                "${formatCertificateSha256(configuredSha256)}, but " +
+                "BITKIT_APP_SIGNING_CERT_SHA256 is " +
+                "${formatCertificateSha256(expectedSha256)}."
+            )
+        }
+    }
+}
+
+def releaseApks = {
+    fileTree(new File(buildDir, "outputs/apk")) {
+        include "**/*.apk"
+    }.files.findAll { File apk ->
+        def normalizedPath = apk.absolutePath.replace(File.separatorChar, '/' as char)
+        normalizedPath.contains("/release/") ||
+            apk.name.toLowerCase(Locale.ROOT).contains("release")
+    }.sort { left, right -> left.absolutePath <=> right.absolutePath }
+}
+
+def releaseBundles = {
+    fileTree(new File(buildDir, "outputs/bundle")) {
+        include "**/*.aab"
+    }.files.findAll { File bundle ->
+        def normalizedPath = bundle.absolutePath.replace(File.separatorChar, '/' as char)
+        normalizedPath.contains("/release/") ||
+            bundle.name.toLowerCase(Locale.ROOT).contains("release")
+    }.sort { left, right -> left.absolutePath <=> right.absolutePath }
+}
+
+def verifyReleaseApk = { File apk, String expectedSha256 ->
+    if (!apk.isFile()) {
+        throw new GradleException("Ring release APK does not exist: ${apk}")
+    }
+
+    def executableName = System.getProperty("os.name")
+        .toLowerCase(Locale.ROOT)
+        .contains("windows") ? "apksigner.bat" : "apksigner"
+    def apksigner = new File(
+        new File(android.sdkDirectory, "build-tools/${android.buildToolsVersion}"),
+        executableName
+    )
+    if (!apksigner.isFile()) {
+        throw new GradleException(
+            "Cannot verify Ring's generated APK signer: apksigner was not found at ${apksigner}."
+        )
+    }
+
+    def process = new ProcessBuilder(
+        apksigner.absolutePath,
+        "verify",
+        "--print-certs",
+        apk.absolutePath
+    ).redirectErrorStream(true).start()
+    def output = process.inputStream.getText("UTF-8")
+    def exitCode = process.waitFor()
+    if (exitCode != 0) {
+        throw new GradleException(
+            "apksigner rejected Ring release APK ${apk.name}: ${output.trim()}"
+        )
+    }
+
+    def signerFingerprints = []
+    output.eachLine { String line ->
+        def matcher = line =~ /Signer #[0-9]+ certificate SHA-256 digest:\s*([0-9A-Fa-f]{64})/
+        if (matcher.find()) {
+            signerFingerprints.add(matcher.group(1).toUpperCase(Locale.ROOT))
+        }
+    }
+    if (signerFingerprints.size() != 1) {
+        throw new GradleException(
+            "Expected exactly one signer certificate in Ring release APK ${apk.name}; " +
+            "apksigner reported ${signerFingerprints.size()}."
+        )
+    }
+    if (signerFingerprints.first() != expectedSha256) {
+        throw new GradleException(
+            "Generated Ring release APK ${apk.name} signer SHA-256 is " +
+            "${formatCertificateSha256(signerFingerprints.first())}, but Bitkit's pinned " +
+            "production certificate is ${formatCertificateSha256(expectedSha256)}."
+        )
+    }
+}
+
+def verifyReleaseBundle = { File bundle, String expectedSha256 ->
+    if (!bundle.isFile()) {
+        throw new GradleException("Ring release bundle does not exist: ${bundle}")
+    }
+
+    def signerFingerprints = [] as Set
+    def unsignedEntries = []
+    def jarFile = new java.util.jar.JarFile(bundle, true)
+    try {
+        def entries = jarFile.entries()
+        while (entries.hasMoreElements()) {
+            def entry = entries.nextElement()
+            if (entry.directory || entry.name.toUpperCase(Locale.ROOT).startsWith("META-INF/")) {
+                continue
+            }
+
+            // JarFile performs signature/integrity verification while each entry is read.
+            jarFile.getInputStream(entry).withCloseable { input ->
+                byte[] buffer = new byte[8192]
+                while (input.read(buffer) != -1) {
+                    // Drain the entry to force verification.
+                }
+            }
+
+            def codeSigners = entry.codeSigners
+            if (codeSigners == null || codeSigners.length == 0) {
+                unsignedEntries.add(entry.name)
+                continue
+            }
+            codeSigners.each { signer ->
+                def leafCertificate = signer.signerCertPath.certificates.first()
+                signerFingerprints.add(sha256OfCertificate(leafCertificate))
+            }
+        }
+    } catch (SecurityException exception) {
+        throw new GradleException(
+            "Ring release bundle ${bundle.name} failed JAR signature verification.",
+            exception
+        )
+    } finally {
+        jarFile.close()
+    }
+
+    if (!unsignedEntries.isEmpty()) {
+        throw new GradleException(
+            "Ring release bundle ${bundle.name} contains unsigned content " +
+            "(first entry: ${unsignedEntries.first()})."
+        )
+    }
+    if (signerFingerprints.size() != 1) {
+        throw new GradleException(
+            "Expected exactly one signer certificate in Ring release bundle ${bundle.name}; " +
+            "found ${signerFingerprints.size()}."
+        )
+    }
+    def actualSha256 = signerFingerprints.first()
+    if (actualSha256 != expectedSha256) {
+        throw new GradleException(
+            "Generated Ring release bundle ${bundle.name} signer SHA-256 is " +
+            "${formatCertificateSha256(actualSha256)}, but Bitkit's pinned production " +
+            "certificate is ${formatCertificateSha256(expectedSha256)}."
+        )
+    }
+}
+
+def verifyReleaseApks = { Collection<File> apks ->
+    if (apks.isEmpty()) {
+        throw new GradleException(
+            "No Ring release APK was found to verify. Run assembleRelease first, or pass " +
+            "-PRING_RELEASE_APK=/absolute/path/to/ring-release.apk to " +
+            "verifyRingReleaseApkSigning."
+        )
+    }
+    def expectedSha256 = normalizeCertificateSha256(
+        bitkitSigningValue('BITKIT_APP_SIGNING_CERT_SHA256'),
+        'BITKIT_APP_SIGNING_CERT_SHA256'
+    )
+    apks.each { File apk -> verifyReleaseApk(apk, expectedSha256) }
+}
+
+def verifyReleaseBundles = { Collection<File> bundles ->
+    if (bundles.isEmpty()) {
+        throw new GradleException(
+            "No Ring release bundle was found to verify. Run bundleRelease first, or pass " +
+            "-PRING_RELEASE_BUNDLE=/absolute/path/to/ring-release.aab to " +
+            "verifyRingReleaseBundleSigning."
+        )
+    }
+    def expectedSha256 = normalizeCertificateSha256(
+        bitkitSigningValue('BITKIT_APP_SIGNING_CERT_SHA256'),
+        'BITKIT_APP_SIGNING_CERT_SHA256'
+    )
+    bundles.each { File bundle -> verifyReleaseBundle(bundle, expectedSha256) }
+}
+
+def verifyRingReleaseApkSigning = tasks.register("verifyRingReleaseApkSigning") {
+    group = "verification"
+    description = "Verifies generated (or RING_RELEASE_APK) APK signer(s) against Bitkit's pin."
+    dependsOn(verifyBitkitReleaseSigning)
+
+    doLast {
+        def explicitApk = bitkitSigningValue('RING_RELEASE_APK')
+        verifyReleaseApks(explicitApk ? [file(explicitApk)] : releaseApks())
+    }
+}
+
+def verifyRingReleaseBundleSigning = tasks.register("verifyRingReleaseBundleSigning") {
+    group = "verification"
+    description = "Verifies generated (or RING_RELEASE_BUNDLE) AAB signer against Bitkit's pin."
+    dependsOn(verifyBitkitReleaseSigning)
+
+    doLast {
+        def explicitBundle = bitkitSigningValue('RING_RELEASE_BUNDLE')
+        verifyReleaseBundles(explicitBundle ? [file(explicitBundle)] : releaseBundles())
+    }
+}
+
+def isReleasePackagingTask = { String taskName ->
+    def lowerName = taskName.toLowerCase(Locale.ROOT)
+    if (!lowerName.contains("release")) {
+        return false
+    }
+
+    // Aggregate assemble/bundle tasks end in the build type. Package/sign tasks have
+    // additional AGP suffixes (for example packageReleaseUniversalApk).
+    (lowerName.startsWith("assemble") && lowerName.endsWith("release")) ||
+        (lowerName.startsWith("bundle") && lowerName.endsWith("release")) ||
+        ["package", "install", "sign", "makeapk", "extractapks", "zipapks"].any {
+            lowerName.startsWith(it)
+        }
+}
+
+tasks.configureEach { task ->
+    if (isReleasePackagingTask(task.name)) {
+        task.dependsOn(verifyBitkitReleaseSigning)
+    }
+
+    // APK signer verification is attached to every release assemble aggregate so it checks
+    // the actual v1/v2/v3/v4 signer(s) after AGP has produced all split/universal APKs.
+    if (task.name.toLowerCase(Locale.ROOT).startsWith("assemble") &&
+        task.name.toLowerCase(Locale.ROOT).endsWith("release")) {
+        task.doLast {
+            verifyReleaseApks(releaseApks())
+        }
+    }
+
+    // AABs use JAR signing, so force verification by reading every signed entry.
+    if (task.name.toLowerCase(Locale.ROOT).startsWith("bundle") &&
+        task.name.toLowerCase(Locale.ROOT).endsWith("release")) {
+        task.doLast {
+            verifyReleaseBundles(releaseBundles())
         }
     }
 }

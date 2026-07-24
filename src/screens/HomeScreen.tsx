@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -22,6 +22,9 @@ import { Plus } from '../icons/index.ts';
 import { SheetManager } from 'react-native-actions-sheet';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
+import { SharedPubkyDiscoveryContext } from '../hooks/useSharedPubkyDiscovery.ts';
+import { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
+import SharedPubkyCard from '../components/SharedPubkyCard.tsx';
 
 const REPLACEMENT_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=app.pubkyring';
 
@@ -60,14 +63,15 @@ const PubkyItem = memo(
 interface ListFooterProps {
 	createPubky: () => void;
 	importPubky: (mnemonic?: string) => Promise<any>;
+	sharedIdentities: SharedPubkyIdentity[];
 }
 
-const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
+const ListFooter = memo(({ createPubky, importPubky, sharedIdentities }: ListFooterProps) => {
 	const { t } = useTranslation();
 
 	const onAddPubkyPress = useCallback(() => {
-		showAddPubkySheet(createPubky, importPubky);
-	}, [createPubky, importPubky]);
+		showAddPubkySheet(createPubky, importPubky, sharedIdentities);
+	}, [createPubky, importPubky, sharedIdentities]);
 
 	return (
 		<View style={styles.listFooterContainer}>
@@ -91,6 +95,7 @@ const HomeScreen = (): ReactElement => {
 
 	const { createPubky, importPubky } = usePubkyManagement();
 	useDeepLinkHandler(createPubky, importPubky);
+	const { identities: sharedIdentities } = useContext(SharedPubkyDiscoveryContext);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -149,9 +154,21 @@ const HomeScreen = (): ReactElement => {
 			<SafeAreaView style={styles.container} edges={['bottom']}>
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
-				<EmptyState />
+				{sharedIdentities.length > 0 ? (
+					<View style={styles.sharedIdentities}>
+						{sharedIdentities.map(identity => (
+							<SharedPubkyCard key={identity.pubky} identity={identity} />
+						))}
+					</View>
+				) : (
+					<EmptyState />
+				)}
 				<View>
-					<ListFooter createPubky={createPubky} importPubky={importPubky} />
+					<ListFooter
+						createPubky={createPubky}
+						importPubky={importPubky}
+						sharedIdentities={sharedIdentities}
+					/>
 				</View>
 			</SafeAreaView>
 		);
@@ -179,7 +196,7 @@ const HomeScreen = (): ReactElement => {
 					end={GRADIENT_END}
 					pointerEvents="none"
 				/>
-				<ListFooter createPubky={createPubky} importPubky={importPubky} />
+				<ListFooter createPubky={createPubky} importPubky={importPubky} sharedIdentities={sharedIdentities} />
 				<SafeAreaInset edge="bottom" />
 			</View>
 		</View>
@@ -196,6 +213,10 @@ const styles = StyleSheet.create({
 	},
 	emptyStateBanner: {
 		paddingTop: HEADER_HEIGHT + 16,
+	},
+	sharedIdentities: {
+		flex: 1,
+		justifyContent: 'center',
 	},
 	fadeOverlay: {
 		position: 'absolute',

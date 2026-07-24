@@ -11,12 +11,12 @@ env:
 - tapOn:
     id: PubkyBox-BackupButton
 - assertVisible:
-    id: select-backup-preference-title
+    id: backup-title
 - tapOn:
-    id: SelectBackupPreferenceEncryptedFileButton
+    id: BackupEncryptedFileButton
 - extendedWaitUntil:
     visible:
-      id: backup-prompt-title
+      id: backup-title
     timeout: 10000
 - tapOn:
     id: BackupFilePassphraseInput

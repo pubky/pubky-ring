@@ -2,12 +2,12 @@ import React, { memo, ReactElement, useCallback } from 'react';
 import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
-import { useQRScanner } from '../hooks/useQRScanner';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { BodySSBText, BodySSBUnspacedText, HeadingText } from '../theme/typography';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
-import { showEditPubkySheet, showBackupPrompt } from '../utils/sheetHelpers.ts';
+import { showBackupSheet } from '../utils/sheetHelpers.ts';
+import { showSheet } from '../sheets/sheetNavigation.tsx';
 import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
 import Card from './Card.tsx';
@@ -23,15 +23,15 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 	const { t } = useTranslation();
 
 	const handleBackupPress = useCallback(() => {
-		showBackupPrompt({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
+		showBackupSheet({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
 	}, [publicKey]);
 
 	return (
-		<View style={styles.contentContainer}>
+		<View style={styles.contentContainer} pointerEvents="box-none">
 			<HeadingText style={styles.nameText} numberOfLines={1}>
 				{pubkyName}
 			</HeadingText>
-			<View style={styles.row}>
+			<View style={styles.row} pointerEvents="box-none">
 				<BodySSBText numberOfLines={1} ellipsizeMode="middle">
 					{truncateStr(publicKey)}
 				</BodySSBText>
@@ -76,12 +76,7 @@ const PubkyBox = ({
 	loading = false,
 }: PubkyBoxProps): ReactElement => {
 	const { t } = useTranslation();
-	const { handleQRPress, isQRLoading } = useQRScanner();
-	const { onQRPress, onPubkyPress } = usePubkyHandlers();
-
-	const handleQRAction = useCallback(async () => {
-		await handleQRPress(pubky, onQRPress);
-	}, [handleQRPress, onQRPress, pubky]);
+	const { onPubkyPress } = usePubkyHandlers();
 
 	const handleOnPress = useCallback(() => {
 		onPubkyPress(pubky, index ?? 0);
@@ -92,18 +87,14 @@ const PubkyBox = ({
 		truncateStr(pubkyData.name, 8) ||
 		`${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
 
-	const qrPress = useCallback(() => {
-		if (pubkyData.signedUp) {
-			handleQRAction();
-		} else {
-			showEditPubkySheet({
-				title: t('pubky.setup'),
-				description: '',
-				pubky: pubky,
-				data: pubkyData,
-			});
+	const handleActionPress = useCallback(() => {
+		if (!pubkyData.signedUp) {
+			showSheet('edit-pubky', { pubky });
+			return;
 		}
-	}, [handleQRAction, pubky, pubkyData, t]);
+
+		showSheet('auth', { screen: 'Scanner', params: { pubky } });
+	}, [pubky, pubkyData.signedUp]);
 
 	// testId example: PubkyBox-StagingTestPubky-0
 	const sanitizedName = pubkyData.name.replace(/[^a-zA-Z0-9]/g, '');
@@ -111,18 +102,19 @@ const PubkyBox = ({
 	const pubkyBoxTestID = `PubkyBox-${sanitizedName}${indexStr}`;
 
 	return (
-		<TouchableOpacity
-			style={styles.container}
-			disabled={disabled}
-			activeOpacity={0.7}
-			accessible={pubkyData.signedUp}
-			testID={pubkyBoxTestID}
-			onPress={handleOnPress}
-			onLongPress={onLongPress}
-		>
+		<View style={styles.container} testID={pubkyBoxTestID}>
 			<Card>
-				<View style={styles.content}>
-					<View style={styles.profileImage}>
+				<TouchableOpacity
+					style={styles.cardPressTarget}
+					disabled={disabled}
+					activeOpacity={0.7}
+					testID={`${pubkyBoxTestID}-Content`}
+					onPress={handleOnPress}
+					onLongPress={onLongPress}
+				/>
+
+				<View style={styles.content} pointerEvents="box-none">
+					<View style={styles.profileImage} pointerEvents="none">
 						<ProfileAvatar name={pubkyData.name || pubkyName} pubky={publicKey} size={48} />
 					</View>
 
@@ -133,7 +125,7 @@ const PubkyBox = ({
 						sessionsCount={sessionsCount}
 					/>
 
-					<View style={styles.iconContainer}>
+					<View style={styles.iconContainer} pointerEvents="none">
 						<ChevronRight size={24} colorName="textTertiary" />
 					</View>
 				</View>
@@ -143,14 +135,14 @@ const PubkyBox = ({
 					text={pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup')}
 					size="medium"
 					variant="secondary"
-					loading={isQRLoading || loading}
+					loading={loading}
 					icon={pubkyData.signedUp ? <Scan size={24} /> : <></>}
 					testID={`${pubkyBoxTestID}-ActionButton`}
-					onPress={qrPress}
+					onPress={handleActionPress}
 					onLongPress={onLongPress}
 				/>
 			</Card>
-		</TouchableOpacity>
+		</View>
 	);
 };
 
@@ -158,6 +150,9 @@ const styles = StyleSheet.create({
 	container: {
 		marginBottom: 24,
 		marginHorizontal: 24,
+	},
+	cardPressTarget: {
+		...StyleSheet.absoluteFill,
 	},
 	content: {
 		flexDirection: 'row',

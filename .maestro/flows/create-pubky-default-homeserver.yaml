@@ -5,6 +5,8 @@ name: create-pubky-default-homeserver
     clearState: true
 - runFlow: ../shared/onboarding.yaml
 - runFlow: ../shared/create-pubky.yaml
+- tapOn:
+    id: AddPubkyReviewContinue
 - assertVisible:
     id: HomeserverDefaultRadioInner
 - assertNotVisible:

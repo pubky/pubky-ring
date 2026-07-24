@@ -1,12 +1,71 @@
 appId: ${APP_ID}
 name: create-pubky-and-authorize
 env:
-  AUTH_URL: pubkyauth://signin?caps=/pub/pubky.app/:rw&relay=https://httprelay.staging.pubky.app/inbox&secret=okIbCVEBmJJGU56jO4WPmeghdyLNun6VOp_xV-B5Yx0
+  AUTH_URL: pubkyauth://signin?caps=/pub/pubky.app/:rw&relay=https://httprelay.staging.pubky.app/inbox&secret=1reDFSnbyhWJiHus08x6NcLGApBYbG-2kNrrscORg6A
 ---
 - launchApp:
     clearState: true
 - runFlow: ../shared/onboarding.yaml
 - runFlow: ../shared/create-pubky.yaml
 - runFlow: ../shared/close-sheet.yaml
-- runFlow: ../shared/signup.yaml
+- runFlow:
+    file: ../shared/signup.yaml
+    env:
+      PUBKY_NAME: Staging Test Pubky
+      PUBKY_ACTION_ID: PubkyBox--0-ActionButton
+      SIGNED_PUBKY_ID: PubkyBox-StagingTestPubky-0
 - runFlow: ../shared/authorize.yaml
+- tapOn:
+    id: PubkyBox-StagingTestPubky-0-ActionButton
+- runFlow: ../shared/allow-camera.yaml
+- assertVisible:
+    id: auth-title
+- assertVisible:
+    id: QRScannerPasteButton
+- runFlow:
+    file: ../shared/open-link.yaml
+    env:
+      URL: ${AUTH_URL}
+- assertVisible:
+    id: confirm-auth-title
+- assertVisible:
+    id: ConfirmAuthRequestedPermissions
+- tapOn:
+    id: auth-back-button
+- assertVisible:
+    id: QRScannerPasteButton
+- assertNotVisible:
+    id: confirm-auth-title
+- runFlow: ../shared/close-sheet.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- runFlow:
+    file: ../shared/signup.yaml
+    env:
+      PUBKY_NAME: Second Test Pubky
+      PUBKY_ACTION_ID: PubkyBox--1-ActionButton
+      SIGNED_PUBKY_ID: PubkyBox-SecondTestPubky-1
+- runFlow:
+    file: ../shared/open-link.yaml
+    env:
+      URL: ${AUTH_URL}
+- assertVisible:
+    id: auth-title
+- assertVisible:
+    id: SelectPubkyRow-0
+- assertVisible:
+    id: SelectPubkyRow-1
+- tapOn:
+    id: SelectPubkyRow-1
+- assertVisible:
+    id: confirm-auth-title
+- assertVisible:
+    id: ConfirmAuthRequestedPermissions
+- tapOn:
+    id: auth-back-button
+- assertVisible:
+    id: SelectPubkyRow-0
+- assertVisible:
+    id: SelectPubkyRow-1
+- assertNotVisible:
+    id: confirm-auth-title

@@ -1,13 +1,12 @@
 appId: ${APP_ID}
 env:
   STAGING_HOMESERVER: ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy
-  PUBKY_NAME: Staging Test Pubky
 ---
 - runScript: ../scripts/request-invite-code.js
 - assertVisible:
-    id: PubkyBox--0-ActionButton
+    id: ${PUBKY_ACTION_ID}
 - tapOn:
-    id: PubkyBox--0-ActionButton
+    id: ${PUBKY_ACTION_ID}
 - waitForAnimationToEnd
 - assertVisible:
     id: EditPubkyNameInput
@@ -30,5 +29,5 @@ env:
     id: EditPubkySaveButton
 - extendedWaitUntil:
     visible:
-      id: PubkyBox-StagingTestPubky-0
+      id: ${SIGNED_PUBKY_ID}
     timeout: 120000

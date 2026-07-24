@@ -19,8 +19,7 @@ import {
 import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
-import { SheetManager } from 'react-native-actions-sheet';
-import { useInputHandler } from '../hooks/useInputHandler.ts';
+import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { BodyMSBText, BodyMText, BodySText, CaptionText } from '../theme/typography';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
@@ -38,7 +37,6 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const hasPubkys = pubkyKeys.length > 0;
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
-	const { showScanner } = useInputHandler({});
 
 	const getThemeDisplayText = useCallback(
 		(theme: ETheme) => {
@@ -127,16 +125,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 		setEnableAutoAuth(prev => !prev);
 	}, [dispatch, enableAutoAuth]);
 
-	// const handleBackupPress = useCallback(() => {
-	// 	// Backup implementation to be added
-	// 	console.log('Backup all pubkys');
-	// }, []);
-
-	const handleShowQRPress = useCallback(async () => {
-		await SheetManager.show('migrate-modal');
-	}, []);
-
-	const handleScanQRPress = useCallback(async () => {
+	const handleScanQRPress = useCallback(() => {
 		// Reset to Home when migration completes (prevents swipe-back to Settings)
 		setOnMigrationComplete(() => {
 			navigation.reset({
@@ -146,8 +135,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			setOnMigrationComplete(null); // Clean up
 		});
 
-		await showScanner({ title: t('settings.migrateKeys') });
-	}, [showScanner, t, navigation]);
+		showSheet('migrate', { screen: 'Scanner' });
+	}, [navigation]);
 
 	return (
 		<SafeAreaView style={styles.container} edges={['bottom']}>
@@ -178,7 +167,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							style={styles.button}
 							text={t('settings.showQR')}
 							size="medium"
-							onPress={handleShowQRPress}
+							onPress={() => showSheet('migrate')}
 							icon={<Qrcode size={24} />}
 						/>
 					)}

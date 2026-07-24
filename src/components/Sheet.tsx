@@ -1,122 +1,138 @@
 import React, { memo, ReactElement, ReactNode } from 'react';
-import { Platform, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
-import ActionSheet from 'react-native-actions-sheet';
-import Toast from 'react-native-toast-message';
-import { useSelector } from 'react-redux';
+import { ScrollView, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import { useIsFocused, useNavigation, useNavigationState } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { toastConfig } from '../theme/toastConfig.tsx';
 import { BLUE_RADIAL_GRADIENT, RED_RADIAL_GRADIENT } from '../utils/constants.ts';
-import { isSmallScreen } from '../utils/helpers.ts';
-import { getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { ENavigationAnimation } from '../types/settings.ts';
 import SafeAreaInset from './SafeAreaInset.tsx';
 import { LinearGradient, RadialGradient } from './LinearGradient.tsx';
 import { BodyMBText } from '../theme/typography.ts';
 import HeaderNavButton from './HeaderNavButton.tsx';
-import { HEADER_HEIGHT } from './AppHeader.tsx';
 import { ArrowLeft } from '../icons/index.ts';
-import { useReducedMotion } from '../hooks/useReducedMotion.ts';
+import type { SheetId } from '../sheets/types.ts';
+import { getSheetContentHeight } from '../sheets/sheetLayout.ts';
 
-type GradientType = 'none' | 'brand' | 'danger';
+export type GradientType = 'none' | 'brand' | 'danger';
 
-interface SheetProps {
-	id: string;
-	title: string;
+interface SheetFrameProps {
 	children: ReactNode;
-	gradientType?: GradientType;
-	contentStyle?: StyleProp<ViewStyle>;
-	keyboardHandlerEnabled?: boolean;
-	showBottomSafeAreaInset?: boolean;
-	headerRight?: ReactNode;
-	onBackPress?: () => void;
-	onClose?: () => void;
 }
 
-const smallScreen = isSmallScreen();
-const sheetToastConfig = toastConfig();
+interface SheetScreenProps {
+	id: SheetId;
+	title: string;
+	children: ReactNode;
+	titleTestID?: string;
+	gradientType?: GradientType;
+	contentStyle?: StyleProp<ViewStyle>;
+	scrollable?: boolean;
+	showBottomSafeAreaInset?: boolean;
+	headerRight?: ReactNode;
+	showBackButton?: boolean;
+	onBackPress?: () => void;
+}
+
+interface SheetProps extends SheetFrameProps, SheetScreenProps {}
+
 const gradientColors: Record<Exclude<GradientType, 'none'>, string[]> = {
 	brand: BLUE_RADIAL_GRADIENT,
 	danger: RED_RADIAL_GRADIENT,
 };
 
-const fadeAnimationConfig = { stiffness: 10000, damping: 1000, mass: 0.1 };
-const openAnimationConfig = { stiffness: 500, damping: 50, mass: 1 };
-
-const Sheet = ({
-	id,
-	title,
-	children,
-	gradientType = 'none',
-	contentStyle,
-	keyboardHandlerEnabled = Platform.OS === 'ios',
-	showBottomSafeAreaInset = true,
-	headerRight,
-	onBackPress,
-	onClose,
-}: SheetProps): ReactElement => {
+export const SheetFrame = ({ children }: SheetFrameProps): ReactElement => {
 	const { height: windowHeight } = useWindowDimensions();
 	const insets = useSafeAreaInsets();
-	const navigationAnimation = useSelector(getNavigationAnimation);
-	const reducedMotionEnabled = useReducedMotion();
-	const fullHeight = windowHeight - insets.top;
-	const sheetHeight = smallScreen ? fullHeight : fullHeight - HEADER_HEIGHT - 12;
+	const sheetHeight = getSheetContentHeight(windowHeight, insets.top, insets.bottom);
+
+	return <View style={[styles.frame, { height: sheetHeight }]}>{children}</View>;
+};
+
+export const SheetScreen = ({
+	id,
+	title: titleText,
+	children,
+	titleTestID,
+	gradientType = 'none',
+	contentStyle,
+	scrollable = false,
+	showBottomSafeAreaInset = true,
+	headerRight,
+	showBackButton = true,
+	onBackPress,
+}: SheetScreenProps): ReactElement => {
+	const navigation = useNavigation();
+	const isFocused = useIsFocused();
+	const hasStackScreenToGoBackTo = useNavigationState(state => {
+		const isRootSheetStack = state.routeNames.some(routeName => routeName.endsWith('Sheet'));
+		return !isRootSheetStack && state.index > 0;
+	});
+	const backPressHandler = onBackPress ?? (hasStackScreenToGoBackTo ? navigation.goBack : undefined);
+	const visibleBackPressHandler = showBackButton && isFocused ? backPressHandler : undefined;
+
+	const titleHeader = (
+		<View style={styles.titleContainer}>
+			{visibleBackPressHandler ? (
+				<HeaderNavButton
+					style={styles.navButton}
+					testID={`${id}-back-button`}
+					onPressIn={visibleBackPressHandler}
+				>
+					<ArrowLeft size={24} />
+				</HeaderNavButton>
+			) : (
+				<HeaderNavButton style={styles.navButton} />
+			)}
+
+			<BodyMBText testID={titleTestID ?? `${id}-title`}>{titleText}</BodyMBText>
+
+			<View style={styles.navButton}>{headerRight}</View>
+		</View>
+	);
 
 	return (
-		<ActionSheet
-			id={id}
-			containerStyle={[styles.sheetContainer, { height: sheetHeight }]}
-			defaultOverlayOpacity={0.7}
-			gestureEnabled={true}
-			animated={!reducedMotionEnabled}
-			drawUnderStatusBar={false}
-			useBottomSafeAreaPadding={false}
-			keyboardHandlerEnabled={keyboardHandlerEnabled}
-			springOffset={80}
-			CustomHeaderComponent={<></>}
-			ExtraOverlayComponent={<Toast config={sheetToastConfig} />}
-			openAnimationConfig={
-				navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : openAnimationConfig
-			}
-			closeAnimationConfig={
-				navigationAnimation === ENavigationAnimation.fade ? fadeAnimationConfig : undefined
-			}
-			onClose={onClose}
-		>
-			<LinearGradient colors={['#1a1a1a', '#000000']}>
-				{gradientType !== 'none' && (
-					<RadialGradient style={styles.background} colors={gradientColors[gradientType]} />
-				)}
+		<LinearGradient colors={['#1a1a1a', '#000000']}>
+			{gradientType !== 'none' && (
+				<RadialGradient style={styles.background} colors={gradientColors[gradientType]} />
+			)}
 
-				<View style={styles.indicator} />
+			<View style={styles.indicator} />
 
-				<View style={styles.titleContainer}>
-					{onBackPress ? (
-						<HeaderNavButton style={styles.navButton} onPressIn={onBackPress}>
-							<ArrowLeft size={24} />
-						</HeaderNavButton>
-					) : (
-						<HeaderNavButton style={styles.navButton} />
-					)}
+			{scrollable ? (
+				<ScrollView
+					style={styles.scroll}
+					contentContainerStyle={styles.scrollContent}
+					keyboardShouldPersistTaps="handled"
+					automaticallyAdjustKeyboardInsets
+				>
+					{titleHeader}
+					<View style={[styles.scrollBody, contentStyle]}>
+						{children}
+						{showBottomSafeAreaInset && <SafeAreaInset edge="bottom" />}
+					</View>
+				</ScrollView>
+			) : (
+				<>
+					{titleHeader}
+					<View style={[styles.content, contentStyle]}>{children}</View>
+					{showBottomSafeAreaInset && <SafeAreaInset edge="bottom" />}
+				</>
+			)}
+		</LinearGradient>
+	);
+};
 
-					<BodyMBText testID={`${id}-title`}>{title}</BodyMBText>
-
-					<View style={styles.navButton}>{headerRight}</View>
-				</View>
-
-				<View style={[styles.content, contentStyle]}>{children}</View>
-
-				{showBottomSafeAreaInset && <SafeAreaInset edge="bottom" />}
-			</LinearGradient>
-		</ActionSheet>
+const Sheet = ({ id, children, ...screenProps }: SheetProps): ReactElement => {
+	return (
+		<SheetFrame>
+			<SheetScreen id={id} {...screenProps}>
+				{children}
+			</SheetScreen>
+		</SheetFrame>
 	);
 };
 
 const styles = StyleSheet.create({
-	sheetContainer: {
+	frame: {
 		backgroundColor: '#000000',
-		borderTopLeftRadius: 32,
-		borderTopRightRadius: 32,
-		overflow: 'hidden',
 	},
 	background: {
 		...StyleSheet.absoluteFill,
@@ -145,6 +161,17 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	content: {
+		flex: 1,
+		paddingHorizontal: 24,
+		overflow: 'hidden',
+	},
+	scroll: {
+		flex: 1,
+	},
+	scrollContent: {
+		flexGrow: 1,
+	},
+	scrollBody: {
 		flex: 1,
 		paddingHorizontal: 24,
 	},

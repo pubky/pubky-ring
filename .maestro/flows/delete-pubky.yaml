@@ -10,7 +10,7 @@ name: delete-pubky
     visible: 'pubky #1'
     timeout: 30000
 - tapOn:
-    text: 'pubky #1'
+    id: PubkyBox--0-Content
 - assertVisible:
     id: PubkyDetailDeleteButton
 - tapOn:

@@ -157,10 +157,10 @@ const validateImportData = async (
 
 /**
  * Parses invite code from a URL
- * Pattern: /invite/XXXX-XXXX-XXXX
+ * Pattern: /invite/XXXX-XXXX-XXXX or invite/XXXX-XXXX-XXXX
  */
 const parseInviteCodeFromUrl = (url: string): string | null => {
-	const invitePattern = /\/invite\/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/;
+	const invitePattern = /(?:^|\/)invite\/([A-Za-z0-9]{4}-[A-Za-z0-9]{4}-[A-Za-z0-9]{4})/;
 	const match = url.match(invitePattern);
 	return match ? match[1] : null;
 };

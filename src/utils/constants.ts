@@ -16,9 +16,5 @@ export const TERMS_OF_USE = 'https://synonym.to/pubky-ring-privacy-policy';
 
 // Timing constants for consistent animations and delays
 export const NAVIGATION_ANIMATION_DURATION = 200; // Duration for screen transition animations
-export const SHEET_ANIMATION_DELAY = 50; // Delay for sheet animations
-export const SHEET_TRANSITION_DELAY = 50; // Delay between sheet transitions
-export const AUTH_SHEET_DELAY = 50; // Small delay for auth sheet display
-export const SCANNER_CLOSE_DELAY = 50; // Delay after closing scanner before opening new sheet
 
 export const BACKUP_PASSWORD_CHAR_MIN = 6; // Minimum characters for file backup password

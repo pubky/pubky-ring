@@ -13,16 +13,24 @@ const pubkysSlice = createSlice({
 				backupPreference?: EBackupPreference;
 				isBackedUp?: boolean;
 				signupToken?: string;
+				sourceApp?: 'app.pubkyring' | 'to.bitkit';
 			}>,
 		) => {
 			state.pubkys = state?.pubkys || {};
-			const { pubky, backupPreference, isBackedUp = false, signupToken = '' } = action.payload;
+			const {
+				pubky,
+				backupPreference,
+				isBackedUp = false,
+				signupToken = '',
+				sourceApp = 'app.pubkyring',
+			} = action.payload;
 			if (!state.pubkys[pubky]) {
 				state.pubkys[pubky] = {
 					...defaultPubkyState,
 					backupPreference: backupPreference ?? defaultPubkyState.backupPreference,
 					isBackedUp,
 					signupToken,
+					sourceApp,
 				};
 			}
 		},

@@ -14,6 +14,8 @@ export interface Pubky {
 	sessions: PubkySession[];
 	backupPreference: EBackupPreference;
 	isBackedUp: boolean;
+	/** The app that owns the canonical private key. Borrowed identities never become Ring-owned. */
+	sourceApp?: 'app.pubkyring' | 'to.bitkit';
 }
 
 export type ISetPubkyData = Partial<Pubky>;

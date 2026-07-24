@@ -1,0 +1,12 @@
+appId: ${APP_ID}
+---
+- runFlow:
+    when:
+      visible: While using the app
+    commands:
+      - tapOn: While using the app
+- runFlow:
+    when:
+      visible: Allow
+    commands:
+      - tapOn: Allow

@@ -8,20 +8,18 @@
 import { Result, ok, err } from '@synonymdev/result';
 import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
 import { InputAction, SignupParams } from '../inputParser';
-import { ActionContext } from '../inputRouter';
+import { RoutedActionContext } from '../inputRouter';
 import { savePubky, signUpToHomeserver } from '../pubky';
 import { checkNetworkConnection, showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { openXError } from '../xCallback';
 import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice';
 import { setLoadingModalError } from '../../store/slices/uiSlice';
-import { setStoredDispatch } from '../../store/shapes/ui';
 import { EBackupPreference } from '../../types/pubky';
 import { handleAuthAction } from './authAction';
-import { SHEET_ANIMATION_DELAY } from '../constants.ts';
 import { getSignupTokenErrorModalFields, LoadingErrorModalFields } from '../signupErrors';
 import i18n from '../../i18n';
-import { SheetManager } from 'react-native-actions-sheet';
+import { hideSheet } from '../../sheets/sheetNavigation.tsx';
 import { Dispatch } from 'redux';
 import {
 	getPubkyDataFromStore,
@@ -42,8 +40,6 @@ const showErrorState = (
 	dispatch: Dispatch,
 	fields: LoadingErrorModalFields = {},
 ): void => {
-	// Store dispatch for use in "Try again" button
-	setStoredDispatch(dispatch);
 	// Update Redux state to show error
 	dispatch(
 		setLoadingModalError({
@@ -61,7 +57,7 @@ const showErrorState = (
  */
 export const handleSignupAction = async (
 	data: SignupActionData,
-	context: ActionContext,
+	context: RoutedActionContext,
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
@@ -98,9 +94,6 @@ export const handleSignupAction = async (
 		rawUrl: authUrl,
 	} as const;
 
-	// Small delay to ensure any previous sheet (e.g., camera) has fully closed
-	await new Promise(resolve => setTimeout(resolve, SHEET_ANIMATION_DELAY));
-
 	// If a pubky already exists for this signup token (e.g. user is rescanning the
 	// same onboarding QR after a prior failure), reuse it instead of creating a new key.
 	const existingPubkyKey = getPubkyKeyBySignupTokenFromStore(inviteCode);
@@ -116,13 +109,7 @@ export const handleSignupAction = async (
 		}
 	}
 
-	// Show loading modal (don't await - it resolves when sheet closes)
-	// This ensures errors are visible via the modal's error state
-	SheetManager.show('loading', {
-		payload: {
-			modalTitle: i18n.t('loading.modalTitle'),
-		},
-	});
+	context.setAddPubkyScreen({ screen: 'Loading' });
 
 	// Step 1: Generate a new keypair only if we don't have an existing match
 	if (!isReusedPubky) {
@@ -179,11 +166,7 @@ export const handleSignupAction = async (
 
 			if (signedUpKeys.length > 0) {
 				// User has existing pubky(s) - forward to auth flow instead of showing error
-				// Hide loading modal first
-				await SheetManager.hide('loading');
-				await new Promise(resolve => {
-					setTimeout(resolve, SHEET_ANIMATION_DELAY);
-				});
+				hideSheet('add-pubky');
 				return await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
 			}
 
@@ -201,15 +184,9 @@ export const handleSignupAction = async (
 		});
 		dispatch(removeProcessing({ pubky }));
 
-		// Hide loading modal before showing auth modal
-		await SheetManager.hide('loading');
+		hideSheet('add-pubky');
 
 		// Step 4: Trigger auth action with the new pubky
-		// Short delay to allow UI to update before showing auth modal
-		await new Promise(resolve => {
-			setTimeout(resolve, SHEET_ANIMATION_DELAY);
-		});
-
 		await handleAuthAction(authData, {
 			...context,
 			pubky,

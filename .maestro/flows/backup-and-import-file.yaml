@@ -1,0 +1,103 @@
+appId: ${APP_ID}
+name: backup-and-import-file
+env:
+  BACKUP_PASSWORD: testpass123
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- tapOn:
+    id: PubkyBox-BackupButton
+- assertVisible:
+    id: backup-title
+- tapOn:
+    id: BackupEncryptedFileButton
+- extendedWaitUntil:
+    visible:
+      id: backup-title
+    timeout: 10000
+- tapOn:
+    id: BackupFilePassphraseInput
+- inputText: ${BACKUP_PASSWORD}
+- tapOn:
+    id: BackupFileSubmitButton
+- runFlow:
+    when:
+      platform: ios
+    commands:
+      - extendedWaitUntil:
+          visible: Pubky Ring
+          timeout: 10000
+      - tapOn:
+          point: 87%,13%
+- extendedWaitUntil:
+    visible:
+      id: AddPubkyButton
+    timeout: 30000
+- runFlow: ../shared/delete.yaml
+- tapOn:
+    id: AddPubkyButton
+- waitForAnimationToEnd
+- assertVisible:
+    id: add-pubky-title
+- tapOn:
+    id: AddPubkyImport
+- waitForAnimationToEnd
+- tapOn:
+    id: EncryptedFileButton
+- runFlow:
+    when:
+      platform: ios
+    commands:
+      # iOS Files may open in Recents locally and in CI. Local Recents often has
+      # the exported backup, while clean CI simulators can show an empty Recents
+      # tab. In that case Browse returns to the app folder used when saving the
+      # backup. That folder also contains mmkv, so select the second grid item.
+      - runFlow:
+          when:
+            visible: No Recents
+          commands:
+            - tapOn: Browse
+            - waitForAnimationToEnd
+            - tapOn:
+                point: 50%,32%
+      - runFlow:
+          when:
+            notVisible: No Recents
+          commands:
+            - tapOn:
+                point: 17%,31%
+- runFlow:
+    when:
+      platform: android
+    commands:
+      # Android DocumentsUI remembers its last folder. CI usually starts in Recents,
+      # while local runs may reopen directly in Downloads/PubkyRing.
+      - runFlow:
+          when:
+            visible: Recent
+          commands:
+            - tapOn:
+                point: 7%,9%
+            - tapOn: Downloads
+            - tapOn: PubkyRing
+      - extendedWaitUntil:
+          visible: .*\.pkarr
+          timeout: 30000
+      - tapOn:
+          point: 28%,52%
+- extendedWaitUntil:
+    visible:
+      id: BackupFilePassphraseInput
+    timeout: 30000
+- tapOn:
+    id: BackupFilePassphraseInput
+- inputText: ${BACKUP_PASSWORD}
+- tapOn:
+    id: BackupFileSubmitButton
+- extendedWaitUntil:
+    visible:
+      id: import-success-title
+    timeout: 30000

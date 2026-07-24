@@ -13,6 +13,7 @@ import { handleMigrateAction } from '../src/utils/actions/migrateAction';
 import { handleSignupAction } from '../src/utils/actions/signupAction';
 import { handleInviteAction } from '../src/utils/actions/inviteAction';
 import { handleSessionAction } from '../src/utils/actions/sessionAction';
+import { showSheet } from '../src/sheets/sheetNavigation';
 
 jest.mock('../src/i18n', () => ({
 	__esModule: true,
@@ -67,12 +68,18 @@ jest.mock('../src/utils/actions/sessionAction', () => ({
 	handleSessionAction: jest.fn(),
 }));
 
+jest.mock('../src/sheets/sheetNavigation', () => ({
+	__esModule: true,
+	showSheet: jest.fn(),
+}));
+
 const handleAuthActionMock = handleAuthAction as jest.MockedFunction<typeof handleAuthAction>;
 const handleImportActionMock = handleImportAction as jest.MockedFunction<typeof handleImportAction>;
 const handleMigrateActionMock = handleMigrateAction as jest.MockedFunction<typeof handleMigrateAction>;
 const handleSignupActionMock = handleSignupAction as jest.MockedFunction<typeof handleSignupAction>;
 const handleInviteActionMock = handleInviteAction as jest.MockedFunction<typeof handleInviteAction>;
 const handleSessionActionMock = handleSessionAction as jest.MockedFunction<typeof handleSessionAction>;
+const showSheetMock = showSheet as jest.MockedFunction<typeof showSheet>;
 
 const dispatch = jest.fn();
 
@@ -205,6 +212,7 @@ describe('routeInput', () => {
 			dispatch,
 			pubky: 'pubky-selected',
 			isDeeplink: true,
+			setAddPubkyScreen: expect.any(Function),
 		});
 	});
 
@@ -227,7 +235,24 @@ describe('routeInput', () => {
 			dispatch,
 			isDeeplink: false,
 			skipImportSheet: true,
+			setAddPubkyScreen: expect.any(Function),
 		});
+	});
+
+	it('uses the Add Pubky sheet as the default screen router', async () => {
+		handleInviteActionMock.mockImplementation(async (_data, context) => {
+			context.setAddPubkyScreen({ screen: 'ImportOptions' });
+			return ok('pubky-invited');
+		});
+		const parsed = parsedInput({
+			action: InputAction.Invite,
+			params: { inviteCode: 'ABCD-1234-WXYZ' },
+		});
+
+		const result = await routeInput(parsed, { dispatch });
+
+		expect(result.isOk()).toBe(true);
+		expect(showSheetMock).toHaveBeenCalledWith('add-pubky', { screen: 'ImportOptions' });
 	});
 
 	it('returns handler error messages without wrapping useful errors', async () => {

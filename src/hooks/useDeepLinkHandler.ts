@@ -13,21 +13,15 @@ import { ParsedInput } from '../utils/inputParser';
 import { actionRequiresPubky } from '../utils/inputRouter';
 import {
 	routeInputWithContext,
-	showPubkySelectionSheet,
+	showAuthPubkySelection,
 	handleNoPubkysAvailable,
-	PubkyCallbacks,
-} from './inputHandlerUtils';
+} from '../utils/inputHandlerUtils';
 
 /**
  * Hook for handling deeplinks using the unified input system
  *
- * @param createPubky - Callback to create a new pubky (for when no pubkys exist)
- * @param importPubky - Callback to import a pubky (for when no pubkys exist)
  */
-export const useDeepLinkHandler = (
-	createPubky: () => Promise<void>,
-	importPubky: (mnemonic?: string) => Promise<any>,
-): void => {
+export const useDeepLinkHandler = (): void => {
 	const dispatch = useDispatch();
 	const deepLink = useSelector(getDeepLink);
 	const signedUpPubkys = useSelector(getSignedUpPubkys);
@@ -53,8 +47,6 @@ export const useDeepLinkHandler = (
 				return;
 			}
 
-			const callbacks: PubkyCallbacks = { createPubky, importPubky };
-
 			// Check if action requires a pubky selection
 			if (actionRequiresPubky(parsedInput.action)) {
 				const signedUpPubkyKeys = Object.keys(signedUpPubkys);
@@ -62,16 +54,12 @@ export const useDeepLinkHandler = (
 				if (signedUpPubkyKeys.length === 0) {
 					// No signed up pubkys - prompt user to set one up
 					dispatch(setDeepLink(''));
-					handleNoPubkysAvailable(allPubkys, callbacks);
+					handleNoPubkysAvailable(allPubkys);
 					return;
 				}
 
 				if (signedUpPubkyKeys.length > 1) {
-					// Multiple pubkys - show selection sheet
-					const selectedPubky = await showPubkySelectionSheet(parsedInput, 'deeplink', dispatch);
-					if (selectedPubky) {
-						await routeInputWithContext(parsedInput, selectedPubky, 'deeplink', dispatch);
-					}
+					showAuthPubkySelection(parsedInput, 'deeplink');
 					return;
 				}
 
@@ -87,5 +75,5 @@ export const useDeepLinkHandler = (
 		processDeepLink();
 		// Note: allPubkys is intentionally excluded to prevent re-triggering when new pubkys are created
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [deepLink, dispatch, signedUpPubkys, createPubky, importPubky]);
+	}, [deepLink, dispatch, signedUpPubkys]);
 };

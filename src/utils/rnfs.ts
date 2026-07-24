@@ -1,14 +1,10 @@
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import { Platform } from 'react-native';
 import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
-import { decryptRecoveryFile } from '@synonymdev/react-native-pubky';
-import { Dispatch } from 'redux';
-import { importPubky } from './pubky.ts';
 import { err, ok, Result } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import Share, { ShareOptions } from 'react-native-share';
-import { SheetManager } from 'react-native-actions-sheet';
-import { EBackupPromptViewId } from './sheetHelpers.ts';
+import type { ImportFileScreenParams } from '../sheets/types.ts';
 
 const Buffer = require('buffer').Buffer;
 
@@ -73,10 +69,9 @@ const ensureBackupDirectory = async (): Promise<Result<string>> => {
 };
 
 /**
- * Imports a .pkarr file selected by the user
- * @returns Promise<Result<string>> The contents of the selected .pkarr file
+ * Picks and reads a .pkarr file selected by the user.
  */
-export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
+export async function importFile(): Promise<Result<ImportFileScreenParams>> {
 	// Check permissions first
 	const hasPermission = await requestStoragePermission();
 	if (!hasPermission) {
@@ -131,11 +126,10 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 			console.warn('Could not get file stats, using current date:', statError);
 		}
 
-		return showImportPrompt({
+		return ok({
 			fileName,
-			fileDate,
+			fileDate: fileDate?.getTime(),
 			content: base64Content,
-			dispatch,
 		});
 	} catch (error) {
 		const errMsg = `Failed to import file: ${JSON.stringify(error)}`;
@@ -149,60 +143,6 @@ export async function importFile(dispatch: Dispatch): Promise<Result<string>> {
 		return err(errMsg);
 	}
 }
-
-export const showImportPrompt = ({
-	fileName,
-	fileDate,
-	content,
-	dispatch,
-}: {
-	fileName: string;
-	fileDate?: Date;
-	content: string;
-	dispatch: Dispatch;
-}): Promise<Result<string>> => {
-	return new Promise(resolve => {
-		SheetManager.show('backup-prompt', {
-			payload: {
-				fileName,
-				fileDate,
-				viewId: EBackupPromptViewId.import,
-				onSubmit: async (passphrase: string): Promise<Result<string>> => {
-					try {
-						const decryptRes = await decryptRecoveryFile(content, passphrase);
-						if (decryptRes.isErr()) {
-							const errorMsg = `Failed to decrypt file: ${decryptRes.error.message}. Please check your passphrase and try again.`;
-							console.error(errorMsg);
-							return err(errorMsg);
-						}
-
-						const secretKey = decryptRes.value;
-						console.log('File decrypted successfully, importing pubky...');
-						const pubky = await importPubky({ secretKey, dispatch });
-						if (pubky.isErr()) {
-							const errorMsg = `Failed to import pubky after decryption: ${pubky.error.message}`;
-							console.error(errorMsg);
-							resolve(err(errorMsg));
-							return err(errorMsg);
-						}
-
-						console.log('Successfully imported pubky from encrypted file');
-						SheetManager.hide('backup-prompt').then();
-						resolve(ok(pubky.value));
-						return ok(pubky.value);
-					} catch (error) {
-						const errorMsg = `Unexpected error during import: ${JSON.stringify(error)}`;
-						resolve(err(errorMsg));
-						return err(errorMsg);
-					}
-				},
-				onClose: () => {
-					resolve(err(''));
-				},
-			},
-		});
-	});
-};
 
 export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
 	// Ensure filename ends with .pkarr
@@ -226,6 +166,7 @@ export async function backupPubky(content: string, filename: string): Promise<Re
 				subject: 'Pubky Backup',
 				title: 'Save Pubky Backup',
 				failOnCancel: false,
+				saveToFiles: true,
 			};
 
 			// Show the native share sheet

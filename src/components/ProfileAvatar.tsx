@@ -66,9 +66,7 @@ const ProfileAvatar = ({ pubky, name, size = 32 }: ProfileAvatarProps): ReactEle
 			name={fallbackSeed}
 			showInitial={false}
 			size={size}
-			onRenderMouth={() => (
-				<Text style={initialStyle}>{fallbackInitial}</Text>
-			)}
+			onRenderMouth={() => <Text style={initialStyle}>{fallbackInitial}</Text>}
 		/>
 	);
 };

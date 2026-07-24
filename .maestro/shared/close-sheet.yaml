@@ -1,6 +1,16 @@
 appId: ${APP_ID}
 ---
-- swipe:
-    start: 50%, 17%
-    end: 50%, 95%
-    duration: 700
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - pressKey: Back
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      - swipe:
+          start: 50%, 17%
+          end: 50%, 95%
+          duration: 700

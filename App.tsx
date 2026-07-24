@@ -18,6 +18,7 @@ import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
+import { SharedPubkyDiscoveryContext, useSharedPubkyDiscovery } from './src/hooks/useSharedPubkyDiscovery.ts';
 
 const appToastConfig = toastConfig();
 
@@ -29,6 +30,7 @@ function App(): React.JSX.Element {
 	isOnlineRef.current = isOnline;
 	const dispatch = useDispatch();
 	const { t } = useTranslation();
+	const sharedPubkyDiscovery = useSharedPubkyDiscovery();
 
 	// Handle deep linking
 	useEffect(() => {
@@ -121,8 +123,10 @@ function App(): React.JSX.Element {
 			<SafeAreaProvider>
 				<SafeAreaView edges={['top', 'left', 'right']}>
 					<SheetProvider>
-						<RootNavigator />
-						<Toast config={appToastConfig} />
+						<SharedPubkyDiscoveryContext.Provider value={sharedPubkyDiscovery}>
+							<RootNavigator />
+							<Toast config={appToastConfig} />
+						</SharedPubkyDiscoveryContext.Provider>
 					</SheetProvider>
 				</SafeAreaView>
 			</SafeAreaProvider>

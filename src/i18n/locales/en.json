@@ -288,6 +288,7 @@
 		"errorDeletingPubky": "Error deleting pubky",
 		"secretKeyNotFoundInKeychain": "Secret key not found in keychain",
 		"failedToGetSecretKeyFromKeychain": "Failed to get secret key from keychain",
+		"pubkyAlreadyExists": "This pubky is already connected. Disconnect it before importing it as a Ring-owned identity.",
 		"homeserverNotFound": "Homeserver not found for this pubky. Please ensure the pubky is properly configured.",
 		"failedToSignOut": "Failed to sign out of homeserver",
 		"pubkyRequiredForAuth": "Pubky is required for auth",
@@ -368,11 +369,12 @@
 		"allFailed": "All keys failed to import"
 	},
 	"reuseSharedPubky": {
-		"title": "Reuse your pubky",
-		"description": "A pubky from Bitkit is available on this device. Choose whether to add it to Pubky Ring.",
-		"source": "Saved in Bitkit",
-		"add": "Add",
-		"added": "Added"
+		"title": "Use a Bitkit profile",
+		"description": "Use this profile in Pubky Ring while its key stays managed by Bitkit.",
+		"source": "Managed by Bitkit",
+		"useFromBitkit": "Use from Bitkit",
+		"add": "Use",
+		"added": "Connected"
 	},
 	"loading": {
 		"modalTitle": "Configuring Pubky",

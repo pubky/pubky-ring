@@ -10,6 +10,7 @@
 		1319212F6007D5772A620B61 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
 		4B1A7B8D2C3D4E5F00112233 /* AppInfo.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B1A7B8C2C3D4E5F00112233 /* AppInfo.m */; };
+		4B1A7B8F2C3D4E5F00112233 /* SharedPubky.m in Sources */ = {isa = PBXBuildFile; fileRef = 4B1A7B8E2C3D4E5F00112233 /* SharedPubky.m */; };
 		70F9B56BE652426C904D16F4 /* InterTight-VariableFont_wght.ttf in Resources */ = {isa = PBXBuildFile; fileRef = C21B8554B47148DBBCC60B15 /* InterTight-VariableFont_wght.ttf */; };
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
@@ -22,6 +23,8 @@
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = pubkyring/Info.plist; sourceTree = "<group>"; };
 		13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = PrivacyInfo.xcprivacy; path = pubkyring/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4B1A7B8C2C3D4E5F00112233 /* AppInfo.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = AppInfo.m; path = pubkyring/AppInfo.m; sourceTree = "<group>"; };
+		4B1A7B8E2C3D4E5F00112233 /* SharedPubky.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = SharedPubky.m; path = pubkyring/SharedPubky.m; sourceTree = "<group>"; };
+		4B1A7B902C3D4E5F00112233 /* pubkyring.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = pubkyring.entitlements; path = pubkyring/pubkyring.entitlements; sourceTree = "<group>"; };
 		5F66FC2D5C5C4019367FA619 /* libPods-pubkyring.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-pubkyring.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = pubkyring/AppDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = pubkyring/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -48,6 +51,8 @@
 			children = (
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				4B1A7B8C2C3D4E5F00112233 /* AppInfo.m */,
+				4B1A7B8E2C3D4E5F00112233 /* SharedPubky.m */,
+				4B1A7B902C3D4E5F00112233 /* pubkyring.entitlements */,
 				761780EC2CA45674006654EE /* AppDelegate.swift */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
@@ -262,6 +267,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4B1A7B8D2C3D4E5F00112233 /* AppInfo.m in Sources */,
+				4B1A7B8F2C3D4E5F00112233 /* SharedPubky.m in Sources */,
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -275,6 +281,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = pubkyring/pubkyring.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KYH47R284B;
 				ENABLE_BITCODE = NO;
@@ -294,6 +301,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.pubkyring;
 				PRODUCT_NAME = pubkyring;
+				PUBKY_PRIVATE_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)app.pubkyring";
+				PUBKY_SHARED_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)pubky.shared";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -306,6 +315,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_ENTITLEMENTS = pubkyring/pubkyring.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = KYH47R284B;
 				INFOPLIST_FILE = pubkyring/Info.plist;
@@ -324,6 +334,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = app.pubkyring;
 				PRODUCT_NAME = pubkyring;
+				PUBKY_PRIVATE_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)app.pubkyring";
+				PUBKY_SHARED_KEYCHAIN_GROUP = "$(AppIdentifierPrefix)pubky.shared";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";

@@ -7,7 +7,7 @@ import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
-import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getOwnedPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { setTheme } from '../theme/helpers.ts';
 import { ENavigationAnimation, ETheme } from '../types/settings.ts';
 import {
@@ -25,6 +25,7 @@ import { BodyMSBText, BodyMText, BodySText, CaptionText } from '../theme/typogra
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
+import { clearOwnedSharedPubkys, withPubkyIdentityLifecycle } from '../utils/sharedPubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -35,7 +36,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const currentTheme = useSelector(getTheme);
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const pubkyKeys = useSelector(getPubkyKeys);
+	const pubkyKeys = useSelector(getOwnedPubkyKeys);
 	const hasPubkys = pubkyKeys.length > 0;
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const { showScanner } = useInputHandler({});
@@ -100,8 +101,17 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			},
 			{
 				text: t('common.yes'),
-				onPress: (): void => {
-					wipeKeychain().then();
+				onPress: async (): Promise<void> => {
+					const wiped = await withPubkyIdentityLifecycle(async () => {
+						// Shared-first removal preserves the canonical private source on failure.
+						if (!(await clearOwnedSharedPubkys()) || !(await wipeKeychain())) return false;
+						// Verify absence again while reconciliation is still excluded.
+						return await clearOwnedSharedPubkys();
+					});
+					if (!wiped) {
+						Alert.alert(t('common.error'), t('pubkyErrors.errorDeletingPubky'));
+						return;
+					}
 					dispatch(resetSettings());
 					dispatch(resetPubkys());
 					navigation.reset({

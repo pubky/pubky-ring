@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="to.bitkit.dev.permission.READ_SHARED_PUBKY" />
+    <uses-permission android:name="to.bitkit.tnet.permission.READ_SHARED_PUBKY" />
+
     <queries>
         <package android:name="to.bitkit.dev" />
         <package android:name="to.bitkit.tnet" />

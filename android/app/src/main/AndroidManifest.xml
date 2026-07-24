@@ -52,6 +52,7 @@
         android:name="to.pubkyring.SharedPubkyProvider"
         android:authorities="${applicationId}.sharedpubky"
         android:exported="true"
+        android:grantUriPermissions="false"
         android:readPermission="app.pubkyring.permission.READ_SHARED_PUBKY"
         android:writePermission="app.pubkyring.permission.READ_SHARED_PUBKY" />
     </application>

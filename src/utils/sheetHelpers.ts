@@ -18,9 +18,10 @@ export const showReuseSharedPubkySheet = (identities: SharedPubkyIdentity[]): vo
 export const showAddPubkySheet = (
 	createPubky: () => void,
 	importPubky: (mnemonic?: string) => Promise<any>,
+	sharedIdentities: SharedPubkyIdentity[] = [],
 ): void => {
 	SheetManager.show('add-pubky', {
-		payload: { createPubky, importPubky },
+		payload: { createPubky, importPubky, sharedIdentities },
 	});
 };
 
@@ -109,6 +110,14 @@ export const showBackupPrompt = async ({
 	backupPreference?: EBackupPreference;
 	onComplete?: () => void;
 }): Promise<void> => {
+	if (getStore().pubky.pubkys[pubky]?.sourceApp === 'to.bitkit') {
+		showToast({
+			type: 'error',
+			title: i18n.t('common.error'),
+			description: i18n.t('reuseSharedPubky.source'),
+		});
+		return;
+	}
 	if (backupPreference === EBackupPreference.unknown) {
 		SheetManager.show('select-backup-preference', {
 			payload: {

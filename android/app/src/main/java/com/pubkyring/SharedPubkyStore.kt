@@ -9,6 +9,7 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import org.json.JSONArray
 import org.json.JSONObject
 
 /** App-private AES-GCM encrypted mirror used by the native ContentProvider. */
@@ -23,22 +24,83 @@ class SharedPubkyStore(context: Context) {
       val plaintext = decrypt(stored) ?: return@mapNotNull null
       try {
         val json = JSONObject(plaintext)
+        val version = json.optInt("version")
+        val sourcePackage = json.optString("sourcePackage")
+        val storedPubky = json.optString("pubky")
         val secretKey = json.optString("secretKey")
-        if (pubky.isBlank() || secretKey.isBlank()) null else Identity(pubky, secretKey)
+        if (
+          version != SharedPubkyContract.VERSION ||
+            sourcePackage != SharedPubkyContract.RING_SOURCE_PACKAGE ||
+            pubky != storedPubky ||
+            !SharedPubkyContract.isValidPubky(pubky) ||
+            !SharedPubkyContract.isValidSecretKey(secretKey)
+        ) {
+          null
+        } else {
+          Identity(pubky, secretKey)
+        }
       } catch (_: Exception) {
         null
       }
-    }
+    }.sortedBy { it.pubky }
+
+  fun get(pubky: String): Identity? = list().firstOrNull { it.pubky == pubky }
 
   fun upsert(pubky: String, secretKey: String) {
-    require(pubky.isNotBlank()) { "pubky must not be blank" }
-    require(secretKey.isNotBlank()) { "secretKey must not be blank" }
-    val plaintext = JSONObject().put("secretKey", secretKey).toString()
-    prefs.edit().putString(pubky, encrypt(plaintext)).apply()
+    require(SharedPubkyContract.isValidPubky(pubky)) { "pubky is invalid" }
+    require(SharedPubkyContract.isValidSecretKey(secretKey)) { "secretKey is invalid" }
+    val plaintext =
+      JSONObject()
+        .put("version", SharedPubkyContract.VERSION)
+        .put("sourcePackage", SharedPubkyContract.RING_SOURCE_PACKAGE)
+        .put("pubky", pubky)
+        .put("secretKey", secretKey)
+        .toString()
+    check(prefs.edit().putString(pubky, encrypt(plaintext)).commit()) {
+      "Unable to persist shared pubky mirror"
+    }
+    check(get(pubky)?.secretKey == secretKey) { "Shared pubky mirror read-back failed" }
   }
 
   fun remove(pubky: String) {
-    prefs.edit().remove(pubky).apply()
+    check(prefs.edit().remove(pubky).commit()) { "Unable to remove shared pubky mirror" }
+    check(get(pubky) == null) { "Shared pubky mirror still exists after removal" }
+  }
+
+  /**
+   * Replaces the mirror with the complete set of identities owned by Ring.
+   *
+   * The caller has already read and validated these values from Ring's canonical private
+   * keychain. Borrowed Bitkit identities are deliberately never passed to this method.
+   */
+  fun reconcile(identitiesJson: String) {
+    val identities = JSONArray(identitiesJson)
+    val desired = linkedMapOf<String, String>()
+    for (index in 0 until identities.length()) {
+      val identity = identities.getJSONObject(index)
+      val pubky = identity.getString("pubky")
+      val secretKey = identity.getString("secretKey")
+      require(SharedPubkyContract.isValidPubky(pubky)) { "pubky is invalid" }
+      require(SharedPubkyContract.isValidSecretKey(secretKey)) { "secretKey is invalid" }
+      check(desired.put(pubky, secretKey) == null) { "Duplicate pubky" }
+    }
+
+    desired.forEach { (pubky, secretKey) -> upsert(pubky, secretKey) }
+    prefs.all.keys.filterNot(desired::containsKey).forEach(::remove)
+    check(list().associate { it.pubky to it.secretKey } == desired) {
+      "Shared pubky reconciliation read-back failed"
+    }
+  }
+
+  fun clear() {
+    check(prefs.edit().clear().commit()) { "Unable to clear shared pubky mirrors" }
+    check(prefs.all.isEmpty()) { "Shared pubky mirrors still exist after clear" }
+
+    val keyStore = KeyStore.getInstance(ANDROID_KEYSTORE).apply { load(null) }
+    if (keyStore.containsAlias(KEY_ALIAS)) {
+      keyStore.deleteEntry(KEY_ALIAS)
+      check(!keyStore.containsAlias(KEY_ALIAS)) { "Shared pubky encryption key still exists after clear" }
+    }
   }
 
   private fun encrypt(plaintext: String): String {

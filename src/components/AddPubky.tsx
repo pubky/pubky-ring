@@ -13,7 +13,9 @@ import { readFromClipboard } from '../utils/clipboard';
 import i18n from '../i18n';
 import { BodyMText, DisplayText } from '../theme/typography';
 import Sheet from './Sheet.tsx';
-import { FileText, Lock, Pencil, Scan, Upload } from '../icons/index.ts';
+import { FileText, Key, Lock, Pencil, Scan, Upload } from '../icons/index.ts';
+import { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
+import { showReuseSharedPubkySheet } from '../utils/sheetHelpers.ts';
 
 const AddPubky = ({
 	payload,
@@ -21,10 +23,11 @@ const AddPubky = ({
 	payload: {
 		createPubky: () => void;
 		importPubky: (mnemonic?: string) => Promise<Result<string>>;
+		sharedIdentities?: SharedPubkyIdentity[];
 	};
 }): ReactElement => {
 	const dispatch = useDispatch();
-	const { createPubky, importPubky } = useMemo(() => payload, [payload]);
+	const { createPubky, importPubky, sharedIdentities = [] } = useMemo(() => payload, [payload]);
 	const [currentScreen, setCurrentScreen] = useState<'main' | 'import-options' | 'mnemonic-form'>('main');
 
 	const closeSheet = useCallback(async (): Promise<void> => {
@@ -52,6 +55,11 @@ const AddPubky = ({
 		closeSheet();
 		createPubky();
 	}, [createPubky, closeSheet]);
+
+	const onUseFromBitkit = useCallback(async () => {
+		await closeSheet();
+		if (sharedIdentities.length > 0) showReuseSharedPubkySheet(sharedIdentities);
+	}, [closeSheet, sharedIdentities]);
 
 	const onMnemonicCancel = useCallback(() => {
 		setCurrentScreen('import-options');
@@ -196,6 +204,16 @@ const AddPubky = ({
 						icon: <Upload />,
 						onPress: onImportPubky,
 					},
+					...(sharedIdentities.length > 0
+						? [
+								{
+									id: 'AddPubkyBitkit',
+									text: i18n.t('reuseSharedPubky.useFromBitkit'),
+									icon: <Key />,
+									onPress: onUseFromBitkit,
+								},
+							]
+						: []),
 				];
 			case 'import-options':
 				return [
@@ -223,7 +241,16 @@ const AddPubky = ({
 			default:
 				return [];
 		}
-	}, [currentScreen, onCreatePubky, onImportPubky, onMnemonicPhrase, onScanQrPress, onUploadFile]);
+	}, [
+		currentScreen,
+		onCreatePubky,
+		onImportPubky,
+		onMnemonicPhrase,
+		onScanQrPress,
+		onUploadFile,
+		onUseFromBitkit,
+		sharedIdentities.length,
+	]);
 
 	const isMnemonicForm = currentScreen === 'mnemonic-form';
 	const shouldShowBackButton = currentScreen !== 'main';

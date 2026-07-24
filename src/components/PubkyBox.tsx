@@ -17,9 +17,10 @@ interface PubkyInfoProps {
 	publicKey: string;
 	sessionsCount: number;
 	isBackedUp: boolean;
+	isBorrowed: boolean;
 }
 
-const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: PubkyInfoProps) => {
+const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, isBorrowed }: PubkyInfoProps) => {
 	const { t } = useTranslation();
 
 	const handleBackupPress = useCallback(() => {
@@ -35,13 +36,15 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 				<BodySSBText numberOfLines={1} ellipsizeMode="middle">
 					{truncateStr(publicKey)}
 				</BodySSBText>
-				{!isBackedUp && (
+				{isBorrowed ? (
+					<BodySSBUnspacedText colorName="textTertiary">{t('reuseSharedPubky.source')}</BodySSBUnspacedText>
+				) : !isBackedUp ? (
 					<TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}>
 						<BodySSBUnspacedText colorName="pubkyRing">
 							{t('pubkyProfile.backupReminder')}
 						</BodySSBUnspacedText>
 					</TouchableOpacity>
-				)}
+				) : null}
 				{sessionsCount > 0 && (
 					<View style={styles.sessionsButton}>
 						<BodySSBText colorName="textTertiary">{sessionsCount}</BodySSBText>
@@ -126,6 +129,7 @@ const PubkyBox = ({
 						pubkyName={pubkyName}
 						publicKey={publicKey}
 						isBackedUp={pubkyData.isBackedUp}
+						isBorrowed={pubkyData.sourceApp === 'to.bitkit'}
 						sessionsCount={sessionsCount}
 					/>
 

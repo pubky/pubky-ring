@@ -15,6 +15,7 @@ interface ProfileAvatarProps {
 	pubky: string;
 	name?: string;
 	size?: number;
+	image?: string;
 }
 
 const resolveFallbackSeed = (pubky: string): string => {
@@ -31,9 +32,10 @@ const resolveFallbackInitial = (name: string | undefined, seed: string): string 
 	return seed.trim().charAt(0).toUpperCase();
 };
 
-const ProfileAvatar = ({ pubky, name, size = 32 }: ProfileAvatarProps): ReactElement => {
+const ProfileAvatar = ({ pubky, name, size = 32, image }: ProfileAvatarProps): ReactElement => {
 	const fallbackSeed = useMemo(() => resolveFallbackSeed(pubky), [pubky]);
-	const imageUri = useSelector((state: RootState) => getPubkyImage(state, fallbackSeed));
+	const storedImageUri = useSelector((state: RootState) => getPubkyImage(state, fallbackSeed));
+	const imageUri = image || storedImageUri;
 	const fallbackInitial = useMemo(() => resolveFallbackInitial(name, fallbackSeed), [name, fallbackSeed]);
 
 	// Memoize style object to prevent unnecessary re-renders
@@ -66,9 +68,7 @@ const ProfileAvatar = ({ pubky, name, size = 32 }: ProfileAvatarProps): ReactEle
 			name={fallbackSeed}
 			showInitial={false}
 			size={size}
-			onRenderMouth={() => (
-				<Text style={initialStyle}>{fallbackInitial}</Text>
-			)}
+			onRenderMouth={() => <Text style={initialStyle}>{fallbackInitial}</Text>}
 		/>
 	);
 };

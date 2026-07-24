@@ -9,7 +9,7 @@ import { Key } from '../icons/index.ts';
 import type { RootStackParamList } from '../navigation/types.ts';
 import { BodyMText, BodyMSBText, CaptionText } from '../theme/typography.ts';
 import { showToast } from '../utils/helpers.ts';
-import { importPubky, truncateStr } from '../utils/pubky.ts';
+import { connectSharedPubky, truncateStr } from '../utils/pubky.ts';
 import type { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import { hideSheet } from './sheetNavigation.tsx';
 
@@ -19,20 +19,21 @@ const ReuseSharedPubkySheet = ({
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const { identities } = route.params;
-	const [importing, setImporting] = useState<string>();
-	const [imported, setImported] = useState<string[]>([]);
+	const [connecting, setConnecting] = useState<string>();
+	const [connected, setConnected] = useState<string[]>([]);
 
-	const add = useCallback(
+	const connectIdentity = useCallback(
 		async (identity: SharedPubkyIdentity): Promise<void> => {
-			setImporting(identity.pubky);
+			setConnecting(identity.pubky);
 			try {
-				// importPubky derives and validates the public key again before saving.
-				const result = await importPubky({ secretKey: identity.secretKey, dispatch });
+				// The native bridge retrieves and validates the selected credential just in time.
+				// Ring stores only the Bitkit source reference and its own homeserver session.
+				const result = await connectSharedPubky({ identity, dispatch });
 				if (result.isErr()) {
 					showToast({ type: 'error', title: t('common.error'), description: result.error.message });
 					return;
 				}
-				setImported(current => [...current, identity.pubky]);
+				setConnected(current => [...current, identity.pubky]);
 			} catch (error) {
 				showToast({
 					type: 'error',
@@ -40,7 +41,7 @@ const ReuseSharedPubkySheet = ({
 					description: error instanceof Error ? error.message : String(error),
 				});
 			} finally {
-				setImporting(undefined);
+				setConnecting(undefined);
 			}
 		},
 		[dispatch, t],
@@ -51,23 +52,23 @@ const ReuseSharedPubkySheet = ({
 			<BodyMText style={styles.description}>{t('reuseSharedPubky.description')}</BodyMText>
 			<View style={styles.list}>
 				{identities.map(identity => {
-					const wasImported = imported.includes(identity.pubky);
+					const wasConnected = connected.includes(identity.pubky);
 					return (
 						<View key={identity.pubky} style={styles.row}>
 							<View style={styles.icon}>
 								<Key />
 							</View>
 							<View style={styles.info}>
-								<BodyMSBText numberOfLines={1}>{truncateStr(identity.pubky).replace(/^pk:/, '')}</BodyMSBText>
+								<BodyMSBText numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</BodyMSBText>
 								<CaptionText colorName="textTertiary">{t('reuseSharedPubky.source')}</CaptionText>
 							</View>
 							<Button
-								text={wasImported ? t('reuseSharedPubky.added') : t('reuseSharedPubky.add')}
+								text={wasConnected ? t('reuseSharedPubky.added') : t('reuseSharedPubky.add')}
 								size="small"
 								variant="secondary"
-								loading={importing === identity.pubky}
-								disabled={wasImported || importing !== undefined}
-								onPress={() => add(identity)}
+								loading={connecting === identity.pubky}
+								disabled={wasConnected || connecting !== undefined}
+								onPress={() => connectIdentity(identity)}
 							/>
 						</View>
 					);

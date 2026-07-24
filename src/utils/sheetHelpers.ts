@@ -2,7 +2,7 @@ import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
 import { getPubkySecretKey } from './pubky.ts';
-import { getBackupPreference } from './store-helpers.ts';
+import { getBackupPreference, getStore } from './store-helpers.ts';
 import i18n from '../i18n';
 import type { BackupSheetParams } from '../sheets/types.ts';
 
@@ -80,6 +80,15 @@ export const showBackupSheet = async ({
 	pubky: string;
 	backupPreference?: EBackupPreference;
 }): Promise<void> => {
+	if (getStore().pubky.pubkys[pubky]?.sourceApp === 'to.bitkit') {
+		showToast({
+			type: 'error',
+			title: i18n.t('common.error'),
+			description: i18n.t('reuseSharedPubky.source'),
+		});
+		return;
+	}
+
 	const params = await createBackupInitialScreenParams({ pubky, backupPreference });
 
 	if (!params) {

@@ -70,14 +70,18 @@ export const PubkyDetailCard = memo(
 						testID="PubkyDetailShareButton"
 						onPress={onSharePress}
 					/>
-					<Button
-						style={styles.actionButton}
-						text={t('backup.backup')}
-						variant="dark"
-						icon={backupIcon}
-						testID="PubkyDetailBackupButton"
-						onPress={onBackup}
-					/>
+
+					{pubkyData.sourceApp !== 'to.bitkit' && (
+						<Button
+							style={styles.actionButton}
+							text={t('backup.backup')}
+							variant="dark"
+							icon={backupIcon}
+							testID="PubkyDetailBackupButton"
+							onPress={onBackup}
+						/>
+					)}
+
 					<Button
 						style={styles.actionButton}
 						text={t('common.delete')}

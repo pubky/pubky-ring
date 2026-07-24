@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback, useContext, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
@@ -19,9 +19,9 @@ import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
-import { useSharedPubkyDiscovery } from '../hooks/useSharedPubkyDiscovery.ts';
+import { SharedPubkyDiscoveryContext } from '../hooks/useSharedPubkyDiscovery.ts';
+import SharedPubkyCard from '../components/SharedPubkyCard.tsx';
 
-// Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
 const GRADIENT_START = { x: 0, y: 0 };
 const GRADIENT_END = { x: 0, y: 1 };
@@ -75,8 +75,7 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
-
-	useSharedPubkyDiscovery();
+	const { identities: sharedIdentities } = useContext(SharedPubkyDiscoveryContext);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -132,7 +131,15 @@ const HomeScreen = (): ReactElement => {
 			<SafeAreaView style={styles.container} edges={['bottom']}>
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
-				<EmptyState />
+				{sharedIdentities.length > 0 ? (
+					<View style={styles.sharedIdentities}>
+						{sharedIdentities.map(identity => (
+							<SharedPubkyCard key={identity.pubky} identity={identity} />
+						))}
+					</View>
+				) : (
+					<EmptyState />
+				)}
 				<View>
 					<ListFooter />
 				</View>
@@ -153,7 +160,6 @@ const HomeScreen = (): ReactElement => {
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 			/>
-			{/* Fixed footer */}
 			<View style={styles.fixedFooterContainer}>
 				<LinearGradient
 					style={styles.fadeOverlay}
@@ -179,6 +185,10 @@ const styles = StyleSheet.create({
 	},
 	emptyStateBanner: {
 		paddingTop: HEADER_HEIGHT + 16,
+	},
+	sharedIdentities: {
+		flex: 1,
+		justifyContent: 'center',
 	},
 	fadeOverlay: {
 		position: 'absolute',

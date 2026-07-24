@@ -15,6 +15,7 @@ import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
+import { SharedPubkyDiscoveryContext, useSharedPubkyDiscovery } from './src/hooks/useSharedPubkyDiscovery.ts';
 import './src/theme/toast';
 
 function App(): React.JSX.Element {
@@ -25,6 +26,7 @@ function App(): React.JSX.Element {
 	isOnlineRef.current = isOnline;
 	const dispatch = useDispatch();
 	const { t } = useTranslation();
+	const sharedPubkyDiscovery = useSharedPubkyDiscovery();
 
 	// Handle deep linking
 	useEffect(() => {
@@ -116,7 +118,9 @@ function App(): React.JSX.Element {
 		<ThemeProvider theme={theme}>
 			<SafeAreaProvider>
 				<SafeAreaView edges={['top', 'left', 'right']}>
-					<RootNavigator />
+					<SharedPubkyDiscoveryContext.Provider value={sharedPubkyDiscovery}>
+						<RootNavigator />
+					</SharedPubkyDiscoveryContext.Provider>
 				</SafeAreaView>
 			</SafeAreaProvider>
 		</ThemeProvider>

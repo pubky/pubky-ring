@@ -15,6 +15,7 @@ export const defaultPubkyState: Pubky = {
 	sessions: [],
 	backupPreference: EBackupPreference.encryptedFile,
 	isBackedUp: false,
+	sourceApp: 'app.pubkyring',
 };
 
 export const defaultProfile: TProfile = {

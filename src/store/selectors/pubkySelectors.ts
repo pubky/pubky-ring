@@ -68,6 +68,14 @@ export const getHasPubkys = createSelector([selectAllPubkys], pubkys => Object.k
  */
 export const getPubkyKeys = createSelector([selectAllPubkys], pubkys => Object.keys(pubkys));
 
+export const getOwnedPubkyKeys = createSelector([selectAllPubkys], pubkys =>
+	Object.keys(pubkys).filter(pubky => pubkys[pubky]?.sourceApp !== 'to.bitkit'),
+);
+
+export const getBorrowedPubkyKeys = createSelector([selectAllPubkys], pubkys =>
+	Object.keys(pubkys).filter(pubky => pubkys[pubky]?.sourceApp === 'to.bitkit'),
+);
+
 /**
  * Combined selector for HomeScreen to reduce re-renders
  */

@@ -4,10 +4,18 @@ set -euo pipefail
 trap 'adb logcat -d > "$GITHUB_WORKSPACE/android-logcat.txt" || true' EXIT
 
 cd "$GITHUB_WORKSPACE/android"
-./gradlew :app:assembleDebug -PreactNativeArchitectures=x86_64 --no-daemon
+./gradlew \
+  :app:assembleDebug \
+  -PRING_BUNDLE_DEBUG_JS=true \
+  -PreactNativeArchitectures=x86_64 \
+  --no-daemon
 APK_PATH="$(find app/build/outputs/apk/debug -maxdepth 1 -name '*.apk' -print -quit)"
 if [[ -z "$APK_PATH" ]]; then
   echo "No debug APK found in app/build/outputs/apk/debug" >&2
+  exit 1
+fi
+if ! unzip -Z1 "$APK_PATH" | grep -Fxq 'assets/index.android.bundle'; then
+  echo "Debug E2E APK is missing its packaged JavaScript bundle" >&2
   exit 1
 fi
 adb install -r "$APK_PATH"

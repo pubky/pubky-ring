@@ -14,7 +14,7 @@ if [[ -z "$APK_PATH" ]]; then
   echo "No debug APK found in app/build/outputs/apk/debug" >&2
   exit 1
 fi
-if ! unzip -Z1 "$APK_PATH" | grep -Fxq 'assets/index.android.bundle'; then
+if ! unzip -tqq "$APK_PATH" assets/index.android.bundle >/dev/null; then
   echo "Debug E2E APK is missing its packaged JavaScript bundle" >&2
   exit 1
 fi

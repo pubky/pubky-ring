@@ -38,6 +38,8 @@
 		"navigationAnimation": "Animación de la navegación",
 		"autoAuth": "Autenticación automática",
 		"showOnboarding": "Mostrar incorporación",
+		"legacySunsetTestMode": "Modo de prueba del aviso de migración",
+		"legacySunsetTestModeDescription": "Muestra el aviso de migración usando el APK de la última versión publicada.",
 		"wipePubkyRing": "Limpiar el anillo pubis",
 		"wipeConfirmTitle": "¿Está seguro?",
 		"wipeConfirmMessage": "Esta acción borrará todos los datos de Pubky Ring y no podrá deshacerse.",

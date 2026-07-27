@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState, useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
 import { createMMKV } from 'react-native-mmkv';
 import { appApplicationId } from '../utils/appInfo.ts';
@@ -8,6 +8,7 @@ export const REPLACEMENT_RELEASE_ENDPOINT = 'https://api.github.com/repos/pubky/
 export const LEGACY_ANDROID_APPLICATION_ID = 'to.pubky.ring';
 
 const ACTIVATION_STORAGE_KEY = 'legacySunset.replacementRelease';
+const TEST_MODE_STORAGE_KEY = 'legacySunset.testMode';
 const REQUEST_TIMEOUT_MS = 5_000;
 
 export type ReplacementRelease = {
@@ -42,7 +43,27 @@ type Fetcher = (
 	init?: { signal?: AbortSignal; headers?: Record<string, string> },
 ) => Promise<FetchResponse>;
 
-const storage = createMMKV();
+export type ParseReplacementReleaseOptions = {
+	/** Accept any APK asset instead of only the replacement package APK. Test mode only. */
+	allowAnyApk?: boolean;
+};
+
+export type DetectReplacementReleaseOptions = {
+	storage?: ReplacementReleaseStorage;
+	fetcher?: Fetcher;
+	timeoutMs?: number;
+	/** Match any published APK and never read or write the persisted activation. */
+	testMode?: boolean;
+};
+
+type DetectionResult = {
+	testMode: boolean;
+	release: ReplacementRelease | null;
+};
+
+const defaultStorage = createMMKV();
+const testModeListeners = new Set<() => void>();
+let testMode: boolean | undefined;
 let sessionCheck: Promise<ReplacementRelease | null> | undefined;
 
 function isAllowedReleaseUrl(value: unknown): value is string {
@@ -74,7 +95,22 @@ function isAllowedApkUrl(value: unknown): value is string {
 	}
 }
 
-export function parseReplacementRelease(payload: unknown): ReplacementRelease | null {
+function isApkAsset(asset: GithubAsset): boolean {
+	return (
+		typeof asset?.name === 'string' &&
+		asset.name.endsWith('.apk') &&
+		isAllowedApkUrl(asset.browser_download_url)
+	);
+}
+
+function isReplacementApkAsset(asset: GithubAsset): boolean {
+	return isApkAsset(asset) && (asset.name as string).startsWith(REPLACEMENT_APK_PREFIX);
+}
+
+export function parseReplacementRelease(
+	payload: unknown,
+	{ allowAnyApk = false }: ParseReplacementReleaseOptions = {},
+): ReplacementRelease | null {
 	if (!payload || typeof payload !== 'object') return null;
 
 	const release = payload as GithubRelease;
@@ -83,13 +119,8 @@ export function parseReplacementRelease(payload: unknown): ReplacementRelease | 
 	}
 	if (!Array.isArray(release.assets)) return null;
 
-	const apk = (release.assets as GithubAsset[]).find(
-		asset =>
-			typeof asset?.name === 'string' &&
-			asset.name.startsWith(REPLACEMENT_APK_PREFIX) &&
-			asset.name.endsWith('.apk') &&
-			isAllowedApkUrl(asset.browser_download_url),
-	);
+	const assets = release.assets as GithubAsset[];
+	const apk = assets.find(isReplacementApkAsset) ?? (allowAnyApk ? assets.find(isApkAsset) : undefined);
 
 	return apk ? { releaseUrl: release.html_url, apkUrl: apk.browser_download_url as string } : null;
 }
@@ -111,13 +142,16 @@ function parsePersistedActivation(value: unknown): ReplacementRelease | null {
 		: null;
 }
 
-export async function detectReplacementRelease(
-	targetStorage: ReplacementReleaseStorage = storage,
-	fetcher: Fetcher = fetch,
+export async function detectReplacementRelease({
+	storage: targetStorage = defaultStorage,
+	fetcher = fetch,
 	timeoutMs = REQUEST_TIMEOUT_MS,
-): Promise<ReplacementRelease | null> {
-	const persisted = readPersistedActivation(targetStorage);
-	if (persisted) return persisted;
+	testMode: useTestMode = false,
+}: DetectReplacementReleaseOptions = {}): Promise<ReplacementRelease | null> {
+	if (!useTestMode) {
+		const persisted = readPersistedActivation(targetStorage);
+		if (persisted) return persisted;
+	}
 
 	const controller = new AbortController();
 	const timeout = setTimeout(() => controller.abort(), timeoutMs);
@@ -129,8 +163,8 @@ export async function detectReplacementRelease(
 		});
 		if (!response.ok) return null;
 
-		const release = parseReplacementRelease(await response.json());
-		if (release) targetStorage.set(ACTIVATION_STORAGE_KEY, JSON.stringify(release));
+		const release = parseReplacementRelease(await response.json(), { allowAnyApk: useTestMode });
+		if (release && !useTestMode) targetStorage.set(ACTIVATION_STORAGE_KEY, JSON.stringify(release));
 		return release;
 	} catch {
 		return null;
@@ -139,11 +173,46 @@ export async function detectReplacementRelease(
 	}
 }
 
-export function getReplacementReleaseForSession(): Promise<ReplacementRelease | null> {
-	if (Platform.OS !== 'android' || appApplicationId !== LEGACY_ANDROID_APPLICATION_ID) {
-		return Promise.resolve(null);
+/** The notice only ever applies to the final legacy Android build. */
+export function isLegacySunsetTarget(): boolean {
+	return Platform.OS === 'android' && appApplicationId === LEGACY_ANDROID_APPLICATION_ID;
+}
+
+export function isTestModeEnabled(): boolean {
+	if (testMode === undefined) {
+		try {
+			testMode = defaultStorage.getString(TEST_MODE_STORAGE_KEY) === 'true';
+		} catch {
+			testMode = false;
+		}
 	}
-	if (!sessionCheck) sessionCheck = detectReplacementRelease();
+	return testMode;
+}
+
+export function setTestModeEnabled(enabled: boolean): void {
+	if (isTestModeEnabled() === enabled) return;
+
+	testMode = enabled;
+	try {
+		defaultStorage.set(TEST_MODE_STORAGE_KEY, enabled ? 'true' : 'false');
+	} catch {
+		// Best effort. The in-memory value still applies to this session.
+	}
+
+	sessionCheck = undefined;
+	testModeListeners.forEach(listener => listener());
+}
+
+export function subscribeToTestMode(listener: () => void): () => void {
+	testModeListeners.add(listener);
+	return (): void => {
+		testModeListeners.delete(listener);
+	};
+}
+
+export function getReplacementReleaseForSession(): Promise<ReplacementRelease | null> {
+	if (!isLegacySunsetTarget()) return Promise.resolve(null);
+	if (!sessionCheck) sessionCheck = detectReplacementRelease({ testMode: isTestModeEnabled() });
 	return sessionCheck;
 }
 
@@ -151,20 +220,45 @@ export function useReplacementRelease(): {
 	replacementRelease: ReplacementRelease | null;
 	isReplacementAvailable: boolean;
 } {
-	const [replacementRelease, setReplacementRelease] = useState<ReplacementRelease | null>(null);
+	const [detection, setDetection] = useState<DetectionResult | null>(null);
+	const isTestMode = useSyncExternalStore(subscribeToTestMode, isTestModeEnabled);
 
 	useEffect(() => {
 		let mounted = true;
 		void getReplacementReleaseForSession().then(release => {
-			if (mounted) setReplacementRelease(release);
+			if (mounted) setDetection({ testMode: isTestMode, release });
 		});
-		return () => {
+		return (): void => {
 			mounted = false;
 		};
-	}, []);
+	}, [isTestMode]);
+
+	// Detections from the previous mode are dropped so the banner tracks the toggle immediately.
+	const replacementRelease = detection?.testMode === isTestMode ? detection.release : null;
 
 	return {
 		replacementRelease,
 		isReplacementAvailable: replacementRelease !== null,
+	};
+}
+
+/**
+ * Hidden settings toggle so QA can exercise the sunset notice before the replacement APK is published.
+ */
+export function useReplacementReleaseTestMode(): {
+	isTestModeAvailable: boolean;
+	isTestModeEnabled: boolean;
+	toggleTestMode: () => void;
+} {
+	const enabled = useSyncExternalStore(subscribeToTestMode, isTestModeEnabled);
+
+	const toggleTestMode = useCallback(() => {
+		setTestModeEnabled(!enabled);
+	}, [enabled]);
+
+	return {
+		isTestModeAvailable: isLegacySunsetTarget(),
+		isTestModeEnabled: enabled,
+		toggleTestMode,
 	};
 }

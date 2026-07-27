@@ -25,6 +25,7 @@ import { BodyMSBText, BodyMText, BodySText, CaptionText } from '../theme/typogra
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
+import { useReplacementReleaseTestMode } from '../hooks/useReplacementRelease.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -39,6 +40,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const hasPubkys = pubkyKeys.length > 0;
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const { showScanner } = useInputHandler({});
+	const { isTestModeAvailable, isTestModeEnabled, toggleTestMode } = useReplacementReleaseTestMode();
 
 	const getThemeDisplayText = useCallback(
 		(theme: ETheme) => {
@@ -223,6 +225,26 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					</ThemedView>
 				)}
 
+				{showSecretSettings && isTestModeAvailable && (
+					<ThemedView style={styles.section} colorName="buttonBackground">
+						<TouchableOpacity
+							testID="LegacySunsetTestModeToggle"
+							onPress={toggleTestMode}
+							style={styles.testModeRow}
+						>
+							<View style={styles.testModeLabel}>
+								<BodyMSBText>{t('settings.legacySunsetTestMode')}</BodyMSBText>
+								<BodySText colorName="textTertiary">
+									{t('settings.legacySunsetTestModeDescription')}
+								</BodySText>
+							</View>
+							<View style={styles.switchContainer}>
+								<Switch value={isTestModeEnabled} onValueChange={toggleTestMode} />
+							</View>
+						</TouchableOpacity>
+					</ThemedView>
+				)}
+
 				{showSecretSettings && (
 					<ThemedView style={styles.section} colorName="buttonBackground">
 						<TouchableOpacity onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
@@ -292,6 +314,20 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 16,
 		height: 60,
 		width: '100%',
+	},
+	testModeRow: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+		gap: 12,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		minHeight: 60,
+		width: '100%',
+	},
+	testModeLabel: {
+		flex: 1,
+		gap: 2,
 	},
 	buttonContainer: {
 		flexDirection: 'row',

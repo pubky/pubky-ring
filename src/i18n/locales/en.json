@@ -38,6 +38,8 @@
 		"navigationAnimation": "Navigation Animation",
 		"autoAuth": "Auto Auth",
 		"showOnboarding": "Show Onboarding",
+		"legacySunsetTestMode": "Sunset Notice Test Mode",
+		"legacySunsetTestModeDescription": "Show the migration notice using the latest published release APK.",
 		"wipePubkyRing": "Wipe Pubky Ring",
 		"wipeConfirmTitle": "Are you sure?",
 		"wipeConfirmMessage": "This action will erase all Pubky Ring data and cannot be undone.",

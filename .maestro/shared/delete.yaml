@@ -1,0 +1,14 @@
+appId: ${APP_ID}
+---
+- tapOn:
+    id: PubkyBox--0
+- assertVisible:
+    id: PubkyDetailDeleteButton
+- tapOn:
+    id: PubkyDetailDeleteButton
+- assertVisible:
+    id: delete-pubky-title
+- tapOn:
+    id: DeletePubkyConfirmButton
+- assertVisible:
+    id: AddPubkyButton

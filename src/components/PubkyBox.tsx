@@ -36,7 +36,11 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 					{truncateStr(publicKey)}
 				</BodySSBText>
 				{!isBackedUp && (
-					<TouchableOpacity onPress={handleBackupPress} style={styles.backupContainer}>
+					<TouchableOpacity
+						style={styles.backupContainer}
+						testID="PubkyBox-BackupButton"
+						onPress={handleBackupPress}
+					>
 						<BodySSBUnspacedText colorName="pubkyRing">
 							{t('pubkyProfile.backupReminder')}
 						</BodySSBUnspacedText>

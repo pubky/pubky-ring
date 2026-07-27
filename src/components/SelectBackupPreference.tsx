@@ -46,11 +46,17 @@ const SelectBackupPreference = ({ payload: { pubky } }: { payload: { pubky: stri
 				<Image source={require('../images/shield.png')} style={styles.image} />
 			</View>
 			<View style={styles.buttonContainer}>
-				<Button text={t('backup.encryptedFile')} size="large" onPress={onEncryptedFilePress} />
+				<Button
+					text={t('backup.encryptedFile')}
+					size="large"
+					testID="SelectBackupPreferenceEncryptedFileButton"
+					onPress={onEncryptedFilePress}
+				/>
 				<Button
 					text={t('backup.recoveryPhrase')}
 					size="large"
 					variant="secondary"
+					testID="SelectBackupPreferenceRecoveryPhraseButton"
 					onPress={onRecoveryPhrasePress}
 				/>
 			</View>

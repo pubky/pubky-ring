@@ -31,6 +31,34 @@ else
   flow_target=".maestro"
 fi
 
+cleanup_ios_backup_files() {
+  local simulator_root="$HOME/Library/Developer/CoreSimulator/Devices"
+  local udids
+
+  udids="$(xcrun simctl list devices booted | awk -F'[()]' '/Booted/{print $2}')"
+
+  while IFS= read -r udid; do
+    [ -n "$udid" ] || continue
+
+    find "$simulator_root/$udid/data/Containers/Shared/AppGroup" \
+      -path "*/File Provider Storage/pubky-backup-*.pkarr" \
+      -type f \
+      -delete 2>/dev/null || true
+  done <<< "$udids"
+}
+
+cleanup_android_backup_files() {
+  adb shell 'rm -f /sdcard/Download/PubkyRing/pubky-backup-*.pkarr' || true
+}
+
+if [ "$platform" = "ios" ] && [ "$(basename "$flow_target")" = "backup-and-import-file.yaml" ]; then
+  cleanup_ios_backup_files
+fi
+
+if [ "$platform" = "android" ] && [ "$(basename "$flow_target")" = "backup-and-import-file.yaml" ]; then
+  cleanup_android_backup_files
+fi
+
 bash .maestro/scripts/prepare-device-motion.sh "$platform"
 
 MAESTRO_CLI_NO_ANALYTICS=true \

@@ -2,43 +2,25 @@ import React, { memo, ReactElement, useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import PubkyDetailCard from './PubkyDetailCard';
 import { PubkyData } from '../../navigation/types.ts';
-import { showToast } from '../../utils/helpers.ts';
-import { showBackupPrompt } from '../../utils/sheetHelpers.ts';
-import { SheetManager } from 'react-native-actions-sheet';
-import i18n from '../../i18n';
+import { showBackupSheet } from '../../utils/sheetHelpers.ts';
+import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { HEADER_HEIGHT } from '../AppHeader.tsx';
 
 export interface PubkyDetailProps {
 	index: number;
 	pubkyData: PubkyData;
 	onQRPress: () => Promise<void>;
-	onDelete: () => Promise<void>;
 }
 
-export const PubkyDetail = ({ index, pubkyData, onQRPress, onDelete }: PubkyDetailProps): ReactElement => {
+export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
 	const { pubky } = pubkyData;
-	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 
 	const handleDelete = useCallback(() => {
-		SheetManager.show('delete-pubky', {
-			payload: {
-				publicKey,
-				onDelete,
-			},
-		});
-	}, [onDelete, publicKey]);
+		showSheet('delete-pubky', { pubky });
+	}, [pubky]);
 
 	const handleBackup = useCallback(async () => {
-		try {
-			showBackupPrompt({ pubky, backupPreference: pubkyData.backupPreference });
-		} catch (error) {
-			console.error('Backup process error:', error);
-			showToast({
-				type: 'error',
-				title: i18n.t('pubkyErrors.backupProcessError'),
-				description: JSON.stringify(error),
-			});
-		}
+		await showBackupSheet({ pubky, backupPreference: pubkyData.backupPreference });
 	}, [pubky, pubkyData.backupPreference]);
 
 	return (

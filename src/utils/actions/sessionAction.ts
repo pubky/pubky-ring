@@ -7,7 +7,7 @@
  * Flow:
  * 1. External app sends: pubkyring://session?x-success=bitkit://session-data
  *    (or legacy: pubkyring://session?callback=bitkit://session-data)
- * 2. Ring prompts user to select a pubky (handled by useInputHandler)
+ * 2. Ring prompts user to select a pubky when needed
  * 3. Ring signs in to homeserver
  * 4. Ring opens x-success URL with session data: bitkit://session-data?pubky=...&session_secret=...
  */

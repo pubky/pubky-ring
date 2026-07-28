@@ -9,7 +9,7 @@ type IconButtonProps = {
 	disabled?: PressableProps['disabled'];
 	style?: StyleProp<ViewStyle>;
 	testID?: PressableProps['testID'];
-	onPress?: PressableProps['onPress'];
+	onPress?: () => void;
 };
 
 const IconButton = ({

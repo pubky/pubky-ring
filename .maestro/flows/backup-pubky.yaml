@@ -1,0 +1,35 @@
+appId: ${APP_ID}
+name: backup-pubky
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- assertVisible:
+    id: PubkyBox-BackupButton
+- tapOn:
+    id: PubkyBox--0
+- assertVisible:
+    id: PubkyDetailBackupButton
+- tapOn:
+    id: PubkyDetailBackupButton
+- assertVisible:
+    id: backup-title
+- tapOn:
+    id: BackupRecoveryPhraseButton
+- tapOn:
+    id: RecoveryPhraseRevealButton
+- tapOn:
+    id: RecoveryPhraseFinishButton
+- waitForAnimationToEnd
+- assertNotVisible:
+    id: backup-title
+- assertVisible:
+    id: PubkyDetailBackupButton
+- tapOn:
+    id: AppHeaderBackButton
+- assertVisible:
+    id: PubkyBox--0
+- assertNotVisible:
+    id: PubkyBox-BackupButton

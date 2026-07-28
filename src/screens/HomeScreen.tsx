@@ -9,9 +9,6 @@ import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
 import { getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
-import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler';
-import { usePubkyManagement } from '../hooks/usePubkyManagement';
-import { showAddPubkySheet } from '../utils/sheetHelpers';
 import HomeHeader from '../components/HomeHeader';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
@@ -19,11 +16,9 @@ import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { Plus } from '../icons/index.ts';
-import { SheetManager } from 'react-native-actions-sheet';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
-
-const REPLACEMENT_PLAY_STORE_URL = 'https://play.google.com/store/apps/details?id=app.pubkyring';
+import { showSheet } from '../sheets/sheetNavigation.tsx';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -57,17 +52,8 @@ const PubkyItem = memo(
 	),
 );
 
-interface ListFooterProps {
-	createPubky: () => void;
-	importPubky: (mnemonic?: string) => Promise<any>;
-}
-
-const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
+const ListFooter = memo(() => {
 	const { t } = useTranslation();
-
-	const onAddPubkyPress = useCallback(() => {
-		showAddPubkySheet(createPubky, importPubky);
-	}, [createPubky, importPubky]);
 
 	return (
 		<View style={styles.listFooterContainer}>
@@ -77,7 +63,7 @@ const ListFooter = memo(({ createPubky, importPubky }: ListFooterProps) => {
 				text={t('home.addPubky')}
 				size="large"
 				icon={<Plus size={24} />}
-				onPress={onAddPubkyPress}
+				onPress={() => showSheet('add-pubky')}
 			/>
 		</View>
 	);
@@ -88,9 +74,6 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
-
-	const { createPubky, importPubky } = usePubkyManagement();
-	useDeepLinkHandler(createPubky, importPubky);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -133,12 +116,9 @@ const HomeScreen = (): ReactElement => {
 
 	const showSunsetDetails = useCallback(() => {
 		if (!replacementRelease) return;
-		void SheetManager.show('legacy-sunset', {
-			payload: {
-				playStoreUrl: REPLACEMENT_PLAY_STORE_URL,
-				apkUrl: replacementRelease.apkUrl,
-				releaseUrl: replacementRelease.releaseUrl,
-			},
+
+		showSheet('legacy-sunset', {
+			apkUrl: replacementRelease.apkUrl,
 		});
 	}, [replacementRelease]);
 
@@ -151,7 +131,7 @@ const HomeScreen = (): ReactElement => {
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
 				<EmptyState />
 				<View>
-					<ListFooter createPubky={createPubky} importPubky={importPubky} />
+					<ListFooter />
 				</View>
 			</SafeAreaView>
 		);
@@ -179,7 +159,7 @@ const HomeScreen = (): ReactElement => {
 					end={GRADIENT_END}
 					pointerEvents="none"
 				/>
-				<ListFooter createPubky={createPubky} importPubky={importPubky} />
+				<ListFooter />
 				<SafeAreaInset edge="bottom" />
 			</View>
 		</View>

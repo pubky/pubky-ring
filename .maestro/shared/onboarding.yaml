@@ -5,7 +5,13 @@ appId: ${APP_ID}
 - tapOn:
     id: TermsContinueButton
     retryTapIfNoChange: true
+- extendedWaitUntil:
+    visible:
+      id: OnboardingContinueButton
+    timeout: 10000
 - tapOn:
     id: OnboardingContinueButton
-- assertVisible:
-    id: AddPubkyButton
+- extendedWaitUntil:
+    visible:
+      id: AddPubkyButton
+    timeout: 10000

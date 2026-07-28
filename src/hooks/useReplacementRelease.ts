@@ -155,7 +155,7 @@ export function useReplacementRelease(): {
 
 	useEffect(() => {
 		let mounted = true;
-		void getReplacementReleaseForSession().then(release => {
+		getReplacementReleaseForSession().then(release => {
 			if (mounted) setReplacementRelease(release);
 		});
 		return () => {

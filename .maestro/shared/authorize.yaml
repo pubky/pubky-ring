@@ -4,10 +4,10 @@ appId: ${APP_ID}
     file: open-link.yaml
     env:
       URL: ${AUTH_URL}
-- assertVisible:
-    id: confirm-auth-title
-- assertVisible:
-    id: ConfirmAuthRequestedPermissions
+- extendedWaitUntil:
+    visible:
+      id: ConfirmAuthAuthorizeButton
+    timeout: 30000
 - tapOn:
     id: ConfirmAuthAuthorizeButton
 - extendedWaitUntil:

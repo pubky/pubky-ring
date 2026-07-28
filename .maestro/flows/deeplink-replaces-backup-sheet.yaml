@@ -1,0 +1,30 @@
+appId: ${APP_ID}
+name: deeplink-replaces-backup-sheet
+env:
+  INVITE_URL: pubkyring://invite/AZ3B-1D37-3SA0
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/create-pubky.yaml
+- runFlow: ../shared/close-sheet.yaml
+- assertVisible:
+    id: PubkyBox--0
+- tapOn:
+    id: PubkyBox--0
+- assertVisible:
+    id: PubkyDetailBackupButton
+- tapOn:
+    id: PubkyDetailBackupButton
+- assertVisible:
+    id: backup-title
+- runFlow:
+    file: ../shared/open-link.yaml
+    env:
+      URL: ${INVITE_URL}
+- extendedWaitUntil:
+    visible:
+      id: add-pubky-title
+    timeout: 30000
+- assertNotVisible:
+    id: backup-title

@@ -90,6 +90,23 @@ describe('parseInput', () => {
 		});
 	});
 
+	it('parses pubkyring invite deeplinks', async () => {
+		const rawInput = 'pubkyring://invite/AZ3B-1D37-3SA0';
+		const parsed = await parseInput(rawInput, 'clipboard');
+
+		expect(parsed).toMatchObject({
+			action: InputAction.Invite,
+			data: {
+				action: InputAction.Invite,
+				params: {
+					inviteCode: 'AZ3B-1D37-3SA0',
+				},
+			},
+			source: 'clipboard',
+			rawInput,
+		});
+	});
+
 	it('parses migration deeplinks before stripping protocols', async () => {
 		const parsed = await parseInput('pubkyring://migrate/?index=2&total=5&key=pubky-key-2', 'scan');
 

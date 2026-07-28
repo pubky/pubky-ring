@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 name: create-pubky-and-authorize
 env:
-  AUTH_URL: pubkyauth://signin?caps=/pub/pubky.app/:rw&relay=https://httprelay.staging.pubky.app/inbox&secret=okIbCVEBmJJGU56jO4WPmeghdyLNun6VOp_xV-B5Yx0
+  AUTH_URL: pubkyauth://signin?caps=%2Fpub%2Fpubky.app%2F%3Arw&relay=https%3A%2F%2Fhttprelay.staging.pubky.app%2Finbox&secret=okIbCVEBmJJGU56jO4WPmeghdyLNun6VOp_xV-B5Yx0
 ---
 - launchApp:
     clearState: true

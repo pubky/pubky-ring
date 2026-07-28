@@ -326,13 +326,7 @@
 		"backupReminder": "backup!"
 	},
 	"screenTitles": {
-		"termsOfUse": "Terms of Use",
-		"onboarding": "Welcome",
-		"home": "Pubky Ring",
-		"about": "About",
-		"settings": "Settings",
-		"pubkyDetail": "Pubky Details",
-		"editPubky": "Edit Pubky"
+		"settings": "Settings"
 	},
 	"permissions": {
 		"cameraTitle": "Permission to use camera",

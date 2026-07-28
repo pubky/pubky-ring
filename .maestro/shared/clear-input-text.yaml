@@ -25,4 +25,4 @@ appId: ${APP_ID}
       - tapOn:
           text: "Select All"
           optional: true
-      - eraseText: 1
+      - eraseText: 100

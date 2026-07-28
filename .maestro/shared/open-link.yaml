@@ -4,6 +4,10 @@ appId: ${APP_ID}
 - waitForAnimationToEnd
 - runFlow:
     when:
-      visible: Open
+      platform: iOS
     commands:
-      - tapOn: Open
+      - runFlow:
+          when:
+            visible: Open
+          commands:
+            - tapOn: Open

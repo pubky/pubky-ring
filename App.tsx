@@ -1,10 +1,8 @@
 import React, { useEffect, useMemo, useRef } from 'react';
-import './src/sheets';
 import { ThemeProvider } from 'styled-components/native';
+import { Linking, useColorScheme } from 'react-native';
 import { darkTheme, lightTheme } from './src/theme';
 import RootNavigator from './src/navigation/RootNavigator.tsx';
-import { SheetProvider } from 'react-native-actions-sheet';
-import { Linking, useColorScheme } from 'react-native';
 import { ETheme } from './src/types/settings.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { getIsOnline, getTheme } from './src/store/selectors/settingsSelectors.ts';
@@ -120,10 +118,8 @@ function App(): React.JSX.Element {
 		<ThemeProvider theme={theme}>
 			<SafeAreaProvider>
 				<SafeAreaView edges={['top', 'left', 'right']}>
-					<SheetProvider>
-						<RootNavigator />
-						<Toast config={appToastConfig} />
-					</SheetProvider>
+					<RootNavigator />
+					<Toast config={appToastConfig} />
 				</SafeAreaView>
 			</SafeAreaProvider>
 		</ThemeProvider>

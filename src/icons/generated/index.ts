@@ -8,7 +8,6 @@ export { default as FileText } from './FileText';
 export { default as Flashlight } from './Flashlight';
 export { default as Folder } from './Folder';
 export { default as Gear } from './Gear';
-export { default as Gift } from './Gift';
 export { default as Image } from './Image';
 export { default as Info } from './Info';
 export { default as Key } from './Key';

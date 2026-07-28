@@ -68,13 +68,9 @@ export const handleInviteAction = async (
 		const { pubky } = createRes.value;
 
 		await openXSuccess(xCallback);
-
 		context.setAddPubkyScreen({
-			screen: 'Welcome',
-			params: {
-				pubky,
-				isInvite: true,
-			},
+			screen: 'PubkyReview',
+			params: { pubky },
 		});
 
 		return ok(pubky);

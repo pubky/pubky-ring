@@ -105,6 +105,9 @@ jobs:
     - name: Enable reduced motion
       run: bash .maestro/scripts/prepare-device-motion.sh ios
 
+    - name: Set recovery phrase clipboard
+      run: bash .maestro/scripts/set-system-clipboard.sh ios "${RECOVERY_PHRASE:-abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about}"
+
     - name: Build iOS simulator app
       run: |
         cd ios
@@ -156,7 +159,7 @@ jobs:
 
     - name: Run Maestro flows
       timeout-minutes: 30
-      run: maestro --platform=ios --device "$SIM_UDID" test -e APP_ID=app.pubkyring -e INVITE_CODE="$INVITE_CODE" .maestro
+      run: maestro --platform=ios --device "$SIM_UDID" test -e APP_ID=app.pubkyring -e INVITE_CODE="$INVITE_CODE" -e RECOVERY_PHRASE="${RECOVERY_PHRASE:-abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about}" .maestro
 
     - name: Upload Maestro results
       uses: actions/upload-artifact@v7

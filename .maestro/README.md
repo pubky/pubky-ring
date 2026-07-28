@@ -50,6 +50,8 @@ HOMESERVER_ADMIN_PASSWORD=... yarn e2e:android
 
 The local `yarn e2e:*` scripts prepare the target simulator/emulator for reduced motion before Maestro runs. The app respects that platform accessibility setting, so sheet and navigation animations are disabled without requiring a special e2e build.
 
+The local and CI e2e setup also seeds the iOS native system clipboard with a valid recovery phrase for import flows. Override the iOS clipboard value with `RECOVERY_PHRASE` if a flow needs a different mnemonic. Android currently fills the recovery phrase fields word-by-word because the emulator shell does not expose a portable system clipboard setter.
+
 ## Continuous Integration
 
 `.github/workflows/ios-e2e.yml` builds the iOS simulator app, installs Maestro, boots an iPhone 17 simulator, installs the app, and runs all flows in `.maestro`.

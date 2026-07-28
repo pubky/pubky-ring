@@ -7,10 +7,11 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
+import { showToast } from '@synonymdev/react-native-toast';
 import { InputAction, SignupParams } from '../inputParser';
 import { RoutedActionContext } from '../inputRouter';
 import { savePubky, signUpToHomeserver } from '../pubky';
-import { checkNetworkConnection, showToast } from '../helpers';
+import { checkNetworkConnection } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { openXError } from '../xCallback';
 import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice';

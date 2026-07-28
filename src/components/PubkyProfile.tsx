@@ -1,9 +1,10 @@
 import React, { memo, useCallback } from 'react';
 import { StyleProp, StyleSheet, View, TouchableOpacity, ViewStyle } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { showToast } from '@synonymdev/react-native-toast';
 import { copyToClipboard } from '../utils/clipboard';
 import { PubkyData } from '../navigation/types';
-import { isSmallScreen, showToast } from '../utils/helpers';
+import { isSmallScreen } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
 import { BodyMSBText, HeadingText } from '../theme/typography';
 import Button from './Button.tsx';
@@ -41,7 +42,7 @@ export const PubkyProfile = memo(
 			showToast({
 				type: 'info',
 				title: t('clipboard.pubkyCopied'),
-				description: t('clipboard.pubkyCopiedDescription'),
+				description: pubky,
 			});
 		}, [pubky, t]);
 

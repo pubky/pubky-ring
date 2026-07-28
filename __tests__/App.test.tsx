@@ -45,7 +45,6 @@ jest.mock('../src/store/slices/pubkysSlice.ts', () => ({
 jest.mock('../src/utils/helpers.ts', () => ({
 	__esModule: true,
 	checkNetworkConnection: jest.fn(),
-	showToast: jest.fn(),
 }));
 
 jest.mock('../src/utils/inputParser.ts', () => ({
@@ -59,16 +58,6 @@ jest.mock('@react-native-community/netinfo', () => ({
 		addEventListener: jest.fn(() => jest.fn()),
 	},
 }));
-
-jest.mock('react-native-toast-message', () => {
-	const ReactMock = require('react');
-	const { View } = require('react-native');
-
-	return {
-		__esModule: true,
-		default: () => ReactMock.createElement(View, { testID: 'Toast' }),
-	};
-});
 
 jest.mock('react-native-safe-area-context', () => {
 	const ReactMock = require('react');
@@ -85,9 +74,10 @@ jest.mock('react-native-safe-area-context', () => {
 	};
 });
 
-jest.mock('../src/theme/toastConfig.tsx', () => ({
+jest.mock('@synonymdev/react-native-toast', () => ({
 	__esModule: true,
-	toastConfig: () => ({}),
+	configureToast: jest.fn(),
+	showToast: jest.fn(),
 }));
 
 jest.mock('react-i18next', () => ({

@@ -1,6 +1,7 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { Keyboard, StyleSheet, View } from 'react-native';
 import { Trans, useTranslation } from 'react-i18next';
+import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { TextInput, TouchableOpacity } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
@@ -13,7 +14,7 @@ import { SheetScreen } from '../components/Sheet.tsx';
 import type { BackupFileScreenParams, ImportFileScreenParams, SheetId } from '../sheets/types.ts';
 import { Eye, EyeOff, Key } from '../icons/index.ts';
 import { backupPubky } from '../utils/rnfs.ts';
-import { generateBackupFileName, showToast } from '../utils/helpers.ts';
+import { generateBackupFileName } from '../utils/helpers.ts';
 import { getPubkySecretKey, importPubky as importPubkyUtil } from '../utils/pubky.ts';
 import { getStore } from '../utils/store-helpers.ts';
 import { createRecoveryFile, decryptRecoveryFile } from '@synonymdev/react-native-pubky';

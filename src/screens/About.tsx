@@ -1,10 +1,11 @@
 import React, { memo, ReactElement } from 'react';
 import { Image, Linking, StyleSheet, TouchableOpacity, ScrollView, View } from 'react-native';
+import { showToast } from '@synonymdev/react-native-toast';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import PubkyRingLogo from '../images/pubky-app-logo.png';
 import BrandEndoresment from '../images/brand-endorsement.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
-import { shareData, showToast } from '../utils/helpers.ts';
+import { shareData } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
 import { BodyMSBUnspacedText, BodyMSpacedText, BodyMText, DisplayText } from '../theme/typography.ts';

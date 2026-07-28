@@ -7,11 +7,11 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { parseAuthUrl } from '@synonymdev/react-native-pubky';
+import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
-import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { getAutoAuthFromStore } from '../store-helpers';
 import { openXSuccess, openXError } from '../xCallback';

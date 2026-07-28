@@ -1,7 +1,7 @@
+import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
 import { getPubkySecretKey } from './pubky.ts';
-import { showToast } from './helpers.ts';
 import { getBackupPreference } from './store-helpers.ts';
 import i18n from '../i18n';
 import type { BackupSheetParams } from '../sheets/types.ts';

@@ -2540,6 +2540,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
+  - SynonymReactNativeToast (0.1.0):
+    - React-Core
   - Yoga (0.0.0)
   - ZXingObjC (3.6.9):
     - ZXingObjC/All (= 3.6.9)
@@ -2645,6 +2647,7 @@ DEPENDENCIES:
   - RNShare (from `../node_modules/react-native-share`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNWorklets (from `../node_modules/react-native-worklets`)
+  - "SynonymReactNativeToast (from `../node_modules/@synonymdev/react-native-toast`)"
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
 SPEC REPOS:
@@ -2850,6 +2853,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-svg"
   RNWorklets:
     :path: "../node_modules/react-native-worklets"
+  SynonymReactNativeToast:
+    :path: "../node_modules/@synonymdev/react-native-toast"
   Yoga:
     :path: "../node_modules/react-native/ReactCommon/yoga"
 
@@ -2953,6 +2958,7 @@ SPEC CHECKSUMS:
   RNShare: 7344a3a7d4e5df58c356ad0f79e4a3ef1325c635
   RNSVG: 6cae8d4082913be2eb43eaec2a456222c42195ed
   RNWorklets: 53439575fed8525fb8d1cabcc05a3d4d91e6ffe4
+  SynonymReactNativeToast: 702acb2af3e8cb708f2cfdb6fe361b9784d50953
   Yoga: fe50ab299e578f397fef753cf309c6703a4db29b
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 

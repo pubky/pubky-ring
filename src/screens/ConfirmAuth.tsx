@@ -1,10 +1,11 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
-import { Alert, Platform, StyleSheet, View } from 'react-native';
+import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { showToast, sleep } from '../utils/helpers.ts';
+import { sleep } from '../utils/helpers.ts';
 import PubkyCard from '../components/PubkyCard.tsx';
 import Animated, {
 	useAnimatedStyle,
@@ -12,7 +13,6 @@ import Animated, {
 	withTiming,
 	withSequence,
 } from 'react-native-reanimated';
-import { copyToClipboard } from '../utils/clipboard.ts';
 import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
@@ -156,11 +156,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				title: t('common.error'),
 				description: errorMsg,
 				autoHide: true,
-				visibilityTime: 20000,
-				onPress: () => {
-					copyToClipboard(errorMsg);
-					Alert.alert(t('confirmAuth.errorCopied'), errorMsg);
-				},
+				durationMs: 20000,
 			});
 			console.error('Auth error:', error);
 			await openXError(xCallback, 'AUTH_ERROR', errorMsg);

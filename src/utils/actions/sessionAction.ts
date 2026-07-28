@@ -13,10 +13,10 @@
  */
 
 import { Result, ok, err } from '@synonymdev/result';
+import { showToast } from '@synonymdev/react-native-toast';
 import { InputAction, SessionParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { signInToHomeserver } from '../pubky';
-import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { openXSuccessWithParams, openXError } from '../xCallback';
 import i18n from '../../i18n';

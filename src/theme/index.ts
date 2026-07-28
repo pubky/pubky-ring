@@ -18,8 +18,6 @@ export interface Theme {
 		buttonBackground: string;
 		buttonBorder: string;
 		cardGradient: string[];
-		toastBackground: string;
-		toastBorder: string;
 	};
 }
 
@@ -44,8 +42,6 @@ export const lightTheme: Theme = {
 		buttonBackground: '#f5f5f5',
 		buttonBorder: '#ddd',
 		cardGradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)'],
-		toastBackground: '#f8f8f8',
-		toastBorder: '#ddd',
 	},
 };
 
@@ -60,7 +56,5 @@ export const darkTheme: Theme = {
 		buttonBackground: 'rgba(255, 255, 255, 0.1)',
 		buttonBorder: 'rgba(255, 255, 255, 0.32)',
 		cardGradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)'],
-		toastBackground: '#333333',
-		toastBorder: '#444',
 	},
 };

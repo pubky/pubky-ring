@@ -1,6 +1,7 @@
 import React, { memo, ReactElement, useCallback, useState } from 'react';
 import { Image, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from './sheetNavigation.tsx';
 import PubkyCard from '../components/PubkyCard.tsx';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
@@ -13,7 +14,6 @@ import Sheet from '../components/Sheet.tsx';
 import type { RootStackParamList } from '../navigation/types.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import { deletePubky } from '../utils/pubky.ts';
-import { showToast } from '../utils/helpers.ts';
 
 const DeletePubkySheet = ({
 	route,

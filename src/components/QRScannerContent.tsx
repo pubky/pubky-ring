@@ -3,12 +3,12 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNQRGenerator from 'rn-qr-generator';
 import { useTranslation } from 'react-i18next';
+import { showToast } from '@synonymdev/react-native-toast';
 import Button from './Button.tsx';
 import Camera from './Camera/Camera.tsx';
 import IconButton from './IconButton.tsx';
 import MigrationProgressOverlay from './MigrationProgressOverlay.tsx';
 import { Flashlight, Image as ImageIcon, Qrcode } from '../icons/index.ts';
-import { showToast } from '../utils/helpers.ts';
 
 type QRScannerContentProps = {
 	onScan: (data: string) => Promise<void> | void;

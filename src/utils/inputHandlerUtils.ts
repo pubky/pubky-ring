@@ -6,12 +6,11 @@
  */
 
 import { Dispatch } from 'redux';
+import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { ParsedInput, InputSource, InputAction } from './inputParser';
 import { routeInput, ActionContext } from './inputRouter';
 import { setDeepLink } from '../store/slices/pubkysSlice';
-import { copyToClipboard } from './clipboard';
-import { showToast } from './helpers';
 import { getErrorMessage } from './errorHandler';
 import i18n from '../i18n';
 
@@ -58,21 +57,11 @@ export const routeInputWithContext = async (
 
 		console.error('Input routing error:', debugInfo);
 
-		const description = `${errorMessage} (${i18n.t('errors.tapToCopyDebug')})`;
-
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
-			description,
+			description: errorMessage,
 			autoHide: false,
-			onPress: () => {
-				copyToClipboard(debugInfo);
-				showToast({
-					type: 'success',
-					title: i18n.t('common.copied'),
-					description: i18n.t('errors.debugInfoCopied'),
-				});
-			},
 		});
 	}
 };
@@ -99,7 +88,7 @@ export const handleNoPubkysAvailable = (allPubkys: Record<string, unknown>): voi
 			type: 'info',
 			title: i18n.t('pubky.noPubkysSetup'),
 			description: i18n.t('pubky.setupExistingToProcess'),
-			visibilityTime: 5000,
+			durationMs: 5000,
 		});
 	} else {
 		// No pubkys at all - prompt setup from the add-pubky sheet
@@ -107,8 +96,7 @@ export const handleNoPubkysAvailable = (allPubkys: Record<string, unknown>): voi
 			type: 'info',
 			title: i18n.t('pubky.noPubkysExist'),
 			description: i18n.t('pubky.addAndSetupToProcess'),
-			visibilityTime: 5000,
-			onPress: () => showSheet('add-pubky'),
+			durationMs: 5000,
 		});
 	}
 };

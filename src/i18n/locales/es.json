@@ -175,8 +175,6 @@
 		"failedToProcessInput": "Fallo al procesar los datos de entrada",
 		"emptyClipboard": "El portapapeles está vacío",
 		"unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación, una URL de autenticación o una solicitud de sesión.",
-		"debugInfoCopied": "Información de depuración copiada al portapapeles",
-		"tapToCopyDebug": "Pulse para copiar la información de depuración",
 		"unknownError": "Se ha producido un error desconocido",
 		"authorizationFailed": "Autorización fallida",
 		"importFailed": "Importación fallida",
@@ -265,7 +263,6 @@
 	},
 	"clipboard": {
 		"pubkyCopied": "Pubky copiado",
-		"pubkyCopiedDescription": "Su Pubky ha sido copiado en el portapapeles",
 		"pasteLink": "Pegar enlace"
 	},
 	"pubkyErrors": {

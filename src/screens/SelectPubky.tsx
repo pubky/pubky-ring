@@ -2,6 +2,7 @@ import React, { memo, ReactElement, useCallback, useEffect, useMemo } from 'reac
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
+import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
@@ -16,7 +17,6 @@ import { SheetScreen } from '../components/Sheet.tsx';
 import { BodyMText } from '../theme/typography.ts';
 import type { AuthStackParamList } from '../sheets/types.ts';
 import { createConfirmAuthPayload } from '../utils/actions/authAction.ts';
-import { showToast } from '../utils/helpers.ts';
 import { getAutoAuthFromStore } from '../utils/store-helpers.ts';
 import { routeInputWithContext } from '../utils/inputHandlerUtils.ts';
 

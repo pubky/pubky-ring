@@ -26,9 +26,9 @@ type ButtonProps = {
 	disabled?: PressableProps['disabled'];
 	style?: StyleProp<ViewStyle>;
 	testID?: PressableProps['testID'];
-	onPress?: PressableProps['onPress'];
-	onPressIn?: PressableProps['onPressIn'];
-	onLongPress?: PressableProps['onLongPress'];
+	onPress?: () => void;
+	onPressIn?: () => void;
+	onLongPress?: () => void;
 };
 
 const Button = ({

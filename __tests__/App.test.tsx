@@ -2,19 +2,6 @@ import 'react-native';
 import React, { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react-native';
 
-jest.mock('react-native-actions-sheet', () => {
-	const ReactMock = require('react');
-
-	return {
-		__esModule: true,
-		default: ({ children }: { children?: ReactNode }) =>
-			ReactMock.createElement(ReactMock.Fragment, null, children),
-		registerSheet: jest.fn(),
-		SheetProvider: ({ children }: { children?: ReactNode }) =>
-			ReactMock.createElement(ReactMock.Fragment, null, children),
-	};
-});
-
 jest.mock('../src/navigation/RootNavigator.tsx', () => {
 	const ReactMock = require('react');
 	const { View } = require('react-native');

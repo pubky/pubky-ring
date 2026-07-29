@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { PubkyData } from '../../navigation/types.ts';
 import Button from '../Button.tsx';
 import { shareData } from '../../utils/helpers.ts';
-import { showEditPubkySheet } from '../../utils/sheetHelpers.ts';
+import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
 
@@ -30,11 +30,7 @@ export const PubkyDetailCard = memo(
 
 		const handleButtonPress = useCallback(async () => {
 			if (!pubkyData.signedUp) {
-				showEditPubkySheet({
-					title: t('pubky.setup'),
-					pubky,
-					data: pubkyData,
-				});
+				showSheet('edit-pubky', { pubky });
 			} else {
 				setIsQRLoading(true);
 				try {
@@ -43,7 +39,7 @@ export const PubkyDetailCard = memo(
 					setIsQRLoading(false);
 				}
 			}
-		}, [onQRPress, pubky, pubkyData, t]);
+		}, [onQRPress, pubky, pubkyData]);
 
 		const buttonIcon = pubkyData.signedUp ? <Scan /> : undefined;
 		const buttonText = pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup');

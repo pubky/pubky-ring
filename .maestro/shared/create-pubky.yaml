@@ -9,6 +9,4 @@ appId: ${APP_ID}
 - tapOn:
     id: AddPubkyManual
 - assertVisible:
-    id: NewPubkyContinueButton
-- tapOn:
-    id: NewPubkyContinueButton
+    id: AddPubkyReviewContinue

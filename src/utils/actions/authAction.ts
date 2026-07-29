@@ -6,22 +6,44 @@
  */
 
 import { Result, ok, err } from '@synonymdev/result';
-import { parseAuthUrl, PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import { SheetManager } from 'react-native-actions-sheet';
+import { parseAuthUrl } from '@synonymdev/react-native-pubky';
+import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { getAutoAuthFromStore } from '../store-helpers';
-import { AUTH_SHEET_DELAY } from '../constants';
 import { openXSuccess, openXError } from '../xCallback';
 import i18n from '../../i18n';
+import type { ConfirmAuthPayload } from '../../sheets/types.ts';
 
-type AuthActionData = {
+export type AuthActionData = {
 	action: InputAction.Auth;
 	params: AuthParams;
 	rawUrl: string;
+};
+
+export const createConfirmAuthPayload = async ({
+	data,
+	pubky,
+}: {
+	data: AuthActionData;
+	pubky: string;
+}): Promise<Result<ConfirmAuthPayload>> => {
+	const authResult = await parseAuthUrl(data.rawUrl);
+
+	if (authResult.isErr()) {
+		const description = authResult.error?.message ?? i18n.t('errors.failedToParseAuth');
+		return err(description);
+	}
+
+	return ok({
+		pubky,
+		authUrl: data.rawUrl,
+		authDetails: authResult.value,
+		xCallback: data.params.xCallback,
+	});
 };
 
 /**
@@ -44,10 +66,9 @@ export const handleAuthAction = async (
 		return err('No pubky provided for authentication');
 	}
 
-	// Parse the auth URL to validate it
-	const authResult = await parseAuthUrl(rawUrl);
-	if (authResult.isErr()) {
-		const description = authResult.error?.message ?? i18n.t('errors.failedToParseAuth');
+	const confirmAuthPayload = await createConfirmAuthPayload({ data, pubky });
+	if (confirmAuthPayload.isErr()) {
+		const description = confirmAuthPayload.error.message;
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
@@ -72,12 +93,7 @@ export const handleAuthAction = async (
 	}
 
 	// Manual auth flow - show confirmation modal
-	return showAuthConfirmation({
-		pubky,
-		authUrl: rawUrl,
-		authDetails: authResult.value,
-		xCallback,
-	});
+	return showAuthConfirmation(confirmAuthPayload.value);
 };
 
 /**
@@ -128,25 +144,17 @@ const showAuthConfirmation = async ({
 	authUrl,
 	authDetails,
 	xCallback,
-}: {
-	pubky: string;
-	authUrl: string;
-	authDetails: PubkyAuthDetails;
-	xCallback?: XCallbackParams;
-}): Promise<Result<string>> => {
+}: ConfirmAuthPayload): Promise<Result<string>> => {
 	try {
-		// Small timeout allows the sheet time to properly display
-		setTimeout(() => {
-			SheetManager.show('confirm-auth', {
-				payload: {
-					pubky,
-					authUrl,
-					authDetails,
-					xCallback,
-					onComplete: async (): Promise<void> => {},
-				},
-			});
-		}, AUTH_SHEET_DELAY);
+		showSheet('auth', {
+			screen: 'ConfirmAuth',
+			params: {
+				pubky,
+				authUrl,
+				authDetails,
+				xCallback,
+			},
+		});
 
 		return ok('success');
 	} catch (error) {

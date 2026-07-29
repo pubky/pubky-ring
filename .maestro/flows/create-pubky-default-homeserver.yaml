@@ -5,6 +5,8 @@ name: create-pubky-default-homeserver
     clearState: true
 - runFlow: ../shared/onboarding.yaml
 - runFlow: ../shared/create-pubky.yaml
+- tapOn:
+    id: AddPubkyReviewContinue
 - assertVisible:
     id: HomeserverDefaultRadioInner
 - assertNotVisible:
@@ -13,7 +15,8 @@ name: create-pubky-default-homeserver
     id: HomeserverContinueButton
 - tapOn:
     id: InviteCodeInput
-- inputText: ABCD1234EFGH
+- setClipboard: ABCD1234EFGH
+- pasteText
 - assertVisible: ABCD-1234-EFGH
 - pressKey: Enter
 - extendedWaitUntil:

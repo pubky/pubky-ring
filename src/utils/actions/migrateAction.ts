@@ -7,14 +7,13 @@
  */
 
 import { Result, ok, err } from '@synonymdev/result';
-import { SheetManager } from 'react-native-actions-sheet';
+import { hideSheet, showSheet } from '../../sheets/sheetNavigation.tsx';
 import { mnemonicPhraseToKeypair } from '@synonymdev/react-native-pubky';
 import { InputAction, MigrateParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { importPubky } from '../pubky';
 import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
-import { showImportSuccessUI } from '../sheetHelpers';
 import { getPubkyKeys } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';
 import i18n from '../../i18n';
@@ -131,7 +130,7 @@ export const handleMigrationScannerClose = (): void => {
 /**
  * Completes the migration - closes camera and shows summary
  */
-const completeMigration = async (): Promise<void> => {
+const completeMigration = (): void => {
 	// Capture counts before resetting
 	const finalSuccessCount = successfulImports;
 	const finalTotalCount = importedIndices.size;
@@ -140,7 +139,7 @@ const completeMigration = async (): Promise<void> => {
 	resetMigrateAccumulator();
 
 	// Close camera now that all keys are imported
-	await SheetManager.hide('camera');
+	hideSheet('migrate');
 
 	// Show completion summary with captured values
 	showMigrationSummary(finalSuccessCount, finalTotalCount);
@@ -174,7 +173,7 @@ export const handleMigrateAction = async (
 	try {
 		// Single key migration - import and show success UI
 		if (total === 1) {
-			await SheetManager.hide('camera');
+			hideSheet('migrate');
 			return await importSingleKey(key, dispatch);
 		}
 
@@ -226,7 +225,7 @@ export const handleMigrateAction = async (
 
 			// Check if cancelled while waiting
 			if (!migrationCancelled) {
-				await completeMigration();
+				completeMigration();
 			}
 		}
 
@@ -268,7 +267,11 @@ const importSingleKey = async (key: string, dispatch: ActionContext['dispatch'])
 
 	const importedPubky = importRes.value;
 	const isNewPubky = !currentPubkys.includes(importedPubky);
-	showImportSuccessUI(importedPubky, isNewPubky);
+
+	showSheet('add-pubky', {
+		screen: 'ImportSuccess',
+		params: { pubky: importedPubky, isNewPubky },
+	});
 
 	return ok(importedPubky);
 };

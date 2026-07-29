@@ -27,6 +27,8 @@ import { handleInviteAction } from './actions/inviteAction';
 import { handleSessionAction } from './actions/sessionAction';
 import i18n from '../i18n';
 import { getErrorMessage } from './errorHandler';
+import type { AddPubkySheetScreenParams } from '../sheets/types.ts';
+import { showSheet } from '../sheets/sheetNavigation.tsx';
 
 // Context passed to action handlers
 export interface ActionContext {
@@ -37,7 +39,13 @@ export interface ActionContext {
 	isDeeplink?: boolean;
 	// Skip showing the import success sheet (for direct import flows)
 	skipImportSheet?: boolean;
+	// Used by Add Pubky actions to move to a target screen in either a new sheet or the current sheet.
+	setAddPubkyScreen?: (screenParams: AddPubkySheetScreenParams) => void;
 }
+
+export type RoutedActionContext = ActionContext & {
+	setAddPubkyScreen: (screenParams: AddPubkySheetScreenParams) => void;
+};
 
 // Result from routing
 export interface RouteResult {
@@ -61,9 +69,11 @@ export const routeInput = async (
 	const { data, source } = parsed;
 
 	// Set isDeeplink based on source if not explicitly provided
-	const effectiveContext: ActionContext = {
+	const effectiveContext: RoutedActionContext = {
 		...context,
 		isDeeplink: context.isDeeplink ?? source === 'deeplink',
+		setAddPubkyScreen:
+			context.setAddPubkyScreen ?? ((screenParams): void => showSheet('add-pubky', screenParams)),
 	};
 
 	try {

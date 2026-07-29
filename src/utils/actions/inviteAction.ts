@@ -6,18 +6,12 @@
  */
 
 import { Result, ok, err } from '@synonymdev/result';
-import { SheetManager } from 'react-native-actions-sheet';
-import { InputAction, InviteParams, parseInput } from '../inputParser';
-import { ActionContext, routeInput } from '../inputRouter';
+import { InputAction, InviteParams } from '../inputParser';
+import { RoutedActionContext } from '../inputRouter';
 import { createPubkyWithInviteCode } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
 import { openXSuccess, openXError } from '../xCallback';
-import { getPubky } from '../../store/selectors/pubkySelectors';
-import { getStore } from '../store-helpers';
-import { ECurrentScreen } from '../../components/PubkySetup/NewPubkySetup';
-import { readFromClipboard } from '../clipboard';
 import { setLoadingModalError } from '../../store/slices/uiSlice';
-import { setStoredDispatch } from '../../store/shapes/ui';
 import i18n from '../../i18n';
 import { Dispatch } from 'redux';
 import { getSignupTokenErrorModalFields, LoadingErrorModalFields } from '../signupErrors';
@@ -28,32 +22,6 @@ type InviteActionData = {
 };
 
 /**
- * Opens the camera modal for scanning invite codes
- * Used for "Try again" functionality after an error
- * Exported for use by LoadingModal
- */
-export const openCameraForRetry = (dispatch: Dispatch): void => {
-	SheetManager.show('camera', {
-		payload: {
-			title: i18n.t('import.title'),
-			onScan: async (data: string) => {
-				await SheetManager.hide('camera');
-				const parsed = await parseInput(data, 'scan');
-				await routeInput(parsed, { dispatch });
-			},
-			onCopyClipboard: async () => {
-				await SheetManager.hide('camera');
-				const clipboardContent = await readFromClipboard();
-				if (clipboardContent) {
-					const parsed = await parseInput(clipboardContent, 'clipboard');
-					await routeInput(parsed, { dispatch });
-				}
-			},
-		},
-	});
-};
-
-/**
  * Transitions the loading modal to error state via Redux
  */
 const showErrorState = (
@@ -61,8 +29,6 @@ const showErrorState = (
 	dispatch: Dispatch,
 	fields: LoadingErrorModalFields = {},
 ): void => {
-	// Store dispatch for use in "Try again" button
-	setStoredDispatch(dispatch);
 	// Update Redux state to show error
 	dispatch(
 		setLoadingModalError({
@@ -80,18 +46,13 @@ const showErrorState = (
  */
 export const handleInviteAction = async (
 	data: InviteActionData,
-	context: ActionContext,
+	context: RoutedActionContext,
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
 	const { inviteCode, xCallback } = params;
 
-	// Show loading modal (don't await - it resolves when sheet closes)
-	SheetManager.show('loading', {
-		payload: {
-			modalTitle: i18n.t('loading.modalTitle'),
-		},
-	});
+	context.setAddPubkyScreen({ screen: 'Loading' });
 
 	try {
 		// Create pubky and sign up with invite code automatically
@@ -106,25 +67,15 @@ export const handleInviteAction = async (
 
 		const { pubky } = createRes.value;
 
-		// Get the pubky data from store
-		const pubkyData = getPubky(getStore(), pubky);
-
-		// Hide loading modal before showing setup sheet
-		await SheetManager.hide('loading');
-
 		await openXSuccess(xCallback);
 
-		// Show new pubky setup sheet on welcome screen with completed setup
-		setTimeout(() => {
-			SheetManager.show('new-pubky-setup', {
-				payload: {
-					pubky,
-					data: pubkyData,
-					currentScreen: ECurrentScreen.welcome,
-					isInvite: true,
-				},
-			});
-		}, 150);
+		context.setAddPubkyScreen({
+			screen: 'Welcome',
+			params: {
+				pubky,
+				isInvite: true,
+			},
+		});
 
 		return ok(pubky);
 	} catch (error) {

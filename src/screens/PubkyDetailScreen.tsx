@@ -1,29 +1,20 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { SheetManager } from 'react-native-actions-sheet';
-import { useTranslation } from 'react-i18next';
 import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import AppHeader from '../components/AppHeader.tsx';
 import HeaderNavButton from '../components/HeaderNavButton.tsx';
-import { useTypedNavigation, useTypedRoute } from '../navigation/hooks';
-import { showEditPubkySheet } from '../utils/sheetHelpers.ts';
-import { useInputHandler } from '../hooks/useInputHandler';
+import { useTypedRoute } from '../navigation/hooks';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Pencil } from '../icons/index.ts';
-import { deletePubky } from '../utils/pubky.ts';
-import { showToast } from '../utils/helpers.ts';
+import { showSheet } from '../sheets/sheetNavigation.tsx';
 
 const PubkyDetailScreen = (): ReactElement => {
-	const { t } = useTranslation();
 	const route = useTypedRoute<'PubkyDetail'>();
-	const navigation = useTypedNavigation();
-	const dispatch = useDispatch();
 	const { pubky, index } = route.params;
 	const data = useSelector((state: RootState) => getPubky(state, pubky));
-	const { showScanner } = useInputHandler({ pubky });
 
 	const pubkyData = useMemo<PubkyData | undefined>(() => {
 		if (!data) return undefined;
@@ -31,30 +22,15 @@ const PubkyDetailScreen = (): ReactElement => {
 	}, [data, pubky]);
 
 	const onRightButtonPress = useCallback(() => {
-		showEditPubkySheet({
-			title: data.signedUp ? t('common.edit') : t('pubky.setup'),
-			pubky,
+		showSheet('edit-pubky', { pubky });
+	}, [pubky]);
+
+	const handleQRPress = useCallback(async (): Promise<void> => {
+		showSheet('auth', {
+			screen: 'Scanner',
+			params: { pubky },
 		});
-	}, [data, pubky, t]);
-
-	const handleQRPress = useCallback(() => {
-		return showScanner({ pubky });
-	}, [showScanner, pubky]);
-
-	const handleDelete = useCallback(async () => {
-		await SheetManager.hide('delete-pubky');
-		navigation.goBack();
-
-		const deleteRes = await deletePubky(pubky, dispatch);
-		if (deleteRes.isErr()) {
-			showToast({
-				type: 'error',
-				title: t('pubkyErrors.failedToDelete'),
-				description: t('pubkyErrors.deleteError'),
-			});
-			return;
-		}
-	}, [dispatch, navigation, pubky, t]);
+	}, [pubky]);
 
 	const rightButton = (
 		<HeaderNavButton onPressIn={onRightButtonPress}>
@@ -69,7 +45,7 @@ const PubkyDetailScreen = (): ReactElement => {
 	return (
 		<SafeAreaView edges={['bottom']}>
 			<AppHeader rightButton={rightButton} />
-			<PubkyDetail index={index} pubkyData={pubkyData} onQRPress={handleQRPress} onDelete={handleDelete} />
+			<PubkyDetail index={index} pubkyData={pubkyData} onQRPress={handleQRPress} />
 		</SafeAreaView>
 	);
 };

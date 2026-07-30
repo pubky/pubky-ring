@@ -4,6 +4,15 @@ appId: ${APP_ID}
     file: open-link.yaml
     env:
       URL: ${AUTH_URL}
+- runFlow:
+    when:
+      notVisible:
+        id: ConfirmAuthAuthorizeButton
+    commands:
+      - runFlow:
+          file: open-link.yaml
+          env:
+            URL: ${AUTH_URL}
 - extendedWaitUntil:
     visible:
       id: ConfirmAuthAuthorizeButton

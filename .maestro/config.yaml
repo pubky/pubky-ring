@@ -1,4 +1,17 @@
 appId: ${APP_ID}
 flows:
   - flows/*.yaml
+executionOrder:
+  continueOnFailure: true
+  flowsOrder:
+    - onboarding
+    - delete-pubky
+    - create-pubky-default-homeserver
+    - create-pubky-and-authorize
+    - backup-pubky
+    - import-pubky-mnemonic
+    - migrate-keys
+    - deeplink-replaces-backup-sheet
+    # Keep the native file-picker flow last to avoid simulator issues in CI right after
+    - backup-and-import-file
 testOutputDir: .maestro/results

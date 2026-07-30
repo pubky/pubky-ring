@@ -1,5 +1,12 @@
-import React, { memo, useEffect, useRef, useState } from 'react';
+import React, { memo, useEffect } from 'react';
 import Svg, { Circle } from 'react-native-svg';
+import Animated, {
+	Easing,
+	cancelAnimation,
+	useAnimatedProps,
+	useSharedValue,
+	withTiming,
+} from 'react-native-reanimated';
 
 type CircularProgressBarProps = {
 	duration?: number;
@@ -10,49 +17,34 @@ type CircularProgressBarProps = {
 	drain?: boolean;
 };
 
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+
 const CircularProgressBar = ({
 	duration = 20000,
 	size = 24,
-	strokeWidth = 2,
-	unfilledColor = '#333333',
+	strokeWidth = 1.5,
+	unfilledColor = 'transparent',
 	filledColor = '#FFFFFF',
 	drain = false,
 }: CircularProgressBarProps): React.ReactElement => {
-	const [progress, setProgress] = useState(drain ? 1 : 0);
-	const animationFrame = useRef<number | null>(null);
+	const progress = useSharedValue(drain ? 1 : 0);
 	const radius = (size - strokeWidth) / 2;
 	const center = size / 2;
 	const circumference = 2 * Math.PI * radius;
-	const strokeDashoffset = circumference * (1 - progress);
+
+	const animatedProps = useAnimatedProps(() => ({
+		strokeDashoffset: (drain ? -1 : 1) * circumference * (1 - progress.value),
+	}));
 
 	useEffect(() => {
-		const startTime = Date.now();
-		const safeDuration = Math.max(duration, 1);
-
-		setProgress(drain ? 1 : 0);
-
-		const updateProgress = (): void => {
-			const elapsed = Date.now() - startTime;
-			const nextProgress = Math.min(elapsed / safeDuration, 1);
-
-			setProgress(drain ? 1 - nextProgress : nextProgress);
-
-			if (nextProgress >= 1) {
-				return;
-			}
-
-			animationFrame.current = requestAnimationFrame(updateProgress);
-		};
-
-		animationFrame.current = requestAnimationFrame(updateProgress);
+		cancelAnimation(progress);
+		progress.value = drain ? 1 : 0;
+		progress.value = withTiming(drain ? 0 : 1, { duration, easing: Easing.linear });
 
 		return (): void => {
-			if (animationFrame.current !== null) {
-				cancelAnimationFrame(animationFrame.current);
-				animationFrame.current = null;
-			}
+			cancelAnimation(progress);
 		};
-	}, [duration, drain]);
+	}, [duration, drain, progress]);
 
 	return (
 		<Svg
@@ -71,7 +63,7 @@ const CircularProgressBar = ({
 				strokeWidth={strokeWidth}
 				fill="none"
 			/>
-			<Circle
+			<AnimatedCircle
 				cx={center}
 				cy={center}
 				r={radius}
@@ -80,7 +72,8 @@ const CircularProgressBar = ({
 				fill="none"
 				strokeLinecap="round"
 				strokeDasharray={`${circumference} ${circumference}`}
-				strokeDashoffset={strokeDashoffset}
+				strokeDashoffset={0}
+				animatedProps={animatedProps}
 			/>
 		</Svg>
 	);

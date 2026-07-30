@@ -181,7 +181,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 
 	const headerProgress =
 		Platform.OS === 'android' && !isAuthorized ? (
-			<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={20} drain={true} />
+			<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={24} drain={true} />
 		) : undefined;
 
 	return (

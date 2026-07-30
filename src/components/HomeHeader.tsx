@@ -9,7 +9,7 @@ const HomeHeader = () => {
 
 	const leftButton = (
 		<HeaderNavButton onPressIn={() => navigation.navigate('About')}>
-			<Info size={24} />
+			<Info size={20} />
 		</HeaderNavButton>
 	);
 
@@ -19,7 +19,7 @@ const HomeHeader = () => {
 				navigation.navigate('Settings', { showSecretSettings: false });
 			}}
 		>
-			<Gear size={24} />
+			<Gear size={20} />
 		</HeaderNavButton>
 	);
 

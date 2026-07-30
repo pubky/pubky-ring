@@ -23,7 +23,7 @@ const LegacySunsetBanner = ({ onPress }: LegacySunsetBannerProps): ReactElement 
 				<TextBaseB color="#061a2f">{t('legacySunset.bannerTitle')}</TextBaseB>
 				<TextSmM color="#061a2f">{t('legacySunset.bannerDescription')}</TextSmM>
 			</View>
-			<ArrowRight color="#ffffff" size={24} />
+			<ArrowRight />
 		</Pressable>
 	);
 };

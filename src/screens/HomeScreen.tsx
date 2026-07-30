@@ -61,7 +61,7 @@ const ListFooter = memo(() => {
 				style={styles.listFooterButton}
 				text={t('home.addPubky')}
 				size="large"
-				icon={<Plus size={16} />}
+				icon={<Plus />}
 				testID="AddPubkyButton"
 				onPress={() => showSheet('add-pubky')}
 			/>

@@ -132,7 +132,7 @@ const PubkyBox = ({
 					/>
 
 					<View style={styles.iconContainer} pointerEvents="none">
-						<ChevronRight size={24} colorName="foreground" />
+						<ChevronRight colorName="foreground" />
 					</View>
 				</View>
 
@@ -142,7 +142,7 @@ const PubkyBox = ({
 					size="large"
 					variant="secondary"
 					loading={loading}
-					icon={pubkyData.signedUp ? <Scan size={16} /> : <></>}
+					icon={pubkyData.signedUp ? <Scan /> : <></>}
 					testID={`${pubkyBoxTestID}-ActionButton`}
 					onPress={handleActionPress}
 					onLongPress={onLongPress}

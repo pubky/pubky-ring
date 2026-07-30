@@ -264,7 +264,7 @@ const RecoveryFilePassphraseScreen = ({
 						activeOpacity={0.7}
 						onPress={() => setShowPassword(!showPassword)}
 					>
-						{showPassword ? <Eye size={24} /> : <EyeOff size={24} />}
+						{showPassword ? <Eye /> : <EyeOff />}
 					</TouchableOpacity>
 				}
 			/>

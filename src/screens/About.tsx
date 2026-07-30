@@ -59,12 +59,12 @@ const About = (): ReactElement => {
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
 					<TextBaseM colorName="foreground">{t('about.legal')}</TextBaseM>
-					<ChevronRight colorName="foreground" />
+					<ChevronRight />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
 					<TextBaseM colorName="foreground">{t('common.share')}</TextBaseM>
-					<ChevronRight colorName="foreground" />
+					<ChevronRight />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
@@ -82,7 +82,7 @@ const About = (): ReactElement => {
 								{t('about.joinWithPubkyRing')}
 							</TextBaseB>
 						</View>
-						<ChevronRight colorName="foreground" />
+						<ChevronRight />
 					</Card>
 				</TouchableOpacity>
 

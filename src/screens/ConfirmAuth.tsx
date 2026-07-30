@@ -212,7 +212,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 
 			<View style={styles.imageContainer}>
 				<Animated.View style={[styles.imageWrapper, checkStyle]}>
-					<CheckCircle colorName="pubkyApp" size={128} />
+					<CheckCircle colorName="pubkyApp" size={128} strokeWidth={1} />
 				</Animated.View>
 			</View>
 

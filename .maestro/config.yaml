@@ -6,7 +6,6 @@ executionOrder:
   flowsOrder:
     - onboarding
     - delete-pubky
-    - create-pubky-default-homeserver
     - create-pubky-and-authorize
     - backup-pubky
     - import-pubky-mnemonic

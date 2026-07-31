@@ -1,11 +1,11 @@
 import React, { ReactElement, useCallback } from 'react';
 import { View, StyleSheet, Image } from 'react-native';
 import { RadialGradient } from './LinearGradient.tsx';
-import { BLUE_RADIAL_GRADIENT } from '../utils/constants.ts';
 import { updateShowOnboarding } from '../store/slices/settingsSlice.ts';
 import { useDispatch } from 'react-redux';
-import { BodyMText, DisplayText } from '../theme/typography';
+import { Text5Xl, TextBaseM } from '../theme/typography';
 import { useTypedNavigation } from '../navigation/hooks';
+import { BLUE_RADIAL_GRADIENT } from '../theme/index.ts';
 import { useTranslation } from 'react-i18next';
 import Button from './Button.tsx';
 import AppHeader from './AppHeader.tsx';
@@ -25,7 +25,7 @@ const OnboardingContent = (): ReactElement => {
 		<View style={styles.container}>
 			<AppHeader disableBackNavigation />
 
-			<RadialGradient style={styles.background} colors={BLUE_RADIAL_GRADIENT} center={{ x: 1, y: 0.5 }}>
+			<RadialGradient style={styles.background} colors={BLUE_RADIAL_GRADIENT} center={{ x: 1.05, y: 0.5 }}>
 				<Image source={require('../images/circles.png')} style={styles.backgroundImage} />
 			</RadialGradient>
 
@@ -34,11 +34,12 @@ const OnboardingContent = (): ReactElement => {
 			</View>
 
 			<View style={styles.contentBlock}>
-				<DisplayText style={styles.screenTitle}>{t('onboarding.title')}</DisplayText>
-				<BodyMText>{t('about.description')}</BodyMText>
+				<Text5Xl style={styles.screenTitle}>{t('onboarding.title')}</Text5Xl>
+				<TextBaseM>{t('about.description')}</TextBaseM>
 
 				<View style={styles.buttonContainer}>
 					<Button
+						style={styles.button}
 						text={t('onboarding.getStarted')}
 						size="large"
 						testID="OnboardingContinueButton"
@@ -52,7 +53,6 @@ const OnboardingContent = (): ReactElement => {
 	);
 };
 
-// Move your existing styles here
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
@@ -100,6 +100,9 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		marginTop: 24,
+	},
+	button: {
+		flex: 1,
 	},
 });
 

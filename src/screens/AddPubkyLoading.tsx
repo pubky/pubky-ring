@@ -15,7 +15,7 @@ import {
 	withTiming,
 } from 'react-native-reanimated';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
-import { BodyMText, BodySSBText, DisplayText } from '../theme/typography';
+import { Text5Xl, TextBaseM } from '../theme/typography';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
@@ -155,8 +155,8 @@ const AddPubkyLoading = ({
 	return (
 		<SheetScreen id="add-pubky" title={modalTitle} gradientType={isError ? 'danger' : 'brand'}>
 			<View style={styles.contentLayer}>
-				{title && <DisplayText style={styles.headerText}>{title}</DisplayText>}
-				<BodyMText>{description}</BodyMText>
+				{title && <Text5Xl style={styles.headerText}>{title}</Text5Xl>}
+				<TextBaseM>{description}</TextBaseM>
 				<View style={styles.imageContainer}>
 					{shouldShowErrorImage ? (
 						<Animated.View style={keyAnimatedStyle}>
@@ -187,14 +187,21 @@ const AddPubkyLoading = ({
 					)}
 				</View>
 
-				{isError ? (
-					<View style={styles.buttonContainer}>
-						<Button text={t('common.cancel')} size="large" onPress={handleCancel} />
-						<Button text={t('loading.tryAgain')} size="large" variant="secondary" onPress={handleTryAgain} />
-					</View>
-				) : (
-					<BodySSBText style={styles.waitText}>{t('loading.pleaseWait')}</BodySSBText>
-				)}
+				<View style={styles.buttonContainer}>
+					{isError ? (
+						<>
+							<Button text={t('common.cancel')} size="large" onPress={handleCancel} />
+							<Button
+								text={t('loading.tryAgain')}
+								size="large"
+								variant="secondary"
+								onPress={handleTryAgain}
+							/>
+						</>
+					) : (
+						<Button text={t('loading.pleaseWait')} size="large" variant="secondary" loading={true} />
+					)}
+				</View>
 			</View>
 		</SheetScreen>
 	);
@@ -205,7 +212,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerText: {
-		marginBottom: 20,
+		marginBottom: 16,
 	},
 	imageContainer: {
 		flex: 1,
@@ -246,7 +253,7 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 	},
 });
 

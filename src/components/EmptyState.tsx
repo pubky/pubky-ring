@@ -2,7 +2,7 @@ import React, { ReactElement, memo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Canvas, Path, Skia, StrokeCap, StrokeJoin } from '@shopify/react-native-skia';
 import { useTranslation } from 'react-i18next';
-import { DisplayText } from '../theme/typography';
+import { Text5Xl } from '../theme/typography';
 import { accentColors } from '../theme/index.ts';
 
 const DashedArrow = (): ReactElement => {
@@ -18,7 +18,7 @@ const DashedArrow = (): ReactElement => {
 
 	// Dashed line paint
 	const dashedPaint = Skia.Paint();
-	dashedPaint.setColor(Skia.Color(accentColors.pubkyRing));
+	dashedPaint.setColor(Skia.Color(accentColors.blue));
 	dashedPaint.setStyle(1);
 	dashedPaint.setStrokeWidth(2);
 	dashedPaint.setStrokeCap(StrokeCap.Round);
@@ -26,7 +26,7 @@ const DashedArrow = (): ReactElement => {
 
 	// Solid arrow head paint
 	const solidPaint = Skia.Paint();
-	solidPaint.setColor(Skia.Color(accentColors.pubkyRing));
+	solidPaint.setColor(Skia.Color(accentColors.blue));
 	solidPaint.setStyle(1);
 	solidPaint.setStrokeWidth(2);
 	solidPaint.setStrokeCap(StrokeCap.Round);
@@ -45,7 +45,7 @@ const EmptyState = (): ReactElement => {
 
 	return (
 		<View style={styles.container}>
-			<DisplayText>{t('emptyState.heading')}</DisplayText>
+			<Text5Xl>{t('emptyState.heading')}</Text5Xl>
 			<DashedArrow />
 		</View>
 	);

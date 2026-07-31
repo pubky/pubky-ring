@@ -4,13 +4,14 @@ import { useTranslation } from 'react-i18next';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { BodySSBText, BodySSBUnspacedText, HeadingText } from '../theme/typography';
+import { Text2Xl, TextBaseB, TextXsSb } from '../theme/typography';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
 import { showBackupSheet } from '../utils/sheetHelpers.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
 import Card from './Card.tsx';
+import { shadows } from '../theme/shadows.ts';
 
 interface PubkyInfoProps {
 	pubkyName: string;
@@ -28,27 +29,32 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 
 	return (
 		<View style={styles.contentContainer} pointerEvents="box-none">
-			<HeadingText style={styles.nameText} numberOfLines={1}>
-				{pubkyName}
-			</HeadingText>
+			<View pointerEvents="none">
+				<Text2Xl style={styles.nameText} numberOfLines={1}>
+					{pubkyName}
+				</Text2Xl>
+			</View>
+
 			<View style={styles.row} pointerEvents="box-none">
-				<BodySSBText numberOfLines={1} ellipsizeMode="middle">
-					{truncateStr(publicKey)}
-				</BodySSBText>
+				<View pointerEvents="none">
+					<TextBaseB numberOfLines={1} ellipsizeMode="middle">
+						{truncateStr(publicKey)}
+					</TextBaseB>
+				</View>
+
 				{!isBackedUp && (
 					<TouchableOpacity
 						style={styles.backupContainer}
 						testID="PubkyBox-BackupButton"
 						onPress={handleBackupPress}
 					>
-						<BodySSBUnspacedText colorName="pubkyRing">
-							{t('pubkyProfile.backupReminder')}
-						</BodySSBUnspacedText>
+						<TextXsSb colorName="blue">{t('pubkyProfile.backupReminder')}</TextXsSb>
 					</TouchableOpacity>
 				)}
+
 				{sessionsCount > 0 && (
 					<View style={styles.sessionsButton}>
-						<BodySSBText colorName="textTertiary">{sessionsCount}</BodySSBText>
+						<TextXsSb colorName="primaryForeground">{sessionsCount}</TextXsSb>
 					</View>
 				)}
 			</View>
@@ -126,17 +132,17 @@ const PubkyBox = ({
 					/>
 
 					<View style={styles.iconContainer} pointerEvents="none">
-						<ChevronRight size={24} colorName="textTertiary" />
+						<ChevronRight size={24} colorName="foreground" />
 					</View>
 				</View>
 
 				<Button
 					style={styles.button}
 					text={pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup')}
-					size="medium"
+					size="large"
 					variant="secondary"
 					loading={loading}
-					icon={pubkyData.signedUp ? <Scan size={24} /> : <></>}
+					icon={pubkyData.signedUp ? <Scan size={16} /> : <></>}
 					testID={`${pubkyBoxTestID}-ActionButton`}
 					onPress={handleActionPress}
 					onLongPress={onLongPress}
@@ -157,6 +163,7 @@ const styles = StyleSheet.create({
 	content: {
 		flexDirection: 'row',
 		alignItems: 'center',
+		marginVertical: 10,
 	},
 	profileImage: {
 		width: 48,
@@ -192,15 +199,17 @@ const styles = StyleSheet.create({
 		flexWrap: 'nowrap',
 	},
 	backupContainer: {
+		flexDirection: 'row',
 		alignItems: 'center',
-		backgroundColor: 'rgba(0, 133, 255, 0.16)',
+		backgroundColor: 'rgba(0, 133, 255, 0.32)',
 		borderRadius: 16,
 		paddingHorizontal: 8,
 		marginLeft: 8,
 		height: 20,
+		...shadows.sm,
 	},
 	button: {
-		marginTop: 24,
+		marginTop: 16,
 	},
 });
 

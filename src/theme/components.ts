@@ -1,8 +1,5 @@
-import { ComponentType, RefAttributes } from 'react';
-import { TextInput as NativeTextInput, TextInputProps } from 'react-native';
 import styled from 'styled-components/native';
 import { Theme, ThemeColorName } from './index';
-import { fontFamily } from './fonts';
 
 interface BackgroundColorProps {
 	colorName?: ThemeColorName;
@@ -14,33 +11,12 @@ const backgroundColor =
 		return theme.colors[colorName ?? defaultColorName];
 	};
 
-export const View = styled.View<BackgroundColorProps>`
+export const ThemedView = styled.View<BackgroundColorProps>`
 	background-color: ${backgroundColor('background')};
-	border-color: ${(props): string => props.theme.colors.textPrimary};
-`;
-
-const StyledTextInput = styled.TextInput.attrs<{ theme: Theme }>(props => ({
-	keyboardAppearance: props.theme.keyboardAppearance,
-}))`
-	color: ${(props): string => props.theme.colors.textSecondary};
-	font-family: ${fontFamily};
-	font-size: 17px;
-	font-weight: 400;
-	line-height: 22px;
-	letter-spacing: 0.4px;
-	padding-left: 24px;
-	padding-right: 24px;
-	include-font-padding: false;
-`;
-
-export const TextInput = StyledTextInput as ComponentType<TextInputProps & RefAttributes<NativeTextInput>>;
-
-export const TouchableOpacity = styled.TouchableOpacity<{ theme: Theme }>`
-	background-color: ${(props): string => props.theme.colors.background};
 `;
 
 export const ActivityIndicator = styled.ActivityIndicator<{ theme: Theme }>`
-	color: ${(props): string => props.theme.colors.textTertiary};
+	color: ${(props): string => props.theme.colors.mutedForeground};
 `;
 
 export const Divider = styled.View<BackgroundColorProps>`

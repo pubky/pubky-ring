@@ -3,7 +3,7 @@ import { Linking, Platform, StyleSheet, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Button from '../Button.tsx';
 import { Gear, Lock } from '../../icons/index.ts';
-import { BodyMBText, BodySText } from '../../theme/typography.ts';
+import { TextBaseB, TextSmM } from '../../theme/typography.ts';
 
 const CameraNoAuth = (): ReactElement => {
 	const { t } = useTranslation();
@@ -21,16 +21,11 @@ const CameraNoAuth = (): ReactElement => {
 			</View>
 
 			<View style={styles.textContainer}>
-				<BodyMBText style={styles.title}>{t('permissions.cameraDeniedTitle')}</BodyMBText>
-				<BodySText style={styles.description}>{t('permissions.cameraDeniedMessage')}</BodySText>
+				<TextBaseB style={styles.title}>{t('permissions.cameraDeniedTitle')}</TextBaseB>
+				<TextSmM style={styles.description}>{t('permissions.cameraDeniedMessage')}</TextSmM>
 			</View>
 
-			<Button
-				text={t('permissions.openSettings')}
-				size="medium"
-				icon={<Gear />}
-				onPress={handleOpenSettings}
-			/>
+			<Button text={t('permissions.openSettings')} icon={<Gear />} onPress={handleOpenSettings} />
 		</View>
 	);
 };

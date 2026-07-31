@@ -14,7 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { InputAction, parseInput } from '../utils/inputParser';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
-import { BodyMText } from '../theme/typography.ts';
+import { TextBaseM } from '../theme/typography.ts';
 import type { AuthStackParamList } from '../sheets/types.ts';
 import { createConfirmAuthPayload } from '../utils/actions/authAction.ts';
 import { getAutoAuthFromStore } from '../utils/store-helpers.ts';
@@ -124,7 +124,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 
 	return (
 		<SheetScreen id="auth" title={t('pubky.selectPubky')}>
-			<BodyMText>{message}</BodyMText>
+			<TextBaseM>{message}</TextBaseM>
 			<View style={styles.listContainer}>
 				<FlashList<PubkyItem>
 					data={pubkyArray}
@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 		marginTop: 'auto',
 	},
 });

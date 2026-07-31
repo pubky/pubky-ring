@@ -1,8 +1,7 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState, useRef } from 'react';
-import { StyleSheet, Keyboard, TextInput as NativeTextInput, View, ScrollView } from 'react-native';
+import { Keyboard, ScrollView, StyleProp, StyleSheet, TextInput, View, ViewStyle } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
-import { TextInput } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { getPubkySecretKey, signInToHomeserver, signUpToHomeserver, truncatePubky } from '../utils/pubky.ts';
 import { formatSignupToken } from '../utils/helpers.ts';
@@ -13,10 +12,11 @@ import { err } from '@synonymdev/result';
 import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from '../utils/constants.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
-import { BodySText, CaptionText } from '../theme/typography';
+import { TextSmM, TextXsM } from '../theme/typography';
 import Sheet from '../components/Sheet.tsx';
 import { getSignupTokenErrorDescription } from '../utils/signupErrors.ts';
 import type { RootStackParamList } from '../navigation/types.ts';
+import TextField from '../components/TextField.tsx';
 
 const MAX_NAME_LENGTH = 50;
 
@@ -26,6 +26,7 @@ const InputItemComponent = ({
 	onChangeText,
 	placeholder,
 	error,
+	helperText,
 	autoFocus = false,
 	onSubmitEditing,
 	editable = true,
@@ -37,34 +38,30 @@ const InputItemComponent = ({
 	onChangeText: (text: string) => void;
 	placeholder: string;
 	error?: string;
+	helperText?: string;
 	autoFocus?: boolean;
 	onSubmitEditing?: () => void;
 	editable?: boolean;
-	style?: any;
-	inputRef?: React.RefObject<NativeTextInput | null>;
+	style?: StyleProp<ViewStyle>;
+	inputRef?: React.RefObject<TextInput | null>;
 }): ReactElement => {
 	return (
 		<View style={[styles.inputWrapper, style]}>
-			<View style={[styles.inputContainer, error ? styles.inputError : null]}>
-				<TextInput
-					style={styles.input}
-					testID={testID}
-					ref={inputRef}
-					value={value}
-					onChangeText={onChangeText}
-					placeholder={placeholder}
-					placeholderTextColor="rgba(255, 255, 255, 0.32)"
-					autoFocus={autoFocus}
-					onSubmitEditing={onSubmitEditing}
-					autoCapitalize="none"
-					editable={editable}
-				/>
-			</View>
-			{error ? (
-				<BodySText colorName="danger" style={styles.errorText}>
-					{error}
-				</BodySText>
-			) : null}
+			<TextField
+				testID={testID}
+				ref={inputRef}
+				value={value}
+				onChangeText={onChangeText}
+				placeholder={placeholder}
+				autoFocus={autoFocus}
+				onSubmitEditing={onSubmitEditing}
+				autoCapitalize="none"
+				editable={editable}
+				error={error}
+				errorStyle={styles.errorText}
+				helperText={helperText}
+				helperTextStyle={styles.helperText}
+			/>
 		</View>
 	);
 };
@@ -90,7 +87,7 @@ const EditPubkySheet = ({
 	);
 	const dispatch = useDispatch();
 	const [error, setError] = useState('');
-	const signupTokenInputRef = useRef<NativeTextInput>(null);
+	const signupTokenInputRef = useRef<TextInput>(null);
 
 	const isSignupTokenInputVisible = useMemo(() => {
 		return isStoredUnsigned || storedHomeserver !== (homeServer?.trim() || '');
@@ -337,20 +334,20 @@ const EditPubkySheet = ({
 				showsVerticalScrollIndicator={false}
 				keyboardShouldPersistTaps="handled"
 			>
-				<CaptionText testID="EditPubkyNameLabel">{t('editPubkySheet.pubkyNameLabel')}</CaptionText>
+				<TextXsM testID="EditPubkyNameLabel">{t('editPubkySheet.pubkyNameLabel')}</TextXsM>
 				<InputItemComponent
-					testID="EditPubkyNameInput"
 					value={newPubkyName}
-					onChangeText={handleChangeText}
 					placeholder={t('editPubkySheet.pubkyNamePlaceholder')}
-					error={nameError}
+					helperText={nameError}
 					autoFocus={true}
+					testID="EditPubkyNameInput"
+					onChangeText={handleChangeText}
 					onSubmitEditing={handleNameSubmit}
 				/>
 
 				{isSignupTokenInputVisible && (
 					<>
-						<CaptionText>{t('editPubkySheet.inviteCodeOptional')}</CaptionText>
+						<TextXsM>{t('editPubkySheet.inviteCodeOptional')}</TextXsM>
 						<InputItemComponent
 							testID="EditPubkyInviteCodeInput"
 							inputRef={signupTokenInputRef}
@@ -371,7 +368,7 @@ const EditPubkySheet = ({
 					</>
 				)}
 
-				<CaptionText testID="EditPubkyHomeserverLabel">{t('editPubky.homeserver')}</CaptionText>
+				<TextXsM testID="EditPubkyHomeserverLabel">{t('editPubky.homeserver')}</TextXsM>
 				<InputItemComponent
 					testID="EditPubkyHomeserverInput"
 					value={homeServer}
@@ -384,9 +381,9 @@ const EditPubkySheet = ({
 
 				<View style={styles.footerContainer}>
 					{displayedError ? (
-						<BodySText colorName="danger" style={styles.errorText}>
+						<TextSmM colorName="danger" style={styles.errorText}>
 							{displayedError}
-						</BodySText>
+						</TextSmM>
 					) : null}
 				</View>
 			</ScrollView>
@@ -418,22 +415,11 @@ const styles = StyleSheet.create({
 		marginTop: 8,
 		marginBottom: 24,
 	},
-	inputContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.32)',
-		borderRadius: 16,
-		borderStyle: 'dashed',
-		height: 70,
-	},
-	input: {
-		flex: 1,
-	},
-	inputError: {
-		borderColor: '#FF0000',
-	},
 	errorText: {
+		textAlign: 'center',
+		marginTop: 4,
+	},
+	helperText: {
 		textAlign: 'center',
 		marginTop: 4,
 	},
@@ -444,7 +430,7 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 		marginTop: 'auto',
 	},
 });

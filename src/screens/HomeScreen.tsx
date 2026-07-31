@@ -58,11 +58,11 @@ const ListFooter = memo(() => {
 	return (
 		<View style={styles.listFooterContainer}>
 			<Button
-				testID="AddPubkyButton"
 				style={styles.listFooterButton}
 				text={t('home.addPubky')}
 				size="large"
-				icon={<Plus size={24} />}
+				icon={<Plus size={16} />}
+				testID="AddPubkyButton"
 				onPress={() => showSheet('add-pubky')}
 			/>
 		</View>
@@ -191,14 +191,13 @@ const styles = StyleSheet.create({
 		left: 0,
 		right: 0,
 		backgroundColor: '#000000',
-		paddingTop: 16,
 		zIndex: 2,
 	},
 	listFooterContainer: {
 		flexDirection: 'row',
 		justifyContent: 'center',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 		paddingHorizontal: 24,
 	},
 	listFooterButton: {

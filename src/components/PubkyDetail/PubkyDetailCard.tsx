@@ -65,6 +65,7 @@ export const PubkyDetailCard = memo(
 					<Button
 						style={styles.actionButton}
 						text={t('common.share')}
+						variant="dark"
 						icon={shareIcon}
 						testID="PubkyDetailShareButton"
 						onPress={onSharePress}
@@ -72,6 +73,7 @@ export const PubkyDetailCard = memo(
 					<Button
 						style={styles.actionButton}
 						text={t('backup.backup')}
+						variant="dark"
 						icon={backupIcon}
 						testID="PubkyDetailBackupButton"
 						onPress={onBackup}
@@ -79,6 +81,7 @@ export const PubkyDetailCard = memo(
 					<Button
 						style={styles.actionButton}
 						text={t('common.delete')}
+						variant="dark"
 						icon={deleteIcon}
 						testID="PubkyDetailDeleteButton"
 						onPress={onDelete}
@@ -96,7 +99,7 @@ const styles = StyleSheet.create({
 	},
 	actionButtonRow: {
 		flexDirection: 'row',
-		gap: 6,
+		gap: 12,
 		marginTop: 24,
 	},
 	actionButton: {

@@ -187,7 +187,7 @@
 	"terms": {
 		"title": "Terms of Use.",
 		"acceptTerms": "By continuing you declare that you have read and accept the terms of use.",
-		"acceptPrivacy": "By continuing you declare that you have read and accept the <accent>privacy policy.</accent>",
+		"acceptPrivacy": "By continuing you declare that you have read and accept the <accent>privacy policy</accent>.",
 		"termsOfUse": "Terms of Use",
 		"privacyPolicy": "Privacy Policy"
 	},
@@ -211,7 +211,7 @@
 		"title": "Add Pubky",
 		"yourKeysYourIdentity": "Your keys,\nyour identity.",
 		"restoreOrImport": "Restore or\nimport pubky.",
-		"createOrImportQuestion": "Scan a signup QR for instant onboarding, add a pubky manually, or import one.",
+		"createOrImportQuestion": "Scan QR, add manually, or import a pubky.",
 		"chooseBackupMethod": "Choose the backup method you used.",
 		"enterRecoveryWords": "Enter the 12 words from your recovery \nphrase to import or restore your pubky.",
 		"importPubkyButton": "Import existing",
@@ -287,14 +287,14 @@
 	},
 	"newPubkySetup": {
 		"newPubky": "New Pubky",
-		"newPubkyDescription": "This is your new unique identifier, your pubky. Create as many as you need for different purposes."
+		"newPubkyDescription": "This is your unique identifier, your pubky. Create as many as you need."
 	},
 	"sessionItem": {
 		"signOut": "Sign Out",
 		"capabilities": "Capabilities:"
 	},
 	"pubkyProfile": {
-		"backupReminder": "backup!"
+		"backupReminder": "Backup!"
 	},
 	"screenTitles": {
 		"settings": "Settings"

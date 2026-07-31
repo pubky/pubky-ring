@@ -1,8 +1,3 @@
-// Gradient definitions
-
-export const BLUE_RADIAL_GRADIENT = ['#0b2033', 'rgba(0, 0, 0, 0.1)'];
-export const RED_RADIAL_GRADIENT = ['rgba(233, 81, 100, 0.32)', 'rgba(0, 0, 0, 0.1)'];
-
 export const IS_STAGING = __DEV__;
 export const STAGING_HOMESERVER = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 export const PRODUCTION_HOMESERVER = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';

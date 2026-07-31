@@ -1,20 +1,20 @@
 import React, { memo } from 'react';
-import { Platform, Pressable, StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from 'styled-components/native';
-import { Theme } from '../theme';
-import { BodySSBText, CaptionSBText } from '../theme/typography';
+import { Theme, ThemeColorName } from '../theme';
+import { TextSmB, TextXsB } from '../theme/typography';
 import { ActivityIndicator } from '../theme/components.ts';
-import BlurView from './BlurView.tsx';
+import { shadows } from '../theme/shadows.ts';
 
 enum EButtonSize {
+	default = 'default',
 	large = 'large',
-	medium = 'medium',
 	small = 'small',
 }
 
 type ButtonSize = `${EButtonSize}`;
-type ButtonVariant = 'primary' | 'secondary';
+type ButtonVariant = 'dark' | 'outline' | 'secondary';
 
 type ButtonProps = {
 	text: string;
@@ -33,8 +33,8 @@ type ButtonProps = {
 
 const Button = ({
 	text,
-	size = EButtonSize.medium,
-	variant = 'primary',
+	size = EButtonSize.default,
+	variant = 'outline',
 	icon,
 	rightIcon,
 	loading = false,
@@ -47,17 +47,40 @@ const Button = ({
 }: ButtonProps): React.ReactElement => {
 	const theme = useTheme() as Theme;
 
-	const hasBlur = Platform.OS === 'ios';
-	const ButtonText = size === EButtonSize.small ? CaptionSBText : BodySSBText;
-	const disabledStyle = disabled || loading ? styles.disabled : null;
-	const pressedStyle = { backgroundColor: 'rgba(255, 255, 255, 0.16)' };
-	const backgroundStyle = { backgroundColor: theme.colors.buttonBackground };
-	const secondaryStyle =
-		variant === 'secondary' ? { borderWidth: 1, borderColor: theme.colors.buttonBorder } : null;
+	const ButtonText = size === EButtonSize.small ? TextXsB : TextSmB;
+	const foregroundColorName: ThemeColorName = variant === 'secondary' ? 'secondaryForeground' : 'foreground';
+	const loadingStyle = loading ? styles.loading : null;
+	const disabledStyle = disabled ? styles.disabled : null;
+	const backgroundColors: Record<ButtonVariant, string> = {
+		dark: theme.colors.card,
+		outline: 'rgba(255, 255, 255, 0.045)',
+		secondary: theme.colors.secondary,
+	};
+	const pressedColors: Record<ButtonVariant, string> = {
+		dark: theme.colors.muted,
+		outline: 'rgba(255, 255, 255, 0.075)',
+		secondary: '#454549',
+	};
+	const borderColors: Partial<Record<ButtonVariant, string>> = {
+		dark: theme.colors.card,
+		outline: theme.colors.border,
+	};
+
+	const pressedStyle = { backgroundColor: pressedColors[variant] };
+	const backgroundStyle = { backgroundColor: backgroundColors[variant] };
+	const borderStyle = borderColors[variant] ? { borderWidth: 1, borderColor: borderColors[variant] } : null;
+
+	const renderIcon = (iconNode: React.ReactNode): React.ReactNode => {
+		if (!React.isValidElement<{ colorName?: ThemeColorName }>(iconNode) || iconNode.type === React.Fragment) {
+			return iconNode;
+		}
+
+		return React.cloneElement(iconNode, { colorName: foregroundColorName });
+	};
 
 	return (
 		<Pressable
-			style={[styles.container, buttonSizeStyles[size], disabledStyle, style]}
+			style={[styles.container, buttonSizeStyles[size], disabledStyle, loadingStyle, style]}
 			disabled={loading || disabled}
 			testID={testID}
 			onPress={onPress}
@@ -67,22 +90,36 @@ const Button = ({
 			{({ pressed }) => (
 				<>
 					<View
-						style={[styles.backgroundLayer, buttonRadiusStyles[size], backgroundStyle, secondaryStyle]}
+						style={[styles.backgroundLayer, buttonRadiusStyles[size], backgroundStyle, borderStyle]}
 						pointerEvents="none"
 					>
-						{hasBlur && <BlurView style={styles.blurBackground} pressed={pressed} />}
 						{pressed && <View style={[styles.pressOverlay, pressedStyle]} />}
 					</View>
 
 					{loading ? (
-						<ActivityIndicator size="small" />
-					) : (
 						<>
-							{icon && icon}
-							<ButtonText style={styles.text} numberOfLines={1} testID={`${testID}-Text`}>
+							<ActivityIndicator size="small" />
+							<ButtonText
+								style={styles.text}
+								colorName={foregroundColorName}
+								numberOfLines={1}
+								testID={`${testID}-Text`}
+							>
 								{text}
 							</ButtonText>
-							{rightIcon && rightIcon}
+						</>
+					) : (
+						<>
+							{icon && renderIcon(icon)}
+							<ButtonText
+								style={styles.text}
+								colorName={foregroundColorName}
+								numberOfLines={1}
+								testID={`${testID}-Text`}
+							>
+								{text}
+							</ButtonText>
+							{rightIcon && renderIcon(rightIcon)}
 						</>
 					)}
 				</>
@@ -97,14 +134,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 		gap: 6,
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 16,
-		},
-		shadowOpacity: 0.16,
-		shadowRadius: 16,
-		elevation: 8,
+		...shadows.xs,
 	},
 	backgroundLayer: {
 		...StyleSheet.absoluteFill,
@@ -118,22 +148,25 @@ const styles = StyleSheet.create({
 	},
 	large: {
 		flex: 1,
-		height: 64,
-		borderRadius: 64,
+		height: 60,
+		borderRadius: 60,
 		paddingHorizontal: 20,
 	},
-	medium: {
-		height: 48,
-		borderRadius: 48,
+	default: {
+		height: 40,
+		borderRadius: 40,
 		paddingHorizontal: 12,
 	},
 	small: {
 		height: 32,
-		borderRadius: 64,
+		borderRadius: 32,
 		paddingHorizontal: 12,
 	},
+	loading: {
+		opacity: 0.5,
+	},
 	disabled: {
-		opacity: 0.32,
+		opacity: 0.4,
 	},
 	text: {
 		flexShrink: 1,
@@ -141,14 +174,14 @@ const styles = StyleSheet.create({
 });
 
 const buttonSizeStyles = {
+	[EButtonSize.default]: styles.default,
 	[EButtonSize.large]: styles.large,
-	[EButtonSize.medium]: styles.medium,
 	[EButtonSize.small]: styles.small,
 };
 
 const buttonRadiusStyles = {
+	[EButtonSize.default]: { borderRadius: styles.default.borderRadius },
 	[EButtonSize.large]: { borderRadius: styles.large.borderRadius },
-	[EButtonSize.medium]: { borderRadius: styles.medium.borderRadius },
 	[EButtonSize.small]: { borderRadius: styles.small.borderRadius },
 };
 

@@ -3,7 +3,7 @@ import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const BOTTOM_FALLBACK_PADDING = 24;
-const BOTTOM_EXTRA_PADDING = 12;
+const BOTTOM_EXTRA_PADDING = 0;
 
 const SafeAreaInset = ({ edge }: { edge: 'top' | 'bottom' }): ReactElement => {
 	const insets = useSafeAreaInsets();

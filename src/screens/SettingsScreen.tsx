@@ -2,14 +2,13 @@ import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react
 import { Alert, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
-import { View as ThemedView } from '../theme/components.ts';
+import { ThemedView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAutoAuth, getNavigationAnimation, getTheme } from '../store/selectors/settingsSelectors.ts';
+import { getAutoAuth, getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
 import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
-import { setTheme } from '../theme/helpers.ts';
-import { ENavigationAnimation, ETheme } from '../types/settings.ts';
+import { ENavigationAnimation } from '../types/settings.ts';
 import {
 	resetSettings,
 	updateAutoAuth,
@@ -20,7 +19,7 @@ import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
-import { BodyMSBText, BodyMText, BodySText, CaptionText } from '../theme/typography';
+import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
 import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
@@ -31,30 +30,11 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const showSecretSettings = route.params?.showSecretSettings ?? true;
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	const currentTheme = useSelector(getTheme);
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const hasPubkys = pubkyKeys.length > 0;
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
-
-	const getThemeDisplayText = useCallback(
-		(theme: ETheme) => {
-			const themeText = {
-				[ETheme.system]: t('settings.theme.system'),
-				[ETheme.light]: t('settings.theme.light'),
-				[ETheme.dark]: t('settings.theme.dark'),
-			};
-			return themeText[theme] || t('settings.theme.system');
-		},
-		[t],
-	);
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const themeDisplayText = useMemo(
-		() => getThemeDisplayText(currentTheme),
-		[currentTheme, getThemeDisplayText],
-	);
 
 	const navigationAnimationText = useMemo(() => {
 		const animationText = {
@@ -63,21 +43,6 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 		};
 		return animationText[navigationAnimation] || t('settings.animation.slide');
 	}, [navigationAnimation, t]);
-
-	// eslint-disable-next-line @typescript-eslint/no-unused-vars
-	const handleThemePress = useCallback(() => {
-		switch (currentTheme) {
-			case ETheme.system:
-				setTheme({ dispatch, theme: ETheme.light });
-				break;
-			case ETheme.light:
-				setTheme({ dispatch, theme: ETheme.dark });
-				break;
-			case ETheme.dark:
-				setTheme({ dispatch, theme: ETheme.system });
-				break;
-		}
-	}, [currentTheme, dispatch]);
 
 	const handleNavigationAnimationPress = useCallback(() => {
 		switch (navigationAnimation) {
@@ -143,60 +108,48 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			<AppHeader title={t('screenTitles.settings')} />
 
 			<View style={styles.content}>
-				{/**
-                 TODO: Adjust light-mode gradient colors.
-                 <ThemedView style={styles.section} colorName="buttonBackground">
-                 <TouchableOpacity onPress={handleThemePress} style={styles.themeButton}>
-                 <BodyMSBText>Theme</BodyMSBText>
-                 <BodySText colorName="textTertiary">
-                 {themeDisplayText}
-                 </BodySText>
-                 </TouchableOpacity>
-                 </ThemedView>
-                 **/}
-
 				<View style={styles.textSection}>
-					<CaptionText>{t('settings.migrateToOtherDevice')}</CaptionText>
-					<BodyMText style={styles.textSettingValue}>{t('settings.migrateDescription')}</BodyMText>
+					<TextXsM>{t('settings.migrateToOtherDevice')}</TextXsM>
+					<TextBaseM style={styles.textSettingValue}>{t('settings.migrateDescription')}</TextBaseM>
 				</View>
 
 				<View style={styles.buttonContainer}>
 					{hasPubkys && (
 						<Button
-							testID="ShowQRButton"
 							style={styles.button}
 							text={t('settings.showQR')}
-							size="medium"
-							onPress={() => showSheet('migrate')}
+							variant="dark"
 							icon={<Qrcode size={24} />}
+							testID="ShowQRButton"
+							onPress={() => showSheet('migrate')}
 						/>
 					)}
 					<Button
-						testID="ScanQRButton"
 						style={styles.button}
 						text={t('settings.scanQR')}
-						size="medium"
-						onPress={handleScanQRPress}
+						variant="dark"
 						icon={<Scan size={24} />}
+						testID="ScanQRButton"
+						onPress={handleScanQRPress}
 					/>
 				</View>
 
 				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="buttonBackground">
+					<ThemedView style={styles.section} colorName="card">
 						<TouchableOpacity
 							onPress={handleNavigationAnimationPress}
 							style={styles.navigationAnimationButton}
 						>
-							<BodyMSBText>{t('settings.navigationAnimation')}</BodyMSBText>
-							<BodySText colorName="textTertiary">{navigationAnimationText}</BodySText>
+							<TextBaseB>{t('settings.navigationAnimation')}</TextBaseB>
+							<TextSmM>{navigationAnimationText}</TextSmM>
 						</TouchableOpacity>
 					</ThemedView>
 				)}
 
 				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="buttonBackground">
+					<ThemedView style={styles.section} colorName="card">
 						<TouchableOpacity onPress={handleAutoAuthToggle} style={styles.toggleRow}>
-							<BodyMSBText>{t('settings.autoAuth')}</BodyMSBText>
+							<TextBaseB>{t('settings.autoAuth')}</TextBaseB>
 							<View style={styles.switchContainer}>
 								<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
 							</View>
@@ -205,32 +158,20 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				)}
 
 				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="buttonBackground">
+					<ThemedView style={styles.section} colorName="card">
 						<TouchableOpacity onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
-							<BodyMSBText>{t('settings.showOnboarding')}</BodyMSBText>
+							<TextBaseB>{t('settings.showOnboarding')}</TextBaseB>
 						</TouchableOpacity>
 					</ThemedView>
 				)}
 
 				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="buttonBackground">
+					<ThemedView style={styles.section} colorName="card">
 						<TouchableOpacity onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
-							<BodyMSBText>{t('settings.wipePubkyRing')}</BodyMSBText>
+							<TextBaseB>{t('settings.wipePubkyRing')}</TextBaseB>
 						</TouchableOpacity>
 					</ThemedView>
 				)}
-
-				{/* Backup all pubkys */}
-				{/* TODO: Consider implementing a "Backup All Pubkys" feature. Backs up all pubkys with same passphrase and saves as zip file for future import
-				<ThemedView style={styles.section} colorName="buttonBackground">
-					<TouchableOpacity
-						onPress={handleBackupPress}
-						style={styles.backupButton}
-					>
-						<BodyMSBText>Backup All Pubkys</BodyMSBText>
-					</TouchableOpacity>
-				</ThemedView>
-				*/}
 			</View>
 		</SafeAreaView>
 	);
@@ -245,7 +186,7 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 	},
 	textSection: {
-		marginBottom: 12,
+		marginBottom: 24,
 	},
 	section: {
 		marginBottom: 16,
@@ -285,7 +226,7 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 6,
+		gap: 12,
 		marginBottom: 16,
 	},
 	button: {

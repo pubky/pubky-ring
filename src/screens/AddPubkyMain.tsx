@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
-import { BodyMText, DisplayText } from '../theme/typography';
+import { TextBaseM, Text5Xl } from '../theme/typography';
 import { Pencil, Scan, Upload } from '../icons/index.ts';
 import { createNewPubky } from '../utils/pubky.ts';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
@@ -35,30 +35,33 @@ const AddPubkyMain = ({
 
 	return (
 		<SheetScreen id={SHEET_ID} title={t('addPubky.title')} gradientType="brand">
-			<DisplayText style={styles.headerText}>{t('addPubky.yourKeysYourIdentity')}</DisplayText>
-			<BodyMText>{t('addPubky.createOrImportQuestion')}</BodyMText>
+			<Text5Xl style={styles.headerText}>{t('addPubky.yourKeysYourIdentity')}</Text5Xl>
+			<TextBaseM>{t('addPubky.createOrImportQuestion')}</TextBaseM>
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/add-pubky-key.png')} style={styles.keyImage} />
 			</View>
 			<View style={styles.buttonContainer}>
 				<Button
+					style={styles.button}
 					text={t('addPubky.scanSignupQr')}
 					variant="secondary"
-					size="medium"
+					size="large"
 					icon={<Scan />}
 					testID="AddPubkyScan"
 					onPress={() => navigation.navigate('Scanner', { mode: 'signup' })}
 				/>
 				<Button
+					style={styles.button}
 					text={t('addPubky.newPubkyButton')}
-					size="medium"
+					size="large"
 					icon={<Pencil />}
 					testID="AddPubkyManual"
 					onPress={onCreatePubky}
 				/>
 				<Button
+					style={styles.button}
 					text={t('addPubky.importPubkyButton')}
-					size="medium"
+					size="large"
 					icon={<Upload />}
 					testID="AddPubkyImport"
 					onPress={() => navigation.navigate('ImportOptions')}
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	headerText: {
-		marginBottom: 20,
+		marginBottom: 16,
 	},
 	keyImage: {
 		width: 250,
@@ -84,6 +87,9 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		gap: 12,
 		marginTop: 'auto',
+	},
+	button: {
+		flex: 0,
 	},
 });
 

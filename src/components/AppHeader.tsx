@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { getTheme } from '../store/selectors/settingsSelectors.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import LinearGradient from 'react-native-linear-gradient';
-import { HeadingText } from '../theme/typography';
+import { Text2Xl } from '../theme/typography';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { ArrowLeft } from '../icons/index.ts';
 
@@ -84,7 +84,7 @@ const AppHeader = memo(
 				{resolvedLeftButton}
 
 				{title ? (
-					<HeadingText>{title}</HeadingText>
+					<Text2Xl>{title}</Text2Xl>
 				) : (
 					<LogoButton onLongPress={toggleTheme} onPress={handleDoubleTap} />
 				)}

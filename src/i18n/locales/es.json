@@ -153,12 +153,6 @@
 		"enterHomeserver": "Introducir servidor doméstico",
 		"homeserver": "Homeserver"
 	},
-	"welcome": {
-		"defaultHomeserver": "Servidor doméstico predeterminado",
-		"welcome": "Bienvenida.",
-		"message": "Su código de invitación es válido. Su pubky <accent>{{pubky}}</accent> está configurado para usar el homeserver de Synonym para alojar sus datos.",
-		"openButton": "Abra {{domain}}"
-	},
 	"session": {
 		"success": "Sesión devuelta",
 		"sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
@@ -295,28 +289,8 @@
 		"failedToGetSecretKey": "Fallo al obtener la clave secreta",
 		"authorizationError": "Se ha producido un error durante la autorización"
 	},
-	"inviteCode": {
-		"title": "Código de invitación.",
-		"description": "Introduzca su código para acceder al servidor doméstico de Synonym. Obtendrá 1 GB de almacenamiento, utilizado para sus publicaciones, fotos, vídeos y perfil.",
-		"needInviteCode": "¿Necesita un código de invitación?",
-		"processing": "Procesando..."
-	},
-	"homeserver": {
-		"title": "Homeserver",
-		"dataHosting": "Alojamiento de datos.",
-		"message": "Elija un homeserver para alojar los datos de pubky <accent>{{pubky}}</accent>",
-		"label": "HOMESERVER",
-		"default": "Por defecto",
-		"requiresInvite": "(requiere código de invitación)",
-		"custom": "A medida"
-	},
-	"requestInvite": {
-		"needInvite": "¿Necesita una invitación?",
-		"askTeam": "Solicite al equipo de Pubky su código de invitación para acceder al servidor doméstico de Synonym."
-	},
 	"newPubkySetup": {
 		"newPubky": "Nuevo Pubky",
-		"pubkyHomeserver": "Pubky Homeserver",
 		"newPubkyDescription": "Este es su nuevo identificador único, su pubky. Cree tantos como necesite para distintos fines."
 	},
 	"sessionItem": {

@@ -75,19 +75,6 @@ export type AddPubkyStackParamList = {
 	PubkyReview: {
 		pubky: string;
 	};
-	Homeserver: {
-		pubky: string;
-	};
-	InviteCode: {
-		pubky: string;
-	};
-	RequestInvite: {
-		pubky: string;
-	};
-	Welcome: {
-		pubky: string;
-		isInvite?: boolean;
-	};
 	ImportOptions: undefined;
 	ImportFileScreen: ImportFileScreenParams;
 	ImportMnemonic: undefined;

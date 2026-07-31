@@ -8,17 +8,21 @@ import Button from '../components/Button.tsx';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { PubkyData } from '../navigation/types.ts';
 import { BodyMText, DisplayText } from '../theme/typography';
+import { showSheet } from '../sheets/sheetNavigation.tsx';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
 
 const SHEET_ID = 'add-pubky';
 
 const AddPubkyReview = ({
-	navigation,
 	route,
 }: NativeStackScreenProps<AddPubkyStackParamList, 'PubkyReview'>): ReactElement => {
 	const { t } = useTranslation();
 	const { pubky } = route.params;
 	const pubkyData: PubkyData = { pubky, ...defaultPubkyState };
+
+	const onContinue = (): void => {
+		showSheet('edit-pubky', { pubky });
+	};
 
 	return (
 		<SheetScreen id={SHEET_ID} title={t('newPubkySetup.newPubky')} gradientType="brand">
@@ -32,7 +36,7 @@ const AddPubkyReview = ({
 						size="large"
 						variant="secondary"
 						testID="AddPubkyReviewContinue"
-						onPress={() => navigation.navigate('Homeserver', { pubky })}
+						onPress={onContinue}
 					/>
 				</View>
 			</View>

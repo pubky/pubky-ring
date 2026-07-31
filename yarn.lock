@@ -2326,6 +2326,11 @@
   dependencies:
     "@synonymdev/result" "^0.0.2"
 
+"@synonymdev/react-native-toast@0.1.0":
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-toast/-/react-native-toast-0.1.0.tgz#c6a357011e6a3a5b450a312cfb2ebb30aa9b6513"
+  integrity sha512-IQaZX9bewFr6wXPN7FPRCvP7aMklPMG5m+peRiYSlAjYsF8FLnfi2oQ2ziWAjtLLfXMuNuUV3hzfXZziiuCZ9g==
+
 "@synonymdev/result@^0.0.2":
   version "0.0.2"
   resolved "https://registry.yarnpkg.com/@synonymdev/result/-/result-0.0.2.tgz#c526743e4f1d3ec1d24a1952281b5daa77ba3fbc"
@@ -6743,11 +6748,6 @@ react-native-svg@^15.15.3:
   dependencies:
     css-select "^5.1.0"
     css-tree "^1.1.3"
-
-react-native-toast-message@^2.3.3:
-  version "2.3.3"
-  resolved "https://registry.yarnpkg.com/react-native-toast-message/-/react-native-toast-message-2.3.3.tgz#e301508d386a9902ff6b4559ecc6674f8cfdf97a"
-  integrity sha512-4IIUHwUPvKHu4gjD0Vj2aGQzqPATiblL1ey8tOqsxOWRPGGu52iIbL8M/mCz4uyqecvPdIcMY38AfwRuUADfQQ==
 
 react-native-worklets@^0.10.0:
   version "0.10.2"

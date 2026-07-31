@@ -7,10 +7,10 @@
 
 import { Result, ok, err } from '@synonymdev/result';
 import { mnemonicPhraseToKeypair } from '@synonymdev/react-native-pubky';
+import { showToast } from '@synonymdev/react-native-toast';
 import { InputAction, ImportParams } from '../inputParser';
 import { RoutedActionContext } from '../inputRouter';
 import { importPubky } from '../pubky';
-import { showToast } from '../helpers';
 import { getErrorMessage } from '../errorHandler';
 import { getPubkyKeys } from '../../store/selectors/pubkySelectors';
 import { getStore } from '../store-helpers';

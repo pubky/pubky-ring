@@ -7,8 +7,6 @@
  */
 
 import { Dispatch } from 'redux';
-import Toast from 'react-native-toast-message';
-import { ToastType } from 'react-native-toast-message/lib/src/types';
 import { Dimensions, Share } from 'react-native';
 import { getIsOnline } from './store-helpers.ts';
 import NetInfo from '@react-native-community/netinfo';
@@ -17,6 +15,7 @@ import { EBackupPreference } from '../types/pubky.ts';
 import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import i18n from '../i18n';
 import { err, ok, Result } from '@synonymdev/result';
+import { showToast } from '@synonymdev/react-native-toast';
 
 /**
  * Formats a signup/invite token to the XXXX-XXXX-XXXX pattern
@@ -143,41 +142,6 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 	const time = `${hours}-${minutes}-${seconds}`;
 
 	return `${prefix}-${date}_${time}`;
-};
-
-export type ToastOptions = {
-	type: ToastType;
-	title: string;
-	description: string;
-	autoHide?: boolean;
-	visibilityTime?: number;
-	onPress?: () => void;
-};
-
-const defaultOptions = {
-	autoHide: true,
-	visibilityTime: 4000,
-	topOffset: 12,
-};
-
-export const showToast = ({
-	type,
-	title,
-	description,
-	autoHide,
-	visibilityTime,
-	onPress,
-}: ToastOptions): void => {
-	Toast.show({
-		...defaultOptions,
-		type,
-		text1: title,
-		text2: description,
-		position: 'top',
-		autoHide,
-		visibilityTime,
-		onPress,
-	});
 };
 
 export const shareData = async (data: string): Promise<void> => {

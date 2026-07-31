@@ -2,13 +2,14 @@ import React, { memo, ReactElement, useCallback } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { showToast } from '@synonymdev/react-native-toast';
 import QRScannerContent from '../components/QRScannerContent.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import type { AuthStackParamList } from '../sheets/types.ts';
-import { readFromClipboard, copyToClipboard } from '../utils/clipboard.ts';
+import { readFromClipboard } from '../utils/clipboard.ts';
 import { getErrorMessage } from '../utils/errorHandler.ts';
-import { checkNetworkConnection, showToast } from '../utils/helpers.ts';
+import { checkNetworkConnection } from '../utils/helpers.ts';
 import { InputAction, parseInput } from '../utils/inputParser.ts';
 import { actionRequiresNetwork, routeInput } from '../utils/inputRouter.ts';
 import { getAutoAuthFromStore, getIsOnline } from '../utils/store-helpers.ts';
@@ -38,18 +39,12 @@ const AuthScanner = ({
 			2,
 		);
 
+		console.error('Auth scanner route error:', debugInfo);
+
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
 			description: errorMsg,
-			onPress: () => {
-				copyToClipboard(debugInfo);
-				showToast({
-					type: 'success',
-					title: i18n.t('common.copied'),
-					description: i18n.t('errors.debugInfoCopied'),
-				});
-			},
 		});
 	}, []);
 

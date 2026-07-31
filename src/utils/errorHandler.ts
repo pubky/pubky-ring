@@ -1,4 +1,4 @@
-import { showToast } from './helpers';
+import { showToast } from '@synonymdev/react-native-toast';
 import { Result, ok, err } from '@synonymdev/result';
 import i18n from '../i18n';
 

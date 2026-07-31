@@ -1,11 +1,12 @@
 import React, { memo, ReactElement, useCallback, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { showToast } from '@synonymdev/react-native-toast';
 import { SheetScreen } from '../components/Sheet.tsx';
 import QRScannerContent from '../components/QRScannerContent.tsx';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { readFromClipboard } from '../utils/clipboard.ts';
-import { checkNetworkConnection, showToast } from '../utils/helpers.ts';
+import { checkNetworkConnection } from '../utils/helpers.ts';
 import { InputAction, parseInput } from '../utils/inputParser.ts';
 import { actionRequiresNetwork, routeInput } from '../utils/inputRouter.ts';
 import {

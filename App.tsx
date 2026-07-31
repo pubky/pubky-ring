@@ -1,23 +1,21 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from 'styled-components/native';
+import { showToast } from '@synonymdev/react-native-toast';
 import { Linking, useColorScheme } from 'react-native';
+import { useDispatch, useSelector } from 'react-redux';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useTranslation } from 'react-i18next';
+import NetInfo from '@react-native-community/netinfo';
 import { darkTheme, lightTheme } from './src/theme';
 import RootNavigator from './src/navigation/RootNavigator.tsx';
 import { ETheme } from './src/types/settings.ts';
-import { useDispatch, useSelector } from 'react-redux';
 import { getIsOnline, getTheme } from './src/store/selectors/settingsSelectors.ts';
 import SafeAreaView from './src/components/SafeAreaView.tsx';
-import Toast from 'react-native-toast-message';
-import { toastConfig } from './src/theme/toastConfig.tsx';
-import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
-import { checkNetworkConnection, showToast } from './src/utils/helpers.ts';
+import { checkNetworkConnection } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { useTranslation } from 'react-i18next';
-
-const appToastConfig = toastConfig();
+import './src/theme/toast';
 
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
@@ -119,7 +117,6 @@ function App(): React.JSX.Element {
 			<SafeAreaProvider>
 				<SafeAreaView edges={['top', 'left', 'right']}>
 					<RootNavigator />
-					<Toast config={appToastConfig} />
 				</SafeAreaView>
 			</SafeAreaProvider>
 		</ThemeProvider>

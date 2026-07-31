@@ -3,12 +3,12 @@ import { Image, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useDispatch } from 'react-redux';
 import { useTranslation } from 'react-i18next';
+import { showToast } from '@synonymdev/react-native-toast';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
 import { BodyMText, DisplayText } from '../theme/typography';
 import { Pencil, Scan, Upload } from '../icons/index.ts';
 import { createNewPubky } from '../utils/pubky.ts';
-import { showToast } from '../utils/helpers.ts';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
 
 const SHEET_ID = 'add-pubky';

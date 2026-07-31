@@ -26,7 +26,8 @@ import {
 } from '../store/slices/pubkysSlice';
 import { Result, err, ok } from '@synonymdev/result';
 import { defaultProfile, defaultPubkyState } from '../store/shapes/pubky';
-import { checkNetworkConnection, showToast } from './helpers.ts';
+import { checkNetworkConnection } from './helpers.ts';
+import { showToast } from '@synonymdev/react-native-toast';
 import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';

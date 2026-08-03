@@ -43,9 +43,7 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, isBor
 					</TextBaseB>
 				</View>
 
-				{isBorrowed ? (
-					<TextBaseB colorName="mutedForeground">{t('reuseSharedPubky.source')}</TextBaseB>
-				) : !isBackedUp ? (
+				{!isBackedUp ? (
 					<TouchableOpacity
 						style={styles.backupContainer}
 						testID="PubkyBox-BackupButton"
@@ -61,6 +59,8 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, isBor
 					</View>
 				)}
 			</View>
+
+			{isBorrowed && <TextBaseB colorName="mutedForeground">{t('reuseSharedPubky.source')}</TextBaseB>}
 		</View>
 	);
 });
@@ -201,6 +201,7 @@ const styles = StyleSheet.create({
 	row: {
 		flexDirection: 'row',
 		flexWrap: 'nowrap',
+		alignItems: 'center',
 	},
 	backupContainer: {
 		flexDirection: 'row',

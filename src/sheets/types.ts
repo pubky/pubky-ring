@@ -1,5 +1,6 @@
 import type { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import type { InputSource, XCallbackParams } from '../utils/inputParser.ts';
+import type { Homeserver } from '../types/pubky.ts';
 
 export type SheetId =
 	| 'backup'
@@ -58,6 +59,13 @@ export type BackupSheetParams = BackupSheetScreenParams;
 export interface EditPubkySheetParams {
 	pubky: string;
 }
+
+export type EditPubkyStackParamList = {
+	Main: EditPubkySheetParams;
+	SelectServer: undefined;
+	AddServer: undefined;
+	EditServer: Homeserver;
+};
 
 export type AddPubkyImportSuccessParams = {
 	pubky: string;

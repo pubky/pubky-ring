@@ -132,7 +132,7 @@ const PubkyBox = ({
 					/>
 
 					<View style={styles.iconContainer} pointerEvents="none">
-						<ChevronRight colorName="foreground" />
+						<ChevronRight />
 					</View>
 				</View>
 

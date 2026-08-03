@@ -1,5 +1,6 @@
 import { PersistedState } from 'redux-persist';
 import { EBackupPreference, PubkySession } from '../../types/pubky';
+import { defaultHomeserver } from '../shapes/pubky.ts';
 
 const migrations = {
 	// @ts-ignore
@@ -97,6 +98,33 @@ const migrations = {
 			pubky: {
 				...state.pubky,
 				pubkys: updatedPubkys,
+			},
+		};
+	},
+	// @ts-ignore
+	7: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			const pubky = updatedPubkys[pubkyKey];
+			// Older signed-up pubkys used an empty homeserver to mean the default homeserver.
+			if (pubky.signedUp && !pubky.homeserver) {
+				updatedPubkys[pubkyKey] = {
+					...pubky,
+					homeserver: defaultHomeserver.publicKey,
+				};
+			}
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+				homeservers: {
+					...(state.pubky.homeservers ?? {}),
+					[defaultHomeserver.publicKey]: defaultHomeserver,
+				},
 			},
 		};
 	},

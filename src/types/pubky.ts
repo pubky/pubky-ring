@@ -16,10 +16,20 @@ export interface Pubky {
 	isBackedUp: boolean;
 }
 
+export interface Homeserver {
+	name: string;
+	publicKey: string;
+}
+
+export type THomeservers = {
+	[publicKey: string]: Homeserver;
+};
+
 export type ISetPubkyData = Partial<Pubky>;
 
 export interface PubkyState {
 	pubkys: TPubkys;
+	homeservers: THomeservers;
 	deepLink: string;
 	processing: { [key: string]: boolean };
 }

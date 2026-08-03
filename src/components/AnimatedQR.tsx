@@ -3,7 +3,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 import QRCode from 'react-native-qrcode-svg';
 import { useTranslation } from 'react-i18next';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
-import { BodySMText } from '../theme/typography';
+import { TextSmB } from '../theme/typography';
 import { ChevronLeft, ChevronRight } from '../icons/index.ts';
 
 const pubkyRingLogo = require('../images/pubky-ring.png');
@@ -165,9 +165,9 @@ const AnimatedQR = ({
 			</View>
 
 			{isPaused && (
-				<BodySMText colorName="textSecondary" style={styles.progressText}>
+				<TextSmB style={styles.progressText} colorName="secondaryForeground">
 					{t('settings.keyProgress', { current: currentIndex + 1, total: data.length })}
-				</BodySMText>
+				</TextSmB>
 			)}
 		</>
 	);

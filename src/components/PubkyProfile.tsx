@@ -4,9 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
 import { copyToClipboard } from '../utils/clipboard';
 import { PubkyData } from '../navigation/types';
-import { isSmallScreen } from '../utils/helpers';
 import ProfileAvatar from './ProfileAvatar';
-import { BodyMSBText, HeadingText } from '../theme/typography';
+import { Text2Xl, TextBaseB } from '../theme/typography';
 import Button from './Button.tsx';
 import Card from './Card.tsx';
 
@@ -20,9 +19,6 @@ interface PubkyProfileProps {
 	style?: StyleProp<ViewStyle>;
 	onButtonPress?: () => void;
 }
-
-const smallScreen = isSmallScreen();
-const containerStyle = { padding: smallScreen ? 15 : 36 };
 
 export const PubkyProfile = memo(
 	({
@@ -54,15 +50,15 @@ export const PubkyProfile = memo(
 				: t('emptyState.placeholderName'));
 
 		return (
-			<Card style={[styles.container, containerStyle, style]}>
+			<Card style={[styles.container, style]}>
 				<View style={styles.avatarContainer}>
 					<ProfileAvatar name={pubkyName} pubky={pubky} size={96} />
 				</View>
 
-				<HeadingText style={styles.nameText}>{pubkyName}</HeadingText>
+				<Text2Xl style={styles.nameText}>{pubkyName}</Text2Xl>
 
 				<TouchableOpacity activeOpacity={0.7} onPress={handleCopyPubky}>
-					<BodyMSBText style={styles.pubkyText}>{pubkyUri}</BodyMSBText>
+					<TextBaseB style={styles.pubkyText}>{pubkyUri}</TextBaseB>
 				</TouchableOpacity>
 
 				{onButtonPress && (
@@ -95,7 +91,7 @@ const styles = StyleSheet.create({
 		marginBottom: 16,
 	},
 	nameText: {
-		paddingBottom: 16,
+		paddingBottom: 12,
 		textAlign: 'center',
 	},
 	pubkyText: {
@@ -103,7 +99,7 @@ const styles = StyleSheet.create({
 	},
 	button: {
 		width: '100%',
-		marginTop: 16,
+		marginTop: 24,
 	},
 });
 

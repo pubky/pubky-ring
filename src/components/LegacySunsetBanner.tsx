@@ -1,7 +1,7 @@
 import React, { memo, ReactElement } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import { ArrowRight } from '../icons/index.ts';
-import { BodySSBText, BodySText } from '../theme/typography.ts';
+import { TextBaseB, TextSmM } from '../theme/typography.ts';
 import { useTranslation } from 'react-i18next';
 
 export interface LegacySunsetBannerProps {
@@ -20,8 +20,8 @@ const LegacySunsetBanner = ({ onPress }: LegacySunsetBannerProps): ReactElement 
 			onPress={onPress}
 		>
 			<View style={styles.copy}>
-				<BodySSBText color="#061a2f">{t('legacySunset.bannerTitle')}</BodySSBText>
-				<BodySText color="#061a2f">{t('legacySunset.bannerDescription')}</BodySText>
+				<TextBaseB color="#061a2f">{t('legacySunset.bannerTitle')}</TextBaseB>
+				<TextSmM color="#061a2f">{t('legacySunset.bannerDescription')}</TextSmM>
 			</View>
 			<ArrowRight color="#ffffff" size={24} />
 		</Pressable>

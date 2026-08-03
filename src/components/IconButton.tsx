@@ -1,6 +1,8 @@
 import React, { ReactElement } from 'react';
-import { Pressable, StyleSheet } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
+import { useTheme } from 'styled-components/native';
+import type { Theme } from '../theme';
 
 type IconButtonProps = {
 	icon: React.ReactNode;
@@ -19,22 +21,28 @@ const IconButton = ({
 	style,
 	testID,
 	onPress,
-}: IconButtonProps): ReactElement => (
-	<Pressable
-		disabled={disabled}
-		style={({ pressed }) => [
-			styles.root,
-			active && styles.active,
-			disabled && styles.disabled,
-			pressed && styles.pressed,
-			style,
-		]}
-		testID={testID}
-		onPress={onPress}
-	>
-		{icon}
-	</Pressable>
-);
+}: IconButtonProps): ReactElement => {
+	const theme = useTheme() as Theme;
+	const backgroundStyle = { backgroundColor: theme.colors.secondary };
+
+	return (
+		<Pressable
+			style={[styles.root, disabled && styles.disabled, style]}
+			disabled={disabled}
+			testID={testID}
+			onPress={onPress}
+		>
+			{({ pressed }) => (
+				<>
+					<View style={[styles.background, backgroundStyle]} pointerEvents="none">
+						{(active || pressed) && <View style={styles.pressOverlay} />}
+					</View>
+					{icon}
+				</>
+			)}
+		</Pressable>
+	);
+};
 
 const styles = StyleSheet.create({
 	root: {
@@ -43,16 +51,18 @@ const styles = StyleSheet.create({
 		width: 48,
 		height: 48,
 		borderRadius: '50%',
+	},
+	background: {
+		...StyleSheet.absoluteFill,
+		borderRadius: '50%',
+		overflow: 'hidden',
+	},
+	pressOverlay: {
+		...StyleSheet.absoluteFill,
 		backgroundColor: 'rgba(255, 255, 255, 0.16)',
 	},
-	active: {
-		backgroundColor: 'rgba(255, 255, 255, 0.32)',
-	},
-	pressed: {
-		backgroundColor: 'rgba(255, 255, 255, 0.32)',
-	},
 	disabled: {
-		opacity: 0.32,
+		opacity: 0.4,
 	},
 });
 

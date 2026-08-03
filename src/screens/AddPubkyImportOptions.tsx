@@ -6,7 +6,7 @@ import { showToast } from '@synonymdev/react-native-toast';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
 import { FileText, Lock, Scan } from '../icons/index.ts';
-import { BodyMText, DisplayText } from '../theme/typography';
+import { Text5Xl, TextBaseM } from '../theme/typography';
 import { importFile } from '../utils/rnfs.ts';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
 
@@ -36,29 +36,32 @@ const AddPubkyImportOptions = ({
 
 	return (
 		<SheetScreen id={SHEET_ID} title={t('import.title')} gradientType="brand">
-			<DisplayText style={styles.headerText}>{t('addPubky.restoreOrImport')}</DisplayText>
-			<BodyMText>{t('addPubky.chooseBackupMethod')}</BodyMText>
+			<Text5Xl style={styles.headerText}>{t('addPubky.restoreOrImport')}</Text5Xl>
+			<TextBaseM>{t('addPubky.chooseBackupMethod')}</TextBaseM>
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/import-pubky.png')} style={styles.importImage} />
 			</View>
 			<View style={styles.buttonContainer}>
 				<Button
+					style={styles.button}
 					text={t('addPubky.encryptedFile')}
-					size="medium"
+					size="large"
 					icon={<Lock />}
 					testID="EncryptedFileButton"
 					onPress={onUploadFile}
 				/>
 				<Button
+					style={styles.button}
 					text={t('addPubky.recoveryPhrase')}
-					size="medium"
+					size="large"
 					icon={<FileText />}
 					testID="RecoveryPhraseButton"
 					onPress={() => navigation.navigate('ImportMnemonic')}
 				/>
 				<Button
+					style={styles.button}
 					text={t('addPubky.scanQrToImport')}
-					size="medium"
+					size="large"
 					icon={<Scan />}
 					testID="ScanQrButton"
 					onPress={() => navigation.navigate('Scanner', { mode: 'import' })}
@@ -74,7 +77,7 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 	},
 	headerText: {
-		marginBottom: 20,
+		marginBottom: 16,
 	},
 	importImage: {
 		width: 200,
@@ -84,6 +87,9 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		gap: 12,
 		marginTop: 'auto',
+	},
+	button: {
+		flex: 0,
 	},
 });
 

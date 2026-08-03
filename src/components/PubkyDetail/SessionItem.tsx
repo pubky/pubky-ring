@@ -1,11 +1,10 @@
 // Currently not used
 
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { PubkySession } from '../../types/pubky.ts';
-import { BodySSBText, BodySText, CaptionSBSpacedText } from '../../theme/typography';
-import { TouchableOpacity } from '../../theme/components.ts';
+import { TextBaseB, TextSmM } from '../../theme/typography';
 import Card from '../Card.tsx';
 
 const formatTimestamp = (timestamp: number): string => {
@@ -40,32 +39,25 @@ const SessionItem = ({
 		<Card style={styles.sessionCard}>
 			<View style={styles.headerRow}>
 				<View style={styles.infoContainer}>
-					<BodySSBText style={styles.pubkyText} numberOfLines={1}>
+					<TextBaseB style={styles.pubkyText} numberOfLines={1}>
 						{session.pubky}
-					</BodySSBText>
-					<BodySText colorName="textTertiary" style={styles.dateText}>
-						{formattedDate}
-					</BodySText>
+					</TextBaseB>
+					<TextSmM style={styles.dateText}>{formattedDate}</TextSmM>
 				</View>
 				<TouchableOpacity style={styles.signOutButton} onPress={handleSignOut} activeOpacity={0.7}>
-					<CaptionSBSpacedText
-						colorName="danger"
-						numberOfLines={1}
-						adjustsFontSizeToFit
-						minimumFontScale={0.8}
-					>
+					<TextSmM colorName="danger" numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
 						{t('sessionItem.signOut')}
-					</CaptionSBSpacedText>
+					</TextSmM>
 				</TouchableOpacity>
 			</View>
 
 			{session.capabilities?.length > 0 && (
 				<View style={styles.capsContainer}>
-					<CaptionSBSpacedText style={styles.capsTitle}>{t('sessionItem.capabilities')}</CaptionSBSpacedText>
+					<TextSmM style={styles.capsTitle}>{t('sessionItem.capabilities')}</TextSmM>
 					<View style={styles.capsWrapper}>
 						{session.capabilities.map(cap => (
 							<View key={cap} style={styles.capChip}>
-								<BodySText>{cap}</BodySText>
+								<TextSmM>{cap}</TextSmM>
 							</View>
 						))}
 					</View>

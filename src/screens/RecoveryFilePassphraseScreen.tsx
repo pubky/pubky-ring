@@ -1,15 +1,14 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Keyboard, StyleSheet, View } from 'react-native';
+import { Keyboard, StyleSheet, View, TouchableOpacity } from 'react-native';
 import { Trans, useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
-import { TextInput, TouchableOpacity } from '../theme/components.ts';
 import Button from '../components/Button.tsx';
 import { truncateStr } from '../utils/pubky.ts';
 import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { BACKUP_PASSWORD_CHAR_MIN } from '../utils/constants.ts';
-import { BodyMText, BodyMSBText, BodySText, CaptionBText, CaptionText } from '../theme/typography';
+import { TextBaseM, TextSmM, TextXsM, TextBaseB, TextXsB } from '../theme/typography';
 import { SheetScreen } from '../components/Sheet.tsx';
 import type { BackupFileScreenParams, ImportFileScreenParams, SheetId } from '../sheets/types.ts';
 import { Eye, EyeOff, Key } from '../icons/index.ts';
@@ -20,6 +19,7 @@ import { getStore } from '../utils/store-helpers.ts';
 import { createRecoveryFile, decryptRecoveryFile } from '@synonymdev/react-native-pubky';
 import { useDispatch } from 'react-redux';
 import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import TextField from '../components/TextField.tsx';
 
 const formatDate = (date: Date): string => {
 	const day = date.getDate().toString().padStart(2, '0');
@@ -209,14 +209,14 @@ const RecoveryFilePassphraseScreen = ({
 		switch (mode) {
 			case 'backup':
 				return (
-					<CaptionText style={styles.inputLabel} numberOfLines={1} ellipsizeMode="middle">
+					<TextXsM style={styles.inputLabel} numberOfLines={1} ellipsizeMode="middle">
 						<Trans
 							t={t}
 							i18nKey="backup.passphraseFor"
-							components={{ accent: <CaptionBText colorName="textPrimary" /> }}
+							components={{ accent: <TextXsB colorName="foreground" /> }}
 							values={{ pubky: truncatedPubky }}
 						/>
-					</CaptionText>
+					</TextXsM>
 				);
 			case 'import':
 				return (
@@ -225,10 +225,10 @@ const RecoveryFilePassphraseScreen = ({
 							<Key />
 						</View>
 						<View style={styles.fileInfoContainer}>
-							<BodyMSBText numberOfLines={1} ellipsizeMode="middle">
+							<TextBaseB numberOfLines={1} ellipsizeMode="middle">
 								{fileName}
-							</BodyMSBText>
-							{fileDate && <CaptionText colorName="textTertiary">{fileDate.toUpperCase()}</CaptionText>}
+							</TextBaseB>
+							{fileDate && <TextSmM colorName="mutedForeground">{fileDate.toUpperCase()}</TextSmM>}
 						</View>
 					</View>
 				);
@@ -237,42 +237,38 @@ const RecoveryFilePassphraseScreen = ({
 
 	return (
 		<SheetScreen id={sheetId} title={title}>
-			<BodyMText style={styles.message}>{message}</BodyMText>
+			<TextBaseM style={styles.message}>{message}</TextBaseM>
 			{content}
-			<View style={[styles.inputContainer, error ? styles.inputError : null]}>
-				<TextInput
-					style={styles.input}
-					autoComplete="off"
-					secureTextEntry={!showPassword}
-					value={password}
-					onChangeText={text => {
-						setPassword(text);
-						if (error) setError('');
-					}}
-					placeholder={t('backup.enterPassphrase')}
-					placeholderTextColor="rgba(255, 255, 255, 0.32)"
-					autoFocus
-					onSubmitEditing={handleSubmit}
-					autoCapitalize="none"
-					autoCorrect={false}
-					textContentType="none"
-					importantForAutofill="no"
-					spellCheck={false}
-					testID="BackupFilePassphraseInput"
-				/>
-				<TouchableOpacity
-					style={styles.eyeButton}
-					onPress={() => setShowPassword(!showPassword)}
-					activeOpacity={0.7}
-				>
-					{showPassword ? <Eye size={24} /> : <EyeOff size={24} />}
-				</TouchableOpacity>
-			</View>
-			{error ? (
-				<BodySText colorName="danger" style={styles.errorText}>
-					{error}
-				</BodySText>
-			) : null}
+			<TextField
+				autoComplete="off"
+				secureTextEntry={!showPassword}
+				value={password}
+				onChangeText={text => {
+					setPassword(text);
+					if (error) setError('');
+				}}
+				placeholder={t('backup.enterPassphrase')}
+				autoFocus
+				onSubmitEditing={handleSubmit}
+				autoCapitalize="none"
+				autoCorrect={false}
+				textContentType="none"
+				importantForAutofill="no"
+				spellCheck={false}
+				testID="BackupFilePassphraseInput"
+				error={error}
+				errorStyle={styles.errorText}
+				rightElement={
+					<TouchableOpacity
+						style={styles.eyeButton}
+						activeOpacity={0.7}
+						onPress={() => setShowPassword(!showPassword)}
+					>
+						{showPassword ? <Eye size={24} /> : <EyeOff size={24} />}
+					</TouchableOpacity>
+				}
+			/>
+
 			<View style={styles.buttonContainer}>
 				<Button
 					text={loading ? t('common.close') : t('common.cancel')}
@@ -301,28 +297,12 @@ const styles = StyleSheet.create({
 	inputLabel: {
 		marginBottom: 8,
 	},
-	inputContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.32)',
-		borderRadius: 16,
-		borderStyle: 'dashed',
-		height: 70,
-	},
-	input: {
-		flex: 1,
-	},
-	inputError: {
-		borderColor: '#FF0000',
-	},
 	errorText: {
 		marginTop: 16,
 	},
 	eyeButton: {
 		padding: 12,
 		marginHorizontal: 5,
-		backgroundColor: 'transparent',
 	},
 	row: {
 		flexDirection: 'row',
@@ -341,12 +321,12 @@ const styles = StyleSheet.create({
 	},
 	fileInfoContainer: {
 		flex: 1,
-		marginRight: 8,
+		marginRight: 24,
 	},
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 		marginTop: 24,
 	},
 });

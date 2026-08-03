@@ -9,7 +9,7 @@ import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 import AnimatedQR from '../components/AnimatedQR.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
-import { BodyMText, BodyMSBText, CaptionText } from '../theme/typography';
+import { TextBaseM, TextBaseB, TextXsM } from '../theme/typography';
 
 const MigrateQRCode = (): ReactElement => {
 	const { t } = useTranslation();
@@ -96,7 +96,7 @@ const MigrateQRCode = (): ReactElement => {
 			return (
 				<View style={styles.centerContent}>
 					<ActivityIndicator size="large" color="#FFFFFF" />
-					<BodyMText style={styles.loadingText}>{t('common.loading')}</BodyMText>
+					<TextBaseM style={styles.loadingText}>{t('common.loading')}</TextBaseM>
 				</View>
 			);
 		}
@@ -104,7 +104,7 @@ const MigrateQRCode = (): ReactElement => {
 		if (keyValues.length === 0) {
 			return (
 				<View style={styles.centerContent}>
-					<BodyMSBText colorName="textTertiary">{t('settings.noKeysToDisplay')}</BodyMSBText>
+					<TextBaseB colorName="mutedForeground">{t('settings.noKeysToDisplay')}</TextBaseB>
 				</View>
 			);
 		}
@@ -122,10 +122,10 @@ const MigrateQRCode = (): ReactElement => {
 	return (
 		<SheetScreen id="migrate" title={t('settings.migrateKeys')}>
 			<View style={styles.textContainer}>
-				<CaptionText>{t('settings.scanDynamicQR')}</CaptionText>
-				<BodyMText style={styles.description}>
+				<TextXsM>{t('settings.scanDynamicQR')}</TextXsM>
+				<TextBaseM style={styles.description}>
 					{t('settings.scanDynamicQRDescription', { count: displayedKeyCount })}
-				</BodyMText>
+				</TextBaseM>
 			</View>
 
 			{renderContent()}

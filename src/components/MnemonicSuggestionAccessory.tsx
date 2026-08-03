@@ -1,14 +1,15 @@
 import React, { memo, ReactElement, useMemo } from 'react';
 import { StyleSheet } from 'react-native';
 import KeyboardAccessory from './KeyboardAccessory.tsx';
-import MnemonicSuggestionPill from './MnemonicSuggestionPill.tsx';
+import Button from './Button.tsx';
 
 const MNEMONIC_WORD_COUNT = 12;
 const MNEMONIC_SUGGESTION_ACCESSORY_ID_PREFIX = 'mnemonic-suggestion-accessory';
 export const MNEMONIC_SUGGESTION_ACCESSORY_HEIGHT = 52;
 
-export const getMnemonicSuggestionAccessoryId = (index: number): string =>
-	`${MNEMONIC_SUGGESTION_ACCESSORY_ID_PREFIX}-${index}`;
+export const getMnemonicSuggestionAccessoryId = (index: number): string => {
+	return `${MNEMONIC_SUGGESTION_ACCESSORY_ID_PREFIX}-${index}`;
+};
 
 interface MnemonicSuggestionAccessoryProps {
 	suggestions: string[];
@@ -21,12 +22,9 @@ const MnemonicSuggestionAccessory = ({
 	bottomInset,
 	onSuggestionPress,
 }: MnemonicSuggestionAccessoryProps): ReactElement => {
-	const accessoryIds = useMemo(
-		() => Array.from({ length: MNEMONIC_WORD_COUNT }, (_, index) => getMnemonicSuggestionAccessoryId(index)),
-		[],
-	);
-	const renderSuggestions = (): ReactElement[] =>
-		suggestions.map(word => <MnemonicSuggestionPill key={word} word={word} onPress={onSuggestionPress} />);
+	const accessoryIds = useMemo(() => {
+		return Array.from({ length: MNEMONIC_WORD_COUNT }, (_, index) => getMnemonicSuggestionAccessoryId(index));
+	}, []);
 
 	return (
 		<KeyboardAccessory
@@ -37,7 +35,15 @@ const MnemonicSuggestionAccessory = ({
 			androidContainerStyle={styles.androidContainer}
 			emptyStyle={styles.emptyAccessory}
 		>
-			{renderSuggestions}
+			{suggestions.map(word => (
+				<Button
+					key={word}
+					text={word}
+					size="small"
+					variant="secondary"
+					onPress={() => onSuggestionPress(word)}
+				/>
+			))}
 		</KeyboardAccessory>
 	);
 };

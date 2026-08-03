@@ -7,7 +7,7 @@ import PubkyProfile from '../components/PubkyProfile.tsx';
 import Button from '../components/Button.tsx';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { PubkyData } from '../navigation/types.ts';
-import { BodyMText, DisplayText } from '../theme/typography';
+import { Text5Xl, TextBaseM } from '../theme/typography';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
 
@@ -27,8 +27,8 @@ const AddPubkyReview = ({
 	return (
 		<SheetScreen id={SHEET_ID} title={t('newPubkySetup.newPubky')} gradientType="brand">
 			<View style={styles.content}>
-				<DisplayText style={styles.headerText}>{t('pubky.yourPubky')}</DisplayText>
-				<BodyMText style={styles.message}>{t('newPubkySetup.newPubkyDescription')}</BodyMText>
+				<Text5Xl style={styles.headerText}>{t('pubky.yourPubky')}</Text5Xl>
+				<TextBaseM style={styles.message}>{t('newPubkySetup.newPubkyDescription')}</TextBaseM>
 				<PubkyProfile pubky={pubky} pubkyData={pubkyData} />
 				<View style={styles.footer}>
 					<Button
@@ -49,10 +49,10 @@ const styles = StyleSheet.create({
 		flex: 1,
 	},
 	headerText: {
-		marginBottom: 20,
+		marginBottom: 16,
 	},
 	message: {
-		marginBottom: 24,
+		marginBottom: 'auto',
 	},
 	footer: {
 		marginTop: 'auto',

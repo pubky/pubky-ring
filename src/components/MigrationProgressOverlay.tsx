@@ -1,5 +1,5 @@
 import React, { memo, useEffect, useState } from 'react';
-import { StyleSheet } from 'react-native';
+import { StyleSheet, View } from 'react-native';
 import Animated, {
 	useSharedValue,
 	useAnimatedStyle,
@@ -9,10 +9,9 @@ import Animated, {
 	interpolate,
 } from 'react-native-reanimated';
 import { scheduleOnRN } from 'react-native-worklets';
-import { View } from '../theme/components';
 import { subscribeMigrationProgress, MigrationProgress } from '../utils/actions/migrateAction';
 import { useTranslation } from 'react-i18next';
-import { BodyMBText, BodySSBText } from '../theme/typography';
+import { TextBaseB } from '../theme/typography';
 import { accentColors } from '../theme';
 
 const MigrationProgressOverlay = (): React.ReactElement | null => {
@@ -90,10 +89,10 @@ const MigrationProgressOverlay = (): React.ReactElement | null => {
 		<Animated.View style={[styles.container, containerAnimatedStyle]}>
 			<View style={styles.contentContainer}>
 				<View style={styles.textContainer}>
-					<BodySSBText>{t('migrate.scanning')}</BodySSBText>
-					<BodyMBText colorName="pubkyRing">
+					<TextBaseB>{t('migrate.scanning')}</TextBaseB>
+					<TextBaseB colorName="blue">
 						{progress.current} / {progress.total}
-					</BodyMBText>
+					</TextBaseB>
 				</View>
 
 				<View style={styles.progressBarContainer}>
@@ -136,7 +135,7 @@ const styles = StyleSheet.create({
 		top: 0,
 		left: 0,
 		height: '100%',
-		backgroundColor: accentColors.pubkyRing,
+		backgroundColor: accentColors.blue,
 		borderRadius: 4,
 	},
 });

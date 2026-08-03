@@ -1,7 +1,7 @@
 import { StyleSheet, StyleProp, ViewStyle, View } from 'react-native';
 import React, { memo, ReactElement } from 'react';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { BodySSBText, HeadingText } from '../theme/typography';
+import { Text2Xl, TextBaseB } from '../theme/typography';
 import { truncatePubky } from '../utils/pubky.ts';
 import { ChevronRight } from '../icons/index.ts';
 import Card from './Card.tsx';
@@ -29,14 +29,14 @@ const PubkyCard = ({
 
 			<View style={styles.text}>
 				{name && (
-					<HeadingText style={styles.name} numberOfLines={1}>
+					<Text2Xl style={styles.name} numberOfLines={1}>
 						{name}
-					</HeadingText>
+					</Text2Xl>
 				)}
-				<BodySSBText numberOfLines={1}>{truncatePubky(publicKey)}</BodySSBText>
+				<TextBaseB numberOfLines={1}>{truncatePubky(publicKey)}</TextBaseB>
 			</View>
 
-			{showChevron && <ChevronRight colorName="textTertiary" />}
+			{showChevron && <ChevronRight colorName="foreground" />}
 		</Card>
 	);
 };

@@ -4,7 +4,7 @@ import {
 	KeyboardEvent,
 	Platform,
 	StyleSheet,
-	TextInput as NativeTextInput,
+	TextInput,
 	TextInputKeyPressEvent,
 	View,
 } from 'react-native';
@@ -17,10 +17,11 @@ import Button from '../components/Button.tsx';
 import MnemonicSuggestionAccessory, {
 	getMnemonicSuggestionAccessoryId,
 } from '../components/MnemonicSuggestionAccessory.tsx';
-import { BodyMText } from '../theme/typography';
-import { TextInput } from '../theme/components.ts';
+import TextField from '../components/TextField.tsx';
+import { TextBaseM, TextXsSb } from '../theme/typography';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
+import { ThemedView } from '../theme/components.ts';
 
 const SHEET_ID = 'add-pubky';
 const MNEMONIC_WORD_COUNT = 12;
@@ -48,7 +49,7 @@ const AddPubkyImportMnemonic = ({
 	const [validWords, setValidWords] = useState<boolean[]>(createValidWordState);
 	const [focused, setFocused] = useState<number | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
-	const inputRefs = useRef<(NativeTextInput | null)[]>(Array(MNEMONIC_WORD_COUNT).fill(null));
+	const inputRefs = useRef<(TextInput | null)[]>(Array(MNEMONIC_WORD_COUNT).fill(null));
 	const insets = useSafeAreaInsets();
 	const [suggestionInset, setSuggestionInset] = useState<number>(0);
 
@@ -149,22 +150,7 @@ const AddPubkyImportMnemonic = ({
 		[isValidWord, mnemonicWords],
 	);
 
-	const getDisplayValue = useCallback(
-		(index: number) => {
-			const word = mnemonicWords[index];
-			if (!word) {
-				return '';
-			}
-
-			const expectedPrefix = `${index + 1}. `;
-			if (word.startsWith(expectedPrefix)) {
-				return word;
-			}
-
-			return `${index + 1}. ${word}`;
-		},
-		[mnemonicWords],
-	);
+	const getDisplayValue = useCallback((index: number) => mnemonicWords[index] ?? '', [mnemonicWords]);
 
 	const handleFocus = useCallback((index: number) => {
 		setFocused(index);
@@ -260,18 +246,16 @@ const AddPubkyImportMnemonic = ({
 	}, [navigation]);
 
 	const renderMnemonicInput = (index: number): ReactElement => {
-		const isInvalid = mnemonicWords[index] && !validWords[index];
+		const isInvalid = Boolean(mnemonicWords[index] && !validWords[index]);
 
 		return (
-			<TextInput
+			<TextField
 				key={index}
 				ref={ref => {
 					inputRefs.current[index] = ref;
 				}}
-				style={[styles.mnemonicInput, isInvalid && styles.invalidInput, loading && styles.disabledInput]}
+				style={[styles.mnemonicInput, loading && styles.disabledInput]}
 				value={getDisplayValue(index)}
-				placeholder={`${index + 1}.`}
-				placeholderTextColor="rgba(255, 255, 255, 0.32)"
 				autoCapitalize="none"
 				autoCorrect={false}
 				autoComplete="off"
@@ -284,6 +268,12 @@ const AddPubkyImportMnemonic = ({
 				submitBehavior="submit"
 				editable={!loading}
 				testID={`MnemonicWordInput-${index + 1}`}
+				hasError={isInvalid}
+				leftElement={
+					<ThemedView style={styles.mnemonicBadge} colorName="secondary">
+						<TextXsSb colorName={isInvalid ? 'danger' : 'secondaryForeground'}>{index + 1}</TextXsSb>
+					</ThemedView>
+				}
 				onChangeText={text => updateMnemonicWord(index, text)}
 				onFocus={() => handleFocus(index)}
 				onBlur={() => handleBlur(index)}
@@ -296,7 +286,7 @@ const AddPubkyImportMnemonic = ({
 	return (
 		<SheetScreen id={SHEET_ID} title={t('import.title')} scrollable={true}>
 			<View style={styles.wrapper}>
-				<BodyMText style={styles.message}>{t('addPubky.enterRecoveryWords')}</BodyMText>
+				<TextBaseM style={styles.message}>{t('addPubky.enterRecoveryWords')}</TextBaseM>
 				<View style={styles.keyContainer}>
 					<View style={styles.mnemonicGrid}>
 						<View style={styles.mnemonicColumn}>
@@ -360,26 +350,25 @@ const styles = StyleSheet.create({
 		gap: 6,
 	},
 	mnemonicInput: {
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.32)',
-		borderStyle: 'dashed',
-		borderRadius: 8,
 		paddingLeft: 12,
 		paddingRight: 12,
-		height: 46,
-	},
-	invalidInput: {
-		borderColor: '#ff0000',
-		color: '#ff0000',
 	},
 	disabledInput: {
 		opacity: 0.8,
 		color: '#666',
 	},
+	mnemonicBadge: {
+		alignItems: 'center',
+		justifyContent: 'center',
+		height: 20,
+		width: 20,
+		borderRadius: '50%',
+		marginLeft: 24,
+	},
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 	},
 });
 

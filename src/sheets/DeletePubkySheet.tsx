@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import Button from '../components/Button.tsx';
 import { useTranslation } from 'react-i18next';
-import { BodyMText } from '../theme/typography';
+import { TextBaseM } from '../theme/typography';
 import Sheet from '../components/Sheet.tsx';
 import type { RootStackParamList } from '../navigation/types.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
@@ -47,7 +47,7 @@ const DeletePubkySheet = ({
 
 	return (
 		<Sheet id="delete-pubky" title={t('pubky.deletePubky')} gradientType="brand">
-			<BodyMText style={styles.message}>{t('pubky.deleteConfirm')}</BodyMText>
+			<TextBaseM style={styles.message}>{t('pubky.deleteConfirm')}</TextBaseM>
 			<PubkyCard name={pubkyName} publicKey={publicKey} />
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/trash.png')} style={styles.image} />
@@ -87,7 +87,7 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 	},
 });
 

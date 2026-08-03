@@ -13,7 +13,7 @@ import Animated, {
 	withTiming,
 	withSequence,
 } from 'react-native-reanimated';
-import { BodySText, CaptionSBText, CaptionText } from '../theme/typography';
+import { TextSmM, TextXsM } from '../theme/typography';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import ProgressBar from '../components/ProgressBar.tsx';
@@ -24,6 +24,7 @@ import { SheetScreen } from '../components/Sheet.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { CheckCircle, Folder } from '../icons/index.ts';
 import CircularProgressBar from '../components/CircularProgressBar.tsx';
+import PermissionCard from '../components/PermissionCard.tsx';
 import type { AuthStackParamList } from '../sheets/types.ts';
 
 interface Capability {
@@ -39,16 +40,16 @@ const Permission = memo(({ capability }: { capability: Capability; isAuthorized:
 		<View style={styles.permissionRow}>
 			<Folder size={16} />
 			<View style={styles.pathContainer}>
-				<CaptionSBText>{capability.path}</CaptionSBText>
+				<TextSmM colorName="foreground">{capability.path}</TextSmM>
 			</View>
 			<View style={styles.permissionsContainer}>
 				{hasReadPermission && (
-					<CaptionText>
+					<TextXsM>
 						{t('common.read')}
 						{hasWritePermission ? ',' : ''}
-					</CaptionText>
+					</TextXsM>
 				)}
-				{hasWritePermission && <CaptionText>{t('common.write')}</CaptionText>}
+				{hasWritePermission && <TextXsM>{t('common.write')}</TextXsM>}
 			</View>
 		</View>
 	);
@@ -188,27 +189,25 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			showBottomSafeAreaInset={false}
 			headerRight={headerProgress}
 		>
-			<View style={styles.section}>
-				<CaptionText
+			<PermissionCard style={styles.permissionsCard}>
+				<TextXsM
 					style={styles.sectionTitle}
 					testID={isAuthorized ? 'ConfirmAuthGrantedPermissions' : 'ConfirmAuthRequestedPermissions'}
 				>
 					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
-				</CaptionText>
+				</TextXsM>
 
 				<View style={styles.permissions}>
 					{authDetailCapabilities.map((capability, index) => (
 						<Permission key={index} capability={capability} isAuthorized={isAuthorized} />
 					))}
 				</View>
-			</View>
-
-			<PubkyCard name={pubkyName} publicKey={pubky} />
+			</PermissionCard>
 
 			{!isAuthorized && (
-				<BodySText style={styles.warningText} colorName="textTertiary">
+				<TextSmM style={styles.warningText} colorName="mutedForeground">
 					{t('auth.trustWarning')}
-				</BodySText>
+				</TextSmM>
 			)}
 
 			<View style={styles.imageContainer}>
@@ -216,6 +215,8 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 					<CheckCircle colorName="pubkyApp" size={128} />
 				</Animated.View>
 			</View>
+
+			<PubkyCard style={styles.card} name={pubkyName} publicKey={pubky} />
 
 			<View style={styles.footerContainer}>
 				<View style={styles.buttonContainer}>
@@ -264,13 +265,8 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 };
 
 const styles = StyleSheet.create({
-	section: {
+	permissionsCard: {
 		marginBottom: 24,
-		backgroundColor: '#000000',
-		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.32)',
-		padding: 20,
-		borderRadius: 16,
 	},
 	relayContainer: {
 		flexDirection: 'row',
@@ -288,7 +284,10 @@ const styles = StyleSheet.create({
 		marginLeft: 6,
 	},
 	warningText: {
-		marginTop: 24,
+		marginBottom: 24,
+	},
+	card: {
+		marginTop: 'auto',
 	},
 	permissionRow: {
 		flexDirection: 'row',
@@ -316,17 +315,17 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	footerContainer: {
-		marginTop: 'auto',
+		marginTop: 24,
 		justifyContent: 'center',
 	},
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 	},
 	progressBarContainer: {
 		position: 'absolute',
-		bottom: -26,
+		bottom: -14,
 		width: 147,
 		alignSelf: 'center',
 	},

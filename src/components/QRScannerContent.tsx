@@ -109,6 +109,7 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 			<View style={styles.buttonContainer}>
 				<Button
 					text={t('clipboard.pasteLink')}
+					variant="secondary"
 					size="large"
 					icon={<Qrcode size={24} />}
 					testID="QRScannerPasteButton"

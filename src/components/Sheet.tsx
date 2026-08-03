@@ -2,14 +2,14 @@ import React, { memo, ReactElement, ReactNode } from 'react';
 import { ScrollView, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
 import { useIsFocused, useNavigation, useNavigationState } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { BLUE_RADIAL_GRADIENT, RED_RADIAL_GRADIENT } from '../utils/constants.ts';
 import SafeAreaInset from './SafeAreaInset.tsx';
 import { LinearGradient, RadialGradient } from './LinearGradient.tsx';
-import { BodyMBText } from '../theme/typography.ts';
+import { TextLgSb } from '../theme/typography.ts';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { ArrowLeft } from '../icons/index.ts';
 import type { SheetId } from '../sheets/types.ts';
 import { getSheetContentHeight } from '../sheets/sheetLayout.ts';
+import { ThemedView } from '../theme/components.ts';
 
 export type GradientType = 'none' | 'brand' | 'danger';
 
@@ -34,8 +34,8 @@ interface SheetScreenProps {
 interface SheetProps extends SheetFrameProps, SheetScreenProps {}
 
 const gradientColors: Record<Exclude<GradientType, 'none'>, string[]> = {
-	brand: BLUE_RADIAL_GRADIENT,
-	danger: RED_RADIAL_GRADIENT,
+	brand: ['#0085FF', '#000000'],
+	danger: ['#E95164', '#000000'],
 };
 
 export const SheetFrame = ({ children }: SheetFrameProps): ReactElement => {
@@ -82,19 +82,19 @@ export const SheetScreen = ({
 				<HeaderNavButton style={styles.navButton} />
 			)}
 
-			<BodyMBText testID={titleTestID ?? `${id}-title`}>{titleText}</BodyMBText>
+			<TextLgSb testID={titleTestID ?? `${id}-title`}>{titleText}</TextLgSb>
 
 			<View style={styles.navButton}>{headerRight}</View>
 		</View>
 	);
 
 	return (
-		<LinearGradient colors={['#1a1a1a', '#000000']}>
+		<LinearGradient colors={['#1D1D20', '#000000']}>
 			{gradientType !== 'none' && (
-				<RadialGradient style={styles.background} colors={gradientColors[gradientType]} />
+				<RadialGradient style={styles.background} radius={0.7} colors={gradientColors[gradientType]} />
 			)}
 
-			<View style={styles.indicator} />
+			<ThemedView style={styles.indicator} colorName="muted" />
 
 			{scrollable ? (
 				<ScrollView
@@ -136,15 +136,15 @@ const styles = StyleSheet.create({
 	},
 	background: {
 		...StyleSheet.absoluteFill,
+		opacity: 0.2,
 	},
 	indicator: {
 		alignSelf: 'center',
-		width: 32,
-		height: 4,
-		marginTop: 12,
-		marginBottom: 16,
-		backgroundColor: '#636363',
-		borderRadius: 2,
+		width: 60,
+		height: 6,
+		marginTop: 16,
+		marginBottom: 24,
+		borderRadius: 3,
 	},
 	titleContainer: {
 		flexDirection: 'row',

@@ -71,8 +71,8 @@ const RootNavigator = (): ReactElement => {
 			colors: {
 				...DefaultTheme.colors,
 				background: theme.colors.background,
-				primary: theme.colors.textPrimary,
-				text: theme.colors.textPrimary,
+				primary: theme.colors.foreground,
+				text: theme.colors.foreground,
 			},
 		}),
 		[theme],

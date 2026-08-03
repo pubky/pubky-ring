@@ -1,10 +1,11 @@
 import React, { memo, useCallback } from 'react';
 import { Image, Linking, StyleSheet, View, ScrollView } from 'react-native';
-import { View as ThemedView, Divider } from '../theme/components.ts';
+import { ThemedView, Divider } from '../theme/components.ts';
 import LinearGradient from 'react-native-linear-gradient';
 import { RadialGradient } from '../components/LinearGradient.tsx';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
-import { BLUE_RADIAL_GRADIENT, TERMS_OF_USE } from '../utils/constants.ts';
+import { TERMS_OF_USE } from '../utils/constants.ts';
+import { BLUE_RADIAL_GRADIENT } from '../theme/index.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { updateSignedTermsOfUse } from '../store/slices/settingsSlice.ts';
 import { getHasPubkys } from '../store/selectors/pubkySelectors.ts';
@@ -14,7 +15,7 @@ import { Trans, useTranslation } from 'react-i18next';
 import Button from '../components/Button.tsx';
 import TermsOfUseContent from '../components/TermsOfUseContent.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
-import { BodyMSBText, BodySSBText } from '../theme/typography';
+import { TextXlB, TextBaseB } from '../theme/typography';
 
 const TermsOfUse = (): React.ReactElement => {
 	const { t } = useTranslation();
@@ -38,7 +39,7 @@ const TermsOfUse = (): React.ReactElement => {
 		<View style={styles.container}>
 			<AppHeader disableBackNavigation />
 
-			<RadialGradient style={styles.background} colors={BLUE_RADIAL_GRADIENT} center={{ x: 1, y: 0.5 }}>
+			<RadialGradient style={styles.background} colors={BLUE_RADIAL_GRADIENT} center={{ x: 1.05, y: 0.5 }}>
 				<Image source={require('../images/circles.png')} style={styles.backgroundImage} />
 			</RadialGradient>
 
@@ -59,21 +60,21 @@ const TermsOfUse = (): React.ReactElement => {
 					/>
 
 					<View>
-						<BodyMSBText style={styles.footerHeaderText}>{t('terms.termsOfUse')}</BodyMSBText>
-						<BodySSBText colorName="textTertiary">{t('terms.acceptTerms')}</BodySSBText>
+						<TextXlB style={styles.footerHeaderText}>{t('terms.termsOfUse')}</TextXlB>
+						<TextBaseB colorName="mutedForeground">{t('terms.acceptTerms')}</TextBaseB>
 					</View>
 
 					<Divider style={styles.divider} />
 
 					<View>
-						<BodyMSBText style={styles.footerHeaderText}>{t('terms.privacyPolicy')}</BodyMSBText>
-						<BodySSBText colorName="textTertiary">
+						<TextXlB style={styles.footerHeaderText}>{t('terms.privacyPolicy')}</TextXlB>
+						<TextBaseB colorName="mutedForeground">
 							<Trans
 								t={t}
 								i18nKey="terms.acceptPrivacy"
-								components={{ accent: <BodySSBText colorName="pubkyRing" onPress={onPrivacyFormPress} /> }}
+								components={{ accent: <TextBaseB colorName="blue" onPress={onPrivacyFormPress} /> }}
 							/>
-						</BodySSBText>
+						</TextBaseB>
 					</View>
 
 					<Button
@@ -141,6 +142,7 @@ const styles = StyleSheet.create({
 		marginVertical: 12,
 	},
 	button: {
+		flex: 1,
 		marginTop: 24,
 	},
 });

@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useMemo, useState } from 'react';
-import { Platform, StyleSheet, TouchableOpacity, View } from 'react-native';
+import { Platform, StyleSheet, TouchableHighlight, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Button from '../components/Button.tsx';
 import { useSelector } from 'react-redux';
@@ -10,9 +10,11 @@ import { RootState } from '../types';
 import { EBackupPreference } from '../types/pubky.ts';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
 import { useTranslation } from 'react-i18next';
-import { BodyMText, BodyMSBText, BodySSBText, BodySText } from '../theme/typography';
+import { TextBaseM, TextSmM, TextSmB } from '../theme/typography';
 import { SheetScreen } from '../components/Sheet.tsx';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
+import { ThemedView } from '../theme/components.ts';
+import { shadows } from '../theme/shadows.ts';
 import type { BackupStackParamList } from '../sheets/types.ts';
 
 const dummyMnemonicWords = Array.from({ length: 12 }, () => 'secret');
@@ -46,26 +48,30 @@ const RecoveryPhraseScreen = ({
 
 	return (
 		<SheetScreen id="backup" title={t('backup.mnemonic.navTitle')}>
-			<BodyMText style={styles.message}>{t('backup.recoveryPhraseMessage')}</BodyMText>
+			<TextBaseM style={styles.message}>{t('backup.recoveryPhraseMessage')}</TextBaseM>
 
-			<View style={styles.mnemonicContainer}>
+			<ThemedView style={styles.mnemonicContainer} colorName="card">
 				<View style={styles.columnContainer}>
 					{mnemonicWordsToShow.slice(0, 6).map((word, index) => (
 						<View key={index} style={styles.wordItem}>
-							<BodyMSBText colorName="textTertiary" style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
+							<TextBaseM style={styles.wordNumber} colorName="mutedForeground" maxFontSizeMultiplier={1.2}>
 								{index + 1}.
-							</BodyMSBText>
-							<BodyMSBText maxFontSizeMultiplier={1.2}>{word}</BodyMSBText>
+							</TextBaseM>
+							<TextBaseM colorName="foreground" maxFontSizeMultiplier={1.2}>
+								{word}
+							</TextBaseM>
 						</View>
 					))}
 				</View>
 				<View style={styles.columnContainer}>
 					{mnemonicWordsToShow.slice(6, 12).map((word, index) => (
 						<View key={index + 6} style={styles.wordItem}>
-							<BodyMSBText colorName="textTertiary" style={styles.wordNumber} maxFontSizeMultiplier={1.2}>
+							<TextBaseM style={styles.wordNumber} colorName="mutedForeground" maxFontSizeMultiplier={1.2}>
 								{index + 7}.
-							</BodyMSBText>
-							<BodyMSBText maxFontSizeMultiplier={1.2}>{word}</BodyMSBText>
+							</TextBaseM>
+							<TextBaseM colorName="foreground" maxFontSizeMultiplier={1.2}>
+								{word}
+							</TextBaseM>
 						</View>
 					))}
 				</View>
@@ -73,34 +79,33 @@ const RecoveryPhraseScreen = ({
 				{isBlurred && (
 					<>
 						<BlurView style={styles.blurOverlay} tintEnabled={true} />
-						<TouchableOpacity
+
+						<TouchableHighlight
 							style={styles.revealButton}
-							activeOpacity={0.7}
 							testID="RecoveryPhraseRevealButton"
 							onPress={handleConfirmBackup}
 						>
-							<BodySSBText
+							<TextSmB
 								style={styles.tapToRevealText}
 								numberOfLines={1}
 								adjustsFontSizeToFit
 								minimumFontScale={0.8}
 							>
 								{t('backup.tapToReveal')}
-							</BodySSBText>
-						</TouchableOpacity>
+							</TextSmB>
+						</TouchableHighlight>
 					</>
 				)}
-			</View>
+			</ThemedView>
 
-			<PubkyCard name={pubkyName} publicKey={promptPayload.pubky} />
+			<TextSmM style={styles.warningText}>{t('backup.recoveryWarning')}</TextSmM>
 
-			<BodySText colorName="textTertiary" style={styles.warningText}>
-				{t('backup.recoveryWarning')}
-			</BodySText>
+			<PubkyCard style={styles.card} name={pubkyName} publicKey={promptPayload.pubky} />
 
 			<View style={styles.buttonContainer}>
 				<Button
 					text={t('backup.finishBackup')}
+					variant="secondary"
 					size="large"
 					disabled={isBlurred}
 					testID="RecoveryPhraseFinishButton"
@@ -116,7 +121,6 @@ const styles = StyleSheet.create({
 		marginBottom: 24,
 	},
 	mnemonicContainer: {
-		backgroundColor: 'rgba(255, 255, 255, 0.10)',
 		borderRadius: 16,
 		padding: 24,
 		flexDirection: 'row',
@@ -132,15 +136,13 @@ const styles = StyleSheet.create({
 		top: '50%',
 		left: '50%',
 		transform: [{ translateX: -50 }, { translateY: -12 }],
-		backgroundColor: 'rgba(0, 0, 0, 0.64)',
+		backgroundColor: '#111115',
 		paddingHorizontal: 28,
 		paddingVertical: 18,
 		borderRadius: 64,
 		borderWidth: 1,
-		borderColor: 'rgba(255, 255, 255, 0.32)',
-		minHeight: 64,
-		alignItems: 'center',
-		justifyContent: 'center',
+		borderColor: '#303034',
+		...shadows.xs,
 	},
 	tapToRevealText: {},
 	columnContainer: {
@@ -154,14 +156,15 @@ const styles = StyleSheet.create({
 	wordNumber: {
 		marginRight: 8,
 	},
-	warningText: {
-		marginTop: 24,
+	warningText: {},
+	card: {
+		marginTop: 'auto',
+		marginBottom: 24,
 	},
 	buttonContainer: {
-		marginTop: 'auto',
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 	},
 });
 

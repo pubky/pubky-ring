@@ -3,21 +3,23 @@ import { TextInputProps } from 'react-native';
 export interface Theme {
 	keyboardAppearance: NonNullable<TextInputProps['keyboardAppearance']>;
 	colors: {
+		// Base colors
+		background: string;
+		foreground: string;
+		secondary: string;
+		primaryForeground: string;
+		secondaryForeground: string;
+		mutedForeground: string;
+		card: string;
+		muted: string;
+		popover: string;
+		border: string;
+		input: string;
+
 		// Accent colors
-		pubkyRing: string;
+		blue: string;
 		pubkyApp: string;
 		danger: string;
-
-		// Text colors
-		textPrimary: string;
-		textSecondary: string;
-		textTertiary: string;
-
-		// UI colors
-		background: string;
-		buttonBackground: string;
-		buttonBorder: string;
-		cardGradient: string[];
 	};
 }
 
@@ -25,8 +27,10 @@ export type ThemeColorName = {
 	[Name in keyof Theme['colors']]: Theme['colors'][Name] extends string ? Name : never;
 }[keyof Theme['colors']];
 
+export const BLUE_RADIAL_GRADIENT = ['rgba(0, 133, 255, 0.32)', 'transparent'];
+
 export const accentColors = {
-	pubkyRing: '#0085FF',
+	blue: '#0085FF',
 	pubkyApp: '#C8FF00',
 	danger: '#FF0000',
 };
@@ -36,12 +40,16 @@ export const lightTheme: Theme = {
 	colors: {
 		...accentColors,
 		background: '#fff',
-		textPrimary: '#333',
-		textSecondary: '#666',
-		textTertiary: '#999',
-		buttonBackground: '#f5f5f5',
-		buttonBorder: '#ddd',
-		cardGradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)'],
+		foreground: '#333',
+		secondary: '#303034',
+		primaryForeground: '#1D1D20',
+		secondaryForeground: '#666',
+		mutedForeground: '#999',
+		card: '#1D1D20',
+		muted: '#303034',
+		popover: '#05050A',
+		border: '#ddd',
+		input: '#525252',
 	},
 };
 
@@ -50,11 +58,15 @@ export const darkTheme: Theme = {
 	colors: {
 		...accentColors,
 		background: '#000',
-		textPrimary: '#fff',
-		textSecondary: 'rgba(255, 255, 255, 0.80)',
-		textTertiary: 'rgba(255, 255, 255, 0.64)',
-		buttonBackground: 'rgba(255, 255, 255, 0.1)',
-		buttonBorder: 'rgba(255, 255, 255, 0.32)',
-		cardGradient: ['rgba(255, 255, 255, 0.12)', 'rgba(255, 255, 255, 0.08)'],
+		foreground: '#fff',
+		secondary: '#303034',
+		primaryForeground: '#1D1D20',
+		secondaryForeground: '#D4D4DB',
+		mutedForeground: '#89898F',
+		card: '#1D1D20',
+		muted: '#303034',
+		popover: '#05050A',
+		border: '#303034',
+		input: '#525252',
 	},
 };

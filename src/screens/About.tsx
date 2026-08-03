@@ -3,15 +3,16 @@ import { Image, Linking, StyleSheet, TouchableOpacity, ScrollView, View } from '
 import { showToast } from '@synonymdev/react-native-toast';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import PubkyRingLogo from '../images/pubky-app-logo.png';
-import BrandEndoresment from '../images/brand-endorsement.png';
+import BrandEndorsement from '../images/brand-endorsement.png';
 import { PUBKY_APP_URL, TERMS_OF_USE } from '../utils/constants.ts';
 import { shareData } from '../utils/helpers.ts';
 import { copyToClipboard } from '../utils/clipboard.ts';
 import { useTranslation } from 'react-i18next';
-import { BodyMSBUnspacedText, BodyMSpacedText, BodyMText, DisplayText } from '../theme/typography.ts';
+import { Text5Xl, TextBaseB, TextBaseM } from '../theme/typography.ts';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { ChevronRight } from '../icons/index.ts';
 import { appVersion } from '../utils/appInfo.ts';
+import Card from '../components/Card.tsx';
 
 const About = (): ReactElement => {
 	const { t } = useTranslation();
@@ -51,36 +52,38 @@ const About = (): ReactElement => {
 			<AppHeader />
 
 			<ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-				<DisplayText>{t('about.keychainFor')}</DisplayText>
-				<DisplayText style={styles.lowerTitle}>{t('about.theNextWeb')}</DisplayText>
-				<BodyMText style={styles.subtitle}>{t('about.description')}</BodyMText>
-				<BodyMText style={styles.subtitle}>{t('about.craftedBy')}</BodyMText>
+				<Text5Xl>{t('about.keychainFor')}</Text5Xl>
+				<Text5Xl style={styles.lowerTitle}>{t('about.theNextWeb')}</Text5Xl>
+				<TextBaseM style={styles.subtitle}>{t('about.description')}</TextBaseM>
+				<TextBaseM style={styles.subtitle}>{t('about.craftedBy')}</TextBaseM>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onLegalPress} style={styles.row}>
-					<BodyMSpacedText>{t('about.legal')}</BodyMSpacedText>
-					<ChevronRight colorName="textTertiary" />
+					<TextBaseM colorName="foreground">{t('about.legal')}</TextBaseM>
+					<ChevronRight colorName="foreground" />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onSharePress} style={styles.row}>
-					<BodyMSpacedText>{t('common.share')}</BodyMSpacedText>
-					<ChevronRight colorName="textTertiary" />
+					<TextBaseM colorName="foreground">{t('common.share')}</TextBaseM>
+					<ChevronRight colorName="foreground" />
 				</TouchableOpacity>
 
 				<TouchableOpacity activeOpacity={0.8} onPress={onCopyPress} style={styles.row}>
-					<BodyMSpacedText>{t('about.version')}</BodyMSpacedText>
-					<BodyMSpacedText colorName="textTertiary">{appVersion}</BodyMSpacedText>
+					<TextBaseM colorName="foreground">{t('about.version')}</TextBaseM>
+					<TextBaseM colorName="mutedForeground">{appVersion}</TextBaseM>
 				</TouchableOpacity>
 
-				<Image source={BrandEndoresment} style={styles.brandLogo} />
+				<Image source={BrandEndorsement} style={styles.brandLogo} />
 
-				<TouchableOpacity style={styles.footer} activeOpacity={0.8} onPress={onFooterPress}>
-					<View>
-						<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
-						<BodyMSBUnspacedText style={styles.footerText} colorName="pubkyApp">
-							{t('about.joinWithPubkyRing')}
-						</BodyMSBUnspacedText>
-					</View>
-					<ChevronRight colorName="textTertiary" />
+				<TouchableOpacity style={styles.pubkyBannerTouchable} activeOpacity={0.8} onPress={onFooterPress}>
+					<Card style={styles.pubkyBanner}>
+						<View>
+							<Image source={PubkyRingLogo} style={styles.pubkyLogo} />
+							<TextBaseB style={styles.footerText} colorName="pubkyApp">
+								{t('about.joinWithPubkyRing')}
+							</TextBaseB>
+						</View>
+						<ChevronRight colorName="foreground" />
+					</Card>
 				</TouchableOpacity>
 
 				<SafeAreaInset edge="bottom" />
@@ -112,40 +115,28 @@ const styles = StyleSheet.create({
 		borderBottomWidth: 1,
 		borderBottomColor: 'rgba(255, 255, 255, 0.1)',
 	},
-	footer: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		marginTop: 'auto',
-		marginHorizontal: 24,
-		padding: 24,
-		borderRadius: 16,
-		alignSelf: 'center',
-		shadowColor: '#000',
-		shadowOffset: {
-			width: 0,
-			height: 1,
-		},
-		shadowOpacity: 0.1,
-		shadowRadius: 2,
-		elevation: 2,
-		width: '100%',
-		backgroundColor: 'rgba(255, 255, 255, 0.1)',
-	},
-	footerText: {
-		marginTop: 12,
-	},
-	pubkyLogo: {
-		height: 36,
-		width: 110,
-		resizeMode: 'contain',
-	},
 	brandLogo: {
 		height: 24,
 		width: 214,
 		alignSelf: 'flex-start',
 		resizeMode: 'contain',
-		marginVertical: 24,
+		marginTop: 24,
+	},
+	pubkyBannerTouchable: {
+		marginTop: 40,
+		alignSelf: 'center',
+		width: '100%',
+	},
+	pubkyBanner: {
+		flexDirection: 'row',
+		justifyContent: 'space-between',
+		alignItems: 'center',
+	},
+	footerText: {},
+	pubkyLogo: {
+		height: 36,
+		width: 110,
+		resizeMode: 'contain',
 	},
 });
 

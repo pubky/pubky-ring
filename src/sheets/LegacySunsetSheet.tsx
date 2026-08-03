@@ -3,7 +3,7 @@ import { Linking, ScrollView, StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import Svg, { Path } from 'react-native-svg';
-import { BodyMBText, BodyMSBText, BodyMText, DisplayText } from '../theme/typography.ts';
+import { TextBaseB, TextBaseM, Text5Xl } from '../theme/typography.ts';
 import Button from '../components/Button.tsx';
 import Sheet from '../components/Sheet.tsx';
 import { RootStackParamList } from '../navigation/types.ts';
@@ -36,22 +36,22 @@ const LegacySunsetSheet = ({
 		<Sheet id="legacy-sunset" title={t('legacySunset.sheetTitle')}>
 			<ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
 				<View style={styles.introduction}>
-					<DisplayText>{t('legacySunset.headline')}</DisplayText>
-					<BodyMText>{t('legacySunset.introduction')}</BodyMText>
+					<Text5Xl>{t('legacySunset.headline')}</Text5Xl>
+					<TextBaseM>{t('legacySunset.introduction')}</TextBaseM>
 				</View>
 
 				<View style={styles.notice}>
-					<BodyMBText color="#061a2f">{t('legacySunset.keepInstalledTitle')}</BodyMBText>
-					<BodyMText color="#061a2f">{t('legacySunset.keepInstalledDescription')}</BodyMText>
+					<TextBaseB color="#061a2f">{t('legacySunset.keepInstalledTitle')}</TextBaseB>
+					<TextBaseM color="#061a2f">{t('legacySunset.keepInstalledDescription')}</TextBaseM>
 				</View>
 
 				<View style={styles.steps}>
 					{([1, 2, 3, 4, 5] as const).map(step => (
 						<View style={styles.step} key={step}>
-							<BodyMBText colorName="pubkyRing" style={styles.stepNumber}>
+							<TextBaseB colorName="blue" style={styles.stepNumber}>
 								{step}.
-							</BodyMBText>
-							<BodyMSBText style={styles.stepCopy}>{t(`legacySunset.transferStep${step}`)}</BodyMSBText>
+							</TextBaseB>
+							<TextBaseB style={styles.stepCopy}>{t(`legacySunset.transferStep${step}`)}</TextBaseB>
 						</View>
 					))}
 				</View>
@@ -60,7 +60,7 @@ const LegacySunsetSheet = ({
 					<Button
 						text={t('legacySunset.openPlayStore')}
 						variant="secondary"
-						icon={<BodyMBText style={styles.googleIcon}>G</BodyMBText>}
+						icon={<TextBaseB style={styles.googleIcon}>G</TextBaseB>}
 						style={styles.actionButton}
 						testID="legacy-sunset-play-store"
 						onPress={() => openUrl(REPLACEMENT_PLAY_STORE_URL)}

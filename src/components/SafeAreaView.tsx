@@ -10,7 +10,7 @@ import {
 } from 'react-native-safe-area-context';
 
 const BOTTOM_FALLBACK_PADDING = 24;
-const BOTTOM_EXTRA_PADDING = 12;
+const BOTTOM_EXTRA_PADDING = 0;
 const DEFAULT_EDGES: EdgeRecord = {
 	top: 'additive',
 	right: 'additive',

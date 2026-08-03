@@ -7,7 +7,7 @@ import { getPubky, getPubkyCount } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
 import { SheetScreen } from '../components/Sheet.tsx';
 import PubkyProfile from '../components/PubkyProfile.tsx';
-import { BodyMText } from '../theme/typography.ts';
+import { TextBaseM } from '../theme/typography.ts';
 import Button from '../components/Button.tsx';
 import { hideSheet, showSheet } from '../sheets/sheetNavigation.tsx';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
@@ -41,10 +41,16 @@ const AddPubkyImportSuccess = ({
 
 	return (
 		<SheetScreen id={SHEET_ID} title={modalTitle} titleTestID="import-success-title" gradientType="brand">
-			<BodyMText style={styles.message}>{description}</BodyMText>
+			<TextBaseM style={styles.message}>{description}</TextBaseM>
 			<PubkyProfile pubky={pubky} pubkyData={data} />
 			<View style={styles.footer}>
-				<Button text={t('common.continue')} size="large" testID="ImportSuccessButton" onPress={onContinue} />
+				<Button
+					text={t('common.continue')}
+					variant="secondary"
+					size="large"
+					testID="ImportSuccessButton"
+					onPress={onContinue}
+				/>
 			</View>
 		</SheetScreen>
 	);

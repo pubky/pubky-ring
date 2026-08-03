@@ -10,7 +10,7 @@ interface TypographyProps {
 
 const textColor = ({
 	color,
-	colorName = 'textPrimary',
+	colorName = 'foreground',
 	theme,
 }: TypographyProps & { theme: Theme }): string => {
 	return color ?? theme.colors[colorName];
@@ -21,112 +21,76 @@ const BaseText = styled.Text<TypographyProps>`
 	font-family: ${fontFamily};
 `;
 
-export const DisplayText = styled(BaseText)`
+export const Text5Xl = styled(BaseText)`
 	font-size: 48px;
-	font-weight: 700;
 	line-height: ${Platform.OS === 'ios' ? '48px' : '58px'};
+	font-weight: 700;
 `;
 
-export const HeadingText = styled(BaseText)`
-	font-size: 26px;
+export const Text2Xl = styled(BaseText)`
+	font-size: 24px;
+	line-height: 32px;
 	font-weight: 300;
-	line-height: ${Platform.OS === 'ios' ? '26px' : '32px'};
 `;
 
-export const BodyMText = styled(BaseText).attrs<TypographyProps>(props => ({
-	colorName: props.colorName ?? 'textSecondary',
-}))`
-	font-size: 17px;
-	font-weight: 400;
-	line-height: 22px;
-`;
-
-export const BodyMSpacedText = styled(BaseText)`
-	font-size: 17px;
-	font-weight: 400;
-	line-height: 22px;
-	letter-spacing: 0.4px;
-`;
-
-export const BodyMSBText = styled(BaseText)`
-	font-size: 17px;
-	font-weight: 600;
-	line-height: 22px;
-	letter-spacing: 0.4px;
-`;
-
-export const BodyMSBUnspacedText = styled(BaseText)`
-	font-size: 17px;
-	font-weight: 600;
-	line-height: 22px;
-`;
-
-export const BodyMBText = styled(BaseText)`
-	font-size: 17px;
+export const TextXlB = styled(BaseText)`
+	font-size: 20px;
+	line-height: 28px;
 	font-weight: 700;
-	line-height: 22px;
-	letter-spacing: 0.4px;
 `;
 
-export const BodySText = styled(BaseText)`
-	font-size: 15px;
-	font-weight: 400;
-	line-height: 20px;
-`;
-
-export const BodySSpacedText = styled(BaseText)`
-	font-size: 15px;
-	font-weight: 400;
-	line-height: 20px;
-	letter-spacing: 0.4px;
-`;
-
-export const BodySMText = styled(BaseText)`
-	font-size: 15px;
-	font-weight: 500;
-	line-height: 20px;
-`;
-
-export const BodySSBText = styled(BaseText)`
-	font-size: 15px;
+export const TextLgSb = styled(BaseText)`
+	font-size: 18px;
+	line-height: 24px;
 	font-weight: 600;
-	line-height: 20px;
-	letter-spacing: 0.4px;
 `;
 
-export const BodySSBUnspacedText = styled(BaseText)`
-	font-size: 15px;
-	font-weight: 600;
-	line-height: 20px;
-`;
-
-export const CaptionText = styled(BaseText).attrs<TypographyProps>(props => ({
-	colorName: props.colorName ?? 'textTertiary',
+export const TextBaseM = styled(BaseText).attrs<TypographyProps>(props => ({
+	colorName: props.colorName ?? 'secondaryForeground',
 }))`
-	font-size: 13px;
+	font-size: 16px;
+	line-height: 24px;
 	font-weight: 500;
-	line-height: 18px;
+`;
+
+export const TextBaseB = styled(BaseText)`
+	font-size: 16px;
+	line-height: 24px;
+	font-weight: 700;
+`;
+
+export const TextSmM = styled(BaseText).attrs<TypographyProps>(props => ({
+	colorName: props.colorName ?? 'mutedForeground',
+}))`
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 500;
+`;
+
+export const TextSmB = styled(BaseText)`
+	font-size: 14px;
+	line-height: 20px;
+	font-weight: 700;
+`;
+
+export const TextXsM = styled(BaseText).attrs<TypographyProps>(props => ({
+	colorName: props.colorName ?? 'mutedForeground',
+}))`
+	font-size: 12px;
+	line-height: 16px;
+	font-weight: 500;
 	letter-spacing: 1px;
 	text-transform: uppercase;
 `;
 
-export const CaptionSBText = styled(BaseText)`
-	font-size: 13px;
+export const TextXsSb = styled(BaseText)`
+	font-size: 12px;
+	line-height: 16px;
 	font-weight: 600;
-	line-height: 18px;
 `;
 
-export const CaptionSBSpacedText = styled(BaseText)`
-	font-size: 13px;
-	font-weight: 600;
-	line-height: 18px;
-	letter-spacing: 0.2px;
-`;
-
-export const CaptionBText = styled(BaseText)`
-	font-size: 13px;
+export const TextXsB = styled(BaseText)`
+	font-size: 12px;
+	line-height: 16px;
 	font-weight: 700;
-	line-height: 18px;
-	letter-spacing: 1px;
-	text-transform: uppercase;
 `;

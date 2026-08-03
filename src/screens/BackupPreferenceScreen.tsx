@@ -6,7 +6,7 @@ import Button from '../components/Button.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
 import { createBackupDestinationParams } from '../utils/sheetHelpers.ts';
 import { truncateStr } from '../utils/pubky.ts';
-import { BodyMBText, BodyMText, DisplayText } from '../theme/typography';
+import { Text5Xl, TextBaseB, TextBaseM } from '../theme/typography';
 import { SheetScreen } from '../components/Sheet.tsx';
 import type { BackupStackParamList } from '../sheets/types.ts';
 
@@ -47,19 +47,20 @@ const BackupPreferenceScreen = ({
 
 	return (
 		<SheetScreen id="backup" gradientType="brand" title={t('selectBackup.title')}>
-			<DisplayText style={styles.headerText}>{t('selectBackup.header')}</DisplayText>
+			<Text5Xl style={styles.headerText}>{t('selectBackup.header')}</Text5Xl>
 
 			<Trans
 				t={t}
 				i18nKey="selectBackup.message"
-				parent={BodyMText}
-				components={{ accent: <BodyMBText colorName="textPrimary" /> }}
+				parent={TextBaseM}
+				components={{ accent: <TextBaseB colorName="foreground" /> }}
 				values={{ pubky: truncatedPubky }}
 			/>
 
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/shield.png')} style={styles.image} />
 			</View>
+
 			<View style={styles.buttonContainer}>
 				<Button
 					text={t('backup.encryptedFile')}
@@ -81,7 +82,7 @@ const BackupPreferenceScreen = ({
 
 const styles = StyleSheet.create({
 	headerText: {
-		marginBottom: 20,
+		marginBottom: 16,
 	},
 	imageContainer: {
 		flex: 1,
@@ -95,7 +96,7 @@ const styles = StyleSheet.create({
 	buttonContainer: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
+		gap: 12,
 	},
 });
 

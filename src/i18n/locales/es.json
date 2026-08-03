@@ -187,7 +187,7 @@
 	"terms": {
 		"title": "Condiciones de uso.",
 		"acceptTerms": "Al continuar, declara que ha leído y acepta las condiciones de uso.",
-		"acceptPrivacy": "Al continuar, declara que ha leído y acepta la <accent>política de privacidad.</accent>",
+		"acceptPrivacy": "Al continuar, declara que ha leído y acepta la <accent>política de privacidad</accent>.",
 		"termsOfUse": "Condiciones de uso",
 		"privacyPolicy": "Política de privacidad"
 	},
@@ -295,7 +295,7 @@
 		"capabilities": "Capacidades:"
 	},
 	"pubkyProfile": {
-		"backupReminder": "¡respaldo!"
+		"backupReminder": "¡Respaldo!"
 	},
 	"screenTitles": {
 		"settings": "Ajustes"

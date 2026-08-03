@@ -3,15 +3,15 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, View } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { showToast } from '@synonymdev/react-native-toast';
 import Sheet from '../components/Sheet.tsx';
 import Button from '../components/Button.tsx';
 import { Key } from '../icons/index.ts';
 import type { RootStackParamList } from '../navigation/types.ts';
-import { BodyMText, BodyMSBText, CaptionText } from '../theme/typography.ts';
-import { showToast } from '../utils/helpers.ts';
+import { TextBaseM, TextBaseB, TextXsSb } from '../theme/typography.ts';
 import { connectSharedPubky, truncateStr } from '../utils/pubky.ts';
-import type { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import { hideSheet } from './sheetNavigation.tsx';
+import type { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 
 const ReuseSharedPubkySheet = ({
 	route,
@@ -49,7 +49,7 @@ const ReuseSharedPubkySheet = ({
 
 	return (
 		<Sheet id="reuse-shared-pubky" title={t('reuseSharedPubky.title')}>
-			<BodyMText style={styles.description}>{t('reuseSharedPubky.description')}</BodyMText>
+			<TextBaseM style={styles.description}>{t('reuseSharedPubky.description')}</TextBaseM>
 			<View style={styles.list}>
 				{identities.map(identity => {
 					const wasConnected = connected.includes(identity.pubky);
@@ -59,8 +59,8 @@ const ReuseSharedPubkySheet = ({
 								<Key />
 							</View>
 							<View style={styles.info}>
-								<BodyMSBText numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</BodyMSBText>
-								<CaptionText colorName="textTertiary">{t('reuseSharedPubky.source')}</CaptionText>
+								<TextBaseB numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</TextBaseB>
+								<TextXsSb colorName="mutedForeground">{t('reuseSharedPubky.source')}</TextXsSb>
 							</View>
 							<Button
 								text={wasConnected ? t('reuseSharedPubky.added') : t('reuseSharedPubky.add')}

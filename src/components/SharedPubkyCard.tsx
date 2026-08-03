@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Card from './Card.tsx';
 import Button from './Button.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { BodyMSBText, CaptionText } from '../theme/typography.ts';
+import { TextBaseB, TextXsSb } from '../theme/typography.ts';
 import { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import { truncateStr } from '../utils/pubky.ts';
 import { Key } from '../icons/index.ts';
@@ -25,14 +25,14 @@ const SharedPubkyCard = ({ identity }: { identity: SharedPubkyIdentity }): React
 						image={identity.image}
 					/>
 					<View style={styles.text}>
-						<BodyMSBText numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</BodyMSBText>
-						<CaptionText colorName="textTertiary">{t('reuseSharedPubky.source')}</CaptionText>
+						<TextBaseB numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</TextBaseB>
+						<TextXsSb colorName="mutedForeground">{t('reuseSharedPubky.source')}</TextXsSb>
 					</View>
 				</View>
 				<Button
 					text={t('reuseSharedPubky.useFromBitkit')}
 					icon={<Key size={24} />}
-					size="medium"
+					size="default"
 					onPress={show}
 				/>
 			</Card>

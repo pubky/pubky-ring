@@ -23,6 +23,7 @@ jest.mock('@synonymdev/react-native-pubky', () => ({
 const OWNED = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 const SHARED = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
 const OTHER = '3rsduhcxpw74snwyct86m38c63j3pq8x4ycqikxg64roik8yw5xg';
+const PREFIX_LIKE_BARE = `pubky${'y'.repeat(47)}`;
 const SECRET_A = '0123456789abcdef'.repeat(4);
 const SECRET_B = 'abcdef0123456789'.repeat(4);
 const derive = getPublicKeyFromSecretKey as jest.MockedFunction<typeof getPublicKeyFromSecretKey>;
@@ -50,6 +51,8 @@ beforeEach(() => {
 test('normalizes only canonical raw or pubky-prefixed z-base32 public keys', () => {
 	expect(normalizeSharedPubky(SHARED)).toBe(SHARED);
 	expect(normalizeSharedPubky(`pubky${SHARED}`)).toBe(SHARED);
+	expect(normalizeSharedPubky(PREFIX_LIKE_BARE)).toBe(PREFIX_LIKE_BARE);
+	expect(normalizeSharedPubky(`pubky${PREFIX_LIKE_BARE}`)).toBe(PREFIX_LIKE_BARE);
 	expect(normalizeSharedPubky(`pk:${SHARED}`)).toBeUndefined();
 	expect(normalizeSharedPubky(SHARED.toUpperCase())).toBeUndefined();
 	expect(normalizeSharedPubky(`${SHARED.slice(0, 51)}0`)).toBeUndefined();

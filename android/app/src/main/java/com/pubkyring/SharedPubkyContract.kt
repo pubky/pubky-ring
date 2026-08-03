@@ -24,7 +24,13 @@ object SharedPubkyContract {
   /** Canonical wire values are always the bare, lowercase 52-character z-base32 key. */
   fun normalizePubky(value: String): String? {
     val trimmed = value.trim()
-    val raw = if (trimmed.startsWith("pubky")) trimmed.removePrefix("pubky") else trimmed
+    if (isValidPubky(trimmed)) return trimmed
+    val raw =
+      if (trimmed.length == 57 && trimmed.startsWith("pubky")) {
+        trimmed.removePrefix("pubky")
+      } else {
+        return null
+      }
     return raw.takeIf(::isValidPubky)
   }
 

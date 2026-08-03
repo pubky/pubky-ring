@@ -75,7 +75,8 @@ export const withPubkyIdentityLifecycle = async <T>(operation: () => Promise<T>)
 export const normalizeSharedPubky = (value: unknown): string | undefined => {
 	if (typeof value !== 'string') return undefined;
 	const trimmed = value.trim();
-	const raw = trimmed.startsWith('pubky') ? trimmed.slice(5) : trimmed;
+	if (PUBKY_PATTERN.test(trimmed)) return trimmed;
+	const raw = trimmed.length === 57 && trimmed.startsWith('pubky') ? trimmed.slice(5) : '';
 	return PUBKY_PATTERN.test(raw) ? raw : undefined;
 };
 

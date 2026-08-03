@@ -262,7 +262,7 @@ RCT_REMAP_METHOD(privateServices,
     return @"";
   }
   NSString *pubky = [(NSString *)value stringByTrimmingCharactersInSet:NSCharacterSet.whitespaceAndNewlineCharacterSet];
-  if ([pubky hasPrefix:@"pubky"]) {
+  if (pubky.length == 57 && [pubky hasPrefix:@"pubky"]) {
     pubky = [pubky substringFromIndex:5];
   }
   if (pubky.length != 52) {

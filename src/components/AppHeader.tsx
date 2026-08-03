@@ -64,7 +64,7 @@ const AppHeader = memo(
 			<HeaderNavButton />
 		) : (
 			<HeaderNavButton testID="AppHeaderBackButton" onPressIn={navigation.goBack}>
-				<ArrowLeft size={24} />
+				<ArrowLeft size={20} />
 			</HeaderNavButton>
 		);
 		const resolvedLeftButton = leftButton ?? defaultLeftButton;

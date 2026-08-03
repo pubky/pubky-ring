@@ -6,6 +6,7 @@ import { Theme, ThemeColorName } from '../theme';
 import { TextSmB, TextXsB } from '../theme/typography';
 import { ActivityIndicator } from '../theme/components.ts';
 import { shadows } from '../theme/shadows.ts';
+import type { IconProps } from '../icons';
 
 enum EButtonSize {
 	default = 'default',
@@ -71,11 +72,14 @@ const Button = ({
 	const borderStyle = borderColors[variant] ? { borderWidth: 1, borderColor: borderColors[variant] } : null;
 
 	const renderIcon = (iconNode: React.ReactNode): React.ReactNode => {
-		if (!React.isValidElement<{ colorName?: ThemeColorName }>(iconNode) || iconNode.type === React.Fragment) {
+		if (!React.isValidElement<IconProps>(iconNode) || iconNode.type === React.Fragment) {
 			return iconNode;
 		}
 
-		return React.cloneElement(iconNode, { colorName: foregroundColorName });
+		return React.cloneElement(iconNode, {
+			colorName: foregroundColorName,
+			size: iconNode.props.size ?? 16,
+		});
 	};
 
 	return (

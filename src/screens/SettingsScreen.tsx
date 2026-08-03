@@ -119,7 +119,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							style={styles.button}
 							text={t('settings.showQR')}
 							variant="dark"
-							icon={<Qrcode size={24} />}
+							icon={<Qrcode />}
 							testID="ShowQRButton"
 							onPress={() => showSheet('migrate')}
 						/>
@@ -128,7 +128,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 						style={styles.button}
 						text={t('settings.scanQR')}
 						variant="dark"
-						icon={<Scan size={24} />}
+						icon={<Scan />}
 						testID="ScanQRButton"
 						onPress={handleScanQRPress}
 					/>

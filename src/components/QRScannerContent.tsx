@@ -98,10 +98,10 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 					<View style={styles.actionsRow}>
 						<IconButton
 							disabled={isProcessingImage}
-							icon={isProcessingImage ? <ActivityIndicator color="#ffffff" /> : <ImageIcon />}
+							icon={isProcessingImage ? <ActivityIndicator color="#ffffff" /> : <ImageIcon size={20} />}
 							onPress={handlePickImage}
 						/>
-						<IconButton active={torchMode} icon={<Flashlight />} onPress={handleToggleTorch} />
+						<IconButton active={torchMode} icon={<Flashlight size={20} />} onPress={handleToggleTorch} />
 					</View>
 				</Camera>
 				<MigrationProgressOverlay />
@@ -111,7 +111,7 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 					text={t('clipboard.pasteLink')}
 					variant="secondary"
 					size="large"
-					icon={<Qrcode size={24} />}
+					icon={<Qrcode />}
 					testID="QRScannerPasteButton"
 					onPress={onCopyClipboard}
 				/>

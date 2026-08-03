@@ -34,7 +34,7 @@ const PubkyDetailScreen = (): ReactElement => {
 
 	const rightButton = (
 		<HeaderNavButton onPressIn={onRightButtonPress}>
-			<Pencil size={24} />
+			<Pencil size={20} />
 		</HeaderNavButton>
 	);
 

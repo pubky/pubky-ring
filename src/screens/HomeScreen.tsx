@@ -76,6 +76,10 @@ const HomeScreen = (): ReactElement => {
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
 	const { identities: sharedIdentities } = useContext(SharedPubkyDiscoveryContext);
+	const unconnectedSharedIdentities = useMemo(() => {
+		const connectedPubkys = new Set(pubkyArray.map(({ key }) => key));
+		return sharedIdentities.filter(identity => !connectedPubkys.has(identity.pubky));
+	}, [pubkyArray, sharedIdentities]);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -125,15 +129,23 @@ const HomeScreen = (): ReactElement => {
 	}, [replacementRelease]);
 
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
+	const listHeader = (
+		<>
+			{sunsetBanner}
+			{unconnectedSharedIdentities.map(identity => (
+				<SharedPubkyCard key={identity.pubky} identity={identity} />
+			))}
+		</>
+	);
 
 	if (!hasPubkys) {
 		return (
 			<SafeAreaView style={styles.container} edges={['bottom']}>
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
-				{sharedIdentities.length > 0 ? (
+				{unconnectedSharedIdentities.length > 0 ? (
 					<View style={styles.sharedIdentities}>
-						{sharedIdentities.map(identity => (
+						{unconnectedSharedIdentities.map(identity => (
 							<SharedPubkyCard key={identity.pubky} identity={identity} />
 						))}
 					</View>
@@ -155,7 +167,7 @@ const HomeScreen = (): ReactElement => {
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
-				ListHeaderComponent={sunsetBanner}
+				ListHeaderComponent={listHeader}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}

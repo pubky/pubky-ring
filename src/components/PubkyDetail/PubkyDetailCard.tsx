@@ -43,6 +43,7 @@ export const PubkyDetailCard = memo(
 
 		const buttonIcon = pubkyData.signedUp ? <Scan /> : undefined;
 		const buttonText = pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup');
+		const isBorrowed = pubkyData.sourceApp === 'to.bitkit';
 
 		const showActionIcons = fontScale <= 1;
 		const shareIcon = showActionIcons ? <Share /> : undefined;
@@ -71,7 +72,7 @@ export const PubkyDetailCard = memo(
 						onPress={onSharePress}
 					/>
 
-					{pubkyData.sourceApp !== 'to.bitkit' && (
+					{!isBorrowed && (
 						<Button
 							style={styles.actionButton}
 							text={t('backup.backup')}
@@ -84,7 +85,7 @@ export const PubkyDetailCard = memo(
 
 					<Button
 						style={styles.actionButton}
-						text={t('common.delete')}
+						text={isBorrowed ? t('reuseSharedPubky.disconnect') : t('common.delete')}
 						variant="dark"
 						icon={deleteIcon}
 						testID="PubkyDetailDeleteButton"

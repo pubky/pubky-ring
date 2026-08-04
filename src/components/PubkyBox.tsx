@@ -43,7 +43,7 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, isBor
 					</TextBaseB>
 				</View>
 
-				{!isBackedUp ? (
+				{!isBackedUp && !isBorrowed ? (
 					<TouchableOpacity
 						style={styles.backupContainer}
 						testID="PubkyBox-BackupButton"

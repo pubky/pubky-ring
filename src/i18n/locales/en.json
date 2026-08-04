@@ -339,7 +339,10 @@
 		"source": "Managed by Bitkit",
 		"useFromBitkit": "Use from Bitkit",
 		"add": "Use",
-		"added": "Connected"
+		"added": "Connected",
+		"disconnect": "Disconnect",
+		"disconnectPubky": "Disconnect Pubky",
+		"disconnectConfirm": "Do you want to disconnect this Pubky from Ring? It will remain in Bitkit."
 	},
 	"loading": {
 		"modalTitle": "Configuring Pubky",

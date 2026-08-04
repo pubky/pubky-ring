@@ -365,8 +365,17 @@ type SavePubkyParams = {
 	signupToken?: string;
 };
 
+const getPrivatePubkyServices = async (pubky: string): Promise<string[]> =>
+	(await getAllKeychainKeys()).filter(service => privatePubkyService(service)?.pubky === pubky);
+
 const hasPrivatePubky = async (pubky: string): Promise<boolean> =>
-	(await getAllKeychainKeys()).some(service => privatePubkyService(service)?.pubky === pubky);
+	(await getPrivatePubkyServices(pubky)).length > 0;
+
+const normalizePubkyReference = (pubky: string): string | undefined =>
+	normalizeSharedPubky(pubky.startsWith('pk:') ? pubky.slice(3) : pubky);
+
+const getStoredPubkyKey = (pubky: string, normalizedPubky: string): string | undefined =>
+	[pubky, normalizedPubky, `pk:${normalizedPubky}`].find(key => getPubkyDataFromStore(key));
 
 export const savePubky = (params: SavePubkyParams): Promise<Result<string>> =>
 	withPubkyIdentityLifecycle(() => savePubkyUnlocked(params));
@@ -381,11 +390,13 @@ const savePubkyUnlocked = async ({
 	signupToken = '',
 }: SavePubkyParams): Promise<Result<string>> => {
 	try {
-		const normalizedPubky = normalizeSharedPubky(pubky);
+		const normalizedPubky = normalizePubkyReference(pubky);
 		if (!normalizedPubky) {
 			return err(i18n.t('pubkyErrors.failedToGetPublicKey'));
 		}
-		if (getPubkyDataFromStore(normalizedPubky) || (await hasPrivatePubky(normalizedPubky))) {
+		const storedPubkyKey = getStoredPubkyKey(pubky, normalizedPubky);
+		const storedPubky = storedPubkyKey ? getPubkyDataFromStore(storedPubkyKey) : undefined;
+		if (storedPubky?.sourceApp === BITKIT_SOURCE_APP) {
 			return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
 		}
 		const derived = await getPublicKeyFromSecretKey(secretKey);
@@ -413,9 +424,18 @@ const savePubkyUnlocked = async ({
 			secretKey,
 			mnemonic,
 		};
+		const serializedKeychainData = JSON.stringify(keychainData);
+		const privateServices = await getPrivatePubkyServices(normalizedPubky);
+		const canonicalRecordExists = privateServices.includes(normalizedPubky);
+		const previousCanonicalRecord = canonicalRecordExists
+			? await getKeychainValue({ key: normalizedPubky })
+			: undefined;
+		if (previousCanonicalRecord?.isErr()) {
+			return err(previousCanonicalRecord.error.message);
+		}
 		const saveResponse = await setKeychainValue({
 			key: pubky,
-			value: JSON.stringify(keychainData),
+			value: serializedKeychainData,
 		});
 		if (saveResponse.isErr()) {
 			showToast({
@@ -426,18 +446,32 @@ const savePubkyUnlocked = async ({
 			return err(saveResponse.error.message);
 		}
 		const readBack = await getKeychainValue({ key: pubky });
-		if (readBack.isErr() || readBack.value !== JSON.stringify(keychainData)) {
+		if (readBack.isErr() || readBack.value !== serializedKeychainData) {
+			if (previousCanonicalRecord?.isOk()) {
+				await setKeychainValue({ key: pubky, value: previousCanonicalRecord.value });
+			} else {
+				await resetKeychainValue({ key: pubky });
+			}
 			return err(i18n.t('pubkyErrors.failedToSaveToKeychain'));
 		}
-		dispatch(
-			addPubky({
-				pubky,
-				backupPreference,
-				isBackedUp,
-				signupToken,
-				sourceApp: RING_SOURCE_APP,
-			}),
-		);
+		if (storedPubkyKey) {
+			dispatch(
+				setPubkyData({
+					pubky: storedPubkyKey,
+					data: { backupPreference, isBackedUp, sourceApp: RING_SOURCE_APP },
+				}),
+			);
+		} else {
+			dispatch(
+				addPubky({
+					pubky,
+					backupPreference,
+					isBackedUp,
+					signupToken,
+					sourceApp: RING_SOURCE_APP,
+				}),
+			);
+		}
 		// Sharing may be unavailable until provisioning is configured. The private record remains
 		// canonical and a foreground reconciliation will retry without risking data loss.
 		await mirrorSharedPubky(pubky, secretKey);
@@ -465,29 +499,35 @@ export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<s
 
 const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
 	try {
-		const pubkyData = getPubkyDataFromStore(pubky);
+		const normalizedPubky = normalizePubkyReference(pubky);
+		if (!normalizedPubky) return err(i18n.t('pubkyErrors.errorDeletingPubky'));
+		const storedPubkyKey = getStoredPubkyKey(pubky, normalizedPubky) ?? normalizedPubky;
+		const pubkyData = getPubkyDataFromStore(storedPubkyKey);
 		if (pubkyData?.sourceApp === BITKIT_SOURCE_APP) {
 			// Disconnecting a borrowed identity never mutates the source app's key.
-			dispatch(removePubky(pubky));
-			return ok(pubky);
+			dispatch(removePubky(storedPubkyKey));
+			return ok(normalizedPubky);
 		}
 
 		// Remove the interoperability mirror first. If this cannot be verified, preserve the
 		// private canonical record and UI state so a later reconciliation can recover safely.
-		if (!(await removeSharedPubky(pubky))) {
+		if (!(await removeSharedPubky(normalizedPubky))) {
 			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 		}
-		const response = await resetKeychainValue({ key: pubky });
-		if (response.isErr()) {
-			showToast({
-				type: 'error',
-				title: i18n.t('pubkyErrors.failedToDelete'),
-				description: response.error.message,
-			});
-			return err(response.error.message);
+		const privateServices = await getPrivatePubkyServices(normalizedPubky);
+		for (const service of privateServices) {
+			const response = await resetKeychainValue({ key: service });
+			if (response.isErr()) {
+				showToast({
+					type: 'error',
+					title: i18n.t('pubkyErrors.failedToDelete'),
+					description: response.error.message,
+				});
+				return err(response.error.message);
+			}
 		}
-		dispatch(removePubky(pubky));
-		return ok(pubky);
+		dispatch(removePubky(storedPubkyKey));
+		return ok(normalizedPubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);
 		return err(i18n.t('pubkyErrors.errorDeletingPubky'));
@@ -655,22 +695,21 @@ const reconcileOwnedSharedPubkysUnlocked = async (): Promise<boolean> => {
 		if (!privateIdentity) continue;
 		const { pubky } = privateIdentity;
 		const value = await getKeychainValue({ key: service });
-		if (value.isErr()) continue;
+		if (value.isErr()) return false;
 		// Reconciliation is read-only with respect to the private source. Legacy values are
 		// mirrored in memory and upgraded only through the verified migration path when used.
 		const data = isNewFormat(value.value)
 			? (JSON.parse(value.value) as IKeychainData)
 			: { secretKey: value.value, mnemonic: '' };
-		if (!isValidSharedSecretKey(data.secretKey)) continue;
+		if (!isValidSharedSecretKey(data.secretKey)) return false;
 		const derived = await getPublicKeyFromSecretKey(data.secretKey);
-		if (derived.isOk() && normalizeSharedPubky(derived.value.public_key) === normalizeSharedPubky(pubky)) {
-			const existingSecretKey = identities.get(pubky);
-			if (existingSecretKey && existingSecretKey !== data.secretKey) {
-				// Ambiguous private sources must never cause a destructive shared reconciliation.
-				return false;
-			}
-			identities.set(pubky, data.secretKey);
+		if (derived.isErr() || normalizeSharedPubky(derived.value.public_key) !== pubky) return false;
+		const existingSecretKey = identities.get(pubky);
+		if (existingSecretKey && existingSecretKey !== data.secretKey) {
+			// Ambiguous private sources must never cause a destructive shared reconciliation.
+			return false;
 		}
+		identities.set(pubky, data.secretKey);
 	}
 	return reconcileSharedPubkys(
 		[...identities]

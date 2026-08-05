@@ -38,7 +38,11 @@ export const routeInputWithContext = async (
 
 	if (result.isErr()) {
 		// Skip toast for signup/invite actions - they handle errors via the loading modal
-		if (parsed.action === InputAction.Signup || parsed.action === InputAction.Invite) {
+		if (
+			parsed.action === InputAction.Signup ||
+			parsed.action === InputAction.DirectSignup ||
+			parsed.action === InputAction.Invite
+		) {
 			return;
 		}
 

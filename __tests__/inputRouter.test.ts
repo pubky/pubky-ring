@@ -10,7 +10,7 @@ import { InputAction, ParsedInput } from '../src/utils/inputParser';
 import { handleAuthAction } from '../src/utils/actions/authAction';
 import { handleImportAction } from '../src/utils/actions/importAction';
 import { handleMigrateAction } from '../src/utils/actions/migrateAction';
-import { handleSignupAction } from '../src/utils/actions/signupAction';
+import { handleDirectSignupAction, handleSignupAction } from '../src/utils/actions/signupAction';
 import { handleInviteAction } from '../src/utils/actions/inviteAction';
 import { handleSessionAction } from '../src/utils/actions/sessionAction';
 import { showSheet } from '../src/sheets/sheetNavigation';
@@ -56,6 +56,7 @@ jest.mock('../src/utils/actions/migrateAction', () => ({
 jest.mock('../src/utils/actions/signupAction', () => ({
 	__esModule: true,
 	handleSignupAction: jest.fn(),
+	handleDirectSignupAction: jest.fn(),
 }));
 
 jest.mock('../src/utils/actions/inviteAction', () => ({
@@ -77,6 +78,9 @@ const handleAuthActionMock = handleAuthAction as jest.MockedFunction<typeof hand
 const handleImportActionMock = handleImportAction as jest.MockedFunction<typeof handleImportAction>;
 const handleMigrateActionMock = handleMigrateAction as jest.MockedFunction<typeof handleMigrateAction>;
 const handleSignupActionMock = handleSignupAction as jest.MockedFunction<typeof handleSignupAction>;
+const handleDirectSignupActionMock = handleDirectSignupAction as jest.MockedFunction<
+	typeof handleDirectSignupAction
+>;
 const handleInviteActionMock = handleInviteAction as jest.MockedFunction<typeof handleInviteAction>;
 const handleSessionActionMock = handleSessionAction as jest.MockedFunction<typeof handleSessionAction>;
 const showSheetMock = showSheet as jest.MockedFunction<typeof showSheet>;
@@ -152,7 +156,7 @@ describe('routeInput', () => {
 			data: {
 				action: InputAction.Signup,
 				params: {
-					homeserver: 'https://homeserver.example.com',
+					homeserver: '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty',
 					inviteCode: 'ABCD-1234-WXYZ',
 					relay: 'wss://relay.example.com',
 					secret: 'secret',
@@ -165,6 +169,24 @@ describe('routeInput', () => {
 				success: true,
 				action: InputAction.Signup,
 				pubky: 'pubky-signed-up',
+				message: 'router.signupSuccessful',
+			},
+		},
+		{
+			action: InputAction.DirectSignup,
+			data: {
+				action: InputAction.DirectSignup,
+				params: {
+					homeserver: '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty',
+					inviteCode: 'ABCD-1234-WXYZ',
+				},
+			},
+			handler: handleDirectSignupActionMock,
+			handlerValue: 'pubky-direct-signed-up',
+			expectedValue: {
+				success: true,
+				action: InputAction.DirectSignup,
+				pubky: 'pubky-direct-signed-up',
 				message: 'router.signupSuccessful',
 			},
 		},
@@ -287,6 +309,7 @@ describe('routeInput', () => {
 		expect(handleImportActionMock).not.toHaveBeenCalled();
 		expect(handleMigrateActionMock).not.toHaveBeenCalled();
 		expect(handleSignupActionMock).not.toHaveBeenCalled();
+		expect(handleDirectSignupActionMock).not.toHaveBeenCalled();
 		expect(handleInviteActionMock).not.toHaveBeenCalled();
 		expect(handleSessionActionMock).not.toHaveBeenCalled();
 
@@ -304,6 +327,7 @@ describe('input routing helpers', () => {
 	it('identifies actions that need network access', () => {
 		expect(actionRequiresNetwork(InputAction.Auth)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.Signup)).toBe(true);
+		expect(actionRequiresNetwork(InputAction.DirectSignup)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.Invite)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.Session)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.Import)).toBe(false);

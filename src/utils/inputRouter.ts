@@ -15,6 +15,7 @@ import {
 	isImportAction,
 	isMigrateAction,
 	isSignupAction,
+	isDirectSignupAction,
 	isInviteAction,
 	isSessionAction,
 	isUnknownAction,
@@ -22,7 +23,7 @@ import {
 import { handleAuthAction } from './actions/authAction';
 import { handleImportAction } from './actions/importAction';
 import { handleMigrateAction } from './actions/migrateAction';
-import { handleSignupAction } from './actions/signupAction';
+import { handleDirectSignupAction, handleSignupAction } from './actions/signupAction';
 import { handleInviteAction } from './actions/inviteAction';
 import { handleSessionAction } from './actions/sessionAction';
 import i18n from '../i18n';
@@ -121,6 +122,18 @@ export const routeInput = async (
 				: err(getErrorMessage(result.error, i18n.t('errors.signupFailed')));
 		}
 
+		if (isDirectSignupAction(data)) {
+			const result = await handleDirectSignupAction(data, effectiveContext);
+			return result.isOk()
+				? ok({
+						success: true,
+						action: InputAction.DirectSignup,
+						pubky: result.value,
+						message: i18n.t('router.signupSuccessful'),
+					})
+				: err(getErrorMessage(result.error, i18n.t('errors.signupFailed')));
+		}
+
 		if (isInviteAction(data)) {
 			const result = await handleInviteAction(data, effectiveContext);
 			return result.isOk()
@@ -169,7 +182,13 @@ export const actionRequiresPubky = (action: InputAction): boolean => {
  * Determines if an action can proceed without network
  */
 export const actionRequiresNetwork = (action: InputAction): boolean => {
-	return [InputAction.Auth, InputAction.Signup, InputAction.Invite, InputAction.Session].includes(action);
+	return [
+		InputAction.Auth,
+		InputAction.Signup,
+		InputAction.DirectSignup,
+		InputAction.Invite,
+		InputAction.Session,
+	].includes(action);
 };
 
 /**

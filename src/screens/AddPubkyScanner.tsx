@@ -32,7 +32,11 @@ const AddPubkyScanner = ({
 	const isAllowedAction = useCallback(
 		(action: InputAction): boolean => {
 			if (mode === 'signup') {
-				return action === InputAction.Signup || action === InputAction.Invite;
+				return (
+					action === InputAction.Signup ||
+					action === InputAction.DirectSignup ||
+					action === InputAction.Invite
+				);
 			}
 
 			return action === InputAction.Import;

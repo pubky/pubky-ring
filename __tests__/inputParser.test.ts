@@ -21,6 +21,7 @@ const mnemonicPhraseToKeypairMock = Pubky.mnemonicPhraseToKeypair as jest.Mocked
 const getPublicKeyFromSecretKeyMock = Pubky.getPublicKeyFromSecretKey as jest.MockedFunction<
 	typeof Pubky.getPublicKeyFromSecretKey
 >;
+const homeserverPubkey = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
 
 describe('parseInput', () => {
 	beforeEach(() => {
@@ -129,7 +130,7 @@ describe('parseInput', () => {
 		const xSuccess = 'bitkit://signup/success?nonce=abc&next=home';
 		const rawInput =
 			'pubkyring://signup?' +
-			`hs=${encodeURIComponent('https://homeserver.example.com')}` +
+			`hs=${homeserverPubkey}` +
 			'&st=ABCD-1234-WXYZ' +
 			`&relay=${encodeURIComponent('wss://relay.example.com')}` +
 			'&secret=secret-value' +
@@ -143,7 +144,7 @@ describe('parseInput', () => {
 		expect(parsed.data).toEqual({
 			action: InputAction.Signup,
 			params: {
-				homeserver: 'https://homeserver.example.com',
+				homeserver: homeserverPubkey,
 				inviteCode: 'ABCD-1234-WXYZ',
 				relay: 'wss://relay.example.com',
 				secret: 'secret-value',
@@ -154,6 +155,57 @@ describe('parseInput', () => {
 					xCancel: undefined,
 					xSource: 'Bitkit',
 				},
+			},
+		});
+	});
+
+	it('parses direct signup deeplinks without auth parameters', async () => {
+		const rawInput =
+			'pubkyauth://direct_signup?' +
+			`hs=${homeserverPubkey}` +
+			'&st=ABCD-1234-WXYZ';
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.DirectSignup);
+		expect(parsed.data).toEqual({
+			action: InputAction.DirectSignup,
+			params: {
+				homeserver: homeserverPubkey,
+				inviteCode: 'ABCD-1234-WXYZ',
+				xCallback: undefined,
+			},
+		});
+	});
+
+	it('parses direct signup deeplinks without signup tokens', async () => {
+		const rawInput = `pubkyauth://direct_signup?hs=${homeserverPubkey}`;
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.DirectSignup);
+		expect(parsed.data).toEqual({
+			action: InputAction.DirectSignup,
+			params: {
+				homeserver: homeserverPubkey,
+				inviteCode: '',
+				xCallback: undefined,
+			},
+		});
+	});
+
+	it('routes legacy signup deeplinks without auth parameters to direct signup', async () => {
+		const rawInput = `pubkyauth://signup?hs=${homeserverPubkey}&st=ABCD-1234-WXYZ`;
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.DirectSignup);
+		expect(parsed.data).toEqual({
+			action: InputAction.DirectSignup,
+			params: {
+				homeserver: homeserverPubkey,
+				inviteCode: 'ABCD-1234-WXYZ',
+				xCallback: undefined,
 			},
 		});
 	});

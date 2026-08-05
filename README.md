@@ -22,7 +22,9 @@ Pubky Ring accepts input via deeplinks, QR code scanning, and clipboard pasting.
 |--------|--------|------------|
 | Auth | `pubkyauth:///?relay={url}&secret={secret}&caps={caps}` | `relay`: relay URL, `secret`: secret key, `caps`: comma-separated capabilities |
 | Sign In | `pubkyring://signin?caps=...&secret=...&relay=...` | Same as Auth (converted internally) |
-| Signup | `pubkyring://signup?hs={homeserver}&st={signup_token}&relay=...&secret=...&caps=...` | `hs`: homeserver URL, `st`: invite/signup token |
+| Signup | `pubkyring://signup?hs={homeserver}&relay=...&secret=...&caps=...[&st={signup_token}]` | Creates an account and authorizes an app; `st` is optional |
+| Direct Signup | `pubkyauth://direct_signup?hs={homeserver}[&st={signup_token}]` | Creates an account without app authorization; `st` is optional |
+| Legacy Direct Signup | `pubkyauth://signup?hs={homeserver}[&st={signup_token}]` | Backward-compatible account creation without app authorization |
 | Session | `pubkyring://session?callback={callback_url}` | `callback`: URL-encoded callback URL |
 | Migrate | `pubkyring://migrate?index={n}&total={total}&key={key}` | `index`: 0-based frame index, `total`: frame count, `key`: mnemonic or secret key |
 

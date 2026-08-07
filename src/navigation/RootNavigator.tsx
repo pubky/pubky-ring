@@ -29,6 +29,7 @@ import EditPubkySheet from '../sheets/EditPubkySheet.tsx';
 import AddPubkySheet from '../sheets/AddPubkySheet.tsx';
 import MigrateSheet from '../sheets/MigrateSheet.tsx';
 import LegacySunsetSheet from '../sheets/LegacySunsetSheet.tsx';
+import ReuseSharedPubkySheet from '../sheets/ReuseSharedPubkySheet.tsx';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler.ts';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -101,6 +102,11 @@ const RootNavigator = (): ReactElement => {
 				<Stack.Screen name="BackupSheet" component={BackupSheet} options={sheetScreenOptions} />
 				<Stack.Screen name="MigrateSheet" component={MigrateSheet} options={sheetScreenOptions} />
 				<Stack.Screen name="LegacySunsetSheet" component={LegacySunsetSheet} options={sheetScreenOptions} />
+				<Stack.Screen
+					name="ReuseSharedPubkySheet"
+					component={ReuseSharedPubkySheet}
+					options={sheetScreenOptions}
+				/>
 			</Stack.Navigator>
 		</NavigationContainer>
 	);

@@ -2,13 +2,14 @@
  * Signup Action Handler
  *
  * Handles signup deeplinks that create a new pubky and authorize with a service.
- * Format: pubkyauth://signup?hs={homeserver}&st={signup_token}&relay={relay}&secret={secret}&caps={capabilities}
+ * Format: pubkyauth://signup?hs={homeserver}&relay={relay}&secret={secret}&caps={capabilities}[&st={signup_token}]
+ * Direct format: pubkyauth://direct_signup?hs={homeserver}[&st={signup_token}]
  */
 
 import { Result, ok, err } from '@synonymdev/result';
 import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
 import { showToast } from '@synonymdev/react-native-toast';
-import { InputAction, SignupParams } from '../inputParser';
+import { DirectSignupParams, InputAction, SignupParams } from '../inputParser';
 import { RoutedActionContext } from '../inputRouter';
 import { savePubky, signUpToHomeserver } from '../pubky';
 import { checkNetworkConnection } from '../helpers';
@@ -18,6 +19,7 @@ import { addProcessing, removeProcessing } from '../../store/slices/pubkysSlice'
 import { setLoadingModalError } from '../../store/slices/uiSlice';
 import { EBackupPreference } from '../../types/pubky';
 import { handleAuthAction } from './authAction';
+import type { AuthActionData } from './authAction';
 import { getSignupTokenErrorModalFields, LoadingErrorModalFields } from '../signupErrors';
 import i18n from '../../i18n';
 import { hideSheet } from '../../sheets/sheetNavigation.tsx';
@@ -32,6 +34,13 @@ type SignupActionData = {
 	action: InputAction.Signup;
 	params: SignupParams;
 };
+
+type DirectSignupActionData = {
+	action: InputAction.DirectSignup;
+	params: DirectSignupParams;
+};
+
+type SignupBaseActionData = SignupActionData | DirectSignupActionData;
 
 /**
  * Transitions the loading modal to error state via Redux
@@ -51,18 +60,31 @@ const showErrorState = (
 	);
 };
 
+const createSignupAuthData = (params: SignupParams): AuthActionData => {
+	const { relay, secret, xCallback } = params;
+
+	return {
+		action: InputAction.Auth,
+		params: { relay, secret, caps: params.caps, xCallback },
+		rawUrl: `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(
+			secret,
+		)}&caps=${encodeURIComponent(params.caps.join(','))}`,
+	};
+};
+
 /**
- * Handles signup action - creates a new pubky, signs up to homeserver, and initiates auth
+ * Handles signup flow - creates a new pubky, signs up to homeserver, and optionally initiates auth
  *
  * @returns The created pubky string on success
  */
-export const handleSignupAction = async (
-	data: SignupActionData,
+const handleSignup = async (
+	data: SignupBaseActionData,
 	context: RoutedActionContext,
+	authData?: AuthActionData,
 ): Promise<Result<string>> => {
 	const { dispatch } = context;
 	const { params } = data;
-	const { xCallback, homeserver, inviteCode, relay, secret, caps } = params;
+	const { xCallback, homeserver, inviteCode } = params;
 
 	const isOnline = await checkNetworkConnection({
 		dispatch,
@@ -85,16 +107,6 @@ export const handleSignupAction = async (
 	let secretKey: string | undefined;
 	let mnemonic: string | undefined;
 
-	const capsString = caps.join(',');
-	const authUrl = `pubkyauth:///?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(
-		secret,
-	)}&caps=${encodeURIComponent(capsString)}`;
-	const authData = {
-		action: InputAction.Auth,
-		params: { relay, secret, caps, xCallback },
-		rawUrl: authUrl,
-	} as const;
-
 	// If a pubky already exists for this signup token (e.g. user is rescanning the
 	// same onboarding QR after a prior failure), reuse it instead of creating a new key.
 	const existingPubkyKey = getPubkyKeyBySignupTokenFromStore(inviteCode);
@@ -104,8 +116,10 @@ export const handleSignupAction = async (
 		isReusedPubky = true;
 
 		if (existingPubky?.signedUp) {
-			// Already signed up to homeserver — skip the loading modal and signup and forward to auth.
-			await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
+			// Already signed up to homeserver — skip the loading modal and signup.
+			if (authData) {
+				await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
+			}
 			return ok(pubky);
 		}
 	}
@@ -166,9 +180,11 @@ export const handleSignupAction = async (
 			const signedUpKeys = Object.keys(signedUpPubkys);
 
 			if (signedUpKeys.length > 0) {
-				// User has existing pubky(s) - forward to auth flow instead of showing error
-				hideSheet('add-pubky');
-				return await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
+				// User has existing pubky(s) - forward to auth flow instead of showing error when possible.
+				if (authData) {
+					hideSheet('add-pubky');
+					return await handleAuthAction(authData, { ...context, pubky, isDeeplink: false });
+				}
 			}
 
 			// No existing pubkys - show error as before
@@ -187,13 +203,15 @@ export const handleSignupAction = async (
 
 		hideSheet('add-pubky');
 
-		// Step 4: Trigger auth action with the new pubky
-		await handleAuthAction(authData, {
-			...context,
-			pubky,
-			// Don't treat as deeplink for redirect behavior since we want user to stay in app
-			isDeeplink: false,
-		});
+		// Step 4: Trigger auth action with the new pubky when the link includes auth parameters.
+		if (authData) {
+			await handleAuthAction(authData, {
+				...context,
+				pubky,
+				// Don't treat as deeplink for redirect behavior since we want user to stay in app
+				isDeeplink: false,
+			});
+		}
 
 		return ok(pubky);
 	} catch (error) {
@@ -208,4 +226,18 @@ export const handleSignupAction = async (
 			dispatch(removeProcessing({ pubky }));
 		}
 	}
+};
+
+export const handleSignupAction = async (
+	data: SignupActionData,
+	context: RoutedActionContext,
+): Promise<Result<string>> => {
+	return handleSignup(data, context, createSignupAuthData(data.params));
+};
+
+export const handleDirectSignupAction = async (
+	data: DirectSignupActionData,
+	context: RoutedActionContext,
+): Promise<Result<string>> => {
+	return handleSignup(data, context);
 };

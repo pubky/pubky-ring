@@ -1,4 +1,4 @@
-import { combineReducers, configureStore } from '@reduxjs/toolkit';
+import { combineReducers, configureStore, Middleware } from '@reduxjs/toolkit';
 import {
 	createMigrate,
 	createTransform,
@@ -44,11 +44,34 @@ const persistConfig: PersistConfig<RootReducerState> = {
 	storage: reduxStorage,
 	whitelist: ['pubky', 'settings'],
 	migrate: createMigrate(migrations),
-	version: 6,
+	version: 7,
 	transforms: [pubkyTransform],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
+
+const summarizeReduxState = (state: RootReducerState) => ({
+	pubky: {
+		pubkyCount: Object.keys(state.pubky.pubkys || {}).length,
+		homeserverCount: Object.keys(state.pubky.homeservers || {}).length,
+		processingCount: Object.keys(state.pubky.processing || {}).length,
+		hasDeepLink: Boolean(state.pubky.deepLink),
+	},
+	settings: state.settings,
+	ui: state.ui,
+});
+
+const reduxDebugLogger: Middleware = storeApi => next => action => {
+	const result = next(action);
+	const actionType =
+		typeof action === 'object' && action !== null && 'type' in action
+			? String(action.type)
+			: 'unknown';
+
+	console.log('[redux]', actionType, summarizeReduxState(storeApi.getState() as RootReducerState));
+
+	return result;
+};
 
 export const store = configureStore({
 	reducer: persistedReducer,
@@ -57,7 +80,7 @@ export const store = configureStore({
 			serializableCheck: {
 				ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
 			},
-		}),
+		}).concat(__DEV__ ? [reduxDebugLogger] : []),
 	devTools: __DEV__ ? { name: 'pubkyring', trace: true, traceLimit: 25 } : false,
 });
 

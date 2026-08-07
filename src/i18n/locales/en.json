@@ -222,13 +222,38 @@
 		"scanQrToImport": "Scan import QR"
 	},
 	"editPubkySheet": {
-		"pubkyNameLabel": "Pubky name (label)",
+		"pubkyNameLabel": "Label",
 		"inviteCodeOptional": "Invite code (optional)",
 		"pubkyNamePlaceholder": "Pubky Name",
 		"inviteCodePlaceholder": "Invite Code (Optional)",
 		"reset": "Reset",
 		"unableToSignUp": "Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.",
-		"unableToSignIn": "Unable to sign in to homeserver: {{error}}"
+		"unableToSignIn": "Unable to sign in to homeserver: {{error}}",
+
+		"homeserverLabel": "Homeserver",
+		"serverButtonSelect": "Select homeserver",
+		"serverButtonChange": "Change homeserver",
+		"pkdnsLabel": "PKDNS",
+		"pkdnsButton": "Manage records"
+	},
+	"selectServer": {
+		"title": "Select Homeserver",
+		"defaultName": "{{name}} (default)",
+		"migrationNotice": "Please note your existing data does not migrate automatically when switching homeservers.",
+		"addButton": "Add Homeserver"
+	},
+	"addServer": {
+		"title": "Add Homeserver",
+		"label": "Label",
+		"labelPlaceholder": "Label for homeserver",
+		"homeserverLabel": "Server",
+		"homeserverPlaceholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"inviteCodeLabel": "Invite code",
+		"inviteCodePlaceholder": "XXXX-XXXX-XXXX",
+		"duplicateError": "This homeserver has already been added."
+	},
+	"editServer": {
+		"title": "Edit Homeserver"
 	},
 	"scanInvite": {
 		"invalidInviteCode": "Invalid Invite Code",

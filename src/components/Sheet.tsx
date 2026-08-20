@@ -1,5 +1,14 @@
 import React, { memo, ReactElement, ReactNode } from 'react';
-import { ScrollView, StyleProp, StyleSheet, useWindowDimensions, View, ViewStyle } from 'react-native';
+import {
+	Platform,
+	Pressable,
+	ScrollView,
+	StyleProp,
+	StyleSheet,
+	useWindowDimensions,
+	View,
+	ViewStyle,
+} from 'react-native';
 import { useIsFocused, useNavigation, useNavigationState } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import SafeAreaInset from './SafeAreaInset.tsx';
@@ -7,8 +16,10 @@ import { LinearGradient, RadialGradient } from './LinearGradient.tsx';
 import { TextLgSb } from '../theme/typography.ts';
 import HeaderNavButton from './HeaderNavButton.tsx';
 import { ArrowLeft } from '../icons/index.ts';
+import { HEADER_HEIGHT } from './AppHeader.tsx';
 import type { SheetId } from '../sheets/types.ts';
 import { getSheetContentHeight } from '../sheets/sheetLayout.ts';
+import { hideActiveSheet } from '../sheets/sheetNavigation.tsx';
 import { ThemedView } from '../theme/components.ts';
 
 export type GradientType = 'none' | 'brand' | 'danger';
@@ -41,8 +52,21 @@ const gradientColors: Record<Exclude<GradientType, 'none'>, string[]> = {
 export const SheetFrame = ({ children }: SheetFrameProps): ReactElement => {
 	const { height: windowHeight } = useWindowDimensions();
 	const insets = useSafeAreaInsets();
-	const sheetHeight = getSheetContentHeight(windowHeight, insets.top, insets.bottom);
 
+	// Android presents sheets as an in-window transparentModal (see RootNavigator / #359),
+	// so we render the bottom-sheet look here: a dimmed, tap-to-dismiss backdrop above a
+	// bottom-anchored, rounded card.
+	if (Platform.OS === 'android') {
+		const cardHeight = windowHeight - insets.top - HEADER_HEIGHT;
+		return (
+			<View style={styles.androidRoot}>
+				<Pressable style={styles.backdrop} onPress={hideActiveSheet} />
+				<View style={[styles.androidCard, { height: cardHeight }]}>{children}</View>
+			</View>
+		);
+	}
+
+	const sheetHeight = getSheetContentHeight(windowHeight, insets.top, insets.bottom);
 	return <View style={[styles.frame, { height: sheetHeight }]}>{children}</View>;
 };
 
@@ -133,6 +157,20 @@ const Sheet = ({ id, children, ...screenProps }: SheetProps): ReactElement => {
 const styles = StyleSheet.create({
 	frame: {
 		backgroundColor: '#000000',
+	},
+	androidRoot: {
+		flex: 1,
+		justifyContent: 'flex-end',
+	},
+	backdrop: {
+		...StyleSheet.absoluteFill,
+		backgroundColor: 'rgba(0, 0, 0, 0.5)',
+	},
+	androidCard: {
+		backgroundColor: '#000000',
+		borderTopLeftRadius: 32,
+		borderTopRightRadius: 32,
+		overflow: 'hidden',
 	},
 	background: {
 		...StyleSheet.absoluteFill,

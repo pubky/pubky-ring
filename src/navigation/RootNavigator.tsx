@@ -2,7 +2,7 @@ import React, { ReactElement, useMemo } from 'react';
 import { DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { useWindowDimensions } from 'react-native';
+import { Platform, useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
 import PubkyDetailScreen from '../screens/PubkyDetailScreen';
@@ -52,8 +52,21 @@ const RootNavigator = (): ReactElement => {
 		return getSheetDetent(windowHeight, insets.top, insets.bottom);
 	}, [insets.top, insets.bottom, windowHeight]);
 
-	const sheetScreenOptions: NativeStackNavigationOptions = useMemo(
-		() => ({
+	const sheetScreenOptions: NativeStackNavigationOptions = useMemo(() => {
+		// iOS: native formSheet works well. Android: react-native-screens' formSheet is
+		// presented in a separate window that is not drawn until a window relayout on some
+		// devices (MIUI / Redmi Note 11), so present an in-window transparentModal instead
+		// and render the bottom-sheet look ourselves in SheetFrame. See #359.
+		if (Platform.OS === 'android') {
+			return {
+				presentation: 'transparentModal',
+				animation: reducedMotionEnabled ? 'none' : 'slide_from_bottom',
+				contentStyle: {
+					backgroundColor: 'transparent',
+				},
+			};
+		}
+		return {
 			presentation: 'formSheet',
 			sheetAllowedDetents: [fixedSheetDetent],
 			sheetCornerRadius: 32,
@@ -61,9 +74,8 @@ const RootNavigator = (): ReactElement => {
 			contentStyle: {
 				backgroundColor: '#000000',
 			},
-		}),
-		[fixedSheetDetent],
-	);
+		};
+	}, [fixedSheetDetent, reducedMotionEnabled]);
 
 	const navTheme: NavigationTheme = useMemo(
 		() => ({

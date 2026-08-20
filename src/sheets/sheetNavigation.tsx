@@ -118,3 +118,17 @@ export const showSheet = <TSheetId extends SheetId>(...args: ShowSheetArgs<TShee
 export const hideSheet = (id: SheetId): void => {
 	closeRootSheetRoute(sheetRouteById[id]);
 };
+
+const sheetRouteNameSet = new Set<string>(Object.values(sheetRouteById));
+
+/** Closes whichever sheet is currently on top of the root stack, if any. */
+export const hideActiveSheet = (): void => {
+	if (!navigationRef.isReady()) {
+		return;
+	}
+	const rootState = navigationRef.getRootState();
+	const top = rootState.routes[rootState.routes.length - 1];
+	if (top && sheetRouteNameSet.has(top.name)) {
+		closeRootSheetRoute(top.name as SheetRouteName);
+	}
+};

@@ -31,5 +31,7 @@ export const getSheetDetent = (windowHeight: number, topInset: number, bottomIns
 		sheetHeight += bottomInset + ANDROID_DETENT_OVERFLOW_PADDING;
 	}
 
-	return sheetHeight / availableHeight;
+	// react-native-screens requires a single detent in (0, 1]; a taller nav bar (e.g. MIUI
+	// 3-button nav) can otherwise push this above 1.0 and the sheet fails to present.
+	return Math.min(1, sheetHeight / availableHeight);
 };

@@ -30,6 +30,7 @@ import AddPubkySheet from '../sheets/AddPubkySheet.tsx';
 import MigrateSheet from '../sheets/MigrateSheet.tsx';
 import LegacySunsetSheet from '../sheets/LegacySunsetSheet.tsx';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler.ts';
+import { shouldUseAndroidSheetFallback } from '../sheets/sheetPlatform.ts';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -52,8 +53,18 @@ const RootNavigator = (): ReactElement => {
 		return getSheetDetent(windowHeight, insets.top, insets.bottom);
 	}, [insets.top, insets.bottom, windowHeight]);
 
-	const sheetScreenOptions: NativeStackNavigationOptions = useMemo(
-		() => ({
+	const sheetScreenOptions: NativeStackNavigationOptions = useMemo(() => {
+		if (shouldUseAndroidSheetFallback()) {
+			return {
+				presentation: 'transparentModal',
+				animation: reducedMotionEnabled ? 'none' : 'slide_from_bottom',
+				contentStyle: {
+					backgroundColor: 'transparent',
+				},
+			};
+		}
+
+		return {
 			presentation: 'formSheet',
 			sheetAllowedDetents: [fixedSheetDetent],
 			sheetCornerRadius: 32,
@@ -61,9 +72,8 @@ const RootNavigator = (): ReactElement => {
 			contentStyle: {
 				backgroundColor: '#000000',
 			},
-		}),
-		[fixedSheetDetent],
-	);
+		};
+	}, [fixedSheetDetent, reducedMotionEnabled]);
 
 	const navTheme: NavigationTheme = useMemo(
 		() => ({

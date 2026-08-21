@@ -2,7 +2,7 @@ import React, { ReactElement, useMemo } from 'react';
 import { DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
-import { Platform, useWindowDimensions } from 'react-native';
+import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
 import PubkyDetailScreen from '../screens/PubkyDetailScreen';
@@ -30,6 +30,7 @@ import AddPubkySheet from '../sheets/AddPubkySheet.tsx';
 import MigrateSheet from '../sheets/MigrateSheet.tsx';
 import LegacySunsetSheet from '../sheets/LegacySunsetSheet.tsx';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler.ts';
+import { shouldUseAndroidSheetFallback } from '../sheets/sheetPlatform.ts';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -53,11 +54,7 @@ const RootNavigator = (): ReactElement => {
 	}, [insets.top, insets.bottom, windowHeight]);
 
 	const sheetScreenOptions: NativeStackNavigationOptions = useMemo(() => {
-		// iOS: native formSheet works well. Android: react-native-screens' formSheet is
-		// presented in a separate window that is not drawn until a window relayout on some
-		// devices (MIUI / Redmi Note 11), so present an in-window transparentModal instead
-		// and render the bottom-sheet look ourselves in SheetFrame. See #359.
-		if (Platform.OS === 'android') {
+		if (shouldUseAndroidSheetFallback()) {
 			return {
 				presentation: 'transparentModal',
 				animation: reducedMotionEnabled ? 'none' : 'slide_from_bottom',
@@ -66,6 +63,7 @@ const RootNavigator = (): ReactElement => {
 				},
 			};
 		}
+
 		return {
 			presentation: 'formSheet',
 			sheetAllowedDetents: [fixedSheetDetent],

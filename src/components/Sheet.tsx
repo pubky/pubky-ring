@@ -1,6 +1,5 @@
 import React, { memo, ReactElement, ReactNode } from 'react';
 import {
-	Platform,
 	Pressable,
 	ScrollView,
 	StyleProp,
@@ -20,6 +19,7 @@ import { HEADER_HEIGHT } from './AppHeader.tsx';
 import type { SheetId } from '../sheets/types.ts';
 import { getSheetContentHeight } from '../sheets/sheetLayout.ts';
 import { hideActiveSheet } from '../sheets/sheetNavigation.tsx';
+import { shouldUseAndroidSheetFallback } from '../sheets/sheetPlatform.ts';
 import { ThemedView } from '../theme/components.ts';
 
 export type GradientType = 'none' | 'brand' | 'danger';
@@ -53,10 +53,7 @@ export const SheetFrame = ({ children }: SheetFrameProps): ReactElement => {
 	const { height: windowHeight } = useWindowDimensions();
 	const insets = useSafeAreaInsets();
 
-	// Android presents sheets as an in-window transparentModal (see RootNavigator / #359),
-	// so we render the bottom-sheet look here: a dimmed, tap-to-dismiss backdrop above a
-	// bottom-anchored, rounded card.
-	if (Platform.OS === 'android') {
+	if (shouldUseAndroidSheetFallback()) {
 		const cardHeight = windowHeight - insets.top - HEADER_HEIGHT;
 		return (
 			<View style={styles.androidRoot}>

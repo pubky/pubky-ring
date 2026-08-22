@@ -7,6 +7,7 @@ executionOrder:
     - onboarding
     - delete-pubky
     - create-pubky-and-authorize
+    - confirm-session
     - backup-pubky
     - import-pubky-mnemonic
     - migrate-keys

@@ -158,7 +158,15 @@
 		"sessionReturned": "Session data sent to requesting app",
 		"signInFailed": "Sign In Failed",
 		"invalidCallback": "Invalid callback URL provided",
-		"cannotOpenCallback": "Cannot open callback URL to return session"
+		"cannotOpenCallback": "Cannot open callback URL to return session",
+		"confirmTitle": "Allow Session",
+		"requestingApp": "Requesting App",
+		"callbackDestination": "Callback Destination",
+		"sessionPermissions": "Session Permissions",
+		"rootSessionDescription": "A root homeserver session with read and write access will be sent to this app.",
+		"trustWarning": "Only allow this if you trust the requesting app. The session secret can access this pubky's homeserver data until it is signed out.",
+		"allow": "Allow",
+		"approving": "Allowing..."
 	},
 	"errors": {
 		"failedToParseQR": "Failed to parse QR code data",

@@ -1,5 +1,5 @@
 import { Linking } from 'react-native';
-import { XCallbackParams } from './inputParser';
+import type { XCallbackParams } from './inputParser';
 
 /**
  * Safely opens a URL via Linking, catching errors from unregistered schemes.
@@ -8,8 +8,27 @@ const safeOpenURL = async (url: string): Promise<void> => {
 	try {
 		await Linking.openURL(url);
 	} catch (e) {
-		console.warn('Failed to open x-callback URL:', url, e);
+		console.warn('Failed to open x-callback URL:', e);
 	}
+};
+
+const hasUrlScheme = (url: string): boolean => {
+	const match = url.match(/^([A-Za-z][A-Za-z0-9+.-]*):\/\//);
+	return Boolean(match);
+};
+
+export const isValidSessionCallbackUrl = (url: string | undefined): boolean => {
+	return url ? hasUrlScheme(url) : false;
+};
+
+export const hasValidSessionCallbacks = (xCallback: XCallbackParams | undefined): boolean => {
+	if (!isValidSessionCallbackUrl(xCallback?.xSuccess)) {
+		return false;
+	}
+
+	return [xCallback?.xError, xCallback?.xCancel].every(
+		callbackUrl => callbackUrl === undefined || isValidSessionCallbackUrl(callbackUrl),
+	);
 };
 
 /**

@@ -1,0 +1,21 @@
+appId: ${APP_ID}
+name: confirm-session
+env:
+  SESSION_URL: pubkyring://session?x-success=https%3A%2F%2Fwebhook.site%2Fpubky-ring-session-test&x-source=Bitkit
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- runFlow: ../shared/import-signed-up-pubky.yaml
+- runFlow:
+    file: ../shared/open-link.yaml
+    env:
+      URL: ${SESSION_URL}
+- extendedWaitUntil:
+    visible:
+      id: confirm-session-title
+    timeout: 30000
+- assertVisible: Bitkit
+- assertVisible: https://webhook.site
+- assertVisible:
+    id: ConfirmSessionAllowButton

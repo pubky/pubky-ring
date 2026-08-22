@@ -1,0 +1,16 @@
+appId: ${APP_ID}
+env:
+  IMPORT_URL: pubkyring://rebel%20clay%20knee%20seed%20airport%20fuel%20stool%20select%20vehicle%20airport%20cigar%20modify
+---
+- runFlow:
+    file: open-link.yaml
+    env:
+      URL: ${IMPORT_URL}
+- extendedWaitUntil:
+    visible:
+      id: import-success-title
+    timeout: 30000
+- runFlow: close-sheet.yaml
+- extendedWaitUntil:
+    visible: Authorize
+    timeout: 120000

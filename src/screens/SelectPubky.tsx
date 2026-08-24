@@ -19,6 +19,7 @@ import type { AuthStackParamList } from '../sheets/types.ts';
 import { createConfirmAuthPayload } from '../utils/actions/authAction.ts';
 import { getAutoAuthFromStore } from '../utils/store-helpers.ts';
 import { routeInputWithContext } from '../utils/inputHandlerUtils.ts';
+import { hasValidSessionCallbacks } from '../utils/xCallback.ts';
 
 type PubkyItem = { key: string; value: Pubky };
 type SelectPubkyNavigation = NativeStackNavigationProp<AuthStackParamList, 'SelectPubky'>;
@@ -99,6 +100,24 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 				}
 
 				navigation.navigate('ConfirmAuth', payload.value);
+				dispatch(setDeepLink(''));
+				return;
+			}
+
+			if (parsed.action === InputAction.Session && parsed.data.action === InputAction.Session) {
+				if (!hasValidSessionCallbacks(parsed.data.params.xCallback)) {
+					showToast({
+						type: 'error',
+						title: t('common.error'),
+						description: t('session.invalidCallback'),
+					});
+					return;
+				}
+
+				navigation.navigate('ConfirmSession', {
+					pubky,
+					xCallback: parsed.data.params.xCallback,
+				});
 				dispatch(setDeepLink(''));
 				return;
 			}

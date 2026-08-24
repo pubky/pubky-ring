@@ -158,7 +158,15 @@
 		"sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
 		"signInFailed": "Fallo al iniciar sesión",
 		"invalidCallback": "URL de devolución de llamada no válida proporcionada",
-		"cannotOpenCallback": "No se puede abrir la URL de devolución de llamada para devolver la sesión"
+		"cannotOpenCallback": "No se puede abrir la URL de devolución de llamada para devolver la sesión",
+		"confirmTitle": "Permitir sesión",
+		"requestingApp": "Aplicación solicitante",
+		"callbackDestination": "Destino de devolución de llamada",
+		"sessionPermissions": "Permisos de sesión",
+		"rootSessionDescription": "Se enviará a esta aplicación una sesión raíz del homeserver con acceso de lectura y escritura.",
+		"trustWarning": "Permita esto solo si confía en la aplicación solicitante. El secreto de sesión puede acceder a los datos del homeserver de este pubky hasta que se cierre la sesión.",
+		"allow": "Permitir",
+		"approving": "Permitiendo..."
 	},
 	"errors": {
 		"failedToParseQR": "Fallo al analizar los datos del código QR",

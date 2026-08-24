@@ -18,11 +18,7 @@ import { InputAction, SessionParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { signInToHomeserver } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
-import {
-	hasValidSessionCallbacks,
-	openXSuccessWithParams,
-	openXError,
-} from '../xCallback';
+import { hasValidSessionCallbacks, openXSuccessWithParams, openXError } from '../xCallback';
 import i18n from '../../i18n';
 import { showSheet } from '../../sheets/sheetNavigation';
 

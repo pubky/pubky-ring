@@ -159,7 +159,7 @@ export const routeInput = async (
 		}
 
 		if (isUnknownAction(data)) {
-			console.log('[InputRouter] Unknown input format:', data.params.rawData.substring(0, 100));
+			console.log('[InputRouter] Unknown input format');
 			return err(i18n.t('errors.unrecognizedFormat'));
 		}
 

@@ -7,8 +7,8 @@ import type { XCallbackParams } from './inputParser';
 const safeOpenURL = async (url: string): Promise<void> => {
 	try {
 		await Linking.openURL(url);
-	} catch (e) {
-		console.warn('Failed to open x-callback URL:', e);
+	} catch {
+		console.warn('Failed to open x-callback URL');
 	}
 };
 

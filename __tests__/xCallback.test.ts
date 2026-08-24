@@ -52,7 +52,7 @@ describe('xCallback', () => {
 			{ session_secret: 'pubky:secret-cookie' },
 		);
 
-		expect(warnSpy).toHaveBeenCalledWith('Failed to open x-callback URL:', expect.any(Error));
+		expect(warnSpy).toHaveBeenCalledWith('Failed to open x-callback URL');
 		expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('pubky:secret-cookie'));
 		warnSpy.mockRestore();
 	});

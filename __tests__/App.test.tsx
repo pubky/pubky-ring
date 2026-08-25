@@ -67,8 +67,7 @@ jest.mock('react-native-safe-area-context', () => {
 		__esModule: true,
 		SafeAreaProvider: ({ children }: { children?: ReactNode }) =>
 			ReactMock.createElement(View, null, children),
-		SafeAreaView: ({ children }: { children?: ReactNode }) =>
-			ReactMock.createElement(View, null, children),
+		SafeAreaView: ({ children }: { children?: ReactNode }) => ReactMock.createElement(View, null, children),
 		useSafeAreaInsets: () => ({ top: 0, right: 0, bottom: 0, left: 0 }),
 		useSafeAreaFrame: () => ({ x: 0, y: 0, width: 320, height: 640 }),
 	};
@@ -79,6 +78,17 @@ jest.mock('@synonymdev/react-native-toast', () => ({
 	configureToast: jest.fn(),
 	showToast: jest.fn(),
 }));
+
+jest.mock('../src/hooks/useSharedPubkyDiscovery.ts', () => {
+	const ReactMock = require('react');
+	const value = { available: false, identities: [], refresh: jest.fn() };
+
+	return {
+		__esModule: true,
+		SharedPubkyDiscoveryContext: ReactMock.createContext(value),
+		useSharedPubkyDiscovery: () => value,
+	};
+});
 
 jest.mock('react-i18next', () => ({
 	__esModule: true,

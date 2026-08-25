@@ -3,7 +3,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getOwnedPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { getPubkySecretKey } from '../utils/pubky.ts';
 import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
@@ -13,7 +13,7 @@ import { TextBaseM, TextBaseB, TextXsM } from '../theme/typography';
 
 const MigrateQRCode = (): ReactElement => {
 	const { t } = useTranslation();
-	const pubkyKeys = useSelector(getPubkyKeys);
+	const pubkyKeys = useSelector(getOwnedPubkyKeys);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const originalBrightnessRef = useRef<number | null>(null);

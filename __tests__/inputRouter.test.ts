@@ -14,6 +14,7 @@ import { handleDirectSignupAction, handleSignupAction } from '../src/utils/actio
 import { handleInviteAction } from '../src/utils/actions/inviteAction';
 import { handleSessionAction } from '../src/utils/actions/sessionAction';
 import { showSheet } from '../src/sheets/sheetNavigation';
+import { routeInputWithContext } from '../src/utils/inputHandlerUtils';
 
 jest.mock('../src/i18n', () => ({
 	__esModule: true,
@@ -27,6 +28,11 @@ jest.mock('@synonymdev/react-native-pubky', () => ({
 	parseAuthUrl: jest.fn(),
 	mnemonicPhraseToKeypair: jest.fn(),
 	getPublicKeyFromSecretKey: jest.fn(),
+}));
+
+jest.mock('@synonymdev/react-native-toast', () => ({
+	__esModule: true,
+	showToast: jest.fn(),
 }));
 
 jest.mock('../src/utils/errorHandler', () => ({
@@ -72,6 +78,11 @@ jest.mock('../src/utils/actions/sessionAction', () => ({
 jest.mock('../src/sheets/sheetNavigation', () => ({
 	__esModule: true,
 	showSheet: jest.fn(),
+}));
+
+jest.mock('../src/store/slices/pubkysSlice', () => ({
+	__esModule: true,
+	setDeepLink: jest.fn((payload: string) => ({ type: 'pubky/setDeepLink', payload })),
 }));
 
 const handleAuthActionMock = handleAuthAction as jest.MockedFunction<typeof handleAuthAction>;
@@ -314,6 +325,35 @@ describe('routeInput', () => {
 		expect(handleSessionActionMock).not.toHaveBeenCalled();
 
 		logSpy.mockRestore();
+	});
+});
+
+describe('routeInputWithContext', () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	it('does not log raw deeplink input when routing fails', async () => {
+		handleMigrateActionMock.mockResolvedValue(err(new Error('Invalid migration parameters')));
+		const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => undefined);
+		const marker = 'TEST_H2_MARKER_not-a-real-secret';
+		const parsed: ParsedInput = {
+			action: InputAction.Migrate,
+			data: {
+				action: InputAction.Migrate,
+				params: { index: 1, total: 1, key: marker },
+			},
+			source: 'deeplink',
+			rawInput: `pubkyring://migrate?index=1%26total=1%26key=${marker}`,
+		};
+
+		await routeInputWithContext(parsed, undefined, 'deeplink', dispatch);
+
+		expect(errorSpy).toHaveBeenCalledWith(
+			'Input routing error:',
+			expect.not.stringContaining(marker),
+		);
+		errorSpy.mockRestore();
 	});
 });
 

@@ -52,7 +52,6 @@ export const routeInputWithContext = async (
 		const debugInfo = JSON.stringify(
 			{
 				action: parsed.action,
-				rawInput: parsed.rawInput,
 				error: errorMessage,
 			},
 			null,

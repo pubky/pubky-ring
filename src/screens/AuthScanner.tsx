@@ -14,7 +14,6 @@ import { InputAction, parseInput } from '../utils/inputParser.ts';
 import { actionRequiresNetwork, routeInput } from '../utils/inputRouter.ts';
 import { getAutoAuthFromStore, getIsOnline } from '../utils/store-helpers.ts';
 import { createConfirmAuthPayload } from '../utils/actions/authAction.ts';
-import i18n from '../i18n';
 
 const SHEET_ID = 'auth';
 
@@ -27,26 +26,18 @@ const AuthScanner = ({
 	const { pubky } = route.params;
 	const title = t('auth.authorize');
 
-	const showRouteError = useCallback((input: string, action: InputAction, error: unknown): void => {
-		const errorMsg = getErrorMessage(error, i18n.t('errors.unknownError'));
-		const debugInfo = JSON.stringify(
-			{
-				error: errorMsg,
-				input: input.substring(0, 100),
-				action,
-			},
-			null,
-			2,
-		);
+	const showRouteError = useCallback((action: InputAction, error: unknown): void => {
+		const errorMsg = getErrorMessage(error, t('errors.unknownError'));
+		const debugInfo = JSON.stringify({ error: errorMsg, action }, null, 2);
 
 		console.error('Auth scanner route error:', debugInfo);
 
 		showToast({
 			type: 'error',
-			title: i18n.t('common.error'),
+			title: t('common.error'),
 			description: errorMsg,
 		});
-	}, []);
+	}, [t]);
 
 	const handleInput = useCallback(
 		async (input: string, source: 'scan' | 'clipboard'): Promise<void> => {
@@ -63,8 +54,8 @@ const AuthScanner = ({
 				if (!connected) {
 					showToast({
 						type: 'error',
-						title: i18n.t('network.currentlyOffline'),
-						description: i18n.t('network.offlineDescription'),
+						title: t('network.currentlyOffline'),
+						description: t('network.offlineDescription'),
 						autoHide: false,
 					});
 					return;
@@ -77,7 +68,7 @@ const AuthScanner = ({
 					const result = await routeInput(parsed, { dispatch, pubky });
 
 					if (result.isErr()) {
-						showRouteError(input, parsed.action, result.error);
+						showRouteError(parsed.action, result.error);
 					}
 					return;
 				}
@@ -104,7 +95,7 @@ const AuthScanner = ({
 			const result = await routeInput(parsed, { dispatch, pubky });
 
 			if (result.isErr()) {
-				showRouteError(input, parsed.action, result.error);
+				showRouteError(parsed.action, result.error);
 			}
 		},
 		[dispatch, navigation, pubky, showRouteError, t],

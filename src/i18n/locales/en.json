@@ -50,6 +50,7 @@
 		"scanDynamicQRDescription_one": "Scan this QR code with your other device to import your {{count}} key pair.",
 		"scanDynamicQRDescription_other": "Scan this dynamic QR code with your other device to import your {{count}} key pairs.",
 		"scanThisQR": "Scan this QR code on your other device to import your keys.",
+		"migrationQRWarning": "This QR code can recover your identity. Only reveal it when your screen is private.",
 		"keyProgress": "Key {{current}} of {{total}}",
 		"noKeysToDisplay": "No keys available to display.",
 		"theme": {

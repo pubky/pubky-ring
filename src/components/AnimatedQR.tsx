@@ -6,7 +6,7 @@ import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-na
 import { TextSmB } from '../theme/typography';
 import { ChevronLeft, ChevronRight } from '../icons/index.ts';
 
-const pubkyRingLogo = require('../images/pubky-ring.png');
+const pubkyRingLogo = require('../images/pubky-ring-logo-small.png');
 
 interface AnimatedQRData {
 	value: string;
@@ -35,31 +35,24 @@ const AnimatedQR = ({
 	const { t } = useTranslation();
 	const [currentIndex, setCurrentIndex] = useState(0);
 	const [isPaused, setIsPaused] = useState(false);
-	const startTimeRef = useRef<number>(Date.now());
+	const startTimeRef = useRef<number | null>(null);
 	const timeoutIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 	const controlsOpacity = useSharedValue(0);
-	const isMountedRef = useRef(true);
 	const hasTransition = startCycleInterval !== undefined && startCycleInterval !== cycleInterval;
 
 	// Use ref for interval calculation to avoid dependency churn in cycling effect
 	const getIntervalRef = useRef(() => cycleInterval);
 
-	// Track mounted state for animation cleanup
-	useEffect(() => {
-		isMountedRef.current = true;
-		return (): void => {
-			isMountedRef.current = false;
-		};
-	}, []);
-
 	// Update the interval calculation function when dependencies change
 	useEffect(() => {
+		startTimeRef.current = Date.now();
 		getIntervalRef.current = (): number => {
 			if (!hasTransition) {
 				return cycleInterval;
 			}
 
-			const elapsed = Date.now() - startTimeRef.current;
+			const startTime = startTimeRef.current ?? Date.now();
+			const elapsed = Date.now() - startTime;
 			if (elapsed >= transitionDuration) {
 				return cycleInterval;
 			}
@@ -135,12 +128,13 @@ const AnimatedQR = ({
 							size={size}
 							backgroundColor="#FFFFFF"
 							logo={pubkyRingLogo}
-							logoSize={45}
+							logoSize={60}
 							logoMargin={0}
 							logoBackgroundColor="black"
-							logoBorderRadius={20.5}
+							logoBorderRadius={30}
 						/>
 					</View>
+
 					{showControls && (
 						<>
 							<Animated.View
@@ -177,7 +171,6 @@ const styles = StyleSheet.create({
 	qrContainer: {
 		alignItems: 'center',
 		justifyContent: 'center',
-		marginBottom: 16,
 	},
 	qrPressable: {
 		position: 'relative',
@@ -202,6 +195,7 @@ const styles = StyleSheet.create({
 	},
 	progressText: {
 		textAlign: 'center',
+		marginTop: 16,
 		marginBottom: 16,
 	},
 });

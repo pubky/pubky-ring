@@ -9,11 +9,7 @@ import { readFromClipboard } from '../utils/clipboard.ts';
 import { checkNetworkConnection } from '../utils/helpers.ts';
 import { InputAction, parseInput } from '../utils/inputParser.ts';
 import { actionRequiresNetwork, routeInput } from '../utils/inputRouter.ts';
-import {
-	handleMigrationScannerClose,
-	resetMigrateAccumulator,
-	setOnMigrationComplete,
-} from '../utils/actions/migrateAction.ts';
+import { handleMigrationScannerClose, resetMigrateAccumulator } from '../utils/actions/migrateAction.ts';
 import { getIsOnline } from '../utils/store-helpers.ts';
 import i18n from '../i18n';
 
@@ -29,7 +25,6 @@ const MigrateScanner = (): ReactElement => {
 
 		return (): void => {
 			handleMigrationScannerClose();
-			setOnMigrationComplete(null);
 		};
 	}, []);
 
@@ -41,8 +36,8 @@ const MigrateScanner = (): ReactElement => {
 				hideSheet(SHEET_ID);
 				showToast({
 					type: 'error',
-					title: t('import.invalidData'),
-					description: t('import.invalidClipboardData'),
+					title: t('migrate.invalid.title'),
+					description: t('migrate.invalid.description'),
 				});
 				return;
 			}

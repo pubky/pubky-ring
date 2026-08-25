@@ -91,8 +91,10 @@
 		"failed": "Importación fallida",
 		"invalidRecoveryPhrase": "Frase de recuperación no válida",
 		"pubkyImportedSuccessfully": "Pubky importado con éxito",
-		"invalidData": "Datos no válidos",
-		"invalidClipboardData": "El portapapeles no contiene una frase de recuperación o una clave secreta válidas",
+		"invalid": {
+			"title": "Datos no válidos",
+			"description": "Esto no contiene una frase de recuperación o una clave secreta válidas"
+		},
 		"importButton": "Importar",
 		"pubkyImported": "Pubky Importado",
 		"pubkyReImported": "Pubky reimportado",
@@ -335,8 +337,15 @@
 	},
 	"migrate": {
 		"scanning": "Búsqueda de llaves",
+		"invalid": {
+			"title": "Datos de migración no válidos",
+			"description": "Esto no contiene datos de migración válidos. Escanee o pegue datos de migración generados desde Configuración > Mostrar QR."
+		},
 		"successTitle": "Migración completada",
 		"partialTitle": "Migración parcial Completa",
+		"importSuccess_one": "Ha importado correctamente {{count}} par de claves.",
+		"importSuccess_other": "Ha importado correctamente {{count}} pares de claves.",
+		"importPartialSuccess": "Ha importado correctamente {{imported}} de {{total}} pares de claves.",
 		"successMessage": "Importado con éxito {{imported}} de {{total}} claves",
 		"partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
 		"allFailed": "Falló la importación de todas las claves"

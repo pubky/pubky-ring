@@ -46,6 +46,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		minHeight: 96,
+		paddingVertical: 16,
 	},
 	avatar: {
 		width: 48,

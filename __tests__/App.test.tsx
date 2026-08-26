@@ -88,24 +88,9 @@ jest.mock('react-i18next', () => ({
 	}),
 }));
 
-// A single in-memory store shared by every createMMKV() caller, so the consumed initial URL
-// survives across renders the way it survives across process death on device.
-jest.mock('react-native-mmkv', () => {
-	const values: Record<string, string> = {};
-
-	return {
-		__esModule: true,
-		createMMKV: () => ({
-			getString: (key: string) => values[key],
-			set: (key: string, value: string) => {
-				values[key] = value;
-			},
-		}),
-	};
-});
-
 import App from '../App';
 import { parseInput } from '../src/utils/inputParser.ts';
+import { resetClaimedInitialUrl } from '../src/utils/initialUrl.ts';
 
 const mockedParseInput = parseInput as jest.Mock;
 
@@ -117,15 +102,16 @@ test('renders correctly', async () => {
 	expect(screen.getByTestId('RootNavigator')).toBeTruthy();
 });
 
-test('routes an initial URL once, even if a later launch replays it', async () => {
+test('routes the launch URL once per launch, not once per mount', async () => {
 	const getInitialURL = jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(AUTH_URL);
 	mockedParseInput.mockClear();
+	resetClaimedInitialUrl();
 
 	const first = render(<App />);
 	await waitFor(() => expect(mockedParseInput).toHaveBeenCalledWith(AUTH_URL, 'deeplink'));
 	first.unmount();
 
-	// Same URL again: a stale launch intent replayed by Android, not a new deeplink.
+	// Remounting reads the same launch intent again; it is not a second deeplink.
 	getInitialURL.mockClear();
 	const second = render(<App />);
 	await waitFor(() => expect(getInitialURL).toHaveBeenCalled());
@@ -133,6 +119,24 @@ test('routes an initial URL once, even if a later launch replays it', async () =
 	second.unmount();
 
 	expect(mockedParseInput).toHaveBeenCalledTimes(1);
+
+	getInitialURL.mockRestore();
+});
+
+test('routes the same URL again on a later launch', async () => {
+	const getInitialURL = jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(AUTH_URL);
+	mockedParseInput.mockClear();
+	resetClaimedInitialUrl();
+
+	const first = render(<App />);
+	await waitFor(() => expect(mockedParseInput).toHaveBeenCalledTimes(1));
+	first.unmount();
+
+	// New process, user re-opening the link after a failed attempt: must be handled again.
+	resetClaimedInitialUrl();
+	const second = render(<App />);
+	await waitFor(() => expect(mockedParseInput).toHaveBeenCalledTimes(2));
+	second.unmount();
 
 	getInitialURL.mockRestore();
 });

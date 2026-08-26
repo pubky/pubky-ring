@@ -33,8 +33,8 @@ function App(): React.JSX.Element {
 		const getInitialURL = async (): Promise<void> => {
 			try {
 				const url = await Linking.getInitialURL();
-				// Android can hand back the intent that created the task, which may be a deeplink from
-				// an earlier run. Only ever act on a given initial URL once.
+				// The launch intent stays readable for the whole process, so route it once per launch
+				// rather than once per mount. Stale intents are dropped natively, before they get here.
 				if (url && claimInitialUrl(url)) {
 					handleDeepLink(url);
 				}

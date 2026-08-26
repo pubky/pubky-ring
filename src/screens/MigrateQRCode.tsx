@@ -1,5 +1,13 @@
-import React, { memo, ReactElement, useEffect, useMemo, useRef, useState } from 'react';
-import { ActivityIndicator, StyleSheet, View } from 'react-native';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+	ActivityIndicator,
+	AppState,
+	Platform,
+	Pressable,
+	StyleSheet,
+	useWindowDimensions,
+	View,
+} from 'react-native';
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
@@ -9,37 +17,85 @@ import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 import AnimatedQR from '../components/AnimatedQR.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
-import { TextBaseM, TextBaseB, TextXsM } from '../theme/typography';
+import { TextBaseM, TextBaseB, TextXsM, TextSmB, TextSmM } from '../theme/typography';
+import BlurView from '../components/BlurView.tsx';
+import { shadows } from '../theme/shadows.ts';
+import { setSecureWindow } from '../utils/secureWindow.ts';
+
+const placeholderData = [{ value: 'pubkyring://migrate' }];
 
 const MigrateQRCode = (): ReactElement => {
 	const { t } = useTranslation();
+	const { width } = useWindowDimensions();
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isRevealed, setIsRevealed] = useState(false);
 	const originalBrightnessRef = useRef<number | null>(null);
+	const brightnessRequestIdRef = useRef(0);
 	const displayedKeyCount = isLoading ? pubkyKeys.length : keyValues.length;
+	const qrSize = Math.min(280, Math.max(220, width - 80));
+
+	const restoreBrightness = useCallback((): void => {
+		if (originalBrightnessRef.current !== null) {
+			DeviceBrightness.setBrightnessLevel(originalBrightnessRef.current)
+				.then(() => {
+					originalBrightnessRef.current = null;
+				})
+				.catch(error => console.warn('Failed to restore brightness:', error));
+		}
+	}, []);
+
+	const revealQRCode = useCallback((): void => {
+		const requestId = brightnessRequestIdRef.current + 1;
+
+		brightnessRequestIdRef.current = requestId;
+		setSecureWindow(true);
+		setIsRevealed(true);
+
+		DeviceBrightness.getBrightnessLevel()
+			.then(currentBrightness => {
+				if (brightnessRequestIdRef.current !== requestId) {
+					return;
+				}
+
+				originalBrightnessRef.current = currentBrightness;
+				return DeviceBrightness.setBrightnessLevel(1);
+			})
+			.catch(error => console.warn('Failed to set brightness:', error));
+	}, []);
+
+	const hideQRCode = useCallback((): void => {
+		brightnessRequestIdRef.current += 1;
+		setIsRevealed(false);
+		setSecureWindow(false);
+		restoreBrightness();
+	}, [restoreBrightness]);
 
 	useEffect(() => {
-		const setBrightness = async (): Promise<void> => {
-			try {
-				const currentBrightness = await DeviceBrightness.getBrightnessLevel();
-				originalBrightnessRef.current = currentBrightness;
-				await DeviceBrightness.setBrightnessLevel(1);
-			} catch (error) {
-				console.warn('Failed to set brightness:', error);
-			}
+		return (): void => {
+			setSecureWindow(false);
+			restoreBrightness();
 		};
+	}, [restoreBrightness]);
 
-		setBrightness();
+	useEffect(() => {
+		const subscriptions = [
+			AppState.addEventListener('change', nextAppState => {
+				if (nextAppState !== 'active') {
+					hideQRCode();
+				}
+			}),
+		];
+
+		if (Platform.OS === 'android') {
+			subscriptions.push(AppState.addEventListener('blur', hideQRCode));
+		}
 
 		return (): void => {
-			if (originalBrightnessRef.current !== null) {
-				DeviceBrightness.setBrightnessLevel(originalBrightnessRef.current).catch(error =>
-					console.warn('Failed to restore brightness:', error),
-				);
-			}
+			subscriptions.forEach(subscription => subscription.remove());
 		};
-	}, []);
+	}, [hideQRCode]);
 
 	useEffect(() => {
 		let mounted = true;
@@ -110,12 +166,37 @@ const MigrateQRCode = (): ReactElement => {
 		}
 
 		return (
-			<AnimatedQR
-				data={migrateFormattedData}
-				startCycleInterval={200}
-				cycleInterval={600}
-				transitionDuration={60000}
-			/>
+			<>
+				<View style={styles.qrRevealContainer}>
+					<AnimatedQR
+						data={isRevealed ? migrateFormattedData : placeholderData}
+						startCycleInterval={200}
+						cycleInterval={600}
+						transitionDuration={60000}
+						size={qrSize}
+					/>
+
+					{!isRevealed && (
+						<>
+							<BlurView style={styles.blurOverlay} tintEnabled={true} />
+
+							<View style={styles.revealButtonContainer} pointerEvents="box-none">
+								<Pressable
+									style={styles.revealButton}
+									testID="MigrateQRCodeRevealButton"
+									onPress={revealQRCode}
+								>
+									<TextSmB numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+										{t('backup.tapToReveal')}
+									</TextSmB>
+								</Pressable>
+							</View>
+						</>
+					)}
+				</View>
+
+				<TextSmM>{t('settings.migrationQRWarning')}</TextSmM>
+			</>
 		);
 	};
 
@@ -147,6 +228,32 @@ const styles = StyleSheet.create({
 	},
 	loadingText: {
 		marginTop: 12,
+	},
+	qrRevealContainer: {
+		position: 'relative',
+		alignSelf: 'center',
+		borderRadius: 16,
+		overflow: 'visible',
+		marginBottom: 24,
+	},
+	blurOverlay: {
+		...StyleSheet.absoluteFill,
+		borderRadius: 16,
+		overflow: 'hidden',
+	},
+	revealButtonContainer: {
+		...StyleSheet.absoluteFill,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	revealButton: {
+		backgroundColor: '#111115',
+		paddingHorizontal: 28,
+		paddingVertical: 18,
+		borderRadius: 64,
+		borderWidth: 1,
+		borderColor: '#303034',
+		...shadows.xs,
 	},
 });
 

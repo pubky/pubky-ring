@@ -11,7 +11,15 @@ import {
 	generateMnemonicPhraseAndKeypair,
 	mnemonicPhraseToKeypair,
 } from '@synonymdev/react-native-pubky';
-import { setKeychainValue, resetKeychainValue, getKeychainValue, getAllKeychainKeys } from './keychain';
+import {
+	setKeychainValue,
+	resetKeychainValue,
+	getKeychainValue,
+	getAllKeychainKeys,
+	setSessionSecret,
+	getSessionSecret,
+	resetSessionSecret,
+} from './keychain';
 import { Dispatch } from 'redux';
 import {
 	addProcessing,
@@ -25,13 +33,14 @@ import {
 	setSignedUp,
 } from '../store/slices/pubkysSlice';
 import { Result, err, ok } from '@synonymdev/result';
+import { v5 as uuid } from 'uuid';
 import { defaultProfile, defaultPubkyState } from '../store/shapes/pubky';
 import { checkNetworkConnection } from './helpers.ts';
 import { showToast } from '@synonymdev/react-native-toast';
 import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
-import { EBackupPreference, IKeychainData, TProfile } from '../types/pubky.ts';
+import { EBackupPreference, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
 import {
 	DEFAULT_HOMESERVER,
 	PRODUCTION_APP_HOST,
@@ -40,6 +49,37 @@ import {
 	STAGING_HOMESERVER,
 } from './constants.ts';
 import i18n from '../i18n';
+
+// Stable UUID v5 namespace for deriving local session ids from homeserver session secrets.
+const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
+
+const saveHomeserverSession = async ({
+	pubky,
+	sessionInfo,
+	dispatch,
+}: {
+	pubky: string;
+	sessionInfo: SessionInfo;
+	dispatch: Dispatch;
+}): Promise<Result<PubkySession>> => {
+	const session: PubkySession = {
+		id: uuid(sessionInfo.session_secret, SESSION_ID_NAMESPACE),
+		capabilities: sessionInfo.capabilities,
+		created_at: Date.now(),
+	};
+	const secretRes = await setSessionSecret({
+		pubky,
+		sessionId: session.id,
+		sessionSecret: sessionInfo.session_secret,
+	});
+
+	if (secretRes.isErr()) {
+		return err(secretRes.error);
+	}
+
+	dispatch(addSession({ pubky, session }));
+	return ok(session);
+};
 
 export const getSignupToken = ({
 	homeserver,
@@ -514,15 +554,10 @@ export const signUpToHomeserver = async ({
 		dispatch,
 	});
 	dispatch(setHomeserver({ pubky, homeserver }));
-	dispatch(
-		addSession({
-			pubky,
-			session: {
-				...signUpRes.value,
-				created_at: Date.now(),
-			},
-		}),
-	);
+	const saveSessionRes = await saveHomeserverSession({ pubky, sessionInfo: signUpRes.value, dispatch });
+	if (saveSessionRes.isErr()) {
+		return err(getErrorMessage(saveSessionRes.error, i18n.t('keychain.failedToSetValue')));
+	}
 	dispatch(setSignedUp({ pubky, signedUp: true }));
 	return ok(signUpRes.value);
 };
@@ -574,29 +609,24 @@ export const signInToHomeserver = async ({
 	} else {
 		response = signInRes.value;
 	}
-	dispatch(
-		addSession({
-			pubky,
-			session: {
-				...response,
-				created_at: Date.now(),
-			},
-		}),
-	);
+	const saveSessionRes = await saveHomeserverSession({ pubky, sessionInfo: response, dispatch });
+	if (saveSessionRes.isErr()) {
+		return err(getErrorMessage(saveSessionRes.error, i18n.t('keychain.failedToSetValue')));
+	}
 	dispatch(setSignedUp({ pubky, signedUp: true }));
 	return ok(response);
 };
 
 export const signOutOfHomeserver = async (
 	pubky: string,
-	sessionSecret: string,
+	sessionId: string,
 	dispatch: Dispatch,
 ): Promise<void> => {
-	const secretKeyRes = await getPubkySecretKey(pubky);
-	if (secretKeyRes.isErr()) {
+	const sessionSecretRes = await getSessionSecret({ pubky, sessionId });
+	if (sessionSecretRes.isErr()) {
 		return;
 	}
-	const signOutRes = await signOut(sessionSecret);
+	const signOutRes = await signOut(sessionSecretRes.value);
 	if (signOutRes.isErr()) {
 		showToast({
 			type: 'error',
@@ -605,8 +635,9 @@ export const signOutOfHomeserver = async (
 		});
 		return;
 	}
+	await resetSessionSecret({ pubky, sessionId });
 	dispatch(setSignedUp({ pubky, signedUp: false }));
-	dispatch(removeSession({ pubky, session_secret: sessionSecret }));
+	dispatch(removeSession({ pubky, sessionId }));
 };
 
 export const truncateStr = (str: string, displayLength: number = 5): string => {

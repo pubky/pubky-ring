@@ -18,6 +18,7 @@ import { initialState as pubkyInitialState } from './shapes/pubky';
 import settingsReducer from './slices/settingsSlice.ts';
 import uiReducer from './slices/uiSlice.ts';
 import migrations from './migrations';
+import { sanitizePubkySessions } from './transforms/pubkyPersistence';
 
 const rootReducer = combineReducers({
 	pubky: pubkyReducer,
@@ -29,13 +30,14 @@ type RootReducerState = ReturnType<typeof rootReducer>;
 type PubkySliceState = typeof pubkyInitialState;
 
 const pubkyTransform = createTransform<PubkySliceState, PubkySliceState>(
-	inboundState => inboundState,
-	outboundState => ({
-		...pubkyInitialState,
-		...outboundState,
-		deepLink: pubkyInitialState.deepLink,
-		processing: { ...pubkyInitialState.processing },
-	}),
+	inboundState => sanitizePubkySessions(inboundState),
+	outboundState =>
+		sanitizePubkySessions({
+			...pubkyInitialState,
+			...outboundState,
+			deepLink: pubkyInitialState.deepLink,
+			processing: { ...pubkyInitialState.processing },
+		}),
 	{ whitelist: ['pubky'] },
 );
 
@@ -44,7 +46,7 @@ const persistConfig: PersistConfig<RootReducerState> = {
 	storage: reduxStorage,
 	whitelist: ['pubky', 'settings'],
 	migrate: createMigrate(migrations),
-	version: 6,
+	version: 7,
 	transforms: [pubkyTransform],
 };
 

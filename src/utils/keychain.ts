@@ -2,6 +2,12 @@ import Keychain from 'react-native-keychain';
 import { err, ok, Result } from '@synonymdev/result';
 import i18n from '../i18n';
 
+const SESSION_SECRET_KEY_PREFIX = 'pubky-session';
+
+const getSessionSecretKey = ({ pubky, sessionId }: { pubky: string; sessionId: string }): string => {
+	return `${SESSION_SECRET_KEY_PREFIX}:${pubky}:${sessionId}`;
+};
+
 export const getKeychainValue = async ({ key }: { key: string }): Promise<Result<string>> => {
 	try {
 		const result = await Keychain.getGenericPassword({ service: key });
@@ -46,6 +52,45 @@ export const resetKeychainValue = async ({ key }: { key: string }): Promise<Resu
 		console.log(e);
 		return err(i18n.t('keychain.failedToResetValue'));
 	}
+};
+
+export const setSessionSecret = async ({
+	pubky,
+	sessionId,
+	sessionSecret,
+}: {
+	pubky: string;
+	sessionId: string;
+	sessionSecret: string;
+}): Promise<Result<string>> => {
+	return setKeychainValue({
+		key: getSessionSecretKey({ pubky, sessionId }),
+		value: sessionSecret,
+	});
+};
+
+export const getSessionSecret = async ({
+	pubky,
+	sessionId,
+}: {
+	pubky: string;
+	sessionId: string;
+}): Promise<Result<string>> => {
+	return getKeychainValue({
+		key: getSessionSecretKey({ pubky, sessionId }),
+	});
+};
+
+export const resetSessionSecret = async ({
+	pubky,
+	sessionId,
+}: {
+	pubky: string;
+	sessionId: string;
+}): Promise<Result<boolean>> => {
+	return resetKeychainValue({
+		key: getSessionSecretKey({ pubky, sessionId }),
+	});
 };
 
 /**

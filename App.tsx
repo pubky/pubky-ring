@@ -15,6 +15,7 @@ import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
+import { claimInitialUrl } from './src/utils/initialUrl.ts';
 import './src/theme/toast';
 
 function App(): React.JSX.Element {
@@ -31,8 +32,10 @@ function App(): React.JSX.Element {
 		// Handle deep link when app is opened from a background state
 		const getInitialURL = async (): Promise<void> => {
 			try {
-				let url = await Linking.getInitialURL();
-				if (url) {
+				const url = await Linking.getInitialURL();
+				// Android can hand back the intent that created the task, which may be a deeplink from
+				// an earlier run. Only ever act on a given initial URL once.
+				if (url && claimInitialUrl(url)) {
 					handleDeepLink(url);
 				}
 			} catch (err) {

@@ -1,6 +1,7 @@
 import 'react-native';
 import React, { ReactNode } from 'react';
-import { render, screen } from '@testing-library/react-native';
+import { Linking } from 'react-native';
+import { act, render, screen, waitFor } from '@testing-library/react-native';
 
 jest.mock('../src/navigation/RootNavigator.tsx', () => {
 	const ReactMock = require('react');
@@ -87,10 +88,51 @@ jest.mock('react-i18next', () => ({
 	}),
 }));
 
+// A single in-memory store shared by every createMMKV() caller, so the consumed initial URL
+// survives across renders the way it survives across process death on device.
+jest.mock('react-native-mmkv', () => {
+	const values: Record<string, string> = {};
+
+	return {
+		__esModule: true,
+		createMMKV: () => ({
+			getString: (key: string) => values[key],
+			set: (key: string, value: string) => {
+				values[key] = value;
+			},
+		}),
+	};
+});
+
 import App from '../App';
+import { parseInput } from '../src/utils/inputParser.ts';
+
+const mockedParseInput = parseInput as jest.Mock;
+
+const AUTH_URL = 'pubkyauth:///?caps=/pub/pubky.app:rw&relay=https://relay.example/link/&secret=abc';
 
 test('renders correctly', async () => {
 	render(<App />);
 
 	expect(screen.getByTestId('RootNavigator')).toBeTruthy();
+});
+
+test('routes an initial URL once, even if a later launch replays it', async () => {
+	const getInitialURL = jest.spyOn(Linking, 'getInitialURL').mockResolvedValue(AUTH_URL);
+	mockedParseInput.mockClear();
+
+	const first = render(<App />);
+	await waitFor(() => expect(mockedParseInput).toHaveBeenCalledWith(AUTH_URL, 'deeplink'));
+	first.unmount();
+
+	// Same URL again: a stale launch intent replayed by Android, not a new deeplink.
+	getInitialURL.mockClear();
+	const second = render(<App />);
+	await waitFor(() => expect(getInitialURL).toHaveBeenCalled());
+	await act(async () => {});
+	second.unmount();
+
+	expect(mockedParseInput).toHaveBeenCalledTimes(1);
+
+	getInitialURL.mockRestore();
 });

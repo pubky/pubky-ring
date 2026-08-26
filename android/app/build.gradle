@@ -107,6 +107,18 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 24
         versionName "1.17"
+
+        // splits.abi above only picks which ABIs are compiled from source and which
+        // per-ABI APKs are emitted; the universal APK packages every ABI still in the
+        // merged jniLibs dir, including x86/x86_64 libs that third-party AARs ship
+        // prebuilt. It then advertised ABIs it had none of our from-source libs for
+        // (libappmodules.so, libNitroMmkv.so, ...) and died on the first dlopen.
+        // packaging.jniLibs.excludes cannot do this job, because AGP resolves
+        // pickFirsts before excludes and the React Native plugin pick-firsts
+        // libreactnative.so, libhermesvm.so and friends for every ABI.
+        ndk {
+            abiFilters(*reactNativeArchitectures())
+        }
     }
 
     signingConfigs {

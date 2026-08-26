@@ -6,6 +6,7 @@ export interface Theme {
 		// Base colors
 		background: string;
 		foreground: string;
+		primary: string;
 		secondary: string;
 		primaryForeground: string;
 		secondaryForeground: string;
@@ -41,6 +42,7 @@ export const lightTheme: Theme = {
 		...accentColors,
 		background: '#fff',
 		foreground: '#333',
+		primary: '#babac1',
 		secondary: '#303034',
 		primaryForeground: '#1D1D20',
 		secondaryForeground: '#666',
@@ -59,6 +61,7 @@ export const darkTheme: Theme = {
 		...accentColors,
 		background: '#000',
 		foreground: '#fff',
+		primary: '#babac1',
 		secondary: '#303034',
 		primaryForeground: '#1D1D20',
 		secondaryForeground: '#D4D4DB',

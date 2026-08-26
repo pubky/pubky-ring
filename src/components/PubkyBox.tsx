@@ -12,6 +12,7 @@ import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
 import Card from './Card.tsx';
 import { shadows } from '../theme/shadows.ts';
+import { ThemedView } from '../theme/components.ts';
 
 interface PubkyInfoProps {
 	pubkyName: string;
@@ -53,9 +54,9 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 				)}
 
 				{sessionsCount > 0 && (
-					<View style={styles.sessionsButton}>
+					<ThemedView style={styles.sessionsButton} colorName="primary" pointerEvents="none">
 						<TextXsSb colorName="primaryForeground">{sessionsCount}</TextXsSb>
-					</View>
+					</ThemedView>
 				)}
 			</View>
 		</View>
@@ -187,14 +188,15 @@ const styles = StyleSheet.create({
 	},
 	sessionsButton: {
 		alignItems: 'center',
+		justifyContent: 'center',
 		height: 20,
-		width: 20,
-		borderRadius: '50%',
+		width: 24,
+		borderRadius: 10,
 		marginLeft: 8,
-		backgroundColor: 'rgba(255, 255, 255, 0.16)',
 	},
 	row: {
 		flexDirection: 'row',
+		alignItems: 'center',
 		flexWrap: 'nowrap',
 	},
 	backupContainer: {

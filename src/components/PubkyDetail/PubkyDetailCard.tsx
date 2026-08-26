@@ -95,7 +95,6 @@ export const PubkyDetailCard = memo(
 const styles = StyleSheet.create({
 	container: {
 		flex: 1,
-		marginHorizontal: 24,
 	},
 	actionButtonRow: {
 		flexDirection: 'row',

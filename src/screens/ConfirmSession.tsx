@@ -66,25 +66,25 @@ const ConfirmSession = ({
 	}, [closeSheet, dispatch, pubky, xCallback]);
 
 	return (
-		<SheetScreen id="auth" title={t('session.confirmTitle')} titleTestID="confirm-session-title">
+		<SheetScreen id="auth" title={t('confirmSession.confirmTitle')} titleTestID="confirm-session-title">
 			<PermissionCard style={styles.detailsCard}>
 				{xCallback?.xSource && (
 					<>
-						<TextXsM style={styles.sectionTitle}>{t('session.requestingApp')}</TextXsM>
+						<TextXsM style={styles.sectionTitle}>{t('confirmSession.requestingApp')}</TextXsM>
 						<TextBaseB style={styles.sourceText}>{xCallback.xSource}</TextBaseB>
 					</>
 				)}
-				<TextXsM style={styles.destinationTitle}>{t('session.callbackDestination')}</TextXsM>
+				<TextXsM style={styles.destinationTitle}>{t('confirmSession.callbackDestination')}</TextXsM>
 				<TextBaseM>{callbackTarget}</TextBaseM>
 			</PermissionCard>
 
 			<PermissionCard style={styles.detailsCard}>
-				<TextXsM style={styles.sectionTitle}>{t('session.sessionPermissions')}</TextXsM>
-				<TextBaseM>{t('session.rootSessionDescription')}</TextBaseM>
+				<TextXsM style={styles.sectionTitle}>{t('confirmSession.sessionPermissions')}</TextXsM>
+				<TextBaseM>{t('confirmSession.rootSessionDescription')}</TextBaseM>
 			</PermissionCard>
 
 			<TextSmM style={styles.warningText} colorName="mutedForeground">
-				{t('session.trustWarning')}
+				{t('confirmSession.trustWarning')}
 			</TextSmM>
 
 			<View style={styles.spacer} />
@@ -100,7 +100,7 @@ const ConfirmSession = ({
 					onPress={handleDeny}
 				/>
 				<Button
-					text={isApproving ? t('session.approving') : t('session.allow')}
+					text={isApproving ? t('confirmSession.approving') : t('confirmSession.allow')}
 					size="large"
 					variant="secondary"
 					testID="ConfirmSessionAllowButton"

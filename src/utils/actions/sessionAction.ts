@@ -18,11 +18,7 @@ import { InputAction, SessionParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { signInToHomeserver } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
-import {
-	hasValidSessionCallbacks,
-	openXSuccessWithParams,
-	openXError,
-} from '../xCallback';
+import { hasValidSessionCallbacks, openXSuccessWithParams, openXError } from '../xCallback';
 import i18n from '../../i18n';
 import { showSheet } from '../../sheets/sheetNavigation';
 
@@ -55,7 +51,7 @@ export const handleSessionAction = async (
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
-			description: i18n.t('session.invalidCallback'),
+			description: i18n.t('confirmSession.invalidCallback'),
 		});
 		return err('Invalid callback URL');
 	}
@@ -100,7 +96,7 @@ export const executeSessionAction = async (
 			const errorMessage = getErrorMessage(signInResult.error, i18n.t('errors.signInFailed'));
 			showToast({
 				type: 'error',
-				title: i18n.t('session.signInFailed'),
+				title: i18n.t('confirmSession.signInFailed'),
 				description: errorMessage,
 			});
 			await openXError(xCallback, 'SESSION_FAILED', errorMessage);
@@ -118,8 +114,8 @@ export const executeSessionAction = async (
 
 		showToast({
 			type: 'success',
-			title: i18n.t('session.success'),
-			description: i18n.t('session.sessionReturned'),
+			title: i18n.t('confirmSession.success'),
+			description: i18n.t('confirmSession.sessionReturned'),
 		});
 
 		return ok(pubky);

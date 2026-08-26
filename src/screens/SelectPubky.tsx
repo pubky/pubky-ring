@@ -109,7 +109,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 					showToast({
 						type: 'error',
 						title: t('common.error'),
-						description: t('session.invalidCallback'),
+						description: t('confirmSession.invalidCallback'),
 					});
 					return;
 				}

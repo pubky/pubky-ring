@@ -43,6 +43,7 @@ const PubkyItem = memo(
 			<PubkyBox
 				pubky={item.key}
 				pubkyData={item.value}
+				sessionsCount={item.value.sessions.length}
 				index={index}
 				onLongPress={drag}
 				disabled={isActive}

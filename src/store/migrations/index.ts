@@ -100,6 +100,37 @@ const migrations = {
 			},
 		};
 	},
+	// @ts-ignore
+	7: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			const pubky = updatedPubkys[pubkyKey];
+			updatedPubkys[pubkyKey] = {
+				...pubky,
+				sessions: (pubky.sessions ?? [])
+					// Legacy persisted sessions had bearer session_secret values but no local id.
+					// They cannot be matched to the new Keychain-backed secret entries, so drop them.
+					.filter(
+						(session: Record<string, unknown>) => typeof session.id === 'string' && session.id.length > 0,
+					)
+					// Persist only the non-secret metadata needed by the session list/details UI.
+					.map((session: Record<string, unknown>) => ({
+						id: session.id,
+						capabilities: session.capabilities,
+						created_at: session.created_at,
+					})),
+			};
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+			},
+		};
+	},
 };
 
 export default migrations;

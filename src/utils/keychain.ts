@@ -8,6 +8,8 @@ const getSessionSecretKey = ({ pubky, sessionId }: { pubky: string; sessionId: s
 	return `${SESSION_SECRET_KEY_PREFIX}:${pubky}:${sessionId}`;
 };
 
+const getSessionSecretKeyPrefix = (pubky: string): string => `${SESSION_SECRET_KEY_PREFIX}:${pubky}:`;
+
 export const getKeychainValue = async ({ key }: { key: string }): Promise<Result<string>> => {
 	try {
 		const result = await Keychain.getGenericPassword({ service: key });
@@ -91,6 +93,20 @@ export const resetSessionSecret = async ({
 	return resetKeychainValue({
 		key: getSessionSecretKey({ pubky, sessionId }),
 	});
+};
+
+export const resetPubkySessionSecrets = async ({ pubky }: { pubky: string }): Promise<Result<boolean>> => {
+	try {
+		const sessionSecretKeyPrefix = getSessionSecretKeyPrefix(pubky);
+		const allServices = await getAllKeychainKeys();
+		const sessionSecretKeys = allServices.filter(key => key.startsWith(sessionSecretKeyPrefix));
+		const results = await Promise.all(sessionSecretKeys.map(key => resetKeychainValue({ key })));
+		const error = results.find(result => result.isErr());
+
+		return error?.isErr() ? err(error.error) : ok(true);
+	} catch {
+		return err(i18n.t('keychain.failedToResetValue'));
+	}
 };
 
 /**

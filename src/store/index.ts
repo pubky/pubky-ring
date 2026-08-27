@@ -31,13 +31,12 @@ type PubkySliceState = typeof pubkyInitialState;
 
 const pubkyTransform = createTransform<PubkySliceState, PubkySliceState>(
 	inboundState => sanitizePubkySessions(inboundState),
-	outboundState =>
-		sanitizePubkySessions({
-			...pubkyInitialState,
-			...outboundState,
-			deepLink: pubkyInitialState.deepLink,
-			processing: { ...pubkyInitialState.processing },
-		}),
+	outboundState => ({
+		...pubkyInitialState,
+		...outboundState,
+		deepLink: pubkyInitialState.deepLink,
+		processing: { ...pubkyInitialState.processing },
+	}),
 	{ whitelist: ['pubky'] },
 );
 

@@ -1,5 +1,22 @@
 import { PersistedState } from 'redux-persist';
+import { signOut } from '@synonymdev/react-native-pubky';
 import { EBackupPreference, PubkySession } from '../../types/pubky';
+
+const revokeLegacySession = (session: Record<string, unknown>): void => {
+	if (typeof session.session_secret !== 'string' || session.session_secret.length === 0) {
+		return;
+	}
+
+	signOut(session.session_secret)
+		.then(result => {
+			if (result.isErr()) {
+				console.error('Failed to revoke legacy homeserver session', result.error.message);
+			}
+		})
+		.catch(error => {
+			console.error('Failed to revoke legacy homeserver session', error);
+		});
+};
 
 const migrations = {
 	// @ts-ignore
@@ -110,9 +127,16 @@ const migrations = {
 				...pubky,
 				sessions: (pubky.sessions ?? [])
 					// Legacy persisted sessions had bearer session_secret values but no local id.
-					// They cannot be matched to the new Keychain-backed secret entries, so drop them.
+					// Revoke them before dropping the local copy.
 					.filter(
-						(session: Record<string, unknown>) => typeof session.id === 'string' && session.id.length > 0,
+						(session: Record<string, unknown>) => {
+							if (typeof session.id !== 'string' || session.id.length === 0) {
+								revokeLegacySession(session);
+								return false;
+							}
+
+							return true;
+						},
 					)
 					// Persist only the non-secret metadata needed by the session list/details UI.
 					.map((session: Record<string, unknown>) => ({

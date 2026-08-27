@@ -19,6 +19,7 @@ import {
 	setSessionSecret,
 	getSessionSecret,
 	resetSessionSecret,
+	resetPubkySessionSecrets,
 } from './keychain';
 import { Dispatch } from 'redux';
 import {
@@ -53,6 +54,13 @@ import i18n from '../i18n';
 // Stable UUID v5 namespace for deriving local session ids from homeserver session secrets.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
 
+const revokeUnsavedHomeserverSession = async (sessionSecret: string): Promise<void> => {
+	const signOutRes = await signOut(sessionSecret);
+	if (signOutRes.isErr()) {
+		console.error('Failed to revoke unsaved homeserver session', signOutRes.error.message);
+	}
+};
+
 const saveHomeserverSession = async ({
 	pubky,
 	sessionInfo,
@@ -74,6 +82,7 @@ const saveHomeserverSession = async ({
 	});
 
 	if (secretRes.isErr()) {
+		await revokeUnsavedHomeserverSession(sessionInfo.session_secret);
 		return err(secretRes.error);
 	}
 
@@ -455,16 +464,21 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 	try {
 		dispatch(removePubky(pubky));
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		resetKeychainValue({ key: pubky }).then(response => {
-			if (response.isErr()) {
-				showToast({
-					type: 'error',
-					title: i18n.t('pubkyErrors.failedToDelete'),
-					description: response.error.message,
-				});
-				console.error('Failed to delete pubky from keychain');
-			}
-		});
+		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
+			.then(results => {
+				const error = results.find(result => result.isErr());
+				if (error?.isErr()) {
+					showToast({
+						type: 'error',
+						title: i18n.t('pubkyErrors.failedToDelete'),
+						description: error.error.message,
+					});
+					console.error('Failed to delete pubky data from keychain');
+				}
+			})
+			.catch(error => {
+				console.error('Failed to delete pubky data from keychain', error);
+			});
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);

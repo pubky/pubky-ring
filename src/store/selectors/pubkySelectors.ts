@@ -1,6 +1,7 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { Pubky, PubkySession } from '../../types/pubky';
+import { Homeserver, Pubky, PubkySession } from '../../types/pubky';
 import { RootState } from '../../types';
+import { defaultHomeserver } from '../shapes/pubky.ts';
 import { truncateStr } from '../../utils/pubky.ts';
 
 /**
@@ -16,6 +17,15 @@ export const getPubky = (state: RootState, pubky: string): Pubky => {
 };
 
 const selectAllPubkys = (state: RootState): { [key: string]: Pubky } => state.pubky.pubkys;
+const selectHomeservers = (state: RootState): { [key: string]: Homeserver } => state.pubky.homeservers || {};
+
+export const getHomeservers = createSelector([selectHomeservers], (homeservers): Homeserver[] => {
+	const customHomeservers = Object.values(homeservers).filter(
+		homeserver => homeserver.publicKey !== defaultHomeserver.publicKey,
+	);
+
+	return [defaultHomeserver, ...customHomeservers];
+});
 
 /**
  * Returns all signed up pubkys

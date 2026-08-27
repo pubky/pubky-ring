@@ -1,6 +1,6 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EBackupPreference, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
-import { initialState, defaultPubkyState } from '../shapes/pubky';
+import { EBackupPreference, Homeserver, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
+import { initialState, defaultHomeserver, defaultPubkyState } from '../shapes/pubky';
 
 const pubkysSlice = createSlice({
 	name: 'pubky',
@@ -56,6 +56,50 @@ const pubkysSlice = createSlice({
 				state.pubkys[pubky].homeserver = homeserver;
 			}
 		},
+		addHomeserver: (state, action: PayloadAction<Homeserver>) => {
+			const name = action.payload.name.trim();
+			const publicKey = action.payload.publicKey.trim();
+
+			if (!name || !publicKey || publicKey === defaultHomeserver.publicKey) {
+				return;
+			}
+
+			state.homeservers = state.homeservers || {};
+			if (!state.homeservers[publicKey]) {
+				state.homeservers[publicKey] = { name, publicKey };
+			}
+		},
+		updateHomeserver: (
+			state,
+			action: PayloadAction<{ originalPublicKey: string; homeserver: Homeserver }>,
+		) => {
+			const { originalPublicKey } = action.payload;
+			const name = action.payload.homeserver.name.trim();
+			const publicKey = action.payload.homeserver.publicKey.trim();
+
+			if (
+				!name ||
+				!publicKey ||
+				originalPublicKey === defaultHomeserver.publicKey ||
+				publicKey === defaultHomeserver.publicKey ||
+				!state.homeservers?.[originalPublicKey] ||
+				(publicKey !== originalPublicKey && state.homeservers[publicKey])
+			) {
+				return;
+			}
+
+			delete state.homeservers[originalPublicKey];
+			state.homeservers[publicKey] = { name, publicKey };
+		},
+		removeHomeserver: (state, action: PayloadAction<string>) => {
+			const publicKey = action.payload.trim();
+
+			if (!publicKey || publicKey === defaultHomeserver.publicKey) {
+				return;
+			}
+
+			delete state.homeservers?.[publicKey];
+		},
 		setSignedUp: (state, action: PayloadAction<{ pubky: string; signedUp: boolean }>) => {
 			const { pubky, signedUp } = action.payload;
 			if (state.pubkys[pubky]) {
@@ -110,6 +154,9 @@ export const {
 	setPubkyData,
 	setDeepLink,
 	setHomeserver,
+	addHomeserver,
+	updateHomeserver,
+	removeHomeserver,
 	setSignedUp,
 	addSession,
 	removeSession,

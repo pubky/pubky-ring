@@ -242,6 +242,25 @@
 		"unableToSignUp": "No es posible registrarse con el servidor doméstico. Por favor, actualice el servidor doméstico y/o el código de invitación e inténtelo de nuevo.",
 		"unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}"
 	},
+	"selectServer": {
+		"title": "Seleccionar homeserver",
+		"defaultName": "{{name}} (predeterminado)",
+		"migrationNotice": "Tenga en cuenta que sus datos existentes no migran automáticamente al cambiar de homeserver.",
+		"addButton": "Añadir homeserver"
+	},
+	"addServer": {
+		"title": "Añadir homeserver",
+		"label": "Etiqueta",
+		"labelPlaceholder": "Etiqueta para el homeserver",
+		"homeserverLabel": "Homeserver",
+		"homeserverPlaceholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"inviteCodeLabel": "Código de invitación",
+		"inviteCodePlaceholder": "XXXX-XXXX-XXXX",
+		"duplicateError": "Este homeserver ya se ha añadido."
+	},
+	"editServer": {
+		"title": "Editar servidor"
+	},
 	"scanInvite": {
 		"invalidInviteCode": "Código de invitación no válido",
 		"invalidInviteDescription": "Por favor, escanee un código de invitación válido o regístrese QR",

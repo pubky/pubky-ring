@@ -27,6 +27,10 @@ export type RootStackParamList = {
 		pubky: string;
 		index: number;
 	};
+	ActiveSession: {
+		pubky: string;
+		sessionId: string;
+	};
 	BackupSheet: BackupSheetParams;
 	AuthSheet: AuthSheetParams;
 	DeletePubkySheet: DeletePubkySheetParams;

@@ -1,6 +1,7 @@
 import React, { memo, ReactElement, useCallback } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import PubkyDetailCard from './PubkyDetailCard';
+import SessionList from './SessionList';
 import { PubkyData } from '../../navigation/types.ts';
 import { showBackupSheet } from '../../utils/sheetHelpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
@@ -24,12 +25,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 	}, [pubky, pubkyData.backupPreference]);
 
 	return (
-		<ScrollView
-			contentContainerStyle={styles.scrollContent}
-			showsVerticalScrollIndicator={true}
-			bounces={false}
-			nestedScrollEnabled={true}
-		>
+		<ScrollView contentContainerStyle={styles.scrollContent}>
 			<PubkyDetailCard
 				index={index}
 				pubky={pubky}
@@ -38,6 +34,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 				onDelete={handleDelete}
 				onBackup={handleBackup}
 			/>
+			<SessionList pubkyData={pubkyData} />
 		</ScrollView>
 	);
 };
@@ -45,6 +42,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 const styles = StyleSheet.create({
 	scrollContent: {
 		paddingTop: HEADER_HEIGHT + 24,
+		paddingHorizontal: 24,
 	},
 });
 

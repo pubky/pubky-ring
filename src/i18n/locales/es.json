@@ -156,7 +156,7 @@
 		"enterHomeserver": "Introducir servidor doméstico",
 		"homeserver": "Homeserver"
 	},
-	"session": {
+	"confirmSession": {
 		"success": "Sesión devuelta",
 		"sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
 		"signInFailed": "Fallo al iniciar sesión",
@@ -170,6 +170,21 @@
 		"trustWarning": "Permita esto solo si confía en la aplicación solicitante. El secreto de sesión puede acceder a los datos del homeserver de este pubky hasta que se cierre la sesión.",
 		"allow": "Permitir",
 		"approving": "Permitiendo..."
+	},
+	"activeSession": {
+		"activeSessions": "Sesiones activas",
+		"activeSession": "Sesión activa",
+		"sessionTitle": "Sesión {{fingerprint}}",
+		"sessionTitleFallback": "Sesión",
+		"noPermissions": "Sin permisos",
+		"rootHomeserverAccess": "Acceso raíz al homeserver",
+		"permissionCount_one": "{{count}} permiso",
+		"permissionCount_other": "{{count}} permisos",
+		"authorizedOn": "Autorizado el {{date}}",
+		"authorizedWithPubky": "Autorizado con Pubky",
+		"grantedPermissions": "Permisos concedidos",
+		"permissionActions": "Ver, editar, eliminar",
+		"removePermissions": "Eliminar permisos"
 	},
 	"errors": {
 		"failedToParseQR": "Fallo al analizar los datos del código QR",

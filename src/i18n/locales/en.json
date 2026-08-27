@@ -156,7 +156,7 @@
 		"enterHomeserver": "Enter homeserver",
 		"homeserver": "Homeserver"
 	},
-	"session": {
+	"confirmSession": {
 		"success": "Session Returned",
 		"sessionReturned": "Session data sent to requesting app",
 		"signInFailed": "Sign In Failed",
@@ -170,6 +170,21 @@
 		"trustWarning": "Only allow this if you trust the requesting app. The session secret can access this pubky's homeserver data until it is signed out.",
 		"allow": "Allow",
 		"approving": "Allowing..."
+	},
+	"activeSession": {
+		"activeSessions": "Active Sessions",
+		"activeSession": "Active Session",
+		"sessionTitle": "Session {{fingerprint}}",
+		"sessionTitleFallback": "Session",
+		"noPermissions": "No permissions",
+		"rootHomeserverAccess": "Root homeserver access",
+		"permissionCount_one": "{{count}} permission",
+		"permissionCount_other": "{{count}} permissions",
+		"authorizedOn": "Authorized on {{date}}",
+		"authorizedWithPubky": "Authorized with Pubky",
+		"grantedPermissions": "Granted Permissions",
+		"permissionActions": "View, Edit, Delete",
+		"removePermissions": "Remove permissions"
 	},
 	"errors": {
 		"failedToParseQR": "Failed to parse QR code data",

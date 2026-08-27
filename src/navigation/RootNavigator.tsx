@@ -6,6 +6,7 @@ import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
 import PubkyDetailScreen from '../screens/PubkyDetailScreen';
+import ActiveSessionScreen from '../screens/ActiveSessionScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import { useTheme } from 'styled-components';
 import { RootStackParamList } from './types';
@@ -102,6 +103,7 @@ const RootNavigator = (): ReactElement => {
 				<Stack.Screen name="Onboarding" component={OnboardingScreen} />
 				<Stack.Screen name="Home" component={HomeScreen} />
 				<Stack.Screen name="PubkyDetail" component={PubkyDetailScreen} />
+				<Stack.Screen name="ActiveSession" component={ActiveSessionScreen} />
 				<Stack.Screen name="About" component={About} />
 				<Stack.Screen name="Settings" component={SettingsScreen} />
 				<Stack.Screen name="AddPubkySheet" component={AddPubkySheet} options={sheetScreenOptions} />

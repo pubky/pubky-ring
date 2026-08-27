@@ -1,4 +1,4 @@
-import React, { ReactElement, useMemo } from 'react';
+import React, { ReactElement, useEffect, useMemo } from 'react';
 import { DefaultTheme, NavigationContainer, type Theme as NavigationTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import type { NativeStackNavigationOptions } from '@react-navigation/native-stack';
@@ -20,7 +20,11 @@ import TermsOfUse from '../screens/TermsOfUse.tsx';
 import About from '../screens/About.tsx';
 import { NAVIGATION_ANIMATION_DURATION } from '../utils/constants';
 import { useReducedMotion } from '../hooks/useReducedMotion.ts';
-import { flushPendingSheetNavigation, navigationRef } from '../sheets/sheetNavigation.tsx';
+import {
+	flushPendingSheetNavigation,
+	navigationRef,
+	resetSheetNavigationState,
+} from '../sheets/sheetNavigation.tsx';
 import { getSheetDetent } from '../sheets/sheetLayout.ts';
 import BackupSheet from '../sheets/BackupSheet.tsx';
 import AuthSheet from '../sheets/AuthSheet.tsx';
@@ -44,6 +48,12 @@ const RootNavigator = (): ReactElement => {
 	const theme = useTheme();
 
 	useDeepLinkHandler();
+	useEffect(
+		() => () => {
+			resetSheetNavigationState();
+		},
+		[],
+	);
 
 	const initialRoute = useMemo(() => {
 		return !signedTermsOfUse ? 'TermsOfUse' : showOnboarding ? 'Onboarding' : 'Home';

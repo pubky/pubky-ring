@@ -78,6 +78,7 @@ jest.mock('../src/utils/actions/sessionAction', () => ({
 jest.mock('../src/sheets/sheetNavigation', () => ({
 	__esModule: true,
 	showSheet: jest.fn(),
+	waitForPendingSheetNavigation: jest.fn(async () => {}),
 }));
 
 jest.mock('../src/store/slices/pubkysSlice', () => ({
@@ -231,23 +232,26 @@ describe('routeInput', () => {
 				message: 'router.sessionReturned',
 			},
 		},
-	])('routes $action input to the matching handler', async ({ data, handler, handlerValue, expectedValue }) => {
-		handler.mockResolvedValue(ok(handlerValue));
-		const parsed = parsedInput(data as ParsedInput['data'], 'deeplink');
+	])(
+		'routes $action input to the matching handler',
+		async ({ data, handler, handlerValue, expectedValue }) => {
+			handler.mockResolvedValue(ok(handlerValue));
+			const parsed = parsedInput(data as ParsedInput['data'], 'deeplink');
 
-		const result = await routeInput(parsed, { dispatch, pubky: 'pubky-selected' });
+			const result = await routeInput(parsed, { dispatch, pubky: 'pubky-selected' });
 
-		expect(result.isOk()).toBe(true);
-		if (result.isOk()) {
-			expect(result.value).toEqual(expectedValue);
-		}
-		expect(handler).toHaveBeenCalledWith(data, {
-			dispatch,
-			pubky: 'pubky-selected',
-			isDeeplink: true,
-			setAddPubkyScreen: expect.any(Function),
-		});
-	});
+			expect(result.isOk()).toBe(true);
+			if (result.isOk()) {
+				expect(result.value).toEqual(expectedValue);
+			}
+			expect(handler).toHaveBeenCalledWith(data, {
+				dispatch,
+				pubky: 'pubky-selected',
+				isDeeplink: true,
+				setAddPubkyScreen: expect.any(Function),
+			});
+		},
+	);
 
 	it('lets explicit context override the derived deeplink flag', async () => {
 		handleImportActionMock.mockResolvedValue(ok('pubky-imported'));
@@ -349,10 +353,7 @@ describe('routeInputWithContext', () => {
 
 		await routeInputWithContext(parsed, undefined, 'deeplink', dispatch);
 
-		expect(errorSpy).toHaveBeenCalledWith(
-			'Input routing error:',
-			expect.not.stringContaining(marker),
-		);
+		expect(errorSpy).toHaveBeenCalledWith('Input routing error:', expect.not.stringContaining(marker));
 		errorSpy.mockRestore();
 	});
 });

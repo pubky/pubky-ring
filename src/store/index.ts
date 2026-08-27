@@ -29,11 +29,16 @@ type RootReducerState = ReturnType<typeof rootReducer>;
 type PubkySliceState = typeof pubkyInitialState;
 
 const pubkyTransform = createTransform<PubkySliceState, PubkySliceState>(
-	inboundState => inboundState,
+	inboundState => ({
+		...inboundState,
+		deepLink: pubkyInitialState.deepLink,
+		deepLinkQueue: pubkyInitialState.deepLinkQueue,
+	}),
 	outboundState => ({
 		...pubkyInitialState,
 		...outboundState,
 		deepLink: pubkyInitialState.deepLink,
+		deepLinkQueue: pubkyInitialState.deepLinkQueue,
 		processing: { ...pubkyInitialState.processing },
 	}),
 	{ whitelist: ['pubky'] },

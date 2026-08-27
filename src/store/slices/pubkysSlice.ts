@@ -1,5 +1,5 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EBackupPreference, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
+import { createSlice, nanoid, PayloadAction } from '@reduxjs/toolkit';
+import { DeepLinkQueueItem, EBackupPreference, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
 import { initialState, defaultPubkyState } from '../shapes/pubky';
 
 const pubkysSlice = createSlice({
@@ -49,6 +49,15 @@ const pubkysSlice = createSlice({
 		},
 		setDeepLink: (state, action: PayloadAction<string>) => {
 			state.deepLink = action.payload;
+		},
+		queueDeepLink: {
+			reducer: (state, action: PayloadAction<DeepLinkQueueItem>) => {
+				state.deepLinkQueue.push(action.payload);
+			},
+			prepare: (deepLink: string) => ({ payload: { id: nanoid(), deepLink } }),
+		},
+		removeDeepLinkFromQueue: (state, action: PayloadAction<string>) => {
+			state.deepLinkQueue = state.deepLinkQueue.filter(item => item.id !== action.payload);
 		},
 		setHomeserver: (state, action: PayloadAction<{ pubky: string; homeserver: string }>) => {
 			const { pubky, homeserver } = action.payload;
@@ -109,6 +118,8 @@ export const {
 	setName,
 	setPubkyData,
 	setDeepLink,
+	queueDeepLink,
+	removeDeepLinkFromQueue,
 	setHomeserver,
 	setSignedUp,
 	addSession,

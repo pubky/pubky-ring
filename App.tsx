@@ -13,10 +13,12 @@ import { getIsOnline, getTheme } from './src/store/selectors/settingsSelectors.t
 import SafeAreaView from './src/components/SafeAreaView.tsx';
 import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection } from './src/utils/helpers.ts';
-import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
+import { queueDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
-import { claimInitialUrl } from './src/utils/initialUrl.ts';
+import { consumeInitialUrls, consumeUrlEvent, hasNativeInitialUrlInbox } from './src/utils/initialUrl.ts';
 import './src/theme/toast';
+
+let deepLinkDeliveryQueue: Promise<void> = Promise.resolve();
 
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
@@ -29,33 +31,75 @@ function App(): React.JSX.Element {
 
 	// Handle deep linking
 	useEffect(() => {
-		// Handle deep link when app is opened from a background state
-		const getInitialURL = async (): Promise<void> => {
-			try {
-				const url = await Linking.getInitialURL();
-				// The launch intent stays readable for the whole process, so route it once per launch
-				// rather than once per mount. Stale intents are dropped natively, before they get here.
-				if (url && claimInitialUrl(url)) {
-					handleDeepLink(url);
-				}
-			} catch (err) {
-				console.error('Error getting initial URL:', err);
-			}
-		};
+		const usesNativeInbox = hasNativeInitialUrlInbox();
+		let initialUrlPending = true;
+		const urlEventsReceivedWhileInitialPending = new Set<string>();
 
 		// Handle the deep link using the unified input parser
 		const handleDeepLink = async (url: string): Promise<void> => {
 			const parsedInput = await parseInput(url, 'deeplink');
-			dispatch(setDeepLink(JSON.stringify(parsedInput)));
+			dispatch(queueDeepLink(JSON.stringify(parsedInput)));
+		};
+
+		const handleDeepLinks = async (urls: string[]): Promise<void> => {
+			for (const url of urls) {
+				try {
+					await handleDeepLink(url);
+				} catch {
+					console.error('Error handling deep link');
+				}
+			}
+		};
+
+		const enqueueDeepLinkDelivery = (urlsPromise: Promise<string[]>, errorMessage: string): void => {
+			const settledUrls = urlsPromise.then(
+				urls => ({ urls }) as const,
+				error => ({ error }) as const,
+			);
+
+			deepLinkDeliveryQueue = deepLinkDeliveryQueue
+				.then(async () => {
+					const result = await settledUrls;
+					if ('error' in result) throw result.error;
+					await handleDeepLinks(result.urls);
+				})
+				.catch(() => console.error(errorMessage));
+		};
+
+		// Handle deep link when app is opened from a background state
+		const handleInitialUrls = (): void => {
+			const initialUrls = consumeInitialUrls().then(
+				urls => {
+					initialUrlPending = false;
+					const unhandledUrls = usesNativeInbox
+						? urls
+						: urls.filter(url => !urlEventsReceivedWhileInitialPending.has(url));
+					urlEventsReceivedWhileInitialPending.clear();
+					return unhandledUrls;
+				},
+				error => {
+					initialUrlPending = false;
+					urlEventsReceivedWhileInitialPending.clear();
+					throw error;
+				},
+			);
+			enqueueDeepLinkDelivery(initialUrls, 'Error getting initial URL:');
+		};
+
+		const handleUrlEvent = (url: string): void => {
+			enqueueDeepLinkDelivery(consumeUrlEvent(url), 'Error handling URL event:');
 		};
 
 		// Set up deep link listeners for when app is already running
 		const subscription = Linking.addEventListener('url', ({ url }) => {
-			handleDeepLink(url);
+			if (initialUrlPending && !usesNativeInbox) {
+				urlEventsReceivedWhileInitialPending.add(url);
+			}
+			handleUrlEvent(url);
 		});
 
 		// Check for initial URL on mount
-		getInitialURL();
+		handleInitialUrls();
 
 		// Cleanup subscription
 		return (): void => {

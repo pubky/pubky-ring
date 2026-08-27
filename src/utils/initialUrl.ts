@@ -1,29 +1,48 @@
+import { Linking, NativeModules } from 'react-native';
+
+type InitialUrlModule = {
+	consumePendingDeepLinks?: () => Promise<string[]>;
+};
+
+let fallbackInitialUrlConsumed = false;
+
+const getNativeInitialUrlModule = (): InitialUrlModule | undefined =>
+	NativeModules.InitialUrl as InitialUrlModule | undefined;
+
+export const hasNativeInitialUrlInbox = (): boolean =>
+	typeof getNativeInitialUrlModule()?.consumePendingDeepLinks === 'function';
+
 /**
- * Initial URL consumption guard.
- *
- * `Linking.getInitialURL()` reports the intent that launched the activity, and on Android that
- * intent outlives a single mount: it stays on the activity for the whole process. Claiming it here
- * keeps a remount of the root component from routing the same launch a second time.
- *
- * The guard is per process on purpose. A replayed launch intent and a genuinely new launch carry
- * the same URL - a user who fails a signup, kills the app and re-opens the same onboarding link is
- * indistinguishable from Android resuming a stale task - so nothing is remembered across launches.
- * Detecting a replay needs the intent flags only the platform sees, which is what MainActivity does.
+ * Returns the URLs that opened the current Activity. Android consumes an Activity-owned inbox so a
+ * root remount cannot replay a URL. Other platforms retain the standard Linking behavior.
  */
+export const consumeInitialUrls = async (): Promise<string[]> => {
+	const nativeModule = getNativeInitialUrlModule();
+	if (nativeModule?.consumePendingDeepLinks) {
+		return nativeModule.consumePendingDeepLinks();
+	}
 
-let claimedUrl: string | undefined;
+	if (fallbackInitialUrlConsumed) return [];
+	fallbackInitialUrlConsumed = true;
+
+	try {
+		const url = await Linking.getInitialURL();
+		return url ? [url] : [];
+	} catch (error) {
+		fallbackInitialUrlConsumed = false;
+		throw error;
+	}
+};
 
 /**
- * Claims an initial URL for handling. Returns false when this exact URL was already claimed earlier
- * in this process, which means it is the same launch intent being read again rather than a new one.
+ * Returns the URLs represented by a live Linking event. Android drains the native inbox that was
+ * filled before React Native emitted the event. Other platforms use the event URL directly.
  */
-export function claimInitialUrl(url: string): boolean {
-	if (claimedUrl === url) return false;
-	claimedUrl = url;
-	return true;
-}
+export const consumeUrlEvent = async (url: string): Promise<string[]> => {
+	const nativeModule = getNativeInitialUrlModule();
+	if (nativeModule?.consumePendingDeepLinks) {
+		return nativeModule.consumePendingDeepLinks();
+	}
 
-/** Test seam: forgets the claimed URL, standing in for a fresh process. */
-export function resetClaimedInitialUrl(): void {
-	claimedUrl = undefined;
-}
+	return [url];
+};

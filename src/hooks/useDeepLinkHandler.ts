@@ -7,8 +7,14 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllPubkys, getDeepLink, getSignedUpPubkys } from '../store/selectors/pubkySelectors';
-import { setDeepLink } from '../store/slices/pubkysSlice';
+import {
+	getAllPubkys,
+	getDeepLink,
+	getDeepLinkQueue,
+	getSignedUpPubkys,
+} from '../store/selectors/pubkySelectors';
+import { queueDeepLink, removeDeepLinkFromQueue, setDeepLink } from '../store/slices/pubkysSlice';
+import { isSheetNavigationResetError } from '../sheets/sheetNavigation.tsx';
 import { ParsedInput } from '../utils/inputParser';
 import { actionRequiresPubky } from '../utils/inputRouter';
 import {
@@ -17,33 +23,41 @@ import {
 	handleNoPubkysAvailable,
 } from '../utils/inputHandlerUtils';
 
+const scheduledDeepLinks = new Set<string>();
+
 /**
  * Hook for handling deeplinks using the unified input system
  *
  */
 export const useDeepLinkHandler = (): void => {
 	const dispatch = useDispatch();
-	const deepLink = useSelector(getDeepLink);
+	const legacyDeepLink = useSelector(getDeepLink);
+	const deepLinkQueue = useSelector(getDeepLinkQueue);
 	const signedUpPubkys = useSelector(getSignedUpPubkys);
 	const allPubkys = useSelector(getAllPubkys);
 
 	useEffect(() => {
-		if (!deepLink) return;
+		if (!legacyDeepLink) return;
+		dispatch(queueDeepLink(legacyDeepLink));
+		dispatch(setDeepLink(''));
+	}, [dispatch, legacyDeepLink]);
+
+	useEffect(() => {
+		const nextDeepLink = deepLinkQueue[0];
+		if (!nextDeepLink || scheduledDeepLinks.has(nextDeepLink.id)) return;
+		scheduledDeepLinks.add(nextDeepLink.id);
 
 		const processDeepLink = async (): Promise<void> => {
 			// Parse the stored deeplink (App.tsx stores ParsedInput as JSON)
 			let parsedInput: ParsedInput;
 			try {
-				parsedInput = JSON.parse(deepLink);
+				parsedInput = JSON.parse(nextDeepLink.deepLink);
 			} catch {
-				// If parsing fails, clear the deeplink and exit
-				dispatch(setDeepLink(''));
 				return;
 			}
 
 			// Validate it's a proper ParsedInput object (has action and data properties)
 			if (!parsedInput.action || !parsedInput.data) {
-				dispatch(setDeepLink(''));
 				return;
 			}
 
@@ -53,13 +67,12 @@ export const useDeepLinkHandler = (): void => {
 
 				if (signedUpPubkyKeys.length === 0) {
 					// No signed up pubkys - prompt user to set one up
-					dispatch(setDeepLink(''));
 					handleNoPubkysAvailable(allPubkys);
 					return;
 				}
 
 				if (signedUpPubkyKeys.length > 1) {
-					showAuthPubkySelection(parsedInput, 'deeplink');
+					await showAuthPubkySelection(parsedInput, 'deeplink');
 					return;
 				}
 
@@ -72,8 +85,16 @@ export const useDeepLinkHandler = (): void => {
 			await routeInputWithContext(parsedInput, undefined, 'deeplink', dispatch);
 		};
 
-		processDeepLink();
+		processDeepLink()
+			.catch(error => {
+				if (isSheetNavigationResetError(error)) return;
+				console.error('Error processing deep link');
+			})
+			.finally(() => {
+				scheduledDeepLinks.delete(nextDeepLink.id);
+				dispatch(removeDeepLinkFromQueue(nextDeepLink.id));
+			});
 		// Note: allPubkys is intentionally excluded to prevent re-triggering when new pubkys are created
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [deepLink, dispatch, signedUpPubkys]);
+	}, [deepLinkQueue, dispatch, signedUpPubkys]);
 };

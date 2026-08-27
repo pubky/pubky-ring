@@ -18,9 +18,15 @@ export interface Pubky {
 
 export type ISetPubkyData = Partial<Pubky>;
 
+export interface DeepLinkQueueItem {
+	id: string;
+	deepLink: string;
+}
+
 export interface PubkyState {
 	pubkys: TPubkys;
 	deepLink: string;
+	deepLinkQueue: DeepLinkQueueItem[];
 	processing: { [key: string]: boolean };
 }
 

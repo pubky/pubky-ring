@@ -92,8 +92,10 @@
 		"failed": "Import Failed",
 		"invalidRecoveryPhrase": "Invalid recovery phrase",
 		"pubkyImportedSuccessfully": "Pubky imported successfully",
-		"invalidData": "Invalid Data",
-		"invalidClipboardData": "Clipboard does not contain a valid recovery phrase or secret key",
+		"invalid": {
+			"title": "Invalid Data",
+			"description": "This does not contain a valid recovery phrase or secret key"
+		},
 		"importButton": "Import",
 		"pubkyImported": "Pubky Imported",
 		"pubkyReImported": "Pubky Re-Imported",
@@ -335,8 +337,15 @@
 	},
 	"migrate": {
 		"scanning": "Scanning for Keys",
+		"invalid": {
+			"title": "Invalid Migration Data",
+			"description": "This does not contain valid migration data. Scan or paste migration data generated from Settings > Show QR."
+		},
 		"successTitle": "Migration Complete",
 		"partialTitle": "Partial Migration Complete",
+		"importSuccess_one": "You successfully imported {{count}} key pair.",
+		"importSuccess_other": "You successfully imported {{count}} key pairs.",
+		"importPartialSuccess": "You successfully imported {{imported}} of {{total}} key pairs.",
 		"successMessage": "Successfully imported {{imported}} of {{total}} keys",
 		"partialSuccess": "Imported {{imported}} keys, {{failed}} failed",
 		"allFailed": "All keys failed to import"

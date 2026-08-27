@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect } from 'react';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { StackActions } from '@react-navigation/native';
 import { useDispatch } from 'react-redux';
@@ -10,6 +10,7 @@ import { readFromClipboard } from '../utils/clipboard';
 import { parseInput, InputAction } from '../utils/inputParser';
 import { routeInput } from '../utils/inputRouter';
 import type { AddPubkySheetScreenParams, AddPubkyStackParamList } from '../sheets/types.ts';
+import { handleMigrationScannerClose, resetMigrateAccumulator } from '../utils/actions/migrateAction.ts';
 
 const SHEET_ID = 'add-pubky';
 
@@ -21,6 +22,18 @@ const AddPubkyScanner = ({
 	const dispatch = useDispatch();
 	const { mode } = route.params;
 	const title = mode === 'import' ? t('import.title') : t('home.scanQR');
+
+	useEffect(() => {
+		if (mode !== 'import') {
+			return;
+		}
+
+		resetMigrateAccumulator();
+
+		return (): void => {
+			handleMigrationScannerClose();
+		};
+	}, [mode]);
 
 	const replaceRoute = useCallback(
 		(nextRoute: AddPubkySheetScreenParams): void => {
@@ -39,7 +52,7 @@ const AddPubkyScanner = ({
 				);
 			}
 
-			return action === InputAction.Import;
+			return action === InputAction.Import || action === InputAction.Migrate;
 		},
 		[mode],
 	);
@@ -56,8 +69,8 @@ const AddPubkyScanner = ({
 
 		showToast({
 			type: 'error',
-			title: t('import.invalidData'),
-			description: t('import.invalidClipboardData'),
+			title: t('import.invalid.title'),
+			description: t('import.invalid.description'),
 		});
 	}, [mode, t]);
 

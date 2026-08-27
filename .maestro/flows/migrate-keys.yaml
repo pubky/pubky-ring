@@ -14,7 +14,14 @@ name: migrate-keys
       URL: "pubkyring://migrate?index=1&total=2&key=legal%20winner%20thank%20year%20wave%20sausage%20worth%20useful%20legal%20winner%20thank%20yellow"
 - extendedWaitUntil:
     visible:
-      id: PubkyBox--0
+      id: import-success-title
     timeout: 120000
+- assertVisible: "You successfully imported 2 key pairs."
+- tapOn:
+    id: ImportSuccessButton
+- extendedWaitUntil:
+    visible:
+      id: PubkyBox--0
+    timeout: 30000
 - assertVisible:
     id: PubkyBox--1

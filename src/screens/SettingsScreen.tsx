@@ -20,7 +20,6 @@ import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
-import { setOnMigrationComplete } from '../utils/actions/migrateAction.ts';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
 
@@ -91,17 +90,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	}, [dispatch, enableAutoAuth]);
 
 	const handleScanQRPress = useCallback(() => {
-		// Reset to Home when migration completes (prevents swipe-back to Settings)
-		setOnMigrationComplete(() => {
-			navigation.reset({
-				index: 0,
-				routes: [{ name: 'Home' }],
-			});
-			setOnMigrationComplete(null); // Clean up
-		});
-
 		showSheet('migrate', { screen: 'Scanner' });
-	}, [navigation]);
+	}, []);
 
 	return (
 		<SafeAreaView style={styles.container} edges={['bottom']}>

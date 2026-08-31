@@ -89,7 +89,12 @@ const ConfirmSession = ({
 	}, [closeSheet, dispatch, pubky, xCallback]);
 
 	return (
-		<SheetScreen id="auth" title={t('session.confirmTitle')} titleTestID="confirm-session-title">
+		<SheetScreen
+			id="auth"
+			title={t('session.confirmTitle')}
+			titleTestID="confirm-session-title"
+			preventBackNavigation={isApproving}
+		>
 			<PermissionCard style={styles.detailsCard}>
 				{xCallback?.xSource && (
 					<>

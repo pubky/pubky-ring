@@ -8,6 +8,7 @@ import pubkyReducer, { queueDeepLink } from '../src/store/slices/pubkysSlice';
 const mockRouteInputWithContext = jest.fn();
 const mockActionRequiresPubky = jest.fn<boolean, [unknown]>(() => false);
 const mockShowAuthPubkySelection = jest.fn<Promise<void>, []>();
+const mockWaitForPendingSheetNavigation = jest.fn<Promise<void>, []>();
 const mockSignedUpPubkys = { first: {}, second: {} };
 
 jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
@@ -15,6 +16,7 @@ jest.mock('react-redux', () => jest.requireActual('../node_modules/react-redux/d
 jest.mock('../src/sheets/sheetNavigation', () => ({
 	isSheetNavigationResetError: (error: unknown) =>
 		error instanceof Error && error.name === 'SheetNavigationResetError',
+	waitForPendingSheetNavigation: () => mockWaitForPendingSheetNavigation(),
 }));
 
 jest.mock('../src/store/selectors/pubkySelectors', () => ({
@@ -45,6 +47,35 @@ beforeEach(() => {
 	mockActionRequiresPubky.mockReset().mockReturnValue(false);
 	mockRouteInputWithContext.mockReset().mockResolvedValue(undefined);
 	mockShowAuthPubkySelection.mockReset().mockResolvedValue(undefined);
+	mockWaitForPendingSheetNavigation.mockReset().mockResolvedValue(undefined);
+});
+
+test('waits for an existing sheet flow before routing the first queued delivery', async () => {
+	let closeExistingSheet: () => void = () => {};
+	mockWaitForPendingSheetNavigation.mockImplementationOnce(
+		() =>
+			new Promise<void>(resolve => {
+				closeExistingSheet = resolve;
+			}),
+	);
+
+	const store = configureStore({ reducer: { pubky: pubkyReducer } });
+	const root = render(
+		<Provider store={store}>
+			<HookHarness />
+		</Provider>,
+	);
+
+	act(() => {
+		store.dispatch(queueDeepLink(DEEP_LINK));
+	});
+	await waitFor(() => expect(mockWaitForPendingSheetNavigation).toHaveBeenCalledTimes(1));
+	expect(mockRouteInputWithContext).not.toHaveBeenCalled();
+
+	await act(async () => closeExistingSheet());
+	await waitFor(() => expect(mockRouteInputWithContext).toHaveBeenCalledTimes(1));
+	await waitFor(() => expect(store.getState().pubky.deepLinkQueue).toEqual([]));
+	root.unmount();
 });
 
 test('routes repeated queued deliveries in order across a root remount', async () => {

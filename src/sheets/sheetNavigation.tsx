@@ -234,6 +234,41 @@ export const hideSheet = (id: SheetId): void => {
 	closeRootSheetRoute(sheetRouteById[id]);
 };
 
+const resetRootRoutes = (
+	routes: Array<{
+		name: keyof RootStackParamList;
+		params?: RootStackParamList[keyof RootStackParamList];
+	}>,
+): void => {
+	if (!navigationRef.isReady()) {
+		return;
+	}
+
+	navigationRef.dispatch(
+		CommonActions.reset({
+			index: routes.length - 1,
+			routes,
+		}),
+	);
+};
+
+export const resetRootToHome = (): void => {
+	resetRootRoutes([{ name: 'Home' }]);
+};
+
+export const resetRootToHomeWithSheet = <TSheetId extends SheetId>(
+	...args: ShowSheetArgs<TSheetId>
+): void => {
+	const [id, params] = args;
+	resetRootRoutes([
+		{ name: 'Home' },
+		{
+			name: sheetRouteById[id],
+			params,
+		},
+	]);
+};
+
 const sheetRouteNameSet = new Set<string>(Object.values(sheetRouteById));
 
 /** Closes whichever sheet is currently on top of the root stack, if any. */

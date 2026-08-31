@@ -14,7 +14,7 @@ import {
 	getSignedUpPubkys,
 } from '../store/selectors/pubkySelectors';
 import { queueDeepLink, removeDeepLinkFromQueue, setDeepLink } from '../store/slices/pubkysSlice';
-import { isSheetNavigationResetError } from '../sheets/sheetNavigation.tsx';
+import { isSheetNavigationResetError, waitForPendingSheetNavigation } from '../sheets/sheetNavigation.tsx';
 import { ParsedInput } from '../utils/inputParser';
 import { actionRequiresPubky } from '../utils/inputRouter';
 import {
@@ -48,6 +48,8 @@ export const useDeepLinkHandler = (): void => {
 		scheduledDeepLinks.add(nextDeepLink.id);
 
 		const processDeepLink = async (): Promise<void> => {
+			await waitForPendingSheetNavigation();
+
 			// Parse the stored deeplink (App.tsx stores ParsedInput as JSON)
 			let parsedInput: ParsedInput;
 			try {

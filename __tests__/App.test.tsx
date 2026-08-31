@@ -56,13 +56,11 @@ jest.mock('../src/utils/inputParser.ts', () => ({
 
 const mockConsumeInitialUrls = jest.fn<Promise<string[]>, []>();
 const mockConsumeUrlEvent = jest.fn<Promise<string[]>, [string]>();
-const mockHasNativeInitialUrlInbox = jest.fn<boolean, []>();
 
 jest.mock('../src/utils/initialUrl.ts', () => ({
 	__esModule: true,
 	consumeInitialUrls: () => mockConsumeInitialUrls(),
 	consumeUrlEvent: (url: string) => mockConsumeUrlEvent(url),
-	hasNativeInitialUrlInbox: () => mockHasNativeInitialUrlInbox(),
 }));
 
 jest.mock('@react-native-community/netinfo', () => ({
@@ -115,7 +113,6 @@ beforeEach(() => {
 	mockDispatch.mockClear();
 	mockConsumeInitialUrls.mockReset().mockResolvedValue([]);
 	mockConsumeUrlEvent.mockReset().mockImplementation(async url => [url]);
-	mockHasNativeInitialUrlInbox.mockReset().mockReturnValue(true);
 	mockRemoveUrlListener.mockClear();
 	mockUrlListener = undefined;
 
@@ -267,9 +264,8 @@ test('does not duplicate a native live URL while the initial inbox drain is pend
 	expect(mockedParseInput).toHaveBeenCalledTimes(1);
 });
 
-test('prefers a fallback live event over the same pending initial URL', async () => {
+test('routes identical initial and live deliveries while the initial lookup is pending', async () => {
 	let resolveInitialUrls: (urls: string[]) => void = () => {};
-	mockHasNativeInitialUrlInbox.mockReturnValue(false);
 	mockConsumeInitialUrls.mockReturnValue(
 		new Promise(resolve => {
 			resolveInitialUrls = resolve;
@@ -283,15 +279,15 @@ test('prefers a fallback live event over the same pending initial URL', async ()
 	expect(mockedParseInput).not.toHaveBeenCalled();
 
 	await act(async () => resolveInitialUrls([AUTH_URL]));
-	await waitFor(() => expect(mockedParseInput).toHaveBeenCalledTimes(1));
+	await waitFor(() => expect(mockedParseInput).toHaveBeenCalledTimes(2));
 	view.unmount();
 
-	expect(mockedParseInput).toHaveBeenCalledTimes(1);
+	expect(mockedParseInput.mock.calls.map(([url]) => url)).toEqual([AUTH_URL, AUTH_URL]);
+	expect(mockDispatch).toHaveBeenCalledTimes(2);
 });
 
 test('routes a pending initial URL before a different fallback live event', async () => {
 	let resolveInitialUrls: (urls: string[]) => void = () => {};
-	mockHasNativeInitialUrlInbox.mockReturnValue(false);
 	mockConsumeInitialUrls.mockReturnValue(
 		new Promise(resolve => {
 			resolveInitialUrls = resolve;

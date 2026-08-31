@@ -67,6 +67,14 @@ export interface EditPubkySheetParams {
 export type AddPubkyImportSuccessParams = {
 	pubky: string;
 	isNewPubky: boolean;
+	isMigration?: false;
+};
+
+export type AddPubkyMigrationSuccessParams = {
+	isMigration: true;
+	pubkys: string[];
+	totalCount: number;
+	failedCount?: number;
 };
 
 export type AddPubkyScannerParams = {
@@ -83,7 +91,7 @@ export type AddPubkyStackParamList = {
 	ImportOptions: undefined;
 	ImportFileScreen: ImportFileScreenParams;
 	ImportMnemonic: undefined;
-	ImportSuccess: AddPubkyImportSuccessParams;
+	ImportSuccess: AddPubkyImportSuccessParams | AddPubkyMigrationSuccessParams;
 };
 
 export type AddPubkySheetScreenParams = {

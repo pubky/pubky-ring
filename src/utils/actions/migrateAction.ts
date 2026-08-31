@@ -9,13 +9,11 @@
 import { Result, ok, err } from '@synonymdev/result';
 import { mnemonicPhraseToKeypair } from '@synonymdev/react-native-pubky';
 import { showToast } from '@synonymdev/react-native-toast';
-import { hideSheet, showSheet } from '../../sheets/sheetNavigation.tsx';
+import { hideActiveSheet, showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, MigrateParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { importPubky } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
-import { getPubkyKeys } from '../../store/selectors/pubkySelectors';
-import { getStore } from '../store-helpers';
 import i18n from '../../i18n';
 
 type MigrateActionData = {
@@ -42,8 +40,8 @@ let importedIndices: Set<number> = new Set();
 let expectedTotal: number | null = null;
 let successfulImports = 0;
 let failedImports = 0;
+let importedPubkys: string[] = [];
 let migrationCancelled = false;
-let onMigrationCompleteCallback: (() => void) | null = null;
 
 // Store import promises for parallel processing
 let importPromises: Map<number, Promise<Result<string>>> = new Map();
@@ -87,11 +85,13 @@ const notifyProgressListeners = (): void => {
 	progressListeners.forEach(listener => listener(progress));
 };
 
-/**
- * Sets a callback to be called when migration completes (all frames imported)
- */
-export const setOnMigrationComplete = (callback: (() => void) | null): void => {
-	onMigrationCompleteCallback = callback;
+const closeMigrationScannerAndShowSuccess = (
+	pubkys: string[],
+	totalCount: number,
+	successCount: number,
+): void => {
+	hideActiveSheet();
+	showMigrationSuccess(pubkys, totalCount, successCount);
 };
 
 /**
@@ -102,6 +102,7 @@ export const resetMigrateAccumulator = (): void => {
 	expectedTotal = null;
 	successfulImports = 0;
 	failedImports = 0;
+	importedPubkys = [];
 	migrationCancelled = false;
 	importPromises = new Map();
 	notifyProgressListeners();
@@ -134,20 +135,12 @@ const completeMigration = (): void => {
 	// Capture counts before resetting
 	const finalSuccessCount = successfulImports;
 	const finalTotalCount = importedIndices.size;
+	const finalImportedPubkys = importedPubkys.filter(Boolean);
 
 	// Reset state immediately
 	resetMigrateAccumulator();
 
-	// Close camera now that all keys are imported
-	hideSheet('migrate');
-
-	// Show completion summary with captured values
-	showMigrationSummary(finalSuccessCount, finalTotalCount);
-
-	// Notify and clear completion callback to prevent stale callbacks on consecutive migrations
-	const callback = onMigrationCompleteCallback;
-	onMigrationCompleteCallback = null;
-	callback?.();
+	closeMigrationScannerAndShowSuccess(finalImportedPubkys, finalTotalCount, finalSuccessCount);
 };
 
 /**
@@ -173,7 +166,6 @@ export const handleMigrateAction = async (
 	try {
 		// Single key migration - import and show success UI
 		if (total === 1) {
-			hideSheet('migrate');
 			return await importSingleKey(key, dispatch);
 		}
 
@@ -209,6 +201,7 @@ export const handleMigrateAction = async (
 			// Update progress when this individual import completes
 			if (result.isOk()) {
 				successfulImports++;
+				importedPubkys[index] = result.value;
 			} else {
 				failedImports++;
 			}
@@ -246,7 +239,6 @@ export const handleMigrateAction = async (
  * Imports a single key (for single-key migrations)
  */
 const importSingleKey = async (key: string, dispatch: ActionContext['dispatch']): Promise<Result<string>> => {
-	const currentPubkys = getPubkyKeys(getStore());
 	const { secretKey, mnemonic } = await parseKeyInput(key);
 
 	const importRes = await importPubky({
@@ -266,12 +258,8 @@ const importSingleKey = async (key: string, dispatch: ActionContext['dispatch'])
 	}
 
 	const importedPubky = importRes.value;
-	const isNewPubky = !currentPubkys.includes(importedPubky);
 
-	showSheet('add-pubky', {
-		screen: 'ImportSuccess',
-		params: { pubky: importedPubky, isNewPubky },
-	});
+	closeMigrationScannerAndShowSuccess([importedPubky], 1, 1);
 
 	return ok(importedPubky);
 };
@@ -347,4 +335,25 @@ const showMigrationSummary = (successCount: number, totalCount: number, isPartia
 			description: i18n.t('migrate.allFailed'),
 		});
 	}
+};
+
+const showMigrationSuccess = (
+	pubkys: string[],
+	totalCount: number,
+	successCount: number,
+): void => {
+	if (pubkys.length === 0) {
+		showMigrationSummary(successCount, totalCount);
+		return;
+	}
+
+	showSheet('add-pubky', {
+		screen: 'ImportSuccess',
+		params: {
+			isMigration: true,
+			pubkys,
+			totalCount,
+			failedCount: Math.max(totalCount - pubkys.length, 0),
+		},
+	});
 };

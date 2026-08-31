@@ -215,6 +215,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			titleTestID="confirm-auth-title"
 			showBottomSafeAreaInset={false}
 			headerRight={headerProgress}
+			preventBackNavigation={authorizing || isAuthorized}
 		>
 			<PermissionCard style={styles.permissionsCard}>
 				<TextXsM

@@ -15,7 +15,7 @@ import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection } from './src/utils/helpers.ts';
 import { queueDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
-import { consumeInitialUrls, consumeUrlEvent, hasNativeInitialUrlInbox } from './src/utils/initialUrl.ts';
+import { consumeInitialUrls, consumeUrlEvent } from './src/utils/initialUrl.ts';
 import './src/theme/toast';
 
 let deepLinkDeliveryQueue: Promise<void> = Promise.resolve();
@@ -31,10 +31,6 @@ function App(): React.JSX.Element {
 
 	// Handle deep linking
 	useEffect(() => {
-		const usesNativeInbox = hasNativeInitialUrlInbox();
-		let initialUrlPending = true;
-		const urlEventsReceivedWhileInitialPending = new Set<string>();
-
 		// Handle the deep link using the unified input parser
 		const handleDeepLink = async (url: string): Promise<void> => {
 			const parsedInput = await parseInput(url, 'deeplink');
@@ -68,22 +64,7 @@ function App(): React.JSX.Element {
 
 		// Handle deep link when app is opened from a background state
 		const handleInitialUrls = (): void => {
-			const initialUrls = consumeInitialUrls().then(
-				urls => {
-					initialUrlPending = false;
-					const unhandledUrls = usesNativeInbox
-						? urls
-						: urls.filter(url => !urlEventsReceivedWhileInitialPending.has(url));
-					urlEventsReceivedWhileInitialPending.clear();
-					return unhandledUrls;
-				},
-				error => {
-					initialUrlPending = false;
-					urlEventsReceivedWhileInitialPending.clear();
-					throw error;
-				},
-			);
-			enqueueDeepLinkDelivery(initialUrls, 'Error getting initial URL:');
+			enqueueDeepLinkDelivery(consumeInitialUrls(), 'Error getting initial URL:');
 		};
 
 		const handleUrlEvent = (url: string): void => {
@@ -92,9 +73,6 @@ function App(): React.JSX.Element {
 
 		// Set up deep link listeners for when app is already running
 		const subscription = Linking.addEventListener('url', ({ url }) => {
-			if (initialUrlPending && !usesNativeInbox) {
-				urlEventsReceivedWhileInitialPending.add(url);
-			}
 			handleUrlEvent(url);
 		});
 

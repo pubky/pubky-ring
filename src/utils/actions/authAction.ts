@@ -6,7 +6,8 @@
  */
 
 import { Result, ok, err } from '@synonymdev/result';
-import { parseAuthUrl } from '@synonymdev/react-native-pubky';
+import { parseDeepLink } from '@synonymdev/react-native-pubky';
+import type { PubkyAuthDetails, PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
@@ -24,6 +25,14 @@ export type AuthActionData = {
 	rawUrl: string;
 };
 
+const isAuthKind = (kind: PubkyDeepLinkDetails['kind']): kind is NonNullable<AuthParams['kind']> => {
+	return kind === 'signin' || kind === 'signup' || kind === 'signin_grant' || kind === 'signup_grant';
+};
+
+const isAuthDetails = (details: PubkyDeepLinkDetails): details is PubkyDeepLinkDetails & PubkyAuthDetails => {
+	return isAuthKind(details.kind) && Boolean(details.relay && details.secret);
+};
+
 export const createConfirmAuthPayload = async ({
 	data,
 	pubky,
@@ -31,17 +40,25 @@ export const createConfirmAuthPayload = async ({
 	data: AuthActionData;
 	pubky: string;
 }): Promise<Result<ConfirmAuthPayload>> => {
-	const authResult = await parseAuthUrl(data.rawUrl);
+	const authResult = await parseDeepLink(data.rawUrl);
 
 	if (authResult.isErr()) {
 		const description = authResult.error?.message ?? i18n.t('errors.failedToParseAuth');
 		return err(description);
 	}
 
+	const authDetails = authResult.value;
+	if (!isAuthDetails(authDetails)) {
+		return err(i18n.t('errors.failedToParseAuth'));
+	}
+
 	return ok({
 		pubky,
 		authUrl: data.rawUrl,
-		authDetails: authResult.value,
+		authDetails: {
+			...authDetails,
+			capabilities: authDetails.capabilities ?? [],
+		},
 		xCallback: data.params.xCallback,
 	});
 };

@@ -2,19 +2,11 @@ import { InputAction, parseInput } from '../src/utils/inputParser';
 import { EBackupPreference } from '../src/types/pubky';
 import { ok, err } from '@synonymdev/result';
 import * as Pubky from '@synonymdev/react-native-pubky';
+import type { PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 
-jest.mock('@synonymdev/react-native-pubky', () => {
-	const { err: resultErr } = require('@synonymdev/result');
+jest.mock('@synonymdev/react-native-pubky');
 
-	return {
-		__esModule: true,
-		parseAuthUrl: jest.fn(async () => resultErr('not an auth url')),
-		mnemonicPhraseToKeypair: jest.fn(async () => resultErr('not a mnemonic')),
-		getPublicKeyFromSecretKey: jest.fn(async () => resultErr('not a secret key')),
-	};
-});
-
-const parseAuthUrlMock = Pubky.parseAuthUrl as jest.MockedFunction<typeof Pubky.parseAuthUrl>;
+const parseDeepLinkMock = Pubky.parseDeepLink as jest.MockedFunction<typeof Pubky.parseDeepLink>;
 const mnemonicPhraseToKeypairMock = Pubky.mnemonicPhraseToKeypair as jest.MockedFunction<
 	typeof Pubky.mnemonicPhraseToKeypair
 >;
@@ -22,10 +14,14 @@ const getPublicKeyFromSecretKeyMock = Pubky.getPublicKeyFromSecretKey as jest.Mo
 	typeof Pubky.getPublicKeyFromSecretKey
 >;
 const homeserverPubkey = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
+const mockDeepLink = (details: PubkyDeepLinkDetails): void => {
+	parseDeepLinkMock.mockResolvedValue(ok(details));
+};
 
 describe('parseInput', () => {
 	beforeEach(() => {
-		parseAuthUrlMock.mockResolvedValue(err('not an auth url'));
+		jest.clearAllMocks();
+		parseDeepLinkMock.mockResolvedValue(err('not a deeplink'));
 		mnemonicPhraseToKeypairMock.mockResolvedValue(err('not a mnemonic'));
 		getPublicKeyFromSecretKeyMock.mockResolvedValue(err('not a secret key'));
 	});
@@ -73,6 +69,9 @@ describe('parseInput', () => {
 				},
 			},
 		});
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(
+			'https://example.com/invite/ABCD-1234-WXYZ?x-success=pubky://invite/accepted?token=abc&next=home',
+		);
 	});
 
 	it('parses standalone invite codes', async () => {
@@ -89,6 +88,7 @@ describe('parseInput', () => {
 			source: 'clipboard',
 			rawInput: 'ABCD-1234-WXYZ',
 		});
+		expect(parseDeepLinkMock).toHaveBeenCalledWith('ABCD-1234-WXYZ');
 	});
 
 	it('parses pubkyring invite deeplinks', async () => {
@@ -106,6 +106,7 @@ describe('parseInput', () => {
 			source: 'clipboard',
 			rawInput,
 		});
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(rawInput);
 	});
 
 	it('parses migration deeplinks before stripping protocols', async () => {
@@ -137,9 +138,25 @@ describe('parseInput', () => {
 			'&caps=pubky.app:read,pubky.app:write' +
 			`&x-success=${encodeURIComponent(xSuccess)}` +
 			'&x-source=Bitkit';
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'signup',
+			url: rawInput.replace('pubkyring://', 'pubkyauth://'),
+			homeserver: homeserverPubkey,
+			signup_token: 'ABCD-1234-WXYZ',
+			relay: 'wss://relay.example.com',
+			secret: 'secret-value',
+			capabilities: [
+				{ path: 'pubky.app', permission: 'read' },
+				{ path: 'pubky.app', permission: 'write' },
+			],
+			x_success: xSuccess,
+			x_source: 'Bitkit',
+		});
 
 		const parsed = await parseInput(rawInput, 'deeplink');
 
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(expect.stringContaining('pubkyauth://signup?'));
 		expect(parsed.action).toBe(InputAction.Signup);
 		expect(parsed.data).toEqual({
 			action: InputAction.Signup,
@@ -149,6 +166,7 @@ describe('parseInput', () => {
 				relay: 'wss://relay.example.com',
 				secret: 'secret-value',
 				caps: ['pubky.app:read', 'pubky.app:write'],
+				kind: 'signup',
 				xCallback: {
 					xSuccess,
 					xError: undefined,
@@ -159,11 +177,52 @@ describe('parseInput', () => {
 		});
 	});
 
+	it('preserves signup grant auth intent from the Pubky deeplink parser', async () => {
+		const rawInput =
+			'pubkyauth://signup_grant?' +
+			`hs=${homeserverPubkey}` +
+			`&relay=${encodeURIComponent('wss://relay.example.com')}` +
+			'&secret=secret-value' +
+			'&caps=pubky.app:write';
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'signup_grant',
+			url: rawInput,
+			homeserver: homeserverPubkey,
+			relay: 'wss://relay.example.com',
+			secret: 'secret-value',
+			capabilities: [{ path: 'pubky.app', permission: 'write' }],
+		});
+
+		const parsed = await parseInput(rawInput, 'deeplink');
+
+		expect(parsed.action).toBe(InputAction.Signup);
+		expect(parsed.data).toEqual({
+			action: InputAction.Signup,
+			params: {
+				homeserver: homeserverPubkey,
+				inviteCode: '',
+				relay: 'wss://relay.example.com',
+				secret: 'secret-value',
+				caps: ['pubky.app:write'],
+				kind: 'signup_grant',
+				xCallback: undefined,
+			},
+		});
+	});
+
 	it('parses direct signup deeplinks without auth parameters', async () => {
 		const rawInput =
 			'pubkyauth://direct_signup?' +
 			`hs=${homeserverPubkey}` +
 			'&st=ABCD-1234-WXYZ';
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'direct_signup',
+			url: rawInput,
+			homeserver: homeserverPubkey,
+			signup_token: 'ABCD-1234-WXYZ',
+		});
 
 		const parsed = await parseInput(rawInput, 'scan');
 
@@ -180,6 +239,12 @@ describe('parseInput', () => {
 
 	it('parses direct signup deeplinks without signup tokens', async () => {
 		const rawInput = `pubkyauth://direct_signup?hs=${homeserverPubkey}`;
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'direct_signup',
+			url: rawInput,
+			homeserver: homeserverPubkey,
+		});
 
 		const parsed = await parseInput(rawInput, 'scan');
 
@@ -194,8 +259,15 @@ describe('parseInput', () => {
 		});
 	});
 
-	it('routes legacy signup deeplinks without auth parameters to direct signup', async () => {
+	it('routes signup deeplinks without auth parameters when accepted by Pubky parser', async () => {
 		const rawInput = `pubkyauth://signup?hs=${homeserverPubkey}&st=ABCD-1234-WXYZ`;
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'signup',
+			url: rawInput,
+			homeserver: homeserverPubkey,
+			signup_token: 'ABCD-1234-WXYZ',
+		});
 
 		const parsed = await parseInput(rawInput, 'scan');
 
@@ -210,18 +282,20 @@ describe('parseInput', () => {
 		});
 	});
 
-	it('parses signin deeplinks through the Pubky auth parser', async () => {
-		parseAuthUrlMock.mockResolvedValue(
-			ok({
-				relay: 'wss://relay.example.com',
-				secret: 'auth-secret',
-				capabilities: [
-					{ path: '/pub/pubky.app/profile.json', permission: 'read' },
-					{ path: '/pub/pubky.app/session.json', permission: 'write' },
-				],
-			}),
-		);
+	it('parses signin deeplinks through the Pubky deeplink parser', async () => {
 		const xCancel = 'bitkit://auth/cancel?nonce=abc&reason=user';
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			relay: 'wss://relay.example.com',
+			secret: 'auth-secret',
+			kind: 'signin',
+			url: 'pubkyauth://signin?caps=ignored-by-mock',
+			capabilities: [
+				{ path: '/pub/pubky.app/profile.json', permission: 'read' },
+				{ path: '/pub/pubky.app/session.json', permission: 'write' },
+			],
+			x_cancel: xCancel,
+		});
 		const rawInput =
 			'pubkyring://signin?' +
 			'caps=ignored-by-mock' +
@@ -231,13 +305,16 @@ describe('parseInput', () => {
 
 		const parsed = await parseInput(rawInput, 'deeplink');
 
-		expect(parseAuthUrlMock).toHaveBeenCalledWith(expect.stringContaining('pubkyauth:///?'));
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(expect.stringContaining('pubkyauth://signin?'));
 		expect(parsed.action).toBe(InputAction.Auth);
 		expect(parsed.data).toEqual({
 			action: InputAction.Auth,
 			params: {
 				relay: 'wss://relay.example.com',
 				secret: 'auth-secret',
+				kind: 'signin',
+				homeserver: undefined,
+				signupToken: undefined,
 				caps: ['/pub/pubky.app/profile.json:read', '/pub/pubky.app/session.json:write'],
 				xCallback: {
 					xSuccess: undefined,
@@ -246,7 +323,124 @@ describe('parseInput', () => {
 					xSource: undefined,
 				},
 			},
-			rawUrl: expect.stringContaining('pubkyauth:///?'),
+			rawUrl: expect.stringContaining('pubkyauth://signin?'),
+		});
+	});
+
+	it('preserves grant auth intent from the Pubky deeplink parser', async () => {
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			relay: 'wss://relay.example.com',
+			secret: 'auth-secret',
+			kind: 'signin_grant',
+			url: 'pubkyauth://signin_grant?caps=ignored-by-mock',
+			capabilities: [{ path: '/pub/pubky.app/session.json', permission: 'write' }],
+		});
+
+		const rawInput =
+			'pubkyauth://signin_grant?caps=ignored-by-mock&secret=auth-secret&relay=wss://relay.example.com';
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(rawInput);
+		expect(parsed.action).toBe(InputAction.Auth);
+		expect(parsed.data).toEqual({
+			action: InputAction.Auth,
+			params: {
+				relay: 'wss://relay.example.com',
+				secret: 'auth-secret',
+				kind: 'signin_grant',
+				homeserver: undefined,
+				signupToken: undefined,
+				caps: ['/pub/pubky.app/session.json:write'],
+				xCallback: undefined,
+			},
+			rawUrl: rawInput,
+		});
+	});
+
+	it('parses grant auth deeplinks through the Pubky deeplink parser', async () => {
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'signin_grant',
+			url: 'pubkyauth://signin_grant?caps=ignored-by-mock',
+			relay: 'wss://relay.example.com',
+			secret: 'auth-secret',
+			client_id: 'pubky.app',
+			client_public_key: 'client-pubky',
+			capabilities: [{ path: '/pub/pubky.app/session.json', permission: 'write' }],
+		});
+
+		const rawInput =
+			'pubkyauth://signin_grant?caps=ignored-by-mock&secret=auth-secret&relay=wss://relay.example.com';
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(rawInput);
+		expect(parsed.action).toBe(InputAction.Auth);
+		expect(parsed.data).toEqual({
+			action: InputAction.Auth,
+			params: {
+				relay: 'wss://relay.example.com',
+				secret: 'auth-secret',
+				kind: 'signin_grant',
+				homeserver: undefined,
+				signupToken: undefined,
+				caps: ['/pub/pubky.app/session.json:write'],
+				xCallback: undefined,
+			},
+			rawUrl: rawInput,
+		});
+	});
+
+	it('parses direct signup deeplinks through the Pubky deeplink parser', async () => {
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'direct_signup',
+			url: `pubkyauth://direct_signup?hs=${homeserverPubkey}&st=ABCD-1234-WXYZ`,
+			homeserver: homeserverPubkey,
+			signup_token: 'ABCD-1234-WXYZ',
+		});
+
+		const rawInput = `pubkyauth://direct_signup?hs=${homeserverPubkey}&st=ABCD-1234-WXYZ`;
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parseDeepLinkMock).toHaveBeenCalledWith(rawInput);
+		expect(parsed.action).toBe(InputAction.DirectSignup);
+		expect(parsed.data).toEqual({
+			action: InputAction.DirectSignup,
+			params: {
+				homeserver: homeserverPubkey,
+				inviteCode: 'ABCD-1234-WXYZ',
+				xCallback: undefined,
+			},
+		});
+	});
+
+	it('parses secret export deeplinks through the Pubky deeplink parser', async () => {
+		mockDeepLink({
+			scheme: 'pubkyring',
+			kind: 'secret_export',
+			url: 'pubkyring://secret_export?secret=secret-value',
+			secret: 'secret-value',
+		});
+
+		const rawInput = 'pubkyring://secret_export?secret=secret-value';
+
+		const parsed = await parseInput(rawInput, 'deeplink');
+
+		expect(parsed).toEqual({
+			action: InputAction.Import,
+			data: {
+				action: InputAction.Import,
+				params: {
+					data: 'secret-value',
+					backupPreference: EBackupPreference.encryptedFile,
+				},
+			},
+			source: 'deeplink',
+			rawInput,
 		});
 	});
 

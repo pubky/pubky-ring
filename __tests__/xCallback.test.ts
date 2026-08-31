@@ -49,11 +49,11 @@ describe('xCallback', () => {
 
 		await openXSuccessWithParams(
 			{ xSuccess: 'bitkit://session/return' },
-			{ session_secret: 'pubky:secret-cookie' },
+			{ grant_secret: 'pubky:grant-secret' },
 		);
 
 		expect(warnSpy).toHaveBeenCalledWith('Failed to open x-callback URL');
-		expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('pubky:secret-cookie'));
+		expect(warnSpy).not.toHaveBeenCalledWith(expect.stringContaining('pubky:grant-secret'));
 		warnSpy.mockRestore();
 	});
 });

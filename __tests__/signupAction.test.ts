@@ -5,24 +5,16 @@ import { hideSheet } from '../src/sheets/sheetNavigation';
 import { savePubky, signUpToHomeserver } from '../src/utils/pubky';
 import { getSignedUpPubkysFromStore } from '../src/utils/store-helpers';
 import { EBackupPreference } from '../src/types/pubky';
+import { generateMnemonicPhraseAndKeypair } from '@synonymdev/react-native-pubky';
+import { ok as resultOk } from '@synonymdev/result';
+
+jest.mock('@synonymdev/react-native-pubky');
 
 jest.mock('../src/i18n', () => ({
 	__esModule: true,
 	default: {
 		t: (key: string) => key,
 	},
-}));
-
-jest.mock('@synonymdev/react-native-pubky', () => ({
-	__esModule: true,
-	generateMnemonicPhraseAndKeypair: jest.fn(async () => {
-		const { ok } = require('@synonymdev/result');
-		return ok({
-			mnemonic: 'one two three four five six seven eight nine ten eleven twelve',
-			secret_key: 'secret-key',
-			public_key: 'pubky-created',
-		});
-	}),
 }));
 
 jest.mock('@synonymdev/react-native-toast', () => ({
@@ -38,7 +30,7 @@ jest.mock('../src/utils/pubky', () => ({
 	}),
 	signUpToHomeserver: jest.fn(async () => {
 		const { ok } = require('@synonymdev/result');
-		return ok({ session_secret: 'session-secret' });
+		return ok({ grant_secret: 'grant-secret' });
 	}),
 }));
 
@@ -92,6 +84,9 @@ const handleAuthActionMock = handleAuthAction as jest.MockedFunction<typeof hand
 const hideSheetMock = hideSheet as jest.MockedFunction<typeof hideSheet>;
 const savePubkyMock = savePubky as jest.MockedFunction<typeof savePubky>;
 const signUpToHomeserverMock = signUpToHomeserver as jest.MockedFunction<typeof signUpToHomeserver>;
+const generateMnemonicPhraseAndKeypairMock = generateMnemonicPhraseAndKeypair as jest.MockedFunction<
+	typeof generateMnemonicPhraseAndKeypair
+>;
 const getSignedUpPubkysFromStoreMock = getSignedUpPubkysFromStore as jest.MockedFunction<
 	typeof getSignedUpPubkysFromStore
 >;
@@ -100,6 +95,14 @@ const homeserverPubkey = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
 describe('handleSignupAction', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		generateMnemonicPhraseAndKeypairMock.mockResolvedValue(
+			resultOk({
+				mnemonic: 'one two three four five six seven eight nine ten eleven twelve',
+				secret_key: 'secret-key',
+				public_key: 'pubky-created',
+				uri: 'pubky://pubky-created',
+			}),
+		);
 	});
 
 	it('signs up directly without delivering auth when auth params are absent', async () => {
@@ -181,6 +184,7 @@ describe('handleSignupAction', () => {
 					relay: 'wss://relay.example.com',
 					secret: 'auth-secret',
 					caps: ['pubky.app:read', 'pubky.app:write'],
+					kind: 'signup_grant',
 					xCallback,
 				},
 			},
@@ -195,10 +199,11 @@ describe('handleSignupAction', () => {
 					relay: 'wss://relay.example.com',
 					secret: 'auth-secret',
 					caps: ['pubky.app:read', 'pubky.app:write'],
+					kind: 'signin_grant',
 					xCallback,
 				},
 				rawUrl:
-					'pubkyauth:///?relay=wss%3A%2F%2Frelay.example.com&secret=auth-secret&caps=pubky.app%3Aread%2Cpubky.app%3Awrite',
+					'pubkyauth://signin_grant?relay=wss%3A%2F%2Frelay.example.com&secret=auth-secret&caps=pubky.app%3Aread%2Cpubky.app%3Awrite',
 			},
 			{ dispatch, setAddPubkyScreen, pubky: 'pubky-created', isDeeplink: false },
 		);

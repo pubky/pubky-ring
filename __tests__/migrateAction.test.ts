@@ -5,16 +5,13 @@ import { hideActiveSheet, showSheet } from '../src/sheets/sheetNavigation';
 import { importPubky } from '../src/utils/pubky';
 import { mnemonicPhraseToKeypair } from '@synonymdev/react-native-pubky';
 
+jest.mock('@synonymdev/react-native-pubky');
+
 jest.mock('../src/i18n', () => ({
 	__esModule: true,
 	default: {
 		t: (key: string) => key,
 	},
-}));
-
-jest.mock('@synonymdev/react-native-pubky', () => ({
-	__esModule: true,
-	mnemonicPhraseToKeypair: jest.fn(),
 }));
 
 jest.mock('@synonymdev/react-native-toast', () => ({

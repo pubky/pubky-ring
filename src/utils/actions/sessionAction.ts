@@ -9,7 +9,7 @@
  *    (or legacy: pubkyring://session?callback=bitkit://session-data)
  * 2. Ring prompts user to select a pubky when needed
  * 3. Ring prompts the user to approve handing a homeserver session to the callback app
- * 4. Ring opens x-success URL with session data: bitkit://session-data?pubky=...&session_secret=...
+ * 4. Ring opens x-success URL with session data: bitkit://session-data?pubky=...&grant_secret=...
  */
 
 import { Result, ok, err } from '@synonymdev/result';
@@ -108,7 +108,7 @@ export const executeSessionAction = async (
 		// Open x-success URL with session data appended as query params
 		await openXSuccessWithParams(xCallback, {
 			pubky: sessionInfo.pubky,
-			session_secret: sessionInfo.session_secret,
+			grant_secret: sessionInfo.grant_secret,
 			capabilities: sessionInfo.capabilities.join(','),
 		});
 

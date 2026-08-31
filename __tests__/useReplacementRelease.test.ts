@@ -6,6 +6,19 @@ import {
 	type ReplacementReleaseStorage,
 } from '../src/hooks/useReplacementRelease';
 
+jest.mock('react-native', () => {
+	return {
+		Platform: {
+			OS: 'android',
+		},
+		NativeModules: {
+			AppInfo: {
+				applicationId: 'to.pubky.ring',
+			},
+		},
+	};
+});
+
 jest.mock('react-native-mmkv', () => ({
 	createMMKV: () => ({ getString: jest.fn(), set: jest.fn() }),
 }));

@@ -1567,7 +1567,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-pubky (0.13.0):
+  - react-native-pubky (0.14.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2907,7 +2907,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: 15cca2d1a6bfb6d0d3ff0283bd9b903e57cb028b
   react-native-image-picker: 23540feacc79c63c60857f318fdfa8477c26e70a
   react-native-netinfo: 2f906d5d9a639090ed1c079135d6485a95f749f1
-  react-native-pubky: 3385d7d2bfd974e58dda4736c30df1a96b0121d0
+  react-native-pubky: 493fdd3beeb7ecb16a492f1b01036805478f75d2
   react-native-safe-area-context: fb5c8ee9f6dd62ef710611b3d370c501f42a4ac0
   react-native-skia: b319389e81797af11985805fcfad0714b8670cab
   React-NativeModulesApple: a092d89b58f635ebfab88048b0eda9fb516819fd

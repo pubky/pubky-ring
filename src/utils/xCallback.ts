@@ -68,7 +68,7 @@ export const openXError = async (
 
 /**
  * Opens the x-success URL with additional data appended as query params.
- * Used by flows that need to pass data back (e.g., session returns session_secret).
+ * Used by flows that need to pass data back (e.g., session returns grant_secret).
  */
 export const openXSuccessWithParams = async (
 	xCallback: XCallbackParams | undefined,

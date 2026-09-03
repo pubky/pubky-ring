@@ -21,12 +21,7 @@ jest.mock('@synonymdev/react-native-toast', () => ({
 	showToast: jest.fn(),
 }));
 
-jest.mock('@synonymdev/react-native-pubky', () => ({
-	__esModule: true,
-	parseAuthUrl: jest.fn(),
-	mnemonicPhraseToKeypair: jest.fn(),
-	getPublicKeyFromSecretKey: jest.fn(),
-}));
+jest.mock('@synonymdev/react-native-pubky');
 
 jest.mock('../src/sheets/sheetNavigation', () => ({
 	__esModule: true,
@@ -76,7 +71,7 @@ describe('session actions', () => {
 		signInToHomeserverMock.mockResolvedValue(
 			ok({
 				pubky: 'pubky-selected',
-				session_secret: 'pubky-selected:session-cookie',
+				grant_secret: 'pubky-selected:grant-secret',
 				capabilities: ['/', '/pub'],
 			}),
 		);
@@ -132,7 +127,7 @@ describe('session actions', () => {
 		expect(openXSuccessWithParamsMock).not.toHaveBeenCalled();
 	});
 
-	it('returns the session secret only after explicit approval', async () => {
+	it('returns the grant secret only after explicit approval', async () => {
 		const result = await executeSessionAction(sessionData, { dispatch, pubky: 'pubky-selected' });
 
 		expect(result.isOk()).toBe(true);
@@ -142,7 +137,7 @@ describe('session actions', () => {
 		});
 		expect(openXSuccessWithParamsMock).toHaveBeenCalledWith(sessionData.params.xCallback, {
 			pubky: 'pubky-selected',
-			session_secret: 'pubky-selected:session-cookie',
+			grant_secret: 'pubky-selected:grant-secret',
 			capabilities: '/,/pub',
 		});
 	});

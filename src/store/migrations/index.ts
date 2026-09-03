@@ -1,6 +1,9 @@
 import { PersistedState } from 'redux-persist';
 import { signOut } from '@synonymdev/react-native-pubky';
-import { EBackupPreference, PubkySession } from '../../types/pubky';
+import { EBackupPreference } from '../../types/pubky';
+import { getSessionSecret, resetSessionSecret } from '../../utils/keychain';
+
+type PersistedSession = Record<string, unknown>;
 
 const revokeLegacySession = (session: Record<string, unknown>): void => {
 	if (typeof session.session_secret !== 'string' || session.session_secret.length === 0) {
@@ -15,6 +18,34 @@ const revokeLegacySession = (session: Record<string, unknown>): void => {
 		})
 		.catch(error => {
 			console.error('Failed to revoke legacy homeserver session', error);
+		});
+};
+
+const revokeStoredSession = (pubky: string, session: Record<string, unknown>): void => {
+	if (typeof session.id !== 'string' || session.id.length === 0) {
+		return;
+	}
+
+	const sessionId = session.id;
+	getSessionSecret({ pubky, sessionId })
+		.then(result => {
+			if (result.isErr()) {
+				return;
+			}
+
+			return signOut(result.value).then(signOutResult => {
+				if (signOutResult.isErr()) {
+					console.error('Failed to revoke stored homeserver session', signOutResult.error.message);
+				}
+			});
+		})
+		.catch(error => {
+			console.error('Failed to revoke stored homeserver session', error);
+		})
+		.finally(() => {
+			resetSessionSecret({ pubky, sessionId }).catch(error => {
+				console.error('Failed to reset stored homeserver session', error);
+			});
 		});
 };
 
@@ -101,7 +132,7 @@ const migrations = {
 			if (pubky.sessions && pubky.sessions.length > 0) {
 				updatedPubkys[pubkyKey] = {
 					...pubky,
-					sessions: pubky.sessions.map((session: PubkySession) => ({
+					sessions: pubky.sessions.map((session: PersistedSession) => ({
 						...session,
 						session_secret: '',
 					})),
@@ -144,6 +175,31 @@ const migrations = {
 						capabilities: session.capabilities,
 						created_at: session.created_at,
 					})),
+			};
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+			},
+		};
+	},
+	// @ts-ignore
+	8: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		// Grant auth replaces legacy Cookie auth sessions. Keep identities, but
+		// drop existing sessions so apps request fresh grant sessions.
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			const pubky = updatedPubkys[pubkyKey];
+			(pubky.sessions ?? []).forEach((session: Record<string, unknown>) => {
+				revokeStoredSession(pubkyKey, session);
+			});
+			updatedPubkys[pubkyKey] = {
+				...pubky,
+				sessions: [],
 			};
 		});
 

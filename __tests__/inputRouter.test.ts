@@ -16,18 +16,13 @@ import { handleSessionAction } from '../src/utils/actions/sessionAction';
 import { showSheet } from '../src/sheets/sheetNavigation';
 import { routeInputWithContext } from '../src/utils/inputHandlerUtils';
 
+jest.mock('@synonymdev/react-native-pubky');
+
 jest.mock('../src/i18n', () => ({
 	__esModule: true,
 	default: {
 		t: (key: string) => key,
 	},
-}));
-
-jest.mock('@synonymdev/react-native-pubky', () => ({
-	__esModule: true,
-	parseAuthUrl: jest.fn(),
-	mnemonicPhraseToKeypair: jest.fn(),
-	getPublicKeyFromSecretKey: jest.fn(),
 }));
 
 jest.mock('@synonymdev/react-native-toast', () => ({

@@ -3,11 +3,11 @@ import { NativeModules } from 'react-native';
 type AppInfoConstants = {
 	version?: string;
 	buildNumber?: string;
-	applicationId?: string;
+	applicationId: string;
 };
 
-const appInfo = NativeModules.AppInfo as AppInfoConstants | undefined;
+const appInfo = NativeModules.AppInfo as AppInfoConstants;
 
 export const appVersion = appInfo?.version ?? '';
 export const appBuildNumber = appInfo?.buildNumber ?? '';
-export const appApplicationId = appInfo?.applicationId ?? '';
+export const appApplicationId = appInfo.applicationId;

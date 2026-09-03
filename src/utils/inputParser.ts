@@ -10,7 +10,7 @@
  * that can be routed to the appropriate action handler.
  */
 
-import { parseAuthUrl } from '@synonymdev/react-native-pubky';
+import { parseDeepLink, PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import { EBackupPreference } from '../types/pubky';
 
@@ -37,6 +37,7 @@ export interface SignupParams {
 	relay: string;
 	secret: string;
 	caps: string[];
+	kind?: 'signup' | 'signup_grant';
 	xCallback?: XCallbackParams;
 }
 
@@ -64,7 +65,7 @@ export interface AuthParams {
 	// are 'signin'. Well-formed signup links (with an hs param) are routed to
 	// InputAction.Signup instead, so 'signup' here means a malformed signup
 	// link that was missing its homeserver.
-	kind?: 'signin' | 'signup';
+	kind?: 'signin' | 'signup' | 'signin_grant' | 'signup_grant';
 	homeserver?: string;
 	signupToken?: string;
 	xCallback?: XCallbackParams;
@@ -236,63 +237,6 @@ export const extractXCallbackParams = (encodedQueryString: string): XCallbackPar
 };
 
 /**
- * Parses signup deeplink parameters
- * Format: signup?hs={homeserver}&relay={relay_url}&secret={secret}&caps={capabilities}[&st={signup_token}]
- *
- * `queryString` is the (possibly multi-pass-decoded) query for plain fields;
- * `encodedQueryString` is the original encoded query used for x-callback
- * extraction so inner callback URLs are preserved verbatim.
- */
-const parseSignupParams = (queryString: string, encodedQueryString: string): SignupParams | null => {
-	try {
-		const params = new URLSearchParams(queryString);
-		const relay = params.get('relay');
-		const secret = params.get('secret');
-
-		if (!relay || !secret) {
-			return null;
-		}
-
-		return {
-			homeserver: decodeURIComponent(params.get('hs') || ''),
-			inviteCode: params.get('st') || '',
-			relay: decodeURIComponent(relay),
-			secret,
-			caps: (params.get('caps') || '').split(',').filter(Boolean),
-			xCallback: extractXCallbackParams(encodedQueryString),
-		};
-	} catch {
-		return null;
-	}
-};
-
-const hasSignupAuthParams = (queryString: string): boolean => {
-	const params = new URLSearchParams(queryString);
-	return Boolean(params.get('relay') && params.get('secret'));
-};
-
-/**
- * Parses direct signup deeplink parameters
- * Format: direct_signup?hs={homeserver_pubkey}[&st={signup_token}]
- */
-const parseDirectSignupParams = (
-	queryString: string,
-	encodedQueryString: string,
-): DirectSignupParams | null => {
-	try {
-		const params = new URLSearchParams(queryString);
-
-		return {
-			homeserver: decodeURIComponent(params.get('hs') || ''),
-			inviteCode: params.get('st') || '',
-			xCallback: extractXCallbackParams(encodedQueryString),
-		};
-	} catch {
-		return null;
-	}
-};
-
-/**
  * Parses session deeplink parameters
  * Format: session?x-success={url}&x-error={url}&x-cancel={url}&x-source={name}
  * Legacy: session?callback={callback_url}
@@ -307,6 +251,162 @@ const parseSessionParams = (encodedQueryString: string): SessionParams | null =>
 	} catch {
 		return null;
 	}
+};
+
+const xCallbackFromDeepLink = (details: PubkyDeepLinkDetails): XCallbackParams | undefined => {
+	const parsed = {
+		xSuccess: details.x_success,
+		xError: details.x_error,
+		xCancel: details.x_cancel,
+		xSource: details.x_source,
+	};
+
+	if (parsed.xSuccess || parsed.xError || parsed.xCancel || parsed.xSource) {
+		return parsed;
+	}
+
+	return undefined;
+};
+
+const capsFromDeepLink = (details: PubkyDeepLinkDetails): string[] => {
+	return details.capabilities?.map(capability => `${capability.path}:${capability.permission}`) ?? [];
+};
+
+const normalizePubkyDeepLinkInput = (input: string): string => {
+	let normalized = input;
+
+	if (normalized.startsWith('pubkyring://pubkyauth://')) {
+		normalized = normalized.replace('pubkyring://', '');
+	}
+
+	if (normalized.startsWith('pubkyauth///')) {
+		normalized = normalized.replace('pubkyauth///', 'pubkyauth:///');
+	}
+
+	if (normalized.startsWith('pubkyring://')) {
+		const path = normalized.replace('pubkyring://', '');
+		if (
+			path.startsWith('signin?') ||
+			path.startsWith('signin/?') ||
+			path.startsWith('signup?') ||
+			path.startsWith('signup/?') ||
+			path.startsWith('direct_signup?') ||
+			path.startsWith('direct_signup/?')
+		) {
+			normalized = `pubkyauth://${path}`;
+		}
+	}
+
+	for (const route of ['signin', 'signup', 'direct_signup', 'signin_grant', 'signup_grant']) {
+		normalized = normalized.replace(`pubkyauth://${route}/?`, `pubkyauth://${route}?`);
+	}
+
+	return normalized;
+};
+
+const parsePubkyDeepLink = async (
+	input: string,
+	rawInput: string,
+	source: InputSource,
+): Promise<ParsedInput | null> => {
+	const normalizedInput = normalizePubkyDeepLinkInput(input);
+	const deepLinkResult = await parseDeepLink(normalizedInput);
+	if (deepLinkResult.isErr()) {
+		return null;
+	}
+
+	const details = deepLinkResult.value;
+	const xCallback = xCallbackFromDeepLink(details);
+
+	if (details.kind === 'direct_signup' && details.homeserver) {
+		return {
+			action: InputAction.DirectSignup,
+			data: {
+				action: InputAction.DirectSignup,
+				params: {
+					homeserver: details.homeserver,
+					inviteCode: details.signup_token ?? '',
+					xCallback,
+				},
+			},
+			source,
+			rawInput,
+		};
+	}
+
+	if ((details.kind === 'signup' || details.kind === 'signup_grant') && details.homeserver) {
+		if (details.relay && details.secret) {
+			return {
+				action: InputAction.Signup,
+				data: {
+					action: InputAction.Signup,
+					params: {
+						homeserver: details.homeserver,
+						inviteCode: details.signup_token ?? '',
+						relay: details.relay,
+						secret: details.secret,
+						caps: capsFromDeepLink(details),
+						kind: details.kind,
+						xCallback,
+					},
+				},
+				source,
+				rawInput,
+			};
+		}
+
+		return {
+			action: InputAction.DirectSignup,
+			data: {
+				action: InputAction.DirectSignup,
+				params: {
+					homeserver: details.homeserver,
+					inviteCode: details.signup_token ?? '',
+					xCallback,
+				},
+			},
+			source,
+			rawInput,
+		};
+	}
+
+	if ((details.kind === 'signin' || details.kind === 'signin_grant') && details.relay && details.secret) {
+		return {
+			action: InputAction.Auth,
+			data: {
+				action: InputAction.Auth,
+				params: {
+					relay: details.relay,
+					secret: details.secret,
+					caps: capsFromDeepLink(details),
+					kind: details.kind,
+					homeserver: details.homeserver,
+					signupToken: details.signup_token,
+					xCallback,
+				},
+				rawUrl: normalizedInput,
+			},
+			source,
+			rawInput,
+		};
+	}
+
+	if (details.kind === 'secret_export' && details.secret) {
+		return {
+			action: InputAction.Import,
+			data: {
+				action: InputAction.Import,
+				params: {
+					data: details.secret,
+					backupPreference: EBackupPreference.encryptedFile,
+				},
+			},
+			source,
+			rawInput,
+		};
+	}
+
+	return null;
 };
 
 /**
@@ -381,16 +481,14 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		}
 	}
 
-	// Remove pubkyring:// wrapper protocol if present
-	// This handles cases like pubkyring://pubkyauth:///?...
-	if (processedInput.startsWith('pubkyring://')) {
-		processedInput = processedInput.replace('pubkyring://', '');
+	const deepLinkParsed = await parsePubkyDeepLink(processedInput, rawInput, source);
+	if (deepLinkParsed) {
+		return deepLinkParsed;
 	}
 
-	// Fix malformed pubkyauth URL (pubkyauth/// -> pubkyauth:///)
-	// Some sources may omit the colon
-	if (processedInput.startsWith('pubkyauth///')) {
-		processedInput = processedInput.replace('pubkyauth///', 'pubkyauth:///');
+	// Remove pubkyring:// wrapper protocol for Ring-owned routes.
+	if (processedInput.startsWith('pubkyring://')) {
+		processedInput = processedInput.replace('pubkyring://', '');
 	}
 
 	// Remove protocol prefixes for further analysis
@@ -400,60 +498,10 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 	}
 
 	// Normalize: remove trailing slash before query string for known routes
-	if (urlWithoutProtocol.startsWith('signup/?'))
-		urlWithoutProtocol = urlWithoutProtocol.replace('signup/?', 'signup?');
-	if (urlWithoutProtocol.startsWith('direct_signup/?'))
-		urlWithoutProtocol = urlWithoutProtocol.replace('direct_signup/?', 'direct_signup?');
 	if (urlWithoutProtocol.startsWith('session/?'))
 		urlWithoutProtocol = urlWithoutProtocol.replace('session/?', 'session?');
-	if (urlWithoutProtocol.startsWith('signin/?'))
-		urlWithoutProtocol = urlWithoutProtocol.replace('signin/?', 'signin?');
 
-	// 1. Check for direct signup deeplink
-	// Format: pubkyauth://direct_signup?...
-	// The signup token (st) is optional per the pubky 0.9.1 deep link spec —
-	// homeservers without invite requirements omit it.
-	if (urlWithoutProtocol.startsWith('direct_signup?')) {
-		const queryString = urlWithoutProtocol.substring('direct_signup?'.length);
-		const directSignupParams = parseDirectSignupParams(queryString, rawEncodedQuery);
-		if (directSignupParams?.homeserver) {
-			return {
-				action: InputAction.DirectSignup,
-				data: { action: InputAction.DirectSignup, params: directSignupParams },
-				source,
-				rawInput,
-			};
-		}
-	}
-
-	// 2. Check for signup deeplink
-	// Format: pubkyring://signup?... or pubkyauth://signup?...
-	if (urlWithoutProtocol.startsWith('signup?')) {
-		const queryString = urlWithoutProtocol.substring('signup?'.length);
-		if (hasSignupAuthParams(queryString)) {
-			const signupParams = parseSignupParams(queryString, rawEncodedQuery);
-			if (signupParams?.homeserver) {
-				return {
-					action: InputAction.Signup,
-					data: { action: InputAction.Signup, params: signupParams },
-					source,
-					rawInput,
-				};
-			}
-		}
-
-		const directSignupParams = parseDirectSignupParams(queryString, rawEncodedQuery);
-		if (directSignupParams?.homeserver) {
-			return {
-				action: InputAction.DirectSignup,
-				data: { action: InputAction.DirectSignup, params: directSignupParams },
-				source,
-				rawInput,
-			};
-		}
-	}
-
-	// 3. Check for session deeplink
+	// 1. Check for session deeplink
 	// Format: pubkyring://session?x-success={url} or pubkyring://session?callback={url}
 	if (urlWithoutProtocol.startsWith('session?')) {
 		const sessionParams = parseSessionParams(rawEncodedQuery);
@@ -467,45 +515,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		}
 	}
 
-	// 4. Check for signin deeplink (alternative auth format)
-	// Format: pubkyring://signin?caps=...&secret=...&relay=...
-	// Convert to pubkyauth:/// format for parsing
-	if (urlWithoutProtocol.startsWith('signin?')) {
-		const queryString = urlWithoutProtocol.substring(7); // Remove "signin?"
-		processedInput = `pubkyauth:///?${queryString}`;
-	}
-
-	// 5. Check for auth URL
-	// Format: pubkyauth:///...
-	const authResult = await parseAuthUrl(processedInput);
-	if (authResult.isOk()) {
-		// Extract optional x-callback-url parameters from the original
-		// (still-encoded) query so inner callback URLs round-trip verbatim.
-		const xCallback = extractXCallbackParams(rawEncodedQuery);
-
-		const details = authResult.value;
-
-		return {
-			action: InputAction.Auth,
-			data: {
-				action: InputAction.Auth,
-				params: {
-					relay: details.relay,
-					secret: details.secret,
-					caps: details.capabilities.map(c => `${c.path}:${c.permission}`),
-					kind: details.kind,
-					homeserver: details.homeserver,
-					signupToken: details.signup_token,
-					xCallback,
-				},
-				rawUrl: processedInput,
-			},
-			source,
-			rawInput,
-		};
-	}
-
-	// 6. Check for invite code in URL
+	// 2. Check for invite code in URL
 	const inviteCode = parseInviteCodeFromUrl(processedInput);
 	if (inviteCode) {
 		// Extract x-callback params from the original encoded query so inner
@@ -519,7 +529,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		};
 	}
 
-	// 7. Check if it's a standalone invite code (XXXX-XXXX-XXXX format)
+	// 3. Check if it's a standalone invite code (XXXX-XXXX-XXXX format)
 	if (isValidInviteCode(urlWithoutProtocol)) {
 		return {
 			action: InputAction.Invite,
@@ -529,7 +539,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		};
 	}
 
-	// 8. Check for import data (recovery phrase or secret key)
+	// 4. Check for import data (recovery phrase or secret key)
 	const formatted = formatImportData(processedInput);
 	const importValidation = await validateImportData(formatted);
 	if (importValidation.isValid) {
@@ -547,7 +557,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		};
 	}
 
-	// 9. Quick check for recovery phrase pattern (12 words) even if validation failed
+	// 5. Quick check for recovery phrase pattern (12 words) even if validation failed
 	// This handles cases where the mnemonic might be valid but validation takes time
 	const words = formatted.trim().split(/\s+/);
 	if (words.length === 12) {
@@ -569,7 +579,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		}
 	}
 
-	// 10. Default to unknown
+	// 6. Default to unknown
 	return {
 		action: InputAction.Unknown,
 		data: { action: InputAction.Unknown, params: { rawData: processedInput } },

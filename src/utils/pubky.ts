@@ -3,13 +3,13 @@ import {
 	signIn,
 	signOut,
 	getPublicKeyFromSecretKey,
-	SessionInfo,
 	getSignupToken as _getSignupToken,
 	republishHomeserver as _republishHomeserver,
 	getHomeserver,
 	get,
 	generateMnemonicPhraseAndKeypair,
 	mnemonicPhraseToKeypair,
+	type SessionInfo,
 } from '@synonymdev/react-native-pubky';
 import {
 	setKeychainValue,
@@ -49,13 +49,14 @@ import {
 	STAGING_APP_HOST,
 	STAGING_HOMESERVER,
 } from './constants.ts';
+import { appApplicationId } from './appInfo.ts';
 import i18n from '../i18n';
 
-// Stable UUID v5 namespace for deriving local session ids from homeserver session secrets.
+// Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
 
-const revokeUnsavedHomeserverSession = async (sessionSecret: string): Promise<void> => {
-	const signOutRes = await signOut(sessionSecret);
+const revokeUnsavedHomeserverSession = async (sessionToken: string): Promise<void> => {
+	const signOutRes = await signOut(sessionToken);
 	if (signOutRes.isErr()) {
 		console.error('Failed to revoke unsaved homeserver session', signOutRes.error.message);
 	}
@@ -71,18 +72,18 @@ const saveHomeserverSession = async ({
 	dispatch: Dispatch;
 }): Promise<Result<PubkySession>> => {
 	const session: PubkySession = {
-		id: uuid(sessionInfo.session_secret, SESSION_ID_NAMESPACE),
+		id: uuid(sessionInfo.grant_secret, SESSION_ID_NAMESPACE),
 		capabilities: sessionInfo.capabilities,
 		created_at: Date.now(),
 	};
 	const secretRes = await setSessionSecret({
 		pubky,
 		sessionId: session.id,
-		sessionSecret: sessionInfo.session_secret,
+		sessionSecret: sessionInfo.grant_secret,
 	});
 
 	if (secretRes.isErr()) {
-		await revokeUnsavedHomeserverSession(sessionInfo.session_secret);
+		await revokeUnsavedHomeserverSession(sessionInfo.grant_secret);
 		return err(secretRes.error);
 	}
 
@@ -555,12 +556,11 @@ export const signUpToHomeserver = async ({
 		}
 		secretKey = secretKeyRes.value.secretKey;
 	}
-	// Pass undefined rather than '' so the FFI receives no signup token
-	// (None) instead of an empty-string token.
-	const signUpRes = await signUp(secretKey, homeserver, signupToken || undefined);
+	const signUpRes = await signUp(secretKey, homeserver, signupToken, appApplicationId);
 	if (signUpRes.isErr()) {
 		return err(getErrorMessage(signUpRes.error, i18n.t('errors.signupFailed')));
 	}
+	const sessionInfo = signUpRes.value;
 	republishHomeserver({
 		pubky,
 		secretKey,
@@ -568,12 +568,12 @@ export const signUpToHomeserver = async ({
 		dispatch,
 	});
 	dispatch(setHomeserver({ pubky, homeserver }));
-	const saveSessionRes = await saveHomeserverSession({ pubky, sessionInfo: signUpRes.value, dispatch });
+	const saveSessionRes = await saveHomeserverSession({ pubky, sessionInfo, dispatch });
 	if (saveSessionRes.isErr()) {
 		return err(getErrorMessage(saveSessionRes.error, i18n.t('keychain.failedToSetValue')));
 	}
 	dispatch(setSignedUp({ pubky, signedUp: true }));
-	return ok(signUpRes.value);
+	return ok(sessionInfo);
 };
 
 export const signInToHomeserver = async ({
@@ -602,7 +602,7 @@ export const signInToHomeserver = async ({
 		secretKey = secretKeyRes.value.secretKey;
 	}
 	let response: SessionInfo;
-	const signInRes = await signIn(secretKey);
+	const signInRes = await signIn(secretKey, appApplicationId);
 	if (signInRes.isErr()) {
 		const republishRes = await republishHomeserver({
 			pubky,
@@ -615,7 +615,7 @@ export const signInToHomeserver = async ({
 			return err(getErrorMessage(signInRes.error, i18n.t('errors.signInFailed')));
 		}
 		// Attempt to signin now
-		const signInResTwo = await signIn(secretKey);
+		const signInResTwo = await signIn(secretKey, appApplicationId);
 		if (signInResTwo.isErr()) {
 			return err(getErrorMessage(signInResTwo.error, i18n.t('errors.signInFailed')));
 		}

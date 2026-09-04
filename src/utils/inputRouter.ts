@@ -74,7 +74,10 @@ export const routeInput = async (
 		...context,
 		isDeeplink: context.isDeeplink ?? source === 'deeplink',
 		setAddPubkyScreen:
-			context.setAddPubkyScreen ?? ((screenParams): void => showSheet('add-pubky', screenParams)),
+			context.setAddPubkyScreen ??
+			((screenParams): void => {
+				showSheet('add-pubky', screenParams);
+			}),
 	};
 
 	try {

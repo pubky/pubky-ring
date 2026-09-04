@@ -22,3 +22,9 @@ export const sanitizePubkySessions = (state: PubkySliceState): PubkySliceState =
 		]),
 	),
 });
+
+export const sanitizePersistedPubkyState = (state: PubkySliceState): PubkySliceState => ({
+	...sanitizePubkySessions(state),
+	deepLink: pubkyInitialState.deepLink,
+	deepLinkQueue: pubkyInitialState.deepLinkQueue,
+});

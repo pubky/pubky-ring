@@ -1,5 +1,6 @@
-import React, { memo, ReactElement, ReactNode } from 'react';
+import React, { memo, ReactElement, ReactNode, useEffect, useLayoutEffect } from 'react';
 import {
+	BackHandler,
 	Pressable,
 	ScrollView,
 	StyleProp,
@@ -40,6 +41,7 @@ interface SheetScreenProps {
 	headerRight?: ReactNode;
 	showBackButton?: boolean;
 	onBackPress?: () => void;
+	preventBackNavigation?: boolean;
 }
 
 interface SheetProps extends SheetFrameProps, SheetScreenProps {}
@@ -79,15 +81,29 @@ export const SheetScreen = ({
 	headerRight,
 	showBackButton = true,
 	onBackPress,
+	preventBackNavigation,
 }: SheetScreenProps): ReactElement => {
 	const navigation = useNavigation();
 	const isFocused = useIsFocused();
+
+	useLayoutEffect(() => {
+		if (preventBackNavigation === undefined) return;
+		navigation.setOptions({ gestureEnabled: !preventBackNavigation });
+	}, [navigation, preventBackNavigation]);
+
+	useEffect(() => {
+		if (!isFocused || preventBackNavigation === undefined) return;
+		const subscription = BackHandler.addEventListener('hardwareBackPress', () => preventBackNavigation);
+		return () => subscription.remove();
+	}, [isFocused, preventBackNavigation]);
+
 	const hasStackScreenToGoBackTo = useNavigationState(state => {
 		const isRootSheetStack = state.routeNames.some(routeName => routeName.endsWith('Sheet'));
 		return !isRootSheetStack && state.index > 0;
 	});
 	const backPressHandler = onBackPress ?? (hasStackScreenToGoBackTo ? navigation.goBack : undefined);
-	const visibleBackPressHandler = showBackButton && isFocused ? backPressHandler : undefined;
+	const visibleBackPressHandler =
+		showBackButton && !preventBackNavigation && isFocused ? backPressHandler : undefined;
 
 	const titleHeader = (
 		<View style={styles.titleContainer}>

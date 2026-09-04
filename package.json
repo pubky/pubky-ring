@@ -1,6 +1,6 @@
 {
   "name": "pubkyring",
-  "version": "0.0.30",
+  "version": "0.0.32",
   "private": false,
   "scripts": {
     "android": "react-native run-android",

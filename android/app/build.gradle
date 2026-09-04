@@ -105,8 +105,8 @@ android {
         applicationId "to.pubky.ring"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 24
-        versionName "1.17"
+        versionCode 26
+        versionName "1.19"
 
         // splits.abi above only picks which ABIs are compiled from source and which
         // per-ABI APKs are emitted; the universal APK packages every ABI still in the

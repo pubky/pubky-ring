@@ -42,6 +42,7 @@ import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getPubkyDataFromStore } from './store-helpers.ts';
 import { EBackupPreference, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
+import type { TPubkys } from '../types/pubky.ts';
 import {
 	DEFAULT_HOMESERVER,
 	PRODUCTION_APP_HOST,
@@ -54,6 +55,13 @@ import i18n from '../i18n';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
+
+export type RepublishAllHomeserverRecordsSummary = {
+	total: number;
+	succeeded: number;
+	failed: number;
+	skipped: number;
+};
 
 const revokeUnsavedHomeserverSession = async (sessionToken: string): Promise<void> => {
 	const signOutRes = await signOut(sessionToken);
@@ -112,19 +120,72 @@ export const republishHomeserver = async ({
 	homeserver: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
+	console.log(`[republish] Starting for ${pubky} via ${homeserver}`);
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {
+			console.error(`[republish] Failed to load secret key for ${pubky}:`, secretKeyRes.error.message);
 			return err(secretKeyRes.error.message);
 		}
 		secretKey = secretKeyRes.value.secretKey;
 	}
 	const res = await _republishHomeserver(secretKey, homeserver);
 	if (res.isErr()) {
+		console.error(`[republish] Failed for ${pubky} via ${homeserver}:`, res.error.message);
 		return err(res.error.message);
 	}
 	dispatch(setHomeserver({ pubky, homeserver }));
+	console.log(`[republish] Succeeded for ${pubky} via ${homeserver}:`, res.value);
 	return ok(res.value);
+};
+
+export const republishAllHomeserverRecords = async ({
+	pubkys,
+	dispatch,
+}: {
+	pubkys: TPubkys;
+	dispatch: Dispatch;
+}): Promise<RepublishAllHomeserverRecordsSummary> => {
+	const summary: RepublishAllHomeserverRecordsSummary = {
+		total: Object.keys(pubkys).length,
+		succeeded: 0,
+		failed: 0,
+		skipped: 0,
+	};
+
+	console.log(`[republish] Starting batch for ${summary.total} pubkys`);
+	const republishablePubkys = Object.entries(pubkys).filter(([pubky, data]) => {
+		const hasHomeserver = !!data.homeserver;
+		if (!hasHomeserver) {
+			console.log(`[republish] Skipping batch item for ${pubky}: no homeserver`);
+		}
+		return hasHomeserver;
+	});
+	summary.skipped = summary.total - republishablePubkys.length;
+
+	const results = await Promise.all(
+		republishablePubkys.map(async ([pubky, data]) => {
+			const res = await republishHomeserver({
+				pubky,
+				homeserver: data.homeserver,
+				dispatch,
+			});
+
+			if (res.isErr()) {
+				console.error(`[republish] Batch item failed for ${pubky}:`, res.error.message);
+			}
+
+			return res;
+		}),
+	);
+
+	summary.succeeded = results.filter(res => res.isOk()).length;
+	summary.failed = results.length - summary.succeeded;
+
+	console.log(
+		`[republish] Batch finished: ${summary.succeeded} succeeded, ${summary.failed} failed, ${summary.skipped} skipped`,
+	);
+	return summary;
 };
 
 export const createNewPubky = async (dispatch: Dispatch): Promise<Result<string>> => {
@@ -701,13 +762,15 @@ export const performAuth = async ({
 			}
 			const pubkyData = getPubkyDataFromStore(pubky);
 			const { signedUp, homeserver } = pubkyData;
+			let republishedDuringSignup = false;
 			if (!signedUp) {
-				await signUpToHomeserver({
+				const signUpRes = await signUpToHomeserver({
 					pubky,
 					secretKey: secretKeyRes.value.secretKey,
 					homeserver,
 					dispatch,
 				});
+				republishedDuringSignup = signUpRes.isOk();
 			}
 			const secretKey = secretKeyRes.value.secretKey;
 			const authRes = await auth(authUrl, secretKey);
@@ -726,6 +789,9 @@ export const performAuth = async ({
 					console.error('Error processing auth:', authRes.error);
 					return err(getErrorMessage(authRes.error, i18n.t('errors.failedToProcessAuth')));
 				}
+			}
+			if (!republishedDuringSignup && homeserver) {
+				republishHomeserver({ pubky, secretKey, homeserver, dispatch });
 			}
 			return ok('success');
 		})();

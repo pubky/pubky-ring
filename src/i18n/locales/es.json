@@ -87,6 +87,18 @@
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
 		"authorizeForApp": "Autorizar {{appName}}"
 	},
+	"republish": {
+		"title": "Republicar registros",
+		"description": "Actualice sus registros pubky en la DHT para que las apps encuentren sus homeservers.",
+		"all": "Republicar todo",
+		"republishing": "Republicando...",
+		"success": "Republicado",
+		"failed": "Error al republicar",
+		"allFinished": "{{count}} registro del homeserver republicado.",
+		"allFinished_one": "{{count}} registro del homeserver republicado.",
+		"allFinished_other": "{{count}} registros del homeserver republicados.",
+		"allFinishedWithFailures": "{{succeeded}} de {{total}} registros del homeserver republicados."
+	},
 	"import": {
 		"title": "Importar Pubky",
 		"failed": "Importación fallida",

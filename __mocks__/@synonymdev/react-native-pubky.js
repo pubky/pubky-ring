@@ -8,5 +8,8 @@ module.exports = {
 	generateMnemonicPhraseAndKeypair: jest.fn(async () =>
 		err('Mocked react-native-pubky.generateMnemonicPhraseAndKeypair was not configured for this test'),
 	),
+	republishHomeserver: jest.fn(async () =>
+		err('Mocked react-native-pubky.republishHomeserver was not configured for this test'),
+	),
 	signOut: jest.fn(async () => err('Mocked react-native-pubky.signOut was not configured for this test')),
 };

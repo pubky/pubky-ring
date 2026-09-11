@@ -9,6 +9,7 @@
 import { Dispatch } from 'redux';
 import { Dimensions, Share } from 'react-native';
 import { getIsOnline } from './store-helpers.ts';
+import { sanitizeFileName } from './fileName.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { EBackupPreference } from '../types/pubky.ts';
@@ -126,6 +127,10 @@ export const isSecretKeyImport = async (
 	return ok({ isSecretKey, backupPreference });
 };
 
+/**
+ * Generates the file name for a pubky backup, e.g. `pubky-backup-2026-09-06_08-46-07`.
+ * The prefix is sanitized because it is derived from the user-provided pubky name.
+ */
 export const generateBackupFileName = (prefix: string = 'pubky-backup'): string => {
 	// Format: pubky-backup-YYYY-MM-DD_HH-MM-SS
 	const now = new Date();
@@ -141,7 +146,7 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 	const date = `${year}-${month}-${day}`;
 	const time = `${hours}-${minutes}-${seconds}`;
 
-	return `${prefix}-${date}_${time}`;
+	return `${sanitizeFileName(prefix)}-${date}_${time}`;
 };
 
 export const shareData = async (data: string): Promise<void> => {

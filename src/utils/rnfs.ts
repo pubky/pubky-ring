@@ -5,6 +5,7 @@ import { err, ok, Result } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import Share, { ShareOptions } from 'react-native-share';
 import type { ImportFileScreenParams } from '../sheets/types.ts';
+import { sanitizeFileName } from './fileName.ts';
 
 const Buffer = require('buffer').Buffer;
 
@@ -145,8 +146,10 @@ export async function importFile(): Promise<Result<ImportFileScreenParams>> {
 }
 
 export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
-	// Ensure filename ends with .pkarr
-	const fullFilename = filename.endsWith('.pkarr') ? filename : `${filename}.pkarr`;
+	// Sanitize before the file name is turned into a path: a pubky name can contain a path
+	// separator (`The Biz / usr2ios`), which made the write fail with ENOENT.
+	const filenameWithExtension = filename.endsWith('.pkarr') ? filename : `${filename}.pkarr`;
+	const fullFilename = sanitizeFileName(filenameWithExtension);
 
 	try {
 		if (Platform.OS === 'ios') {

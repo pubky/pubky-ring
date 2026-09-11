@@ -146,10 +146,9 @@ export async function importFile(): Promise<Result<ImportFileScreenParams>> {
 }
 
 export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
-	// Sanitize before the file name is turned into a path: a pubky name can contain a path
-	// separator (`The Biz / usr2ios`), which made the write fail with ENOENT.
-	const filenameWithExtension = filename.endsWith('.pkarr') ? filename : `${filename}.pkarr`;
-	const fullFilename = sanitizeFileName(filenameWithExtension);
+	// Sanitize the basename separately so the extension is always preserved.
+	const filenameWithoutExtension = filename.endsWith('.pkarr') ? filename.slice(0, -'.pkarr'.length) : filename;
+	const fullFilename = `${sanitizeFileName(filenameWithoutExtension)}.pkarr`;
 
 	try {
 		if (Platform.OS === 'ios') {

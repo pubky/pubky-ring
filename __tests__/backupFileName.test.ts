@@ -118,6 +118,12 @@ describe('backupPubky', () => {
 		expect(writeFileMock).toHaveBeenCalledWith('/tmp/backup.pkarr', 'Y29udGVudA==', 'base64');
 	});
 
+	it('uses the fallback name while preserving the .pkarr extension', async () => {
+		await backupPubky('Y29udGVudA==', '/');
+
+		expect(writeFileMock).toHaveBeenCalledWith('/tmp/pubky-backup.pkarr', 'Y29udGVudA==', 'base64');
+	});
+
 	it('shares the backup file on iOS and cleans up the temp file', async () => {
 		await backupPubky('Y29udGVudA==', 'identity-backup');
 

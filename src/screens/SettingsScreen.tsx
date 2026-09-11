@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
 import { Alert, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
+import { showToast } from '@synonymdev/react-native-toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { ThemedView } from '../theme/components.ts';
@@ -7,7 +8,7 @@ import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';
 import {
 	resetSettings,
@@ -22,6 +23,7 @@ import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
+import { republishAllHomeserverRecords } from '../utils/pubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -32,8 +34,14 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const pubkyKeys = useSelector(getPubkyKeys);
+	const pubkys = useSelector(getAllPubkys);
 	const hasPubkys = pubkyKeys.length > 0;
+	const hasRepublishablePubkys = useMemo(
+		() => Object.values(pubkys).some(pubky => !!pubky.homeserver),
+		[pubkys],
+	);
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
+	const [republishingAll, setRepublishingAll] = useState(false);
 
 	const navigationAnimationText = useMemo(() => {
 		const animationText = {
@@ -93,74 +101,117 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 		showSheet('migrate', { screen: 'Scanner' });
 	}, []);
 
+	const handleRepublishAllPress = useCallback(async () => {
+		setRepublishingAll(true);
+		try {
+			const summary = await republishAllHomeserverRecords({ pubkys, dispatch });
+			if (summary.failed > 0) {
+				showToast({
+					type: 'error',
+					title: t('republish.failed'),
+					description: t('republish.allFinishedWithFailures', {
+						succeeded: summary.succeeded,
+						total: summary.total - summary.skipped,
+					}),
+				});
+				return;
+			}
+
+			showToast({
+				type: 'success',
+				title: t('republish.success'),
+				description: t('republish.allFinished', {
+					count: summary.succeeded,
+				}),
+			});
+		} finally {
+			setRepublishingAll(false);
+		}
+	}, [dispatch, pubkys, t]);
+
 	return (
 		<SafeAreaView style={styles.container} edges={['bottom']}>
 			<AppHeader title={t('screenTitles.settings')} />
 
 			<View style={styles.content}>
-				<View style={styles.textSection}>
-					<TextXsM>{t('settings.migrateToOtherDevice')}</TextXsM>
-					<TextBaseM style={styles.textSettingValue}>{t('settings.migrateDescription')}</TextBaseM>
-				</View>
+				<View>
+					<View style={styles.textSection}>
+						<TextXsM>{t('settings.migrateToOtherDevice')}</TextXsM>
+						<TextBaseM style={styles.sectionDescription}>{t('settings.migrateDescription')}</TextBaseM>
+					</View>
 
-				<View style={styles.buttonContainer}>
-					{hasPubkys && (
+					<View style={styles.buttonContainer}>
+						{hasPubkys && (
+							<Button
+								style={styles.button}
+								text={t('settings.showQR')}
+								variant="dark"
+								icon={<Qrcode />}
+								testID="ShowQRButton"
+								onPress={() => showSheet('migrate')}
+							/>
+						)}
 						<Button
 							style={styles.button}
-							text={t('settings.showQR')}
+							text={t('settings.scanQR')}
 							variant="dark"
-							icon={<Qrcode />}
-							testID="ShowQRButton"
-							onPress={() => showSheet('migrate')}
+							icon={<Scan />}
+							testID="ScanQRButton"
+							onPress={handleScanQRPress}
 						/>
-					)}
-					<Button
-						style={styles.button}
-						text={t('settings.scanQR')}
-						variant="dark"
-						icon={<Scan />}
-						testID="ScanQRButton"
-						onPress={handleScanQRPress}
-					/>
+					</View>
 				</View>
 
-				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="card">
-						<TouchableOpacity
-							onPress={handleNavigationAnimationPress}
-							style={styles.navigationAnimationButton}
-						>
-							<TextBaseB>{t('settings.navigationAnimation')}</TextBaseB>
-							<TextSmM>{navigationAnimationText}</TextSmM>
-						</TouchableOpacity>
-					</ThemedView>
+				{hasPubkys && (
+					<View>
+						<View style={styles.textSection}>
+							<TextXsM>{t('republish.title')}</TextXsM>
+							<TextBaseM style={styles.sectionDescription}>{t('republish.description')}</TextBaseM>
+						</View>
+						<Button
+							text={republishingAll ? t('republish.republishing') : t('republish.all')}
+							variant="dark"
+							loading={republishingAll}
+							disabled={!hasRepublishablePubkys}
+							testID="RepublishAllButton"
+							onPress={handleRepublishAllPress}
+						/>
+					</View>
 				)}
 
 				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="card">
-						<TouchableOpacity onPress={handleAutoAuthToggle} style={styles.toggleRow}>
-							<TextBaseB>{t('settings.autoAuth')}</TextBaseB>
-							<View style={styles.switchContainer}>
-								<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
-							</View>
-						</TouchableOpacity>
-					</ThemedView>
-				)}
+					<View>
+						<ThemedView style={styles.devButton} colorName="card">
+							<TouchableOpacity
+								style={styles.navigationAnimationButton}
+								onPress={handleNavigationAnimationPress}
+							>
+								<TextBaseB>{t('settings.navigationAnimation')}</TextBaseB>
+								<TextSmM>{navigationAnimationText}</TextSmM>
+							</TouchableOpacity>
+						</ThemedView>
 
-				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="card">
-						<TouchableOpacity onPress={handleShowOnboarding} style={styles.navigationAnimationButton}>
-							<TextBaseB>{t('settings.showOnboarding')}</TextBaseB>
-						</TouchableOpacity>
-					</ThemedView>
-				)}
+						<ThemedView style={styles.devButton} colorName="card">
+							<TouchableOpacity style={styles.toggleRow} onPress={handleAutoAuthToggle}>
+								<TextBaseB>{t('settings.autoAuth')}</TextBaseB>
+								<View style={styles.switchContainer}>
+									<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
+								</View>
+							</TouchableOpacity>
+						</ThemedView>
 
-				{showSecretSettings && (
-					<ThemedView style={styles.section} colorName="card">
-						<TouchableOpacity onPress={handleWipePubkyRing} style={styles.navigationAnimationButton}>
-							<TextBaseB>{t('settings.wipePubkyRing')}</TextBaseB>
-						</TouchableOpacity>
-					</ThemedView>
+						<ThemedView style={styles.devButton} colorName="card">
+							<TouchableOpacity style={styles.navigationAnimationButton} onPress={handleShowOnboarding}>
+								<TextBaseB>{t('settings.showOnboarding')}</TextBaseB>
+							</TouchableOpacity>
+						</ThemedView>
+
+						<ThemedView style={styles.devButton} colorName="card">
+							<TouchableOpacity style={styles.navigationAnimationButton} onPress={handleWipePubkyRing}>
+								<TextBaseB>{t('settings.wipePubkyRing')}</TextBaseB>
+							</TouchableOpacity>
+						</ThemedView>
+					</View>
 				)}
 			</View>
 		</SafeAreaView>
@@ -174,29 +225,21 @@ const styles = StyleSheet.create({
 	content: {
 		paddingTop: HEADER_HEIGHT + 24,
 		paddingHorizontal: 24,
+		gap: 24,
 	},
 	textSection: {
 		marginBottom: 24,
 	},
-	section: {
+	devButton: {
 		marginBottom: 16,
 		borderRadius: 16,
 		overflow: 'hidden',
 	},
-	textSettingValue: {
+	sectionDescription: {
 		marginTop: 10,
 	},
 	switchContainer: {
 		justifyContent: 'center',
-	},
-	themeButton: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-		padding: 16,
-		paddingHorizontal: 16,
-		height: 60,
-		width: '100%',
 	},
 	navigationAnimationButton: {
 		flexDirection: 'row',
@@ -217,7 +260,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 12,
-		marginBottom: 16,
 	},
 	button: {
 		flex: 1,

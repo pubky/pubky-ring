@@ -87,6 +87,18 @@
 		"timeoutError": "The authentication process took too long. Please try again.",
 		"authorizeForApp": "Authorize {{appName}}"
 	},
+	"republish": {
+		"title": "Republish records",
+		"description": "Refresh your pubky records on the DHT so apps can find their homeservers.",
+		"all": "Republish all",
+		"republishing": "Republishing...",
+		"success": "Republished",
+		"failed": "Republish failed",
+		"allFinished": "{{count}} homeserver record republished.",
+		"allFinished_one": "{{count}} homeserver record republished.",
+		"allFinished_other": "{{count}} homeserver records republished.",
+		"allFinishedWithFailures": "{{succeeded}} of {{total}} homeserver records republished."
+	},
 	"import": {
 		"title": "Import Pubky",
 		"failed": "Import Failed",

@@ -2,6 +2,7 @@ import { Platform } from 'react-native';
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import Share from 'react-native-share';
 import { sanitizeFileName } from '../src/utils/fileName';
+import { generateBackupFileName } from '../src/utils/helpers';
 import { backupPubky } from '../src/utils/rnfs';
 
 jest.mock('@dr.pogodin/react-native-fs', () => ({
@@ -34,6 +35,16 @@ jest.mock('react-native-share', () => ({
 	__esModule: true,
 	default: { open: jest.fn(async () => ({ success: true })) },
 }));
+
+jest.mock('../src/utils/store-helpers.ts', () => ({ getIsOnline: jest.fn() }));
+jest.mock('@react-native-community/netinfo', () => ({ __esModule: true, default: {} }));
+jest.mock('../src/store/slices/settingsSlice.ts', () => ({ updateIsOnline: jest.fn() }));
+jest.mock('@synonymdev/react-native-pubky', () => ({
+	mnemonicPhraseToKeypair: jest.fn(),
+	getPublicKeyFromSecretKey: jest.fn(),
+}));
+jest.mock('../src/i18n', () => ({ __esModule: true, default: { t: jest.fn() } }));
+jest.mock('@synonymdev/react-native-toast', () => ({ showToast: jest.fn() }));
 
 const writeFileMock = RNFS.writeFile as jest.MockedFunction<typeof RNFS.writeFile>;
 const shareOpenMock = Share.open as jest.MockedFunction<typeof Share.open>;
@@ -76,6 +87,24 @@ describe('sanitizeFileName', () => {
 	it('is idempotent, so an already sanitized name is left alone', () => {
 		const sanitized = sanitizeFileName('The Biz / usr2ios-backup');
 		expect(sanitizeFileName(sanitized)).toBe(sanitized);
+	});
+
+	it('limits the result by UTF-8 bytes without splitting an emoji', () => {
+		const result = sanitizeFileName('🙂'.repeat(100));
+		expect(Buffer.byteLength(result, 'utf8')).toBeLessThanOrEqual(255);
+		expect(result).toBe('🙂'.repeat(63));
+	});
+});
+
+describe('generateBackupFileName', () => {
+	it('sanitizes its prefix', () => {
+		expect(generateBackupFileName('a/b')).toMatch(/^a-b-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/);
+	});
+
+	it('reserves space for the timestamp and extension', () => {
+		const filename = generateBackupFileName('🙂'.repeat(100));
+		expect(Buffer.byteLength(`${filename}.pkarr`, 'utf8')).toBeLessThanOrEqual(255);
+		expect(filename).toMatch(/-\d{4}-\d{2}-\d{2}_\d{2}-\d{2}-\d{2}$/);
 	});
 });
 
@@ -122,6 +151,21 @@ describe('backupPubky', () => {
 		await backupPubky('Y29udGVudA==', '/');
 
 		expect(writeFileMock).toHaveBeenCalledWith('/tmp/pubky-backup.pkarr', 'Y29udGVudA==', 'base64');
+	});
+
+	it('writes the generated long name without changing the toast name', async () => {
+		const filename = generateBackupFileName('🙂'.repeat(100));
+		await backupPubky('Y29udGVudA==', filename);
+
+		expect(writeFileMock).toHaveBeenCalledWith(`/tmp/${filename}.pkarr`, 'Y29udGVudA==', 'base64');
+	});
+
+	it('caps a long filename passed directly to backupPubky', async () => {
+		await backupPubky('Y29udGVudA==', '🙂'.repeat(100));
+
+		const path = writeFileMock.mock.calls[0][0];
+		expect(Buffer.byteLength(path.split('/').pop()!, 'utf8')).toBeLessThanOrEqual(255);
+		expect(path).toMatch(/\.pkarr$/);
 	});
 
 	it('shares the backup file on iOS and cleans up the temp file', async () => {

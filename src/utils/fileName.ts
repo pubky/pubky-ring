@@ -10,6 +10,7 @@
  */
 // eslint-disable-next-line no-control-regex -- control characters are not valid in file names
 const INVALID_FILE_NAME_CHARS = /[/\\:*?"<>|\u0000-\u001f]/g;
+export const MAX_FILE_NAME_BYTES = 255;
 
 /**
  * Makes a user-provided string safe to use as a file name.
@@ -22,9 +23,23 @@ const INVALID_FILE_NAME_CHARS = /[/\\:*?"<>|\u0000-\u001f]/g;
  *
  * @param fileName String to sanitize.
  * @param fallback Name to use when nothing usable is left.
+ * @param maxBytes Maximum UTF-8 byte length for the result.
  * @returns {string} A file name that is safe on iOS and Android.
  */
-export const sanitizeFileName = (fileName: string, fallback = 'pubky-backup'): string => {
+export const sanitizeFileName = (
+	fileName: string,
+	fallback = 'pubky-backup',
+	maxBytes = MAX_FILE_NAME_BYTES,
+): string => {
 	const sanitized = fileName.replace(INVALID_FILE_NAME_CHARS, '-').replace(/^[\s.-]+|[\s.-]+$/g, '');
-	return sanitized || fallback;
+	let result = '';
+	let byteLength = 0;
+	for (const character of sanitized) {
+		const codePoint = character.codePointAt(0)!;
+		const characterBytes = codePoint <= 0x7f ? 1 : codePoint <= 0x7ff ? 2 : codePoint <= 0xffff ? 3 : 4;
+		if (byteLength + characterBytes > maxBytes) break;
+		result += character;
+		byteLength += characterBytes;
+	}
+	return result.replace(/[\s.-]+$/g, '') || fallback;
 };

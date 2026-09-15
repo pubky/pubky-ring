@@ -9,7 +9,7 @@
 import { Dispatch } from 'redux';
 import { Dimensions, Share } from 'react-native';
 import { getIsOnline } from './store-helpers.ts';
-import { sanitizeFileName } from './fileName.ts';
+import { MAX_FILE_NAME_BYTES, sanitizeFileName } from './fileName.ts';
 import NetInfo from '@react-native-community/netinfo';
 import { updateIsOnline } from '../store/slices/settingsSlice.ts';
 import { EBackupPreference } from '../types/pubky.ts';
@@ -146,7 +146,9 @@ export const generateBackupFileName = (prefix: string = 'pubky-backup'): string 
 	const date = `${year}-${month}-${day}`;
 	const time = `${hours}-${minutes}-${seconds}`;
 
-	return `${sanitizeFileName(prefix)}-${date}_${time}`;
+	const suffix = `-${date}_${time}`;
+	const maxPrefixBytes = MAX_FILE_NAME_BYTES - suffix.length - '.pkarr'.length;
+	return `${sanitizeFileName(prefix, 'pubky-backup', maxPrefixBytes)}${suffix}`;
 };
 
 export const shareData = async (data: string): Promise<void> => {

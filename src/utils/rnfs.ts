@@ -5,7 +5,7 @@ import { err, ok, Result } from '@synonymdev/result';
 import { pick, keepLocalCopy } from '@react-native-documents/picker';
 import Share, { ShareOptions } from 'react-native-share';
 import type { ImportFileScreenParams } from '../sheets/types.ts';
-import { sanitizeFileName } from './fileName.ts';
+import { MAX_FILE_NAME_BYTES, sanitizeFileName } from './fileName.ts';
 
 const Buffer = require('buffer').Buffer;
 
@@ -147,8 +147,10 @@ export async function importFile(): Promise<Result<ImportFileScreenParams>> {
 
 export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
 	// Sanitize the basename separately so the extension is always preserved.
-	const filenameWithoutExtension = filename.endsWith('.pkarr') ? filename.slice(0, -'.pkarr'.length) : filename;
-	const fullFilename = `${sanitizeFileName(filenameWithoutExtension)}.pkarr`;
+	const filenameWithoutExtension = filename.endsWith('.pkarr')
+		? filename.slice(0, -'.pkarr'.length)
+		: filename;
+	const fullFilename = `${sanitizeFileName(filenameWithoutExtension, 'pubky-backup', MAX_FILE_NAME_BYTES - '.pkarr'.length)}.pkarr`;
 
 	try {
 		if (Platform.OS === 'ios') {

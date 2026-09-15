@@ -5,7 +5,7 @@
  */
 
 export { handleAuthAction } from './authAction';
-export { handleImportAction } from './importAction';
+export { executeImportAction, handleImportAction } from './importAction';
 export { handleSignupAction } from './signupAction';
 export { handleInviteAction } from './inviteAction';
 export { handleSessionAction } from './sessionAction';

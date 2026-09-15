@@ -11,13 +11,11 @@ import { getAutoAuth, getNavigationAnimation } from '../store/selectors/settings
 import { getAllPubkys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';
 import {
-	resetSettings,
 	updateAutoAuth,
 	updateNavigationAnimation,
 	updateShowOnboarding,
 } from '../store/slices/settingsSlice.ts';
-import { wipeKeychain } from '../utils/keychain.ts';
-import { resetPubkys } from '../store/slices/pubkysSlice.ts';
+import { wipeRingCustody } from '../utils/wipeRing.ts';
 import { useTranslation } from 'react-i18next';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
@@ -70,10 +68,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			},
 			{
 				text: t('common.yes'),
-				onPress: (): void => {
-					wipeKeychain().then();
-					dispatch(resetSettings());
-					dispatch(resetPubkys());
+				onPress: async (): Promise<void> => {
+					await wipeRingCustody(dispatch);
 					navigation.reset({
 						index: 0,
 						routes: [{ name: 'Onboarding' }],

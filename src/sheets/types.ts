@@ -1,5 +1,5 @@
 import type { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
-import type { InputSource, XCallbackParams } from '../utils/inputParser.ts';
+import type { ImportParams, InputSource, XCallbackParams } from '../utils/inputParser.ts';
 
 export type SheetId =
 	| 'backup'
@@ -91,6 +91,7 @@ export type AddPubkyStackParamList = {
 	ImportOptions: undefined;
 	ImportFileScreen: ImportFileScreenParams;
 	ImportMnemonic: undefined;
+	ConfirmImport: ImportParams;
 	ImportSuccess: AddPubkyImportSuccessParams | AddPubkyMigrationSuccessParams;
 };
 

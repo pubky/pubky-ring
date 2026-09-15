@@ -7,6 +7,7 @@ import AddPubkyReview from '../screens/AddPubkyReview.tsx';
 import AddPubkyImportOptions from '../screens/AddPubkyImportOptions.tsx';
 import AddPubkyImportFileScreen from '../screens/AddPubkyImportFileScreen.tsx';
 import AddPubkyImportMnemonic from '../screens/AddPubkyImportMnemonic.tsx';
+import ConfirmImport from '../screens/ConfirmImport.tsx';
 import AddPubkyImportSuccess from '../screens/AddPubkyImportSuccess.tsx';
 import AddPubkyLoading from '../screens/AddPubkyLoading.tsx';
 import type { AddPubkyStackParamList } from './types.ts';
@@ -24,6 +25,7 @@ const AddPubkySheet = (): ReactElement => {
 				<Stack.Screen name="ImportOptions" component={AddPubkyImportOptions} />
 				<Stack.Screen name="ImportFileScreen" component={AddPubkyImportFileScreen} />
 				<Stack.Screen name="ImportMnemonic" component={AddPubkyImportMnemonic} />
+				<Stack.Screen name="ConfirmImport" component={ConfirmImport} />
 				<Stack.Screen name="ImportSuccess" component={AddPubkyImportSuccess} />
 			</Stack.Navigator>
 		</SheetFrame>

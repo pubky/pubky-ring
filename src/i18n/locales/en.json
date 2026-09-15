@@ -114,7 +114,14 @@
 		"importSuccess": "You successfully imported your Pubky.",
 		"reImportSuccess": "You successfully re-imported your Pubky.",
 		"notValidSecretKey": "Not a valid secret key or recovery phrase.",
-		"unableToImportFile": "Unable to import file."
+		"unableToImportFile": "Unable to import file.",
+		"confirmTitle": "Import this pubky?",
+		"confirmMaterial": "What will be stored",
+		"materialRecoveryPhrase": "A 12-word recovery phrase",
+		"materialSecretKey": "A secret key",
+		"confirmWarning": "An external link wants to import a key onto this device. Continue only if you started this import. Ring will not show the secret on this screen.",
+		"allow": "Import",
+		"approving": "Importing..."
 	},
 	"pubky": {
 		"noSelection": "No Pubky Selected",

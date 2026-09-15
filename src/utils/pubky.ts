@@ -483,26 +483,24 @@ export const savePubky = async ({
 			// If no mnemonic is provided we have to default to the encrypted file.
 			backupPreference = EBackupPreference.encryptedFile;
 		}
-		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken }));
 		const keychainData: IKeychainData = {
 			secretKey,
 			mnemonic,
 		};
-		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		setKeychainValue({
+		const saveRes = await setKeychainValue({
 			key: pubky,
 			value: JSON.stringify(keychainData),
-		}).then(response => {
-			if (response.isErr()) {
-				console.error('Failed to save keychain value');
-				showToast({
-					type: 'error',
-					title: i18n.t('pubkyErrors.failedToSaveToKeychain'),
-					description: response.error.message,
-				});
-				deletePubky(pubky, dispatch).then();
-			}
 		});
+		if (saveRes.isErr()) {
+			const errorMessage = getErrorMessage(saveRes.error, i18n.t('pubkyErrors.failedToSaveToKeychain'));
+			showToast({
+				type: 'error',
+				title: i18n.t('pubkyErrors.failedToSaveToKeychain'),
+				description: errorMessage,
+			});
+			return err(errorMessage);
+		}
+		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken }));
 		return ok(pubky);
 	} catch (e) {
 		console.error('Error saving pubky:', e);
@@ -524,23 +522,21 @@ const isNewFormat = (value: string): boolean => {
 
 export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
 	try {
-		dispatch(removePubky(pubky));
-		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
-			.then(results => {
-				const error = results.find(result => result.isErr());
-				if (error?.isErr()) {
-					showToast({
-						type: 'error',
-						title: i18n.t('pubkyErrors.failedToDelete'),
-						description: error.error.message,
-					});
-					console.error('Failed to delete pubky data from keychain');
-				}
-			})
-			.catch(error => {
-				console.error('Failed to delete pubky data from keychain', error);
+		const results = await Promise.all([
+			resetKeychainValue({ key: pubky }),
+			resetPubkySessionSecrets({ pubky }),
+		]);
+		const error = results.find(result => result.isErr());
+		if (error?.isErr()) {
+			const errorMessage = getErrorMessage(error.error, i18n.t('pubkyErrors.failedToDelete'));
+			showToast({
+				type: 'error',
+				title: i18n.t('pubkyErrors.failedToDelete'),
+				description: errorMessage,
 			});
+			return err(errorMessage);
+		}
+		dispatch(removePubky(pubky));
 		return ok(pubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);

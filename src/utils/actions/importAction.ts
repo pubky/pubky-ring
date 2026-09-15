@@ -18,17 +18,39 @@ import { EBackupPreference } from '../../types/pubky';
 import i18n from '../../i18n';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 
-type ImportActionData = {
+export type ImportActionData = {
 	action: InputAction.Import;
 	params: ImportParams;
 };
 
 /**
- * Handles import action - imports a pubky from recovery phrase or secret key
+ * Deeplink imports must not persist until the user confirms (H10).
+ * In-app flows (scanner, mnemonic screen routed without isDeeplink) import immediately.
+ */
+export const handleImportAction = async (
+	data: ImportActionData,
+	context: RoutedActionContext,
+): Promise<Result<string>> => {
+	if (context.isDeeplink) {
+		context.setAddPubkyScreen({
+			screen: 'ConfirmImport',
+			params: {
+				data: data.params.data,
+				backupPreference: data.params.backupPreference,
+			},
+		});
+		return ok('pending-import-confirmation');
+	}
+
+	return executeImportAction(data, context);
+};
+
+/**
+ * Persists an already-approved import (in-app, or after ConfirmImport).
  *
  * @returns The imported pubky string on success
  */
-export const handleImportAction = async (
+export const executeImportAction = async (
 	data: ImportActionData,
 	context: RoutedActionContext,
 ): Promise<Result<string>> => {

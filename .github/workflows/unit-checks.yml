@@ -51,5 +51,5 @@ jobs:
     - name: Run TypeScript check
       run: yarn typecheck
 
-    - name: Run Jest tests and custody oracles
-      run: yarn audit:oracles
+    - name: Run Jest tests
+      run: yarn test

@@ -13,9 +13,12 @@ import { getIsOnline, getTheme } from './src/store/selectors/settingsSelectors.t
 import SafeAreaView from './src/components/SafeAreaView.tsx';
 import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection } from './src/utils/helpers.ts';
-import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
+import { queueDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
+import { consumeInitialUrls, consumeUrlEvent } from './src/utils/initialUrl.ts';
 import './src/theme/toast';
+
+let deepLinkDeliveryQueue: Promise<void> = Promise.resolve();
 
 function App(): React.JSX.Element {
 	const colorScheme = useColorScheme();
@@ -28,31 +31,53 @@ function App(): React.JSX.Element {
 
 	// Handle deep linking
 	useEffect(() => {
-		// Handle deep link when app is opened from a background state
-		const getInitialURL = async (): Promise<void> => {
-			try {
-				let url = await Linking.getInitialURL();
-				if (url) {
-					handleDeepLink(url);
-				}
-			} catch (err) {
-				console.error('Error getting initial URL:', err);
-			}
-		};
-
 		// Handle the deep link using the unified input parser
 		const handleDeepLink = async (url: string): Promise<void> => {
 			const parsedInput = await parseInput(url, 'deeplink');
-			dispatch(setDeepLink(JSON.stringify(parsedInput)));
+			dispatch(queueDeepLink(JSON.stringify(parsedInput)));
+		};
+
+		const handleDeepLinks = async (urls: string[]): Promise<void> => {
+			for (const url of urls) {
+				try {
+					await handleDeepLink(url);
+				} catch {
+					console.error('Error handling deep link');
+				}
+			}
+		};
+
+		const enqueueDeepLinkDelivery = (urlsPromise: Promise<string[]>, errorMessage: string): void => {
+			const settledUrls = urlsPromise.then(
+				urls => ({ urls }) as const,
+				error => ({ error }) as const,
+			);
+
+			deepLinkDeliveryQueue = deepLinkDeliveryQueue
+				.then(async () => {
+					const result = await settledUrls;
+					if ('error' in result) throw result.error;
+					await handleDeepLinks(result.urls);
+				})
+				.catch(() => console.error(errorMessage));
+		};
+
+		// Handle deep link when app is opened from a background state
+		const handleInitialUrls = (): void => {
+			enqueueDeepLinkDelivery(consumeInitialUrls(), 'Error getting initial URL:');
+		};
+
+		const handleUrlEvent = (url: string): void => {
+			enqueueDeepLinkDelivery(consumeUrlEvent(url), 'Error handling URL event:');
 		};
 
 		// Set up deep link listeners for when app is already running
 		const subscription = Linking.addEventListener('url', ({ url }) => {
-			handleDeepLink(url);
+			handleUrlEvent(url);
 		});
 
 		// Check for initial URL on mount
-		getInitialURL();
+		handleInitialUrls();
 
 		// Cleanup subscription
 		return (): void => {

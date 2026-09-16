@@ -1,9 +1,9 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { StyleSheet, View, TouchableOpacity, ScrollView } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp, NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
-import { hideSheet } from '../sheets/sheetNavigation.tsx';
+import { beginSheetWork, hideSheet } from '../sheets/sheetNavigation.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
 import PubkyCard from '../components/PubkyCard.tsx';
@@ -28,15 +28,18 @@ const PubkyRow = memo(
 	({
 		index,
 		item,
+		disabled,
 		onPress,
 	}: {
 		index: number;
 		item: PubkyItem;
+		disabled: boolean;
 		onPress: (key: string) => void;
 	}): ReactElement => (
 		<TouchableOpacity
 			style={styles.card}
 			testID={`SelectPubkyRow-${index}`}
+			disabled={disabled}
 			onPress={() => onPress(item.key)}
 		>
 			<PubkyCard publicKey={item.key} name={item.value.name} showChevron={true} />
@@ -50,13 +53,18 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 	const { deepLink, source } = route.params;
 	const dispatch = useDispatch();
 	const pubkys = useSelector(getAllPubkys);
+	const [isRoutingDeepLink, setIsRoutingDeepLink] = useState(false);
+	const isMountedRef = useRef(true);
+	const isRoutingDeepLinkRef = useRef(false);
 
 	const clearDeepLink = useCallback((): void => {
 		dispatch(setDeepLink(''));
 	}, [dispatch]);
 
 	useEffect(() => {
+		isMountedRef.current = true;
 		return () => {
+			isMountedRef.current = false;
 			if (source === 'deeplink') {
 				clearDeepLink();
 			}
@@ -76,54 +84,70 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 
 	const onPubkyPress = useCallback(
 		async (pubky: string) => {
-			const parsed = await parseInput(deepLink, source);
+			if (isRoutingDeepLinkRef.current) return;
+			isRoutingDeepLinkRef.current = true;
+			setIsRoutingDeepLink(true);
+			const finishSheetWork = beginSheetWork('auth');
 
-			if (parsed.action === InputAction.Auth && parsed.data.action === InputAction.Auth) {
-				if (getAutoAuthFromStore()) {
-					hideSheet('auth');
-					await routeInputWithContext(parsed, pubky, source, dispatch);
-					return;
-				}
+			try {
+				const parsed = await parseInput(deepLink, source);
+				if (!isMountedRef.current) return;
 
-				const payload = await createConfirmAuthPayload({
-					data: parsed.data,
-					pubky,
-				});
+				if (parsed.action === InputAction.Auth && parsed.data.action === InputAction.Auth) {
+					if (getAutoAuthFromStore()) {
+						try {
+							await routeInputWithContext(parsed, pubky, source, dispatch, false);
+						} finally {
+							if (isMountedRef.current) hideSheet('auth');
+						}
+						return;
+					}
 
-				if (payload.isErr()) {
-					showToast({
-						type: 'error',
-						title: t('common.error'),
-						description: payload.error.message,
+					const payload = await createConfirmAuthPayload({
+						data: parsed.data,
+						pubky,
 					});
+					if (!isMountedRef.current) return;
+
+					if (payload.isErr()) {
+						showToast({
+							type: 'error',
+							title: t('common.error'),
+							description: payload.error.message,
+						});
+						return;
+					}
+
+					navigation.navigate('ConfirmAuth', payload.value);
+					dispatch(setDeepLink(''));
 					return;
 				}
 
-				navigation.navigate('ConfirmAuth', payload.value);
-				dispatch(setDeepLink(''));
-				return;
-			}
+				if (parsed.action === InputAction.Session && parsed.data.action === InputAction.Session) {
+					if (!hasValidSessionCallbacks(parsed.data.params.xCallback)) {
+						showToast({
+							type: 'error',
+							title: t('common.error'),
+							description: t('session.invalidCallback'),
+						});
+						return;
+					}
 
-			if (parsed.action === InputAction.Session && parsed.data.action === InputAction.Session) {
-				if (!hasValidSessionCallbacks(parsed.data.params.xCallback)) {
-					showToast({
-						type: 'error',
-						title: t('common.error'),
-						description: t('session.invalidCallback'),
+					navigation.navigate('ConfirmSession', {
+						pubky,
+						xCallback: parsed.data.params.xCallback,
 					});
+					dispatch(setDeepLink(''));
 					return;
 				}
 
-				navigation.navigate('ConfirmSession', {
-					pubky,
-					xCallback: parsed.data.params.xCallback,
-				});
-				dispatch(setDeepLink(''));
-				return;
+				hideSheet('auth');
+				await routeInputWithContext(parsed, pubky, source, dispatch);
+			} finally {
+				finishSheetWork();
+				isRoutingDeepLinkRef.current = false;
+				if (isMountedRef.current) setIsRoutingDeepLink(false);
 			}
-
-			hideSheet('auth');
-			await routeInputWithContext(parsed, pubky, source, dispatch);
 		},
 		[deepLink, dispatch, navigation, source, t],
 	);
@@ -134,9 +158,9 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 
 	const renderItem = useCallback(
 		(info: { item: PubkyItem; index: number }): ReactElement => (
-			<PubkyRow index={info.index} item={info.item} onPress={onPubkyPress} />
+			<PubkyRow index={info.index} item={info.item} disabled={isRoutingDeepLink} onPress={onPubkyPress} />
 		),
-		[onPubkyPress],
+		[isRoutingDeepLink, onPubkyPress],
 	);
 
 	const keyExtractor = useCallback((item: PubkyItem): string => item.key, []);
@@ -155,7 +179,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 			</View>
 
 			<View style={styles.buttonContainer}>
-				<Button size="large" text={t('common.cancel')} onPress={closeSheet} />
+				<Button size="large" text={t('common.cancel')} disabled={isRoutingDeepLink} onPress={closeSheet} />
 			</View>
 		</SheetScreen>
 	);

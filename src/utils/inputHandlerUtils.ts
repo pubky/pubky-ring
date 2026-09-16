@@ -7,7 +7,7 @@
 
 import { Dispatch } from 'redux';
 import { showToast } from '@synonymdev/react-native-toast';
-import { showSheet } from '../sheets/sheetNavigation.tsx';
+import { showSheet, waitForPendingSheetNavigation } from '../sheets/sheetNavigation.tsx';
 import { ParsedInput, InputSource, InputAction } from './inputParser';
 import { routeInput, ActionContext } from './inputRouter';
 import { setDeepLink } from '../store/slices/pubkysSlice';
@@ -22,6 +22,7 @@ export const routeInputWithContext = async (
 	effectivePubky: string | undefined,
 	source: InputSource,
 	dispatch: Dispatch,
+	waitForSheetNavigation = true,
 ): Promise<void> => {
 	// Clear deeplink BEFORE processing to prevent re-triggering
 	if (source === 'deeplink') {
@@ -43,6 +44,7 @@ export const routeInputWithContext = async (
 			parsed.action === InputAction.DirectSignup ||
 			parsed.action === InputAction.Invite
 		) {
+			if (waitForSheetNavigation) await waitForPendingSheetNavigation();
 			return;
 		}
 
@@ -67,15 +69,17 @@ export const routeInputWithContext = async (
 			autoHide: false,
 		});
 	}
+
+	if (waitForSheetNavigation) await waitForPendingSheetNavigation();
 };
 
-export const showAuthPubkySelection = (parsed: ParsedInput, source: InputSource): void => {
+export const showAuthPubkySelection = (parsed: ParsedInput, source: InputSource): Promise<void> => {
 	const selectPubky = {
 		deepLink: parsed.rawInput,
 		source,
 	};
 
-	showSheet('auth', {
+	return showSheet('auth', {
 		screen: 'SelectPubky',
 		params: selectPubky,
 	});

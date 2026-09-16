@@ -30,6 +30,21 @@ let pendingSheetNavigation: Array<{
 	routeName: SheetRouteName;
 	params?: SheetParamsById[SheetId];
 }> = [];
+const noPendingSheet = Promise.resolve();
+let latestSheetCompletion: Promise<void> = noPendingSheet;
+const resetSheetWaiters = new Set<() => void>();
+const activeSheetWork = new Map<SheetRouteName, number>();
+const sheetWorkListeners = new Set<() => void>();
+
+export class SheetNavigationResetError extends Error {
+	constructor() {
+		super('Sheet navigation was reset');
+		this.name = 'SheetNavigationResetError';
+	}
+}
+
+export const isSheetNavigationResetError = (error: unknown): error is SheetNavigationResetError =>
+	error instanceof SheetNavigationResetError;
 
 export const navigationRef = createNavigationContainerRef<RootStackParamList>();
 
@@ -79,6 +94,95 @@ const getRootSheetRouteIndex = (routeName: SheetRouteName): number => {
 	return -1;
 };
 
+const waitForSheetRouteToClose = (routeName: SheetRouteName): Promise<void> =>
+	new Promise((resolve, reject) => {
+		let observedRoute = pendingSheetNavigation.some(item => item.routeName === routeName);
+		let settled = false;
+		let navigationWasReset = false;
+		let unsubscribe = (): void => {};
+		const cleanup = (): void => {
+			unsubscribe();
+			resetSheetWaiters.delete(resetWaiter);
+			sheetWorkListeners.delete(checkRoute);
+		};
+		const resetWaiter = (): void => {
+			if (settled) return;
+			navigationWasReset = true;
+			checkRoute(false);
+		};
+
+		const checkRoute = (fromStateEvent = false): void => {
+			if (settled) return;
+			const isPending = pendingSheetNavigation.some(item => item.routeName === routeName);
+			const isVisible = navigationRef.isReady() && getRootSheetRouteIndex(routeName) !== -1;
+
+			if (isPending || isVisible) {
+				observedRoute = true;
+			}
+			if ((activeSheetWork.get(routeName) ?? 0) > 0) return;
+
+			if (navigationWasReset) {
+				settled = true;
+				cleanup();
+				reject(new SheetNavigationResetError());
+				return;
+			}
+
+			if (isPending || isVisible) {
+				return;
+			}
+
+			if (observedRoute || fromStateEvent) {
+				settled = true;
+				cleanup();
+				resolve();
+			}
+		};
+
+		resetSheetWaiters.add(resetWaiter);
+		sheetWorkListeners.add(checkRoute);
+
+		unsubscribe = navigationRef.addListener('state', () => {
+			Promise.resolve().then(() => checkRoute(true));
+		});
+		checkRoute(false);
+	});
+
+export const beginSheetWork = (id: SheetId): (() => void) => {
+	const routeName = sheetRouteById[id];
+	activeSheetWork.set(routeName, (activeSheetWork.get(routeName) ?? 0) + 1);
+	sheetWorkListeners.forEach(listener => listener());
+
+	let finished = false;
+	return () => {
+		if (finished) return;
+		finished = true;
+		const remainingWork = (activeSheetWork.get(routeName) ?? 1) - 1;
+		if (remainingWork > 0) {
+			activeSheetWork.set(routeName, remainingWork);
+		} else {
+			activeSheetWork.delete(routeName);
+		}
+		sheetWorkListeners.forEach(listener => listener());
+	};
+};
+
+export const resetSheetNavigationState = (): void => {
+	pendingSheetNavigation = [];
+	latestSheetCompletion = noPendingSheet;
+	const waiters = [...resetSheetWaiters];
+	waiters.forEach(reset => reset());
+};
+
+export const waitForPendingSheetNavigation = async (): Promise<void> => {
+	let pending = latestSheetCompletion;
+	while (pending !== noPendingSheet) {
+		await pending;
+		if (pending === latestSheetCompletion) return;
+		pending = latestSheetCompletion;
+	}
+};
+
 const closeRootSheetRoute = (routeName: SheetRouteName): boolean => {
 	if (!navigationRef.isReady()) {
 		return false;
@@ -110,9 +214,20 @@ const closeRootSheetRoute = (routeName: SheetRouteName): boolean => {
 	return true;
 };
 
-export const showSheet = <TSheetId extends SheetId>(...args: ShowSheetArgs<TSheetId>): void => {
+export const showSheet = <TSheetId extends SheetId>(...args: ShowSheetArgs<TSheetId>): Promise<void> => {
 	const [id, params] = args;
-	navigateToSheet(sheetRouteById[id], params);
+	const routeName = sheetRouteById[id];
+	navigateToSheet(routeName, params);
+
+	const completion = waitForSheetRouteToClose(routeName);
+	latestSheetCompletion = completion;
+	const clearLatestCompletion = (): void => {
+		if (latestSheetCompletion === completion) {
+			latestSheetCompletion = noPendingSheet;
+		}
+	};
+	completion.then(clearLatestCompletion, clearLatestCompletion);
+	return completion;
 };
 
 export const hideSheet = (id: SheetId): void => {

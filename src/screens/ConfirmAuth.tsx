@@ -1,8 +1,8 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
-import { hideSheet } from '../sheets/sheetNavigation.tsx';
+import { beginSheetWork, hideSheet } from '../sheets/sheetNavigation.tsx';
 import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { sleep } from '../utils/helpers.ts';
@@ -63,6 +63,8 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 	const { pubky, authUrl, authDetails, xCallback } = route.params;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
+	const authorizingRef = useRef(false);
+	const isMountedRef = useRef(true);
 	const dispatch = useDispatch();
 
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, pubky));
@@ -75,6 +77,13 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 		transform: [{ scale: checkScale.value }],
 		position: 'absolute',
 	}));
+
+	useEffect(() => {
+		isMountedRef.current = true;
+		return () => {
+			isMountedRef.current = false;
+		};
+	}, []);
 
 	// Reset state and animations when pubky changes
 	useEffect(() => {
@@ -106,9 +115,22 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 		hideSheet('auth');
 	}, []);
 
-	const handleDeny = useCallback(() => {
-		openXCancel(xCallback);
+	const handleDeny = useCallback(async () => {
+		if (authorizingRef.current) {
+			handleClose();
+			return;
+		}
+		authorizingRef.current = true;
+		const finishSheetWork = beginSheetWork('auth');
+		setAuthorizing(true);
 		handleClose();
+		try {
+			await openXCancel(xCallback);
+		} finally {
+			authorizingRef.current = false;
+			finishSheetWork();
+			if (isMountedRef.current) setAuthorizing(false);
+		}
 	}, [xCallback, handleClose]);
 
 	useEffect(() => {
@@ -124,6 +146,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 	}, [authorizing, handleDeny, isAuthorized]);
 
 	const handleAuth = useCallback(async () => {
+		if (authorizingRef.current) return;
+		authorizingRef.current = true;
+		const finishSheetWork = beginSheetWork('auth');
 		setAuthorizing(true);
 		try {
 			const res = await performAuth({
@@ -140,10 +165,10 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				await openXError(xCallback, 'AUTH_FAILED', res.error.message);
 				return;
 			}
-			setIsAuthorized(true);
+			if (isMountedRef.current) setIsAuthorized(true);
 			if (xCallback?.xSuccess) {
 				await sleep(FADE_DURATION + 300);
-				handleClose();
+				if (isMountedRef.current) handleClose();
 				await openXSuccess(xCallback);
 			}
 		} catch (e: unknown) {
@@ -162,7 +187,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			console.error('Auth error:', error);
 			await openXError(xCallback, 'AUTH_ERROR', errorMsg);
 		} finally {
-			setAuthorizing(false);
+			authorizingRef.current = false;
+			finishSheetWork();
+			if (isMountedRef.current) setAuthorizing(false);
 		}
 	}, [authUrl, xCallback, dispatch, handleClose, pubky, t]);
 
@@ -188,6 +215,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			titleTestID="confirm-auth-title"
 			showBottomSafeAreaInset={false}
 			headerRight={headerProgress}
+			preventBackNavigation={authorizing || isAuthorized}
 		>
 			<PermissionCard style={styles.permissionsCard}>
 				<TextXsM

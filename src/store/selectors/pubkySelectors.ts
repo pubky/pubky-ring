@@ -1,5 +1,5 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { Pubky, PubkySession } from '../../types/pubky';
+import { DeepLinkQueueItem, Pubky, PubkySession } from '../../types/pubky';
 import { RootState } from '../../types';
 import { truncateStr } from '../../utils/pubky.ts';
 
@@ -81,6 +81,10 @@ export const getHomeScreenData = createSelector(
 
 export const getDeepLink = (state: RootState): string => {
 	return state.pubky.deepLink;
+};
+
+export const getDeepLinkQueue = (state: RootState): DeepLinkQueueItem[] => {
+	return state.pubky.deepLinkQueue;
 };
 
 /**

@@ -20,6 +20,7 @@ const mockGetKeychainValue = jest.fn();
 const mockSetKeychainValue = jest.fn();
 const mockResetKeychainValue = jest.fn();
 const mockResetPubkySessionSecrets = jest.fn();
+const mockSetSessionSecret = jest.fn();
 const mockGetAllKeychainKeys = jest.fn();
 const mockGetPubkyDataFromStore = jest.fn();
 const mockMirrorSharedPubky = jest.fn();
@@ -78,6 +79,7 @@ jest.mock('../src/utils/keychain', () => ({
 	resetKeychainValue: (...args: unknown[]) => mockResetKeychainValue(...args),
 	resetPubkySessionSecrets: (...args: unknown[]) => mockResetPubkySessionSecrets(...args),
 	setKeychainValue: (...args: unknown[]) => mockSetKeychainValue(...args),
+	setSessionSecret: (...args: unknown[]) => mockSetSessionSecret(...args),
 }));
 
 jest.mock('../src/utils/sharedPubky.ts', () => {
@@ -134,6 +136,7 @@ beforeEach(() => {
 	mockSetKeychainValue.mockResolvedValue(ok('saved'));
 	mockResetKeychainValue.mockResolvedValue(ok(true));
 	mockResetPubkySessionSecrets.mockResolvedValue(ok(true));
+	mockSetSessionSecret.mockResolvedValue(ok(true));
 	mockGetAllKeychainKeys.mockResolvedValue([]);
 	mockGetPubkyDataFromStore.mockReturnValue(undefined);
 	mockMirrorSharedPubky.mockResolvedValue(true);
@@ -364,4 +367,74 @@ test('never signs a borrowed identity up to a locally edited homeserver', async 
 	expect(signUpMock).not.toHaveBeenCalled();
 	expect(republishHomeserverMock).not.toHaveBeenCalled();
 	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('connects a Bitkit identity whose homeserver record cannot be resolved', async () => {
+	// Nothing resolvable means the connect flow has no homeserver to hand to sign-in, and signing in
+	// does not need one: it resolves the homeserver from the key itself.
+	let connected = false;
+	const dispatch = jest.fn();
+	dispatch.mockImplementation((action: { type: string }) => {
+		if (action.type === 'pubky/addPubky') connected = true;
+		if (action.type === 'pubky/removePubky') connected = false;
+		return action;
+	});
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		connected && pubky === OWNED ? { ...ringPubky(), sourceApp: 'to.bitkit' } : undefined,
+	);
+	getSharedPubkyCredentialMock.mockResolvedValue({
+		...bitkitIdentity,
+		pubky: OWNED,
+		secretKey: SECRET,
+	});
+	getHomeserverMock.mockResolvedValue(err(new Error('No homeserver found')));
+	signInMock.mockResolvedValue(ok({ pubky: OWNED, capabilities: ['/pub/:rw'], grant_secret: 'grant' }));
+
+	const result = await connectSharedPubky({
+		identity: { ...bitkitIdentity, pubky: OWNED },
+		dispatch,
+	});
+
+	expect(result.isOk()).toBe(true);
+	expect(signInMock).toHaveBeenCalled();
+	expect(republishHomeserverMock).not.toHaveBeenCalled();
+	// Only a genuinely resolved homeserver is stored; the sign-in fallback is never persisted.
+	expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'pubky/setHomeserver' }));
+	expect(dispatch).toHaveBeenCalledWith(
+		expect.objectContaining({ type: 'pubky/addPubky', payload: expect.objectContaining({ pubky: OWNED }) }),
+	);
+});
+
+test('never republishes a borrowed identity connected without a homeserver record', async () => {
+	// Sign-in receives a fallback homeserver so the connect can proceed, and a failed sign-in falls
+	// back to republishing. That fallback must never be signed into the owner's pkarr record.
+	let connected = false;
+	const dispatch = jest.fn();
+	dispatch.mockImplementation((action: { type: string }) => {
+		if (action.type === 'pubky/addPubky') connected = true;
+		if (action.type === 'pubky/removePubky') connected = false;
+		return action;
+	});
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		connected && pubky === OWNED ? { ...ringPubky(), sourceApp: 'to.bitkit' } : undefined,
+	);
+	getSharedPubkyCredentialMock.mockResolvedValue({
+		...bitkitIdentity,
+		pubky: OWNED,
+		secretKey: SECRET,
+	});
+	getHomeserverMock.mockResolvedValue(ok(''));
+	signInMock.mockResolvedValue(err(new Error('homeserver unavailable')));
+	republishHomeserverMock.mockResolvedValue(ok('republished'));
+
+	const result = await connectSharedPubky({
+		identity: { ...bitkitIdentity, pubky: OWNED },
+		dispatch,
+	});
+
+	expect(result.isErr()).toBe(true);
+	expect(republishHomeserverMock).not.toHaveBeenCalled();
+	expect(dispatch).toHaveBeenCalledWith(
+		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
+	);
 });

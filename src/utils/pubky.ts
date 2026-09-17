@@ -862,7 +862,11 @@ const connectSharedPubkyUnlocked = async ({
 
 	const signInResult = await signInToHomeserver({
 		pubky,
-		homeserver,
+		// Signing in resolves the homeserver from the key itself, so an identity whose record could
+		// not be resolved must not be blocked here. The fallback is only a non-empty placeholder and
+		// is deliberately not persisted: the store keeps a genuinely resolved homeserver or nothing.
+		// The one path that would publish it, republishHomeserver, is refused for borrowed keys.
+		homeserver: homeserver || DEFAULT_HOMESERVER,
 		secretKey: credential.secretKey,
 		dispatch,
 	});
@@ -978,7 +982,9 @@ export const signInToHomeserver = async ({
 }): Promise<Result<SessionInfo>> => {
 	if (!homeserver) {
 		const pubkyData = getPubkyDataFromStore(pubky);
-		homeserver = pubkyData?.homeserver ?? DEFAULT_HOMESERVER;
+		// `||`, not `??`: an identity with no resolvable homeserver record is stored with an empty
+		// string, which must fall back the same way a missing entry does.
+		homeserver = pubkyData?.homeserver || DEFAULT_HOMESERVER;
 		if (!homeserver) {
 			return err(i18n.t('pubkyErrors.homeserverNotFound'));
 		}

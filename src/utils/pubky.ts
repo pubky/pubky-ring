@@ -628,17 +628,25 @@ const clearPubkySessionSecrets = async (candidates: Array<string | undefined>): 
 /**
  * Drops a borrowed identity Ring can no longer use. The source app keeps its own key, but the
  * homeserver session secrets Ring created now live in the Keychain rather than in Redux, so
- * removing the Redux entry alone would strand them. Callers must already know the identity is
- * borrowed. Disconnecting still wins over a Keychain failure: an unusable borrowed profile must
- * never stay active, so a failure is reported and the reference is dropped regardless.
+ * removing the Redux entry alone would strand them. Disconnecting still wins over a Keychain
+ * failure: an unusable borrowed profile must never stay active, so a failure is reported and the
+ * reference is dropped regardless.
+ *
+ * Serialized like every other identity-lifecycle change, so it cannot interleave with a connect
+ * that is still persisting the identity's session secrets. The lifecycle gate is not reentrant,
+ * so this must never be called from inside it.
  */
-export const disconnectBorrowedPubky = async (pubky: string, dispatch: Dispatch): Promise<void> => {
-	const res = await clearPubkySessionSecrets([pubky, normalizePubkyReference(pubky)]);
-	if (res.isErr()) {
-		console.error('Failed to clear session secrets for disconnected identity', res.error.message);
-	}
-	dispatch(removePubky(pubky));
-};
+export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Promise<void> =>
+	withPubkyIdentityLifecycle(async () => {
+		// Re-checked under the gate: a concurrent flow may have removed the identity, or replaced
+		// it with a Ring-owned one that this must not touch.
+		if (getPubkyDataFromStore(pubky)?.sourceApp !== BITKIT_SOURCE_APP) return;
+		const res = await clearPubkySessionSecrets([pubky, normalizePubkyReference(pubky)]);
+		if (res.isErr()) {
+			console.error('Failed to clear session secrets for disconnected identity', res.error.message);
+		}
+		dispatch(removePubky(pubky));
+	});
 
 export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<string>> =>
 	withPubkyIdentityLifecycle(() => deletePubkyUnlocked(pubky, dispatch));

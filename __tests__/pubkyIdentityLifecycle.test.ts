@@ -1,6 +1,11 @@
 import { err, ok } from '@synonymdev/result';
 import { EBackupPreference, Pubky } from '../src/types/pubky';
-import { deletePubky, reconcileOwnedSharedPubkys, savePubky } from '../src/utils/pubky';
+import {
+	deletePubky,
+	disconnectBorrowedPubky,
+	reconcileOwnedSharedPubkys,
+	savePubky,
+} from '../src/utils/pubky';
 
 const OWNED = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 const SECRET = '0123456789abcdef'.repeat(4);
@@ -222,6 +227,29 @@ test('keeps session secrets revocable when deleting the private record fails', a
 
 	expect(result.isErr()).toBe(true);
 	// The identity survives the aborted delete, so its homeserver grants must still be revocable.
+	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('drops a borrowed reference along with its session secrets', async () => {
+	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
+	const dispatch = jest.fn();
+
+	await disconnectBorrowedPubky(OWNED, dispatch);
+
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: OWNED });
+	expect(dispatch).toHaveBeenCalledWith(
+		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
+	);
+});
+
+test('never disconnects an identity that is no longer borrowed', async () => {
+	// A concurrent flow may have removed the identity or replaced it with a Ring-owned one.
+	mockGetPubkyDataFromStore.mockReturnValue(ringPubky());
+	const dispatch = jest.fn();
+
+	await disconnectBorrowedPubky(OWNED, dispatch);
+
 	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
 	expect(dispatch).not.toHaveBeenCalled();
 });

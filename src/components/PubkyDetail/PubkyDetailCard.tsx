@@ -8,6 +8,7 @@ import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
 import { isBorrowedPubkyData } from '../../utils/sharedPubky.ts';
+import BitkitBadge from '../BitkitBadge.tsx';
 
 interface PubkyDetailCardProps {
 	index: number;
@@ -60,6 +61,7 @@ export const PubkyDetailCard = memo(
 					buttonText={buttonText}
 					buttonIcon={buttonIcon}
 					isButtonLoading={isQRLoading}
+					badge={isBorrowed ? <BitkitBadge /> : undefined}
 					onButtonPress={handleButtonPress}
 				/>
 

@@ -635,11 +635,13 @@ const isNewFormat = (value: string): boolean => {
  * (possibly prefixed) key or its canonical form, so every known variant is cleared.
  */
 const clearPubkySessionSecrets = async (candidates: Array<string | undefined>): Promise<Result<boolean>> => {
+	// Every variant is attempted even after a failure, so one bad entry never shields the rest.
+	let firstError: Error | undefined;
 	for (const candidate of new Set(candidates.filter((value): value is string => !!value))) {
 		const res = await resetPubkySessionSecrets({ pubky: candidate });
-		if (res.isErr()) return err(res.error);
+		if (res.isErr()) firstError = firstError ?? res.error;
 	}
-	return ok(true);
+	return firstError ? err(firstError) : ok(true);
 };
 
 /**
@@ -696,7 +698,13 @@ const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<R
 			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 		}
 		const privateServices = await getPrivatePubkyServices(normalizedPubky);
-		for (const service of privateServices) {
+		// The record stored under the Redux key is the only one the read paths use, so it goes
+		// last: an abort part-way through never leaves a listed identity whose key is unreadable.
+		const orderedServices = [
+			...privateServices.filter(service => service !== storedPubkyKey),
+			...privateServices.filter(service => service === storedPubkyKey),
+		];
+		for (const service of orderedServices) {
 			const response = await resetKeychainValue({ key: service });
 			if (response.isErr()) {
 				showToast({
@@ -707,19 +715,20 @@ const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<R
 				return err(response.error.message);
 			}
 		}
-		// Session secrets go once the canonical private record is confirmed gone, and still before
-		// the Redux entry that lists them. Every earlier abort therefore leaves the identity intact
-		// with its sessions still revocable, and no abort can strand secret material.
+		// Session secrets go once every private record has been deleted, so every earlier abort
+		// leaves the identity intact with its sessions still revocable. From here the private key
+		// no longer exists: the Redux entry is removed even if this cleanup fails, because a
+		// keyless identity must never stay on screen. The failure is reported, not fatal.
 		const sessionSecretsRes = await clearPubkySessionSecrets([storedPubkyKey, normalizedPubky, pubky]);
+		dispatch(removePubky(storedPubkyKey));
 		if (sessionSecretsRes.isErr()) {
+			console.error('Failed to clear session secrets for deleted identity', sessionSecretsRes.error.message);
 			showToast({
 				type: 'error',
 				title: i18n.t('pubkyErrors.failedToDelete'),
 				description: sessionSecretsRes.error.message,
 			});
-			return err(sessionSecretsRes.error.message);
 		}
-		dispatch(removePubky(storedPubkyKey));
 		return ok(normalizedPubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);

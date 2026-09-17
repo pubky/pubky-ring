@@ -1,5 +1,6 @@
 import { err, ok } from '@synonymdev/result';
 import { getHomeserver, republishHomeserver, signIn, signUp } from '@synonymdev/react-native-pubky';
+import { showToast } from '@synonymdev/react-native-toast';
 import { EBackupPreference, Pubky } from '../src/types/pubky';
 import {
 	connectSharedPubky,
@@ -121,6 +122,7 @@ const getHomeserverMock = getHomeserver as jest.MockedFunction<typeof getHomeser
 const republishHomeserverMock = republishHomeserver as jest.MockedFunction<typeof republishHomeserver>;
 const signInMock = signIn as jest.MockedFunction<typeof signIn>;
 const signUpMock = signUp as jest.MockedFunction<typeof signUp>;
+const showToastMock = showToast as jest.MockedFunction<typeof showToast>;
 const getSharedPubkyCredentialMock = getSharedPubkyCredential as jest.MockedFunction<
 	typeof getSharedPubkyCredential
 >;
@@ -243,6 +245,44 @@ test('keeps session secrets revocable when deleting the private record fails', a
 	// The identity survives the aborted delete, so its homeserver grants must still be revocable.
 	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
 	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('deletes the record the read paths use last so a partial failure keeps a usable key', async () => {
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === OWNED ? ringPubky() : undefined,
+	);
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED, `pubky${OWNED}`]);
+	mockResetKeychainValue.mockImplementation(async ({ key }: { key: string }) =>
+		key === OWNED ? ok(true) : err(new Error('keychain locked')),
+	);
+	const dispatch = jest.fn();
+
+	const result = await deletePubky(OWNED, dispatch);
+
+	expect(result.isErr()).toBe(true);
+	// The identity stays listed, so the record stored under its Redux key must survive.
+	expect(mockResetKeychainValue).toHaveBeenCalledTimes(1);
+	expect(mockResetKeychainValue).toHaveBeenCalledWith({ key: `pubky${OWNED}` });
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('removes the identity once its private key is gone even if session cleanup fails', async () => {
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === OWNED ? ringPubky() : undefined,
+	);
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED]);
+	mockResetPubkySessionSecrets.mockResolvedValue(err(new Error('keychain locked')));
+	const dispatch = jest.fn();
+
+	const result = await deletePubky(OWNED, dispatch);
+
+	// The private key is irreversibly deleted, so a keyless identity must not stay listed.
+	expect(mockResetKeychainValue).toHaveBeenCalledWith({ key: OWNED });
+	expect(dispatch).toHaveBeenCalledWith(
+		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
+	);
+	expect(result.isOk()).toBe(true);
+	expect(showToastMock).toHaveBeenCalledWith(expect.objectContaining({ type: 'error' }));
 });
 
 test('drops a borrowed reference along with its session secrets', async () => {

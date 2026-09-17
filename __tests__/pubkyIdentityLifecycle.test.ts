@@ -81,8 +81,7 @@ jest.mock('../src/utils/sharedPubky.ts', () => {
 		BITKIT_SOURCE_APP: 'to.bitkit',
 		RING_SOURCE_APP: 'app.pubkyring',
 		getSharedPubkyCredential: jest.fn(),
-		isValidSharedSecretKey: (value: unknown) =>
-			typeof value === 'string' && /^[0-9a-f]{64}$/.test(value),
+		isValidSharedSecretKey: (value: unknown) => typeof value === 'string' && /^[0-9a-f]{64}$/.test(value),
 		mirrorSharedPubky: (...args: unknown[]) => mockMirrorSharedPubky(...args),
 		normalizeSharedPubky: normalize,
 		privatePubkyService: (service: string) => {
@@ -122,7 +121,9 @@ beforeEach(() => {
 });
 
 test('re-imports an existing Ring identity instead of rejecting it as a duplicate', async () => {
-	mockGetPubkyDataFromStore.mockImplementation((pubky: string) => (pubky === OWNED ? ringPubky() : undefined));
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === OWNED ? ringPubky() : undefined,
+	);
 	mockGetAllKeychainKeys.mockResolvedValue([OWNED]);
 	const dispatch = jest.fn();
 
@@ -175,7 +176,9 @@ test('does not prune shared mirrors after a private keychain read failure', asyn
 });
 
 test('deletes every private service for a normalized identity before removing Redux state', async () => {
-	mockGetPubkyDataFromStore.mockImplementation((pubky: string) => (pubky === OWNED ? ringPubky() : undefined));
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === OWNED ? ringPubky() : undefined,
+	);
 	mockGetAllKeychainKeys.mockResolvedValue([OWNED, `pubky${OWNED}`]);
 	const dispatch = jest.fn();
 
@@ -205,4 +208,20 @@ test('disconnects a Bitkit identity without deleting either key store', async ()
 	expect(dispatch).toHaveBeenCalledWith(
 		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
 	);
+});
+
+test('keeps session secrets revocable when deleting the private record fails', async () => {
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === OWNED ? ringPubky() : undefined,
+	);
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED]);
+	mockResetKeychainValue.mockResolvedValue(err(new Error('keychain locked')));
+	const dispatch = jest.fn();
+
+	const result = await deletePubky(OWNED, dispatch);
+
+	expect(result.isErr()).toBe(true);
+	// The identity survives the aborted delete, so its homeserver grants must still be revocable.
+	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
 });

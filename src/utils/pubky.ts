@@ -670,17 +670,6 @@ const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<R
 		if (!(await removeSharedPubky(normalizedPubky))) {
 			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 		}
-		// Session secrets go before the canonical record: a failure here aborts the delete with
-		// the identity still intact and retryable, instead of orphaning secret material.
-		const sessionSecretsRes = await clearPubkySessionSecrets([storedPubkyKey, normalizedPubky, pubky]);
-		if (sessionSecretsRes.isErr()) {
-			showToast({
-				type: 'error',
-				title: i18n.t('pubkyErrors.failedToDelete'),
-				description: sessionSecretsRes.error.message,
-			});
-			return err(sessionSecretsRes.error.message);
-		}
 		const privateServices = await getPrivatePubkyServices(normalizedPubky);
 		for (const service of privateServices) {
 			const response = await resetKeychainValue({ key: service });
@@ -692,6 +681,18 @@ const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<R
 				});
 				return err(response.error.message);
 			}
+		}
+		// Session secrets go once the canonical private record is confirmed gone, and still before
+		// the Redux entry that lists them. Every earlier abort therefore leaves the identity intact
+		// with its sessions still revocable, and no abort can strand secret material.
+		const sessionSecretsRes = await clearPubkySessionSecrets([storedPubkyKey, normalizedPubky, pubky]);
+		if (sessionSecretsRes.isErr()) {
+			showToast({
+				type: 'error',
+				title: i18n.t('pubkyErrors.failedToDelete'),
+				description: sessionSecretsRes.error.message,
+			});
+			return err(sessionSecretsRes.error.message);
 		}
 		dispatch(removePubky(storedPubkyKey));
 		return ok(normalizedPubky);

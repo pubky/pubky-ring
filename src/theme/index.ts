@@ -30,6 +30,9 @@ export type ThemeColorName = {
 
 export const BLUE_RADIAL_GRADIENT = ['rgba(0, 133, 255, 0.32)', 'transparent'];
 
+/** Outline of a surface that is offered but not adopted yet, e.g. an unconnected Bitkit pubky. */
+export const DASHED_BORDER_COLOR = 'rgba(255, 255, 255, 0.32)';
+
 export const accentColors = {
 	blue: '#0085FF',
 	// Bitkit brand orange, used to mark identities that stay managed by Bitkit.

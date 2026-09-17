@@ -2,7 +2,7 @@ import React, { memo } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import type { PressableProps, StyleProp, ViewStyle } from 'react-native';
 import { useTheme } from 'styled-components/native';
-import { Theme, ThemeColorName } from '../theme';
+import { DASHED_BORDER_COLOR, Theme, ThemeColorName } from '../theme';
 import { TextSmB, TextXsB } from '../theme/typography';
 import { ActivityIndicator } from '../theme/components.ts';
 import { shadows } from '../theme/shadows.ts';
@@ -23,6 +23,8 @@ type ButtonProps = {
 	variant?: ButtonVariant;
 	icon?: React.ReactNode;
 	rightIcon?: React.ReactNode;
+	/** Draws the outline as a dashed line, marking an action that is offered but not adopted yet. */
+	dashed?: boolean;
 	loading?: boolean;
 	disabled?: PressableProps['disabled'];
 	style?: StyleProp<ViewStyle>;
@@ -38,6 +40,7 @@ const Button = ({
 	variant = 'outline',
 	icon,
 	rightIcon,
+	dashed = false,
 	loading = false,
 	disabled = false,
 	style,
@@ -69,7 +72,11 @@ const Button = ({
 
 	const pressedStyle = { backgroundColor: pressedColors[variant] };
 	const backgroundStyle = { backgroundColor: backgroundColors[variant] };
-	const borderStyle = borderColors[variant] ? { borderWidth: 1, borderColor: borderColors[variant] } : null;
+	// A dashed outline is drawn even on variants that have no border of their own (e.g. secondary).
+	const borderColor = dashed ? (borderColors[variant] ?? DASHED_BORDER_COLOR) : borderColors[variant];
+	const borderStyle: ViewStyle | null = borderColor
+		? { borderWidth: 1, borderColor, borderStyle: dashed ? 'dashed' : 'solid' }
+		: null;
 
 	const renderIcon = (iconNode: React.ReactNode): React.ReactNode => {
 		if (!React.isValidElement<IconProps>(iconNode) || iconNode.type === React.Fragment) {

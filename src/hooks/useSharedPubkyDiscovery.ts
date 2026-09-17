@@ -2,8 +2,12 @@ import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { getBorrowedPubkyKeys, getOwnedPubkyKeys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
-import { removePubky } from '../store/slices/pubkysSlice.ts';
-import { getProfileAvatar, getProfileInfo, reconcileOwnedSharedPubkys } from '../utils/pubky.ts';
+import {
+	disconnectBorrowedPubky,
+	getProfileAvatar,
+	getProfileInfo,
+	reconcileOwnedSharedPubkys,
+} from '../utils/pubky.ts';
 import { getStore } from '../utils/store-helpers.ts';
 import { discoverSharedPubkys, SharedPubkyDiscovery, SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 
@@ -38,7 +42,7 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 			// Fail closed: a borrowed profile cannot remain active when its source can no longer
 			// supply the credential. Ring-owned private identities are never affected.
 			for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
-				dispatch(removePubky(borrowedPubky));
+				await disconnectBorrowedPubky(borrowedPubky, dispatch);
 			}
 			return;
 		}
@@ -47,7 +51,7 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
 			if (!discoveredKeys.has(borrowedPubky)) {
 				// The source app/item disappeared. Clear only Ring's reference and local session.
-				dispatch(removePubky(borrowedPubky));
+				await disconnectBorrowedPubky(borrowedPubky, dispatch);
 			}
 		}
 

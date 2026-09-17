@@ -618,6 +618,21 @@ const clearPubkySessionSecrets = async (candidates: Array<string | undefined>): 
 	return ok(true);
 };
 
+/**
+ * Drops a borrowed identity Ring can no longer use. The source app keeps its own key, but the
+ * homeserver session secrets Ring created now live in the Keychain rather than in Redux, so
+ * removing the Redux entry alone would strand them. Callers must already know the identity is
+ * borrowed. Disconnecting still wins over a Keychain failure: an unusable borrowed profile must
+ * never stay active, so a failure is reported and the reference is dropped regardless.
+ */
+export const disconnectBorrowedPubky = async (pubky: string, dispatch: Dispatch): Promise<void> => {
+	const res = await clearPubkySessionSecrets([pubky, normalizePubkyReference(pubky)]);
+	if (res.isErr()) {
+		console.error('Failed to clear session secrets for disconnected identity', res.error.message);
+	}
+	dispatch(removePubky(pubky));
+};
+
 export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<string>> =>
 	withPubkyIdentityLifecycle(() => deletePubkyUnlocked(pubky, dispatch));
 
@@ -722,7 +737,7 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 				sourceApp: BITKIT_SOURCE_APP,
 			});
 			if (!credential) {
-				store.dispatch(removePubky(pubky));
+				await disconnectBorrowedPubky(pubky, store.dispatch);
 				return err(i18n.t('pubkyErrors.secretKeyNotFoundInKeychain'));
 			}
 			return ok({ secretKey: credential.secretKey, mnemonic: '' });

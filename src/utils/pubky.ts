@@ -671,6 +671,31 @@ export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Prom
 		return true;
 	});
 
+/**
+ * Drops the Ring-owned identities whose private key record no longer exists, for a wipe that
+ * could not delete every record. The read paths use only the record stored under the Redux key,
+ * so an identity without it is keyless and must never stay listed. One whose record survived
+ * stays, which keeps the list truthful and the wipe retryable. Must run inside the identity
+ * lifecycle gate, so reconciliation cannot interleave with it.
+ */
+export const removeKeylessPubkys = async ({
+	ownedPubkys,
+	dispatch,
+}: {
+	ownedPubkys: string[];
+	dispatch: Dispatch;
+}): Promise<void> => {
+	try {
+		const remainingServices = new Set(await getAllKeychainKeys());
+		for (const pubky of ownedPubkys) {
+			if (!remainingServices.has(pubky)) dispatch(removePubky(pubky));
+		}
+	} catch (error) {
+		// Without a readable keychain listing nothing can be proven keyless.
+		console.error('Failed to list the keychain after a partial wipe', error);
+	}
+};
+
 export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<string>> =>
 	withPubkyIdentityLifecycle(() => deletePubkyUnlocked(pubky, dispatch));
 

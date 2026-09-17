@@ -7,6 +7,7 @@ import {
 	deletePubky,
 	disconnectBorrowedPubky,
 	reconcileOwnedSharedPubkys,
+	removeKeylessPubkys,
 	savePubky,
 	signInToHomeserver,
 	signUpToHomeserver,
@@ -455,5 +456,26 @@ test('never falls back to the default homeserver for a Ring-owned identity store
 	expect(result.isErr()).toBe(true);
 	expect(signInMock).not.toHaveBeenCalled();
 	expect(republishHomeserverMock).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('drops only the identities a partial wipe left without a private key', async () => {
+	// A wipe deletes records in parallel, so a failure can leave some keys already destroyed.
+	const SURVIVOR = 'o4dksfbqk85ogzdb5osziw6befigbuxmuxkuxq8434q89uj56uyy';
+	mockGetAllKeychainKeys.mockResolvedValue([SURVIVOR, `pubky-session:${OWNED}:session-id`]);
+	const dispatch = jest.fn();
+
+	await removeKeylessPubkys({ ownedPubkys: [OWNED, SURVIVOR], dispatch });
+
+	expect(dispatch).toHaveBeenCalledTimes(1);
+	expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: OWNED });
+});
+
+test('keeps every identity listed when the keychain cannot be read after a partial wipe', async () => {
+	mockGetAllKeychainKeys.mockRejectedValue(new Error('keychain unavailable'));
+	const dispatch = jest.fn();
+
+	await removeKeylessPubkys({ ownedPubkys: [OWNED], dispatch });
+
 	expect(dispatch).not.toHaveBeenCalled();
 });

@@ -23,7 +23,7 @@ import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
-import { republishAllHomeserverRecords } from '../utils/pubky.ts';
+import { removeKeylessPubkys, republishAllHomeserverRecords } from '../utils/pubky.ts';
 import { clearOwnedSharedPubkys, withPubkyIdentityLifecycle } from '../utils/sharedPubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -76,7 +76,13 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				onPress: async (): Promise<void> => {
 					const wiped = await withPubkyIdentityLifecycle(async () => {
 						// Shared-first removal preserves the canonical private source on failure.
-						if (!(await clearOwnedSharedPubkys()) || !(await wipeKeychain())) return false;
+						if (!(await clearOwnedSharedPubkys())) return false;
+						if (!(await wipeKeychain())) {
+							// The wipe deletes records in parallel, so a failure can leave some private
+							// keys already destroyed. Those identities must not stay listed.
+							await removeKeylessPubkys({ ownedPubkys: ownedPubkyKeys, dispatch });
+							return false;
+						}
 						// Verify absence again while reconciliation is still excluded.
 						return await clearOwnedSharedPubkys();
 					});
@@ -94,7 +100,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				style: 'destructive',
 			},
 		]);
-	}, [dispatch, navigation, t]);
+	}, [dispatch, navigation, ownedPubkyKeys, t]);
 
 	const handleShowOnboarding = useCallback(() => {
 		dispatch(updateShowOnboarding({ showOnboarding: true }));

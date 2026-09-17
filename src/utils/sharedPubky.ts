@@ -1,9 +1,17 @@
 import { NativeModules, Platform } from 'react-native';
 import { getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
+import type { Pubky } from '../types/pubky.ts';
 
 export const SHARED_PUBKY_PROTOCOL_VERSION = 1 as const;
 export const RING_SOURCE_APP = 'app.pubkyring' as const;
 export const BITKIT_SOURCE_APP = 'to.bitkit' as const;
+
+/**
+ * A borrowed identity's canonical private key belongs to another app, so Ring never persists,
+ * exports or re-homes it. Single source of truth for that check across the UI.
+ */
+export const isBorrowedPubkyData = (data?: Pick<Pubky, 'sourceApp'> | null): boolean =>
+	data?.sourceApp === BITKIT_SOURCE_APP;
 
 export type SharedPubkySourceApp = typeof RING_SOURCE_APP | typeof BITKIT_SOURCE_APP;
 

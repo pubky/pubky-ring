@@ -7,6 +7,7 @@ import { shareData } from '../../utils/helpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
+import { isBorrowedPubkyData } from '../../utils/sharedPubky.ts';
 
 interface PubkyDetailCardProps {
 	index: number;
@@ -43,7 +44,7 @@ export const PubkyDetailCard = memo(
 
 		const buttonIcon = pubkyData.signedUp ? <Scan /> : undefined;
 		const buttonText = pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup');
-		const isBorrowed = pubkyData.sourceApp === 'to.bitkit';
+		const isBorrowed = isBorrowedPubkyData(pubkyData);
 
 		const showActionIcons = fontScale <= 1;
 		const shareIcon = showActionIcons ? <Share /> : undefined;

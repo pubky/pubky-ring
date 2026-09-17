@@ -3,6 +3,7 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { truncateStr } from '../utils/pubky.ts';
+import { isBorrowedPubkyData } from '../utils/sharedPubky.ts';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { Text2Xl, TextBaseB, TextXsSb } from '../theme/typography';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
@@ -131,7 +132,7 @@ const PubkyBox = ({
 						pubkyName={pubkyName}
 						publicKey={publicKey}
 						isBackedUp={pubkyData.isBackedUp}
-						isBorrowed={pubkyData.sourceApp === 'to.bitkit'}
+						isBorrowed={isBorrowedPubkyData(pubkyData)}
 						sessionsCount={sessionsCount}
 					/>
 

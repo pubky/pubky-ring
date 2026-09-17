@@ -306,6 +306,12 @@ test('never signs a borrowed identity up to a locally edited homeserver', async 
 	// The edit sheet lets any identity's homeserver be changed, and signing up publishes a new
 	// homeserver record for the key, which only the owning app may do.
 	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
+	// A readable credential, so that without the ownership gate the signup would go through.
+	getSharedPubkyCredentialMock.mockResolvedValue({
+		...bitkitIdentity,
+		pubky: OWNED,
+		secretKey: SECRET,
+	});
 	const dispatch = jest.fn();
 
 	const result = await signUpToHomeserver({

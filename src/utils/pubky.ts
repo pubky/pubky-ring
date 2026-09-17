@@ -145,13 +145,13 @@ export const republishHomeserver = async ({
 	homeserver: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
-	console.log(`[republish] Starting for ${pubky} via ${homeserver}`);
 	// Central ownership gate. The individual call sites keep their own checks as defence in depth,
 	// but recovery paths such as a failed sign-in must not reach the signer either.
 	if (isBorrowedPubky(pubky)) {
 		console.log(`[republish] Refusing for ${pubky}: borrowed identity`);
 		return err(i18n.t('pubkyErrors.homeserverManagedBySourceApp'));
 	}
+	console.log(`[republish] Starting for ${pubky} via ${homeserver}`);
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {

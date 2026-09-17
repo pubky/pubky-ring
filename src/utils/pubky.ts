@@ -988,9 +988,14 @@ export const signInToHomeserver = async ({
 }): Promise<Result<SessionInfo>> => {
 	if (!homeserver) {
 		const pubkyData = getPubkyDataFromStore(pubky);
-		// `||`, not `??`: an identity with no resolvable homeserver record is stored with an empty
-		// string, which must fall back the same way a missing entry does.
-		homeserver = pubkyData?.homeserver || DEFAULT_HOMESERVER;
+		// A borrowed identity with no resolvable homeserver record is stored with an empty string,
+		// which `??` does not catch. Only a borrowed identity gets that fallback: the recovery path
+		// below republishes this value, which is refused for borrowed keys but would re-home a
+		// Ring-owned identity to the default homeserver. An owned key keeps failing closed.
+		homeserver =
+			pubkyData?.sourceApp === BITKIT_SOURCE_APP
+				? pubkyData.homeserver || DEFAULT_HOMESERVER
+				: (pubkyData?.homeserver ?? DEFAULT_HOMESERVER);
 		if (!homeserver) {
 			return err(i18n.t('pubkyErrors.homeserverNotFound'));
 		}

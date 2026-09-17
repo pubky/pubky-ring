@@ -8,6 +8,7 @@ import {
 	disconnectBorrowedPubky,
 	reconcileOwnedSharedPubkys,
 	savePubky,
+	signInToHomeserver,
 	signUpToHomeserver,
 } from '../src/utils/pubky';
 import { getSharedPubkyCredential } from '../src/utils/sharedPubky';
@@ -439,4 +440,20 @@ test('never republishes a borrowed identity connected without a homeserver recor
 	expect(dispatch).toHaveBeenCalledWith(
 		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
 	);
+});
+
+test('never falls back to the default homeserver for a Ring-owned identity stored without one', async () => {
+	// A failed sign-in republishes the homeserver it was given. Substituting the default for an
+	// owned key's empty record would let that recovery path re-home the identity.
+	mockGetPubkyDataFromStore.mockReturnValue(ringPubky());
+	signInMock.mockResolvedValue(err(new Error('homeserver unavailable')));
+	republishHomeserverMock.mockResolvedValue(ok('republished'));
+	const dispatch = jest.fn();
+
+	const result = await signInToHomeserver({ pubky: OWNED, secretKey: SECRET, dispatch });
+
+	expect(result.isErr()).toBe(true);
+	expect(signInMock).not.toHaveBeenCalled();
+	expect(republishHomeserverMock).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
 });

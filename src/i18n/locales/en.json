@@ -368,6 +368,8 @@
 		"title": "Use a Bitkit profile",
 		"description": "Use this profile in Pubky Ring while its key stays managed by Bitkit.",
 		"source": "Managed by Bitkit",
+		"badge": "Bitkit pubky",
+		"fallbackName": "pubky #{{number}} (Bitkit)",
 		"useFromBitkit": "Use from Bitkit",
 		"add": "Use",
 		"added": "Connected",

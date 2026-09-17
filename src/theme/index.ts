@@ -18,6 +18,7 @@ export interface Theme {
 
 		// Accent colors
 		blue: string;
+		orange: string;
 		pubkyApp: string;
 		danger: string;
 	};
@@ -31,6 +32,8 @@ export const BLUE_RADIAL_GRADIENT = ['rgba(0, 133, 255, 0.32)', 'transparent'];
 
 export const accentColors = {
 	blue: '#0085FF',
+	// Bitkit brand orange, used to mark identities that stay managed by Bitkit.
+	orange: '#FF4400',
 	pubkyApp: '#C8FF00',
 	danger: '#FF0000',
 };

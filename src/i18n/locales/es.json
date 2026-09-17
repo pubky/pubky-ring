@@ -369,6 +369,8 @@
 		"title": "Usar un perfil de Bitkit",
 		"description": "Usa este perfil en Pubky Ring mientras Bitkit sigue gestionando su clave.",
 		"source": "Gestionada por Bitkit",
+		"badge": "Pubky de Bitkit",
+		"fallbackName": "pubky #{{number}} (Bitkit)",
 		"useFromBitkit": "Usar desde Bitkit",
 		"add": "Usar",
 		"added": "Conectada",

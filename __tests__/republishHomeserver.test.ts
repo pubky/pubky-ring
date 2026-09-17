@@ -52,6 +52,13 @@ jest.mock('../src/utils/store-helpers', () => ({
 	getPubkyDataFromStore: jest.fn(),
 }));
 
+// pubky.ts now dispatches to the singleton store when a borrowed identity's credential is gone,
+// so the real store (and its ESM-only dependencies) must stay out of this suite.
+jest.mock('../src/store', () => ({
+	__esModule: true,
+	store: { dispatch: jest.fn() },
+}));
+
 const nativeRepublishHomeserverMock = nativeRepublishHomeserver as jest.MockedFunction<
 	typeof nativeRepublishHomeserver
 >;

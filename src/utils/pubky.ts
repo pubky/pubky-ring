@@ -1078,7 +1078,11 @@ export const performAuth = async ({
 					return err(getErrorMessage(authRes.error, i18n.t('errors.failedToProcessAuth')));
 				}
 			}
-			if (!republishedDuringSignup && homeserver) {
+			// A borrowed identity's homeserver record belongs to the app that owns the key, and the
+			// value cached here is only as fresh as the moment it was connected. Authorising a third
+			// party must not overwrite the owner's record with it.
+			const isBorrowed = pubkyData?.sourceApp === BITKIT_SOURCE_APP;
+			if (!republishedDuringSignup && homeserver && !isBorrowed) {
 				republishHomeserver({ pubky, secretKey, homeserver, dispatch });
 			}
 			return ok('success');

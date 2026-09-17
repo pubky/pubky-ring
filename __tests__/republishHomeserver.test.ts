@@ -1,9 +1,15 @@
 import { ok, err } from '@synonymdev/result';
-import { republishHomeserver as nativeRepublishHomeserver } from '@synonymdev/react-native-pubky';
-import { republishAllHomeserverRecords } from '../src/utils/pubky';
+import { auth, republishHomeserver as nativeRepublishHomeserver } from '@synonymdev/react-native-pubky';
+import { performAuth, republishAllHomeserverRecords } from '../src/utils/pubky';
 import { getKeychainValue } from '../src/utils/keychain';
 import { setHomeserver } from '../src/store/slices/pubkysSlice';
-import { EBackupPreference, TPubkys } from '../src/types/pubky';
+import { getPubkyDataFromStore } from '../src/utils/store-helpers';
+import {
+	BITKIT_SOURCE_APP,
+	SHARED_PUBKY_PROTOCOL_VERSION,
+	getSharedPubkyCredential,
+} from '../src/utils/sharedPubky';
+import { EBackupPreference, Pubky, TPubkys } from '../src/types/pubky';
 
 jest.mock('@synonymdev/react-native-pubky');
 
@@ -52,6 +58,12 @@ jest.mock('../src/utils/store-helpers', () => ({
 	getPubkyDataFromStore: jest.fn(),
 }));
 
+// Only the native bridge is faked: the source-app constants and the lifecycle gate stay real.
+jest.mock('../src/utils/sharedPubky', () => ({
+	...jest.requireActual('../src/utils/sharedPubky'),
+	getSharedPubkyCredential: jest.fn(),
+}));
+
 // pubky.ts now dispatches to the singleton store when a borrowed identity's credential is gone,
 // so the real store (and its ESM-only dependencies) must stay out of this suite.
 jest.mock('../src/store', () => ({
@@ -63,6 +75,11 @@ const nativeRepublishHomeserverMock = nativeRepublishHomeserver as jest.MockedFu
 	typeof nativeRepublishHomeserver
 >;
 const getKeychainValueMock = getKeychainValue as jest.MockedFunction<typeof getKeychainValue>;
+const authMock = auth as jest.MockedFunction<typeof auth>;
+const getPubkyDataFromStoreMock = getPubkyDataFromStore as jest.MockedFunction<typeof getPubkyDataFromStore>;
+const getSharedPubkyCredentialMock = getSharedPubkyCredential as jest.MockedFunction<
+	typeof getSharedPubkyCredential
+>;
 
 const createPubkys = (): TPubkys => ({
 	pubkyOne: {
@@ -219,5 +236,63 @@ describe('republishAllHomeserverRecords', () => {
 			failed: 0,
 			skipped: 1,
 		});
+	});
+});
+
+describe('performAuth', () => {
+	const dispatch = jest.fn();
+	const authUrl = 'pubkyauth:///?relay=https://relay.example';
+
+	const createPubky = (sourceApp: Pubky['sourceApp']): Pubky => ({
+		name: '',
+		homeserver: 'pubky://homeserver-one',
+		signedUp: true,
+		signupToken: '',
+		image: '',
+		sessions: [],
+		backupPreference: EBackupPreference.encryptedFile,
+		isBackedUp: true,
+		sourceApp,
+	});
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		// The auth timeout races a 20s timer that is never meant to win here.
+		jest.useFakeTimers();
+		jest.spyOn(console, 'log').mockImplementation(() => undefined);
+		jest.spyOn(console, 'error').mockImplementation(() => undefined);
+		getKeychainValueMock.mockImplementation(async ({ key }) =>
+			ok(JSON.stringify({ secretKey: `${key}-secret`, mnemonic: '' })),
+		);
+		getSharedPubkyCredentialMock.mockResolvedValue({
+			version: SHARED_PUBKY_PROTOCOL_VERSION,
+			sourceApp: BITKIT_SOURCE_APP,
+			pubky: 'borrowedPubky',
+			secretKey: 'borrowedPubky-secret',
+		});
+		nativeRepublishHomeserverMock.mockResolvedValue(ok('Homeserver republished successfully'));
+		authMock.mockResolvedValue(ok(['session-token']));
+	});
+
+	afterEach(() => {
+		jest.useRealTimers();
+		jest.restoreAllMocks();
+	});
+
+	it('republishes an owned identity after authorising', async () => {
+		getPubkyDataFromStoreMock.mockReturnValue(createPubky('app.pubkyring'));
+
+		await expect(performAuth({ pubky: 'ownedPubky', authUrl, dispatch })).resolves.toEqual(ok('success'));
+
+		expect(nativeRepublishHomeserverMock).toHaveBeenCalledWith('ownedPubky-secret', 'pubky://homeserver-one');
+	});
+
+	it('never republishes a borrowed identity after authorising', async () => {
+		getPubkyDataFromStoreMock.mockReturnValue(createPubky('to.bitkit'));
+
+		await expect(performAuth({ pubky: 'borrowedPubky', authUrl, dispatch })).resolves.toEqual(ok('success'));
+
+		expect(authMock).toHaveBeenCalledWith(authUrl, 'borrowedPubky-secret');
+		expect(nativeRepublishHomeserverMock).not.toHaveBeenCalled();
 	});
 });

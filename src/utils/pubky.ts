@@ -654,17 +654,21 @@ const clearPubkySessionSecrets = async (candidates: Array<string | undefined>): 
  * Serialized like every other identity-lifecycle change, so it cannot interleave with a connect
  * that is still persisting the identity's session secrets. The lifecycle gate is not reentrant,
  * so this must never be called from inside it.
+ *
+ * Resolves `true` only when this call is the one that removed the identity, so a caller can
+ * explain the removal exactly once however many flows raced to detect it.
  */
-export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Promise<void> =>
+export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Promise<boolean> =>
 	withPubkyIdentityLifecycle(async () => {
 		// Re-checked under the gate: a concurrent flow may have removed the identity, or replaced
 		// it with a Ring-owned one that this must not touch.
-		if (getPubkyDataFromStore(pubky)?.sourceApp !== BITKIT_SOURCE_APP) return;
+		if (getPubkyDataFromStore(pubky)?.sourceApp !== BITKIT_SOURCE_APP) return false;
 		const res = await clearPubkySessionSecrets([pubky, normalizePubkyReference(pubky)]);
 		if (res.isErr()) {
 			console.error('Failed to clear session secrets for disconnected identity', res.error.message);
 		}
 		dispatch(removePubky(pubky));
+		return true;
 	});
 
 export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<string>> =>
@@ -779,8 +783,10 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 				sourceApp: BITKIT_SOURCE_APP,
 			});
 			if (!credential) {
+				// Fail closed, then explain: the identity has just been dropped, so the caller's
+				// error message is the only chance to tell the user why it disappeared.
 				await disconnectBorrowedPubky(pubky, store.dispatch);
-				return err(i18n.t('pubkyErrors.secretKeyNotFoundInKeychain'));
+				return err(i18n.t('reuseSharedPubky.noLongerShared'));
 			}
 			return ok({ secretKey: credential.secretKey, mnemonic: '' });
 		}
@@ -1090,9 +1096,14 @@ export const performAuth = async ({
 			if (!pubky) {
 				return err(i18n.t('pubkyErrors.pubkyRequiredForAuth'));
 			}
+			// Read before the fetch: a borrowed credential that has gone away auto-disconnects the
+			// identity, so afterwards the store no longer knows it was borrowed.
+			const wasBorrowed = getPubkyDataFromStore(pubky)?.sourceApp === BITKIT_SOURCE_APP;
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
-				return err(i18n.t('pubkyErrors.failedToGetSecretKey'));
+				// A borrowed identity fails here because its source app stopped sharing it, which is
+				// worth explaining; an owned one keeps the generic keychain message.
+				return err(wasBorrowed ? secretKeyRes.error.message : i18n.t('pubkyErrors.failedToGetSecretKey'));
 			}
 			const pubkyData = getPubkyDataFromStore(pubky);
 			const { signedUp, homeserver } = pubkyData;

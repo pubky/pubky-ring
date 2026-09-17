@@ -376,7 +376,9 @@
 		"added": "Connected",
 		"disconnect": "Disconnect",
 		"disconnectPubky": "Disconnect Pubky",
-		"disconnectConfirm": "Do you want to disconnect this Pubky from Ring? It will remain in Bitkit."
+		"disconnectConfirm": "Do you want to disconnect this Pubky from Ring? It will remain in Bitkit.",
+		"noLongerSharedTitle": "Pubky disconnected",
+		"noLongerShared": "Bitkit is no longer sharing this pubky. It was removed from Pubky Ring."
 	},
 	"loading": {
 		"modalTitle": "Configuring Pubky",

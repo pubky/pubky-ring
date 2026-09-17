@@ -25,10 +25,16 @@ jest.mock('../src/i18n', () => ({
 	},
 }));
 
-jest.mock('../src/utils/keychain', () => ({
-	__esModule: true,
-	getKeychainValue: jest.fn(),
-}));
+jest.mock('../src/utils/keychain', () => {
+	// A borrowed identity whose credential is gone is disconnected before the error is returned,
+	// and that clears its session secrets.
+	const { ok: okResult } = jest.requireActual('@synonymdev/result');
+	return {
+		__esModule: true,
+		getKeychainValue: jest.fn(),
+		resetPubkySessionSecrets: jest.fn(async () => okResult(true)),
+	};
+});
 
 jest.mock('../src/utils/helpers.ts', () => ({
 	__esModule: true,
@@ -294,5 +300,25 @@ describe('performAuth', () => {
 
 		expect(authMock).toHaveBeenCalledWith(authUrl, 'borrowedPubky-secret');
 		expect(nativeRepublishHomeserverMock).not.toHaveBeenCalled();
+	});
+
+	it('explains that a borrowed identity is no longer shared when its credential is gone', async () => {
+		getPubkyDataFromStoreMock.mockReturnValue(createPubky('to.bitkit'));
+		getSharedPubkyCredentialMock.mockResolvedValue(undefined);
+
+		await expect(performAuth({ pubky: 'borrowedPubky', authUrl, dispatch })).resolves.toEqual(
+			err('reuseSharedPubky.noLongerShared'),
+		);
+		// Nothing is signed with a key Ring no longer has.
+		expect(authMock).not.toHaveBeenCalled();
+	});
+
+	it('keeps the generic secret key message for an owned identity', async () => {
+		getPubkyDataFromStoreMock.mockReturnValue(createPubky('app.pubkyring'));
+		getKeychainValueMock.mockResolvedValue(err('keychain locked'));
+
+		await expect(performAuth({ pubky: 'ownedPubky', authUrl, dispatch })).resolves.toEqual(
+			err('pubkyErrors.failedToGetSecretKey'),
+		);
 	});
 });

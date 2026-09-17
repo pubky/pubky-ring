@@ -377,7 +377,9 @@
 		"added": "Conectada",
 		"disconnect": "Desconectar",
 		"disconnectPubky": "Desconectar Pubky",
-		"disconnectConfirm": "¿Quieres desconectar este Pubky de Ring? Permanecerá en Bitkit."
+		"disconnectConfirm": "¿Quieres desconectar este Pubky de Ring? Permanecerá en Bitkit.",
+		"noLongerSharedTitle": "Pubky desconectado",
+		"noLongerShared": "Bitkit ya no comparte este pubky. Se eliminó de Pubky Ring."
 	},
 	"loading": {
 		"modalTitle": "Configuración de Pubky",

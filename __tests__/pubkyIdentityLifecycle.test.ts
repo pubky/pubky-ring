@@ -292,7 +292,8 @@ test('drops a borrowed reference along with its session secrets', async () => {
 	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
 	const dispatch = jest.fn();
 
-	await disconnectBorrowedPubky(OWNED, dispatch);
+	// Reports the removal so the caller can explain it exactly once.
+	await expect(disconnectBorrowedPubky(OWNED, dispatch)).resolves.toBe(true);
 
 	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: OWNED });
 	expect(dispatch).toHaveBeenCalledWith(
@@ -305,7 +306,8 @@ test('never disconnects an identity that is no longer borrowed', async () => {
 	mockGetPubkyDataFromStore.mockReturnValue(ringPubky());
 	const dispatch = jest.fn();
 
-	await disconnectBorrowedPubky(OWNED, dispatch);
+	// Reports that it removed nothing, so a racing caller stays quiet.
+	await expect(disconnectBorrowedPubky(OWNED, dispatch)).resolves.toBe(false);
 
 	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
 	expect(dispatch).not.toHaveBeenCalled();

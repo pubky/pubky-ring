@@ -1,6 +1,7 @@
 import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useDispatch } from 'react-redux';
+import { showToast } from '@synonymdev/react-native-toast';
 import { getBorrowedPubkyKeys, getOwnedPubkyKeys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import {
 	disconnectBorrowedPubky,
@@ -10,12 +11,27 @@ import {
 } from '../utils/pubky.ts';
 import { getStore } from '../utils/store-helpers.ts';
 import { discoverSharedPubkys, SharedPubkyDiscovery, SharedPubkyIdentity } from '../utils/sharedPubky.ts';
+import i18n from '../i18n';
 
 export interface SharedPubkyDiscoveryState extends SharedPubkyDiscovery {
 	refresh: () => Promise<void>;
 }
 
 const noOpRefresh = async (): Promise<void> => {};
+
+/**
+ * A card vanishing from Home with no explanation looks like data loss, so the automatic
+ * disconnect says why. One toast per refresh, however many identities the source app dropped.
+ */
+const notifyAutoDisconnected = (disconnectedCount: number): void => {
+	if (disconnectedCount === 0) return;
+	showToast({
+		type: 'info',
+		title: i18n.t('reuseSharedPubky.noLongerSharedTitle'),
+		description: i18n.t('reuseSharedPubky.noLongerShared'),
+		durationMs: 5000,
+	});
+};
 export const SharedPubkyDiscoveryContext = createContext<SharedPubkyDiscoveryState>({
 	available: false,
 	identities: [],
@@ -37,13 +53,17 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		const owned = getOwnedPubkyKeys(state);
 		const discovery = await discoverSharedPubkys(owned);
 		setAvailable(discovery.available);
+		// Only the calls that actually removed something are counted: another flow may have
+		// disconnected the same identity first and already explained it.
+		let disconnectedCount = 0;
 		if (!discovery.available) {
 			setIdentities([]);
 			// Fail closed: a borrowed profile cannot remain active when its source can no longer
 			// supply the credential. Ring-owned private identities are never affected.
 			for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
-				await disconnectBorrowedPubky(borrowedPubky, dispatch);
+				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) disconnectedCount += 1;
 			}
+			notifyAutoDisconnected(disconnectedCount);
 			return;
 		}
 
@@ -51,9 +71,10 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
 			if (!discoveredKeys.has(borrowedPubky)) {
 				// The source app/item disappeared. Clear only Ring's reference and local session.
-				await disconnectBorrowedPubky(borrowedPubky, dispatch);
+				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) disconnectedCount += 1;
 			}
 		}
+		notifyAutoDisconnected(disconnectedCount);
 
 		const existing = new Set(getPubkyKeys(getStore()));
 		const candidates = discovery.identities.filter(identity => !existing.has(identity.pubky));

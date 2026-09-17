@@ -85,7 +85,7 @@ export const showBackupSheet = async ({
 		showToast({
 			type: 'error',
 			title: i18n.t('common.error'),
-			description: i18n.t('reuseSharedPubky.source'),
+			description: i18n.t('reuseSharedPubky.backupManagedByBitkit'),
 		});
 		return;
 	}

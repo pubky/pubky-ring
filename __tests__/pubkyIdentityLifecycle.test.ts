@@ -1,11 +1,15 @@
 import { err, ok } from '@synonymdev/result';
+import { getHomeserver, republishHomeserver, signIn, signUp } from '@synonymdev/react-native-pubky';
 import { EBackupPreference, Pubky } from '../src/types/pubky';
 import {
+	connectSharedPubky,
 	deletePubky,
 	disconnectBorrowedPubky,
 	reconcileOwnedSharedPubkys,
 	savePubky,
+	signUpToHomeserver,
 } from '../src/utils/pubky';
+import { getSharedPubkyCredential } from '../src/utils/sharedPubky';
 
 const OWNED = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 const SECRET = '0123456789abcdef'.repeat(4);
@@ -110,6 +114,16 @@ const ringPubky = (): Pubky => ({
 	isBackedUp: false,
 	sourceApp: 'app.pubkyring',
 });
+
+const bitkitIdentity = { version: 1, sourceApp: 'to.bitkit' } as const;
+
+const getHomeserverMock = getHomeserver as jest.MockedFunction<typeof getHomeserver>;
+const republishHomeserverMock = republishHomeserver as jest.MockedFunction<typeof republishHomeserver>;
+const signInMock = signIn as jest.MockedFunction<typeof signIn>;
+const signUpMock = signUp as jest.MockedFunction<typeof signUp>;
+const getSharedPubkyCredentialMock = getSharedPubkyCredential as jest.MockedFunction<
+	typeof getSharedPubkyCredential
+>;
 
 beforeEach(() => {
 	jest.clearAllMocks();
@@ -251,5 +265,57 @@ test('never disconnects an identity that is no longer borrowed', async () => {
 	await disconnectBorrowedPubky(OWNED, dispatch);
 
 	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('never republishes a borrowed identity when its homeserver sign-in fails', async () => {
+	// Connecting is the first thing Ring does with a borrowed key, and a failed sign-in falls back
+	// to republishing. That would sign Ring's cached homeserver into the owner's pkarr record.
+	let connected = false;
+	const dispatch = jest.fn();
+	dispatch.mockImplementation((action: { type: string }) => {
+		if (action.type === 'pubky/addPubky') connected = true;
+		if (action.type === 'pubky/removePubky') connected = false;
+		return action;
+	});
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		connected && pubky === OWNED ? { ...ringPubky(), sourceApp: 'to.bitkit' } : undefined,
+	);
+	getSharedPubkyCredentialMock.mockResolvedValue({
+		...bitkitIdentity,
+		pubky: OWNED,
+		secretKey: SECRET,
+	});
+	getHomeserverMock.mockResolvedValue(ok('pubky://bitkit-homeserver'));
+	signInMock.mockResolvedValue(err(new Error('homeserver unavailable')));
+	republishHomeserverMock.mockResolvedValue(ok('republished'));
+
+	const result = await connectSharedPubky({
+		identity: { ...bitkitIdentity, pubky: OWNED },
+		dispatch,
+	});
+
+	expect(result.isErr()).toBe(true);
+	expect(republishHomeserverMock).not.toHaveBeenCalled();
+	expect(dispatch).toHaveBeenCalledWith(
+		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
+	);
+});
+
+test('never signs a borrowed identity up to a locally edited homeserver', async () => {
+	// The edit sheet lets any identity's homeserver be changed, and signing up publishes a new
+	// homeserver record for the key, which only the owning app may do.
+	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
+	const dispatch = jest.fn();
+
+	const result = await signUpToHomeserver({
+		pubky: OWNED,
+		homeserver: 'pubky://ring-edited-homeserver',
+		dispatch,
+	});
+
+	expect(result.isErr()).toBe(true);
+	expect(signUpMock).not.toHaveBeenCalled();
+	expect(republishHomeserverMock).not.toHaveBeenCalled();
 	expect(dispatch).not.toHaveBeenCalled();
 });

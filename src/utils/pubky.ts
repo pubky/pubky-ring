@@ -123,6 +123,17 @@ export const getSignupToken = ({
 	return _getSignupToken(homeserver, adminPassword);
 };
 
+/**
+ * Signing a pkarr record or a homeserver signup re-homes an identity, so both are ownership
+ * actions that belong to the app holding the key. Resolved from Redux alone: a borrowed identity
+ * is refused before any key material is fetched.
+ */
+const isBorrowedPubky = (pubky: string): boolean => {
+	const normalizedPubky = normalizePubkyReference(pubky);
+	const storedPubkyKey = normalizedPubky ? getStoredPubkyKey(pubky, normalizedPubky) : undefined;
+	return getPubkyDataFromStore(storedPubkyKey ?? pubky)?.sourceApp === BITKIT_SOURCE_APP;
+};
+
 export const republishHomeserver = async ({
 	pubky,
 	secretKey,
@@ -135,6 +146,12 @@ export const republishHomeserver = async ({
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
 	console.log(`[republish] Starting for ${pubky} via ${homeserver}`);
+	// Central ownership gate. The individual call sites keep their own checks as defence in depth,
+	// but recovery paths such as a failed sign-in must not reach the signer either.
+	if (isBorrowedPubky(pubky)) {
+		console.log(`[republish] Refusing for ${pubky}: borrowed identity`);
+		return err(i18n.t('pubkyErrors.homeserverManagedBySourceApp'));
+	}
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {
@@ -907,6 +924,11 @@ export const signUpToHomeserver = async ({
 	signupToken?: string;
 	dispatch: Dispatch;
 }): Promise<Result<SessionInfo>> => {
+	// Signing up publishes a homeserver record for the key, so it re-homes the identity. Only the
+	// owning app may do that, and the edit flow can reach this with a locally changed homeserver.
+	if (isBorrowedPubky(pubky)) {
+		return err(i18n.t('pubkyErrors.homeserverManagedBySourceApp'));
+	}
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {

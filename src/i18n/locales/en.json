@@ -303,6 +303,7 @@
 		"secretKeyNotFoundInKeychain": "Secret key not found in keychain",
 		"failedToGetSecretKeyFromKeychain": "Failed to get secret key from keychain",
 		"pubkyAlreadyExists": "This pubky is already connected. Disconnect it before importing it as a Ring-owned identity.",
+		"homeserverManagedBySourceApp": "This pubky's homeserver is managed by Bitkit. Change it there instead.",
 		"homeserverNotFound": "Homeserver not found for this pubky. Please ensure the pubky is properly configured.",
 		"failedToSignOut": "Failed to sign out of homeserver",
 		"pubkyRequiredForAuth": "Pubky is required for auth",

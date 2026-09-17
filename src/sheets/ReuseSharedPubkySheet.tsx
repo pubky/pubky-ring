@@ -18,7 +18,7 @@ const ReuseSharedPubkySheet = ({
 }: NativeStackScreenProps<RootStackParamList, 'ReuseSharedPubkySheet'>): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	const { identities } = route.params;
+	const identities = [route.params.identity];
 	const [connecting, setConnecting] = useState<string>();
 	const [connected, setConnected] = useState<string[]>([]);
 

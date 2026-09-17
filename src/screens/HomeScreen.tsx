@@ -129,11 +129,11 @@ const HomeScreen = (): ReactElement => {
 	}, [replacementRelease]);
 
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
-	const listHeader = (
+	// Below the owned pubkys, so connecting one appends it to the end and nothing jumps position.
+	const sharedCards = (offset: number): ReactElement => (
 		<>
-			{sunsetBanner}
-			{unconnectedSharedIdentities.map(identity => (
-				<SharedPubkyCard key={identity.pubky} identity={identity} />
+			{unconnectedSharedIdentities.map((identity, index) => (
+				<SharedPubkyCard key={identity.pubky} identity={identity} index={offset + index} />
 			))}
 		</>
 	);
@@ -149,9 +149,7 @@ const HomeScreen = (): ReactElement => {
 						contentContainerStyle={styles.sharedIdentitiesContent}
 						showsVerticalScrollIndicator={false}
 					>
-						{unconnectedSharedIdentities.map(identity => (
-							<SharedPubkyCard key={identity.pubky} identity={identity} />
-						))}
+						{sharedCards(0)}
 					</ScrollView>
 				) : (
 					<EmptyState />
@@ -171,7 +169,8 @@ const HomeScreen = (): ReactElement => {
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
-				ListHeaderComponent={listHeader}
+				ListHeaderComponent={sunsetBanner}
+				ListFooterComponent={sharedCards(pubkyArray.length)}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}

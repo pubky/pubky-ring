@@ -151,7 +151,9 @@ export type LegacySunsetSheetParams = {
 };
 
 export type ReuseSharedPubkySheetParams = {
-	identities: SharedPubkyIdentity[];
+	identity: SharedPubkyIdentity;
+	/** Zero-based position of the card the sheet was opened from, used for the fallback name. */
+	index: number;
 };
 
 export type SheetParamsById = {

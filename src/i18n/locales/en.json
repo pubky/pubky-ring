@@ -365,11 +365,12 @@
 		"allFailed": "All keys failed to import"
 	},
 	"reuseSharedPubky": {
-		"title": "Use a Bitkit profile",
-		"description": "Use this profile in Pubky Ring while its key stays managed by Bitkit.",
+		"title": "Use Bitkit pubky",
+		"description": "Use this pubky in Pubky Ring to authorize services, while it stays managed by Bitkit.",
 		"source": "Managed by Bitkit",
 		"badge": "Bitkit pubky",
 		"fallbackName": "pubky #{{number}} (Bitkit)",
+		"useInRing": "Use in Pubky Ring",
 		"useFromBitkit": "Use from Bitkit",
 		"add": "Use",
 		"added": "Connected",

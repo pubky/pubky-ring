@@ -13,6 +13,9 @@ function mockSharedIdentities(): SharedPubkyIdentity[] {
 	}));
 }
 
+// Owned pubkys the selector reports; mutable so a test can switch between the two home layouts.
+let mockPubkyArray: { key: string; value: unknown }[] = [];
+
 jest.mock('react-redux', () => ({
 	__esModule: true,
 	useDispatch: () => jest.fn(),
@@ -22,7 +25,7 @@ jest.mock('react-redux', () => ({
 
 jest.mock('../src/store/selectors/pubkySelectors.ts', () => ({
 	__esModule: true,
-	getHomeScreenData: () => ({ pubkyArray: [], hasPubkys: false }),
+	getHomeScreenData: () => ({ pubkyArray: mockPubkyArray, hasPubkys: mockPubkyArray.length > 0 }),
 }));
 
 jest.mock('../src/store/slices/pubkysSlice.ts', () => ({
@@ -48,7 +51,19 @@ jest.mock('react-native-draggable-flatlist', () => {
 
 	return {
 		__esModule: true,
-		default: () => ReactMock.createElement(View, { testID: 'PubkyList' }),
+		default: ({
+			ListHeaderComponent,
+			ListFooterComponent,
+		}: {
+			ListHeaderComponent?: ReactNode;
+			ListFooterComponent?: ReactNode;
+		}) =>
+			ReactMock.createElement(
+				View,
+				{ testID: 'PubkyList' },
+				ReactMock.createElement(View, { testID: 'PubkyListHeader' }, ListHeaderComponent),
+				ReactMock.createElement(View, { testID: 'PubkyListFooter' }, ListFooterComponent),
+			),
 		ScaleDecorator: ({ children }: { children?: ReactNode }) => ReactMock.createElement(View, null, children),
 	};
 });
@@ -120,8 +135,8 @@ jest.mock('../src/components/SharedPubkyCard.tsx', () => {
 
 	return {
 		__esModule: true,
-		default: ({ identity }: { identity: { pubky: string } }) =>
-			ReactMock.createElement(View, { testID: `SharedPubkyCard-${identity.pubky}` }),
+		default: ({ identity, index }: { identity: { pubky: string }; index: number }) =>
+			ReactMock.createElement(View, { testID: `SharedPubkyCard-${identity.pubky}`, index }),
 	};
 });
 
@@ -152,13 +167,38 @@ jest.mock('../src/hooks/useSharedPubkyDiscovery.ts', () => {
 
 import HomeScreen from '../src/screens/HomeScreen';
 
+beforeEach(() => {
+	mockPubkyArray = [];
+});
+
 test('keeps every discovered identity reachable when Ring has no pubkys of its own', () => {
 	render(<HomeScreen />);
 
 	// More identities than fit on screen must stay reachable, so the empty state scrolls.
 	const list = screen.UNSAFE_getByType(ScrollView);
-	mockSharedIdentities().forEach(identity => {
-		expect(within(list).getByTestId(`SharedPubkyCard-${identity.pubky}`)).toBeTruthy();
+	mockSharedIdentities().forEach((identity, index) => {
+		const card = within(list).getByTestId(`SharedPubkyCard-${identity.pubky}`);
+		expect(card).toBeTruthy();
+		// Nothing is above them, so they are numbered from the top of the list.
+		expect(card.props.index).toBe(index);
 	});
 	expect(screen.queryByTestId('EmptyState')).toBeNull();
+});
+
+test('lists the unconnected identities below the owned pubkys', () => {
+	mockPubkyArray = [
+		{ key: 'ownedPubky0', value: {} },
+		{ key: 'ownedPubky1', value: {} },
+	];
+
+	render(<HomeScreen />);
+
+	const header = screen.getByTestId('PubkyListHeader');
+	const footer = screen.getByTestId('PubkyListFooter');
+	mockSharedIdentities().forEach((identity, index) => {
+		const testID = `SharedPubkyCard-${identity.pubky}`;
+		expect(within(header).queryByTestId(testID)).toBeNull();
+		// Connecting one appends it after the owned pubkys, so it is numbered from there too.
+		expect(within(footer).getByTestId(testID).props.index).toBe(mockPubkyArray.length + index);
+	});
 });

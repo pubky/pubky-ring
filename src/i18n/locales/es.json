@@ -366,11 +366,12 @@
 		"allFailed": "Falló la importación de todas las claves"
 	},
 	"reuseSharedPubky": {
-		"title": "Usar un perfil de Bitkit",
-		"description": "Usa este perfil en Pubky Ring mientras Bitkit sigue gestionando su clave.",
+		"title": "Usar pubky de Bitkit",
+		"description": "Usa este pubky en Pubky Ring para autorizar servicios, mientras Bitkit lo sigue gestionando.",
 		"source": "Gestionada por Bitkit",
 		"badge": "Pubky de Bitkit",
 		"fallbackName": "pubky #{{number}} (Bitkit)",
+		"useInRing": "Usar en Pubky Ring",
 		"useFromBitkit": "Usar desde Bitkit",
 		"add": "Usar",
 		"added": "Conectada",

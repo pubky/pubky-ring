@@ -1,39 +1,81 @@
 import React, { memo, ReactElement, useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Card from './Card.tsx';
 import Button from './Button.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { TextBaseB, TextXsSb } from '../theme/typography.ts';
+import { PubkyInfo } from './PubkyBox.tsx';
+import { DASHED_BORDER_COLOR } from '../theme';
 import { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import { truncateStr } from '../utils/pubky.ts';
-import { Key } from '../icons/index.ts';
+import { getFallbackPubkyName } from '../utils/pubkyName.ts';
+import { ChevronRight, Plus } from '../icons/index.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 
-const SharedPubkyCard = ({ identity }: { identity: SharedPubkyIdentity }): ReactElement => {
+interface SharedPubkyCardProps {
+	identity: SharedPubkyIdentity;
+	/** Zero-based position in the home list, used for the presentational fallback name. */
+	index: number;
+}
+
+/**
+ * An identity another app (Bitkit) offers but Ring has not adopted yet: same anatomy as a
+ * connected pubky, outlined with a dashed border. Card body, chevron and button all open the
+ * same sheet; nothing here touches key material.
+ */
+const SharedPubkyCard = ({ identity, index }: SharedPubkyCardProps): ReactElement => {
 	const { t } = useTranslation();
-	const show = useCallback(() => showSheet('reuse-shared-pubky', { identities: [identity] }), [identity]);
+
+	const handlePress = useCallback(
+		() => showSheet('reuse-shared-pubky', { identity, index }),
+		[identity, index],
+	);
+
+	const publicKey = identity.pubky.startsWith('pk:') ? identity.pubky.slice(3) : identity.pubky;
+	const name = identity.name ?? '';
+	const pubkyName = truncateStr(name, 8) || getFallbackPubkyName({ index, isBorrowed: true });
+
+	// testId example: SharedPubkyCard-StagingTestPubky-1
+	const sanitizedName = name.replace(/[^a-zA-Z0-9]/g, '');
+	const cardTestID = `SharedPubkyCard-${sanitizedName}-${index}`;
 
 	return (
-		<View style={styles.container}>
-			<Card>
-				<View style={styles.identity}>
-					<ProfileAvatar
-						name={identity.name || t('emptyState.placeholderName')}
-						pubky={identity.pubky}
-						size={48}
-						image={identity.image}
+		<View style={styles.container} testID={cardTestID}>
+			<Card style={styles.card}>
+				<TouchableOpacity
+					style={styles.cardPressTarget}
+					activeOpacity={0.7}
+					testID={`${cardTestID}-Content`}
+					onPress={handlePress}
+				/>
+
+				<View style={styles.content} pointerEvents="box-none">
+					<View style={styles.profileImage} pointerEvents="none">
+						<ProfileAvatar name={name || pubkyName} pubky={publicKey} size={48} image={identity.image} />
+					</View>
+
+					<PubkyInfo
+						pubkyName={pubkyName}
+						publicKey={publicKey}
+						isBackedUp={true}
+						isBorrowed={true}
+						sessionsCount={0}
 					/>
-					<View style={styles.text}>
-						<TextBaseB numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</TextBaseB>
-						<TextXsSb colorName="mutedForeground">{t('reuseSharedPubky.source')}</TextXsSb>
+
+					<View style={styles.iconContainer} pointerEvents="none">
+						<ChevronRight colorName="foreground" />
 					</View>
 				</View>
+
 				<Button
-					text={t('reuseSharedPubky.useFromBitkit')}
-					icon={<Key size={24} />}
-					size="default"
-					onPress={show}
+					style={styles.button}
+					text={t('reuseSharedPubky.useInRing')}
+					size="large"
+					variant="secondary"
+					dashed={true}
+					icon={<Plus />}
+					testID={`${cardTestID}-ActionButton`}
+					onPress={handlePress}
 				/>
 			</Card>
 		</View>
@@ -42,17 +84,36 @@ const SharedPubkyCard = ({ identity }: { identity: SharedPubkyIdentity }): React
 
 const styles = StyleSheet.create({
 	container: {
+		marginBottom: 24,
 		marginHorizontal: 24,
-		marginBottom: 16,
 	},
-	identity: {
+	card: {
+		borderWidth: 1,
+		borderStyle: 'dashed',
+		borderColor: DASHED_BORDER_COLOR,
+	},
+	cardPressTarget: {
+		...StyleSheet.absoluteFill,
+	},
+	content: {
 		flexDirection: 'row',
 		alignItems: 'center',
-		gap: 16,
-		marginBottom: 16,
 	},
-	text: {
-		flex: 1,
+	profileImage: {
+		width: 48,
+		height: 48,
+		borderRadius: '50%',
+		overflow: 'hidden',
+		justifyContent: 'center',
+		alignItems: 'center',
+		marginRight: 16,
+	},
+	iconContainer: {
+		justifyContent: 'center',
+		marginLeft: 'auto',
+	},
+	button: {
+		marginTop: 16,
 	},
 });
 

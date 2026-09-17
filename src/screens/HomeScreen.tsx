@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useContext, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
@@ -144,11 +144,15 @@ const HomeScreen = (): ReactElement => {
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
 				{unconnectedSharedIdentities.length > 0 ? (
-					<View style={styles.sharedIdentities}>
+					<ScrollView
+						style={styles.sharedIdentities}
+						contentContainerStyle={styles.sharedIdentitiesContent}
+						showsVerticalScrollIndicator={false}
+					>
 						{unconnectedSharedIdentities.map(identity => (
 							<SharedPubkyCard key={identity.pubky} identity={identity} />
 						))}
-					</View>
+					</ScrollView>
 				) : (
 					<EmptyState />
 				)}
@@ -200,7 +204,12 @@ const styles = StyleSheet.create({
 	},
 	sharedIdentities: {
 		flex: 1,
+	},
+	// Centres a short list, and lets a long one grow past the viewport and scroll.
+	sharedIdentitiesContent: {
+		flexGrow: 1,
 		justifyContent: 'center',
+		paddingVertical: 16,
 	},
 	fadeOverlay: {
 		position: 'absolute',

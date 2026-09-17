@@ -230,4 +230,40 @@ describe('EditPubkySheet', () => {
 		expect(signInMock).toHaveBeenCalled();
 		expect(hideSheetMock).toHaveBeenCalledWith('edit-pubky');
 	});
+
+	it('locks the homeserver and hides the invite code for a borrowed pubky', () => {
+		getPubkyMock.mockReturnValue(storedPubky({ sourceApp: 'to.bitkit', signedUp: false }));
+		const { getByTestId, queryByTestId } = renderSheet();
+
+		expect(getByTestId('EditPubkyHomeserverInput').props.editable).toBe(false);
+		expect(getByTestId('EditPubkyHomeserverInput-HelperText')).toBeTruthy();
+		expect(queryByTestId('EditPubkyInviteCodeInput')).toBeNull();
+		// The name stays editable.
+		expect(getByTestId('EditPubkyNameInput').props.editable).not.toBe(false);
+	});
+
+	it('keeps the homeserver editable and the invite code visible for an owned pubky', () => {
+		getPubkyMock.mockReturnValue(storedPubky({ signedUp: false }));
+		const { getByTestId, queryByTestId } = renderSheet();
+
+		expect(getByTestId('EditPubkyHomeserverInput').props.editable).toBe(true);
+		expect(queryByTestId('EditPubkyHomeserverInput-HelperText')).toBeNull();
+		expect(getByTestId('EditPubkyInviteCodeInput')).toBeTruthy();
+	});
+
+	it('does not substitute a default homeserver for a borrowed pubky without one', async () => {
+		getPubkyMock.mockReturnValue(storedPubky({ sourceApp: 'to.bitkit', homeserver: '' }));
+		const { getByTestId } = renderSheet();
+
+		expect(getByTestId('EditPubkyHomeserverInput').props.value).toBe('');
+
+		fireEvent.changeText(getByTestId('EditPubkyNameInput'), 'Renamed');
+		await pressSave(getByTestId);
+
+		expect(getPubkySecretKeyMock).not.toHaveBeenCalled();
+		expect(mockDispatch).toHaveBeenCalledWith({
+			type: 'pubky/setPubkyData',
+			payload: { pubky: PUBKY, data: { name: 'Renamed', homeserver: '', signupToken: '' } },
+		});
+	});
 });

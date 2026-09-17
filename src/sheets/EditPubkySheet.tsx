@@ -80,7 +80,11 @@ const EditPubkySheet = ({
 	const isBorrowed = isBorrowedPubkyData(storedPubkyData);
 	const [loading, setLoading] = useState(false);
 	const [newPubkyName, setNewPubkyName] = useState(storedName);
-	const [homeServer, setHomeServer] = useState(storedHomeserver || DEFAULT_HOMESERVER || '');
+	// A borrowed pubky's homeserver is whatever the source app published, so the read-only field
+	// shows the stored value as-is rather than defaulting to a homeserver Ring merely assumes.
+	const [homeServer, setHomeServer] = useState(
+		isBorrowed ? storedHomeserver : storedHomeserver || DEFAULT_HOMESERVER || '',
+	);
 	const [signupToken, setSignupToken] = useState('');
 	const pubkyNameLength = newPubkyName.length;
 	const [nameError, setNameError] = useState<string>(
@@ -91,8 +95,10 @@ const EditPubkySheet = ({
 	const signupTokenInputRef = useRef<TextInput>(null);
 
 	const isSignupTokenInputVisible = useMemo(() => {
+		// Ring never signs a borrowed pubky up, so an invite code has nothing to apply to.
+		if (isBorrowed) return false;
 		return isStoredUnsigned || storedHomeserver !== (homeServer?.trim() || '');
-	}, [homeServer, isStoredUnsigned, storedHomeserver]);
+	}, [homeServer, isBorrowed, isStoredUnsigned, storedHomeserver]);
 
 	const formatSignupTokenForHomeserver = useCallback(
 		(text: string) => {
@@ -384,6 +390,8 @@ const EditPubkySheet = ({
 					placeholder={t('editPubky.homeserver')}
 					error=""
 					autoFocus={false}
+					editable={!isBorrowed}
+					helperText={isBorrowed ? t('pubkyErrors.homeserverManagedBySourceApp') : undefined}
 					onSubmitEditing={handleHomeserverSubmit}
 				/>
 

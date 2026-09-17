@@ -6,96 +6,91 @@ import { useDispatch } from 'react-redux';
 import { showToast } from '@synonymdev/react-native-toast';
 import Sheet from '../components/Sheet.tsx';
 import Button from '../components/Button.tsx';
-import { Key } from '../icons/index.ts';
-import type { RootStackParamList } from '../navigation/types.ts';
-import { TextBaseM, TextBaseB, TextXsSb } from '../theme/typography.ts';
-import { connectSharedPubky, truncateStr } from '../utils/pubky.ts';
+import PubkyProfile from '../components/PubkyProfile.tsx';
+import { defaultPubkyState } from '../store/shapes/pubky.ts';
+import type { PubkyData, RootStackParamList } from '../navigation/types.ts';
+import { Text5Xl, TextBaseM } from '../theme/typography.ts';
+import { connectSharedPubky } from '../utils/pubky.ts';
+import { BITKIT_SOURCE_APP } from '../utils/sharedPubky.ts';
 import { hideSheet } from './sheetNavigation.tsx';
-import type { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
+
+const SHEET_ID = 'reuse-shared-pubky';
 
 const ReuseSharedPubkySheet = ({
 	route,
 }: NativeStackScreenProps<RootStackParamList, 'ReuseSharedPubkySheet'>): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	const identities = [route.params.identity];
-	const [connecting, setConnecting] = useState<string>();
-	const [connected, setConnected] = useState<string[]>([]);
+	const { identity, index } = route.params;
+	const [connecting, setConnecting] = useState(false);
 
-	const connectIdentity = useCallback(
-		async (identity: SharedPubkyIdentity): Promise<void> => {
-			setConnecting(identity.pubky);
-			try {
-				// The native bridge retrieves and validates the selected credential just in time.
-				// Ring stores only the Bitkit source reference and its own homeserver session.
-				const result = await connectSharedPubky({ identity, dispatch });
-				if (result.isErr()) {
-					showToast({ type: 'error', title: t('common.error'), description: result.error.message });
-					return;
-				}
-				setConnected(current => [...current, identity.pubky]);
-			} catch (error) {
-				showToast({
-					type: 'error',
-					title: t('common.error'),
-					description: error instanceof Error ? error.message : String(error),
-				});
-			} finally {
-				setConnecting(undefined);
+	// Nothing here holds key material: the identity carries only what Bitkit published about it.
+	const pubkyData: PubkyData = {
+		...defaultPubkyState,
+		pubky: identity.pubky,
+		name: identity.name ?? '',
+		sourceApp: BITKIT_SOURCE_APP,
+	};
+
+	const onConnect = useCallback(async (): Promise<void> => {
+		setConnecting(true);
+		try {
+			// The native bridge retrieves and validates the selected credential just in time.
+			// Ring stores only the Bitkit source reference and its own homeserver session.
+			const result = await connectSharedPubky({ identity, dispatch });
+			if (result.isErr()) {
+				// The sheet stays open so the same identity can be retried.
+				showToast({ type: 'error', title: t('common.error'), description: result.error.message });
+				return;
 			}
-		},
-		[dispatch, t],
-	);
+			hideSheet(SHEET_ID);
+		} catch (error) {
+			showToast({
+				type: 'error',
+				title: t('common.error'),
+				description: error instanceof Error ? error.message : String(error),
+			});
+		} finally {
+			setConnecting(false);
+		}
+	}, [dispatch, identity, t]);
 
 	return (
-		<Sheet id="reuse-shared-pubky" title={t('reuseSharedPubky.title')}>
-			<TextBaseM style={styles.description}>{t('reuseSharedPubky.description')}</TextBaseM>
-			<View style={styles.list}>
-				{identities.map(identity => {
-					const wasConnected = connected.includes(identity.pubky);
-					return (
-						<View key={identity.pubky} style={styles.row}>
-							<View style={styles.icon}>
-								<Key />
-							</View>
-							<View style={styles.info}>
-								<TextBaseB numberOfLines={1}>{identity.name || truncateStr(identity.pubky)}</TextBaseB>
-								<TextXsSb colorName="mutedForeground">{t('reuseSharedPubky.source')}</TextXsSb>
-							</View>
-							<Button
-								text={wasConnected ? t('reuseSharedPubky.added') : t('reuseSharedPubky.add')}
-								size="small"
-								variant="secondary"
-								loading={connecting === identity.pubky}
-								disabled={wasConnected || connecting !== undefined}
-								onPress={() => connectIdentity(identity)}
-							/>
-						</View>
-					);
-				})}
-			</View>
-			<View style={styles.close}>
-				<Button text={t('common.close')} size="large" onPress={() => hideSheet('reuse-shared-pubky')} />
+		<Sheet id={SHEET_ID} title={t('reuseSharedPubky.title')} gradientType="brand">
+			<View style={styles.content}>
+				<Text5Xl style={styles.headerText}>{t('pubky.yourPubky')}</Text5Xl>
+				<TextBaseM style={styles.message}>{t('reuseSharedPubky.description')}</TextBaseM>
+				<PubkyProfile index={index} pubky={identity.pubky} pubkyData={pubkyData} image={identity.image} />
+				<View style={styles.footer}>
+					<Button
+						text={t('reuseSharedPubky.useInRing')}
+						size="large"
+						variant="secondary"
+						loading={connecting}
+						testID="ReuseSharedPubkyConnectButton"
+						onPress={onConnect}
+					/>
+				</View>
 			</View>
 		</Sheet>
 	);
 };
 
 const styles = StyleSheet.create({
-	description: { marginBottom: 24 },
-	list: { gap: 12 },
-	row: { flexDirection: 'row', alignItems: 'center', gap: 16 },
-	icon: {
-		width: 48,
-		height: 48,
-		borderWidth: 1,
-		borderRadius: 8,
-		borderColor: 'rgba(255,255,255,0.16)',
-		alignItems: 'center',
-		justifyContent: 'center',
+	content: {
+		flex: 1,
 	},
-	info: { flex: 1 },
-	close: { marginTop: 24 },
+	headerText: {
+		marginBottom: 16,
+	},
+	message: {
+		marginBottom: 'auto',
+	},
+	footer: {
+		marginTop: 'auto',
+		flexDirection: 'row',
+		alignItems: 'center',
+	},
 });
 
 export default memo(ReuseSharedPubkySheet);

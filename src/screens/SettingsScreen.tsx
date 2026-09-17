@@ -8,7 +8,7 @@ import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { getAllPubkys, getOwnedPubkyKeys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getOwnedPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';
 import {
 	resetSettings,
@@ -34,15 +34,14 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const dispatch = useDispatch();
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const pubkyKeys = useSelector(getPubkyKeys);
-	// Backup/migration must never export a borrowed identity's key, so it is gated on owned keys only.
+	// Backup/migration must never export a borrowed identity's key, and republishing a homeserver
+	// record is an ownership action, so both are gated on owned keys only.
 	const ownedPubkyKeys = useSelector(getOwnedPubkyKeys);
 	const pubkys = useSelector(getAllPubkys);
-	const hasPubkys = pubkyKeys.length > 0;
 	const hasOwnedPubkys = ownedPubkyKeys.length > 0;
 	const hasRepublishablePubkys = useMemo(
-		() => Object.values(pubkys).some(pubky => !!pubky.homeserver),
-		[pubkys],
+		() => ownedPubkyKeys.some(key => !!pubkys[key]?.homeserver),
+		[ownedPubkyKeys, pubkys],
 	);
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const [republishingAll, setRepublishingAll] = useState(false);
@@ -175,7 +174,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					</View>
 				</View>
 
-				{hasPubkys && (
+				{hasOwnedPubkys && (
 					<View>
 						<View style={styles.textSection}>
 							<TextXsM>{t('republish.title')}</TextXsM>

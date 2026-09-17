@@ -145,6 +145,26 @@ describe('republishAllHomeserverRecords', () => {
 		);
 	});
 
+	it('never republishes a borrowed identity', async () => {
+		const pubkys = createPubkys();
+		pubkys.pubkyThree.sourceApp = 'to.bitkit';
+
+		const summary = await republishAllHomeserverRecords({ pubkys, dispatch });
+
+		expect(summary).toEqual({
+			total: 3,
+			succeeded: 1,
+			failed: 0,
+			skipped: 2,
+		});
+		expect(nativeRepublishHomeserverMock).toHaveBeenCalledTimes(1);
+		expect(nativeRepublishHomeserverMock).toHaveBeenCalledWith('pubkyOne-secret', 'pubky://homeserver-one');
+		expect(getKeychainValueMock).not.toHaveBeenCalledWith({ key: 'pubkyThree' });
+		expect(dispatch).not.toHaveBeenCalledWith(
+			setHomeserver({ pubky: 'pubkyThree', homeserver: 'pubky://homeserver-three' }),
+		);
+	});
+
 	it('continues republishing after a key fails', async () => {
 		nativeRepublishHomeserverMock
 			.mockResolvedValueOnce(err('relay rate limited'))

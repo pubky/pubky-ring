@@ -172,8 +172,15 @@ export const republishAllHomeserverRecords = async ({
 		const hasHomeserver = !!data.homeserver;
 		if (!hasHomeserver) {
 			console.log(`[republish] Skipping batch item for ${pubky}: no homeserver`);
+			return false;
 		}
-		return hasHomeserver;
+		// Publishing a signed pkarr record is an ownership action, so it belongs to the app that
+		// owns the key. Ring only maintains records for the identities it owns.
+		const isOwned = data.sourceApp !== BITKIT_SOURCE_APP;
+		if (!isOwned) {
+			console.log(`[republish] Skipping batch item for ${pubky}: borrowed identity`);
+		}
+		return isOwned;
 	});
 	summary.skipped = summary.total - republishablePubkys.length;
 

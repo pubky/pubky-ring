@@ -9,6 +9,7 @@ const mockGetPublicKeyFromSecretKey = jest.fn();
 const mockGetKeychainValue = jest.fn();
 const mockSetKeychainValue = jest.fn();
 const mockResetKeychainValue = jest.fn();
+const mockResetPubkySessionSecrets = jest.fn();
 const mockGetAllKeychainKeys = jest.fn();
 const mockGetPubkyDataFromStore = jest.fn();
 const mockMirrorSharedPubky = jest.fn();
@@ -30,6 +31,11 @@ jest.mock('@synonymdev/react-native-pubky', () => ({
 }));
 
 jest.mock('@synonymdev/react-native-toast', () => ({ showToast: jest.fn() }));
+
+jest.mock('uuid', () => ({
+	__esModule: true,
+	v5: jest.fn(() => 'session-id'),
+}));
 
 jest.mock('../src/i18n', () => ({
 	__esModule: true,
@@ -60,6 +66,7 @@ jest.mock('../src/utils/keychain', () => ({
 	getAllKeychainKeys: (...args: unknown[]) => mockGetAllKeychainKeys(...args),
 	getKeychainValue: (...args: unknown[]) => mockGetKeychainValue(...args),
 	resetKeychainValue: (...args: unknown[]) => mockResetKeychainValue(...args),
+	resetPubkySessionSecrets: (...args: unknown[]) => mockResetPubkySessionSecrets(...args),
 	setKeychainValue: (...args: unknown[]) => mockSetKeychainValue(...args),
 }));
 
@@ -106,6 +113,7 @@ beforeEach(() => {
 	mockGetKeychainValue.mockResolvedValue(ok(JSON.stringify({ secretKey: SECRET, mnemonic: '' })));
 	mockSetKeychainValue.mockResolvedValue(ok('saved'));
 	mockResetKeychainValue.mockResolvedValue(ok(true));
+	mockResetPubkySessionSecrets.mockResolvedValue(ok(true));
 	mockGetAllKeychainKeys.mockResolvedValue([]);
 	mockGetPubkyDataFromStore.mockReturnValue(undefined);
 	mockMirrorSharedPubky.mockResolvedValue(true);
@@ -175,6 +183,7 @@ test('deletes every private service for a normalized identity before removing Re
 
 	expect(result.isOk()).toBe(true);
 	expect(mockRemoveSharedPubky).toHaveBeenCalledWith(OWNED);
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: OWNED });
 	expect(mockResetKeychainValue).toHaveBeenCalledTimes(2);
 	expect(dispatch).toHaveBeenCalledWith(
 		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
@@ -191,6 +200,8 @@ test('disconnects a Bitkit identity without deleting either key store', async ()
 	expect(mockRemoveSharedPubky).not.toHaveBeenCalled();
 	expect(mockResetKeychainValue).not.toHaveBeenCalled();
 	expect(mockGetAllKeychainKeys).not.toHaveBeenCalled();
+	// Ring-local session secrets are the one piece of private state a disconnect must clear.
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: OWNED });
 	expect(dispatch).toHaveBeenCalledWith(
 		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
 	);

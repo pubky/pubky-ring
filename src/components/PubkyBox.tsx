@@ -160,7 +160,7 @@ const PubkyBox = ({
 	);
 };
 
-const styles = StyleSheet.create({
+export const pubkyCardStyles = StyleSheet.create({
 	container: {
 		marginBottom: 24,
 		marginHorizontal: 24,
@@ -181,6 +181,17 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		marginRight: 16,
 	},
+	iconContainer: {
+		justifyContent: 'center',
+		marginLeft: 'auto',
+	},
+	button: {
+		marginTop: 16,
+	},
+});
+
+const styles = StyleSheet.create({
+	...pubkyCardStyles,
 	contentContainer: {
 		flex: 1,
 		justifyContent: 'center',
@@ -188,10 +199,6 @@ const styles = StyleSheet.create({
 	},
 	nameText: {
 		paddingRight: 16,
-	},
-	iconContainer: {
-		justifyContent: 'center',
-		marginLeft: 'auto',
 	},
 	sessionsButton: {
 		alignItems: 'center',
@@ -224,9 +231,6 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 8,
 		height: 20,
 		...shadows.sm,
-	},
-	button: {
-		marginTop: 16,
 	},
 });
 

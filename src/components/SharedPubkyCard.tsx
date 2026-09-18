@@ -4,7 +4,7 @@ import { useTranslation } from 'react-i18next';
 import Card from './Card.tsx';
 import Button from './Button.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
-import { PubkyInfo } from './PubkyBox.tsx';
+import { PubkyInfo, pubkyCardStyles } from './PubkyBox.tsx';
 import { DASHED_BORDER_COLOR } from '../theme';
 import { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import { truncateStr } from '../utils/pubky.ts';
@@ -83,37 +83,11 @@ const SharedPubkyCard = ({ identity, index }: SharedPubkyCardProps): ReactElemen
 };
 
 const styles = StyleSheet.create({
-	container: {
-		marginBottom: 24,
-		marginHorizontal: 24,
-	},
+	...pubkyCardStyles,
 	card: {
 		borderWidth: 1,
 		borderStyle: 'dashed',
 		borderColor: DASHED_BORDER_COLOR,
-	},
-	cardPressTarget: {
-		...StyleSheet.absoluteFill,
-	},
-	content: {
-		flexDirection: 'row',
-		alignItems: 'center',
-	},
-	profileImage: {
-		width: 48,
-		height: 48,
-		borderRadius: '50%',
-		overflow: 'hidden',
-		justifyContent: 'center',
-		alignItems: 'center',
-		marginRight: 16,
-	},
-	iconContainer: {
-		justifyContent: 'center',
-		marginLeft: 'auto',
-	},
-	button: {
-		marginTop: 16,
 	},
 });
 

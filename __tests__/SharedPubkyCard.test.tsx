@@ -1,6 +1,9 @@
 import React from 'react';
+import { StyleSheet, TouchableOpacity } from 'react-native';
 import { fireEvent, render, screen } from '@testing-library/react-native';
+import type { ReactTestRendererJSON } from 'react-test-renderer';
 import SharedPubkyCard from '../src/components/SharedPubkyCard';
+import Button from '../src/components/Button';
 import { showSheet } from '../src/sheets/sheetNavigation';
 import type { SharedPubkyIdentity } from '../src/utils/sharedPubky';
 
@@ -56,8 +59,8 @@ jest.mock('../src/components/ProfileAvatar.tsx', () => {
 
 	return {
 		__esModule: true,
-		default: ({ image }: { image?: string }) =>
-			ReactMock.createElement(View, { testID: 'ProfileAvatar', image }),
+		default: (props: { name?: string; pubky: string; size?: number; image?: string }) =>
+			ReactMock.createElement(View, { testID: 'ProfileAvatar', ...props }),
 	};
 });
 
@@ -151,5 +154,41 @@ describe('SharedPubkyCard', () => {
 		const button = screen.getByTestId('SharedPubkyCard--0-ActionButton');
 		expect(button.props.dashed).toBe(true);
 		expect(button).toHaveTextContent('reuseSharedPubky.useInRing');
+	});
+
+	it('preserves the shared avatar inputs and dashed native sibling tree without long presses', () => {
+		render(
+			<SharedPubkyCard
+				identity={identity({ pubky: `pk:${PUBKY}`, name: 'Alice & Bob', image: 'shared-avatar.jpg' })}
+				index={4}
+			/>,
+		);
+		const testID = 'SharedPubkyCard-AliceBob-4';
+		expect(screen.getByTestId('ProfileAvatar').props).toMatchObject({
+			pubky: PUBKY,
+			name: 'Alice & Bob',
+			size: 48,
+			image: 'shared-avatar.jpg',
+		});
+		expect(screen.getByText('Alice & Bob')).toBeTruthy();
+		const outer = screen.toJSON() as ReactTestRendererJSON;
+		const card = outer.children?.[0] as ReactTestRendererJSON;
+		const [body, content, action] = card.children as ReactTestRendererJSON[];
+		expect(outer.props.testID).toBe(testID);
+		expect(outer.children).toHaveLength(1);
+		expect(card.children).toHaveLength(3);
+		expect(StyleSheet.flatten(card.props.style)).toMatchObject({ borderWidth: 1, borderStyle: 'dashed' });
+		expect(body.props.testID).toBe(`${testID}-Content`);
+		expect(StyleSheet.flatten(body.props.style)).toMatchObject({
+			position: 'absolute',
+			top: 0,
+			right: 0,
+			bottom: 0,
+			left: 0,
+		});
+		expect(content.props.pointerEvents).toBe('box-none');
+		expect(action.props.testID).toBe(`${testID}-ActionButton`);
+		expect(screen.UNSAFE_getByType(TouchableOpacity).props.onLongPress).toBeUndefined();
+		expect(screen.UNSAFE_getByType(Button).props.onLongPress).toBeUndefined();
 	});
 });

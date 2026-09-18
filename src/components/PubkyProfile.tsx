@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
 import { copyToClipboard } from '../utils/clipboard';
 import { PubkyData } from '../navigation/types';
+import { getFallbackPubkyName } from '../utils/pubkyName.ts';
+import { isBorrowedPubkyData } from '../utils/sharedPubky.ts';
 import ProfileAvatar from './ProfileAvatar';
 import { Text2Xl, TextBaseB } from '../theme/typography';
 import Button from './Button.tsx';
@@ -16,6 +18,10 @@ interface PubkyProfileProps {
 	buttonText?: string;
 	buttonIcon?: React.ReactNode;
 	isButtonLoading?: boolean;
+	/** Avatar override for identities that are not (yet) in the store. */
+	image?: string;
+	/** Optional provenance pill rendered under the pubky. */
+	badge?: React.ReactNode;
 	style?: StyleProp<ViewStyle>;
 	onButtonPress?: () => void;
 }
@@ -28,6 +34,8 @@ export const PubkyProfile = memo(
 		buttonText,
 		buttonIcon,
 		isButtonLoading = false,
+		image,
+		badge,
 		style,
 		onButtonPress,
 	}: PubkyProfileProps) => {
@@ -44,15 +52,12 @@ export const PubkyProfile = memo(
 
 		const pubkyUri = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 		const pubkyName =
-			pubkyData.name ||
-			(index !== undefined
-				? `${t('emptyState.placeholderName')} #${index + 1}`
-				: t('emptyState.placeholderName'));
+			pubkyData.name || getFallbackPubkyName({ index, isBorrowed: isBorrowedPubkyData(pubkyData) });
 
 		return (
 			<Card style={[styles.container, style]}>
 				<View style={styles.avatarContainer}>
-					<ProfileAvatar name={pubkyName} pubky={pubky} size={96} />
+					<ProfileAvatar name={pubkyName} pubky={pubky} size={96} image={image} />
 				</View>
 
 				<Text2Xl style={styles.nameText}>{pubkyName}</Text2Xl>
@@ -60,6 +65,8 @@ export const PubkyProfile = memo(
 				<TouchableOpacity activeOpacity={0.7} onPress={handleCopyPubky}>
 					<TextBaseB style={styles.pubkyText}>{pubkyUri}</TextBaseB>
 				</TouchableOpacity>
+
+				{badge ? <View style={styles.badgeContainer}>{badge}</View> : null}
 
 				{onButtonPress && (
 					<Button
@@ -96,6 +103,9 @@ const styles = StyleSheet.create({
 	},
 	pubkyText: {
 		textAlign: 'center',
+	},
+	badgeContainer: {
+		marginTop: 12,
 	},
 	button: {
 		width: '100%',

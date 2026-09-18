@@ -14,6 +14,7 @@ import Sheet from '../components/Sheet.tsx';
 import type { RootStackParamList } from '../navigation/types.ts';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import { deletePubky } from '../utils/pubky.ts';
+import { isBorrowedPubkyData } from '../utils/sharedPubky.ts';
 
 const DeletePubkySheet = ({
 	route,
@@ -24,6 +25,7 @@ const DeletePubkySheet = ({
 	const { pubky } = route.params;
 	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 	const currentPubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
+	const isBorrowed = useSelector((state: RootState) => isBorrowedPubkyData(state.pubky.pubkys[publicKey]));
 	// Preserve the original name while loading/deleting
 	const [pubkyName] = useState(currentPubkyName);
 
@@ -46,8 +48,14 @@ const DeletePubkySheet = ({
 	}, [dispatch, navigation, pubky, t]);
 
 	return (
-		<Sheet id="delete-pubky" title={t('pubky.deletePubky')} gradientType="brand">
-			<TextBaseM style={styles.message}>{t('pubky.deleteConfirm')}</TextBaseM>
+		<Sheet
+			id="delete-pubky"
+			title={isBorrowed ? t('reuseSharedPubky.disconnectPubky') : t('pubky.deletePubky')}
+			gradientType="brand"
+		>
+			<TextBaseM style={styles.message}>
+				{isBorrowed ? t('reuseSharedPubky.disconnectConfirm') : t('pubky.deleteConfirm')}
+			</TextBaseM>
 			<PubkyCard name={pubkyName} publicKey={publicKey} />
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/trash.png')} style={styles.image} />
@@ -60,7 +68,7 @@ const DeletePubkySheet = ({
 					onPress={closeSheet}
 				/>
 				<Button
-					text={t('common.delete')}
+					text={isBorrowed ? t('reuseSharedPubky.disconnect') : t('common.delete')}
 					size="large"
 					variant="secondary"
 					testID="DeletePubkyConfirmButton"

@@ -7,6 +7,8 @@ import { shareData } from '../../utils/helpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
+import { isBorrowedPubkyData } from '../../utils/sharedPubky.ts';
+import BitkitBadge from '../BitkitBadge.tsx';
 
 interface PubkyDetailCardProps {
 	index: number;
@@ -43,6 +45,7 @@ export const PubkyDetailCard = memo(
 
 		const buttonIcon = pubkyData.signedUp ? <Scan /> : undefined;
 		const buttonText = pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup');
+		const isBorrowed = isBorrowedPubkyData(pubkyData);
 
 		const showActionIcons = fontScale <= 1;
 		const shareIcon = showActionIcons ? <Share /> : undefined;
@@ -58,6 +61,7 @@ export const PubkyDetailCard = memo(
 					buttonText={buttonText}
 					buttonIcon={buttonIcon}
 					isButtonLoading={isQRLoading}
+					badge={isBorrowed ? <BitkitBadge /> : undefined}
 					onButtonPress={handleButtonPress}
 				/>
 
@@ -70,17 +74,21 @@ export const PubkyDetailCard = memo(
 						testID="PubkyDetailShareButton"
 						onPress={onSharePress}
 					/>
+
+					{!isBorrowed && (
+						<Button
+							style={styles.actionButton}
+							text={t('backup.backup')}
+							variant="dark"
+							icon={backupIcon}
+							testID="PubkyDetailBackupButton"
+							onPress={onBackup}
+						/>
+					)}
+
 					<Button
 						style={styles.actionButton}
-						text={t('backup.backup')}
-						variant="dark"
-						icon={backupIcon}
-						testID="PubkyDetailBackupButton"
-						onPress={onBackup}
-					/>
-					<Button
-						style={styles.actionButton}
-						text={t('common.delete')}
+						text={isBorrowed ? t('reuseSharedPubky.disconnect') : t('common.delete')}
 						variant="dark"
 						icon={deleteIcon}
 						testID="PubkyDetailDeleteButton"

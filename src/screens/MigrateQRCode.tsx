@@ -11,7 +11,7 @@ import {
 import DeviceBrightness from '@adrianso/react-native-device-brightness';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getOwnedPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { getPubkySecretKey } from '../utils/pubky.ts';
 import { getBackupPreference } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
@@ -27,7 +27,7 @@ const placeholderData = [{ value: 'pubkyring://migrate' }];
 const MigrateQRCode = (): ReactElement => {
 	const { t } = useTranslation();
 	const { width } = useWindowDimensions();
-	const pubkyKeys = useSelector(getPubkyKeys);
+	const pubkyKeys = useSelector(getOwnedPubkyKeys);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [isRevealed, setIsRevealed] = useState(false);

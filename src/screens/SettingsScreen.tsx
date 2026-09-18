@@ -8,7 +8,7 @@ import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAutoAuth, getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
-import { getAllPubkys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getOwnedPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';
 import {
 	resetSettings,
@@ -23,7 +23,8 @@ import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
-import { republishAllHomeserverRecords } from '../utils/pubky.ts';
+import { removeKeylessPubkys, republishAllHomeserverRecords } from '../utils/pubky.ts';
+import { clearOwnedSharedPubkys, withPubkyIdentityLifecycle } from '../utils/sharedPubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -33,12 +34,14 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	const dispatch = useDispatch();
 	const autoAuth = useSelector(getAutoAuth);
 	const navigationAnimation = useSelector(getNavigationAnimation);
-	const pubkyKeys = useSelector(getPubkyKeys);
+	// Backup/migration must never export a borrowed identity's key, and republishing a homeserver
+	// record is an ownership action, so both are gated on owned keys only.
+	const ownedPubkyKeys = useSelector(getOwnedPubkyKeys);
 	const pubkys = useSelector(getAllPubkys);
-	const hasPubkys = pubkyKeys.length > 0;
+	const hasOwnedPubkys = ownedPubkyKeys.length > 0;
 	const hasRepublishablePubkys = useMemo(
-		() => Object.values(pubkys).some(pubky => !!pubky.homeserver),
-		[pubkys],
+		() => ownedPubkyKeys.some(key => !!pubkys[key]?.homeserver),
+		[ownedPubkyKeys, pubkys],
 	);
 	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const [republishingAll, setRepublishingAll] = useState(false);
@@ -70,8 +73,23 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			},
 			{
 				text: t('common.yes'),
-				onPress: (): void => {
-					wipeKeychain().then();
+				onPress: async (): Promise<void> => {
+					const wiped = await withPubkyIdentityLifecycle(async () => {
+						// Shared-first removal preserves the canonical private source on failure.
+						if (!(await clearOwnedSharedPubkys())) return false;
+						if (!(await wipeKeychain())) {
+							// The wipe deletes records in parallel, so a failure can leave some private
+							// keys already destroyed. Those identities must not stay listed.
+							await removeKeylessPubkys({ ownedPubkys: ownedPubkyKeys, dispatch });
+							return false;
+						}
+						// Verify absence again while reconciliation is still excluded.
+						return await clearOwnedSharedPubkys();
+					});
+					if (!wiped) {
+						Alert.alert(t('common.error'), t('pubkyErrors.errorDeletingPubky'));
+						return;
+					}
 					dispatch(resetSettings());
 					dispatch(resetPubkys());
 					navigation.reset({
@@ -82,7 +100,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 				style: 'destructive',
 			},
 		]);
-	}, [dispatch, navigation, t]);
+	}, [dispatch, navigation, ownedPubkyKeys, t]);
 
 	const handleShowOnboarding = useCallback(() => {
 		dispatch(updateShowOnboarding({ showOnboarding: true }));
@@ -141,7 +159,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					</View>
 
 					<View style={styles.buttonContainer}>
-						{hasPubkys && (
+						{hasOwnedPubkys && (
 							<Button
 								style={styles.button}
 								text={t('settings.showQR')}
@@ -162,7 +180,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					</View>
 				</View>
 
-				{hasPubkys && (
+				{hasOwnedPubkys && (
 					<View>
 						<View style={styles.textSection}>
 							<TextXsM>{t('republish.title')}</TextXsM>

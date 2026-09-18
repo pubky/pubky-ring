@@ -3,6 +3,9 @@ import { StyleSheet, View, TouchableOpacity } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { EBackupPreference, Pubky } from '../types/pubky.ts';
 import { truncateStr } from '../utils/pubky.ts';
+import { getFallbackPubkyName } from '../utils/pubkyName.ts';
+import { isBorrowedPubkyData } from '../utils/sharedPubky.ts';
+import BitkitBadge from './BitkitBadge.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import { Text2Xl, TextBaseB, TextXsSb } from '../theme/typography';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers';
@@ -13,54 +16,59 @@ import { ChevronRight, Scan } from '../icons/index.ts';
 import Card from './Card.tsx';
 import { shadows } from '../theme/shadows.ts';
 
-interface PubkyInfoProps {
+export interface PubkyInfoProps {
 	pubkyName: string;
 	publicKey: string;
 	sessionsCount: number;
 	isBackedUp: boolean;
+	isBorrowed: boolean;
 }
 
-const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: PubkyInfoProps) => {
-	const { t } = useTranslation();
+export const PubkyInfo = memo(
+	({ pubkyName, publicKey, sessionsCount, isBackedUp, isBorrowed }: PubkyInfoProps) => {
+		const { t } = useTranslation();
 
-	const handleBackupPress = useCallback(() => {
-		showBackupSheet({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
-	}, [publicKey]);
+		const handleBackupPress = useCallback(() => {
+			showBackupSheet({ pubky: publicKey, backupPreference: EBackupPreference.unknown });
+		}, [publicKey]);
 
-	return (
-		<View style={styles.contentContainer} pointerEvents="box-none">
-			<View pointerEvents="none">
-				<Text2Xl style={styles.nameText} numberOfLines={1}>
-					{pubkyName}
-				</Text2Xl>
-			</View>
-
-			<View style={styles.row} pointerEvents="box-none">
+		return (
+			<View style={styles.contentContainer} pointerEvents="box-none">
 				<View pointerEvents="none">
-					<TextBaseB numberOfLines={1} ellipsizeMode="middle">
-						{truncateStr(publicKey)}
-					</TextBaseB>
+					<Text2Xl style={styles.nameText} numberOfLines={1}>
+						{pubkyName}
+					</Text2Xl>
 				</View>
 
-				{!isBackedUp && (
-					<TouchableOpacity
-						style={styles.backupContainer}
-						testID="PubkyBox-BackupButton"
-						onPress={handleBackupPress}
-					>
-						<TextXsSb colorName="blue">{t('pubkyProfile.backupReminder')}</TextXsSb>
-					</TouchableOpacity>
-				)}
-
-				{sessionsCount > 0 && (
-					<View style={styles.sessionsButton}>
-						<TextXsSb colorName="primaryForeground">{sessionsCount}</TextXsSb>
+				<View style={styles.row} pointerEvents="box-none">
+					<View style={styles.publicKeyContainer} pointerEvents="none">
+						<TextBaseB numberOfLines={1} ellipsizeMode="middle">
+							{truncateStr(publicKey)}
+						</TextBaseB>
 					</View>
-				)}
+
+					{isBorrowed ? <BitkitBadge style={styles.pill} /> : null}
+
+					{!isBackedUp && !isBorrowed ? (
+						<TouchableOpacity
+							style={[styles.backupContainer, styles.pill]}
+							testID="PubkyBox-BackupButton"
+							onPress={handleBackupPress}
+						>
+							<TextXsSb colorName="blue">{t('pubkyProfile.backupReminder')}</TextXsSb>
+						</TouchableOpacity>
+					) : null}
+
+					{sessionsCount > 0 && (
+						<View style={styles.sessionsButton}>
+							<TextXsSb colorName="primaryForeground">{sessionsCount}</TextXsSb>
+						</View>
+					)}
+				</View>
 			</View>
-		</View>
-	);
-});
+		);
+	},
+);
 
 interface PubkyBoxProps {
 	pubky: string;
@@ -89,9 +97,8 @@ const PubkyBox = ({
 	}, [index, onPubkyPress, pubky]);
 
 	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
-	const pubkyName =
-		truncateStr(pubkyData.name, 8) ||
-		`${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
+	const isBorrowed = isBorrowedPubkyData(pubkyData);
+	const pubkyName = truncateStr(pubkyData.name, 8) || getFallbackPubkyName({ index: index ?? 0, isBorrowed });
 
 	const handleActionPress = useCallback(() => {
 		if (!pubkyData.signedUp) {
@@ -128,6 +135,7 @@ const PubkyBox = ({
 						pubkyName={pubkyName}
 						publicKey={publicKey}
 						isBackedUp={pubkyData.isBackedUp}
+						isBorrowed={isBorrowed}
 						sessionsCount={sessionsCount}
 					/>
 
@@ -152,7 +160,7 @@ const PubkyBox = ({
 	);
 };
 
-const styles = StyleSheet.create({
+export const pubkyCardStyles = StyleSheet.create({
 	container: {
 		marginBottom: 24,
 		marginHorizontal: 24,
@@ -173,6 +181,17 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 		marginRight: 16,
 	},
+	iconContainer: {
+		justifyContent: 'center',
+		marginLeft: 'auto',
+	},
+	button: {
+		marginTop: 16,
+	},
+});
+
+const styles = StyleSheet.create({
+	...pubkyCardStyles,
 	contentContainer: {
 		flex: 1,
 		justifyContent: 'center',
@@ -180,10 +199,6 @@ const styles = StyleSheet.create({
 	},
 	nameText: {
 		paddingRight: 16,
-	},
-	iconContainer: {
-		justifyContent: 'center',
-		marginLeft: 'auto',
 	},
 	sessionsButton: {
 		alignItems: 'center',
@@ -196,6 +211,17 @@ const styles = StyleSheet.create({
 	row: {
 		flexDirection: 'row',
 		flexWrap: 'nowrap',
+		alignItems: 'center',
+		// Take the full width the card leaves us so the children below shrink instead of overflowing.
+		alignSelf: 'stretch',
+	},
+	// The key truncates so a wider pill can never push the row under the chevron.
+	publicKeyContainer: {
+		flexShrink: 1,
+	},
+	pill: {
+		marginLeft: 8,
+		flexShrink: 0,
 	},
 	backupContainer: {
 		flexDirection: 'row',
@@ -203,12 +229,8 @@ const styles = StyleSheet.create({
 		backgroundColor: 'rgba(0, 133, 255, 0.32)',
 		borderRadius: 16,
 		paddingHorizontal: 8,
-		marginLeft: 8,
 		height: 20,
 		...shadows.sm,
-	},
-	button: {
-		marginTop: 16,
 	},
 });
 

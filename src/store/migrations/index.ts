@@ -211,6 +211,24 @@ const migrations = {
 			},
 		};
 	},
+	// @ts-ignore
+	9: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			updatedPubkys[pubkyKey] = {
+				...updatedPubkys[pubkyKey],
+				// All identities saved by earlier Ring versions are private, Ring-owned records.
+				sourceApp: 'app.pubkyring',
+			};
+		});
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+			},
+		};
+	},
 };
 
 export default migrations;

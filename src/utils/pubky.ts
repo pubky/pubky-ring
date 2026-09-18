@@ -52,6 +52,20 @@ import {
 } from './constants.ts';
 import { appApplicationId } from './appInfo.ts';
 import i18n from '../i18n';
+import {
+	BITKIT_SOURCE_APP,
+	getSharedPubkyCredential,
+	isValidSharedSecretKey,
+	mirrorSharedPubky,
+	normalizeSharedPubky,
+	privatePubkyService,
+	reconcileSharedPubkys,
+	removeSharedPubky,
+	RING_SOURCE_APP,
+	SharedPubkyIdentity,
+	withPubkyIdentityLifecycle,
+} from './sharedPubky.ts';
+import { store } from '../store';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
@@ -109,6 +123,17 @@ export const getSignupToken = ({
 	return _getSignupToken(homeserver, adminPassword);
 };
 
+/**
+ * Signing a pkarr record or a homeserver signup re-homes an identity, so both are ownership
+ * actions that belong to the app holding the key. Resolved from Redux alone: a borrowed identity
+ * is refused before any key material is fetched.
+ */
+const isBorrowedPubky = (pubky: string): boolean => {
+	const normalizedPubky = normalizePubkyReference(pubky);
+	const storedPubkyKey = normalizedPubky ? getStoredPubkyKey(pubky, normalizedPubky) : undefined;
+	return getPubkyDataFromStore(storedPubkyKey ?? pubky)?.sourceApp === BITKIT_SOURCE_APP;
+};
+
 export const republishHomeserver = async ({
 	pubky,
 	secretKey,
@@ -120,6 +145,12 @@ export const republishHomeserver = async ({
 	homeserver: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
+	// Central ownership gate. The individual call sites keep their own checks as defence in depth,
+	// but recovery paths such as a failed sign-in must not reach the signer either.
+	if (isBorrowedPubky(pubky)) {
+		console.log(`[republish] Refusing for ${pubky}: borrowed identity`);
+		return err(i18n.t('pubkyErrors.homeserverManagedBySourceApp'));
+	}
 	console.log(`[republish] Starting for ${pubky} via ${homeserver}`);
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
@@ -158,8 +189,15 @@ export const republishAllHomeserverRecords = async ({
 		const hasHomeserver = !!data.homeserver;
 		if (!hasHomeserver) {
 			console.log(`[republish] Skipping batch item for ${pubky}: no homeserver`);
+			return false;
 		}
-		return hasHomeserver;
+		// Publishing a signed pkarr record is an ownership action, so it belongs to the app that
+		// owns the key. Ring only maintains records for the identities it owns.
+		const isOwned = data.sourceApp !== BITKIT_SOURCE_APP;
+		if (!isOwned) {
+			console.log(`[republish] Skipping batch item for ${pubky}: borrowed identity`);
+		}
+		return isOwned;
 	});
 	summary.skipped = summary.total - republishablePubkys.length;
 
@@ -304,11 +342,14 @@ export const createPubkyWithInviteCode = async (
 export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
 	const allKeys = await getAllKeychainKeys();
 	if (allKeys?.length > 0) {
-		for (const pubky of allKeys) {
+		for (const key of allKeys) {
+			const privateIdentity = privatePubkyService(key);
+			if (!privateIdentity) continue;
+			const { service, pubky } = privateIdentity;
 			try {
-				const secretKeyRes = await getKeychainValue({ key: pubky });
+				const secretKeyRes = await getKeychainValue({ key: service });
 				if (secretKeyRes.isOk()) {
-					const isMigrated = isNewFormat(pubky);
+					const isMigrated = isNewFormat(secretKeyRes.value);
 					if (isMigrated) {
 						const { secretKey, mnemonic } = JSON.parse(secretKeyRes.value) as IKeychainData;
 						// Restored pubkys were already backed up
@@ -449,15 +490,7 @@ export const importPubky = async ({
 	}
 };
 
-export const savePubky = async ({
-	secretKey,
-	pubky,
-	dispatch,
-	mnemonic = '',
-	backupPreference = EBackupPreference.unknown,
-	isBackedUp = false,
-	signupToken = '',
-}: {
+type SavePubkyParams = {
 	secretKey: string;
 	pubky: string;
 	dispatch: Dispatch;
@@ -465,8 +498,47 @@ export const savePubky = async ({
 	backupPreference?: EBackupPreference;
 	isBackedUp?: boolean;
 	signupToken?: string;
-}): Promise<Result<string>> => {
+};
+
+const getPrivatePubkyServices = async (pubky: string): Promise<string[]> =>
+	(await getAllKeychainKeys()).filter(service => privatePubkyService(service)?.pubky === pubky);
+
+const hasPrivatePubky = async (pubky: string): Promise<boolean> =>
+	(await getPrivatePubkyServices(pubky)).length > 0;
+
+const normalizePubkyReference = (pubky: string): string | undefined =>
+	normalizeSharedPubky(pubky.startsWith('pk:') ? pubky.slice(3) : pubky);
+
+const getStoredPubkyKey = (pubky: string, normalizedPubky: string): string | undefined =>
+	[pubky, normalizedPubky, `pk:${normalizedPubky}`].find(key => getPubkyDataFromStore(key));
+
+export const savePubky = (params: SavePubkyParams): Promise<Result<string>> =>
+	withPubkyIdentityLifecycle(() => savePubkyUnlocked(params));
+
+const savePubkyUnlocked = async ({
+	secretKey,
+	pubky,
+	dispatch,
+	mnemonic = '',
+	backupPreference = EBackupPreference.unknown,
+	isBackedUp = false,
+	signupToken = '',
+}: SavePubkyParams): Promise<Result<string>> => {
 	try {
+		const normalizedPubky = normalizePubkyReference(pubky);
+		if (!normalizedPubky) {
+			return err(i18n.t('pubkyErrors.failedToGetPublicKey'));
+		}
+		const storedPubkyKey = getStoredPubkyKey(pubky, normalizedPubky);
+		const storedPubky = storedPubkyKey ? getPubkyDataFromStore(storedPubkyKey) : undefined;
+		if (storedPubky?.sourceApp === BITKIT_SOURCE_APP) {
+			return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
+		}
+		const derived = await getPublicKeyFromSecretKey(secretKey);
+		if (derived.isErr() || normalizeSharedPubky(derived.value.public_key) !== normalizedPubky) {
+			return err(i18n.t('pubkyErrors.failedToGetPublicKey'));
+		}
+		pubky = normalizedPubky;
 		// Ensure the mnemonic phrase generates the expected secretKey
 		if (mnemonic) {
 			const res = await mnemonicPhraseToKeypair(mnemonic);
@@ -476,33 +548,68 @@ export const savePubky = async ({
 			if (res.value.secret_key !== secretKey) {
 				return err(i18n.t('pubkyErrors.mnemonicDoesNotMatchSecretKey'));
 			}
-			if (res.value.public_key !== pubky) {
+			if (normalizeSharedPubky(res.value.public_key) !== pubky) {
 				return err(i18n.t('pubkyErrors.mnemonicDoesNotMatchPubky'));
 			}
 		} else {
 			// If no mnemonic is provided we have to default to the encrypted file.
 			backupPreference = EBackupPreference.encryptedFile;
 		}
-		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken }));
 		const keychainData: IKeychainData = {
 			secretKey,
 			mnemonic,
 		};
-		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		setKeychainValue({
+		const serializedKeychainData = JSON.stringify(keychainData);
+		const privateServices = await getPrivatePubkyServices(normalizedPubky);
+		const canonicalRecordExists = privateServices.includes(normalizedPubky);
+		const previousCanonicalRecord = canonicalRecordExists
+			? await getKeychainValue({ key: normalizedPubky })
+			: undefined;
+		if (previousCanonicalRecord?.isErr()) {
+			return err(previousCanonicalRecord.error.message);
+		}
+		const saveResponse = await setKeychainValue({
 			key: pubky,
-			value: JSON.stringify(keychainData),
-		}).then(response => {
-			if (response.isErr()) {
-				console.error('Failed to save keychain value');
-				showToast({
-					type: 'error',
-					title: i18n.t('pubkyErrors.failedToSaveToKeychain'),
-					description: response.error.message,
-				});
-				deletePubky(pubky, dispatch).then();
-			}
+			value: serializedKeychainData,
 		});
+		if (saveResponse.isErr()) {
+			showToast({
+				type: 'error',
+				title: i18n.t('pubkyErrors.failedToSaveToKeychain'),
+				description: saveResponse.error.message,
+			});
+			return err(saveResponse.error.message);
+		}
+		const readBack = await getKeychainValue({ key: pubky });
+		if (readBack.isErr() || readBack.value !== serializedKeychainData) {
+			if (previousCanonicalRecord?.isOk()) {
+				await setKeychainValue({ key: pubky, value: previousCanonicalRecord.value });
+			} else {
+				await resetKeychainValue({ key: pubky });
+			}
+			return err(i18n.t('pubkyErrors.failedToSaveToKeychain'));
+		}
+		if (storedPubkyKey) {
+			dispatch(
+				setPubkyData({
+					pubky: storedPubkyKey,
+					data: { backupPreference, isBackedUp, sourceApp: RING_SOURCE_APP },
+				}),
+			);
+		} else {
+			dispatch(
+				addPubky({
+					pubky,
+					backupPreference,
+					isBackedUp,
+					signupToken,
+					sourceApp: RING_SOURCE_APP,
+				}),
+			);
+		}
+		// Sharing may be unavailable until provisioning is configured. The private record remains
+		// canonical and a foreground reconciliation will retry without risking data loss.
+		await mirrorSharedPubky(pubky, secretKey);
 		return ok(pubky);
 	} catch (e) {
 		console.error('Error saving pubky:', e);
@@ -522,26 +629,136 @@ const isNewFormat = (value: string): boolean => {
 	}
 };
 
-export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
-	try {
+/**
+ * Clears every app-private homeserver session secret belonging to an identity.
+ * Sessions are keyed by whichever pubky string created them, which may be the stored
+ * (possibly prefixed) key or its canonical form, so every known variant is cleared.
+ */
+const clearPubkySessionSecrets = async (candidates: Array<string | undefined>): Promise<Result<boolean>> => {
+	// Every variant is attempted even after a failure, so one bad entry never shields the rest.
+	let firstError: Error | undefined;
+	for (const candidate of new Set(candidates.filter((value): value is string => !!value))) {
+		const res = await resetPubkySessionSecrets({ pubky: candidate });
+		if (res.isErr()) firstError = firstError ?? res.error;
+	}
+	return firstError ? err(firstError) : ok(true);
+};
+
+/**
+ * Drops a borrowed identity Ring can no longer use. The source app keeps its own key, but the
+ * homeserver session secrets Ring created now live in the Keychain rather than in Redux, so
+ * removing the Redux entry alone would strand them. Disconnecting still wins over a Keychain
+ * failure: an unusable borrowed profile must never stay active, so a failure is reported and the
+ * reference is dropped regardless.
+ *
+ * Serialized like every other identity-lifecycle change, so it cannot interleave with a connect
+ * that is still persisting the identity's session secrets. The lifecycle gate is not reentrant,
+ * so this must never be called from inside it.
+ *
+ * Resolves `true` only when this call is the one that removed the identity, so a caller can
+ * explain the removal exactly once however many flows raced to detect it.
+ */
+export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Promise<boolean> =>
+	withPubkyIdentityLifecycle(async () => {
+		// Re-checked under the gate: a concurrent flow may have removed the identity, or replaced
+		// it with a Ring-owned one that this must not touch.
+		if (getPubkyDataFromStore(pubky)?.sourceApp !== BITKIT_SOURCE_APP) return false;
+		const res = await clearPubkySessionSecrets([pubky, normalizePubkyReference(pubky)]);
+		if (res.isErr()) {
+			console.error('Failed to clear session secrets for disconnected identity', res.error.message);
+		}
 		dispatch(removePubky(pubky));
-		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
-			.then(results => {
-				const error = results.find(result => result.isErr());
-				if (error?.isErr()) {
-					showToast({
-						type: 'error',
-						title: i18n.t('pubkyErrors.failedToDelete'),
-						description: error.error.message,
-					});
-					console.error('Failed to delete pubky data from keychain');
-				}
-			})
-			.catch(error => {
-				console.error('Failed to delete pubky data from keychain', error);
+		return true;
+	});
+
+/**
+ * Drops the Ring-owned identities whose private key record no longer exists, for a wipe that
+ * could not delete every record. The read paths use only the record stored under the Redux key,
+ * so an identity without it is keyless and must never stay listed. One whose record survived
+ * stays, which keeps the list truthful and the wipe retryable. Must run inside the identity
+ * lifecycle gate, so reconciliation cannot interleave with it.
+ */
+export const removeKeylessPubkys = async ({
+	ownedPubkys,
+	dispatch,
+}: {
+	ownedPubkys: string[];
+	dispatch: Dispatch;
+}): Promise<void> => {
+	try {
+		const remainingServices = new Set(await getAllKeychainKeys());
+		for (const pubky of ownedPubkys) {
+			if (!remainingServices.has(pubky)) dispatch(removePubky(pubky));
+		}
+	} catch (error) {
+		// Without a readable keychain listing nothing can be proven keyless.
+		console.error('Failed to list the keychain after a partial wipe', error);
+	}
+};
+
+export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<string>> =>
+	withPubkyIdentityLifecycle(() => deletePubkyUnlocked(pubky, dispatch));
+
+const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
+	try {
+		const normalizedPubky = normalizePubkyReference(pubky);
+		if (!normalizedPubky) return err(i18n.t('pubkyErrors.errorDeletingPubky'));
+		const storedPubkyKey = getStoredPubkyKey(pubky, normalizedPubky) ?? normalizedPubky;
+		const pubkyData = getPubkyDataFromStore(storedPubkyKey);
+		if (pubkyData?.sourceApp === BITKIT_SOURCE_APP) {
+			// Disconnecting a borrowed identity never mutates the source app's key, but the
+			// homeserver session secrets Ring created for it are Ring-local private state.
+			const sessionSecretsRes = await clearPubkySessionSecrets([storedPubkyKey, normalizedPubky, pubky]);
+			if (sessionSecretsRes.isErr()) {
+				showToast({
+					type: 'error',
+					title: i18n.t('pubkyErrors.failedToDelete'),
+					description: sessionSecretsRes.error.message,
+				});
+				return err(sessionSecretsRes.error.message);
+			}
+			dispatch(removePubky(storedPubkyKey));
+			return ok(normalizedPubky);
+		}
+
+		// Remove the interoperability mirror first. If this cannot be verified, preserve the
+		// private canonical record and UI state so a later reconciliation can recover safely.
+		if (!(await removeSharedPubky(normalizedPubky))) {
+			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
+		}
+		const privateServices = await getPrivatePubkyServices(normalizedPubky);
+		// The record stored under the Redux key is the only one the read paths use, so it goes
+		// last: an abort part-way through never leaves a listed identity whose key is unreadable.
+		const orderedServices = [
+			...privateServices.filter(service => service !== storedPubkyKey),
+			...privateServices.filter(service => service === storedPubkyKey),
+		];
+		for (const service of orderedServices) {
+			const response = await resetKeychainValue({ key: service });
+			if (response.isErr()) {
+				showToast({
+					type: 'error',
+					title: i18n.t('pubkyErrors.failedToDelete'),
+					description: response.error.message,
+				});
+				return err(response.error.message);
+			}
+		}
+		// Session secrets go once every private record has been deleted, so every earlier abort
+		// leaves the identity intact with its sessions still revocable. From here the private key
+		// no longer exists: the Redux entry is removed even if this cleanup fails, because a
+		// keyless identity must never stay on screen. The failure is reported, not fatal.
+		const sessionSecretsRes = await clearPubkySessionSecrets([storedPubkyKey, normalizedPubky, pubky]);
+		dispatch(removePubky(storedPubkyKey));
+		if (sessionSecretsRes.isErr()) {
+			console.error('Failed to clear session secrets for deleted identity', sessionSecretsRes.error.message);
+			showToast({
+				type: 'error',
+				title: i18n.t('pubkyErrors.failedToDelete'),
+				description: sessionSecretsRes.error.message,
 			});
-		return ok(pubky);
+		}
+		return ok(normalizedPubky);
 	} catch (error) {
 		console.error('Error deleting pubky:', error);
 		return err(i18n.t('pubkyErrors.errorDeletingPubky'));
@@ -560,13 +777,20 @@ const migrateKeychainEntry = async (pubky: string, oldSecretKey: string): Promis
 		};
 
 		// Save in new format
+		const serialized = JSON.stringify(keychainData);
 		const saveRes = await setKeychainValue({
 			key: pubky,
-			value: JSON.stringify(keychainData),
+			value: serialized,
 		});
 
 		if (saveRes.isErr()) {
 			return err(`Failed to migrate keychain entry for ${pubky}: ${saveRes.error.message}`);
+		}
+		const readBack = await getKeychainValue({ key: pubky });
+		if (readBack.isErr() || readBack.value !== serialized) {
+			// Keep the legacy source recoverable if verification ever fails.
+			await setKeychainValue({ key: pubky, value: oldSecretKey });
+			return err(`Failed to verify migrated keychain entry for ${pubky}`);
 		}
 
 		return ok(keychainData);
@@ -577,6 +801,20 @@ const migrateKeychainEntry = async (pubky: string, oldSecretKey: string): Promis
 
 export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychainData>> => {
 	try {
+		const pubkyData = getPubkyDataFromStore(pubky);
+		if (pubkyData?.sourceApp === BITKIT_SOURCE_APP) {
+			const credential = await getSharedPubkyCredential({
+				pubky,
+				sourceApp: BITKIT_SOURCE_APP,
+			});
+			if (!credential) {
+				// Fail closed, then explain: the identity has just been dropped, so the caller's
+				// error message is the only chance to tell the user why it disappeared.
+				await disconnectBorrowedPubky(pubky, store.dispatch);
+				return err(i18n.t('reuseSharedPubky.noLongerShared'));
+			}
+			return ok({ secretKey: credential.secretKey, mnemonic: '' });
+		}
 		const res = await getKeychainValue({ key: pubky });
 		if (res.isErr()) {
 			console.error('Failed to get secret key from keychain');
@@ -591,10 +829,130 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 			return ok(JSON.parse(res.value));
 		}
 
-		return await migrateKeychainEntry(pubky, res.value);
+		return await withPubkyIdentityLifecycle(async () => {
+			// Re-read under the lifecycle gate so deletion/wipe cannot resurrect a stale value.
+			const current = await getKeychainValue({ key: pubky });
+			if (current.isErr()) return err(i18n.t('pubkyErrors.failedToGetSecretKeyFromKeychain'));
+			if (isNewFormat(current.value)) return ok(JSON.parse(current.value));
+			return await migrateKeychainEntry(pubky, current.value);
+		});
 	} catch {
 		return err(i18n.t('pubkyErrors.unableToGetSecretKey'));
 	}
+};
+
+/**
+ * Adds a Bitkit-owned identity without copying its secret into Ring's private keychain or mirror.
+ * The credential exists only for this authentication call; Redux persists the source reference
+ * and the app-private Pubky session returned by the homeserver.
+ */
+type ConnectSharedPubkyParams = {
+	identity: SharedPubkyIdentity;
+	dispatch: Dispatch;
+};
+
+export const connectSharedPubky = (params: ConnectSharedPubkyParams): Promise<Result<string>> =>
+	withPubkyIdentityLifecycle(() => connectSharedPubkyUnlocked(params));
+
+const connectSharedPubkyUnlocked = async ({
+	identity,
+	dispatch,
+}: ConnectSharedPubkyParams): Promise<Result<string>> => {
+	const requestedPubky = normalizeSharedPubky(identity.pubky);
+	if (!requestedPubky || getPubkyDataFromStore(requestedPubky) || (await hasPrivatePubky(requestedPubky))) {
+		return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
+	}
+	const credential = await getSharedPubkyCredential(identity);
+	if (!credential) return err(i18n.t('pubkyErrors.secretKeyNotFoundInKeychain'));
+
+	const pubky = credential.pubky;
+	if (getPubkyDataFromStore(pubky)) {
+		// Discovery and selection are asynchronous; another flow may have connected this identity.
+		return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
+	}
+	let homeserver = defaultPubkyState.homeserver;
+	const homeserverResult = await getHomeserver(pubky);
+	if (
+		homeserverResult.isOk() &&
+		homeserverResult.value &&
+		!homeserverResult.value.toLowerCase().includes('error') &&
+		!homeserverResult.value.toLowerCase().includes('no homeserver')
+	) {
+		homeserver = homeserverResult.value;
+	}
+
+	dispatch(
+		addPubky({
+			pubky,
+			sourceApp: BITKIT_SOURCE_APP,
+			backupPreference: EBackupPreference.unknown,
+			isBackedUp: false,
+		}),
+	);
+	if (homeserver?.trim()) dispatch(setHomeserver({ pubky, homeserver }));
+
+	const signInResult = await signInToHomeserver({
+		pubky,
+		// Signing in resolves the homeserver from the key itself, so an identity whose record could
+		// not be resolved must not be blocked here. The fallback is only a non-empty placeholder and
+		// is deliberately not persisted: the store keeps a genuinely resolved homeserver or nothing.
+		// The one path that would publish it, republishHomeserver, is refused for borrowed keys.
+		homeserver: homeserver || DEFAULT_HOMESERVER,
+		secretKey: credential.secretKey,
+		dispatch,
+	});
+	if (signInResult.isErr()) {
+		dispatch(removePubky(pubky));
+		return err(signInResult.error.message);
+	}
+
+	if (homeserver === PRODUCTION_HOMESERVER || homeserver === STAGING_HOMESERVER) {
+		const app = homeserver === STAGING_HOMESERVER ? STAGING_APP_HOST : PRODUCTION_APP_HOST;
+		const profileInfo = await getProfileInfo(pubky, app);
+		if (profileInfo.isOk() && profileInfo.value.name) {
+			dispatch(setPubkyData({ pubky, data: { name: profileInfo.value.name } }));
+		}
+		const avatar = await getProfileAvatar(pubky, app);
+		if (avatar.isOk()) {
+			dispatch(setPubkyData({ pubky, data: { image: avatar.value } }));
+		}
+	}
+	return ok(pubky);
+};
+
+/** Rebuilds source-owned mirrors exclusively from Ring's validated private keychain records. */
+export const reconcileOwnedSharedPubkys = (): Promise<boolean> =>
+	withPubkyIdentityLifecycle(reconcileOwnedSharedPubkysUnlocked).catch(() => false);
+
+const reconcileOwnedSharedPubkysUnlocked = async (): Promise<boolean> => {
+	const identities = new Map<string, string>();
+	const privateServices = await getAllKeychainKeys();
+	for (const service of privateServices) {
+		const privateIdentity = privatePubkyService(service);
+		if (!privateIdentity) continue;
+		const { pubky } = privateIdentity;
+		const value = await getKeychainValue({ key: service });
+		if (value.isErr()) return false;
+		// Reconciliation is read-only with respect to the private source. Legacy values are
+		// mirrored in memory and upgraded only through the verified migration path when used.
+		const data = isNewFormat(value.value)
+			? (JSON.parse(value.value) as IKeychainData)
+			: { secretKey: value.value, mnemonic: '' };
+		if (!isValidSharedSecretKey(data.secretKey)) return false;
+		const derived = await getPublicKeyFromSecretKey(data.secretKey);
+		if (derived.isErr() || normalizeSharedPubky(derived.value.public_key) !== pubky) return false;
+		const existingSecretKey = identities.get(pubky);
+		if (existingSecretKey && existingSecretKey !== data.secretKey) {
+			// Ambiguous private sources must never cause a destructive shared reconciliation.
+			return false;
+		}
+		identities.set(pubky, data.secretKey);
+	}
+	return reconcileSharedPubkys(
+		[...identities]
+			.sort(([left], [right]) => left.localeCompare(right))
+			.map(([pubky, secretKey]) => ({ pubky, secretKey })),
+	);
 };
 
 export const signUpToHomeserver = async ({
@@ -610,6 +968,11 @@ export const signUpToHomeserver = async ({
 	signupToken?: string;
 	dispatch: Dispatch;
 }): Promise<Result<SessionInfo>> => {
+	// Signing up publishes a homeserver record for the key, so it re-homes the identity. Only the
+	// owning app may do that, and the edit flow can reach this with a locally changed homeserver.
+	if (isBorrowedPubky(pubky)) {
+		return err(i18n.t('pubkyErrors.homeserverManagedBySourceApp'));
+	}
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {
@@ -650,7 +1013,14 @@ export const signInToHomeserver = async ({
 }): Promise<Result<SessionInfo>> => {
 	if (!homeserver) {
 		const pubkyData = getPubkyDataFromStore(pubky);
-		homeserver = pubkyData?.homeserver ?? DEFAULT_HOMESERVER;
+		// A borrowed identity with no resolvable homeserver record is stored with an empty string,
+		// which `??` does not catch. Only a borrowed identity gets that fallback: the recovery path
+		// below republishes this value, which is refused for borrowed keys but would re-home a
+		// Ring-owned identity to the default homeserver. An owned key keeps failing closed.
+		homeserver =
+			pubkyData?.sourceApp === BITKIT_SOURCE_APP
+				? pubkyData.homeserver || DEFAULT_HOMESERVER
+				: (pubkyData?.homeserver ?? DEFAULT_HOMESERVER);
 		if (!homeserver) {
 			return err(i18n.t('pubkyErrors.homeserverNotFound'));
 		}
@@ -756,9 +1126,14 @@ export const performAuth = async ({
 			if (!pubky) {
 				return err(i18n.t('pubkyErrors.pubkyRequiredForAuth'));
 			}
+			// Read before the fetch: a borrowed credential that has gone away auto-disconnects the
+			// identity, so afterwards the store no longer knows it was borrowed.
+			const wasBorrowed = getPubkyDataFromStore(pubky)?.sourceApp === BITKIT_SOURCE_APP;
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
-				return err(i18n.t('pubkyErrors.failedToGetSecretKey'));
+				// A borrowed identity fails here because its source app stopped sharing it, which is
+				// worth explaining; an owned one keeps the generic keychain message.
+				return err(wasBorrowed ? secretKeyRes.error.message : i18n.t('pubkyErrors.failedToGetSecretKey'));
 			}
 			const pubkyData = getPubkyDataFromStore(pubky);
 			const { signedUp, homeserver } = pubkyData;
@@ -790,7 +1165,11 @@ export const performAuth = async ({
 					return err(getErrorMessage(authRes.error, i18n.t('errors.failedToProcessAuth')));
 				}
 			}
-			if (!republishedDuringSignup && homeserver) {
+			// A borrowed identity's homeserver record belongs to the app that owns the key, and the
+			// value cached here is only as fresh as the moment it was connected. Authorising a third
+			// party must not overwrite the owner's record with it.
+			const isBorrowed = pubkyData?.sourceApp === BITKIT_SOURCE_APP;
+			if (!republishedDuringSignup && homeserver && !isBorrowed) {
 				republishHomeserver({ pubky, secretKey, homeserver, dispatch });
 			}
 			return ok('success');

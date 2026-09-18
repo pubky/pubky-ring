@@ -7,6 +7,7 @@ import type {
 	EditPubkySheetParams,
 	LegacySunsetSheetParams,
 	MigrateSheetParams,
+	ReuseSharedPubkySheetParams,
 } from '../sheets/types.ts';
 
 export interface PubkyData extends Pubky {
@@ -34,4 +35,5 @@ export type RootStackParamList = {
 	AddPubkySheet: AddPubkySheetParams;
 	MigrateSheet: MigrateSheetParams;
 	LegacySunsetSheet: LegacySunsetSheetParams;
+	ReuseSharedPubkySheet: ReuseSharedPubkySheetParams;
 };

@@ -1,5 +1,6 @@
 import type { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import type { InputSource, XCallbackParams } from '../utils/inputParser.ts';
+import type { SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 
 export type SheetId =
 	| 'backup'
@@ -8,7 +9,8 @@ export type SheetId =
 	| 'edit-pubky'
 	| 'add-pubky'
 	| 'migrate'
-	| 'legacy-sunset';
+	| 'legacy-sunset'
+	| 'reuse-shared-pubky';
 
 export type BackupFileScreenParams = {
 	pubky: string;
@@ -148,6 +150,12 @@ export type LegacySunsetSheetParams = {
 	apkUrl: string;
 };
 
+export type ReuseSharedPubkySheetParams = {
+	identity: SharedPubkyIdentity;
+	/** Zero-based position of the card the sheet was opened from, used for the fallback name. */
+	index: number;
+};
+
 export type SheetParamsById = {
 	backup: BackupSheetParams;
 	auth: AuthSheetParams;
@@ -156,4 +164,5 @@ export type SheetParamsById = {
 	'add-pubky': AddPubkySheetParams;
 	migrate: MigrateSheetParams;
 	'legacy-sunset': LegacySunsetSheetParams;
+	'reuse-shared-pubky': ReuseSharedPubkySheetParams;
 };

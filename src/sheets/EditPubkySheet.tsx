@@ -8,8 +8,8 @@ import { formatSignupToken } from '../utils/helpers.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { setPubkyData } from '../store/slices/pubkysSlice.ts';
 import { hideSheet } from './sheetNavigation.tsx';
-import { err } from '@synonymdev/result';
 import { DEFAULT_HOMESERVER, STAGING_HOMESERVER } from '../utils/constants.ts';
+import { isBorrowedPubkyData } from '../utils/sharedPubky.ts';
 import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
 import { TextSmM, TextXsM } from '../theme/typography';
@@ -77,9 +77,14 @@ const EditPubkySheet = ({
 	const storedSignupToken = storedPubkyData?.signupToken ?? '';
 	const isStoredUnsigned = storedPubkyData?.signedUp === false;
 	const isStoredSignedUp = storedPubkyData?.signedUp === true;
+	const isBorrowed = isBorrowedPubkyData(storedPubkyData);
 	const [loading, setLoading] = useState(false);
 	const [newPubkyName, setNewPubkyName] = useState(storedName);
-	const [homeServer, setHomeServer] = useState(storedHomeserver || DEFAULT_HOMESERVER || '');
+	// A borrowed pubky's homeserver is whatever the source app published, so the read-only field
+	// shows the stored value as-is rather than defaulting to a homeserver Ring merely assumes.
+	const [homeServer, setHomeServer] = useState(
+		isBorrowed ? storedHomeserver : storedHomeserver || DEFAULT_HOMESERVER || '',
+	);
 	const [signupToken, setSignupToken] = useState('');
 	const pubkyNameLength = newPubkyName.length;
 	const [nameError, setNameError] = useState<string>(
@@ -90,8 +95,10 @@ const EditPubkySheet = ({
 	const signupTokenInputRef = useRef<TextInput>(null);
 
 	const isSignupTokenInputVisible = useMemo(() => {
+		// Ring never signs a borrowed pubky up, so an invite code has nothing to apply to.
+		if (isBorrowed) return false;
 		return isStoredUnsigned || storedHomeserver !== (homeServer?.trim() || '');
-	}, [homeServer, isStoredUnsigned, storedHomeserver]);
+	}, [homeServer, isBorrowed, isStoredUnsigned, storedHomeserver]);
 
 	const formatSignupTokenForHomeserver = useCallback(
 		(text: string) => {
@@ -134,13 +141,6 @@ const EditPubkySheet = ({
 			Keyboard.dismiss();
 			setLoading(true);
 
-			const secretKeyRes = await getPubkySecretKey(pubky);
-			if (secretKeyRes.isErr()) {
-				updateName(); // No need to prevent updating the name if we can.
-				return err(secretKeyRes.error.message);
-			}
-			const secretKey = secretKeyRes.value.secretKey;
-
 			let newData = {
 				name: newPubkyName.trim(),
 				homeserver: homeServer.trim(),
@@ -148,8 +148,21 @@ const EditPubkySheet = ({
 			};
 
 			if (!isStoredSignedUp || storedHomeserver !== homeServer.trim() || storedSignupToken !== signupToken) {
+				// Only fetched once the homeserver actually has to be contacted: a rename must never
+				// touch key material, and for a borrowed pubky it must never ask the source app for
+				// its secret key.
+				const secretKeyRes = await getPubkySecretKey(pubky);
+				if (secretKeyRes.isErr()) {
+					updateName(); // No need to prevent updating the name if we can.
+					setError(secretKeyRes.error.message);
+					return;
+				}
+				const secretKey = secretKeyRes.value.secretKey;
+
 				let signedIn = false;
-				if (!isStoredSignedUp || storedHomeserver !== homeServer.trim()) {
+				// Signing up re-homes the identity, which only the owning app may do, so a borrowed
+				// pubky goes straight to sign-in (signUpToHomeserver refuses it by design).
+				if (!isBorrowed && (!isStoredSignedUp || storedHomeserver !== homeServer.trim())) {
 					//Attempt sign-up
 					const signupRes = await signUpToHomeserver({
 						pubky,
@@ -223,6 +236,7 @@ const EditPubkySheet = ({
 		isStoredSignedUp,
 		storedHomeserver,
 		signupToken,
+		isBorrowed,
 		dispatch,
 		updateName,
 		onClose,
@@ -376,6 +390,8 @@ const EditPubkySheet = ({
 					placeholder={t('editPubky.homeserver')}
 					error=""
 					autoFocus={false}
+					editable={!isBorrowed}
+					helperText={isBorrowed ? t('pubkyErrors.homeserverManagedBySourceApp') : undefined}
 					onSubmitEditing={handleHomeserverSubmit}
 				/>
 

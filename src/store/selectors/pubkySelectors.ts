@@ -2,6 +2,8 @@ import { createSelector } from '@reduxjs/toolkit';
 import { Pubky, PubkySession } from '../../types/pubky';
 import { RootState } from '../../types';
 import { truncateStr } from '../../utils/pubky.ts';
+import { getFallbackPubkyName } from '../../utils/pubkyName.ts';
+import { isBorrowedPubkyData } from '../../utils/sharedPubky.ts';
 
 /**
  * Get a specific pubky by its identifier.
@@ -67,6 +69,14 @@ export const getHasPubkys = createSelector([selectAllPubkys], pubkys => Object.k
  * Get all pubky keys (pubky identifiers)
  */
 export const getPubkyKeys = createSelector([selectAllPubkys], pubkys => Object.keys(pubkys));
+
+export const getOwnedPubkyKeys = createSelector([selectAllPubkys], pubkys =>
+	Object.keys(pubkys).filter(pubky => pubkys[pubky]?.sourceApp !== 'to.bitkit'),
+);
+
+export const getBorrowedPubkyKeys = createSelector([selectAllPubkys], pubkys =>
+	Object.keys(pubkys).filter(pubky => pubkys[pubky]?.sourceApp === 'to.bitkit'),
+);
 
 /**
  * Combined selector for HomeScreen to reduce re-renders
@@ -135,12 +145,13 @@ export const getPubkyImage = (state: RootState, pubky: string): string => {
 
 /**
  * Get pubky name
- * If no name is set, returns "pubky #N" where N is the index + 1
+ * If no name is set, returns "pubky #N" where N is the index + 1, or
+ * "pubky #N (Bitkit)" for an identity that stays managed by Bitkit
  * Optionally truncates the name to displayLength characters
  * @param state Redux state
  * @param pubky Pubky identifier
  * @param displayLength Number of characters to display (default: 8)
- * @returns Truncated name or "pubky #N"
+ * @returns Truncated name or the presentational fallback name
  */
 export const getPubkyName = (state: RootState, pubky: string, displayLength = 8): string => {
 	const pubkyData = state.pubky.pubkys[pubky];
@@ -151,8 +162,7 @@ export const getPubkyName = (state: RootState, pubky: string, displayLength = 8)
 		return truncateStr(name, displayLength);
 	}
 
-	// Fall back to "pubky #N" if no name
-	return `pubky #${pubkyIndex + 1}`;
+	return getFallbackPubkyName({ index: pubkyIndex, isBorrowed: isBorrowedPubkyData(pubkyData) });
 };
 
 /**

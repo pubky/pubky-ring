@@ -302,6 +302,8 @@
 		"errorDeletingPubky": "Error deleting pubky",
 		"secretKeyNotFoundInKeychain": "Secret key not found in keychain",
 		"failedToGetSecretKeyFromKeychain": "Failed to get secret key from keychain",
+		"pubkyAlreadyExists": "This pubky is already connected. Disconnect it before importing it as a Ring-owned identity.",
+		"homeserverManagedBySourceApp": "This pubky's homeserver is managed by Bitkit. Change it there instead.",
 		"homeserverNotFound": "Homeserver not found for this pubky. Please ensure the pubky is properly configured.",
 		"failedToSignOut": "Failed to sign out of homeserver",
 		"pubkyRequiredForAuth": "Pubky is required for auth",
@@ -361,6 +363,19 @@
 		"successMessage": "Successfully imported {{imported}} of {{total}} keys",
 		"partialSuccess": "Imported {{imported}} keys, {{failed}} failed",
 		"allFailed": "All keys failed to import"
+	},
+	"reuseSharedPubky": {
+		"title": "Use Bitkit pubky",
+		"description": "Use this pubky in Pubky Ring to authorize services, while it stays managed by Bitkit.",
+		"badge": "Bitkit pubky",
+		"fallbackName": "pubky #{{number}} (Bitkit)",
+		"useInRing": "Use in Pubky Ring",
+		"backupManagedByBitkit": "This pubky is managed by Bitkit. Back it up in Bitkit instead.",
+		"disconnect": "Disconnect",
+		"disconnectPubky": "Disconnect Pubky",
+		"disconnectConfirm": "Do you want to disconnect this Pubky from Ring? It will remain in Bitkit.",
+		"noLongerSharedTitle": "Pubky disconnected",
+		"noLongerShared": "Bitkit is no longer sharing this pubky. It was removed from Pubky Ring."
 	},
 	"loading": {
 		"modalTitle": "Configuring Pubky",

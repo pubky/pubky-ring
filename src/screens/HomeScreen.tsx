@@ -1,5 +1,5 @@
-import React, { memo, ReactElement, useCallback, useMemo } from 'react';
-import { StyleSheet, View } from 'react-native';
+import React, { memo, ReactElement, useCallback, useContext, useMemo } from 'react';
+import { ScrollView, StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
 import EmptyState from '../components/EmptyState';
@@ -19,8 +19,9 @@ import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
+import { SharedPubkyDiscoveryContext } from '../hooks/useSharedPubkyDiscovery.ts';
+import SharedPubkyCard from '../components/SharedPubkyCard.tsx';
 
-// Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
 const GRADIENT_START = { x: 0, y: 0 };
 const GRADIENT_END = { x: 0, y: 1 };
@@ -74,6 +75,11 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
+	const { identities: sharedIdentities } = useContext(SharedPubkyDiscoveryContext);
+	const unconnectedSharedIdentities = useMemo(() => {
+		const connectedPubkys = new Set(pubkyArray.map(({ key }) => key));
+		return sharedIdentities.filter(identity => !connectedPubkys.has(identity.pubky));
+	}, [pubkyArray, sharedIdentities]);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -123,13 +129,31 @@ const HomeScreen = (): ReactElement => {
 	}, [replacementRelease]);
 
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
+	// Below the owned pubkys, so connecting one appends it to the end and nothing jumps position.
+	const sharedCards = (offset: number): ReactElement => (
+		<>
+			{unconnectedSharedIdentities.map((identity, index) => (
+				<SharedPubkyCard key={identity.pubky} identity={identity} index={offset + index} />
+			))}
+		</>
+	);
 
 	if (!hasPubkys) {
 		return (
 			<SafeAreaView style={styles.container} edges={['bottom']}>
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
-				<EmptyState />
+				{unconnectedSharedIdentities.length > 0 ? (
+					<ScrollView
+						style={styles.sharedIdentities}
+						contentContainerStyle={styles.sharedIdentitiesContent}
+						showsVerticalScrollIndicator={false}
+					>
+						{sharedCards(0)}
+					</ScrollView>
+				) : (
+					<EmptyState />
+				)}
 				<View>
 					<ListFooter />
 				</View>
@@ -146,11 +170,11 @@ const HomeScreen = (): ReactElement => {
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
 				ListHeaderComponent={sunsetBanner}
+				ListFooterComponent={sharedCards(pubkyArray.length)}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 			/>
-			{/* Fixed footer */}
 			<View style={styles.fixedFooterContainer}>
 				<LinearGradient
 					style={styles.fadeOverlay}
@@ -176,6 +200,15 @@ const styles = StyleSheet.create({
 	},
 	emptyStateBanner: {
 		paddingTop: HEADER_HEIGHT + 16,
+	},
+	sharedIdentities: {
+		flex: 1,
+	},
+	// Centres a short list, and lets a long one grow past the viewport and scroll.
+	sharedIdentitiesContent: {
+		flexGrow: 1,
+		justifyContent: 'center',
+		paddingVertical: 16,
 	},
 	fadeOverlay: {
 		position: 'absolute',

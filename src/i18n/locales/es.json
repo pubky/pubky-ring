@@ -303,6 +303,8 @@
 		"errorDeletingPubky": "Error al borrar pubky",
 		"secretKeyNotFoundInKeychain": "Clave secreta no encontrada en el llavero",
 		"failedToGetSecretKeyFromKeychain": "Fallo al obtener la clave secreta del llavero",
+		"pubkyAlreadyExists": "Esta pubky ya está conectada. Desconéctala antes de importarla como una identidad propiedad de Ring.",
+		"homeserverManagedBySourceApp": "El homeserver de este pubky lo gestiona Bitkit. Cámbialo allí.",
 		"homeserverNotFound": "Homeserver no encontrado para este pubky. Por favor, asegúrese de que el pubky está configurado correctamente.",
 		"failedToSignOut": "Fallo al cerrar sesión en el servidor doméstico",
 		"pubkyRequiredForAuth": "Pubky es necesario para auth",
@@ -362,6 +364,19 @@
 		"successMessage": "Importado con éxito {{imported}} de {{total}} claves",
 		"partialSuccess": "Importadas las claves {{imported}}, {{failed}} ha fallado",
 		"allFailed": "Falló la importación de todas las claves"
+	},
+	"reuseSharedPubky": {
+		"title": "Usar pubky de Bitkit",
+		"description": "Usa este pubky en Pubky Ring para autorizar servicios, mientras Bitkit lo sigue gestionando.",
+		"badge": "Pubky de Bitkit",
+		"fallbackName": "pubky #{{number}} (Bitkit)",
+		"useInRing": "Usar en Pubky Ring",
+		"backupManagedByBitkit": "Este pubky lo gestiona Bitkit. Haz la copia de seguridad en Bitkit.",
+		"disconnect": "Desconectar",
+		"disconnectPubky": "Desconectar Pubky",
+		"disconnectConfirm": "¿Quieres desconectar este Pubky de Ring? Permanecerá en Bitkit.",
+		"noLongerSharedTitle": "Pubky desconectado",
+		"noLongerShared": "Bitkit ya no comparte este pubky. Se eliminó de Pubky Ring."
 	},
 	"loading": {
 		"modalTitle": "Configuración de Pubky",

@@ -9,7 +9,6 @@ import javax.crypto.Cipher
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
-import org.json.JSONArray
 import org.json.JSONObject
 
 /** App-private AES-GCM encrypted mirror used by the native ContentProvider. */
@@ -73,13 +72,11 @@ class SharedPubkyStore(context: Context) {
    * The caller has already read and validated these values from Ring's canonical private
    * keychain. Borrowed Bitkit identities are deliberately never passed to this method.
    */
-  fun reconcile(identitiesJson: String) {
-    val identities = JSONArray(identitiesJson)
+  fun reconcile(identities: List<Identity>) {
     val desired = linkedMapOf<String, String>()
-    for (index in 0 until identities.length()) {
-      val identity = identities.getJSONObject(index)
-      val pubky = identity.getString("pubky")
-      val secretKey = identity.getString("secretKey")
+    for (identity in identities) {
+      val pubky = identity.pubky
+      val secretKey = identity.secretKey
       require(SharedPubkyContract.isValidPubky(pubky)) { "pubky is invalid" }
       require(SharedPubkyContract.isValidSecretKey(secretKey)) { "secretKey is invalid" }
       check(desired.put(pubky, secretKey) == null) { "Duplicate pubky" }

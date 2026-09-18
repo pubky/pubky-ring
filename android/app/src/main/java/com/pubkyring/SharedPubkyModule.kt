@@ -8,8 +8,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
-import org.json.JSONArray
-import org.json.JSONObject
 
 class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
   ReactContextBaseJavaModule(reactContext) {
@@ -42,7 +40,7 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
   @ReactMethod
   fun reconcile(identities: ReadableArray, promise: Promise) {
     try {
-      val json = JSONArray()
+      val parsed = mutableListOf<SharedPubkyStore.Identity>()
       for (index in 0 until identities.size()) {
         val identity = identities.getMap(index) ?: throw IllegalArgumentException("Invalid identity")
         val pubky =
@@ -54,13 +52,9 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
             "Invalid pubky"
           }
         val secretKey = requireNotNull(identity.getString("secretKey")) { "Missing secret key" }
-        json.put(
-          JSONObject()
-            .put("pubky", pubky)
-            .put("secretKey", secretKey),
-        )
+        parsed.add(SharedPubkyStore.Identity(pubky, secretKey))
       }
-      SharedPubkyStore(reactContext).reconcile(json.toString())
+      SharedPubkyStore(reactContext).reconcile(parsed)
       promise.resolve(null)
     } catch (error: Exception) {
       promise.reject("reconcile_failed", error)

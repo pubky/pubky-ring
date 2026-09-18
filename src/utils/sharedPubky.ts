@@ -1,4 +1,4 @@
-import { NativeModules, Platform } from 'react-native';
+import { NativeModules } from 'react-native';
 import { getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import type { Pubky } from '../types/pubky.ts';
 
@@ -47,14 +47,12 @@ interface NativeSharedPubkyDiscovery {
 }
 
 interface SharedPubkyNativeModule {
-	privateAccessGroup?: string;
 	mirror(pubky: string, secretKey: string): Promise<void>;
 	remove(pubky: string): Promise<void>;
 	reconcile(identities: Array<{ pubky: string; secretKey: string }>): Promise<void>;
 	clear(): Promise<void>;
 	list(): Promise<NativeSharedPubkyDiscovery>;
 	credential(pubky: string): Promise<NativeSharedPubkyIdentity>;
-	privateServices?(): Promise<unknown>;
 }
 
 const PUBKY_PATTERN = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{52}$/;
@@ -101,26 +99,6 @@ export const isValidSharedSecretKey = (value: unknown): value is string =>
 
 const nativeModule = (): SharedPubkyNativeModule | undefined =>
 	NativeModules.SharedPubky as SharedPubkyNativeModule | undefined;
-
-export const getPrivateKeychainAccessGroup = (): string | undefined => {
-	if (Platform.OS !== 'ios') return undefined;
-	const group = nativeModule()?.privateAccessGroup;
-	return typeof group === 'string' && group.length > 0 ? group : undefined;
-};
-
-export const getPrivateKeychainServices = async (): Promise<string[] | undefined> => {
-	if (Platform.OS !== 'ios') return undefined;
-	const module = nativeModule();
-	if (!module?.privateServices) return undefined;
-	try {
-		const services = await module.privateServices();
-		return Array.isArray(services)
-			? services.filter((service): service is string => typeof service === 'string' && service.length > 0)
-			: undefined;
-	} catch {
-		return undefined;
-	}
-};
 
 export const mirrorSharedPubky = async (pubky: string, secretKey: string): Promise<boolean> => {
 	const module = nativeModule();

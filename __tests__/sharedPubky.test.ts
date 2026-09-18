@@ -4,7 +4,6 @@ import {
 	canonicalSharedPubky,
 	clearOwnedSharedPubkys,
 	discoverSharedPubkys,
-	getPrivateKeychainAccessGroup,
 	getSharedPubkyCredential,
 	isValidSharedSecretKey,
 	mirrorSharedPubky,
@@ -181,12 +180,6 @@ test('fails closed when native sharing is unavailable or rejects', async () => {
 	await expect(removeSharedPubky(OWNED)).resolves.toBe(false);
 	await expect(reconcileSharedPubkys([{ pubky: OWNED, secretKey: SECRET_A }])).resolves.toBe(false);
 	await expect(clearOwnedSharedPubkys()).resolves.toBe(false);
-});
-
-test('uses the expanded private access group only on iOS', () => {
-	expect(getPrivateKeychainAccessGroup()).toBeUndefined();
-	Object.defineProperty(Platform, 'OS', { configurable: true, value: 'ios' });
-	expect(getPrivateKeychainAccessGroup()).toBe('TEAM.app.pubkyring');
 });
 
 test('serializes identity lifecycle transactions across asynchronous gaps', async () => {

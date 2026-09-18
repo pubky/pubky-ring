@@ -19,6 +19,16 @@ RCT_EXPORT_MODULE();
   return NO;
 }
 
+- (dispatch_queue_t)methodQueue
+{
+  static dispatch_queue_t queue;
+  static dispatch_once_t onceToken;
+  dispatch_once(&onceToken, ^{
+    queue = dispatch_queue_create("app.pubkyring.SharedPubky", DISPATCH_QUEUE_SERIAL);
+  });
+  return queue;
+}
+
 - (NSDictionary *)constantsToExport
 {
   return @{
@@ -210,38 +220,210 @@ RCT_REMAP_METHOD(privateServices,
                  privateServicesResolver:(RCTPromiseResolveBlock)resolve
                  privateServicesRejecter:(RCTPromiseRejectBlock)reject)
 {
-  NSString *accessGroup = [self privateAccessGroup];
-  if (accessGroup.length == 0) {
-    reject(@"private_keychain_unavailable", @"Private keychain access group is unavailable", nil);
+  NSError *error;
+  NSArray<NSDictionary *> *items = [self privateItemsMatching:nil includeData:NO error:&error];
+  if (items == nil) {
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
     return;
   }
-  NSDictionary *query = @{
-    (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
-    (__bridge id)kSecAttrAccessGroup : accessGroup,
-    (__bridge id)kSecReturnAttributes : @YES,
-    (__bridge id)kSecMatchLimit : (__bridge id)kSecMatchLimitAll,
-  };
-  CFTypeRef result = NULL;
-  OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
-  if (status == errSecItemNotFound) {
-    resolve(@[]);
+  NSMutableOrderedSet<NSString *> *services = [NSMutableOrderedSet orderedSet];
+  for (NSDictionary *item in items) {
+    [services addObject:item[(__bridge id)kSecAttrService]];
+  }
+  resolve(services.array);
+}
+
+RCT_REMAP_METHOD(privateValue,
+                 privateValueService:(NSString *)service
+                 privateValueResolver:(RCTPromiseResolveBlock)resolve
+                 privateValueRejecter:(RCTPromiseRejectBlock)reject)
+{
+  NSError *error;
+  NSArray<NSDictionary *> *items = [self privateRecordsForService:service error:&error];
+  if (items == nil) {
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
     return;
+  }
+  if (items.count == 0) {
+    resolve(nil);
+    return;
+  }
+  NSString *value = [[NSString alloc] initWithData:items.firstObject[(__bridge id)kSecValueData]
+                                        encoding:NSUTF8StringEncoding];
+  if (value == nil) {
+    [self setError:&error status:errSecDecode];
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
+    return;
+  }
+  resolve(value);
+}
+
+RCT_REMAP_METHOD(setPrivateValue,
+                 setPrivateValueService:(NSString *)service
+                 value:(NSString *)value
+                 setPrivateValueResolver:(RCTPromiseResolveBlock)resolve
+                 setPrivateValueRejecter:(RCTPromiseRejectBlock)reject)
+{
+  NSError *error;
+  NSData *data = [value isKindOfClass:NSString.class] ? [value dataUsingEncoding:NSUTF8StringEncoding] : nil;
+  NSArray<NSDictionary *> *items = [self privateRecordsForService:service error:&error];
+  if (items == nil || data == nil) {
+    if (error == nil) [self setError:&error status:errSecParam];
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
+    return;
+  }
+  NSMutableDictionary *query = [[self privateQueryForService:service] mutableCopy];
+  OSStatus status;
+  if (items.count == 0) {
+    query[(__bridge id)kSecAttrAccount] = service;
+    query[(__bridge id)kSecAttrSynchronizable] = @NO;
+    query[(__bridge id)kSecAttrAccessible] = (__bridge id)kSecAttrAccessibleAfterFirstUnlock;
+    query[(__bridge id)kSecValueData] = data;
+    status = SecItemAdd((__bridge CFDictionaryRef)query, NULL);
+  } else {
+    // Keep existing sync modes and accessibility. In particular, do not delete
+    // legacy synchronizable records: that could remove copies on other devices.
+    query[(__bridge id)kSecAttrAccount] = items.firstObject[(__bridge id)kSecAttrAccount];
+    status = SecItemUpdate((__bridge CFDictionaryRef)query,
+                          (__bridge CFDictionaryRef)@{(__bridge id)kSecValueData : data});
   }
   if (status != errSecSuccess) {
-    NSError *error;
     [self setError:&error status:status];
     reject(@"private_keychain_unavailable", error.localizedDescription, error);
     return;
   }
-  NSArray<NSDictionary *> *attributes = CFBridgingRelease(result);
-  NSMutableOrderedSet<NSString *> *services = [NSMutableOrderedSet orderedSet];
-  for (NSDictionary *item in attributes) {
+  NSArray<NSDictionary *> *stored = [self privateRecordsForService:service error:&error];
+  if (stored == nil || stored.count != MAX(items.count, 1) ||
+      ![stored.firstObject[(__bridge id)kSecValueData] isEqual:data]) {
+    if (error == nil) [self setError:&error status:errSecDecode];
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
+    return;
+  }
+  resolve(nil);
+}
+
+RCT_REMAP_METHOD(resetPrivateValue,
+                 resetPrivateValueService:(NSString *)service
+                 resetPrivateValueResolver:(RCTPromiseResolveBlock)resolve
+                 resetPrivateValueRejecter:(RCTPromiseRejectBlock)reject)
+{
+  NSError *error;
+  NSArray<NSDictionary *> *items = [self privateRecordsForService:service error:&error];
+  if (items == nil) {
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
+    return;
+  }
+  // Callers retain shared-before-private deletion ordering. Remove both legacy
+  // synchronizable and current local copies only when this service is deleted.
+  NSDictionary *query = [self privateQueryForService:service];
+  OSStatus status = SecItemDelete((__bridge CFDictionaryRef)query);
+  if (status != errSecSuccess && status != errSecItemNotFound) {
+    [self setError:&error status:status];
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
+    return;
+  }
+  NSArray *remaining = [self privateItemsMatching:query includeData:NO error:&error];
+  if (remaining == nil || remaining.count != 0) {
+    if (error == nil) [self setError:&error status:errSecDuplicateItem];
+    reject(@"private_keychain_unavailable", error.localizedDescription, error);
+    return;
+  }
+  resolve(nil);
+}
+
+- (NSDictionary *)privateQueryForService:(NSString *)service
+{
+  return @{
+    (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+    (__bridge id)kSecAttrAccessGroup : [self privateAccessGroup],
+    (__bridge id)kSecAttrService : service,
+    (__bridge id)kSecAttrSynchronizable : (__bridge id)kSecAttrSynchronizableAny,
+  };
+}
+
+- (NSArray<NSDictionary *> *)privateItemsMatching:(NSDictionary *)match
+                                    includeData:(BOOL)includeData
+                                          error:(NSError **)error
+{
+  NSString *accessGroup = [self privateAccessGroup];
+  if (accessGroup.length == 0) {
+    [self setMissingEntitlementError:error];
+    return nil;
+  }
+  NSMutableDictionary *query = [@{
+    (__bridge id)kSecClass : (__bridge id)kSecClassGenericPassword,
+    (__bridge id)kSecAttrAccessGroup : accessGroup,
+    (__bridge id)kSecAttrSynchronizable : (__bridge id)kSecAttrSynchronizableAny,
+    (__bridge id)kSecReturnAttributes : @YES,
+    (__bridge id)kSecMatchLimit : (__bridge id)kSecMatchLimitAll,
+  } mutableCopy];
+  [query addEntriesFromDictionary:match ?: @{}];
+  if (includeData) {
+    query[(__bridge id)kSecReturnData] = @YES;
+  }
+  CFTypeRef result = NULL;
+  OSStatus status = SecItemCopyMatching((__bridge CFDictionaryRef)query, &result);
+  id items = CFBridgingRelease(result);
+  if (status == errSecItemNotFound) {
+    return @[];
+  }
+  if (status != errSecSuccess) {
+    [self setError:error status:status];
+    return nil;
+  }
+  // Only errSecItemNotFound authoritatively means an empty private keychain.
+  if (![items isKindOfClass:NSArray.class] || [items count] == 0) {
+    [self setError:error status:errSecDecode];
+    return nil;
+  }
+  for (id item in items) {
+    if (![item isKindOfClass:NSDictionary.class]) {
+      [self setError:error status:errSecDecode];
+      return nil;
+    }
     NSString *service = item[(__bridge id)kSecAttrService];
-    if ([service isKindOfClass:NSString.class] && service.length > 0) {
-      [services addObject:service];
+    NSString *account = item[(__bridge id)kSecAttrAccount];
+    id sync = item[(__bridge id)kSecAttrSynchronizable];
+    if (![service isKindOfClass:NSString.class] || service.length == 0 ||
+        ![account isKindOfClass:NSString.class] || account.length == 0 ||
+        ![item[(__bridge id)kSecAttrAccessGroup] isEqual:accessGroup] ||
+        (match[(__bridge id)kSecAttrService] != nil && ![service isEqual:match[(__bridge id)kSecAttrService]]) ||
+        ![sync isKindOfClass:NSNumber.class] ||
+        !([sync isEqual:@NO] || [sync isEqual:@YES]) ||
+        (includeData && ![item[(__bridge id)kSecValueData] isKindOfClass:NSData.class])) {
+      [self setError:error status:errSecDecode];
+      return nil;
     }
   }
-  resolve(services.array);
+  return items;
+}
+
+- (NSArray<NSDictionary *> *)privateRecordsForService:(NSString *)service error:(NSError **)error
+{
+  if (![service isKindOfClass:NSString.class] || service.length == 0) {
+    [self setError:error status:errSecParam];
+    return nil;
+  }
+  NSArray<NSDictionary *> *items = [self privateItemsMatching:@{(__bridge id)kSecAttrService : service}
+                                               includeData:YES error:error];
+  if (items == nil) {
+    return nil;
+  }
+  // A service may have matching copies in both modes, but never choose between
+  // differing accounts or data. Reads do not normalize, rewrite, or remove records.
+  NSDictionary *first = items.firstObject;
+  NSMutableSet<NSNumber *> *modes = [NSMutableSet set];
+  for (NSDictionary *item in items) {
+    NSNumber *sync = item[(__bridge id)kSecAttrSynchronizable];
+    if ([modes containsObject:sync] ||
+        ![item[(__bridge id)kSecAttrAccount] isEqual:first[(__bridge id)kSecAttrAccount]] ||
+        ![item[(__bridge id)kSecValueData] isEqual:first[(__bridge id)kSecValueData]]) {
+      [self setError:error status:errSecDuplicateItem];
+      return nil;
+    }
+    [modes addObject:sync];
+  }
+  return items;
 }
 
 - (NSString *)privateAccessGroup

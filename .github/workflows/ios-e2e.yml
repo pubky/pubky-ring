@@ -45,6 +45,9 @@ jobs:
     - name: Install dependencies
       run: yarn install --frozen-lockfile
 
+    - name: Test native Keychain operations
+      run: bash scripts/test-ios-keychain.sh
+
     - name: Cache CocoaPods
       uses: actions/cache@v5
       with:

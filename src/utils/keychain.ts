@@ -1,15 +1,21 @@
 import Keychain from 'react-native-keychain';
+import { NativeModules, Platform } from 'react-native';
 import { err, ok, Result } from '@synonymdev/result';
 import i18n from '../i18n';
-import { getPrivateKeychainAccessGroup, getPrivateKeychainServices } from './sharedPubky.ts';
+interface PrivateKeychain {
+	privateServices(): Promise<unknown>;
+	privateValue(service: string): Promise<string | null>;
+	setPrivateValue(service: string, value: string): Promise<void>;
+	resetPrivateValue(service: string): Promise<void>;
+}
 
-const keychainOptions = (service?: string): { service?: string; accessGroup?: string; cloudSync: false } => {
-	const accessGroup = getPrivateKeychainAccessGroup();
-	return {
-		...(service ? { service } : {}),
-		...(accessGroup ? { accessGroup } : {}),
-		cloudSync: false,
-	};
+// iOS must use the scoped native implementation, including for legacy synchronizable records.
+// Never fall back to an unscoped dependency query when the bridge or Keychain is unavailable.
+const privateKeychain = (): PrivateKeychain | undefined => {
+	if (Platform.OS !== 'ios') return undefined;
+	const module = NativeModules.SharedPubky as PrivateKeychain | undefined;
+	if (!module) throw new Error('Private Keychain is unavailable');
+	return module;
 };
 
 const SESSION_SECRET_KEY_PREFIX = 'pubky-session';
@@ -22,11 +28,16 @@ const getSessionSecretKeyPrefix = (pubky: string): string => `${SESSION_SECRET_K
 
 export const getKeychainValue = async ({ key }: { key: string }): Promise<Result<string>> => {
 	try {
-		const result = await Keychain.getGenericPassword(keychainOptions(key));
-		if (!result || !result?.password) {
+		const native = privateKeychain();
+		const result = native
+			? await native.privateValue(key)
+			: await Keychain.getGenericPassword({ service: key, cloudSync: false }).then(
+					value => value && value.password,
+				);
+		if (!result) {
 			return err(i18n.t('keychain.failedToGetValue'));
 		}
-		return ok(result.password);
+		return ok(result);
 	} catch {
 		return err(i18n.t('keychain.failedToGetValue'));
 	}
@@ -40,7 +51,12 @@ export const setKeychainValue = async ({
 	value: string;
 }): Promise<Result<string>> => {
 	try {
-		const res = await Keychain.setGenericPassword(key, value, keychainOptions(key));
+		const native = privateKeychain();
+		if (native) {
+			await native.setPrivateValue(key, value);
+			return ok(value);
+		}
+		const res = await Keychain.setGenericPassword(key, value, { service: key, cloudSync: false });
 		return res ? ok(value) : err(i18n.t('keychain.failedToSetValue'));
 	} catch {
 		return err(i18n.t('keychain.failedToSetValue'));
@@ -52,15 +68,29 @@ export const setKeychainValue = async ({
  * @returns {Promise<string[]>}
  */
 export const getAllKeychainKeys = async (): Promise<string[]> => {
-	const privateServices = await getPrivateKeychainServices();
-	if (privateServices) return privateServices;
+	const native = privateKeychain();
+	if (native) {
+		const services = await native.privateServices();
+		if (
+			!Array.isArray(services) ||
+			services.some(service => typeof service !== 'string' || !service.length)
+		) {
+			throw new Error('Invalid private Keychain services');
+		}
+		return services;
+	}
 	return await Keychain.getAllGenericPasswordServices();
 };
 
 //WARNING: This will wipe the specified key's value from storage
 export const resetKeychainValue = async ({ key }: { key: string }): Promise<Result<boolean>> => {
 	try {
-		const result = await Keychain.resetGenericPassword(keychainOptions(key));
+		const native = privateKeychain();
+		if (native) {
+			await native.resetPrivateValue(key);
+			return ok(true);
+		}
+		const result = await Keychain.resetGenericPassword({ service: key, cloudSync: false });
 		return result ? ok(true) : err(i18n.t('keychain.failedToResetValue'));
 	} catch (e) {
 		console.log(e);
@@ -123,10 +153,14 @@ export const resetPubkySessionSecrets = async ({ pubky }: { pubky: string }): Pr
 
 /**
  * Wipes all known device keychain data.
- * @returns {Promise<void>}
+ * @returns {Promise<boolean>}
  */
 export const wipeKeychain = async (): Promise<boolean> => {
-	const allServices = await getAllKeychainKeys();
-	const results = await Promise.all(allServices.map(key => resetKeychainValue({ key })));
-	return results.every(result => result.isOk());
+	try {
+		const allServices = await getAllKeychainKeys();
+		const results = await Promise.all(allServices.map(key => resetKeychainValue({ key })));
+		return results.every(result => result.isOk());
+	} catch {
+		return false;
+	}
 };

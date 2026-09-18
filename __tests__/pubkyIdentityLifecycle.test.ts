@@ -201,6 +201,14 @@ test('does not prune shared mirrors after a private keychain read failure', asyn
 	expect(mockReconcileSharedPubkys).not.toHaveBeenCalled();
 });
 
+test('does not prune shared mirrors after private enumeration fails', async () => {
+	mockGetAllKeychainKeys.mockRejectedValue(new Error('temporarily unavailable'));
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(false);
+	expect(mockGetKeychainValue).not.toHaveBeenCalled();
+	expect(mockReconcileSharedPubkys).not.toHaveBeenCalled();
+});
+
 test('deletes every private service for a normalized identity before removing Redux state', async () => {
 	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
 		pubky === OWNED ? ringPubky() : undefined,

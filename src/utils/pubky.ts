@@ -922,7 +922,7 @@ const connectSharedPubkyUnlocked = async ({
 
 /** Rebuilds source-owned mirrors exclusively from Ring's validated private keychain records. */
 export const reconcileOwnedSharedPubkys = (): Promise<boolean> =>
-	withPubkyIdentityLifecycle(reconcileOwnedSharedPubkysUnlocked);
+	withPubkyIdentityLifecycle(reconcileOwnedSharedPubkysUnlocked).catch(() => false);
 
 const reconcileOwnedSharedPubkysUnlocked = async (): Promise<boolean> => {
 	const identities = new Map<string, string>();

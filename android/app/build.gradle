@@ -307,25 +307,17 @@ def verifyBitkitReleaseSigning = tasks.register("verifyBitkitReleaseSigning") {
     }
 }
 
-def releaseApks = {
-    fileTree(new File(buildDir, "outputs/apk")) {
-        include "**/*.apk"
-    }.files.findAll { File apk ->
-        def normalizedPath = apk.absolutePath.replace(File.separatorChar, '/' as char)
+def releaseArtifacts = { String directory, String extension ->
+    fileTree(new File(buildDir, "outputs/${directory}")) {
+        include "**/*.${extension}"
+    }.files.findAll { File artifact ->
+        def normalizedPath = artifact.absolutePath.replace(File.separatorChar, '/' as char)
         normalizedPath.contains("/release/") ||
-            apk.name.toLowerCase(Locale.ROOT).contains("release")
+            artifact.name.toLowerCase(Locale.ROOT).contains("release")
     }.sort { left, right -> left.absolutePath <=> right.absolutePath }
 }
-
-def releaseBundles = {
-    fileTree(new File(buildDir, "outputs/bundle")) {
-        include "**/*.aab"
-    }.files.findAll { File bundle ->
-        def normalizedPath = bundle.absolutePath.replace(File.separatorChar, '/' as char)
-        normalizedPath.contains("/release/") ||
-            bundle.name.toLowerCase(Locale.ROOT).contains("release")
-    }.sort { left, right -> left.absolutePath <=> right.absolutePath }
-}
+def releaseApks = { releaseArtifacts("apk", "apk") }
+def releaseBundles = { releaseArtifacts("bundle", "aab") }
 
 def verifyReleaseApk = { File apk, String expectedSha256 ->
     if (!apk.isFile()) {
@@ -446,34 +438,31 @@ def verifyReleaseBundle = { File bundle, String expectedSha256 ->
     }
 }
 
-def verifyReleaseApks = { Collection<File> apks ->
-    if (apks.isEmpty()) {
-        throw new GradleException(
-            "No Ring release APK was found to verify. Run assembleRelease first, or pass " +
-            "-PRING_RELEASE_APK=/absolute/path/to/ring-release.apk to " +
-            "verifyRingReleaseApkSigning."
-        )
-    }
+def verifyReleaseArtifacts = { Collection<File> artifacts, String missingMessage, Closure verifyOne ->
+    if (artifacts.isEmpty()) throw new GradleException(missingMessage)
     def expectedSha256 = normalizeCertificateSha256(
         bitkitSigningValue('BITKIT_APP_SIGNING_CERT_SHA256'),
         'BITKIT_APP_SIGNING_CERT_SHA256'
     )
-    apks.each { File apk -> verifyReleaseApk(apk, expectedSha256) }
+    artifacts.each { File artifact -> verifyOne(artifact, expectedSha256) }
+}
+
+def verifyReleaseApks = { Collection<File> apks ->
+    verifyReleaseArtifacts(apks,
+        "No Ring release APK was found to verify. Run assembleRelease first, or pass " +
+        "-PRING_RELEASE_APK=/absolute/path/to/ring-release.apk to " +
+        "verifyRingReleaseApkSigning.",
+        verifyReleaseApk
+    )
 }
 
 def verifyReleaseBundles = { Collection<File> bundles ->
-    if (bundles.isEmpty()) {
-        throw new GradleException(
-            "No Ring release bundle was found to verify. Run bundleRelease first, or pass " +
-            "-PRING_RELEASE_BUNDLE=/absolute/path/to/ring-release.aab to " +
-            "verifyRingReleaseBundleSigning."
-        )
-    }
-    def expectedSha256 = normalizeCertificateSha256(
-        bitkitSigningValue('BITKIT_APP_SIGNING_CERT_SHA256'),
-        'BITKIT_APP_SIGNING_CERT_SHA256'
+    verifyReleaseArtifacts(bundles,
+        "No Ring release bundle was found to verify. Run bundleRelease first, or pass " +
+        "-PRING_RELEASE_BUNDLE=/absolute/path/to/ring-release.aab to " +
+        "verifyRingReleaseBundleSigning.",
+        verifyReleaseBundle
     )
-    bundles.each { File bundle -> verifyReleaseBundle(bundle, expectedSha256) }
 }
 
 def verifyRingReleaseApkSigning = tasks.register("verifyRingReleaseApkSigning") {

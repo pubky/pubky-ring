@@ -1,4 +1,4 @@
-import { renderHook, waitFor } from '@testing-library/react-native';
+import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { showToast } from '@synonymdev/react-native-toast';
 import { useSharedPubkyDiscovery } from '../src/hooks/useSharedPubkyDiscovery';
 import { disconnectBorrowedPubky } from '../src/utils/pubky';
@@ -131,4 +131,56 @@ test('says nothing when another flow already removed the identity', async () => 
 	await waitFor(() => expect(disconnectBorrowedPubkyMock).toHaveBeenCalledTimes(1));
 	expect(showToastMock).not.toHaveBeenCalled();
 	expect(removeDisconnectedPubkyDetailMock).not.toHaveBeenCalled();
+});
+
+test('runs one queued refresh when refresh is requested during an active refresh', async () => {
+	let finishFirstDiscovery = (): void => {};
+	discoverSharedPubkysMock.mockImplementationOnce(
+		() =>
+			new Promise(resolve => {
+				finishFirstDiscovery = () => resolve({ available: true, identities: [] });
+			}),
+	);
+	const { result } = renderHook(() => useSharedPubkyDiscovery());
+	await waitFor(() => expect(discoverSharedPubkysMock).toHaveBeenCalledTimes(1));
+
+	let firstQueuedRefresh!: Promise<void>;
+	let secondQueuedRefresh!: Promise<void>;
+	act(() => {
+		firstQueuedRefresh = result.current.refresh();
+		secondQueuedRefresh = result.current.refresh();
+	});
+	expect(firstQueuedRefresh).toBe(secondQueuedRefresh);
+	expect(discoverSharedPubkysMock).toHaveBeenCalledTimes(1);
+
+	await act(async () => {
+		finishFirstDiscovery();
+		await firstQueuedRefresh;
+	});
+
+	expect(discoverSharedPubkysMock).toHaveBeenCalledTimes(2);
+});
+
+test('runs the queued refresh after the active refresh fails', async () => {
+	let failFirstDiscovery = (): void => {};
+	discoverSharedPubkysMock.mockImplementationOnce(
+		() =>
+			new Promise((_resolve, reject) => {
+				failFirstDiscovery = () => reject(new Error('temporary discovery failure'));
+			}),
+	);
+	const { result } = renderHook(() => useSharedPubkyDiscovery());
+	await waitFor(() => expect(discoverSharedPubkysMock).toHaveBeenCalledTimes(1));
+
+	let queuedRefresh!: Promise<void>;
+	act(() => {
+		queuedRefresh = result.current.refresh();
+	});
+
+	await act(async () => {
+		failFirstDiscovery();
+		await queuedRefresh;
+	});
+
+	expect(discoverSharedPubkysMock).toHaveBeenCalledTimes(2);
 });

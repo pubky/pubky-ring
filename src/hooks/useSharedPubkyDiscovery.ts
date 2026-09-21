@@ -45,6 +45,7 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 	const [available, setAvailable] = useState(false);
 	const [identities, setIdentities] = useState<SharedPubkyIdentity[]>([]);
 	const refreshInFlight = useRef<Promise<void> | null>(null);
+	const refreshQueued = useRef(false);
 
 	const runRefresh = useCallback(async (): Promise<void> => {
 		// Best-effort migration/reconciliation. Failure (including a missing iOS entitlement) never
@@ -103,11 +104,30 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 	}, [dispatch]);
 
 	const refresh = useCallback((): Promise<void> => {
-		if (refreshInFlight.current) return refreshInFlight.current;
+		if (refreshInFlight.current) {
+			refreshQueued.current = true;
+			return refreshInFlight.current;
+		}
 
-		const task = runRefresh().finally(() => {
-			if (refreshInFlight.current === task) refreshInFlight.current = null;
-		});
+		const task = (async (): Promise<void> => {
+			try {
+				let lastRefreshFailed = false;
+				let lastRefreshError: unknown;
+				do {
+					refreshQueued.current = false;
+					lastRefreshFailed = false;
+					try {
+						await runRefresh();
+					} catch (error) {
+						lastRefreshFailed = true;
+						lastRefreshError = error;
+					}
+				} while (refreshQueued.current);
+				if (lastRefreshFailed) throw lastRefreshError;
+			} finally {
+				refreshInFlight.current = null;
+			}
+		})();
 		refreshInFlight.current = task;
 		return task;
 	}, [runRefresh]);

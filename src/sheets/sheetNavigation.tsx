@@ -36,7 +36,7 @@ const identitySheetRouteNameSet = new Set<string>([
 	'ReuseSharedPubkySheet',
 ]);
 
-const getRoutePubky = (params: unknown): string | undefined => {
+const getParamsPubky = (params: unknown): string | undefined => {
 	if (!params || typeof params !== 'object') return undefined;
 
 	const values = params as {
@@ -46,6 +46,22 @@ const getRoutePubky = (params: unknown): string | undefined => {
 	};
 	const pubky = values.pubky ?? values.params?.pubky ?? values.identity?.pubky;
 	return typeof pubky === 'string' ? pubky : undefined;
+};
+
+const getActiveRoutePubky = (route: unknown): string | undefined => {
+	if (!route || typeof route !== 'object') return undefined;
+
+	const values = route as {
+		params?: unknown;
+		state?: { index?: unknown; routes?: unknown };
+	};
+	const { index, routes } = values.state ?? {};
+	if (typeof index === 'number' && Array.isArray(routes)) {
+		const nestedPubky = getActiveRoutePubky(routes[index]);
+		if (nestedPubky) return nestedPubky;
+	}
+
+	return getParamsPubky(values.params);
 };
 
 let pendingSheetNavigation: Array<{
@@ -177,16 +193,16 @@ export const removeDisconnectedPubkyDetail = (pubky: string): void => {
 
 	const displayedContent = rootState.routes[displayedContentIndex];
 	const hasMatchingDetail =
-		displayedContent?.name === 'PubkyDetail' && getRoutePubky(displayedContent.params) === pubky;
+		displayedContent?.name === 'PubkyDetail' && getActiveRoutePubky(displayedContent) === pubky;
 	const hasMatchingIdentitySheet = rootState.routes.some(
-		route => identitySheetRouteNameSet.has(route.name) && getRoutePubky(route.params) === pubky,
+		route => identitySheetRouteNameSet.has(route.name) && getActiveRoutePubky(route) === pubky,
 	);
 	if (!hasMatchingDetail && !hasMatchingIdentitySheet) return;
 
 	const activeRouteKey = rootState.routes[rootState.index]?.key;
 	const routes = rootState.routes.filter((route, index) => {
 		if (hasMatchingDetail && index === displayedContentIndex) return false;
-		return !(identitySheetRouteNameSet.has(route.name) && getRoutePubky(route.params) === pubky);
+		return !(identitySheetRouteNameSet.has(route.name) && getActiveRoutePubky(route) === pubky);
 	});
 
 	if (!routes.some(route => route.name === 'Home')) {

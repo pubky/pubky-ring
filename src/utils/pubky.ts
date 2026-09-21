@@ -68,6 +68,7 @@ import {
 	withPubkyIdentityLifecycle,
 } from './sharedPubky.ts';
 import { store } from '../store';
+import { removeDisconnectedPubkyDetail } from '../sheets/sheetNavigation.tsx';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
@@ -834,7 +835,9 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 			if (!credential) {
 				// Fail closed, then explain: the identity has just been dropped, so the caller's
 				// error message is the only chance to tell the user why it disappeared.
-				await disconnectBorrowedPubky(pubky, store.dispatch);
+				if (await disconnectBorrowedPubky(pubky, store.dispatch)) {
+					removeDisconnectedPubkyDetail(pubky);
+				}
 				return err(i18n.t('reuseSharedPubky.noLongerShared'));
 			}
 			return ok({ secretKey: credential.secretKey, mnemonic: '' });

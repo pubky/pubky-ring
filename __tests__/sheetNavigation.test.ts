@@ -96,6 +96,54 @@ test('closes an active sheet tied to the disconnected detail identity', () => {
 	expect(action.payload.routes).toEqual([homeRoute]);
 });
 
+test('closes a nested auth sheet tied to the disconnected detail identity', () => {
+	const sheetRoute = {
+		key: 'auth-a',
+		name: 'AuthSheet',
+		params: {
+			screen: 'SelectPubky',
+			params: { deepLink: 'pubkyauth://example', source: 'scan' },
+		},
+		state: {
+			key: 'auth-stack',
+			index: 1,
+			routes: [
+				{ key: 'select', name: 'SelectPubky' },
+				{ key: 'confirm', name: 'ConfirmAuth', params: { pubky: BORROWED_A } },
+			],
+		},
+	};
+	setRootRoutes([homeRoute, detailRoute(BORROWED_A), sheetRoute]);
+
+	removeDisconnectedPubkyDetail(BORROWED_A);
+
+	const action = navigationRefMock.dispatch.mock.calls[0][0] as {
+		payload: { index: number; routes: unknown[] };
+	};
+	expect(action.payload.index).toBe(0);
+	expect(action.payload.routes).toEqual([homeRoute]);
+});
+
+test('keeps an auth sheet when only an inactive nested route belongs to the disconnected identity', () => {
+	const sheetRoute = {
+		key: 'auth-b',
+		name: 'AuthSheet',
+		state: {
+			key: 'auth-stack',
+			index: 1,
+			routes: [
+				{ key: 'confirm-a', name: 'ConfirmAuth', params: { pubky: BORROWED_A } },
+				{ key: 'confirm-b', name: 'ConfirmAuth', params: { pubky: BORROWED_B } },
+			],
+		},
+	};
+	setRootRoutes([homeRoute, sheetRoute]);
+
+	removeDisconnectedPubkyDetail(BORROWED_A);
+
+	expect(navigationRefMock.dispatch).not.toHaveBeenCalled();
+});
+
 test('closes a matching identity sheet over Home without removing Home', () => {
 	const sheetRoute = {
 		key: 'edit-a',

@@ -33,6 +33,7 @@ const mockMirrorSharedPubky = jest.fn();
 const mockRemoveSharedPubky = jest.fn();
 const mockReconcileSharedPubkys = jest.fn();
 const mockClearOwnedSharedPubkys = jest.fn();
+const mockRemoveDisconnectedPubkyDetail = jest.fn();
 
 jest.mock('@synonymdev/react-native-pubky', () => ({
 	auth: jest.fn(),
@@ -88,6 +89,10 @@ jest.mock('../src/utils/keychain', () => ({
 	setKeychainValue: (...args: unknown[]) => mockSetKeychainValue(...args),
 	setSessionSecret: (...args: unknown[]) => mockSetSessionSecret(...args),
 	wipeKeychain: (...args: unknown[]) => mockWipeKeychain(...args),
+}));
+
+jest.mock('../src/sheets/sheetNavigation.tsx', () => ({
+	removeDisconnectedPubkyDetail: (...args: unknown[]) => mockRemoveDisconnectedPubkyDetail(...args),
 }));
 
 jest.mock('../src/utils/sharedPubky.ts', () => {
@@ -254,6 +259,28 @@ test('reads a pk-prefixed Ring identity from its canonical private service', asy
 
 	expect(result.isOk()).toBe(true);
 	expect(mockGetKeychainValue).toHaveBeenCalledWith({ key: OWNED });
+});
+
+test('closes identity routes after a credential-driven disconnect removes the borrowed identity', async () => {
+	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
+	getSharedPubkyCredentialMock.mockResolvedValue(undefined);
+
+	const result = await getPubkySecretKey(OWNED);
+
+	expect(result.isErr()).toBe(true);
+	expect(mockRemoveDisconnectedPubkyDetail).toHaveBeenCalledWith(OWNED);
+});
+
+test('keeps identity routes when a racing flow makes the credential-driven disconnect a no-op', async () => {
+	mockGetPubkyDataFromStore
+		.mockReturnValueOnce({ ...ringPubky(), sourceApp: 'to.bitkit' })
+		.mockReturnValue(ringPubky());
+	getSharedPubkyCredentialMock.mockResolvedValue(undefined);
+
+	const result = await getPubkySecretKey(OWNED);
+
+	expect(result.isErr()).toBe(true);
+	expect(mockRemoveDisconnectedPubkyDetail).not.toHaveBeenCalled();
 });
 
 test('restores a legacy private service into its existing prefixed Redux identity', async () => {

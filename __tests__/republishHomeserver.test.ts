@@ -77,6 +77,12 @@ jest.mock('../src/store', () => ({
 	store: { dispatch: jest.fn() },
 }));
 
+// Route cleanup is covered by the identity lifecycle tests. Keep this homeserver unit suite
+// isolated from React Navigation and its ESM-only runtime.
+jest.mock('../src/sheets/sheetNavigation.tsx', () => ({
+	removeDisconnectedPubkyDetail: jest.fn(),
+}));
+
 const nativeRepublishHomeserverMock = nativeRepublishHomeserver as jest.MockedFunction<
 	typeof nativeRepublishHomeserver
 >;

@@ -6,8 +6,10 @@ import {
 	connectSharedPubky,
 	deletePubky,
 	disconnectBorrowedPubky,
+	getPubkySecretKey,
 	reconcileOwnedSharedPubkys,
 	removeKeylessPubkys,
+	restorePubkys,
 	savePubky,
 	signInToHomeserver,
 	signUpToHomeserver,
@@ -178,6 +180,107 @@ test('re-imports an existing Ring identity instead of rejecting it as a duplicat
 	expect(mockMirrorSharedPubky).toHaveBeenCalledWith(OWNED, SECRET);
 });
 
+test.each([
+	{
+		importedPubky: `pubky${OWNED}`,
+		privateRecordKey: `pubky${OWNED}`,
+		storedPubkyKey: `pubky${OWNED}`,
+	},
+	{ importedPubky: OWNED, privateRecordKey: `pubky${OWNED}`, storedPubkyKey: `pubky${OWNED}` },
+	{ importedPubky: OWNED, privateRecordKey: OWNED, storedPubkyKey: `pk:${OWNED}` },
+])(
+	're-imports $importedPubky without changing its persisted Redux key $storedPubkyKey',
+	async ({ importedPubky, privateRecordKey, storedPubkyKey }) => {
+		mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+			pubky === storedPubkyKey ? ringPubky() : undefined,
+		);
+		mockGetAllKeychainKeys.mockResolvedValue([privateRecordKey]);
+		const dispatch = jest.fn();
+
+		const result = await savePubky({
+			secretKey: SECRET,
+			pubky: importedPubky,
+			dispatch,
+			isBackedUp: true,
+			backupPreference: EBackupPreference.encryptedFile,
+		});
+
+		expect(result.isOk()).toBe(true);
+		expect(mockSetKeychainValue).toHaveBeenCalledWith({
+			key: privateRecordKey,
+			value: JSON.stringify({ secretKey: SECRET, mnemonic: '' }),
+		});
+		expect(mockGetKeychainValue).toHaveBeenLastCalledWith({ key: privateRecordKey });
+		expect(dispatch).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: 'pubky/setPubkyData',
+				payload: expect.objectContaining({ pubky: storedPubkyKey }),
+			}),
+		);
+		expect(mockMirrorSharedPubky).toHaveBeenCalledWith(OWNED, SECRET);
+	},
+);
+
+test('restores an existing prefixed private record when re-import verification fails', async () => {
+	const storedPubkyKey = `pubky${OWNED}`;
+	const previousRecord = JSON.stringify({ secretKey: SECRET, mnemonic: 'previous mnemonic' });
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === storedPubkyKey ? ringPubky() : undefined,
+	);
+	mockGetAllKeychainKeys.mockResolvedValue([storedPubkyKey]);
+	mockGetKeychainValue
+		.mockResolvedValueOnce(ok(previousRecord))
+		.mockResolvedValueOnce(err(new Error('read failed')));
+	const dispatch = jest.fn();
+
+	const result = await savePubky({ secretKey: SECRET, pubky: storedPubkyKey, dispatch });
+
+	expect(result.isErr()).toBe(true);
+	expect(mockSetKeychainValue).toHaveBeenLastCalledWith({
+		key: storedPubkyKey,
+		value: previousRecord,
+	});
+	expect(mockResetKeychainValue).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('reads a pk-prefixed Ring identity from its canonical private service', async () => {
+	const storedPubkyKey = `pk:${OWNED}`;
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === storedPubkyKey ? ringPubky() : undefined,
+	);
+
+	const result = await getPubkySecretKey(storedPubkyKey);
+
+	expect(result.isOk()).toBe(true);
+	expect(mockGetKeychainValue).toHaveBeenCalledWith({ key: OWNED });
+});
+
+test('restores a legacy private service into its existing prefixed Redux identity', async () => {
+	const storedPubkyKey = `pubky${OWNED}`;
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === storedPubkyKey ? ringPubky() : undefined,
+	);
+	mockGetAllKeychainKeys.mockResolvedValue([storedPubkyKey]);
+	const dispatch = jest.fn();
+
+	await expect(restorePubkys(dispatch)).resolves.toEqual([storedPubkyKey]);
+
+	expect(mockSetKeychainValue).toHaveBeenCalledWith(expect.objectContaining({ key: storedPubkyKey }));
+	expect(dispatch).toHaveBeenCalledWith(
+		expect.objectContaining({
+			type: 'pubky/setPubkyData',
+			payload: expect.objectContaining({ pubky: storedPubkyKey }),
+		}),
+	);
+	expect(dispatch).not.toHaveBeenCalledWith(
+		expect.objectContaining({
+			type: 'pubky/addPubky',
+			payload: expect.objectContaining({ pubky: OWNED }),
+		}),
+	);
+});
+
 test('never promotes a Bitkit-owned identity into Ring private storage', async () => {
 	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
 	const dispatch = jest.fn();
@@ -281,6 +384,25 @@ test('deletes the record the read paths use last so a partial failure keeps a us
 
 	expect(result.isErr()).toBe(true);
 	// The identity stays listed, so the record stored under its Redux key must survive.
+	expect(mockResetKeychainValue).toHaveBeenCalledTimes(1);
+	expect(mockResetKeychainValue).toHaveBeenCalledWith({ key: `pubky${OWNED}` });
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('deletes the canonical record for a pk-prefixed Redux identity last', async () => {
+	const storedPubkyKey = `pk:${OWNED}`;
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === storedPubkyKey ? ringPubky() : undefined,
+	);
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED, `pubky${OWNED}`]);
+	mockResetKeychainValue.mockImplementation(async ({ key }: { key: string }) =>
+		key === OWNED ? ok(true) : err(new Error('keychain locked')),
+	);
+	const dispatch = jest.fn();
+
+	const result = await deletePubky(storedPubkyKey, dispatch);
+
+	expect(result.isErr()).toBe(true);
 	expect(mockResetKeychainValue).toHaveBeenCalledTimes(1);
 	expect(mockResetKeychainValue).toHaveBeenCalledWith({ key: `pubky${OWNED}` });
 	expect(dispatch).not.toHaveBeenCalled();
@@ -484,6 +606,16 @@ test('drops only the identities a partial wipe left without a private key', asyn
 
 	expect(dispatch).toHaveBeenCalledTimes(1);
 	expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: OWNED });
+});
+
+test('keeps a pk-prefixed Redux identity when its canonical service survives a partial wipe', async () => {
+	const storedPubkyKey = `pk:${OWNED}`;
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED]);
+	const dispatch = jest.fn();
+
+	await removeKeylessPubkys({ ownedPubkys: [storedPubkyKey], dispatch });
+
+	expect(dispatch).not.toHaveBeenCalled();
 });
 
 test('keeps every identity listed when the keychain cannot be read after a partial wipe', async () => {

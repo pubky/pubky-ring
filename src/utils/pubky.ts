@@ -512,7 +512,12 @@ const normalizePubkyReference = (pubky: string): string | undefined =>
 	normalizeSharedPubky(pubky.startsWith('pk:') ? pubky.slice(3) : pubky);
 
 const getStoredPubkyKey = (pubky: string, normalizedPubky: string): string | undefined =>
-	[pubky, normalizedPubky, `pk:${normalizedPubky}`].find(key => getPubkyDataFromStore(key));
+	[pubky, normalizedPubky, `pubky${normalizedPubky}`, `pk:${normalizedPubky}`].find(key =>
+		getPubkyDataFromStore(key),
+	);
+
+const getPrivateRecordKey = (storedPubkyKey: string | undefined, normalizedPubky: string): string =>
+	storedPubkyKey && privatePubkyService(storedPubkyKey) ? storedPubkyKey : normalizedPubky;
 
 export const savePubky = (params: SavePubkyParams): Promise<Result<string>> =>
 	withPubkyIdentityLifecycle(() => savePubkyUnlocked(params));
@@ -562,16 +567,16 @@ const savePubkyUnlocked = async ({
 			mnemonic,
 		};
 		const serializedKeychainData = JSON.stringify(keychainData);
-		const privateServices = await getPrivatePubkyServices(normalizedPubky);
-		const canonicalRecordExists = privateServices.includes(normalizedPubky);
-		const previousCanonicalRecord = canonicalRecordExists
-			? await getKeychainValue({ key: normalizedPubky })
+		const privateRecordKey = getPrivateRecordKey(storedPubkyKey, normalizedPubky);
+		const privateRecordExists = (await getAllKeychainKeys()).includes(privateRecordKey);
+		const previousPrivateRecord = privateRecordExists
+			? await getKeychainValue({ key: privateRecordKey })
 			: undefined;
-		if (previousCanonicalRecord?.isErr()) {
-			return err(previousCanonicalRecord.error.message);
+		if (previousPrivateRecord?.isErr()) {
+			return err(previousPrivateRecord.error.message);
 		}
 		const saveResponse = await setKeychainValue({
-			key: pubky,
+			key: privateRecordKey,
 			value: serializedKeychainData,
 		});
 		if (saveResponse.isErr()) {
@@ -582,12 +587,12 @@ const savePubkyUnlocked = async ({
 			});
 			return err(saveResponse.error.message);
 		}
-		const readBack = await getKeychainValue({ key: pubky });
+		const readBack = await getKeychainValue({ key: privateRecordKey });
 		if (readBack.isErr() || readBack.value !== serializedKeychainData) {
-			if (previousCanonicalRecord?.isOk()) {
-				await setKeychainValue({ key: pubky, value: previousCanonicalRecord.value });
+			if (previousPrivateRecord?.isOk()) {
+				await setKeychainValue({ key: privateRecordKey, value: previousPrivateRecord.value });
 			} else {
-				await resetKeychainValue({ key: pubky });
+				await resetKeychainValue({ key: privateRecordKey });
 			}
 			return err(i18n.t('pubkyErrors.failedToSaveToKeychain'));
 		}
@@ -674,11 +679,11 @@ export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Prom
 	});
 
 /**
- * Drops the Ring-owned identities whose private key record no longer exists, for a wipe that
- * could not delete every record. The read paths use only the record stored under the Redux key,
- * so an identity without it is keyless and must never stay listed. One whose record survived
- * stays, which keeps the list truthful and the wipe retryable. Must run inside the identity
- * lifecycle gate, so reconciliation cannot interleave with it.
+ * Drops the Ring-owned identities whose readable private key record no longer exists, for a wipe
+ * that could not delete every record. A `pk:` Redux key resolves to the canonical private service;
+ * every other supported Redux key is also its service key. One whose record survived stays, which
+ * keeps the list truthful and the wipe retryable. Must run inside the identity lifecycle gate, so
+ * reconciliation cannot interleave with it.
  */
 export const removeKeylessPubkys = async ({
 	ownedPubkys,
@@ -690,7 +695,9 @@ export const removeKeylessPubkys = async ({
 	try {
 		const remainingServices = new Set(await getAllKeychainKeys());
 		for (const pubky of ownedPubkys) {
-			if (!remainingServices.has(pubky)) dispatch(removePubky(pubky));
+			const normalizedPubky = normalizePubkyReference(pubky);
+			const privateRecordKey = normalizedPubky ? getPrivateRecordKey(pubky, normalizedPubky) : pubky;
+			if (!remainingServices.has(privateRecordKey)) dispatch(removePubky(pubky));
 		}
 	} catch (error) {
 		// Without a readable keychain listing nothing can be proven keyless.
@@ -742,11 +749,13 @@ const deletePubkyUnlocked = async (pubky: string, dispatch: Dispatch): Promise<R
 			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 		}
 		const privateServices = await getPrivatePubkyServices(normalizedPubky);
-		// The record stored under the Redux key is the only one the read paths use, so it goes
-		// last: an abort part-way through never leaves a listed identity whose key is unreadable.
+		const privateRecordKey = getPrivateRecordKey(storedPubkyKey, normalizedPubky);
+		// The record resolved by the read paths goes last, so an abort part-way through never leaves
+		// a listed identity whose key is unreadable. A `pk:` Redux key resolves to the canonical
+		// service rather than becoming a private service itself.
 		const orderedServices = [
-			...privateServices.filter(service => service !== storedPubkyKey),
-			...privateServices.filter(service => service === storedPubkyKey),
+			...privateServices.filter(service => service !== privateRecordKey),
+			...privateServices.filter(service => service === privateRecordKey),
 		];
 		for (const service of orderedServices) {
 			const response = await resetKeychainValue({ key: service });
@@ -830,7 +839,9 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 			}
 			return ok({ secretKey: credential.secretKey, mnemonic: '' });
 		}
-		const res = await getKeychainValue({ key: pubky });
+		const normalizedPubky = normalizePubkyReference(pubky);
+		const privateRecordKey = normalizedPubky ? getPrivateRecordKey(pubky, normalizedPubky) : pubky;
+		const res = await getKeychainValue({ key: privateRecordKey });
 		if (res.isErr()) {
 			console.error('Failed to get secret key from keychain');
 			return err(i18n.t('pubkyErrors.failedToGetSecretKeyFromKeychain'));
@@ -846,10 +857,10 @@ export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychain
 
 		return await withPubkyIdentityLifecycle(async () => {
 			// Re-read under the lifecycle gate so deletion/wipe cannot resurrect a stale value.
-			const current = await getKeychainValue({ key: pubky });
+			const current = await getKeychainValue({ key: privateRecordKey });
 			if (current.isErr()) return err(i18n.t('pubkyErrors.failedToGetSecretKeyFromKeychain'));
 			if (isNewFormat(current.value)) return ok(JSON.parse(current.value));
-			return await migrateKeychainEntry(pubky, current.value);
+			return await migrateKeychainEntry(privateRecordKey, current.value);
 		});
 	} catch {
 		return err(i18n.t('pubkyErrors.unableToGetSecretKey'));

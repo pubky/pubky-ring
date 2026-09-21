@@ -16,15 +16,13 @@ import {
 	updateNavigationAnimation,
 	updateShowOnboarding,
 } from '../store/slices/settingsSlice.ts';
-import { wipeKeychain } from '../utils/keychain.ts';
 import { resetPubkys } from '../store/slices/pubkysSlice.ts';
 import { useTranslation } from 'react-i18next';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
 import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Qrcode, Scan } from '../icons/index.ts';
-import { removeKeylessPubkys, republishAllHomeserverRecords } from '../utils/pubky.ts';
-import { clearOwnedSharedPubkys, withPubkyIdentityLifecycle } from '../utils/sharedPubky.ts';
+import { republishAllHomeserverRecords, wipePubkyRingData } from '../utils/pubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
@@ -74,18 +72,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			{
 				text: t('common.yes'),
 				onPress: async (): Promise<void> => {
-					const wiped = await withPubkyIdentityLifecycle(async () => {
-						// Shared-first removal preserves the canonical private source on failure.
-						if (!(await clearOwnedSharedPubkys())) return false;
-						if (!(await wipeKeychain())) {
-							// The wipe deletes records in parallel, so a failure can leave some private
-							// keys already destroyed. Those identities must not stay listed.
-							await removeKeylessPubkys({ ownedPubkys: ownedPubkyKeys, dispatch });
-							return false;
-						}
-						// Verify absence again while reconciliation is still excluded.
-						return await clearOwnedSharedPubkys();
-					});
+					const wiped = await wipePubkyRingData(ownedPubkyKeys, dispatch);
 					if (!wiped) {
 						Alert.alert(t('common.error'), t('pubkyErrors.errorDeletingPubky'));
 						return;

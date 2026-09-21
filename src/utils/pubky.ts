@@ -20,6 +20,7 @@ import {
 	getSessionSecret,
 	resetSessionSecret,
 	resetPubkySessionSecrets,
+	wipeKeychain,
 } from './keychain';
 import { Dispatch } from 'redux';
 import {
@@ -54,6 +55,7 @@ import { appApplicationId } from './appInfo.ts';
 import i18n from '../i18n';
 import {
 	BITKIT_SOURCE_APP,
+	clearOwnedSharedPubkys,
 	getSharedPubkyCredential,
 	isValidSharedSecretKey,
 	mirrorSharedPubky,
@@ -695,6 +697,19 @@ export const removeKeylessPubkys = async ({
 		console.error('Failed to list the keychain after a partial wipe', error);
 	}
 };
+
+export const wipePubkyRingData = (ownedPubkys: string[], dispatch: Dispatch): Promise<boolean> =>
+	withPubkyIdentityLifecycle(async () => {
+		// Shared-first removal preserves the canonical private source on failure.
+		if (!(await clearOwnedSharedPubkys())) return false;
+		if (!(await wipeKeychain()) || !(await clearOwnedSharedPubkys())) {
+			// Keep only owned cards whose private source survived, whether private deletion or the
+			// final shared-store verification failed.
+			await removeKeylessPubkys({ ownedPubkys, dispatch });
+			return false;
+		}
+		return true;
+	});
 
 export const deletePubky = (pubky: string, dispatch: Dispatch): Promise<Result<string>> =>
 	withPubkyIdentityLifecycle(() => deletePubkyUnlocked(pubky, dispatch));

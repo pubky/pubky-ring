@@ -11,6 +11,7 @@ import {
 	savePubky,
 	signInToHomeserver,
 	signUpToHomeserver,
+	wipePubkyRingData,
 } from '../src/utils/pubky';
 import { getSharedPubkyCredential } from '../src/utils/sharedPubky';
 
@@ -22,12 +23,14 @@ const mockGetKeychainValue = jest.fn();
 const mockSetKeychainValue = jest.fn();
 const mockResetKeychainValue = jest.fn();
 const mockResetPubkySessionSecrets = jest.fn();
+const mockWipeKeychain = jest.fn();
 const mockSetSessionSecret = jest.fn();
 const mockGetAllKeychainKeys = jest.fn();
 const mockGetPubkyDataFromStore = jest.fn();
 const mockMirrorSharedPubky = jest.fn();
 const mockRemoveSharedPubky = jest.fn();
 const mockReconcileSharedPubkys = jest.fn();
+const mockClearOwnedSharedPubkys = jest.fn();
 
 jest.mock('@synonymdev/react-native-pubky', () => ({
 	auth: jest.fn(),
@@ -82,6 +85,7 @@ jest.mock('../src/utils/keychain', () => ({
 	resetPubkySessionSecrets: (...args: unknown[]) => mockResetPubkySessionSecrets(...args),
 	setKeychainValue: (...args: unknown[]) => mockSetKeychainValue(...args),
 	setSessionSecret: (...args: unknown[]) => mockSetSessionSecret(...args),
+	wipeKeychain: (...args: unknown[]) => mockWipeKeychain(...args),
 }));
 
 jest.mock('../src/utils/sharedPubky.ts', () => {
@@ -94,6 +98,7 @@ jest.mock('../src/utils/sharedPubky.ts', () => {
 	return {
 		BITKIT_SOURCE_APP: 'to.bitkit',
 		RING_SOURCE_APP: 'app.pubkyring',
+		clearOwnedSharedPubkys: (...args: unknown[]) => mockClearOwnedSharedPubkys(...args),
 		getSharedPubkyCredential: jest.fn(),
 		isValidSharedSecretKey: (value: unknown) => typeof value === 'string' && /^[0-9a-f]{64}$/.test(value),
 		mirrorSharedPubky: (...args: unknown[]) => mockMirrorSharedPubky(...args),
@@ -138,12 +143,14 @@ beforeEach(() => {
 	mockSetKeychainValue.mockResolvedValue(ok('saved'));
 	mockResetKeychainValue.mockResolvedValue(ok(true));
 	mockResetPubkySessionSecrets.mockResolvedValue(ok(true));
+	mockWipeKeychain.mockResolvedValue(true);
 	mockSetSessionSecret.mockResolvedValue(ok(true));
 	mockGetAllKeychainKeys.mockResolvedValue([]);
 	mockGetPubkyDataFromStore.mockReturnValue(undefined);
 	mockMirrorSharedPubky.mockResolvedValue(true);
 	mockRemoveSharedPubky.mockResolvedValue(true);
 	mockReconcileSharedPubkys.mockResolvedValue(true);
+	mockClearOwnedSharedPubkys.mockResolvedValue(true);
 });
 
 test('re-imports an existing Ring identity instead of rejecting it as a duplicate', async () => {
@@ -485,5 +492,60 @@ test('keeps every identity listed when the keychain cannot be read after a parti
 
 	await removeKeylessPubkys({ ownedPubkys: [OWNED], dispatch });
 
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('clears persisted identities when final shared wipe verification fails', async () => {
+	mockClearOwnedSharedPubkys.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+	mockGetAllKeychainKeys.mockResolvedValue([]);
+	const dispatch = jest.fn();
+
+	await expect(wipePubkyRingData([OWNED], dispatch)).resolves.toBe(false);
+
+	expect(mockWipeKeychain).toHaveBeenCalledTimes(1);
+	expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: OWNED });
+	expect(mockClearOwnedSharedPubkys).toHaveBeenCalledTimes(2);
+});
+
+test('preserves private and persisted identities when initial shared wipe fails', async () => {
+	mockClearOwnedSharedPubkys.mockResolvedValue(false);
+	const dispatch = jest.fn();
+
+	await expect(wipePubkyRingData([OWNED], dispatch)).resolves.toBe(false);
+
+	expect(mockWipeKeychain).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('skips final shared verification when the private wipe fails', async () => {
+	const SURVIVOR = 'o4dksfbqk85ogzdb5osziw6befigbuxmuxkuxq8434q89uj56uyy';
+	mockWipeKeychain.mockResolvedValue(false);
+	mockGetAllKeychainKeys.mockResolvedValue([SURVIVOR]);
+	const dispatch = jest.fn();
+
+	await expect(wipePubkyRingData([OWNED, SURVIVOR], dispatch)).resolves.toBe(false);
+
+	expect(mockClearOwnedSharedPubkys).toHaveBeenCalledTimes(1);
+	expect(dispatch).toHaveBeenCalledTimes(1);
+	expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: OWNED });
+});
+
+test('preserves identities when keychain enumeration fails after final shared verification', async () => {
+	mockClearOwnedSharedPubkys.mockResolvedValueOnce(true).mockResolvedValueOnce(false);
+	mockGetAllKeychainKeys.mockRejectedValue(new Error('keychain unavailable'));
+	const dispatch = jest.fn();
+
+	await expect(wipePubkyRingData([OWNED], dispatch)).resolves.toBe(false);
+
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
+test('accepts a fully verified wipe without failure reconciliation', async () => {
+	const dispatch = jest.fn();
+
+	await expect(wipePubkyRingData([OWNED], dispatch)).resolves.toBe(true);
+
+	expect(mockWipeKeychain).toHaveBeenCalledTimes(1);
+	expect(mockClearOwnedSharedPubkys).toHaveBeenCalledTimes(2);
 	expect(dispatch).not.toHaveBeenCalled();
 });

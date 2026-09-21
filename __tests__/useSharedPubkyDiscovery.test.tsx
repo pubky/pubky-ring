@@ -4,6 +4,7 @@ import { useSharedPubkyDiscovery } from '../src/hooks/useSharedPubkyDiscovery';
 import { disconnectBorrowedPubky } from '../src/utils/pubky';
 import { getBorrowedPubkyKeys } from '../src/store/selectors/pubkySelectors';
 import { discoverSharedPubkys } from '../src/utils/sharedPubky';
+import { removeDisconnectedPubkyDetail } from '../src/sheets/sheetNavigation';
 
 const mockDispatch = jest.fn();
 
@@ -49,12 +50,20 @@ jest.mock('../src/i18n', () => ({
 	default: { t: (key: string) => key },
 }));
 
+jest.mock('../src/sheets/sheetNavigation', () => ({
+	__esModule: true,
+	removeDisconnectedPubkyDetail: jest.fn(),
+}));
+
 const showToastMock = showToast as jest.MockedFunction<typeof showToast>;
 const disconnectBorrowedPubkyMock = disconnectBorrowedPubky as jest.MockedFunction<
 	typeof disconnectBorrowedPubky
 >;
 const getBorrowedPubkyKeysMock = getBorrowedPubkyKeys as unknown as jest.MockedFunction<() => string[]>;
 const discoverSharedPubkysMock = discoverSharedPubkys as jest.MockedFunction<typeof discoverSharedPubkys>;
+const removeDisconnectedPubkyDetailMock = removeDisconnectedPubkyDetail as jest.MockedFunction<
+	typeof removeDisconnectedPubkyDetail
+>;
 
 const BORROWED_A = 'borrowedA';
 const BORROWED_B = 'borrowedB';
@@ -77,6 +86,8 @@ test('explains an automatic disconnect exactly once, however many identities wen
 	await renderDiscovery();
 
 	await waitFor(() => expect(disconnectBorrowedPubkyMock).toHaveBeenCalledTimes(2));
+	expect(removeDisconnectedPubkyDetailMock).toHaveBeenCalledWith(BORROWED_A);
+	expect(removeDisconnectedPubkyDetailMock).toHaveBeenCalledWith(BORROWED_B);
 	await waitFor(() => expect(showToastMock).toHaveBeenCalledTimes(1));
 	expect(showToastMock).toHaveBeenCalledWith(
 		expect.objectContaining({
@@ -93,6 +104,7 @@ test('explains the disconnect when the source app is gone entirely', async () =>
 	await renderDiscovery();
 
 	await waitFor(() => expect(disconnectBorrowedPubkyMock).toHaveBeenCalledWith(BORROWED_A, mockDispatch));
+	expect(removeDisconnectedPubkyDetailMock).toHaveBeenCalledWith(BORROWED_A);
 	await waitFor(() => expect(showToastMock).toHaveBeenCalledTimes(1));
 });
 
@@ -118,4 +130,5 @@ test('says nothing when another flow already removed the identity', async () => 
 
 	await waitFor(() => expect(disconnectBorrowedPubkyMock).toHaveBeenCalledTimes(1));
 	expect(showToastMock).not.toHaveBeenCalled();
+	expect(removeDisconnectedPubkyDetailMock).not.toHaveBeenCalled();
 });

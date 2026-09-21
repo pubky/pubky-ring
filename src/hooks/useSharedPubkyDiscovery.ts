@@ -12,6 +12,7 @@ import {
 import { getStore } from '../utils/store-helpers.ts';
 import { discoverSharedPubkys, SharedPubkyDiscovery, SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import i18n from '../i18n';
+import { removeDisconnectedPubkyDetail } from '../sheets/sheetNavigation.tsx';
 
 export interface SharedPubkyDiscoveryState extends SharedPubkyDiscovery {
 	refresh: () => Promise<void>;
@@ -32,6 +33,7 @@ const notifyAutoDisconnected = (disconnectedCount: number): void => {
 		durationMs: 5000,
 	});
 };
+
 export const SharedPubkyDiscoveryContext = createContext<SharedPubkyDiscoveryState>({
 	available: false,
 	identities: [],
@@ -61,7 +63,10 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 			// Fail closed: a borrowed profile cannot remain active when its source can no longer
 			// supply the credential. Ring-owned private identities are never affected.
 			for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
-				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) disconnectedCount += 1;
+				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) {
+					disconnectedCount += 1;
+					removeDisconnectedPubkyDetail(borrowedPubky);
+				}
 			}
 			notifyAutoDisconnected(disconnectedCount);
 			return;
@@ -71,7 +76,10 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
 			if (!discoveredKeys.has(borrowedPubky)) {
 				// The source app/item disappeared. Clear only Ring's reference and local session.
-				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) disconnectedCount += 1;
+				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) {
+					disconnectedCount += 1;
+					removeDisconnectedPubkyDetail(borrowedPubky);
+				}
 			}
 		}
 		notifyAutoDisconnected(disconnectedCount);

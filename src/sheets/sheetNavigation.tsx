@@ -27,6 +27,27 @@ const sheetRouteById: Record<SheetId, SheetRouteName> = {
 	'reuse-shared-pubky': 'ReuseSharedPubkySheet',
 };
 
+const sheetRouteNameSet = new Set<string>(Object.values(sheetRouteById));
+const identitySheetRouteNameSet = new Set<string>([
+	'BackupSheet',
+	'AuthSheet',
+	'DeletePubkySheet',
+	'EditPubkySheet',
+	'ReuseSharedPubkySheet',
+]);
+
+const getRoutePubky = (params: unknown): string | undefined => {
+	if (!params || typeof params !== 'object') return undefined;
+
+	const values = params as {
+		pubky?: unknown;
+		params?: { pubky?: unknown };
+		identity?: { pubky?: unknown };
+	};
+	const pubky = values.pubky ?? values.params?.pubky ?? values.identity?.pubky;
+	return typeof pubky === 'string' ? pubky : undefined;
+};
+
 let pendingSheetNavigation: Array<{
 	routeName: SheetRouteName;
 	params?: SheetParamsById[SheetId];
@@ -142,6 +163,47 @@ export const resetRootToHome = (): void => {
 	resetRootRoutes([{ name: 'Home' }]);
 };
 
+export const removeDisconnectedPubkyDetail = (pubky: string): void => {
+	if (!navigationRef.isReady()) return;
+
+	const rootState = navigationRef.getRootState();
+	let displayedContentIndex = rootState.index;
+	while (
+		displayedContentIndex >= 0 &&
+		sheetRouteNameSet.has(rootState.routes[displayedContentIndex]?.name ?? '')
+	) {
+		displayedContentIndex -= 1;
+	}
+
+	const displayedContent = rootState.routes[displayedContentIndex];
+	const hasMatchingDetail =
+		displayedContent?.name === 'PubkyDetail' && getRoutePubky(displayedContent.params) === pubky;
+	const hasMatchingIdentitySheet = rootState.routes.some(
+		route => identitySheetRouteNameSet.has(route.name) && getRoutePubky(route.params) === pubky,
+	);
+	if (!hasMatchingDetail && !hasMatchingIdentitySheet) return;
+
+	const activeRouteKey = rootState.routes[rootState.index]?.key;
+	const routes = rootState.routes.filter((route, index) => {
+		if (hasMatchingDetail && index === displayedContentIndex) return false;
+		return !(identitySheetRouteNameSet.has(route.name) && getRoutePubky(route.params) === pubky);
+	});
+
+	if (!routes.some(route => route.name === 'Home')) {
+		resetRootToHome();
+		return;
+	}
+
+	const preservedActiveIndex = routes.findIndex(route => route.key === activeRouteKey);
+	navigationRef.dispatch(
+		CommonActions.reset({
+			...rootState,
+			routes,
+			index: preservedActiveIndex >= 0 ? preservedActiveIndex : routes.length - 1,
+		}),
+	);
+};
+
 export const resetRootToHomeWithSheet = <TSheetId extends SheetId>(
 	...args: ShowSheetArgs<TSheetId>
 ): void => {
@@ -154,8 +216,6 @@ export const resetRootToHomeWithSheet = <TSheetId extends SheetId>(
 		},
 	]);
 };
-
-const sheetRouteNameSet = new Set<string>(Object.values(sheetRouteById));
 
 /** Closes whichever sheet is currently on top of the root stack, if any. */
 export const hideActiveSheet = (): void => {

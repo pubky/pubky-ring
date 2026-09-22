@@ -1,5 +1,7 @@
 import Keychain from 'react-native-keychain';
 import { err, ok, Result } from '@synonymdev/result';
+import { SHARED_PUBKY_SERVICE } from './constants';
+import { unpublishAllOwnedPubkys } from './sharedPubky';
 import i18n from '../i18n';
 
 const SESSION_SECRET_KEY_PREFIX = 'pubky-session';
@@ -111,9 +113,13 @@ export const resetPubkySessionSecrets = async ({ pubky }: { pubky: string }): Pr
 
 /**
  * Wipes all known device keychain data.
+ * The shared service is owned by every app that publishes to it, so only this app's records are removed.
  * @returns {Promise<void>}
  */
 export const wipeKeychain = async (): Promise<void> => {
 	const allServices = await getAllKeychainKeys();
-	await Promise.all(allServices.map(key => resetKeychainValue({ key })));
+	await Promise.all([
+		...allServices.filter(key => key !== SHARED_PUBKY_SERVICE).map(key => resetKeychainValue({ key })),
+		unpublishAllOwnedPubkys(),
+	]);
 };

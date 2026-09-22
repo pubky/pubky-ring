@@ -15,7 +15,6 @@ import {
 	setKeychainValue,
 	resetKeychainValue,
 	getKeychainValue,
-	getAllKeychainKeys,
 	setSessionSecret,
 	getSessionSecret,
 	resetSessionSecret,
@@ -51,6 +50,7 @@ import {
 	STAGING_HOMESERVER,
 } from './constants.ts';
 import { appApplicationId } from './appInfo.ts';
+import { publishOwnedPubky, unpublishOwnedPubky } from './sharedPubky.ts';
 import i18n from '../i18n';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
@@ -296,42 +296,6 @@ export const createPubkyWithInviteCode = async (
 	}
 };
 
-/**
- * Restores all pubkys from the keychain and signs up to the homeserver.
- * @param {Dispatch} dispatch
- * @returns {Promise<string[]>}
- */
-export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
-	const allKeys = await getAllKeychainKeys();
-	if (allKeys?.length > 0) {
-		for (const pubky of allKeys) {
-			try {
-				const secretKeyRes = await getKeychainValue({ key: pubky });
-				if (secretKeyRes.isOk()) {
-					const isMigrated = isNewFormat(pubky);
-					if (isMigrated) {
-						const { secretKey, mnemonic } = JSON.parse(secretKeyRes.value) as IKeychainData;
-						// Restored pubkys were already backed up
-						await savePubky({ secretKey, pubky, dispatch, mnemonic });
-					} else {
-						const migrationRes = await migrateKeychainEntry(pubky, secretKeyRes.value);
-						if (migrationRes.isOk()) {
-							// Restored pubkys were already backed up
-							await savePubky({
-								secretKey: migrationRes.value.secretKey,
-								pubky,
-								dispatch,
-								mnemonic: migrationRes.value.mnemonic,
-							});
-						}
-					}
-				}
-			} catch {}
-		}
-	}
-	return allKeys;
-};
-
 export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app'): Promise<Result<string>> => {
 	try {
 		const profileUrl = `pubky://${pubky}/pub/${app}/profile.json`;
@@ -501,7 +465,9 @@ export const savePubky = async ({
 					description: response.error.message,
 				});
 				deletePubky(pubky, dispatch).then();
+				return;
 			}
+			publishOwnedPubky(pubky, secretKey);
 		});
 		return ok(pubky);
 	} catch (e) {
@@ -526,9 +492,13 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 	try {
 		dispatch(removePubky(pubky));
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
-			.then(results => {
-				const error = results.find(result => result.isErr());
+		Promise.all([
+			resetKeychainValue({ key: pubky }),
+			resetPubkySessionSecrets({ pubky }),
+			unpublishOwnedPubky(pubky),
+		])
+			.then(([keychainRes, sessionRes]) => {
+				const error = [keychainRes, sessionRes].find(result => result.isErr());
 				if (error?.isErr()) {
 					showToast({
 						type: 'error',
@@ -546,6 +516,21 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 		console.error('Error deleting pubky:', error);
 		return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 	}
+};
+
+/**
+ * Publishes a shared record for every pubky this app owns so other apps can use them.
+ * Runs on every app start and is idempotent.
+ */
+export const publishAllOwnedPubkys = async (pubkys: TPubkys): Promise<void> => {
+	await Promise.all(
+		Object.keys(pubkys).map(async pubky => {
+			const secretKeyRes = await getPubkySecretKey(pubky);
+			if (secretKeyRes.isOk()) {
+				await publishOwnedPubky(pubky, secretKeyRes.value.secretKey);
+			}
+		}),
+	);
 };
 
 /**

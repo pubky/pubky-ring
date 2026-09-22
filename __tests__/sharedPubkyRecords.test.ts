@@ -1,8 +1,13 @@
 import Keychain from 'react-native-keychain';
+import { showToast } from '@synonymdev/react-native-toast';
+import { err, ok } from '@synonymdev/result';
 import { wipeKeychain } from '../src/utils/keychain';
-import { deletePubky } from '../src/utils/pubky';
-import { unpublishAllOwnedPubkys, unpublishOwnedPubky } from '../src/utils/sharedPubky';
+import { deletePubky, pruneMissingExternalPubkys } from '../src/utils/pubky';
+import { listExternalPubkys, unpublishAllOwnedPubkys, unpublishOwnedPubky } from '../src/utils/sharedPubky';
 import { SHARED_PUBKY_SERVICE } from '../src/utils/constants';
+import { getPubkyDataFromStore } from '../src/utils/store-helpers';
+import { defaultPubkyState } from '../src/store/shapes/pubky';
+import { TPubkys } from '../src/types/pubky';
 
 jest.mock('@synonymdev/react-native-pubky');
 
@@ -28,6 +33,7 @@ jest.mock('../src/i18n', () => ({
 
 jest.mock('../src/utils/sharedPubky', () => ({
 	__esModule: true,
+	listExternalPubkys: jest.fn(),
 	publishOwnedPubky: jest.fn(async () => undefined),
 	unpublishAllOwnedPubkys: jest.fn(async () => undefined),
 	unpublishOwnedPubky: jest.fn(async () => undefined),
@@ -62,6 +68,7 @@ jest.mock('@synonymdev/react-native-toast', () => ({
 }));
 
 const PUBKY = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
+const EXTERNAL_PUBKY = 'pbkdgr9ubmtpkrx9zjsgxhxd6zfkmqg1tgmnh1ysnnhzuxeaikoy';
 
 const getAllGenericPasswordServicesMock = Keychain.getAllGenericPasswordServices as jest.Mock;
 const resetGenericPasswordMock = Keychain.resetGenericPassword as jest.Mock;
@@ -89,5 +96,57 @@ describe('deletePubky', () => {
 
 		expect(resetGenericPasswordMock).toHaveBeenCalledWith({ service: PUBKY });
 		expect(unpublishOwnedPubky).toHaveBeenCalledWith(PUBKY);
+	});
+
+	it('only removes the reference to an adopted pubky', async () => {
+		(getPubkyDataFromStore as jest.Mock).mockReturnValue({ sourceApp: 'to.bitkit' });
+		const dispatch = jest.fn();
+
+		await deletePubky(EXTERNAL_PUBKY, dispatch);
+		await new Promise(setImmediate);
+
+		expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: EXTERNAL_PUBKY });
+		expect(resetGenericPasswordMock).not.toHaveBeenCalled();
+		expect(unpublishOwnedPubky).not.toHaveBeenCalled();
+	});
+});
+
+describe('pruneMissingExternalPubkys', () => {
+	const pubkys: TPubkys = {
+		[PUBKY]: defaultPubkyState,
+		[EXTERNAL_PUBKY]: { ...defaultPubkyState, sourceApp: 'to.bitkit' },
+	};
+
+	it('removes adopted pubkys the owning app no longer publishes', async () => {
+		(listExternalPubkys as jest.Mock).mockResolvedValue(ok([]));
+		const dispatch = jest.fn();
+
+		await pruneMissingExternalPubkys(pubkys, dispatch);
+
+		expect(dispatch).toHaveBeenCalledTimes(1);
+		expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: EXTERNAL_PUBKY });
+		expect(showToast).toHaveBeenCalledTimes(1);
+	});
+
+	it('keeps adopted pubkys that are still published', async () => {
+		(listExternalPubkys as jest.Mock).mockResolvedValue(
+			ok([{ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit' }]),
+		);
+		const dispatch = jest.fn();
+
+		await pruneMissingExternalPubkys(pubkys, dispatch);
+
+		expect(dispatch).not.toHaveBeenCalled();
+		expect(showToast).not.toHaveBeenCalled();
+	});
+
+	it('removes nothing when the shared store cannot be read', async () => {
+		(listExternalPubkys as jest.Mock).mockResolvedValue(err('unavailable'));
+		const dispatch = jest.fn();
+
+		await pruneMissingExternalPubkys(pubkys, dispatch);
+
+		expect(dispatch).not.toHaveBeenCalled();
+		expect(showToast).not.toHaveBeenCalled();
 	});
 });

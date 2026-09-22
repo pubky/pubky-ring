@@ -387,5 +387,10 @@
 		"openPlayStore": "Google Play",
 		"downloadApk": "Signed APK",
 		"viewRelease": "View release and verification files"
+	},
+	"sharedPubky": {
+		"sourceLostTitle": "Bitkit pubky removed",
+		"sourceLostDescription": "A pubky you were using from Bitkit is no longer available.",
+		"homeserverUnsupported": "Homeserver actions are not available for a Bitkit pubky."
 	}
 }

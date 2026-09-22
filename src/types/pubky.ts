@@ -13,6 +13,8 @@ export interface Pubky {
 	sessions: PubkySession[];
 	backupPreference: EBackupPreference;
 	isBackedUp: boolean;
+	// Set when another app owns the key and Ring only holds a reference to it.
+	sourceApp?: string;
 }
 
 export type ISetPubkyData = Partial<Pubky>;

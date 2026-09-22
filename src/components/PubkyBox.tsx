@@ -94,8 +94,7 @@ const PubkyBox = ({
 
 	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 	const pubkyName =
-		truncateStr(pubkyData.name, 8) ||
-		`${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
+		pubkyData.name || `${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
 
 	const canAuthorize = pubkyData.signedUp || !!pubkyData.sourceApp;
 

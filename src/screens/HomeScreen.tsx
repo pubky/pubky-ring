@@ -13,7 +13,6 @@ import HomeHeader from '../components/HomeHeader';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
-import SafeAreaView from '../components/SafeAreaView.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
@@ -138,19 +137,12 @@ const HomeScreen = (): ReactElement => {
 
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
 
-	if (!hasPubkys) {
-		return (
-			<SafeAreaView style={styles.container} edges={['bottom']}>
-				<HomeHeader />
-				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
-				<EmptyState />
-				{externalPubkyCards}
-				<View>
-					<ListFooter />
-				</View>
-			</SafeAreaView>
-		);
-	}
+	const listHeader = (
+		<>
+			{sunsetBanner}
+			{!hasPubkys && <EmptyState />}
+		</>
+	);
 
 	return (
 		<View style={styles.container}>
@@ -160,9 +152,11 @@ const HomeScreen = (): ReactElement => {
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
-				ListHeaderComponent={sunsetBanner}
+				containerStyle={styles.container}
+				ListHeaderComponent={listHeader}
+				ListHeaderComponentStyle={!hasPubkys && styles.grow}
 				ListFooterComponent={externalPubkyCards}
-				contentContainerStyle={styles.listContent}
+				contentContainerStyle={[styles.listContent, !hasPubkys && styles.emptyContent]}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 			/>
@@ -190,8 +184,12 @@ const styles = StyleSheet.create({
 		paddingTop: HEADER_HEIGHT + 24,
 		paddingBottom: 180,
 	},
-	emptyStateBanner: {
-		paddingTop: HEADER_HEIGHT + 16,
+	grow: {
+		flexGrow: 1,
+	},
+	emptyContent: {
+		flexGrow: 1,
+		paddingBottom: 100,
 	},
 	fadeOverlay: {
 		position: 'absolute',

@@ -508,6 +508,8 @@ export const savePubky = async ({
 				deletePubky(pubky, dispatch).then();
 				return;
 			}
+			// Ring holds the secret now, so any earlier reference to an owning app is stale.
+			dispatch(setPubkyData({ pubky, data: { sourceApp: undefined } }));
 			publishOwnedPubky(pubky, secretKey);
 		});
 		return ok(pubky);
@@ -534,7 +536,8 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 		const isExternal = !!getPubkyDataFromStore(pubky)?.sourceApp;
 		dispatch(removePubky(pubky));
 		if (isExternal) {
-			// The key belongs to another app, so dropping our reference is the entire deletion.
+			// The key belongs to another app, so only the Ring-owned session secrets are ours to clear.
+			await resetPubkySessionSecrets({ pubky });
 			return ok(pubky);
 		}
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.

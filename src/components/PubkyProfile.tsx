@@ -8,6 +8,7 @@ import ProfileAvatar from './ProfileAvatar';
 import { Text2Xl, TextBaseB } from '../theme/typography';
 import Button from './Button.tsx';
 import Card from './Card.tsx';
+import SourceAppPill from './SourceAppPill.tsx';
 
 interface PubkyProfileProps {
 	index?: number;
@@ -61,6 +62,8 @@ export const PubkyProfile = memo(
 					<TextBaseB style={styles.pubkyText}>{pubkyUri}</TextBaseB>
 				</TouchableOpacity>
 
+				{pubkyData.sourceApp && <SourceAppPill style={styles.sourceAppPill} />}
+
 				{onButtonPress && (
 					<Button
 						style={styles.button}
@@ -96,6 +99,9 @@ const styles = StyleSheet.create({
 	},
 	pubkyText: {
 		textAlign: 'center',
+	},
+	sourceAppPill: {
+		marginTop: 12,
 	},
 	button: {
 		width: '100%',

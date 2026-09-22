@@ -20,6 +20,7 @@ export interface Theme {
 		blue: string;
 		pubkyApp: string;
 		danger: string;
+		orange: string;
 	};
 }
 
@@ -33,6 +34,7 @@ export const accentColors = {
 	blue: '#0085FF',
 	pubkyApp: '#C8FF00',
 	danger: '#FF0000',
+	orange: '#FF4400',
 };
 
 export const lightTheme: Theme = {

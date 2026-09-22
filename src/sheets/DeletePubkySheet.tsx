@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from './sheetNavigation.tsx';
 import PubkyCard from '../components/PubkyCard.tsx';
-import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
+import { getPubky, getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '../store';
 import Button from '../components/Button.tsx';
@@ -24,6 +24,7 @@ const DeletePubkySheet = ({
 	const { pubky } = route.params;
 	const publicKey = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
 	const currentPubkyName = useSelector((state: RootState) => getPubkyName(state, publicKey));
+	const isExternal = useSelector((state: RootState) => !!getPubky(state, publicKey)?.sourceApp);
 	// Preserve the original name while loading/deleting
 	const [pubkyName] = useState(currentPubkyName);
 
@@ -46,8 +47,14 @@ const DeletePubkySheet = ({
 	}, [dispatch, navigation, pubky, t]);
 
 	return (
-		<Sheet id="delete-pubky" title={t('pubky.deletePubky')} gradientType="brand">
-			<TextBaseM style={styles.message}>{t('pubky.deleteConfirm')}</TextBaseM>
+		<Sheet
+			id="delete-pubky"
+			title={isExternal ? t('sharedPubky.deleteTitle') : t('pubky.deletePubky')}
+			gradientType="brand"
+		>
+			<TextBaseM style={styles.message}>
+				{isExternal ? t('sharedPubky.deleteConfirm') : t('pubky.deleteConfirm')}
+			</TextBaseM>
 			<PubkyCard name={pubkyName} publicKey={publicKey} />
 			<View style={styles.imageContainer}>
 				<Image source={require('../images/trash.png')} style={styles.image} />

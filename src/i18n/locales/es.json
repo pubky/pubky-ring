@@ -392,6 +392,14 @@
 	"sharedPubky": {
 		"sourceLostTitle": "Pubky de Bitkit eliminado",
 		"sourceLostDescription": "Un pubky que usabas desde Bitkit ya no está disponible.",
-		"homeserverUnsupported": "Las acciones del homeserver no están disponibles para un pubky de Bitkit."
+		"homeserverUnsupported": "Las acciones del homeserver no están disponibles para un pubky de Bitkit.",
+		"pill": "Pubky de Bitkit",
+		"useTitle": "Usar pubky de Bitkit",
+		"useHeadline": "Tu pubky.",
+		"useDescription": "Usa este pubky en Pubky Ring para autorizar servicios, mientras Bitkit lo sigue gestionando.",
+		"useCta": "Usar en Pubky Ring",
+		"useError": "No se pudo usar este pubky en Pubky Ring.",
+		"deleteTitle": "Eliminar pubky",
+		"deleteConfirm": "¿Quieres eliminar este pubky de Pubky Ring? Seguirá en Bitkit."
 	}
 }

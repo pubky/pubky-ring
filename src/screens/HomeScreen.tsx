@@ -19,6 +19,8 @@ import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
+import ExternalPubkyBox from '../components/ExternalPubkyBox.tsx';
+import { useExternalPubkys } from '../hooks/useExternalPubkys.ts';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -74,6 +76,7 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
+	const externalPubkys = useExternalPubkys();
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -114,6 +117,17 @@ const HomeScreen = (): ReactElement => {
 		return pubkyArray.length > 0;
 	}, [pubkyArray.length]);
 
+	const externalPubkyCards = useMemo(
+		() => (
+			<>
+				{externalPubkys.map(({ pubky, sourceApp }) => (
+					<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
+				))}
+			</>
+		),
+		[externalPubkys, pubkyArray.length],
+	);
+
 	const showSunsetDetails = useCallback(() => {
 		if (!replacementRelease) return;
 
@@ -130,6 +144,7 @@ const HomeScreen = (): ReactElement => {
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
 				<EmptyState />
+				{externalPubkyCards}
 				<View>
 					<ListFooter />
 				</View>
@@ -146,6 +161,7 @@ const HomeScreen = (): ReactElement => {
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
 				ListHeaderComponent={sunsetBanner}
+				ListFooterComponent={externalPubkyCards}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}

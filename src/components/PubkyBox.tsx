@@ -11,6 +11,7 @@ import { showSheet } from '../sheets/sheetNavigation.tsx';
 import Button from './Button.tsx';
 import { ChevronRight, Scan } from '../icons/index.ts';
 import Card from './Card.tsx';
+import SourceAppPill from './SourceAppPill.tsx';
 import { shadows } from '../theme/shadows.ts';
 
 interface PubkyInfoProps {
@@ -18,9 +19,10 @@ interface PubkyInfoProps {
 	publicKey: string;
 	sessionsCount: number;
 	isBackedUp: boolean;
+	sourceApp?: string;
 }
 
-const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: PubkyInfoProps) => {
+const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, sourceApp }: PubkyInfoProps) => {
 	const { t } = useTranslation();
 
 	const handleBackupPress = useCallback(() => {
@@ -51,6 +53,8 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp }: Pub
 						<TextXsSb colorName="blue">{t('pubkyProfile.backupReminder')}</TextXsSb>
 					</TouchableOpacity>
 				)}
+
+				{sourceApp && <SourceAppPill style={styles.sourceAppPill} />}
 
 				{sessionsCount > 0 && (
 					<View style={styles.sessionsButton}>
@@ -93,14 +97,16 @@ const PubkyBox = ({
 		truncateStr(pubkyData.name, 8) ||
 		`${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
 
+	const canAuthorize = pubkyData.signedUp || !!pubkyData.sourceApp;
+
 	const handleActionPress = useCallback(() => {
-		if (!pubkyData.signedUp) {
+		if (!canAuthorize) {
 			showSheet('edit-pubky', { pubky });
 			return;
 		}
 
 		showSheet('auth', { screen: 'Scanner', params: { pubky } });
-	}, [pubky, pubkyData.signedUp]);
+	}, [canAuthorize, pubky]);
 
 	// testId example: PubkyBox-StagingTestPubky-0
 	const sanitizedName = pubkyData.name.replace(/[^a-zA-Z0-9]/g, '');
@@ -129,6 +135,7 @@ const PubkyBox = ({
 						publicKey={publicKey}
 						isBackedUp={pubkyData.isBackedUp}
 						sessionsCount={sessionsCount}
+						sourceApp={pubkyData.sourceApp}
 					/>
 
 					<View style={styles.iconContainer} pointerEvents="none">
@@ -138,11 +145,11 @@ const PubkyBox = ({
 
 				<Button
 					style={styles.button}
-					text={pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup')}
+					text={canAuthorize ? t('auth.authorize') : t('pubky.setup')}
 					size="large"
 					variant="secondary"
 					loading={loading}
-					icon={pubkyData.signedUp ? <Scan /> : <></>}
+					icon={canAuthorize ? <Scan /> : <></>}
 					testID={`${pubkyBoxTestID}-ActionButton`}
 					onPress={handleActionPress}
 					onLongPress={onLongPress}
@@ -206,6 +213,9 @@ const styles = StyleSheet.create({
 		marginLeft: 8,
 		height: 20,
 		...shadows.sm,
+	},
+	sourceAppPill: {
+		marginLeft: 8,
 	},
 	button: {
 		marginTop: 16,

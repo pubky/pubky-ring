@@ -889,7 +889,7 @@ const connectSharedPubkyUnlocked = async ({
 }: ConnectSharedPubkyParams): Promise<Result<string>> => {
 	const requestedPubky = normalizeSharedPubky(identity.pubky);
 	if (!requestedPubky || getPubkyDataFromStore(requestedPubky) || (await hasPrivatePubky(requestedPubky))) {
-		return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
+		return err(i18n.t('reuseSharedPubky.alreadyConnected'));
 	}
 	const credential = await getSharedPubkyCredential(identity);
 	if (!credential) return err(i18n.t('pubkyErrors.secretKeyNotFoundInKeychain'));
@@ -897,7 +897,7 @@ const connectSharedPubkyUnlocked = async ({
 	const pubky = credential.pubky;
 	if (getPubkyDataFromStore(pubky)) {
 		// Discovery and selection are asynchronous; another flow may have connected this identity.
-		return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
+		return err(i18n.t('reuseSharedPubky.alreadyConnected'));
 	}
 	let homeserver = defaultPubkyState.homeserver;
 	const homeserverResult = await getHomeserver(pubky);

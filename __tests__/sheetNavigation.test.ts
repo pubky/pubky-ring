@@ -1,4 +1,8 @@
-import { navigationRef, removeDisconnectedPubkyDetail } from '../src/sheets/sheetNavigation';
+import {
+	closeUnavailableSharedPubkySheet,
+	navigationRef,
+	removeDisconnectedPubkyDetail,
+} from '../src/sheets/sheetNavigation';
 
 jest.mock('@react-navigation/native', () => ({
 	__esModule: true,
@@ -76,6 +80,75 @@ test('does not alter the stack when the displayed detail belongs to another iden
 
 	removeDisconnectedPubkyDetail(BORROWED_A);
 
+	expect(navigationRefMock.dispatch).not.toHaveBeenCalled();
+});
+
+test('removes stale details beneath Settings while preserving the active route and its nested state', () => {
+	const settings = {
+		key: 'settings',
+		name: 'Settings',
+		state: { key: 'settings-stack', index: 0, routes: [{ key: 'preferences', name: 'Preferences' }] },
+	};
+	const otherDetail = detailRoute(BORROWED_B);
+	setRootRoutes([homeRoute, detailRoute(BORROWED_A), otherDetail, settings]);
+	removeDisconnectedPubkyDetail(BORROWED_A);
+	const action = navigationRefMock.dispatch.mock.calls[0][0] as {
+		payload: { index: number; routes: unknown[] };
+	};
+	expect(action.payload.routes).toEqual([homeRoute, otherDetail, settings]);
+	expect(action.payload.index).toBe(2);
+	expect(action.payload.routes[2]).toBe(settings);
+});
+
+test('preserves unrelated routes even when Home is absent from the stack', () => {
+	const settings = { key: 'settings', name: 'Settings' };
+	setRootRoutes([detailRoute(BORROWED_A), settings]);
+	removeDisconnectedPubkyDetail(BORROWED_A);
+	const action = navigationRefMock.dispatch.mock.calls[0][0] as {
+		payload: { index: number; routes: unknown[] };
+	};
+	expect(action.payload.routes).toEqual([settings]);
+	expect(action.payload.index).toBe(0);
+});
+
+test('closes only the reuse sheet whose offer disappeared', () => {
+	const sheet = {
+		key: 'reuse-a',
+		name: 'ReuseSharedPubkySheet',
+		params: { identity: { pubky: BORROWED_A } },
+	};
+	setRootRoutes([homeRoute, sheet]);
+	closeUnavailableSharedPubkySheet(new Set([BORROWED_A]));
+	expect(navigationRefMock.dispatch).not.toHaveBeenCalled();
+	closeUnavailableSharedPubkySheet(new Set([BORROWED_B]));
+	expect(navigationRefMock.dispatch).toHaveBeenCalledWith({
+		type: 'POP',
+		payload: { count: 1 },
+		target: 'root',
+	});
+});
+
+test('removes an unavailable reuse sheet without moving the active Settings route', () => {
+	const sheet = {
+		key: 'reuse-a',
+		name: 'ReuseSharedPubkySheet',
+		params: { identity: { pubky: BORROWED_A } },
+	};
+	const settings = { key: 'settings', name: 'Settings' };
+	const about = { key: 'about', name: 'About' };
+	setRootRoutes([homeRoute, sheet, settings, about], 2);
+	closeUnavailableSharedPubkySheet(new Set());
+	const action = navigationRefMock.dispatch.mock.calls[0][0] as {
+		payload: { index: number; routes: unknown[] };
+	};
+	expect(action.payload.routes).toEqual([homeRoute, settings, about]);
+	expect(action.payload.index).toBe(1);
+	expect(action.payload.routes[1]).toBe(settings);
+});
+
+test('does not close an unrelated sheet when an offer disappears', () => {
+	setRootRoutes([homeRoute, { key: 'add', name: 'AddPubkySheet' }]);
+	closeUnavailableSharedPubkySheet(new Set());
 	expect(navigationRefMock.dispatch).not.toHaveBeenCalled();
 });
 

@@ -370,6 +370,7 @@
 		"badge": "Bitkit pubky",
 		"fallbackName": "pubky #{{number}} (Bitkit)",
 		"useInRing": "Use in Pubky Ring",
+		"alreadyConnected": "This pubky is already connected to Pubky Ring.",
 		"backupManagedByBitkit": "This pubky is managed by Bitkit. Back it up in Bitkit instead.",
 		"disconnect": "Disconnect",
 		"disconnectPubky": "Disconnect Pubky",

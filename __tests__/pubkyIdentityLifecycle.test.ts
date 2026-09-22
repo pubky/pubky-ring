@@ -522,6 +522,16 @@ test('never republishes a borrowed identity when its homeserver sign-in fails', 
 	);
 });
 
+test('reports a duplicate connect without suggesting an owned-key import', async () => {
+	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
+	const dispatch = jest.fn();
+	const result = await connectSharedPubky({ identity: { ...bitkitIdentity, pubky: OWNED }, dispatch });
+	expect(result.isErr()).toBe(true);
+	if (result.isErr()) expect(result.error.message).toBe('reuseSharedPubky.alreadyConnected');
+	expect(getSharedPubkyCredentialMock).not.toHaveBeenCalled();
+	expect(dispatch).not.toHaveBeenCalled();
+});
+
 test('never signs a borrowed identity up to a locally edited homeserver', async () => {
 	// The edit sheet lets any identity's homeserver be changed, and signing up publishes a new
 	// homeserver record for the key, which only the owning app may do.

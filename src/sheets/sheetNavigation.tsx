@@ -142,7 +142,7 @@ const closeRootSheetRoute = (routeName: SheetRouteName): boolean => {
 		CommonActions.reset({
 			...rootState,
 			routes,
-			index: Math.min(rootState.index, routes.length - 1),
+			index: rootState.index - (routeIndex < rootState.index ? 1 : 0),
 		}),
 	);
 	return true;
@@ -155,6 +155,13 @@ export const showSheet = <TSheetId extends SheetId>(...args: ShowSheetArgs<TShee
 
 export const hideSheet = (id: SheetId): void => {
 	closeRootSheetRoute(sheetRouteById[id]);
+};
+
+export const closeUnavailableSharedPubkySheet = (availablePubkys: ReadonlySet<string>): void => {
+	if (!navigationRef.isReady()) return;
+	const route = navigationRef.getRootState().routes.find(item => item.name === 'ReuseSharedPubkySheet');
+	const pubky = getActiveRoutePubky(route);
+	if (pubky && !availablePubkys.has(pubky)) closeRootSheetRoute('ReuseSharedPubkySheet');
 };
 
 const resetRootRoutes = (
@@ -183,29 +190,17 @@ export const removeDisconnectedPubkyDetail = (pubky: string): void => {
 	if (!navigationRef.isReady()) return;
 
 	const rootState = navigationRef.getRootState();
-	let displayedContentIndex = rootState.index;
-	while (
-		displayedContentIndex >= 0 &&
-		sheetRouteNameSet.has(rootState.routes[displayedContentIndex]?.name ?? '')
-	) {
-		displayedContentIndex -= 1;
-	}
-
-	const displayedContent = rootState.routes[displayedContentIndex];
-	const hasMatchingDetail =
-		displayedContent?.name === 'PubkyDetail' && getActiveRoutePubky(displayedContent) === pubky;
-	const hasMatchingIdentitySheet = rootState.routes.some(
-		route => identitySheetRouteNameSet.has(route.name) && getActiveRoutePubky(route) === pubky,
-	);
-	if (!hasMatchingDetail && !hasMatchingIdentitySheet) return;
-
 	const activeRouteKey = rootState.routes[rootState.index]?.key;
-	const routes = rootState.routes.filter((route, index) => {
-		if (hasMatchingDetail && index === displayedContentIndex) return false;
-		return !(identitySheetRouteNameSet.has(route.name) && getActiveRoutePubky(route) === pubky);
-	});
+	const routes = rootState.routes.filter(
+		route =>
+			!(
+				(route.name === 'PubkyDetail' || identitySheetRouteNameSet.has(route.name)) &&
+				getActiveRoutePubky(route) === pubky
+			),
+	);
+	if (routes.length === rootState.routes.length) return;
 
-	if (!routes.some(route => route.name === 'Home')) {
+	if (routes.length === 0) {
 		resetRootToHome();
 		return;
 	}

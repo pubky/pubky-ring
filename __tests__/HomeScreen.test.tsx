@@ -166,6 +166,7 @@ jest.mock('../src/hooks/useSharedPubkyDiscovery.ts', () => {
 });
 
 import HomeScreen from '../src/screens/HomeScreen';
+import { SharedPubkyDiscoveryContext } from '../src/hooks/useSharedPubkyDiscovery';
 
 beforeEach(() => {
 	mockPubkyArray = [];
@@ -201,4 +202,25 @@ test('lists the unconnected identities below the owned pubkys', () => {
 		// Connecting one appends it after the owned pubkys, so it is numbered from there too.
 		expect(within(footer).getByTestId(testID).props.index).toBe(mockPubkyArray.length + index);
 	});
+});
+
+test('reveals a retained shared offer immediately after its borrowed identity is disconnected', () => {
+	const pubky = mockSharedIdentities()[0].pubky;
+	const discovery = { available: true, identities: mockSharedIdentities(), refresh: jest.fn() };
+	mockPubkyArray = [{ key: pubky, value: { sourceApp: 'to.bitkit' } }];
+	const { rerender } = render(
+		<SharedPubkyDiscoveryContext.Provider value={discovery}>
+			<HomeScreen />
+		</SharedPubkyDiscoveryContext.Provider>,
+	);
+	expect(screen.queryByTestId(`SharedPubkyCard-${pubky}`)).toBeNull();
+	mockPubkyArray = [];
+	// The selector mock has no Redux subscription, so notify via context with the same identity snapshot.
+	rerender(
+		<SharedPubkyDiscoveryContext.Provider value={{ ...discovery }}>
+			<HomeScreen />
+		</SharedPubkyDiscoveryContext.Provider>,
+	);
+	expect(screen.getByTestId(`SharedPubkyCard-${pubky}`)).toBeTruthy();
+	expect(discovery.refresh).not.toHaveBeenCalled();
 });

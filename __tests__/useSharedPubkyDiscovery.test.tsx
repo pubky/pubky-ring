@@ -1,10 +1,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
 import { showToast } from '@synonymdev/react-native-toast';
 import { useSharedPubkyDiscovery } from '../src/hooks/useSharedPubkyDiscovery';
-import { disconnectBorrowedPubky } from '../src/utils/pubky';
-import { getBorrowedPubkyKeys } from '../src/store/selectors/pubkySelectors';
+import { disconnectBorrowedPubky, getProfileAvatar, getProfileInfo } from '../src/utils/pubky';
+import { getAllPubkys, getBorrowedPubkyKeys } from '../src/store/selectors/pubkySelectors';
 import { discoverSharedPubkys } from '../src/utils/sharedPubky';
-import { removeDisconnectedPubkyDetail } from '../src/sheets/sheetNavigation';
+import {
+	closeUnavailableSharedPubkySheet,
+	removeDisconnectedPubkyDetail,
+} from '../src/sheets/sheetNavigation';
 
 const mockDispatch = jest.fn();
 
@@ -18,7 +21,7 @@ jest.mock('../src/store/selectors/pubkySelectors', () => ({
 	__esModule: true,
 	getBorrowedPubkyKeys: jest.fn(() => []),
 	getOwnedPubkyKeys: jest.fn(() => []),
-	getPubkyKeys: jest.fn(() => []),
+	getAllPubkys: jest.fn(() => ({})),
 }));
 
 jest.mock('../src/utils/store-helpers', () => ({
@@ -53,6 +56,7 @@ jest.mock('../src/i18n', () => ({
 jest.mock('../src/sheets/sheetNavigation', () => ({
 	__esModule: true,
 	removeDisconnectedPubkyDetail: jest.fn(),
+	closeUnavailableSharedPubkySheet: jest.fn(),
 }));
 
 const showToastMock = showToast as jest.MockedFunction<typeof showToast>;
@@ -76,6 +80,7 @@ const renderDiscovery = async (): Promise<void> => {
 beforeEach(() => {
 	jest.clearAllMocks();
 	getBorrowedPubkyKeysMock.mockReturnValue([]);
+	(getAllPubkys as jest.Mock).mockReturnValue({});
 	disconnectBorrowedPubkyMock.mockResolvedValue(true);
 	discoverSharedPubkysMock.mockResolvedValue({ available: true, identities: [] });
 });
@@ -121,22 +126,49 @@ test('says nothing when every borrowed identity is still shared', async () => {
 	expect(showToastMock).not.toHaveBeenCalled();
 });
 
-test('retains the last discovery and borrowed identities on failure, then recovers', async () => {
+test('retains connected offers with their profile metadata for an immediate manual disconnect', async () => {
+	const identity = { version: 1, sourceApp: 'to.bitkit', pubky: BORROWED_A } as const;
+	getBorrowedPubkyKeysMock.mockReturnValue([BORROWED_A]);
+	(getAllPubkys as jest.Mock).mockReturnValue({ [BORROWED_A]: { name: 'Alice', image: 'avatar' } });
+	discoverSharedPubkysMock.mockResolvedValue({ available: true, identities: [identity] });
+	const { result } = renderHook(() => useSharedPubkyDiscovery());
+	await waitFor(() =>
+		expect(result.current.identities).toEqual([{ ...identity, name: 'Alice', image: 'avatar' }]),
+	);
+	expect(getProfileInfo).not.toHaveBeenCalled();
+	expect(getProfileAvatar).not.toHaveBeenCalled();
+	expect(closeUnavailableSharedPubkySheet).toHaveBeenCalledWith(new Set([BORROWED_A]));
+});
+
+test.each([true, false])(
+	'closes missing reuse offers on a definitive discovery (available=%s)',
+	async available => {
+		discoverSharedPubkysMock.mockResolvedValue({ available, identities: [] });
+		await renderDiscovery();
+		await waitFor(() => expect(closeUnavailableSharedPubkySheet).toHaveBeenCalledWith(new Set()));
+		expect(disconnectBorrowedPubkyMock).not.toHaveBeenCalled();
+	},
+);
+
+test('retains discovery, the reuse sheet, and borrowed identities on failure, then recovers', async () => {
 	getBorrowedPubkyKeysMock.mockReturnValue([BORROWED_A]);
 	const identity = { version: 1, sourceApp: 'to.bitkit', pubky: BORROWED_A } as const;
 	discoverSharedPubkysMock.mockResolvedValue({ available: true, identities: [identity] });
 	const { result } = renderHook(() => useSharedPubkyDiscovery());
 	await waitFor(() => expect(result.current.identities).toEqual([identity]));
+	(closeUnavailableSharedPubkySheet as jest.Mock).mockClear();
 	discoverSharedPubkysMock.mockRejectedValueOnce(new Error('provider temporarily unavailable'));
 	await act(async () => {
 		await expect(result.current.refresh()).rejects.toThrow('provider temporarily unavailable');
 	});
 	expect(result.current.identities).toEqual([identity]);
+	expect(closeUnavailableSharedPubkySheet).not.toHaveBeenCalled();
 	expect(disconnectBorrowedPubkyMock).not.toHaveBeenCalled();
 	expect(showToastMock).not.toHaveBeenCalled();
 	discoverSharedPubkysMock.mockResolvedValue({ available: true, identities: [] });
 	await act(async () => result.current.refresh());
 	expect(disconnectBorrowedPubkyMock).toHaveBeenCalledWith(BORROWED_A, mockDispatch);
+	expect(closeUnavailableSharedPubkySheet).toHaveBeenCalledWith(new Set());
 });
 
 test('says nothing when another flow already removed the identity', async () => {

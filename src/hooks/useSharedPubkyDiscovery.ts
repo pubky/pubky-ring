@@ -2,7 +2,7 @@ import { createContext, useCallback, useEffect, useRef, useState } from 'react';
 import { AppState } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { showToast } from '@synonymdev/react-native-toast';
-import { getBorrowedPubkyKeys, getOwnedPubkyKeys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getBorrowedPubkyKeys, getOwnedPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import {
 	disconnectBorrowedPubky,
 	getProfileAvatar,
@@ -12,7 +12,10 @@ import {
 import { getStore } from '../utils/store-helpers.ts';
 import { discoverSharedPubkys, SharedPubkyDiscovery, SharedPubkyIdentity } from '../utils/sharedPubky.ts';
 import i18n from '../i18n';
-import { removeDisconnectedPubkyDetail } from '../sheets/sheetNavigation.tsx';
+import {
+	closeUnavailableSharedPubkySheet,
+	removeDisconnectedPubkyDetail,
+} from '../sheets/sheetNavigation.tsx';
 
 export interface SharedPubkyDiscoveryState extends SharedPubkyDiscovery {
 	refresh: () => Promise<void>;
@@ -56,6 +59,8 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		const owned = getOwnedPubkyKeys(state);
 		const discovery = await discoverSharedPubkys(owned);
 		setAvailable(discovery.available);
+		const discoveredKeys = new Set(discovery.identities.map(identity => identity.pubky));
+		closeUnavailableSharedPubkySheet(discoveredKeys);
 		// Only the calls that actually removed something are counted: another flow may have
 		// disconnected the same identity first and already explained it.
 		let disconnectedCount = 0;
@@ -73,7 +78,6 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 			return;
 		}
 
-		const discoveredKeys = new Set(discovery.identities.map(identity => identity.pubky));
 		for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
 			if (!discoveredKeys.has(borrowedPubky)) {
 				// The source app/item disappeared. Clear only Ring's reference and local session.
@@ -85,10 +89,12 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		}
 		notifyAutoDisconnected(disconnectedCount);
 
-		const existing = new Set(getPubkyKeys(getStore()));
-		const candidates = discovery.identities.filter(identity => !existing.has(identity.pubky));
+		const connected = getAllPubkys(getStore());
 		const resolved = await Promise.all(
-			candidates.map(async identity => {
+			discovery.identities.map(async identity => {
+				// Keep connected offers in discovery so Home can reveal them immediately after disconnect.
+				const existing = connected[identity.pubky];
+				if (existing) return { ...identity, name: existing.name, image: existing.image };
 				const [profile, avatar] = await Promise.all([
 					getProfileInfo(identity.pubky),
 					getProfileAvatar(identity.pubky),

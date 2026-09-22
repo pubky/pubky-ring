@@ -191,5 +191,9 @@ describe('ReuseSharedPubkySheet', () => {
 		expect(showToastMock).toHaveBeenCalledWith(
 			expect.objectContaining({ type: 'error', description: 'bridge unavailable' }),
 		);
+		expect(screen.getByTestId('ReuseSharedPubkyConnectButton').props.loading).toBe(false);
+		connectSharedPubkyMock.mockResolvedValueOnce(ok(PUBKY));
+		await pressConnect();
+		expect(hideSheetMock).toHaveBeenCalledWith('reuse-shared-pubky');
 	});
 });

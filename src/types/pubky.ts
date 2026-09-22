@@ -23,6 +23,8 @@ export interface PubkyState {
 	pubkys: TPubkys;
 	deepLink: string;
 	processing: { [key: string]: boolean };
+	/** Public identity references only; secrets stay in the private Keychain until deletion succeeds. */
+	pendingSessionCleanup?: Record<string, string[]>;
 }
 
 export type TPubkys = {

@@ -1,15 +1,21 @@
 import { err, ok } from '@synonymdev/result';
+import type { Dispatch } from 'redux';
 import { getHomeserver, republishHomeserver, signIn, signUp } from '@synonymdev/react-native-pubky';
 import { showToast } from '@synonymdev/react-native-toast';
-import { EBackupPreference, Pubky } from '../src/types/pubky';
+import { EBackupPreference, Pubky, PubkyState } from '../src/types/pubky';
+import pubkysReducer from '../src/store/slices/pubkysSlice';
+import { initialState } from '../src/store/shapes/pubky';
+import { sanitizePubkySessions } from '../src/store/transforms/pubkyPersistence';
 import {
 	connectSharedPubky,
 	deletePubky,
 	disconnectBorrowedPubky,
 	getPubkySecretKey,
+	importPubky,
 	reconcileOwnedSharedPubkys,
 	removeKeylessPubkys,
 	restorePubkys,
+	retryPendingPubkySessionCleanup,
 	savePubky,
 	signInToHomeserver,
 	signUpToHomeserver,
@@ -38,6 +44,8 @@ const mockReconcileSharedPubkys = jest.fn();
 const mockClearOwnedSharedPubkys = jest.fn();
 const mockRemoveDisconnectedPubkyDetail = jest.fn();
 const mockStoreDispatch = jest.fn();
+const mockFlush = jest.fn();
+let mockPubkyState: PubkyState;
 
 jest.mock('@synonymdev/react-native-pubky', () => ({
 	auth: jest.fn(),
@@ -55,6 +63,9 @@ jest.mock('@synonymdev/react-native-pubky', () => ({
 
 jest.mock('@synonymdev/react-native-toast', () => ({ showToast: jest.fn() }));
 
+// The React Native resolver selects Immer's ESM build; use its equivalent CJS build for the real reducer.
+jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
+
 jest.mock('uuid', () => ({
 	__esModule: true,
 	v5: jest.fn(() => 'session-id'),
@@ -69,16 +80,8 @@ jest.mock('../src/store', () => ({
 	store: { dispatch: (...args: unknown[]) => mockStoreDispatch(...args) },
 }));
 
-jest.mock('../src/store/slices/pubkysSlice', () => ({
-	addProcessing: (payload: unknown) => ({ type: 'pubky/addProcessing', payload }),
-	addPubky: (payload: unknown) => ({ type: 'pubky/addPubky', payload }),
-	addSession: (payload: unknown) => ({ type: 'pubky/addSession', payload }),
-	removeProcessing: (payload: unknown) => ({ type: 'pubky/removeProcessing', payload }),
-	removePubky: (payload: unknown) => ({ type: 'pubky/removePubky', payload }),
-	removeSession: (payload: unknown) => ({ type: 'pubky/removeSession', payload }),
-	setHomeserver: (payload: unknown) => ({ type: 'pubky/setHomeserver', payload }),
-	setPubkyData: (payload: unknown) => ({ type: 'pubky/setPubkyData', payload }),
-	setSignedUp: (payload: unknown) => ({ type: 'pubky/setSignedUp', payload }),
+jest.mock('../src/store/persistPubkySessionCleanup', () => ({
+	persistPubkySessionCleanup: (...args: unknown[]) => mockFlush(...args),
 }));
 
 jest.mock('../src/utils/helpers.ts', () => ({ checkNetworkConnection: jest.fn() }));
@@ -123,7 +126,7 @@ jest.mock('../src/utils/sharedPubky.ts', () => {
 		},
 		reconcileSharedPubkys: (...args: unknown[]) => mockReconcileSharedPubkys(...args),
 		removeSharedPubky: (...args: unknown[]) => mockRemoveSharedPubky(...args),
-		withPubkyIdentityLifecycle: (operation: () => Promise<unknown>) => operation(),
+		withPubkyIdentityLifecycle: jest.requireActual('../src/utils/sharedPubky.ts').withPubkyIdentityLifecycle,
 	};
 });
 
@@ -152,6 +155,8 @@ const getSharedPubkyCredentialMock = getSharedPubkyCredential as jest.MockedFunc
 
 beforeEach(() => {
 	jest.clearAllMocks();
+	mockPubkyState = { ...initialState };
+	mockFlush.mockResolvedValue(true);
 	mockGetPublicKeyFromSecretKey.mockResolvedValue(ok({ public_key: OWNED }));
 	mockGetKeychainValue.mockResolvedValue(ok(JSON.stringify({ secretKey: SECRET, mnemonic: '' })));
 	mockSetKeychainValue.mockResolvedValue(ok('saved'));
@@ -161,7 +166,7 @@ beforeEach(() => {
 	mockSetSessionSecret.mockResolvedValue(ok(true));
 	mockGetAllKeychainKeys.mockResolvedValue([]);
 	mockGetPubkyDataFromStore.mockReturnValue(undefined);
-	mockGetStore.mockReturnValue({ pubky: { pendingSessionCleanup: {} } });
+	mockGetStore.mockImplementation(() => ({ pubky: mockPubkyState }));
 	mockMirrorSharedPubky.mockResolvedValue(true);
 	mockRemoveSharedPubky.mockResolvedValue(true);
 	mockReconcileSharedPubkys.mockResolvedValue(true);
@@ -609,7 +614,10 @@ test('drops a borrowed reference along with its session secrets', async () => {
 
 	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: OWNED });
 	expect(dispatch).toHaveBeenCalledWith(
-		expect.objectContaining({ type: 'pubky/removePubky', payload: OWNED }),
+		expect.objectContaining({
+			type: 'pubky/disconnectBorrowedPubky',
+			payload: { pubky: OWNED, sessionPubkys: [OWNED] },
+		}),
 	);
 });
 
@@ -632,6 +640,178 @@ test('refuses authorization without dropping a borrowed identity after a tempora
 	expect(result.isErr()).toBe(true);
 	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
 	expect(mockRemoveDisconnectedPubkyDetail).not.toHaveBeenCalled();
+});
+
+const useCleanupStore = (): Dispatch => {
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) => mockPubkyState.pubkys[pubky]);
+	return action => {
+		mockPubkyState = pubkysReducer(mockPubkyState, action);
+		return action;
+	};
+};
+
+test('persists a retry target with removal, then cleans it after a restart without touching owned keys', async () => {
+	const reference = `pubky${OWNED}`;
+	const unrelated = 'unrelated-owned-identity';
+	mockPubkyState = {
+		...initialState,
+		pubkys: {
+			[reference]: { ...ringPubky(), sourceApp: 'to.bitkit' },
+			[unrelated]: ringPubky(),
+		},
+	};
+	const dispatch = useCleanupStore();
+	mockResetPubkySessionSecrets.mockImplementation(async () => {
+		// The identity is already disabled even while the Keychain operation is pending/failing.
+		expect(mockPubkyState.pubkys[reference]).toBeUndefined();
+		return err(new Error('keychain locked'));
+	});
+
+	await expect(disconnectBorrowedPubky(reference, dispatch)).resolves.toBe(true);
+	const persisted = JSON.stringify(sanitizePubkySessions(mockPubkyState));
+	mockPubkyState = JSON.parse(persisted);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [reference]: [reference, OWNED] });
+	expect(mockPubkyState.pubkys[unrelated]).toEqual(ringPubky());
+
+	mockResetPubkySessionSecrets.mockResolvedValue(ok(true));
+	await expect(retryPendingPubkySessionCleanup(dispatch)).resolves.toBe(true);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({});
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: reference });
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledWith({ pubky: OWNED });
+	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalledWith({ pubky: unrelated });
+	expect(mockResetKeychainValue).not.toHaveBeenCalled();
+	expect(mockRemoveSharedPubky).not.toHaveBeenCalled();
+});
+
+test('retains only failed cleanup targets and retries them on the next refresh', async () => {
+	mockPubkyState = {
+		...initialState,
+		pendingSessionCleanup: { [OWNED]: [OWNED], other: ['other'] },
+	};
+	const dispatch = useCleanupStore();
+	mockResetPubkySessionSecrets.mockImplementation(async ({ pubky }: { pubky: string }) =>
+		pubky === OWNED ? err(new Error('keychain locked')) : ok(true),
+	);
+
+	await expect(retryPendingPubkySessionCleanup(dispatch)).resolves.toBe(false);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [OWNED]: [OWNED] });
+
+	mockResetPubkySessionSecrets.mockClear().mockResolvedValue(ok(true));
+	await expect(retryPendingPubkySessionCleanup(dispatch)).resolves.toBe(true);
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledTimes(1);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({});
+});
+
+test('refuses reconnect while old session deletion still fails', async () => {
+	mockPubkyState = { ...initialState, pendingSessionCleanup: { [OWNED]: [OWNED] } };
+	const dispatch = useCleanupStore();
+	mockResetPubkySessionSecrets.mockResolvedValue(err(new Error('keychain locked')));
+
+	const result = await connectSharedPubky({ identity: { ...bitkitIdentity, pubky: OWNED }, dispatch });
+
+	expect(result.isErr()).toBe(true);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [OWNED]: [OWNED] });
+	expect(mockPubkyState.pubkys).toEqual({});
+	expect(getSharedPubkyCredentialMock).not.toHaveBeenCalled();
+	expect(signInMock).not.toHaveBeenCalled();
+	expect(mockSetSessionSecret).not.toHaveBeenCalled();
+});
+
+test('keeps failed durable cleanup completion pending and blocks reconnect until a later verified write', async () => {
+	mockPubkyState = { ...initialState, pendingSessionCleanup: { [OWNED]: [OWNED] } };
+	const dispatch = useCleanupStore();
+	mockFlush.mockResolvedValue(false);
+
+	// Foreground deletion succeeds, but failed persistence must keep recovery and reconnect gated.
+	await expect(retryPendingPubkySessionCleanup(dispatch)).resolves.toBe(false);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [OWNED]: [OWNED] });
+	const refused = await connectSharedPubky({ identity: { ...bitkitIdentity, pubky: OWNED }, dispatch });
+	expect(refused.isErr()).toBe(true);
+	expect(signInMock).not.toHaveBeenCalled();
+	expect(mockSetSessionSecret).not.toHaveBeenCalled();
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [OWNED]: [OWNED] });
+
+	mockFlush.mockResolvedValue(true);
+	getSharedPubkyCredentialMock.mockResolvedValue({ ...bitkitIdentity, pubky: OWNED, secretKey: SECRET });
+	getHomeserverMock.mockResolvedValue(ok('pubky://bitkit-homeserver'));
+	signInMock.mockResolvedValue(ok({ pubky: OWNED, capabilities: ['/pub/:rw'], grant_secret: 'new-grant' }));
+	const connected = await connectSharedPubky({ identity: { ...bitkitIdentity, pubky: OWNED }, dispatch });
+	expect(connected.isOk()).toBe(true);
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({});
+	expect(mockSetSessionSecret).toHaveBeenCalledTimes(1);
+});
+
+test('serializes reconnect with cleanup and persists completion before saving its new session', async () => {
+	mockPubkyState = { ...initialState, pendingSessionCleanup: { [OWNED]: [OWNED] } };
+	const dispatch = useCleanupStore();
+	let releaseCleanup!: () => void;
+	let cleanupStarted!: () => void;
+	const started = new Promise<void>(resolve => {
+		cleanupStarted = resolve;
+	});
+	mockResetPubkySessionSecrets.mockImplementationOnce(
+		() =>
+			new Promise(resolve => {
+				cleanupStarted();
+				releaseCleanup = () => resolve(ok(true));
+			}),
+	);
+	let durableState = JSON.stringify(mockPubkyState);
+	mockFlush.mockImplementation(async () => {
+		durableState = JSON.stringify(sanitizePubkySessions(mockPubkyState));
+		return true;
+	});
+	getSharedPubkyCredentialMock.mockResolvedValue({ ...bitkitIdentity, pubky: OWNED, secretKey: SECRET });
+	getHomeserverMock.mockResolvedValue(ok('pubky://bitkit-homeserver'));
+	signInMock.mockResolvedValue(ok({ pubky: OWNED, capabilities: ['/pub/:rw'], grant_secret: 'new-grant' }));
+	mockSetSessionSecret.mockImplementation(async () => {
+		expect(JSON.parse(durableState).pendingSessionCleanup).toEqual({});
+		return ok(true);
+	});
+
+	const retry = retryPendingPubkySessionCleanup(dispatch);
+	await started;
+	const reconnect = connectSharedPubky({ identity: { ...bitkitIdentity, pubky: OWNED }, dispatch });
+	expect(signInMock).not.toHaveBeenCalled();
+	releaseCleanup();
+	await retry;
+	expect((await reconnect).isOk()).toBe(true);
+	expect(mockPubkyState.pubkys[OWNED].sessions).toHaveLength(1);
+
+	await retryPendingPubkySessionCleanup(dispatch);
+	expect(mockResetPubkySessionSecrets).toHaveBeenCalledTimes(1);
+	expect(mockSetSessionSecret).toHaveBeenCalledWith({
+		pubky: OWNED,
+		sessionId: 'session-id',
+		sessionSecret: 'new-grant',
+	});
+});
+
+test('finishes pending borrowed cleanup before importing the same identity as owned', async () => {
+	mockPubkyState = { ...initialState, pendingSessionCleanup: { [OWNED]: [OWNED] } };
+	const dispatch = useCleanupStore();
+	mockResetPubkySessionSecrets.mockResolvedValue(err(new Error('keychain locked')));
+
+	const result = await savePubky({ pubky: OWNED, secretKey: SECRET, dispatch });
+
+	expect(result.isErr()).toBe(true);
+	expect(mockSetKeychainValue).not.toHaveBeenCalled();
+	expect(mockPubkyState.pubkys).toEqual({});
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [OWNED]: [OWNED] });
+});
+
+test('does not start import sign-in while prior borrowed cleanup is failing', async () => {
+	mockPubkyState = { ...initialState, pendingSessionCleanup: { [OWNED]: [OWNED] } };
+	const dispatch = useCleanupStore();
+	mockResetPubkySessionSecrets.mockResolvedValue(err(new Error('keychain locked')));
+	getHomeserverMock.mockResolvedValue(ok('pubky://bitkit-homeserver'));
+
+	const result = await importPubky({ secretKey: SECRET, dispatch });
+
+	expect(result.isErr()).toBe(true);
+	expect(signInMock).not.toHaveBeenCalled();
+	expect(mockSetSessionSecret).not.toHaveBeenCalled();
+	expect(mockPubkyState.pendingSessionCleanup).toEqual({ [OWNED]: [OWNED] });
 });
 
 test('never republishes a borrowed identity when its homeserver sign-in fails', async () => {

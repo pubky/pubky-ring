@@ -4,6 +4,7 @@ export const initialState: PubkyState = {
 	pubkys: {},
 	deepLink: '',
 	processing: {},
+	pendingSessionCleanup: {},
 };
 
 export const defaultPubkyState: Pubky = {

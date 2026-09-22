@@ -27,6 +27,9 @@ import {
 	addProcessing,
 	addPubky,
 	addSession,
+	completePubkySessionCleanup,
+	disconnectBorrowedPubky as disconnectBorrowedPubkyAction,
+	queuePubkySessionCleanup,
 	removeProcessing,
 	removePubky,
 	removeSession,
@@ -68,6 +71,7 @@ import {
 	withPubkyIdentityLifecycle,
 } from './sharedPubky.ts';
 import { store } from '../store';
+import { persistPubkySessionCleanup } from '../store/persistPubkySessionCleanup';
 import { removeDisconnectedPubkyDetail } from '../sheets/sheetNavigation.tsx';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
@@ -451,11 +455,6 @@ export const importPubky = async ({
 		) {
 			homeserver = getHomeserverRes.value;
 		}
-		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then(res => {
-			if (res.isErr()) {
-				dispatch(setSignedUp({ pubky, signedUp: false }));
-			}
-		});
 		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
 		const savePubkyRes = await savePubky({
 			secretKey,
@@ -466,6 +465,12 @@ export const importPubky = async ({
 			isBackedUp: true,
 		});
 		if (savePubkyRes.isOk()) {
+			// Saving completes any older borrowed-session cleanup before this creates a new session.
+			signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then(res => {
+				if (res.isErr()) {
+					dispatch(setSignedUp({ pubky, signedUp: false }));
+				}
+			});
 			// Only set homeserver if we have a valid non-empty value
 			if (homeserver?.trim()) {
 				dispatch(setHomeserver({ pubky, homeserver }));
@@ -541,6 +546,9 @@ const savePubkyUnlocked = async ({
 		const storedPubky = storedPubkyKey ? getPubkyDataFromStore(storedPubkyKey) : undefined;
 		if (storedPubky?.sourceApp === BITKIT_SOURCE_APP) {
 			return err(i18n.t('pubkyErrors.pubkyAlreadyExists'));
+		}
+		if (!(await retryPendingPubkySessionCleanupUnlocked(dispatch, normalizedPubky))) {
+			return err(i18n.t('keychain.failedToResetValue'));
 		}
 		const derived = await getPublicKeyFromSecretKey(secretKey);
 		if (derived.isErr() || normalizeSharedPubky(derived.value.public_key) !== normalizedPubky) {
@@ -652,12 +660,52 @@ const clearPubkySessionSecrets = async (candidates: Array<string | undefined>): 
 	return firstError ? err(firstError) : ok(true);
 };
 
+const completeSessionCleanup = async (
+	pubky: string,
+	sessionPubkys: string[],
+	dispatch: Dispatch,
+): Promise<boolean> => {
+	dispatch(completePubkySessionCleanup(pubky));
+	if (await persistPubkySessionCleanup(dispatch)) return true;
+	// Keep the identity disabled and retryable if the removal could not be persisted. Recovery
+	// also sees this marker and must not restore a usable card over an unfinished cleanup.
+	dispatch(queuePubkySessionCleanup({ pubky, sessionPubkys }));
+	return false;
+};
+
+/** Called under the lifecycle gate; reconnect must finish old cleanup before saving new sessions. */
+const retryPendingPubkySessionCleanupUnlocked = async (
+	dispatch: Dispatch,
+	pubky?: string,
+): Promise<boolean> => {
+	let succeeded = true;
+	for (const [reference, sessionPubkys] of Object.entries(getStore().pubky.pendingSessionCleanup ?? {})) {
+		if (pubky && normalizePubkyReference(reference) !== pubky) continue;
+		const result = await clearPubkySessionSecrets(sessionPubkys);
+		if (result.isErr()) {
+			succeeded = false;
+			console.error('Failed to clear session secrets for disconnected identity', result.error.message);
+		} else {
+			if (!(await completeSessionCleanup(reference, sessionPubkys, dispatch))) succeeded = false;
+		}
+	}
+	if (pubky) {
+		// A completed in-memory retry may still be queued for persistence. Flush before a reconnect
+		// writes new secrets so restarting cannot replay an old cleanup against its new session.
+		if (!(await persistPubkySessionCleanup(dispatch))) succeeded = false;
+	}
+	return succeeded;
+};
+
+export const retryPendingPubkySessionCleanup = (dispatch: Dispatch): Promise<boolean> =>
+	withPubkyIdentityLifecycle(() => retryPendingPubkySessionCleanupUnlocked(dispatch));
+
 /**
  * Drops a borrowed identity Ring can no longer use. The source app keeps its own key, but the
  * homeserver session secrets Ring created now live in the Keychain rather than in Redux, so
  * removing the Redux entry alone would strand them. Disconnecting still wins over a Keychain
- * failure: an unusable borrowed profile must never stay active, so a failure is reported and the
- * reference is dropped regardless.
+ * failure: an unusable borrowed profile must never stay active. A persisted public-reference
+ * tombstone retains the deletion target until startup/foreground cleanup can finish.
  *
  * Serialized like every other identity-lifecycle change, so it cannot interleave with a connect
  * that is still persisting the identity's session secrets. The lifecycle gate is not reentrant,
@@ -671,11 +719,14 @@ export const disconnectBorrowedPubky = (pubky: string, dispatch: Dispatch): Prom
 		// Re-checked under the gate: a concurrent flow may have removed the identity, or replaced
 		// it with a Ring-owned one that this must not touch.
 		if (getPubkyDataFromStore(pubky)?.sourceApp !== BITKIT_SOURCE_APP) return false;
-		const res = await clearPubkySessionSecrets([pubky, normalizePubkyReference(pubky)]);
+		const sessionPubkys = [...new Set([pubky, normalizePubkyReference(pubky)].filter(Boolean))] as string[];
+		dispatch(disconnectBorrowedPubkyAction({ pubky, sessionPubkys }));
+		const res = await clearPubkySessionSecrets(sessionPubkys);
 		if (res.isErr()) {
 			console.error('Failed to clear session secrets for disconnected identity', res.error.message);
+		} else {
+			await completeSessionCleanup(pubky, sessionPubkys, dispatch);
 		}
-		dispatch(removePubky(pubky));
 		return true;
 	});
 
@@ -891,6 +942,9 @@ const connectSharedPubkyUnlocked = async ({
 	if (!requestedPubky || getPubkyDataFromStore(requestedPubky) || (await hasPrivatePubky(requestedPubky))) {
 		return err(i18n.t('reuseSharedPubky.alreadyConnected'));
 	}
+	if (!(await retryPendingPubkySessionCleanupUnlocked(dispatch, requestedPubky))) {
+		return err(i18n.t('keychain.failedToResetValue'));
+	}
 	const credential = await getSharedPubkyCredential(identity);
 	if (!credential) return err(i18n.t('pubkyErrors.secretKeyNotFoundInKeychain'));
 
@@ -990,8 +1044,7 @@ const reconcileOwnedSharedPubkysUnlocked = async (): Promise<boolean> => {
 			});
 		}
 	}
-	const pendingSessionCleanup = (getStore().pubky as { pendingSessionCleanup?: Record<string, string[]> })
-		.pendingSessionCleanup;
+	const pendingSessionCleanup = getStore().pubky.pendingSessionCleanup;
 	const pendingCleanupPubkys = new Set(
 		Object.keys(pendingSessionCleanup ?? {})
 			.map(normalizePubkyReference)

@@ -101,6 +101,27 @@ const pubkysSlice = createSlice({
 		removePubky: (state, action: PayloadAction<string>) => {
 			delete state.pubkys[action.payload];
 		},
+		disconnectBorrowedPubky: (state, action: PayloadAction<{ pubky: string; sessionPubkys: string[] }>) => {
+			const { pubky, sessionPubkys } = action.payload;
+			if (state.pubkys[pubky]?.sourceApp !== 'to.bitkit') return;
+			// Persist removal and its retry target together: a failed delete must never leave either
+			// an active borrowed identity or an unreachable private session secret.
+			state.pendingSessionCleanup ??= {};
+			state.pendingSessionCleanup[pubky] = sessionPubkys;
+			delete state.pubkys[pubky];
+		},
+		completePubkySessionCleanup: (state, action: PayloadAction<string>) => {
+			delete state.pendingSessionCleanup?.[action.payload];
+		},
+		queuePubkySessionCleanup: (state, action: PayloadAction<{ pubky: string; sessionPubkys: string[] }>) => {
+			state.pendingSessionCleanup ??= {};
+			state.pendingSessionCleanup[action.payload.pubky] = action.payload.sessionPubkys;
+		},
+		refreshPubkySessionCleanup: state => {
+			// A failed MMKV write may have drained redux-persist's queue. A new slice reference
+			// makes the next flush serialize the current cleanup state again.
+			state.pendingSessionCleanup = { ...state.pendingSessionCleanup };
+		},
 		reorderPubkys: (state, action: PayloadAction<{ [key: string]: Pubky }>) => {
 			state.pubkys = action.payload;
 		},
@@ -121,6 +142,10 @@ export const {
 	addSession,
 	removeSession,
 	removePubky,
+	disconnectBorrowedPubky,
+	completePubkySessionCleanup,
+	queuePubkySessionCleanup,
+	refreshPubkySessionCleanup,
 	reorderPubkys,
 	resetPubkys,
 	addProcessing,

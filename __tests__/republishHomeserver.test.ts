@@ -46,6 +46,9 @@ jest.mock('../src/store/slices/pubkysSlice', () => ({
 	addProcessing: jest.fn(payload => ({ type: 'pubky/addProcessing', payload })),
 	addPubky: jest.fn(payload => ({ type: 'pubky/addPubky', payload })),
 	addSession: jest.fn(payload => ({ type: 'pubky/addSession', payload })),
+	completePubkySessionCleanup: jest.fn(payload => ({ type: 'pubky/completePubkySessionCleanup', payload })),
+	disconnectBorrowedPubky: jest.fn(payload => ({ type: 'pubky/disconnectBorrowedPubky', payload })),
+	queuePubkySessionCleanup: jest.fn(payload => ({ type: 'pubky/queuePubkySessionCleanup', payload })),
 	removeProcessing: jest.fn(payload => ({ type: 'pubky/removeProcessing', payload })),
 	removePubky: jest.fn(payload => ({ type: 'pubky/removePubky', payload })),
 	removeSession: jest.fn(payload => ({ type: 'pubky/removeSession', payload })),
@@ -75,6 +78,10 @@ jest.mock('../src/utils/sharedPubky', () => ({
 jest.mock('../src/store', () => ({
 	__esModule: true,
 	store: { dispatch: jest.fn() },
+}));
+
+jest.mock('../src/store/persistPubkySessionCleanup', () => ({
+	persistPubkySessionCleanup: jest.fn(async () => true),
 }));
 
 // Route cleanup is covered by the identity lifecycle tests. Keep this homeserver unit suite

@@ -8,6 +8,7 @@ import {
 	getProfileAvatar,
 	getProfileInfo,
 	reconcileOwnedSharedPubkys,
+	retryPendingPubkySessionCleanup,
 } from '../utils/pubky.ts';
 import { getStore } from '../utils/store-helpers.ts';
 import { discoverSharedPubkys, SharedPubkyDiscovery, SharedPubkyIdentity } from '../utils/sharedPubky.ts';
@@ -51,6 +52,7 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 	const refreshQueued = useRef(false);
 
 	const runRefresh = useCallback(async (): Promise<void> => {
+		await retryPendingPubkySessionCleanup(dispatch);
 		// Best-effort migration/reconciliation. Failure (including a missing iOS entitlement) never
 		// mutates Ring's canonical private keychain.
 		await reconcileOwnedSharedPubkys();

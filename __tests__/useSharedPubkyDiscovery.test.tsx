@@ -1,7 +1,13 @@
 import { act, renderHook, waitFor } from '@testing-library/react-native';
+import { AppState, AppStateStatus } from 'react-native';
 import { showToast } from '@synonymdev/react-native-toast';
 import { useSharedPubkyDiscovery } from '../src/hooks/useSharedPubkyDiscovery';
-import { disconnectBorrowedPubky, getProfileAvatar, getProfileInfo } from '../src/utils/pubky';
+import {
+	disconnectBorrowedPubky,
+	getProfileAvatar,
+	getProfileInfo,
+	retryPendingPubkySessionCleanup,
+} from '../src/utils/pubky';
 import { getAllPubkys, getBorrowedPubkyKeys } from '../src/store/selectors/pubkySelectors';
 import { discoverSharedPubkys } from '../src/utils/sharedPubky';
 import {
@@ -36,6 +42,7 @@ jest.mock('../src/utils/pubky', () => ({
 	getProfileAvatar: jest.fn(async () => ({ isOk: (): boolean => false })),
 	getProfileInfo: jest.fn(async () => ({ isOk: (): boolean => false })),
 	reconcileOwnedSharedPubkys: jest.fn(async () => undefined),
+	retryPendingPubkySessionCleanup: jest.fn(async () => true),
 }));
 
 jest.mock('../src/utils/sharedPubky', () => ({
@@ -100,6 +107,20 @@ test('explains an automatic disconnect exactly once, however many identities wen
 			description: 'reuseSharedPubky.noLongerShared',
 		}),
 	);
+});
+
+test('retries pending private session cleanup on startup and foreground', async () => {
+	let onChange: ((state: AppStateStatus) => void) | undefined;
+	(AppState.addEventListener as jest.Mock).mockImplementationOnce((_event, callback) => {
+		onChange = callback;
+		return { remove: jest.fn() };
+	});
+	await renderDiscovery();
+	expect(retryPendingPubkySessionCleanup).toHaveBeenCalledWith(mockDispatch);
+	await act(async () => {
+		onChange?.('active');
+	});
+	await waitFor(() => expect(retryPendingPubkySessionCleanup).toHaveBeenCalledTimes(2));
 });
 
 test('explains the disconnect when the source app is gone entirely', async () => {

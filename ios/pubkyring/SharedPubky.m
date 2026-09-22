@@ -627,6 +627,7 @@ RCT_REMAP_METHOD(resetPrivateValue,
       !CFNumberIsFloatType((__bridge CFNumberRef)version);
   return isIntegerVersion &&
       [version integerValue] == SharedPubkyProtocolVersion &&
+      [payload[@"sourceApp"] isKindOfClass:NSString.class] &&
       [payload[@"sourceApp"] isEqualToString:source] &&
       [payload[@"pubky"] isKindOfClass:NSString.class] &&
       [payload[@"pubky"] isEqualToString:pubky] &&

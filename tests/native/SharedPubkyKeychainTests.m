@@ -304,11 +304,44 @@ static void CheckSharedReadFailures(TestSharedPubky *module)
   CHECK(Operations.count == 0, @"An invalid pubky must reject before Keychain access");
 }
 
+static void CheckSharedPayloads(TestSharedPubky *module)
+{
+  NSString *pubky = [@"y" stringByPaddingToLength:52 withString:@"y" startingAtIndex:0];
+  NSString *secretKey = [@"a" stringByPaddingToLength:64 withString:@"a" startingAtIndex:0];
+  NSDictionary *valid = @{@"version": @1, @"sourceApp": @"to.bitkit", @"pubky": pubky, @"secretKey": secretKey};
+  CHECK([module isValidPayload:valid expectedSource:@"to.bitkit" expectedPubky:pubky], @"A valid shared credential must remain accepted");
+
+  for (NSString *field in @[@"version", @"sourceApp", @"pubky", @"secretKey"]) {
+    NSMutableDictionary *missing = [valid mutableCopy];
+    [missing removeObjectForKey:field];
+    CHECK(![module isValidPayload:missing expectedSource:@"to.bitkit" expectedPubky:pubky], @"Missing payload fields must be rejected");
+    for (id value in @[@7, NSNull.null, @[], @{}, @"wrong-value"]) {
+      NSMutableDictionary *malformed = [valid mutableCopy];
+      malformed[field] = value;
+      CHECK(![module isValidPayload:malformed expectedSource:@"to.bitkit" expectedPubky:pubky],
+            ([NSString stringWithFormat:@"Malformed %@ must be rejected without throwing", field]));
+    }
+  }
+
+  for (id version in @[@YES, @1.5, @"1"]) {
+    NSMutableDictionary *malformed = [valid mutableCopy];
+    malformed[@"version"] = version;
+    CHECK(![module isValidPayload:malformed expectedSource:@"to.bitkit" expectedPubky:pubky], @"The protocol version must be an integer, not a boolean, fraction, or string");
+  }
+  CHECK(![module isValidPayload:valid expectedSource:@"app.pubkyring" expectedPubky:pubky], @"The credential must belong to the expected source app");
+  CHECK(![module isValidPayload:valid expectedSource:@"to.bitkit" expectedPubky:[pubky stringByReplacingOccurrencesOfString:@"y" withString:@"b"]], @"The credential must match the requested identity");
+  NSMutableDictionary *invalidSecret = [valid mutableCopy];
+  invalidSecret[@"secretKey"] = secretKey.uppercaseString;
+  CHECK(![module isValidPayload:invalidSecret expectedSource:@"to.bitkit" expectedPubky:pubky], @"Secret keys must remain lowercase hexadecimal strings");
+  CHECK(![module isValidPayload:@{} expectedSource:@"to.bitkit" expectedPubky:pubky], @"An empty payload must be rejected");
+}
+
 int main(void)
 {
   @autoreleasepool {
     TestSharedPubky *module = [TestSharedPubky new];
     CheckSharedReadFailures(module);
+    CheckSharedPayloads(module);
     Reset(@[]);
     CHECK([Services(module, YES) isEqual:@[]], @"Empty enumeration returns an empty list");
     CHECK(Value(module, @"missing", YES) == nil, @"An absent private value resolves null");

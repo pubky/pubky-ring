@@ -10,6 +10,14 @@ NativeModules.AppInfo = NativeModules.AppInfo || {
 	version: '1.0.0',
 };
 
+NativeModules.SharedPubky = NativeModules.SharedPubky || {
+	listExternal: jest.fn(async () => []),
+	getExternalSecret: jest.fn(async () => ''),
+	setOwned: jest.fn(async () => undefined),
+	removeOwned: jest.fn(async () => undefined),
+	removeAllOwned: jest.fn(async () => undefined),
+};
+
 NativeModules.Pubky = NativeModules.Pubky || new Proxy(
 	{
 		addListener: jest.fn(),

@@ -8,7 +8,7 @@ import com.facebook.react.uimanager.ViewManager
 class AppInfoPackage : ReactPackage {
   @Suppress("OVERRIDE_DEPRECATION")
   override fun createNativeModules(reactContext: ReactApplicationContext): List<NativeModule> =
-      listOf(AppInfoModule(reactContext), SecureWindowModule(reactContext))
+      listOf(AppInfoModule(reactContext), SecureWindowModule(reactContext), SharedPubkyModule(reactContext))
 
   override fun createViewManagers(
       reactContext: ReactApplicationContext

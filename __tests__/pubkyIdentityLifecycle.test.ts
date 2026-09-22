@@ -19,6 +19,8 @@ import { getSharedPubkyCredential } from '../src/utils/sharedPubky';
 
 const OWNED = 'ufibwbmed6jeq9k4p583go95wofakh9fwpp4k734trq79pd9u1uy';
 const SECRET = '0123456789abcdef'.repeat(4);
+const SECOND_OWNED = 'o4dksfbqk85ogzdb5osziw6befigbuxmuxkuxq8434q89uj56uyy';
+const SECOND_SECRET = 'fedcba9876543210'.repeat(4);
 
 const mockGetPublicKeyFromSecretKey = jest.fn();
 const mockGetKeychainValue = jest.fn();
@@ -29,11 +31,13 @@ const mockWipeKeychain = jest.fn();
 const mockSetSessionSecret = jest.fn();
 const mockGetAllKeychainKeys = jest.fn();
 const mockGetPubkyDataFromStore = jest.fn();
+const mockGetStore = jest.fn();
 const mockMirrorSharedPubky = jest.fn();
 const mockRemoveSharedPubky = jest.fn();
 const mockReconcileSharedPubkys = jest.fn();
 const mockClearOwnedSharedPubkys = jest.fn();
 const mockRemoveDisconnectedPubkyDetail = jest.fn();
+const mockStoreDispatch = jest.fn();
 
 jest.mock('@synonymdev/react-native-pubky', () => ({
 	auth: jest.fn(),
@@ -61,7 +65,9 @@ jest.mock('../src/i18n', () => ({
 	default: { t: (key: string) => key },
 }));
 
-jest.mock('../src/store', () => ({ store: { dispatch: jest.fn() } }));
+jest.mock('../src/store', () => ({
+	store: { dispatch: (...args: unknown[]) => mockStoreDispatch(...args) },
+}));
 
 jest.mock('../src/store/slices/pubkysSlice', () => ({
 	addProcessing: (payload: unknown) => ({ type: 'pubky/addProcessing', payload }),
@@ -79,6 +85,7 @@ jest.mock('../src/utils/helpers.ts', () => ({ checkNetworkConnection: jest.fn() 
 
 jest.mock('../src/utils/store-helpers.ts', () => ({
 	getPubkyDataFromStore: (...args: unknown[]) => mockGetPubkyDataFromStore(...args),
+	getStore: (...args: unknown[]) => mockGetStore(...args),
 }));
 
 jest.mock('../src/utils/keychain', () => ({
@@ -154,6 +161,7 @@ beforeEach(() => {
 	mockSetSessionSecret.mockResolvedValue(ok(true));
 	mockGetAllKeychainKeys.mockResolvedValue([]);
 	mockGetPubkyDataFromStore.mockReturnValue(undefined);
+	mockGetStore.mockReturnValue({ pubky: { pendingSessionCleanup: {} } });
 	mockMirrorSharedPubky.mockResolvedValue(true);
 	mockRemoveSharedPubky.mockResolvedValue(true);
 	mockReconcileSharedPubkys.mockResolvedValue(true);
@@ -335,6 +343,7 @@ test('does not prune shared mirrors after a private keychain read failure', asyn
 	mockGetKeychainValue.mockResolvedValue(err(new Error('temporarily unavailable')));
 
 	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(false);
+	expect(mockStoreDispatch).not.toHaveBeenCalled();
 	expect(mockReconcileSharedPubkys).not.toHaveBeenCalled();
 });
 
@@ -343,7 +352,144 @@ test('does not prune shared mirrors after private enumeration fails', async () =
 
 	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(false);
 	expect(mockGetKeychainValue).not.toHaveBeenCalled();
+	expect(mockStoreDispatch).not.toHaveBeenCalled();
 	expect(mockReconcileSharedPubkys).not.toHaveBeenCalled();
+});
+
+test('restores a missing owned card from a validated private record before sharing it', async () => {
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED]);
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(true);
+
+	expect(mockStoreDispatch).toHaveBeenCalledWith({
+		type: 'pubky/addPubky',
+		payload: expect.objectContaining({ pubky: OWNED, sourceApp: 'app.pubkyring' }),
+	});
+	expect(mockReconcileSharedPubkys).toHaveBeenCalledWith([{ pubky: OWNED, secretKey: SECRET }]);
+	expect(mockStoreDispatch.mock.invocationCallOrder[0]).toBeLessThan(
+		mockReconcileSharedPubkys.mock.invocationCallOrder[0],
+	);
+	expect(mockSetKeychainValue).not.toHaveBeenCalled();
+	expect(signInMock).not.toHaveBeenCalled();
+	expect(signUpMock).not.toHaveBeenCalled();
+	expect(getHomeserverMock).not.toHaveBeenCalled();
+});
+
+test.each([OWNED, `pubky${OWNED}`])(
+	'restores the original private service alias without rewriting it: %s',
+	async privateRecordKey => {
+		mockGetAllKeychainKeys.mockResolvedValue([privateRecordKey]);
+
+		await expect(reconcileOwnedSharedPubkys()).resolves.toBe(true);
+
+		expect(mockGetKeychainValue).toHaveBeenCalledWith({ key: privateRecordKey });
+		expect(mockStoreDispatch).toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: 'pubky/addPubky',
+				payload: expect.objectContaining({ pubky: privateRecordKey }),
+			}),
+		);
+		expect(mockSetKeychainValue).not.toHaveBeenCalled();
+	},
+);
+
+test('restores missing owned cards without promoting an existing borrowed reference', async () => {
+	const borrowedKey = `pk:${OWNED}`;
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED, SECOND_OWNED]);
+	mockGetKeychainValue.mockImplementation(async ({ key }: { key: string }) =>
+		ok(JSON.stringify({ secretKey: key === OWNED ? SECRET : SECOND_SECRET, mnemonic: '' })),
+	);
+	mockGetPublicKeyFromSecretKey.mockImplementation(async (secretKey: string) =>
+		ok({ public_key: secretKey === SECRET ? OWNED : SECOND_OWNED }),
+	);
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === borrowedKey ? { ...ringPubky(), sourceApp: 'to.bitkit' } : undefined,
+	);
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(true);
+
+	expect(mockStoreDispatch).toHaveBeenCalledTimes(1);
+	expect(mockStoreDispatch).toHaveBeenCalledWith(
+		expect.objectContaining({
+			type: 'pubky/addPubky',
+			payload: expect.objectContaining({ pubky: SECOND_OWNED, sourceApp: 'app.pubkyring' }),
+		}),
+	);
+	expect(mockStoreDispatch).not.toHaveBeenCalledWith(
+		expect.objectContaining({ payload: expect.objectContaining({ pubky: borrowedKey }) }),
+	);
+	expect(mockReconcileSharedPubkys).toHaveBeenCalledWith([{ pubky: SECOND_OWNED, secretKey: SECOND_SECRET }]);
+});
+
+test('leaves every field of an existing owned alias untouched', async () => {
+	const storedPubkyKey = `pk:${OWNED}`;
+	const existing = {
+		...ringPubky(),
+		name: 'Alice',
+		homeserver: 'pubky://homeserver',
+		signedUp: true,
+		signupToken: 'invite',
+		image: 'data:image/png;base64,image',
+		sessions: [{ id: 'session', capabilities: ['/'], created_at: 123 }],
+		backupPreference: EBackupPreference.recoveryPhrase,
+		isBackedUp: true,
+	};
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED]);
+	mockGetPubkyDataFromStore.mockImplementation((pubky: string) =>
+		pubky === storedPubkyKey ? existing : undefined,
+	);
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(true);
+
+	expect(mockStoreDispatch).not.toHaveBeenCalled();
+	expect(mockGetPubkyDataFromStore(storedPubkyKey)).toBe(existing);
+	expect(mockReconcileSharedPubkys).toHaveBeenCalledWith([{ pubky: OWNED, secretKey: SECRET }]);
+});
+
+test('fails before restoring or sharing conflicting private aliases', async () => {
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED, `pubky${OWNED}`]);
+	mockGetKeychainValue
+		.mockResolvedValueOnce(ok(JSON.stringify({ secretKey: SECRET, mnemonic: '' })))
+		.mockResolvedValueOnce(ok(JSON.stringify({ secretKey: SECOND_SECRET, mnemonic: '' })));
+	mockGetPublicKeyFromSecretKey.mockResolvedValue(ok({ public_key: OWNED }));
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(false);
+
+	expect(mockStoreDispatch).not.toHaveBeenCalled();
+	expect(mockReconcileSharedPubkys).not.toHaveBeenCalled();
+	expect(mockSetKeychainValue).not.toHaveBeenCalled();
+});
+
+test('does not resurrect a card after its last private record was deleted', async () => {
+	mockGetAllKeychainKeys.mockResolvedValue([]);
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(true);
+
+	expect(mockStoreDispatch).not.toHaveBeenCalled();
+	expect(mockGetKeychainValue).not.toHaveBeenCalled();
+	expect(mockReconcileSharedPubkys).toHaveBeenCalledWith([]);
+});
+
+test('does not restore or share an identity while its old session cleanup is pending', async () => {
+	mockGetAllKeychainKeys.mockResolvedValue([OWNED, SECOND_OWNED]);
+	mockGetKeychainValue.mockImplementation(async ({ key }: { key: string }) =>
+		ok(JSON.stringify({ secretKey: key === OWNED ? SECRET : SECOND_SECRET, mnemonic: '' })),
+	);
+	mockGetPublicKeyFromSecretKey.mockImplementation(async (secretKey: string) =>
+		ok({ public_key: secretKey === SECRET ? OWNED : SECOND_OWNED }),
+	);
+	mockGetStore.mockReturnValue({
+		pubky: { pendingSessionCleanup: { [`pk:${OWNED}`]: [`pk:${OWNED}`, OWNED] } },
+	});
+
+	await expect(reconcileOwnedSharedPubkys()).resolves.toBe(true);
+
+	expect(mockStoreDispatch).toHaveBeenCalledTimes(1);
+	expect(mockStoreDispatch).toHaveBeenCalledWith(
+		expect.objectContaining({ payload: expect.objectContaining({ pubky: SECOND_OWNED }) }),
+	);
+	expect(mockReconcileSharedPubkys).toHaveBeenCalledWith([{ pubky: SECOND_OWNED, secretKey: SECOND_SECRET }]);
+	expect(mockGetKeychainValue).toHaveBeenCalledTimes(2);
 });
 
 test('deletes every private service for a normalized identity before removing Redux state', async () => {

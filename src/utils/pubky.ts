@@ -41,7 +41,7 @@ import { checkNetworkConnection } from './helpers.ts';
 import { showToast } from '@synonymdev/react-native-toast';
 import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
-import { getPubkyDataFromStore } from './store-helpers.ts';
+import { getPubkyDataFromStore, getStore } from './store-helpers.ts';
 import { EBackupPreference, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
 import type { TPubkys } from '../types/pubky.ts';
 import {
@@ -954,7 +954,12 @@ export const reconcileOwnedSharedPubkys = (): Promise<boolean> =>
 	withPubkyIdentityLifecycle(reconcileOwnedSharedPubkysUnlocked).catch(() => false);
 
 const reconcileOwnedSharedPubkysUnlocked = async (): Promise<boolean> => {
-	const identities = new Map<string, string>();
+	type ReconciledPrivateIdentity = {
+		secretKey: string;
+		privateRecordKey: string;
+		backupPreference: EBackupPreference;
+	};
+	const identities = new Map<string, ReconciledPrivateIdentity>();
 	const privateServices = await getAllKeychainKeys();
 	for (const service of privateServices) {
 		const privateIdentity = privatePubkyService(service);
@@ -970,17 +975,54 @@ const reconcileOwnedSharedPubkysUnlocked = async (): Promise<boolean> => {
 		if (!isValidSharedSecretKey(data.secretKey)) return false;
 		const derived = await getPublicKeyFromSecretKey(data.secretKey);
 		if (derived.isErr() || normalizeSharedPubky(derived.value.public_key) !== pubky) return false;
-		const existingSecretKey = identities.get(pubky);
-		if (existingSecretKey && existingSecretKey !== data.secretKey) {
+		const existingIdentity = identities.get(pubky);
+		if (existingIdentity && existingIdentity.secretKey !== data.secretKey) {
 			// Ambiguous private sources must never cause a destructive shared reconciliation.
 			return false;
 		}
-		identities.set(pubky, data.secretKey);
+		if (!existingIdentity || service === pubky) {
+			// Prefer the canonical service when identical legacy aliases coexist. A lone prefixed
+			// record keeps that prefix when its missing Redux card is restored.
+			identities.set(pubky, {
+				secretKey: data.secretKey,
+				privateRecordKey: service,
+				backupPreference: data.mnemonic ? EBackupPreference.unknown : EBackupPreference.encryptedFile,
+			});
+		}
 	}
+	const pendingSessionCleanup = (getStore().pubky as { pendingSessionCleanup?: Record<string, string[]> })
+		.pendingSessionCleanup;
+	const pendingCleanupPubkys = new Set(
+		Object.keys(pendingSessionCleanup ?? {})
+			.map(normalizePubkyReference)
+			.filter((pubky): pubky is string => !!pubky),
+	);
+	const shareableIdentities: Array<[string, ReconciledPrivateIdentity]> = [];
+
+	// App mounts below PersistGate, so reconciliation sees the fully rehydrated store. Restore only
+	// cards that persistence lost; existing metadata, borrowed references, and identities whose old
+	// session cleanup is still pending remain untouched. Borrowed and pending identities are also
+	// excluded from Ring's owned mirror.
+	for (const [pubky, identity] of [...identities].sort(([left], [right]) => left.localeCompare(right))) {
+		if (pendingCleanupPubkys.has(pubky)) continue;
+		const storedPubkyKey = getStoredPubkyKey(identity.privateRecordKey, pubky);
+		const storedPubky = storedPubkyKey ? getPubkyDataFromStore(storedPubkyKey) : undefined;
+		if (storedPubky?.sourceApp === BITKIT_SOURCE_APP) continue;
+		if (!storedPubkyKey) {
+			store.dispatch(
+				addPubky({
+					pubky: identity.privateRecordKey,
+					backupPreference: identity.backupPreference,
+					isBackedUp: false,
+					sourceApp: RING_SOURCE_APP,
+				}),
+			);
+		}
+		shareableIdentities.push([pubky, identity]);
+	}
+
 	return reconcileSharedPubkys(
-		[...identities]
-			.sort(([left], [right]) => left.localeCompare(right))
-			.map(([pubky, secretKey]) => ({ pubky, secretKey })),
+		shareableIdentities.map(([pubky, identity]) => ({ pubky, secretKey: identity.secretKey })),
 	);
 };
 

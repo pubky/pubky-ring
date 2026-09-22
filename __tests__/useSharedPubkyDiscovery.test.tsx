@@ -121,6 +121,24 @@ test('says nothing when every borrowed identity is still shared', async () => {
 	expect(showToastMock).not.toHaveBeenCalled();
 });
 
+test('retains the last discovery and borrowed identities on failure, then recovers', async () => {
+	getBorrowedPubkyKeysMock.mockReturnValue([BORROWED_A]);
+	const identity = { version: 1, sourceApp: 'to.bitkit', pubky: BORROWED_A } as const;
+	discoverSharedPubkysMock.mockResolvedValue({ available: true, identities: [identity] });
+	const { result } = renderHook(() => useSharedPubkyDiscovery());
+	await waitFor(() => expect(result.current.identities).toEqual([identity]));
+	discoverSharedPubkysMock.mockRejectedValueOnce(new Error('provider temporarily unavailable'));
+	await act(async () => {
+		await expect(result.current.refresh()).rejects.toThrow('provider temporarily unavailable');
+	});
+	expect(result.current.identities).toEqual([identity]);
+	expect(disconnectBorrowedPubkyMock).not.toHaveBeenCalled();
+	expect(showToastMock).not.toHaveBeenCalled();
+	discoverSharedPubkysMock.mockResolvedValue({ available: true, identities: [] });
+	await act(async () => result.current.refresh());
+	expect(disconnectBorrowedPubkyMock).toHaveBeenCalledWith(BORROWED_A, mockDispatch);
+});
+
 test('says nothing when another flow already removed the identity', async () => {
 	// A failed Authorize disconnects and explains it itself, so the reconcile must stay quiet.
 	getBorrowedPubkyKeysMock.mockReturnValue([BORROWED_A]);

@@ -479,6 +479,15 @@ test('never disconnects an identity that is no longer borrowed', async () => {
 	expect(dispatch).not.toHaveBeenCalled();
 });
 
+test('refuses authorization without dropping a borrowed identity after a temporary credential failure', async () => {
+	mockGetPubkyDataFromStore.mockReturnValue({ ...ringPubky(), sourceApp: 'to.bitkit' });
+	getSharedPubkyCredentialMock.mockRejectedValueOnce(new Error('keychain temporarily locked'));
+	const result = await getPubkySecretKey(OWNED);
+	expect(result.isErr()).toBe(true);
+	expect(mockResetPubkySessionSecrets).not.toHaveBeenCalled();
+	expect(mockRemoveDisconnectedPubkyDetail).not.toHaveBeenCalled();
+});
+
 test('never republishes a borrowed identity when its homeserver sign-in fails', async () => {
 	// Connecting is the first thing Ring does with a borrowed key, and a failed sign-in falls back
 	// to republishing. That would sign Ring's cached homeserver into the owner's pkarr record.

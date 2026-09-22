@@ -12,6 +12,8 @@ static void Check(BOOL condition, NSString *message, int line)
 #define K(value) ((__bridge id)(value))
 
 static NSString *const PrivateGroup = @"TEST.app.pubkyring";
+static NSString *const SharedGroup = @"TEST.pubky.shared";
+static NSString *ExpectedGroup;
 static NSMutableArray<NSDictionary *> *Rows;
 static NSMutableArray<NSDictionary *> *Operations;
 static NSUInteger FailAt;
@@ -34,7 +36,7 @@ static BOOL Matches(NSDictionary *row, NSDictionary *query)
 static OSStatus Before(NSString *operation, NSDictionary *query)
 {
   CHECK([query[K(kSecClass)] isEqual:K(kSecClassGenericPassword)], @"Every operation must target generic passwords");
-  CHECK([query[K(kSecAttrAccessGroup)] isEqual:PrivateGroup], @"Every operation must explicitly target Ring's private group");
+  CHECK([query[K(kSecAttrAccessGroup)] isEqual:ExpectedGroup], @"Every operation must explicitly target the expected access group");
   [Operations addObject:@{@"operation": operation, @"query": [query copy]}];
   return FailAt == Operations.count ? FailureStatus : errSecSuccess;
 }
@@ -131,9 +133,12 @@ static OSStatus FakeSecItemUpdate(CFDictionaryRef rawQuery, CFDictionaryRef rawU
 
 @interface TestSharedPubky : SharedPubky
 @property(nonatomic) BOOL missingGroup;
+@property(nonatomic) BOOL missingBitkit;
 @end
 @implementation TestSharedPubky
 - (NSString *)privateAccessGroup { return self.missingGroup ? nil : PrivateGroup; }
+- (NSString *)sharedAccessGroup { return self.missingGroup ? nil : SharedGroup; }
+- (BOOL)isBitkitInstalled { return !self.missingBitkit; }
 @end
 
 static NSMutableDictionary *Record(NSString *service, NSString *account, BOOL sync, NSString *value)
@@ -151,6 +156,7 @@ static NSMutableDictionary *Record(NSString *service, NSString *account, BOOL sy
 
 static void Reset(NSArray<NSDictionary *> *records)
 {
+  ExpectedGroup = PrivateGroup;
   Rows = [NSMutableArray array];
   for (NSDictionary *row in records) [Rows addObject:[row mutableCopy]];
   Operations = [NSMutableArray array];
@@ -226,10 +232,83 @@ static void CheckOnlyRead(void)
   }
 }
 
+static id SharedResult(TestSharedPubky *module, NSString *pubky, NSString *expectedError)
+{
+  __block id result;
+  __block NSString *errorCode;
+  __block NSUInteger resolved = 0, rejected = 0;
+  RCTPromiseResolveBlock resolve = ^(id value) { result = value; resolved++; };
+  RCTPromiseRejectBlock reject = ^(NSString *code, NSString *message, NSError *error) { errorCode = code; rejected++; };
+  if (pubky == nil) [module listResolver:resolve listRejecter:reject];
+  else [module credentialPubky:pubky credentialResolver:resolve credentialRejecter:reject];
+  CHECK(resolved + rejected == 1, @"Shared reads must settle exactly once");
+  CHECK(expectedError == nil ? resolved == 1 : (rejected == 1 && [errorCode isEqual:expectedError]),
+        @"Shared reads must distinguish source loss from temporary failure");
+  return result;
+}
+
+static void CheckSharedReadFailures(TestSharedPubky *module)
+{
+  NSString *pubky = [@"y" stringByPaddingToLength:52 withString:@"y" startingAtIndex:0];
+  NSString *secretKey = [@"a" stringByPaddingToLength:64 withString:@"a" startingAtIndex:0];
+  NSDictionary *payload = @{@"version": @1, @"sourceApp": @"to.bitkit", @"pubky": pubky, @"secretKey": secretKey};
+  NSMutableDictionary *record = Record(@"pubky.identity-sharing.v1", [@"to.bitkit:" stringByAppendingString:pubky], NO, @"");
+  record[K(kSecAttrAccessGroup)] = SharedGroup;
+  record[K(kSecValueData)] = [NSJSONSerialization dataWithJSONObject:payload options:0 error:nil];
+
+  Reset(@[]);
+  ExpectedGroup = SharedGroup;
+  SharedResult(module, pubky, @"credential_missing");
+  CHECK(([SharedResult(module, nil, nil) isEqual:@{@"available": @YES, @"identities": @[]}]), @"An installed but empty source must resolve an available empty listing");
+  CheckOnlyRead();
+
+  for (NSNumber *status in @[@(errSecInteractionNotAllowed), @(errSecAuthFailed), @(errSecNotAvailable), @(errSecMissingEntitlement)]) {
+    Reset(@[record]);
+    ExpectedGroup = SharedGroup;
+    FailureStatus = status.intValue;
+    BOOL missingEntitlement = FailureStatus == errSecMissingEntitlement;
+    FailAt = Operations.count + 1;
+    SharedResult(module, pubky, missingEntitlement ? @"sharing_unavailable" : @"credential_failed");
+    FailAt = Operations.count + 1;
+    SharedResult(module, nil, missingEntitlement ? @"sharing_unavailable" : @"list_failed");
+    FailAt = 0;
+    CHECK([SharedResult(module, pubky, nil) isEqual:payload], @"Credential reads must recover after temporary failures");
+    NSDictionary *discovery = SharedResult(module, nil, nil);
+    CHECK([discovery[@"available"] boolValue] && [discovery[@"identities"] count] == 1, @"Discovery must recover after temporary failures");
+    CheckOnlyRead();
+    CheckRecoverable(@[record]);
+  }
+
+  for (NSString *json in @[@"[]", @"{}", @"not-json"]) {
+    NSMutableDictionary *malformed = [record mutableCopy];
+    malformed[K(kSecValueData)] = [json dataUsingEncoding:NSUTF8StringEncoding];
+    Reset(@[malformed]);
+    ExpectedGroup = SharedGroup;
+    SharedResult(module, pubky, [json isEqual:@"not-json"] ? @"credential_failed" : @"invalid_credential");
+    CheckOnlyRead();
+  }
+
+  Reset(@[record]);
+  ExpectedGroup = SharedGroup;
+  module.missingBitkit = YES;
+  SharedResult(module, pubky, @"source_unavailable");
+  CHECK(([SharedResult(module, nil, nil) isEqual:@{@"available": @NO, @"identities": @[]}]), @"Confirmed source absence must resolve unavailable");
+  CHECK(Operations.count == 0, @"An absent source must not read leftover shared credentials");
+  module.missingBitkit = NO;
+  module.missingGroup = YES;
+  SharedResult(module, pubky, @"sharing_unavailable");
+  SharedResult(module, nil, @"sharing_unavailable");
+  CHECK(Operations.count == 0, @"Missing entitlement must prevent unscoped reads");
+  module.missingGroup = NO;
+  SharedResult(module, @"invalid", @"invalid_credential");
+  CHECK(Operations.count == 0, @"An invalid pubky must reject before Keychain access");
+}
+
 int main(void)
 {
   @autoreleasepool {
     TestSharedPubky *module = [TestSharedPubky new];
+    CheckSharedReadFailures(module);
     Reset(@[]);
     CHECK([Services(module, YES) isEqual:@[]], @"Empty enumeration returns an empty list");
     CHECK(Value(module, @"missing", YES) == nil, @"An absent private value resolves null");

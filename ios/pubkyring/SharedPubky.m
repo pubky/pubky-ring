@@ -197,8 +197,12 @@ RCT_REMAP_METHOD(credential,
                  credentialRejecter:(RCTPromiseRejectBlock)reject)
 {
   NSString *normalized = [self normalizedPubky:pubky];
-  if (normalized.length == 0 || ![self isBitkitInstalled]) {
-    reject(@"credential_unavailable", @"Shared Pubky credential is unavailable", nil);
+  if (normalized.length == 0) {
+    reject(@"invalid_credential", @"Shared Pubky credential is invalid", nil);
+    return;
+  }
+  if (![self isBitkitInstalled]) {
+    reject(@"source_unavailable", @"Shared Pubky source is unavailable", nil);
     return;
   }
 
@@ -206,7 +210,9 @@ RCT_REMAP_METHOD(credential,
   NSDictionary *payload =
       [self payloadForAccount:[self accountForSource:BitkitSourceApp pubky:normalized] error:&error];
   if (payload == nil) {
-    [self reject:reject error:error fallbackCode:@"credential_unavailable"];
+    NSString *code = error.code == errSecItemNotFound ? @"credential_missing" :
+        (error == nil ? @"invalid_credential" : @"credential_failed");
+    [self reject:reject error:error fallbackCode:code];
     return;
   }
   if (![self isValidPayload:payload expectedSource:BitkitSourceApp expectedPubky:normalized]) {

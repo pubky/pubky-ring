@@ -153,7 +153,7 @@ test('retrieves and derives only the selected credential just in time', async ()
 	).resolves.toBeUndefined();
 });
 
-test('distinguishes unavailable sharing from an available empty source', async () => {
+test('distinguishes confirmed source absence from an empty source and a failed check', async () => {
 	list.mockResolvedValue({ available: false, identities: [] });
 	await expect(discoverSharedPubkys([])).resolves.toEqual({ available: false, identities: [] });
 
@@ -161,12 +161,53 @@ test('distinguishes unavailable sharing from an available empty source', async (
 	await expect(discoverSharedPubkys([])).resolves.toEqual({ available: true, identities: [] });
 
 	list.mockRejectedValue(new Error('missing entitlement'));
-	await expect(discoverSharedPubkys([])).resolves.toEqual({ available: false, identities: [] });
+	await expect(discoverSharedPubkys([])).rejects.toThrow('missing entitlement');
+});
+
+test('rejects malformed discovery instead of reporting source loss', async () => {
+	list.mockResolvedValue({ identities: [] });
+	await expect(discoverSharedPubkys([])).rejects.toThrow('Invalid Shared Pubky discovery response');
+});
+
+test.each(['credential_missing', 'source_unavailable', 'invalid_credential'])(
+	'confirms an unusable credential for %s',
+	async code => {
+		credential.mockRejectedValue({ code });
+		await expect(
+			getSharedPubkyCredential({ pubky: SHARED, sourceApp: BITKIT_SOURCE_APP }),
+		).resolves.toBeUndefined();
+	},
+);
+
+test.each(['credential_failed', 'sharing_unavailable', 'unknown_error'])(
+	'preserves an uncertain credential failure for %s',
+	async code => {
+		credential.mockRejectedValue({ code });
+		await expect(getSharedPubkyCredential({ pubky: SHARED, sourceApp: BITKIT_SOURCE_APP })).rejects.toEqual({
+			code,
+		});
+	},
+);
+
+test('does not treat a failed key derivation as proof the credential disappeared', async () => {
+	credential.mockResolvedValue({
+		version: 1,
+		sourceApp: BITKIT_SOURCE_APP,
+		pubky: SHARED,
+		secretKey: SECRET_B,
+	});
+	derive.mockResolvedValue({ isOk: () => false } as never);
+	await expect(getSharedPubkyCredential({ pubky: SHARED, sourceApp: BITKIT_SOURCE_APP })).rejects.toThrow(
+		'validation failed',
+	);
 });
 
 test('fails closed when native sharing is unavailable or rejects', async () => {
 	delete NativeModules.SharedPubky;
-	await expect(discoverSharedPubkys([])).resolves.toEqual({ available: false, identities: [] });
+	await expect(discoverSharedPubkys([])).rejects.toThrow('discovery is unavailable');
+	await expect(getSharedPubkyCredential({ pubky: SHARED, sourceApp: BITKIT_SOURCE_APP })).rejects.toThrow(
+		'lookup is unavailable',
+	);
 	await expect(mirrorSharedPubky(OWNED, SECRET_A)).resolves.toBe(false);
 	await expect(removeSharedPubky(OWNED)).resolves.toBe(false);
 	await expect(clearOwnedSharedPubkys()).resolves.toBe(false);

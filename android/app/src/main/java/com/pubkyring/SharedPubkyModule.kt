@@ -78,6 +78,7 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
     val authorities =
       if (BuildConfig.DEBUG) BITKIT_AUTHORITIES else listOf(PRODUCTION_BITKIT_AUTHORITY)
     var available = false
+    var failure: Exception? = null
     authorities.forEach { authority ->
       try {
         if (!isTrustedBitkitProvider(authority)) return@forEach
@@ -88,7 +89,7 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
             null,
             null,
             null,
-          ) ?: return@forEach
+          ) ?: throw IllegalStateException("Shared Pubky query returned no cursor")
         cursor.use {
           available = true
             val versionIndex =
@@ -117,9 +118,14 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
               )
             }
         }
-      } catch (_: Exception) {
-        // A missing provider or denied permission must not hide results from another authority.
+      } catch (error: Exception) {
+        failure = error
       }
+    }
+    // A partial listing cannot prove that a previously connected identity disappeared.
+    if (failure != null) {
+      promise.reject("discovery_failed", failure)
+      return
     }
     promise.resolve(
       Arguments.createMap().apply {
@@ -138,6 +144,7 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
     }
     val authorities =
       if (BuildConfig.DEBUG) BITKIT_AUTHORITIES else listOf(PRODUCTION_BITKIT_AUTHORITY)
+    var failure: Exception? = null
     authorities.forEach { authority ->
       try {
         if (!isTrustedBitkitProvider(authority)) return@forEach
@@ -150,9 +157,10 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
             .appendPath(normalized)
             .appendPath(SharedPubkyContract.CREDENTIAL_SEGMENT)
             .build()
-        reactContext.contentResolver
+        val cursor = reactContext.contentResolver
           .query(uri, SharedPubkyContract.CREDENTIAL_COLUMNS, null, null, null)
-          ?.use { cursor ->
+          ?: throw IllegalStateException("Shared Pubky query returned no cursor")
+        cursor.use { cursor ->
             if (!cursor.moveToFirst() || !cursor.isLast) return@use
             val version =
               cursor.getInt(
@@ -184,11 +192,16 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
               return
             }
           }
-      } catch (_: Exception) {
-        // Try another installed debug variant.
+      } catch (error: Exception) {
+        // Another debug variant may still return the requested credential successfully.
+        failure = error
       }
     }
-    promise.reject("credential_unavailable", "Shared Pubky credential is unavailable")
+    if (failure != null) {
+      promise.reject("credential_failed", failure)
+    } else {
+      promise.reject("credential_missing", "Shared Pubky credential is no longer shared")
+    }
   }
 
   private fun isTrustedBitkitProvider(authority: String): Boolean {

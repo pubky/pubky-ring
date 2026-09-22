@@ -61,8 +61,8 @@ export const useSharedPubkyDiscovery = (): SharedPubkyDiscoveryState => {
 		let disconnectedCount = 0;
 		if (!discovery.available) {
 			setIdentities([]);
-			// Fail closed: a borrowed profile cannot remain active when its source can no longer
-			// supply the credential. Ring-owned private identities are never affected.
+			// Only authoritative source absence reaches this branch. Failed discovery rejects
+			// above, preserving the last snapshot and all connected identities for a later retry.
 			for (const borrowedPubky of getBorrowedPubkyKeys(getStore())) {
 				if (await disconnectBorrowedPubky(borrowedPubky, dispatch)) {
 					disconnectedCount += 1;

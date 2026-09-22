@@ -168,31 +168,26 @@ const parsePublicIdentity = (row: NativeSharedPubkyIdentity): SharedPubkyIdentit
 
 export const discoverSharedPubkys = async (ownedPubkys: string[]): Promise<SharedPubkyDiscovery> => {
 	const module = nativeModule();
-	if (!module) return { available: false, identities: [] };
+	if (!module) throw new Error('Shared Pubky discovery is unavailable');
 
-	try {
-		const response = await module.list();
-		if (typeof response?.available !== 'boolean' || !Array.isArray(response.identities)) {
-			return { available: false, identities: [] };
-		}
-		if (!response.available) return { available: false, identities: [] };
-
-		const owned = new Set(ownedPubkys.map(normalizeSharedPubky).filter((value): value is string => !!value));
-		const discovered = new Map<string, SharedPubkyIdentity>();
-		for (const raw of response.identities) {
-			if (!raw || typeof raw !== 'object') continue;
-			const identity = parsePublicIdentity(raw as NativeSharedPubkyIdentity);
-			if (!identity || owned.has(identity.pubky) || discovered.has(identity.pubky)) continue;
-			discovered.set(identity.pubky, identity);
-		}
-		return {
-			available: true,
-			identities: [...discovered.values()].sort((left, right) => left.pubky.localeCompare(right.pubky)),
-		};
-	} catch {
-		// Missing entitlements, providers, or permissions are unavailable—not an empty source.
-		return { available: false, identities: [] };
+	const response = await module.list();
+	if (typeof response?.available !== 'boolean' || !Array.isArray(response.identities)) {
+		throw new Error('Invalid Shared Pubky discovery response');
 	}
+	if (!response.available) return { available: false, identities: [] };
+
+	const owned = new Set(ownedPubkys.map(normalizeSharedPubky).filter((value): value is string => !!value));
+	const discovered = new Map<string, SharedPubkyIdentity>();
+	for (const raw of response.identities) {
+		if (!raw || typeof raw !== 'object') continue;
+		const identity = parsePublicIdentity(raw as NativeSharedPubkyIdentity);
+		if (!identity || owned.has(identity.pubky) || discovered.has(identity.pubky)) continue;
+		discovered.set(identity.pubky, identity);
+	}
+	return {
+		available: true,
+		identities: [...discovered.values()].sort((left, right) => left.pubky.localeCompare(right.pubky)),
+	};
 };
 
 export const getSharedPubkyCredential = async (
@@ -200,7 +195,8 @@ export const getSharedPubkyCredential = async (
 ): Promise<SharedPubkyCredential | undefined> => {
 	const module = nativeModule();
 	const normalized = normalizeSharedPubky(identity.pubky);
-	if (!module || identity.sourceApp !== BITKIT_SOURCE_APP || !normalized) return undefined;
+	if (identity.sourceApp !== BITKIT_SOURCE_APP || !normalized) return undefined;
+	if (!module) throw new Error('Shared Pubky credential lookup is unavailable');
 
 	try {
 		const raw = await module.credential(normalized);
@@ -210,10 +206,17 @@ export const getSharedPubkyCredential = async (
 			return undefined;
 		}
 		const derived = await getPublicKeyFromSecretKey(secretKey);
-		const derivedPubky = derived.isOk() ? normalizeSharedPubky(derived.value.public_key) : undefined;
+		if (!derived.isOk()) throw new Error('Shared Pubky credential validation failed');
+		const derivedPubky = normalizeSharedPubky(derived.value.public_key);
 		if (derivedPubky !== normalized) return undefined;
 		return { ...parsed, secretKey };
-	} catch {
-		return undefined;
+	} catch (error) {
+		// Only a definitive absence/invalid record disconnects an existing borrowed identity.
+		// Keychain/provider failures reject so callers refuse this operation but retain the identity.
+		const code = (error as { code?: string } | null)?.code;
+		if (code === 'credential_missing' || code === 'source_unavailable' || code === 'invalid_credential') {
+			return undefined;
+		}
+		throw error;
 	}
 };

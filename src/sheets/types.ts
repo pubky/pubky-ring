@@ -33,11 +33,6 @@ export interface ConfirmAuthPayload {
 	xCallback?: XCallbackParams;
 }
 
-export interface ConfirmSessionPayload {
-	pubky: string;
-	xCallback?: XCallbackParams;
-}
-
 export interface DeletePubkySheetParams {
 	pubky: string;
 }
@@ -121,7 +116,6 @@ export type AuthScannerParams = {
 export type AuthStackParamList = {
 	SelectPubky: SelectPubkyPayload;
 	ConfirmAuth: ConfirmAuthPayload;
-	ConfirmSession: ConfirmSessionPayload;
 	Scanner: AuthScannerParams;
 };
 

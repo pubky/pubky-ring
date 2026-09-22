@@ -168,21 +168,6 @@
 		"enterHomeserver": "Enter homeserver",
 		"homeserver": "Homeserver"
 	},
-	"session": {
-		"success": "Session Returned",
-		"sessionReturned": "Session data sent to requesting app",
-		"signInFailed": "Sign In Failed",
-		"invalidCallback": "Invalid callback URL provided",
-		"cannotOpenCallback": "Cannot open callback URL to return session",
-		"confirmTitle": "Allow Session",
-		"requestingApp": "Requesting App",
-		"callbackDestination": "Callback Destination",
-		"sessionPermissions": "Session Permissions",
-		"rootSessionDescription": "A root homeserver session with read and write access will be sent to this app.",
-		"trustWarning": "Only allow this if you trust the requesting app. The session secret can access this pubky's homeserver data until it is signed out.",
-		"allow": "Allow",
-		"approving": "Allowing..."
-	},
 	"errors": {
 		"failedToParseQR": "Failed to parse QR code data",
 		"failedToProcessQR": "Failed to process QR code data",
@@ -191,7 +176,7 @@
 		"noClipboardPubky": "No pubky provided for clipboard handling",
 		"failedToProcessInput": "Failed to process input data",
 		"emptyClipboard": "Clipboard is empty",
-		"unrecognizedFormat": "Unrecognized format. Expected a recovery phrase, invite code, auth URL, or session request.",
+		"unrecognizedFormat": "Unrecognized format. Expected a recovery phrase, invite code, or auth URL.",
 		"unknownError": "An unknown error occurred",
 		"authorizationFailed": "Authorization failed",
 		"importFailed": "Import failed",
@@ -199,7 +184,6 @@
 		"signupFailed": "Signup failed",
 		"signupFailedDescription": "Please check your signup link is still valid, then try again.",
 		"inviteProcessingFailed": "Invite processing failed",
-		"sessionRequestFailed": "Session request failed",
 		"signInFailed": "Sign in failed",
 		"failedToGetSecretKey": "Failed to get secret key",
 		"failedToProcessAuth": "Failed to process auth",
@@ -269,7 +253,6 @@
 		"migrateSuccessful": "Migration successful",
 		"signupSuccessful": "Signup successful",
 		"inviteProcessed": "Invite processed",
-		"sessionReturned": "Session returned",
 		"unhandledInputType": "Unhandled input type",
 		"unknownRoutingError": "Unknown error during routing"
 	},

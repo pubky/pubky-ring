@@ -168,21 +168,6 @@
 		"enterHomeserver": "Introducir servidor doméstico",
 		"homeserver": "Homeserver"
 	},
-	"session": {
-		"success": "Sesión devuelta",
-		"sessionReturned": "Datos de la sesión enviados a la aplicación solicitante",
-		"signInFailed": "Fallo al iniciar sesión",
-		"invalidCallback": "URL de devolución de llamada no válida proporcionada",
-		"cannotOpenCallback": "No se puede abrir la URL de devolución de llamada para devolver la sesión",
-		"confirmTitle": "Permitir sesión",
-		"requestingApp": "Aplicación solicitante",
-		"callbackDestination": "Destino de devolución de llamada",
-		"sessionPermissions": "Permisos de sesión",
-		"rootSessionDescription": "Se enviará a esta aplicación una sesión raíz del homeserver con acceso de lectura y escritura.",
-		"trustWarning": "Permita esto solo si confía en la aplicación solicitante. El secreto de sesión puede acceder a los datos del homeserver de este pubky hasta que se cierre la sesión.",
-		"allow": "Permitir",
-		"approving": "Permitiendo..."
-	},
 	"errors": {
 		"failedToParseQR": "Fallo al analizar los datos del código QR",
 		"failedToProcessQR": "Fallo al procesar los datos del código QR",
@@ -191,7 +176,7 @@
 		"noClipboardPubky": "No se proporciona pubky para el manejo del portapapeles",
 		"failedToProcessInput": "Fallo al procesar los datos de entrada",
 		"emptyClipboard": "El portapapeles está vacío",
-		"unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación, una URL de autenticación o una solicitud de sesión.",
+		"unrecognizedFormat": "Formato no reconocido. Se esperaba una frase de recuperación, un código de invitación o una URL de autenticación.",
 		"unknownError": "Se ha producido un error desconocido",
 		"authorizationFailed": "Autorización fallida",
 		"importFailed": "Importación fallida",
@@ -199,7 +184,6 @@
 		"signupFailed": "Error de registro",
 		"signupFailedDescription": "Por favor, compruebe que su enlace de inscripción sigue siendo válido y vuelva a intentarlo.",
 		"inviteProcessingFailed": "Fallo en el procesamiento de la invitación",
-		"sessionRequestFailed": "Fallo en la solicitud de sesión",
 		"signInFailed": "Fallo en el registro",
 		"failedToGetSecretKey": "Fallo al obtener la clave secreta",
 		"failedToProcessAuth": "Fallo al procesar auth",
@@ -270,7 +254,6 @@
 		"migrateSuccessful": "Migración con éxito",
 		"signupSuccessful": "Inscripción realizada con éxito",
 		"inviteProcessed": "Invitación procesada",
-		"sessionReturned": "Sesión devuelta",
 		"unhandledInputType": "Tipo de entrada no manejada",
 		"unknownRoutingError": "Error desconocido durante el enrutamiento"
 	},

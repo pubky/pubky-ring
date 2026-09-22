@@ -12,25 +12,6 @@ const safeOpenURL = async (url: string): Promise<void> => {
 	}
 };
 
-const hasUrlScheme = (url: string): boolean => {
-	const match = url.match(/^([A-Za-z][A-Za-z0-9+.-]*):\/\//);
-	return Boolean(match);
-};
-
-export const isValidSessionCallbackUrl = (url: string | undefined): boolean => {
-	return url ? hasUrlScheme(url) : false;
-};
-
-export const hasValidSessionCallbacks = (xCallback: XCallbackParams | undefined): boolean => {
-	if (!isValidSessionCallbackUrl(xCallback?.xSuccess)) {
-		return false;
-	}
-
-	return [xCallback?.xError, xCallback?.xCancel].every(
-		callbackUrl => callbackUrl === undefined || isValidSessionCallbackUrl(callbackUrl),
-	);
-};
-
 /**
  * Appends query parameters to a URL, respecting existing query strings.
  */
@@ -62,20 +43,6 @@ export const openXError = async (
 			errorCode,
 			errorMessage,
 		});
-		await safeOpenURL(url);
-	}
-};
-
-/**
- * Opens the x-success URL with additional data appended as query params.
- * Used by flows that need to pass data back (e.g., session returns grant_secret).
- */
-export const openXSuccessWithParams = async (
-	xCallback: XCallbackParams | undefined,
-	params: Record<string, string>,
-): Promise<void> => {
-	if (xCallback?.xSuccess) {
-		const url = appendParams(xCallback.xSuccess, params);
 		await safeOpenURL(url);
 	}
 };

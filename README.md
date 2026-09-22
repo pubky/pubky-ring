@@ -25,7 +25,6 @@ Pubky Ring accepts input via deeplinks, QR code scanning, and clipboard pasting.
 | Signup | `pubkyring://signup?hs={homeserver}&relay=...&secret=...&caps=...[&st={signup_token}]` | Creates an account and authorizes an app; `st` is optional |
 | Direct Signup | `pubkyauth://direct_signup?hs={homeserver}[&st={signup_token}]` | Creates an account without app authorization; `st` is optional |
 | Legacy Direct Signup | `pubkyauth://signup?hs={homeserver}[&st={signup_token}]` | Backward-compatible account creation without app authorization |
-| Session | `pubkyring://session?callback={callback_url}` | `callback`: URL-encoded callback URL |
 | Migrate | `pubkyring://migrate?index={n}&total={total}&key={key}` | `index`: 0-based frame index, `total`: frame count, `key`: mnemonic or secret key |
 
 ## Clipboard (Pasting)
@@ -54,14 +53,13 @@ When parsing input, the first matching format wins:
 
 1. Migrate deeplinks
 2. Signup deeplinks
-3. Session deeplinks
-4. Sign-in deeplinks
-5. Auth URLs (`pubkyauth:///`)
-6. Invite codes in URLs
-7. Standalone invite codes
-8. Recovery phrases (12 words)
-9. Encrypted secret keys
-10. Unknown (fallback)
+3. Sign-in deeplinks
+4. Auth URLs (`pubkyauth:///`)
+5. Invite codes in URLs
+6. Standalone invite codes
+7. Recovery phrases (12 words)
+8. Encrypted secret keys
+9. Unknown (fallback)
 
 # Getting Started
 

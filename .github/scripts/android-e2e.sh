@@ -25,4 +25,4 @@ INVITE_CODE_COMPACT="${INVITE_CODE//-/}"
 echo "::add-mask::$INVITE_CODE"
 echo "::add-mask::$INVITE_CODE_COMPACT"
 
-maestro --platform=android test -e APP_ID=to.pubky.ring -e INVITE_CODE="$INVITE_CODE" .maestro
+maestro --platform=android test -e APP_ID=app.pubkyring -e INVITE_CODE="$INVITE_CODE" .maestro

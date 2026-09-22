@@ -5,7 +5,7 @@ const { NativeModules } = require('react-native');
 const nativeResultError = method => ['true', `Mocked native Pubky.${method} was not configured for this test`];
 
 NativeModules.AppInfo = NativeModules.AppInfo || {
-	applicationId: 'to.pubky.ring',
+	applicationId: 'app.pubkyring',
 	buildNumber: '1',
 	version: '1.0.0',
 };

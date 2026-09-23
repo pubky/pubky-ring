@@ -48,7 +48,7 @@ const UseExternalPubkySheet = ({
 
 			<Card style={styles.card}>
 				<View style={styles.avatarContainer}>
-					<ProfileAvatar name={pubkyName} pubky={pubky} size={96} />
+					<ProfileAvatar name={pubkyName} pubky={pubky} size={96} external />
 				</View>
 				<Text2Xl style={styles.nameText}>{pubkyName}</Text2Xl>
 				<TextBaseB style={styles.pubkyText}>{pubky}</TextBaseB>

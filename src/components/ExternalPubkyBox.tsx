@@ -45,7 +45,7 @@ const ExternalPubkyBox = ({ pubky, sourceApp, index }: ExternalPubkyBoxProps): R
 						onPress={handlePress}
 					>
 						<View style={styles.profileImage}>
-							<ProfileAvatar name={pubkyName} pubky={pubky} size={48} />
+							<ProfileAvatar name={pubkyName} pubky={pubky} size={48} external />
 						</View>
 
 						<View style={styles.contentContainer}>

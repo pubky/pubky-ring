@@ -125,6 +125,10 @@ const HomeScreen = (): ReactElement => {
 		});
 	}, [replacementRelease]);
 
+	const externalPubkyCards = externalPubkys.map(({ pubky, sourceApp }) => (
+		<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
+	));
+
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
 
 	if (!hasPubkys) {
@@ -133,6 +137,7 @@ const HomeScreen = (): ReactElement => {
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
 				<EmptyState />
+				{externalPubkyCards.length > 0 && <View style={styles.emptyStateCards}>{externalPubkyCards}</View>}
 				<View>
 					<ListFooter />
 				</View>
@@ -149,13 +154,7 @@ const HomeScreen = (): ReactElement => {
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
 				ListHeaderComponent={sunsetBanner}
-				ListFooterComponent={
-					<>
-						{externalPubkys.map(({ pubky, sourceApp }) => (
-							<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
-						))}
-					</>
-				}
+				ListFooterComponent={<>{externalPubkyCards}</>}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
@@ -186,6 +185,9 @@ const styles = StyleSheet.create({
 	},
 	emptyStateBanner: {
 		paddingTop: HEADER_HEIGHT + 16,
+	},
+	emptyStateCards: {
+		marginBottom: 28,
 	},
 	fadeOverlay: {
 		position: 'absolute',

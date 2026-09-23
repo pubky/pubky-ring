@@ -74,6 +74,7 @@ const ExternalPubkyBox = ({ pubky, sourceApp, index }: ExternalPubkyBoxProps): R
 					>
 						<Button
 							text={t('sharedPubky.useCta')}
+							style={styles.useButton}
 							size="large"
 							variant="secondary"
 							icon={<Plus />}
@@ -130,6 +131,10 @@ const styles = StyleSheet.create({
 	iconContainer: {
 		justifyContent: 'center',
 		marginLeft: 'auto',
+	},
+	useButton: {
+		// The large size flexes, which collapses it in the non-scrolling empty Home.
+		flex: 0,
 	},
 	dashedButton: {
 		borderRadius: 60,

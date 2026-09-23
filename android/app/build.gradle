@@ -142,11 +142,23 @@ android {
             signingConfig signingConfigs.debug
         }
         release {
-            // Caution! In production, you need to generate your own keystore file.
-            // see https://reactnative.dev/docs/signed-apk-android.
-            signingConfig project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE') ? signingConfigs.release : signingConfigs.debug
+            // Only e2e builds opt in to the debug keystore, see the preReleaseBuild check below.
+            signingConfig project.hasProperty('PUBKYRING_DEBUG_SIGNING') ? signingConfigs.debug : signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+}
+
+// A release build without the upload key must fail rather than ship unsigned or debug-signed. The committed debug
+// keystore is public and matches Bitkit's, and apps signed with the same key can read each other's shared pubkys.
+tasks.configureEach { task ->
+    if (task.name == 'preReleaseBuild') {
+        task.doFirst {
+            if (!project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE') && !project.hasProperty('PUBKYRING_DEBUG_SIGNING')) {
+                throw new GradleException('Release builds need the PUBKYRING_UPLOAD_* signing properties. ' +
+                        'Pass -PPUBKYRING_DEBUG_SIGNING=true only for test builds.')
+            }
         }
     }
 }

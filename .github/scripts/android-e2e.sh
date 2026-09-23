@@ -4,7 +4,7 @@ set -euo pipefail
 trap 'adb logcat -d > "$GITHUB_WORKSPACE/android-logcat.txt" || true' EXIT
 
 cd "$GITHUB_WORKSPACE/android"
-./gradlew :app:assembleRelease -PreactNativeArchitectures=x86_64 --no-daemon
+./gradlew :app:assembleRelease -PreactNativeArchitectures=x86_64 -PPUBKYRING_DEBUG_SIGNING=true --no-daemon
 APK_PATH="$(find app/build/outputs/apk/release -maxdepth 1 -name '*.apk' -print -quit)"
 if [[ -z "$APK_PATH" ]]; then
   echo "No release APK found in app/build/outputs/apk/release" >&2

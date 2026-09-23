@@ -13,6 +13,7 @@ import HomeHeader from '../components/HomeHeader';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
 import { HEADER_HEIGHT } from '../components/AppHeader.tsx';
+import SafeAreaView from '../components/SafeAreaView.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
 import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
@@ -116,17 +117,6 @@ const HomeScreen = (): ReactElement => {
 		return pubkyArray.length > 0;
 	}, [pubkyArray.length]);
 
-	const externalPubkyCards = useMemo(
-		() => (
-			<>
-				{externalPubkys.map(({ pubky, sourceApp }) => (
-					<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
-				))}
-			</>
-		),
-		[externalPubkys, pubkyArray.length],
-	);
-
 	const showSunsetDetails = useCallback(() => {
 		if (!replacementRelease) return;
 
@@ -137,12 +127,18 @@ const HomeScreen = (): ReactElement => {
 
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
 
-	const listHeader = (
-		<>
-			{sunsetBanner}
-			{!hasPubkys && <EmptyState />}
-		</>
-	);
+	if (!hasPubkys) {
+		return (
+			<SafeAreaView style={styles.container} edges={['bottom']}>
+				<HomeHeader />
+				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
+				<EmptyState />
+				<View>
+					<ListFooter />
+				</View>
+			</SafeAreaView>
+		);
+	}
 
 	return (
 		<View style={styles.container}>
@@ -152,11 +148,15 @@ const HomeScreen = (): ReactElement => {
 				onDragEnd={handleDragEnd}
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
-				containerStyle={styles.container}
-				ListHeaderComponent={listHeader}
-				ListHeaderComponentStyle={!hasPubkys && styles.grow}
-				ListFooterComponent={externalPubkyCards}
-				contentContainerStyle={[styles.listContent, !hasPubkys && styles.emptyContent]}
+				ListHeaderComponent={sunsetBanner}
+				ListFooterComponent={
+					<>
+						{externalPubkys.map(({ pubky, sourceApp }) => (
+							<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
+						))}
+					</>
+				}
+				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
 			/>
@@ -184,12 +184,8 @@ const styles = StyleSheet.create({
 		paddingTop: HEADER_HEIGHT + 24,
 		paddingBottom: 180,
 	},
-	grow: {
-		flexGrow: 1,
-	},
-	emptyContent: {
-		flexGrow: 1,
-		paddingBottom: 100,
+	emptyStateBanner: {
+		paddingTop: HEADER_HEIGHT + 16,
 	},
 	fadeOverlay: {
 		position: 'absolute',

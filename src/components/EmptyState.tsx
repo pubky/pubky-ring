@@ -53,7 +53,7 @@ const EmptyState = (): ReactElement => {
 
 const styles = StyleSheet.create({
 	container: {
-		flexGrow: 1,
+		flex: 1,
 		justifyContent: 'flex-end',
 		paddingHorizontal: 24,
 	},

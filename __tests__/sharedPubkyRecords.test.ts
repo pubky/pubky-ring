@@ -35,7 +35,7 @@ jest.mock('../src/utils/sharedPubky', () => ({
 	__esModule: true,
 	listExternalPubkys: jest.fn(),
 	publishOwnedPubky: jest.fn(async () => undefined),
-	unpublishAllOwnedPubkys: jest.fn(async () => undefined),
+	unpublishAllOwnedPubkys: jest.fn(),
 	unpublishOwnedPubky: jest.fn(async () => undefined),
 }));
 
@@ -77,15 +77,26 @@ beforeEach(() => {
 	jest.clearAllMocks();
 	getAllGenericPasswordServicesMock.mockResolvedValue([PUBKY, SHARED_PUBKY_SERVICE]);
 	resetGenericPasswordMock.mockResolvedValue(true);
+	(unpublishAllOwnedPubkys as jest.Mock).mockResolvedValue(ok(undefined));
 });
 
 describe('wipeKeychain', () => {
 	it('unpublishes the owned shared records instead of resetting the shared service', async () => {
-		await wipeKeychain();
+		const res = await wipeKeychain();
 
+		expect(res.isOk()).toBe(true);
 		expect(resetGenericPasswordMock).toHaveBeenCalledWith({ service: PUBKY });
 		expect(resetGenericPasswordMock).not.toHaveBeenCalledWith({ service: SHARED_PUBKY_SERVICE });
 		expect(unpublishAllOwnedPubkys).toHaveBeenCalled();
+	});
+
+	it('keeps the private keychain when the shared records cannot be removed', async () => {
+		(unpublishAllOwnedPubkys as jest.Mock).mockResolvedValue(err('delete failed'));
+
+		const res = await wipeKeychain();
+
+		expect(res.isErr()).toBe(true);
+		expect(resetGenericPasswordMock).not.toHaveBeenCalled();
 	});
 });
 

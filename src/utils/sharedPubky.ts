@@ -62,7 +62,15 @@ export const publishOwnedPubky = (pubky: string, secretKey: string): Promise<voi
 export const unpublishOwnedPubky = (pubky: string): Promise<void> =>
 	updateOwned(() => SharedPubky?.removeOwned(pubky));
 
-export const unpublishAllOwnedPubkys = (): Promise<void> => updateOwned(() => SharedPubky?.removeAllOwned());
+/** Unlike single records, a wipe reports failures: nothing retries it, so a leftover record would stay readable by other apps. */
+export const unpublishAllOwnedPubkys = async (): Promise<Result<void>> => {
+	try {
+		await SharedPubky?.removeAllOwned();
+		return ok(undefined);
+	} catch (e) {
+		return err(JSON.stringify(e));
+	}
+};
 
 export const filterUnadoptedExternal = (external: TExternalPubky[], pubkys: string[]): TExternalPubky[] =>
 	external.filter(({ pubky }) => !pubkys.includes(pubky));

@@ -157,10 +157,18 @@ RCT_EXPORT_METHOD(removeAllOwned:(RCTPromiseResolveBlock)resolve
   }
 
   NSString *prefix = [kOwnSourceApp stringByAppendingString:@":"];
+  OSStatus failure = errSecSuccess;
   for (NSString *account in accounts) {
     if ([account hasPrefix:prefix]) {
-      SecItemDelete((__bridge CFDictionaryRef)SharedQuery(account));
+      OSStatus deleteStatus = SecItemDelete((__bridge CFDictionaryRef)SharedQuery(account));
+      if (deleteStatus != errSecSuccess && deleteStatus != errSecItemNotFound) {
+        failure = deleteStatus;
+      }
     }
+  }
+  if (failure != errSecSuccess) {
+    RejectStatus(reject, failure);
+    return;
   }
   resolve(nil);
 }

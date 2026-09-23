@@ -1,11 +1,12 @@
 import { getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import { err, ok } from '@synonymdev/result';
 import { NativeModules } from 'react-native';
-import { filterUnadoptedExternal, getExternalSecretKey } from '../src/utils/sharedPubky';
+import { filterUnadoptedExternal, getExternalSecretKey, unpublishAllOwnedPubkys } from '../src/utils/sharedPubky';
 
 jest.mock('@synonymdev/react-native-pubky', () => ({ getPublicKeyFromSecretKey: jest.fn() }));
 
 const getExternalSecretMock = NativeModules.SharedPubky.getExternalSecret as jest.Mock;
+const removeAllOwnedMock = NativeModules.SharedPubky.removeAllOwned as jest.Mock;
 const getPublicKeyFromSecretKeyMock = getPublicKeyFromSecretKey as jest.MockedFunction<
 	typeof getPublicKeyFromSecretKey
 >;
@@ -70,5 +71,15 @@ describe('filterUnadoptedExternal', () => {
 
 	it('keeps every external pubky when none is adopted', () => {
 		expect(filterUnadoptedExternal(external, [])).toEqual(external);
+	});
+});
+
+describe('unpublishAllOwnedPubkys', () => {
+	it('reports a failed native removal instead of swallowing it', async () => {
+		removeAllOwnedMock.mockRejectedValueOnce(new Error('Keychain error -25244'));
+
+		const res = await unpublishAllOwnedPubkys();
+
+		expect(res.isErr()).toBe(true);
 	});
 });

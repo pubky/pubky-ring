@@ -8,7 +8,6 @@ import { truncateStr } from '../utils/pubky.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import Button from './Button.tsx';
-import Card from './Card.tsx';
 import DashedBorder from './DashedBorder.tsx';
 import SourceAppPill from './SourceAppPill.tsx';
 import { ChevronRight, Plus } from '../icons/index.ts';
@@ -37,7 +36,7 @@ const ExternalPubkyBox = ({ pubky, sourceApp, index }: ExternalPubkyBoxProps): R
 				borderWidth={1}
 				borderRadius={styles.dashedCard.borderRadius}
 			>
-				<Card style={styles.card}>
+				<View style={styles.card}>
 					<TouchableOpacity
 						style={styles.content}
 						activeOpacity={0.7}
@@ -82,7 +81,7 @@ const ExternalPubkyBox = ({ pubky, sourceApp, index }: ExternalPubkyBoxProps): R
 							onPress={handlePress}
 						/>
 					</DashedBorder>
-				</Card>
+				</View>
 			</DashedBorder>
 		</View>
 	);
@@ -97,7 +96,7 @@ const styles = StyleSheet.create({
 		borderRadius: 16,
 	},
 	card: {
-		backgroundColor: 'transparent',
+		padding: 24,
 	},
 	content: {
 		flexDirection: 'row',

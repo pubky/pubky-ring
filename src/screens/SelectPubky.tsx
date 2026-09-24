@@ -7,7 +7,7 @@ import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
 import PubkyCard from '../components/PubkyCard.tsx';
-import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
+import { getAuthorizablePubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
 import { useTranslation } from 'react-i18next';
@@ -48,7 +48,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 	const navigation = useNavigation<SelectPubkyNavigation>();
 	const { deepLink, source } = route.params;
 	const dispatch = useDispatch();
-	const pubkys = useSelector(getAllPubkys);
+	const pubkys = useSelector(getAuthorizablePubkys);
 
 	const clearDeepLink = useCallback((): void => {
 		dispatch(setDeepLink(''));
@@ -68,9 +68,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 	}, [clearDeepLink]);
 
 	const pubkyArray: { key: string; value: Pubky }[] = useMemo(() => {
-		return Object.entries(pubkys)
-			.filter(([_, value]) => value.signedUp)
-			.map(([key, value]) => ({ key, value }));
+		return Object.entries(pubkys).map(([key, value]) => ({ key, value }));
 	}, [pubkys]);
 
 	const onPubkyPress = useCallback(

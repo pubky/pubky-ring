@@ -7,6 +7,7 @@ import { shareData } from '../../utils/helpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
+import { canPubkyAuthorize } from '../../store/selectors/pubkySelectors.ts';
 
 interface PubkyDetailCardProps {
 	index: number;
@@ -28,7 +29,7 @@ export const PubkyDetailCard = memo(
 			shareData(pubkyUri).then();
 		}, [pubkyUri]);
 
-		const canAuthorize = pubkyData.signedUp || !!pubkyData.sourceApp;
+		const canAuthorize = canPubkyAuthorize(pubkyData);
 
 		const handleButtonPress = useCallback(async () => {
 			if (!canAuthorize) {

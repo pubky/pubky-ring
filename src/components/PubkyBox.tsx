@@ -13,6 +13,7 @@ import { ChevronRight, Scan } from '../icons/index.ts';
 import Card from './Card.tsx';
 import SourceAppPill from './SourceAppPill.tsx';
 import { shadows } from '../theme/shadows.ts';
+import { canPubkyAuthorize } from '../store/selectors/pubkySelectors.ts';
 
 interface PubkyInfoProps {
 	pubkyName: string;
@@ -96,7 +97,7 @@ const PubkyBox = ({
 	const pubkyName =
 		pubkyData.name || `${t('emptyState.placeholderName')} #${index !== undefined ? index + 1 : 1}`;
 
-	const canAuthorize = pubkyData.signedUp || !!pubkyData.sourceApp;
+	const canAuthorize = canPubkyAuthorize(pubkyData);
 
 	const handleActionPress = useCallback(() => {
 		if (!canAuthorize) {

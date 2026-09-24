@@ -1,6 +1,7 @@
 package to.pubkyring
 
 import android.content.Context
+import android.content.SharedPreferences
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties
 import android.util.Base64
@@ -39,11 +40,16 @@ class SharedPubkyStore(context: Context) {
   }
 
   fun remove(pubky: String) {
-    prefs.edit().remove(pubky).apply()
+    commit(prefs.edit().remove(pubky))
   }
 
   fun removeAll() {
-    prefs.edit().clear().apply()
+    commit(prefs.edit().clear())
+  }
+
+  /** commit() rather than apply() so a failed write is reported. Callers run on the native modules thread. */
+  private fun commit(editor: SharedPreferences.Editor) {
+    check(editor.commit()) { "Failed to write the shared pubky records" }
   }
 
   private fun key(): SecretKey {

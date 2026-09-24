@@ -74,14 +74,22 @@ class SharedPubkyModule(private val reactContext: ReactApplicationContext) :
 
   @ReactMethod
   fun removeOwned(pubky: String, promise: Promise) {
-    store.remove(pubky)
-    promise.resolve(null)
+    try {
+      store.remove(pubky)
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject(ERROR_CODE, e)
+    }
   }
 
   @ReactMethod
   fun removeAllOwned(promise: Promise) {
-    store.removeAll()
-    promise.resolve(null)
+    try {
+      store.removeAll()
+      promise.resolve(null)
+    } catch (e: Exception) {
+      promise.reject(ERROR_CODE, e)
+    }
   }
 
   private fun trustedAuthority(sourceApp: String): String? {

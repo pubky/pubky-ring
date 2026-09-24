@@ -70,8 +70,16 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 			},
 			{
 				text: t('common.yes'),
-				onPress: (): void => {
-					wipeKeychain().then();
+				onPress: async (): Promise<void> => {
+					const wipeRes = await wipeKeychain();
+					if (wipeRes.isErr()) {
+						showToast({
+							type: 'error',
+							title: t('common.error'),
+							description: t('keychain.failedToResetValue'),
+						});
+						return;
+					}
 					dispatch(resetSettings());
 					dispatch(resetPubkys());
 					navigation.reset({

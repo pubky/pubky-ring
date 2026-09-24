@@ -8,6 +8,20 @@
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />
 
+    <permission
+        android:name="${applicationId}.permission.READ_SHARED_PUBKY"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="to.bitkit.permission.READ_SHARED_PUBKY" />
+    <uses-permission android:name="to.bitkit.tnet.permission.READ_SHARED_PUBKY" />
+    <uses-permission android:name="to.bitkit.dev.permission.READ_SHARED_PUBKY" />
+
+    <queries>
+        <package android:name="to.bitkit" />
+        <package android:name="to.bitkit.tnet" />
+        <package android:name="to.bitkit.dev" />
+    </queries>
+
     <application
       android:name=".MainApplication"
       android:label="@string/app_name"
@@ -37,5 +51,12 @@
             <data android:scheme="pubkyauth" />
         </intent-filter>
       </activity>
+
+      <provider
+        android:name=".SharedPubkyProvider"
+        android:authorities="${applicationId}.sharedpubky"
+        android:exported="true"
+        android:readPermission="${applicationId}.permission.READ_SHARED_PUBKY"
+        android:grantUriPermissions="false" />
     </application>
 </manifest>

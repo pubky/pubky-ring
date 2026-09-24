@@ -8,7 +8,8 @@ export type SheetId =
 	| 'edit-pubky'
 	| 'add-pubky'
 	| 'migrate'
-	| 'legacy-sunset';
+	| 'legacy-sunset'
+	| 'use-external-pubky';
 
 export type BackupFileScreenParams = {
 	pubky: string;
@@ -29,11 +30,6 @@ export interface ConfirmAuthPayload {
 	pubky: string;
 	authUrl: string;
 	authDetails: PubkyAuthDetails;
-	xCallback?: XCallbackParams;
-}
-
-export interface ConfirmSessionPayload {
-	pubky: string;
 	xCallback?: XCallbackParams;
 }
 
@@ -120,7 +116,6 @@ export type AuthScannerParams = {
 export type AuthStackParamList = {
 	SelectPubky: SelectPubkyPayload;
 	ConfirmAuth: ConfirmAuthPayload;
-	ConfirmSession: ConfirmSessionPayload;
 	Scanner: AuthScannerParams;
 };
 
@@ -144,6 +139,11 @@ export type MigrateSheetScreenParams = {
 
 export type MigrateSheetParams = MigrateSheetScreenParams | undefined;
 
+export type UseExternalPubkySheetParams = {
+	pubky: string;
+	sourceApp: string;
+};
+
 export type LegacySunsetSheetParams = {
 	apkUrl: string;
 };
@@ -156,4 +156,5 @@ export type SheetParamsById = {
 	'add-pubky': AddPubkySheetParams;
 	migrate: MigrateSheetParams;
 	'legacy-sunset': LegacySunsetSheetParams;
+	'use-external-pubky': UseExternalPubkySheetParams;
 };

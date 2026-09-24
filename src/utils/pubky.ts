@@ -15,7 +15,6 @@ import {
 	setKeychainValue,
 	resetKeychainValue,
 	getKeychainValue,
-	getAllKeychainKeys,
 	setSessionSecret,
 	getSessionSecret,
 	resetSessionSecret,
@@ -40,7 +39,7 @@ import { checkNetworkConnection } from './helpers.ts';
 import { showToast } from '@synonymdev/react-native-toast';
 import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
-import { getPubkyDataFromStore } from './store-helpers.ts';
+import { getAllPubkysFromStore, getPubkyDataFromStore } from './store-helpers.ts';
 import { EBackupPreference, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
 import type { TPubkys } from '../types/pubky.ts';
 import {
@@ -51,6 +50,12 @@ import {
 	STAGING_HOMESERVER,
 } from './constants.ts';
 import { appApplicationId } from './appInfo.ts';
+import {
+	getExternalSecretKey,
+	listExternalPubkys,
+	publishOwnedPubky,
+	unpublishOwnedPubky,
+} from './sharedPubky.ts';
 import i18n from '../i18n';
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
@@ -120,6 +125,9 @@ export const republishHomeserver = async ({
 	homeserver: string;
 	dispatch: Dispatch;
 }): Promise<Result<string>> => {
+	if (getPubkyDataFromStore(pubky)?.sourceApp) {
+		return err(i18n.t('sharedPubky.homeserverUnsupported'));
+	}
 	console.log(`[republish] Starting for ${pubky} via ${homeserver}`);
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
@@ -159,7 +167,7 @@ export const republishAllHomeserverRecords = async ({
 		if (!hasHomeserver) {
 			console.log(`[republish] Skipping batch item for ${pubky}: no homeserver`);
 		}
-		return hasHomeserver;
+		return hasHomeserver && !data.sourceApp;
 	});
 	summary.skipped = summary.total - republishablePubkys.length;
 
@@ -296,42 +304,6 @@ export const createPubkyWithInviteCode = async (
 	}
 };
 
-/**
- * Restores all pubkys from the keychain and signs up to the homeserver.
- * @param {Dispatch} dispatch
- * @returns {Promise<string[]>}
- */
-export const restorePubkys = async (dispatch: Dispatch): Promise<string[]> => {
-	const allKeys = await getAllKeychainKeys();
-	if (allKeys?.length > 0) {
-		for (const pubky of allKeys) {
-			try {
-				const secretKeyRes = await getKeychainValue({ key: pubky });
-				if (secretKeyRes.isOk()) {
-					const isMigrated = isNewFormat(pubky);
-					if (isMigrated) {
-						const { secretKey, mnemonic } = JSON.parse(secretKeyRes.value) as IKeychainData;
-						// Restored pubkys were already backed up
-						await savePubky({ secretKey, pubky, dispatch, mnemonic });
-					} else {
-						const migrationRes = await migrateKeychainEntry(pubky, secretKeyRes.value);
-						if (migrationRes.isOk()) {
-							// Restored pubkys were already backed up
-							await savePubky({
-								secretKey: migrationRes.value.secretKey,
-								pubky,
-								dispatch,
-								mnemonic: migrationRes.value.mnemonic,
-							});
-						}
-					}
-				}
-			} catch {}
-		}
-	}
-	return allKeys;
-};
-
 export const getProfileAvatar = async (pubky: string, app: string = 'pubky.app'): Promise<Result<string>> => {
 	try {
 		const profileUrl = `pubky://${pubky}/pub/${app}/profile.json`;
@@ -381,6 +353,19 @@ export const getProfileInfo = async (pubky: string, app: string = 'pubky.app'): 
 	}
 };
 
+const lookupHomeserver = async (pubky: string): Promise<string> => {
+	const res = await getHomeserver(pubky);
+	if (
+		res.isOk() &&
+		res.value &&
+		!res.value.toLowerCase().includes('error') &&
+		!res.value.toLowerCase().includes('no homeserver')
+	) {
+		return res.value;
+	}
+	return defaultPubkyState.homeserver;
+};
+
 export const importPubky = async ({
 	secretKey,
 	dispatch,
@@ -397,16 +382,7 @@ export const importPubky = async ({
 			return err(i18n.t('pubkyErrors.failedToGetPublicKey'));
 		}
 		const pubky = pubkyRes.value.public_key;
-		let homeserver = defaultPubkyState.homeserver;
-		const getHomeserverRes = await getHomeserver(pubky);
-		if (
-			getHomeserverRes.isOk() &&
-			getHomeserverRes.value &&
-			!getHomeserverRes.value.toLowerCase().includes('error') &&
-			!getHomeserverRes.value.toLowerCase().includes('no homeserver')
-		) {
-			homeserver = getHomeserverRes.value;
-		}
+		const homeserver = await lookupHomeserver(pubky);
 		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then(res => {
 			if (res.isErr()) {
 				dispatch(setSignedUp({ pubky, signedUp: false }));
@@ -447,6 +423,39 @@ export const importPubky = async ({
 		console.error('Error saving pubky:', error);
 		return err(i18n.t('pubkyErrors.errorSavingPubky'));
 	}
+};
+
+/**
+ * Adds a pubky owned by another app. Only the reference is stored:
+ * the secret key stays with the owning app and is read just in time for signing.
+ */
+export const adoptExternalPubky = async ({
+	pubky,
+	sourceApp,
+	dispatch,
+}: {
+	pubky: string;
+	sourceApp: string;
+	dispatch: Dispatch;
+}): Promise<void> => {
+	// A stale card can offer a pubky Ring already lists, and adopting it again would relabel it.
+	if (getPubkyDataFromStore(pubky)) {
+		return;
+	}
+	const homeserver = await lookupHomeserver(pubky);
+	dispatch(addPubky({ pubky, backupPreference: EBackupPreference.unknown, isBackedUp: true }));
+	const index = Object.keys(getAllPubkysFromStore()).indexOf(pubky);
+	dispatch(
+		setPubkyData({
+			pubky,
+			data: {
+				sourceApp,
+				name: `pubky #${index + 1} (Bitkit)`,
+				signedUp: !!homeserver,
+				homeserver,
+			},
+		}),
+	);
 };
 
 export const savePubky = async ({
@@ -501,7 +510,11 @@ export const savePubky = async ({
 					description: response.error.message,
 				});
 				deletePubky(pubky, dispatch).then();
+				return;
 			}
+			// Ring holds the secret now, so any earlier reference to an owning app is stale.
+			dispatch(setPubkyData({ pubky, data: { sourceApp: undefined } }));
+			publishOwnedPubky(pubky, secretKey);
 		});
 		return ok(pubky);
 	} catch (e) {
@@ -522,13 +535,29 @@ const isNewFormat = (value: string): boolean => {
 	}
 };
 
+/** The key belongs to another app, so only the reference and the Ring-owned session secrets are ours to clear. */
+const removeExternalPubky = async (pubky: string, dispatch: Dispatch): Promise<void> => {
+	dispatch(removePubky(pubky));
+	await resetPubkySessionSecrets({ pubky });
+};
+
 export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
 	try {
+		if (getPubkyDataFromStore(pubky)?.sourceApp) {
+			await removeExternalPubky(pubky, dispatch);
+			return ok(pubky);
+		}
+		// The shared record goes first, so a failure keeps the pubky and the delete can be retried.
+		const unpublishRes = await unpublishOwnedPubky(pubky);
+		if (unpublishRes.isErr()) {
+			console.error('Failed to remove the shared pubky record:', unpublishRes.error);
+			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
+		}
 		dispatch(removePubky(pubky));
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
 		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
-			.then(results => {
-				const error = results.find(result => result.isErr());
+			.then(([keychainRes, sessionRes]) => {
+				const error = [keychainRes, sessionRes].find(result => result.isErr());
 				if (error?.isErr()) {
 					showToast({
 						type: 'error',
@@ -546,6 +575,49 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 		console.error('Error deleting pubky:', error);
 		return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 	}
+};
+
+/**
+ * Publishes a shared record for every pubky this app owns so other apps can use them.
+ * Runs on every app start and is idempotent.
+ */
+export const publishAllOwnedPubkys = async (pubkys: TPubkys): Promise<void> => {
+	await Promise.all(
+		Object.entries(pubkys).map(async ([pubky, { sourceApp }]) => {
+			if (sourceApp) {
+				return;
+			}
+			const secretKeyRes = await getPubkySecretKey(pubky);
+			if (secretKeyRes.isOk()) {
+				await publishOwnedPubky(pubky, secretKeyRes.value.secretKey);
+			}
+		}),
+	);
+};
+
+/**
+ * Removes adopted pubkys whose owning app no longer publishes them.
+ * Read failures are ignored so a temporary error never deletes a reference.
+ */
+export const pruneMissingExternalPubkys = async (pubkys: TPubkys, dispatch: Dispatch): Promise<void> => {
+	const externalRes = await listExternalPubkys();
+	if (externalRes.isErr()) {
+		return;
+	}
+	const missing = Object.entries(pubkys).filter(
+		([pubky, { sourceApp }]) =>
+			sourceApp &&
+			!externalRes.value.some(record => record.pubky === pubky && record.sourceApp === sourceApp),
+	);
+	if (missing.length === 0) {
+		return;
+	}
+	await Promise.all(missing.map(([pubky]) => removeExternalPubky(pubky, dispatch)));
+	showToast({
+		type: 'info',
+		title: i18n.t('sharedPubky.sourceLostTitle'),
+		description: i18n.t('sharedPubky.sourceLostDescription'),
+	});
 };
 
 /**
@@ -576,6 +648,13 @@ const migrateKeychainEntry = async (pubky: string, oldSecretKey: string): Promis
 };
 
 export const getPubkySecretKey = async (pubky: string): Promise<Result<IKeychainData>> => {
+	const sourceApp = getPubkyDataFromStore(pubky)?.sourceApp;
+	if (sourceApp) {
+		const externalRes = await getExternalSecretKey(pubky, sourceApp);
+		return externalRes.isErr()
+			? err(externalRes.error.message)
+			: ok({ secretKey: externalRes.value, mnemonic: '' });
+	}
 	try {
 		const res = await getKeychainValue({ key: pubky });
 		if (res.isErr()) {
@@ -610,6 +689,9 @@ export const signUpToHomeserver = async ({
 	signupToken?: string;
 	dispatch: Dispatch;
 }): Promise<Result<SessionInfo>> => {
+	if (getPubkyDataFromStore(pubky)?.sourceApp) {
+		return err(i18n.t('sharedPubky.homeserverUnsupported'));
+	}
 	if (!secretKey) {
 		const secretKeyRes = await getPubkySecretKey(pubky);
 		if (secretKeyRes.isErr()) {

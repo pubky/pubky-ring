@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAllPubkys, getDeepLink, getSignedUpPubkys } from '../store/selectors/pubkySelectors';
+import { getAllPubkys, getAuthorizablePubkys, getDeepLink } from '../store/selectors/pubkySelectors';
 import { setDeepLink } from '../store/slices/pubkysSlice';
 import { ParsedInput } from '../utils/inputParser';
 import { actionRequiresPubky } from '../utils/inputRouter';
@@ -24,7 +24,7 @@ import {
 export const useDeepLinkHandler = (): void => {
 	const dispatch = useDispatch();
 	const deepLink = useSelector(getDeepLink);
-	const signedUpPubkys = useSelector(getSignedUpPubkys);
+	const authorizablePubkys = useSelector(getAuthorizablePubkys);
 	const allPubkys = useSelector(getAllPubkys);
 
 	useEffect(() => {
@@ -49,22 +49,22 @@ export const useDeepLinkHandler = (): void => {
 
 			// Check if action requires a pubky selection
 			if (actionRequiresPubky(parsedInput.action)) {
-				const signedUpPubkyKeys = Object.keys(signedUpPubkys);
+				const authorizablePubkyKeys = Object.keys(authorizablePubkys);
 
-				if (signedUpPubkyKeys.length === 0) {
-					// No signed up pubkys - prompt user to set one up
+				if (authorizablePubkyKeys.length === 0) {
+					// No authorizable pubkys - prompt user to set one up
 					dispatch(setDeepLink(''));
 					handleNoPubkysAvailable(allPubkys);
 					return;
 				}
 
-				if (signedUpPubkyKeys.length > 1) {
+				if (authorizablePubkyKeys.length > 1) {
 					showAuthPubkySelection(parsedInput, 'deeplink');
 					return;
 				}
 
 				// Single pubky - use it directly
-				await routeInputWithContext(parsedInput, signedUpPubkyKeys[0], 'deeplink', dispatch);
+				await routeInputWithContext(parsedInput, authorizablePubkyKeys[0], 'deeplink', dispatch);
 				return;
 			}
 
@@ -75,5 +75,5 @@ export const useDeepLinkHandler = (): void => {
 		processDeepLink();
 		// Note: allPubkys is intentionally excluded to prevent re-triggering when new pubkys are created
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [deepLink, dispatch, signedUpPubkys]);
+	}, [deepLink, dispatch, authorizablePubkys]);
 };

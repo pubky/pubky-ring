@@ -13,7 +13,7 @@ import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { getPubkySecretKey } from '../utils/pubky.ts';
-import { getBackupPreference } from '../utils/store-helpers.ts';
+import { getBackupPreference, getPubkyDataFromStore } from '../utils/store-helpers.ts';
 import { EBackupPreference, IKeychainData } from '../types/pubky.ts';
 import AnimatedQR from '../components/AnimatedQR.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
@@ -104,6 +104,9 @@ const MigrateQRCode = (): ReactElement => {
 			const values: string[] = [];
 
 			for (const pubky of pubkyKeys) {
+				if (getPubkyDataFromStore(pubky)?.sourceApp) {
+					continue;
+				}
 				const keyDataResult = await getPubkySecretKey(pubky);
 				if (keyDataResult.isErr()) {
 					continue;

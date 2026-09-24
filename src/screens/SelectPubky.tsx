@@ -7,7 +7,7 @@ import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { useDispatch, useSelector } from 'react-redux';
 import { FlashList } from '@shopify/flash-list';
 import PubkyCard from '../components/PubkyCard.tsx';
-import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
+import { getAuthorizablePubkys } from '../store/selectors/pubkySelectors.ts';
 import { setDeepLink } from '../store/slices/pubkysSlice.ts';
 import { Pubky } from '../types/pubky.ts';
 import { useTranslation } from 'react-i18next';
@@ -19,7 +19,6 @@ import type { AuthStackParamList } from '../sheets/types.ts';
 import { createConfirmAuthPayload } from '../utils/actions/authAction.ts';
 import { getAutoAuthFromStore } from '../utils/store-helpers.ts';
 import { routeInputWithContext } from '../utils/inputHandlerUtils.ts';
-import { hasValidSessionCallbacks } from '../utils/xCallback.ts';
 
 type PubkyItem = { key: string; value: Pubky };
 type SelectPubkyNavigation = NativeStackNavigationProp<AuthStackParamList, 'SelectPubky'>;
@@ -49,7 +48,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 	const navigation = useNavigation<SelectPubkyNavigation>();
 	const { deepLink, source } = route.params;
 	const dispatch = useDispatch();
-	const pubkys = useSelector(getAllPubkys);
+	const pubkys = useSelector(getAuthorizablePubkys);
 
 	const clearDeepLink = useCallback((): void => {
 		dispatch(setDeepLink(''));
@@ -69,9 +68,7 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 	}, [clearDeepLink]);
 
 	const pubkyArray: { key: string; value: Pubky }[] = useMemo(() => {
-		return Object.entries(pubkys)
-			.filter(([_, value]) => value.signedUp)
-			.map(([key, value]) => ({ key, value }));
+		return Object.entries(pubkys).map(([key, value]) => ({ key, value }));
 	}, [pubkys]);
 
 	const onPubkyPress = useCallback(
@@ -100,24 +97,6 @@ const SelectPubky = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Sele
 				}
 
 				navigation.navigate('ConfirmAuth', payload.value);
-				dispatch(setDeepLink(''));
-				return;
-			}
-
-			if (parsed.action === InputAction.Session && parsed.data.action === InputAction.Session) {
-				if (!hasValidSessionCallbacks(parsed.data.params.xCallback)) {
-					showToast({
-						type: 'error',
-						title: t('common.error'),
-						description: t('session.invalidCallback'),
-					});
-					return;
-				}
-
-				navigation.navigate('ConfirmSession', {
-					pubky,
-					xCallback: parsed.data.params.xCallback,
-				});
 				dispatch(setDeepLink(''));
 				return;
 			}

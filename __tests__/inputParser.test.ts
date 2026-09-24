@@ -26,30 +26,6 @@ describe('parseInput', () => {
 		getPublicKeyFromSecretKeyMock.mockResolvedValue(err('not a secret key'));
 	});
 
-	it('preserves nested x-callback URLs when parsing session deeplinks', async () => {
-		const xSuccess = 'bitkit://wallet/callback?nonce=abc123&state=ready';
-		const xError = 'bitkit://wallet/error?nonce=abc123&reason=denied';
-		const rawInput =
-			`pubkyring://session?x-success=${encodeURIComponent(xSuccess)}` +
-			`&x-error=${encodeURIComponent(xError)}` +
-			'&x-source=Bitkit';
-
-		const parsed = await parseInput(rawInput, 'deeplink');
-
-		expect(parsed.action).toBe(InputAction.Session);
-		expect(parsed.data).toEqual({
-			action: InputAction.Session,
-			params: {
-				xCallback: {
-					xSuccess,
-					xError,
-					xCancel: undefined,
-					xSource: 'Bitkit',
-				},
-			},
-		});
-	});
-
 	it('extracts invite codes from URLs without losing x-callback parameters', async () => {
 		const xSuccess = 'pubky://invite/accepted?token=abc&next=home';
 		const rawInput = `https://example.com/invite/ABCD-1234-WXYZ?x-success=${encodeURIComponent(xSuccess)}`;

@@ -533,19 +533,21 @@ const isNewFormat = (value: string): boolean => {
 
 export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
 	try {
-		const isExternal = !!getPubkyDataFromStore(pubky)?.sourceApp;
-		dispatch(removePubky(pubky));
-		if (isExternal) {
+		if (getPubkyDataFromStore(pubky)?.sourceApp) {
+			dispatch(removePubky(pubky));
 			// The key belongs to another app, so only the Ring-owned session secrets are ours to clear.
 			await resetPubkySessionSecrets({ pubky });
 			return ok(pubky);
 		}
+		// The shared record goes first, so a failure keeps the pubky and the delete can be retried.
+		const unpublishRes = await unpublishOwnedPubky(pubky);
+		if (unpublishRes.isErr()) {
+			console.error('Failed to remove the shared pubky record:', unpublishRes.error);
+			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
+		}
+		dispatch(removePubky(pubky));
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
-		Promise.all([
-			resetKeychainValue({ key: pubky }),
-			resetPubkySessionSecrets({ pubky }),
-			unpublishOwnedPubky(pubky),
-		])
+		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
 			.then(([keychainRes, sessionRes]) => {
 				const error = [keychainRes, sessionRes].find(result => result.isErr());
 				if (error?.isErr()) {

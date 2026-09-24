@@ -47,30 +47,30 @@ export const getExternalSecretKey = async (pubky: string, sourceApp: string): Pr
 	}
 };
 
-/** Owned records are best effort: the private keychain stays the source of truth, so failures never throw. */
-const updateOwned = async (update: () => Promise<void>): Promise<void> => {
+/** Removals report failures: nothing retries them, so a leftover record would stay readable by other apps. */
+const removeOwnedRecords = async (remove: () => Promise<void>): Promise<Result<void>> => {
 	try {
-		await update();
-	} catch (e) {
-		console.log('Failed to update the shared pubky records', e);
-	}
-};
-
-export const publishOwnedPubky = (pubky: string, secretKey: string): Promise<void> =>
-	updateOwned(() => SharedPubky?.setOwned(pubky, secretKey));
-
-export const unpublishOwnedPubky = (pubky: string): Promise<void> =>
-	updateOwned(() => SharedPubky?.removeOwned(pubky));
-
-/** Unlike single records, a wipe reports failures: nothing retries it, so a leftover record would stay readable by other apps. */
-export const unpublishAllOwnedPubkys = async (): Promise<Result<void>> => {
-	try {
-		await SharedPubky?.removeAllOwned();
+		await remove();
 		return ok(undefined);
 	} catch (e) {
 		return err(JSON.stringify(e));
 	}
 };
+
+/** Publishing is best effort: every app start publishes again, so failures never throw. */
+export const publishOwnedPubky = async (pubky: string, secretKey: string): Promise<void> => {
+	try {
+		await SharedPubky?.setOwned(pubky, secretKey);
+	} catch (e) {
+		console.log('Failed to update the shared pubky records', e);
+	}
+};
+
+export const unpublishOwnedPubky = (pubky: string): Promise<Result<void>> =>
+	removeOwnedRecords(() => SharedPubky?.removeOwned(pubky));
+
+export const unpublishAllOwnedPubkys = (): Promise<Result<void>> =>
+	removeOwnedRecords(() => SharedPubky?.removeAllOwned());
 
 export const filterUnadoptedExternal = (external: TExternalPubky[], pubkys: string[]): TExternalPubky[] =>
 	external.filter(({ pubky }) => !pubkys.includes(pubky));

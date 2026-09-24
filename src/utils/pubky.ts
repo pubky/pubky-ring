@@ -531,12 +531,16 @@ const isNewFormat = (value: string): boolean => {
 	}
 };
 
+/** The key belongs to another app, so only the reference and the Ring-owned session secrets are ours to clear. */
+const removeExternalPubky = async (pubky: string, dispatch: Dispatch): Promise<void> => {
+	dispatch(removePubky(pubky));
+	await resetPubkySessionSecrets({ pubky });
+};
+
 export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Result<string>> => {
 	try {
 		if (getPubkyDataFromStore(pubky)?.sourceApp) {
-			dispatch(removePubky(pubky));
-			// The key belongs to another app, so only the Ring-owned session secrets are ours to clear.
-			await resetPubkySessionSecrets({ pubky });
+			await removeExternalPubky(pubky, dispatch);
 			return ok(pubky);
 		}
 		// The shared record goes first, so a failure keeps the pubky and the delete can be retried.
@@ -596,14 +600,15 @@ export const pruneMissingExternalPubkys = async (pubkys: TPubkys, dispatch: Disp
 	if (externalRes.isErr()) {
 		return;
 	}
-	const available = externalRes.value.map(({ pubky }) => pubky);
 	const missing = Object.entries(pubkys).filter(
-		([pubky, { sourceApp }]) => sourceApp && !available.includes(pubky),
+		([pubky, { sourceApp }]) =>
+			sourceApp &&
+			!externalRes.value.some(record => record.pubky === pubky && record.sourceApp === sourceApp),
 	);
 	if (missing.length === 0) {
 		return;
 	}
-	missing.forEach(([pubky]) => dispatch(removePubky(pubky)));
+	await Promise.all(missing.map(([pubky]) => removeExternalPubky(pubky, dispatch)));
 	showToast({
 		type: 'info',
 		title: i18n.t('sharedPubky.sourceLostTitle'),

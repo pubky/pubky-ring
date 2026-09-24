@@ -153,6 +153,29 @@ describe('pruneMissingExternalPubkys', () => {
 		expect(showToast).toHaveBeenCalledTimes(1);
 	});
 
+	it('clears the session secrets of pruned pubkys', async () => {
+		const sessionSecret = `pubky-session:${EXTERNAL_PUBKY}:session-id`;
+		getAllGenericPasswordServicesMock.mockResolvedValue([PUBKY, sessionSecret]);
+		(listExternalPubkys as jest.Mock).mockResolvedValue(ok([]));
+
+		await pruneMissingExternalPubkys(pubkys, jest.fn());
+
+		expect(resetGenericPasswordMock).toHaveBeenCalledWith({ service: sessionSecret });
+		expect(resetGenericPasswordMock).not.toHaveBeenCalledWith({ service: PUBKY });
+	});
+
+	it('removes adopted pubkys that only another source app publishes', async () => {
+		(listExternalPubkys as jest.Mock).mockResolvedValue(
+			ok([{ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit.dev' }]),
+		);
+		const dispatch = jest.fn();
+
+		await pruneMissingExternalPubkys(pubkys, dispatch);
+
+		expect(dispatch).toHaveBeenCalledWith({ type: 'pubky/removePubky', payload: EXTERNAL_PUBKY });
+		expect(showToast).toHaveBeenCalledTimes(1);
+	});
+
 	it('keeps adopted pubkys that are still published', async () => {
 		(listExternalPubkys as jest.Mock).mockResolvedValue(
 			ok([{ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit' }]),

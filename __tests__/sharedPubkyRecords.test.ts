@@ -2,7 +2,7 @@ import Keychain from 'react-native-keychain';
 import { showToast } from '@synonymdev/react-native-toast';
 import { err, ok } from '@synonymdev/result';
 import { wipeKeychain } from '../src/utils/keychain';
-import { deletePubky, pruneMissingExternalPubkys } from '../src/utils/pubky';
+import { adoptExternalPubky, deletePubky, pruneMissingExternalPubkys } from '../src/utils/pubky';
 import { listExternalPubkys, unpublishAllOwnedPubkys, unpublishOwnedPubky } from '../src/utils/sharedPubky';
 import { SHARED_PUBKY_SERVICE } from '../src/utils/constants';
 import { getPubkyDataFromStore } from '../src/utils/store-helpers';
@@ -196,5 +196,16 @@ describe('pruneMissingExternalPubkys', () => {
 
 		expect(dispatch).not.toHaveBeenCalled();
 		expect(showToast).not.toHaveBeenCalled();
+	});
+});
+
+describe('adoptExternalPubky', () => {
+	it('leaves a pubky Ring already lists untouched', async () => {
+		(getPubkyDataFromStore as jest.Mock).mockReturnValue(defaultPubkyState);
+		const dispatch = jest.fn();
+
+		await adoptExternalPubky({ pubky: PUBKY, sourceApp: 'to.bitkit', dispatch });
+
+		expect(dispatch).not.toHaveBeenCalled();
 	});
 });

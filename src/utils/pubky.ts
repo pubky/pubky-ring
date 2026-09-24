@@ -438,6 +438,10 @@ export const adoptExternalPubky = async ({
 	sourceApp: string;
 	dispatch: Dispatch;
 }): Promise<void> => {
+	// A stale card can offer a pubky Ring already lists, and adopting it again would relabel it.
+	if (getPubkyDataFromStore(pubky)) {
+		return;
+	}
 	const homeserver = await lookupHomeserver(pubky);
 	dispatch(addPubky({ pubky, backupPreference: EBackupPreference.unknown, isBackedUp: true }));
 	const index = Object.keys(getAllPubkysFromStore()).indexOf(pubky);

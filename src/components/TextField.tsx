@@ -1,6 +1,6 @@
 import React, { forwardRef, ReactNode, useState } from 'react';
 import { Platform, StyleProp, StyleSheet, TextStyle, View, ViewStyle } from 'react-native';
-import type { LayoutChangeEvent, TextInput as NativeTextInput, TextInputProps } from 'react-native';
+import type { LayoutChangeEvent, TextInputInstance, TextInputProps } from 'react-native';
 import Svg, { Rect } from 'react-native-svg';
 import styled, { useTheme } from 'styled-components/native';
 import { fontFamily } from '../theme/fonts';
@@ -36,7 +36,7 @@ const StyledTextInput = styled.TextInput.attrs<{ theme: Theme }>(props => ({
 	include-font-padding: false;
 `;
 
-const TextField = forwardRef<NativeTextInput, TextFieldProps>(
+const TextField = forwardRef<TextInputInstance, TextFieldProps>(
 	(
 		{
 			containerStyle,

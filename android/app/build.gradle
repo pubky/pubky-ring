@@ -145,7 +145,7 @@ android {
             // Only e2e builds opt in to the debug keystore, see the preReleaseBuild check below.
             signingConfig project.hasProperty('PUBKYRING_DEBUG_SIGNING') ? signingConfigs.debug : signingConfigs.release
             minifyEnabled enableProguardInReleaseBuilds
-            proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
         }
     }
 }

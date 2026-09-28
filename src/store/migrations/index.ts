@@ -211,6 +211,9 @@ const migrations = {
 			},
 		};
 	},
+	// Adds the optional Pubky.sourceApp field. Existing pubkys are Ring-owned, so it stays unset.
+	// @ts-ignore
+	9: (state): PersistedState => state,
 };
 
 export default migrations;

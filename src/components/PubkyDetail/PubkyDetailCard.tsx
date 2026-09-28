@@ -7,6 +7,7 @@ import { shareData } from '../../utils/helpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import PubkyProfile from '../PubkyProfile.tsx';
 import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
+import { canPubkyAuthorize } from '../../store/selectors/pubkySelectors.ts';
 
 interface PubkyDetailCardProps {
 	index: number;
@@ -28,8 +29,10 @@ export const PubkyDetailCard = memo(
 			shareData(pubkyUri).then();
 		}, [pubkyUri]);
 
+		const canAuthorize = canPubkyAuthorize(pubkyData);
+
 		const handleButtonPress = useCallback(async () => {
-			if (!pubkyData.signedUp) {
+			if (!canAuthorize) {
 				showSheet('edit-pubky', { pubky });
 			} else {
 				setIsQRLoading(true);
@@ -39,10 +42,10 @@ export const PubkyDetailCard = memo(
 					setIsQRLoading(false);
 				}
 			}
-		}, [onQRPress, pubky, pubkyData]);
+		}, [canAuthorize, onQRPress, pubky]);
 
-		const buttonIcon = pubkyData.signedUp ? <Scan /> : undefined;
-		const buttonText = pubkyData.signedUp ? t('auth.authorize') : t('pubky.setup');
+		const buttonIcon = canAuthorize ? <Scan /> : undefined;
+		const buttonText = canAuthorize ? t('auth.authorize') : t('pubky.setup');
 
 		const showActionIcons = fontScale <= 1;
 		const shareIcon = showActionIcons ? <Share /> : undefined;
@@ -70,14 +73,16 @@ export const PubkyDetailCard = memo(
 						testID="PubkyDetailShareButton"
 						onPress={onSharePress}
 					/>
-					<Button
-						style={styles.actionButton}
-						text={t('backup.backup')}
-						variant="dark"
-						icon={backupIcon}
-						testID="PubkyDetailBackupButton"
-						onPress={onBackup}
-					/>
+					{!pubkyData.sourceApp && (
+						<Button
+							style={styles.actionButton}
+							text={t('backup.backup')}
+							variant="dark"
+							icon={backupIcon}
+							testID="PubkyDetailBackupButton"
+							onPress={onBackup}
+						/>
+					)}
 					<Button
 						style={styles.actionButton}
 						text={t('common.delete')}

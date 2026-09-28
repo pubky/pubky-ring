@@ -25,7 +25,6 @@ export enum InputAction {
 	Signup = 'signup',
 	DirectSignup = 'direct_signup',
 	Invite = 'invite',
-	Session = 'session',
 	HomeserverSignIn = 'homeserver_signin',
 	Unknown = 'unknown',
 }
@@ -83,11 +82,6 @@ export interface InviteParams {
 	xCallback?: XCallbackParams;
 }
 
-// Session parameters for external app session requests
-export interface SessionParams {
-	xCallback?: XCallbackParams;
-}
-
 // Migrate parameters for multi-key migration QR codes
 export interface MigrateParams {
 	index: number;
@@ -103,7 +97,6 @@ export type ActionData =
 	| { action: InputAction.Signup; params: SignupParams }
 	| { action: InputAction.DirectSignup; params: DirectSignupParams }
 	| { action: InputAction.Invite; params: InviteParams }
-	| { action: InputAction.Session; params: SessionParams }
 	| { action: InputAction.HomeserverSignIn; params: { url: string } }
 	| { action: InputAction.Unknown; params: { rawData: string } };
 
@@ -234,23 +227,6 @@ export const extractXCallbackParams = (encodedQueryString: string): XCallbackPar
 		xCancel: xCancelRaw !== undefined ? safeDecode(xCancelRaw) : undefined,
 		xSource: xSourceRaw !== undefined ? safeDecode(xSourceRaw) : undefined,
 	};
-};
-
-/**
- * Parses session deeplink parameters
- * Format: session?x-success={url}&x-error={url}&x-cancel={url}&x-source={name}
- * Legacy: session?callback={callback_url}
- */
-const parseSessionParams = (encodedQueryString: string): SessionParams | null => {
-	try {
-		const xCallback = extractXCallbackParams(encodedQueryString);
-		if (!xCallback?.xSuccess) {
-			return null;
-		}
-		return { xCallback };
-	} catch {
-		return null;
-	}
 };
 
 const xCallbackFromDeepLink = (details: PubkyDeepLinkDetails): XCallbackParams | undefined => {
@@ -497,25 +473,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		urlWithoutProtocol = urlWithoutProtocol.replace('pubkyauth://', '');
 	}
 
-	// Normalize: remove trailing slash before query string for known routes
-	if (urlWithoutProtocol.startsWith('session/?'))
-		urlWithoutProtocol = urlWithoutProtocol.replace('session/?', 'session?');
-
-	// 1. Check for session deeplink
-	// Format: pubkyring://session?x-success={url} or pubkyring://session?callback={url}
-	if (urlWithoutProtocol.startsWith('session?')) {
-		const sessionParams = parseSessionParams(rawEncodedQuery);
-		if (sessionParams?.xCallback?.xSuccess) {
-			return {
-				action: InputAction.Session,
-				data: { action: InputAction.Session, params: sessionParams },
-				source,
-				rawInput,
-			};
-		}
-	}
-
-	// 2. Check for invite code in URL
+	// 1. Check for invite code in URL
 	const inviteCode = parseInviteCodeFromUrl(processedInput);
 	if (inviteCode) {
 		// Extract x-callback params from the original encoded query so inner
@@ -529,7 +487,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		};
 	}
 
-	// 3. Check if it's a standalone invite code (XXXX-XXXX-XXXX format)
+	// 2. Check if it's a standalone invite code (XXXX-XXXX-XXXX format)
 	if (isValidInviteCode(urlWithoutProtocol)) {
 		return {
 			action: InputAction.Invite,
@@ -539,7 +497,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		};
 	}
 
-	// 4. Check for import data (recovery phrase or secret key)
+	// 3. Check for import data (recovery phrase or secret key)
 	const formatted = formatImportData(processedInput);
 	const importValidation = await validateImportData(formatted);
 	if (importValidation.isValid) {
@@ -557,7 +515,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		};
 	}
 
-	// 5. Quick check for recovery phrase pattern (12 words) even if validation failed
+	// 4. Quick check for recovery phrase pattern (12 words) even if validation failed
 	// This handles cases where the mnemonic might be valid but validation takes time
 	const words = formatted.trim().split(/\s+/);
 	if (words.length === 12) {
@@ -579,7 +537,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		}
 	}
 
-	// 6. Default to unknown
+	// 5. Default to unknown
 	return {
 		action: InputAction.Unknown,
 		data: { action: InputAction.Unknown, params: { rawData: processedInput } },
@@ -625,12 +583,6 @@ export const isInviteAction = (
 	data: ActionData,
 ): data is { action: InputAction.Invite; params: InviteParams } => {
 	return data.action === InputAction.Invite;
-};
-
-export const isSessionAction = (
-	data: ActionData,
-): data is { action: InputAction.Session; params: SessionParams } => {
-	return data.action === InputAction.Session;
 };
 
 export const isUnknownAction = (

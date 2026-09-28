@@ -27,11 +27,27 @@ env:
     when:
       platform: ios
     commands:
+      # The Files picker's remote content is missing from the accessibility tree
+      # and can take a few seconds to load on CI, so keep tapping where its Save
+      # button sits until the picker is gone.
       - extendedWaitUntil:
           visible: Pubky Ring
           timeout: 10000
-      - tapOn:
-          point: 87%,13%
+      - repeat:
+          times: 3
+          while:
+            notVisible:
+              id: AddPubkyButton
+          commands:
+            - waitForAnimationToEnd:
+                timeout: 3000
+            - tapOn:
+                point: 87%,13%
+            - extendedWaitUntil:
+                visible:
+                  id: AddPubkyButton
+                  optional: true
+                timeout: 20000
 - extendedWaitUntil:
     visible:
       id: AddPubkyButton

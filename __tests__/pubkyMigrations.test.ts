@@ -103,4 +103,29 @@ describe('pubky migrations', () => {
 		expect(signOutMock).toHaveBeenCalledWith('pubkyOne:stored-cookie');
 		expect(resetSessionSecretMock).toHaveBeenCalledWith({ pubky: 'pubkyOne', sessionId: 'session-id' });
 	});
+
+	it('keeps existing pubkys owned by this app when adding sourceApp', () => {
+		const state = {
+			pubky: {
+				deepLink: '',
+				processing: {},
+				pubkys: {
+					pubkyOne: {
+						name: 'Alice',
+						homeserver: 'https://homeserver.example',
+						signedUp: true,
+						signupToken: '',
+						image: '',
+						sessions: [],
+						backupPreference: EBackupPreference.encryptedFile,
+						isBackedUp: true,
+					},
+				},
+			},
+		};
+
+		const migratedState = runMigration(9, state);
+
+		expect(migratedState.pubky.pubkys.pubkyOne).not.toHaveProperty('sourceApp');
+	});
 });

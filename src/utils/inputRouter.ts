@@ -17,7 +17,6 @@ import {
 	isSignupAction,
 	isDirectSignupAction,
 	isInviteAction,
-	isSessionAction,
 	isUnknownAction,
 } from './inputParser';
 import { handleAuthAction } from './actions/authAction';
@@ -25,7 +24,6 @@ import { handleImportAction } from './actions/importAction';
 import { handleMigrateAction } from './actions/migrateAction';
 import { handleDirectSignupAction, handleSignupAction } from './actions/signupAction';
 import { handleInviteAction } from './actions/inviteAction';
-import { handleSessionAction } from './actions/sessionAction';
 import i18n from '../i18n';
 import { getErrorMessage } from './errorHandler';
 import type { AddPubkySheetScreenParams } from '../sheets/types.ts';
@@ -146,18 +144,6 @@ export const routeInput = async (
 				: err(getErrorMessage(result.error, i18n.t('errors.inviteProcessingFailed')));
 		}
 
-		if (isSessionAction(data)) {
-			const result = await handleSessionAction(data, effectiveContext);
-			return result.isOk()
-				? ok({
-						success: true,
-						action: InputAction.Session,
-						pubky: result.value,
-						message: i18n.t('router.sessionReturned'),
-					})
-				: err(getErrorMessage(result.error, i18n.t('errors.sessionRequestFailed')));
-		}
-
 		if (isUnknownAction(data)) {
 			console.log('[InputRouter] Unknown input format');
 			return err(i18n.t('errors.unrecognizedFormat'));
@@ -175,7 +161,7 @@ export const routeInput = async (
  * Determines if an action requires a pubky to be selected
  */
 export const actionRequiresPubky = (action: InputAction): boolean => {
-	return action === InputAction.Auth || action === InputAction.Session;
+	return action === InputAction.Auth;
 };
 
 /**
@@ -187,7 +173,6 @@ export const actionRequiresNetwork = (action: InputAction): boolean => {
 		InputAction.Signup,
 		InputAction.DirectSignup,
 		InputAction.Invite,
-		InputAction.Session,
 	].includes(action);
 };
 

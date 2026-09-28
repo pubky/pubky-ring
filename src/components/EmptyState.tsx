@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
 	canvas: {
 		width: 56,
 		height: 70,
-		marginVertical: 20,
+		marginVertical: 15,
 		marginLeft: 60,
 	},
 });

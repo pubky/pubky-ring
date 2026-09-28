@@ -15,6 +15,8 @@ import { updateIsOnline } from './src/store/slices/settingsSlice.ts';
 import { checkNetworkConnection } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
+import { publishAllOwnedPubkys } from './src/utils/pubky.ts';
+import { getAllPubkysFromStore } from './src/utils/store-helpers.ts';
 import './src/theme/toast';
 
 function App(): React.JSX.Element {
@@ -59,6 +61,11 @@ function App(): React.JSX.Element {
 			subscription.remove();
 		};
 	}, [dispatch]);
+
+	// Publish the pubkys this app owns so other apps can use them. The store is rehydrated by the time App mounts.
+	useEffect(() => {
+		publishAllOwnedPubkys(getAllPubkysFromStore());
+	}, []);
 
 	useEffect(() => {
 		// Defer network check to avoid blocking initial render

@@ -19,6 +19,8 @@ import { Plus } from '../icons/index.ts';
 import LegacySunsetBanner from '../components/LegacySunsetBanner.tsx';
 import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
+import ExternalPubkyBox from '../components/ExternalPubkyBox.tsx';
+import { useExternalPubkys } from '../hooks/useExternalPubkys.ts';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -74,6 +76,7 @@ const HomeScreen = (): ReactElement => {
 	const { pubkyArray } = useSelector(getHomeScreenData, shallowEqual);
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
+	const externalPubkys = useExternalPubkys();
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {
@@ -122,6 +125,10 @@ const HomeScreen = (): ReactElement => {
 		});
 	}, [replacementRelease]);
 
+	const externalPubkyCards = externalPubkys.map(({ pubky, sourceApp }) => (
+		<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
+	));
+
 	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
 
 	if (!hasPubkys) {
@@ -130,6 +137,7 @@ const HomeScreen = (): ReactElement => {
 				<HomeHeader />
 				<View style={styles.emptyStateBanner}>{sunsetBanner}</View>
 				<EmptyState />
+				{externalPubkyCards.length > 0 && <View style={styles.emptyStateCards}>{externalPubkyCards}</View>}
 				<View>
 					<ListFooter />
 				</View>
@@ -146,6 +154,7 @@ const HomeScreen = (): ReactElement => {
 				keyExtractor={keyExtractor}
 				renderItem={renderItem}
 				ListHeaderComponent={sunsetBanner}
+				ListFooterComponent={<>{externalPubkyCards}</>}
 				contentContainerStyle={styles.listContent}
 				showsVerticalScrollIndicator={false}
 				showsHorizontalScrollIndicator={false}
@@ -176,6 +185,9 @@ const styles = StyleSheet.create({
 	},
 	emptyStateBanner: {
 		paddingTop: HEADER_HEIGHT + 16,
+	},
+	emptyStateCards: {
+		marginBottom: 28,
 	},
 	fadeOverlay: {
 		position: 'absolute',

@@ -24,6 +24,7 @@ const sheetRouteById: Record<SheetId, SheetRouteName> = {
 	'add-pubky': 'AddPubkySheet',
 	migrate: 'MigrateSheet',
 	'legacy-sunset': 'LegacySunsetSheet',
+	'use-external-pubky': 'UseExternalPubkySheet',
 };
 
 let pendingSheetNavigation: Array<{

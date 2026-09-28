@@ -2,7 +2,7 @@ import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
 import { getPubkySecretKey } from './pubky.ts';
-import { getBackupPreference } from './store-helpers.ts';
+import { getBackupPreference, getPubkyDataFromStore } from './store-helpers.ts';
 import i18n from '../i18n';
 import type { BackupSheetParams } from '../sheets/types.ts';
 
@@ -80,6 +80,11 @@ export const showBackupSheet = async ({
 	pubky: string;
 	backupPreference?: EBackupPreference;
 }): Promise<void> => {
+	// A pubky owned by another app must never be exported from Ring.
+	if (getPubkyDataFromStore(pubky)?.sourceApp) {
+		return;
+	}
+
 	const params = await createBackupInitialScreenParams({ pubky, backupPreference });
 
 	if (!params) {

@@ -47,6 +47,16 @@ jest.mock('../src/utils/helpers.ts', () => ({
 	checkNetworkConnection: jest.fn(),
 }));
 
+jest.mock('../src/utils/pubky.ts', () => ({
+	__esModule: true,
+	publishAllOwnedPubkys: jest.fn(),
+}));
+
+jest.mock('../src/utils/store-helpers.ts', () => ({
+	__esModule: true,
+	getAllPubkysFromStore: jest.fn(() => ({})),
+}));
+
 jest.mock('../src/utils/inputParser.ts', () => ({
 	__esModule: true,
 	parseInput: jest.fn(async input => ({ rawInput: input })),

@@ -13,3 +13,8 @@ export const TERMS_OF_USE = 'https://synonym.to/pubky-ring-privacy-policy';
 export const NAVIGATION_ANIMATION_DURATION = 200; // Duration for screen transition animations
 
 export const BACKUP_PASSWORD_CHAR_MIN = 6; // Minimum characters for file backup password
+
+// Cross-app shared pubky records
+export const SHARED_PUBKY_SERVICE = 'pubky.shared.v1';
+export const RING_SOURCE_APP = 'app.pubkyring';
+export const BITKIT_SOURCE_APPS = ['to.bitkit', 'to.bitkit.tnet', 'to.bitkit.dev'];

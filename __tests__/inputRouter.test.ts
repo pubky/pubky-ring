@@ -12,7 +12,6 @@ import { handleImportAction } from '../src/utils/actions/importAction';
 import { handleMigrateAction } from '../src/utils/actions/migrateAction';
 import { handleDirectSignupAction, handleSignupAction } from '../src/utils/actions/signupAction';
 import { handleInviteAction } from '../src/utils/actions/inviteAction';
-import { handleSessionAction } from '../src/utils/actions/sessionAction';
 import { showSheet } from '../src/sheets/sheetNavigation';
 import { routeInputWithContext } from '../src/utils/inputHandlerUtils';
 
@@ -65,11 +64,6 @@ jest.mock('../src/utils/actions/inviteAction', () => ({
 	handleInviteAction: jest.fn(),
 }));
 
-jest.mock('../src/utils/actions/sessionAction', () => ({
-	__esModule: true,
-	handleSessionAction: jest.fn(),
-}));
-
 jest.mock('../src/sheets/sheetNavigation', () => ({
 	__esModule: true,
 	showSheet: jest.fn(),
@@ -88,7 +82,6 @@ const handleDirectSignupActionMock = handleDirectSignupAction as jest.MockedFunc
 	typeof handleDirectSignupAction
 >;
 const handleInviteActionMock = handleInviteAction as jest.MockedFunction<typeof handleInviteAction>;
-const handleSessionActionMock = handleSessionAction as jest.MockedFunction<typeof handleSessionAction>;
 const showSheetMock = showSheet as jest.MockedFunction<typeof showSheet>;
 
 const dispatch = jest.fn();
@@ -211,21 +204,6 @@ describe('routeInput', () => {
 				message: 'router.inviteProcessed',
 			},
 		},
-		{
-			action: InputAction.Session,
-			data: {
-				action: InputAction.Session,
-				params: { xCallback: { xSuccess: 'bitkit://session' } },
-			},
-			handler: handleSessionActionMock,
-			handlerValue: 'pubky-session',
-			expectedValue: {
-				success: true,
-				action: InputAction.Session,
-				pubky: 'pubky-session',
-				message: 'router.sessionReturned',
-			},
-		},
 	])('routes $action input to the matching handler', async ({ data, handler, handlerValue, expectedValue }) => {
 		handler.mockResolvedValue(ok(handlerValue));
 		const parsed = parsedInput(data as ParsedInput['data'], 'deeplink');
@@ -317,7 +295,6 @@ describe('routeInput', () => {
 		expect(handleSignupActionMock).not.toHaveBeenCalled();
 		expect(handleDirectSignupActionMock).not.toHaveBeenCalled();
 		expect(handleInviteActionMock).not.toHaveBeenCalled();
-		expect(handleSessionActionMock).not.toHaveBeenCalled();
 
 		logSpy.mockRestore();
 	});
@@ -355,7 +332,6 @@ describe('routeInputWithContext', () => {
 describe('input routing helpers', () => {
 	it('identifies actions that need selected pubky context', () => {
 		expect(actionRequiresPubky(InputAction.Auth)).toBe(true);
-		expect(actionRequiresPubky(InputAction.Session)).toBe(true);
 		expect(actionRequiresPubky(InputAction.Import)).toBe(false);
 	});
 
@@ -364,7 +340,6 @@ describe('input routing helpers', () => {
 		expect(actionRequiresNetwork(InputAction.Signup)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.DirectSignup)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.Invite)).toBe(true);
-		expect(actionRequiresNetwork(InputAction.Session)).toBe(true);
 		expect(actionRequiresNetwork(InputAction.Import)).toBe(false);
 		expect(actionRequiresNetwork(InputAction.Migrate)).toBe(false);
 	});

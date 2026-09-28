@@ -2,8 +2,9 @@ import { memo, ReactElement, useMemo } from 'react';
 import { Image, Text } from 'react-native';
 import { Facehash } from 'react-native-facehash';
 import { useSelector } from 'react-redux';
-import { getPubkyImage } from '../store/selectors/pubkySelectors.ts';
+import { getPubky, getPubkyImage } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../types';
+import { accentColors } from '../theme';
 
 /**
  * Shared palette used when generating Facehash avatars for profiles without an image.
@@ -11,10 +12,15 @@ import { RootState } from '../types';
  */
 export const FACEHASH_AVATAR_COLORS = ['#00FF5D', '#00F0FF', '#004BFF', '#FC00FF', '#FF0000', '#FF9900'];
 
+// Bitkit-owned pubkys always use the Bitkit brand color.
+const EXTERNAL_AVATAR_COLORS = [accentColors.orange];
+
 interface ProfileAvatarProps {
 	pubky: string;
 	name?: string;
 	size?: number;
+	// Set for Bitkit pubkys that are not adopted yet and so are not in the store.
+	external?: boolean;
 }
 
 const resolveFallbackSeed = (pubky: string): string => {
@@ -31,9 +37,10 @@ const resolveFallbackInitial = (name: string | undefined, seed: string): string 
 	return seed.trim().charAt(0).toUpperCase();
 };
 
-const ProfileAvatar = ({ pubky, name, size = 32 }: ProfileAvatarProps): ReactElement => {
+const ProfileAvatar = ({ pubky, name, size = 32, external = false }: ProfileAvatarProps): ReactElement => {
 	const fallbackSeed = useMemo(() => resolveFallbackSeed(pubky), [pubky]);
 	const imageUri = useSelector((state: RootState) => getPubkyImage(state, fallbackSeed));
+	const isExternal = useSelector((state: RootState) => external || !!getPubky(state, fallbackSeed)?.sourceApp);
 	const fallbackInitial = useMemo(() => resolveFallbackInitial(name, fallbackSeed), [name, fallbackSeed]);
 
 	// Memoize style object to prevent unnecessary re-renders
@@ -61,7 +68,7 @@ const ProfileAvatar = ({ pubky, name, size = 32 }: ProfileAvatarProps): ReactEle
 
 	return (
 		<Facehash
-			colors={FACEHASH_AVATAR_COLORS}
+			colors={isExternal ? EXTERNAL_AVATAR_COLORS : FACEHASH_AVATAR_COLORS}
 			enableBlink
 			name={fallbackSeed}
 			showInitial={false}

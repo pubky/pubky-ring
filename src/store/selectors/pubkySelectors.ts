@@ -42,6 +42,30 @@ export const isPubkySignedUp = (state: RootState, pubky: string): boolean => {
 };
 
 /**
+ * Returns if a pubky can authorize. The homeserver of an adopted pubky is managed by its owning app.
+ */
+export const canPubkyAuthorize = (pubky: Pubky): boolean => pubky.signedUp || !!pubky.sourceApp;
+
+/**
+ * Returns all pubkys that can authorize
+ */
+export const getAuthorizablePubkys = createSelector(
+	[selectAllPubkys],
+	(allPubkys): { [key: string]: Pubky } => {
+		const authorizablePubkys: { [key: string]: Pubky } = {};
+
+		for (const key in allPubkys) {
+			const pubky = allPubkys[key];
+			if (pubky && canPubkyAuthorize(pubky)) {
+				authorizablePubkys[key] = pubky;
+			}
+		}
+
+		return authorizablePubkys;
+	},
+);
+
+/**
  * Get all pubkys
  */
 export const getAllPubkys = (state: RootState): { [key: string]: Pubky } => {

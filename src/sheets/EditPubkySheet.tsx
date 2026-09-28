@@ -77,6 +77,8 @@ const EditPubkySheet = ({
 	const storedSignupToken = storedPubkyData?.signupToken ?? '';
 	const isStoredUnsigned = storedPubkyData?.signedUp === false;
 	const isStoredSignedUp = storedPubkyData?.signedUp === true;
+	// The owning app manages the homeserver of an adopted pubky, so only the local name is editable.
+	const isExternal = !!storedPubkyData?.sourceApp;
 	const [loading, setLoading] = useState(false);
 	const [newPubkyName, setNewPubkyName] = useState(storedName);
 	const [homeServer, setHomeServer] = useState(storedHomeserver || DEFAULT_HOMESERVER || '');
@@ -133,6 +135,12 @@ const EditPubkySheet = ({
 		try {
 			Keyboard.dismiss();
 			setLoading(true);
+
+			if (isExternal) {
+				updateName();
+				onClose();
+				return;
+			}
 
 			const secretKeyRes = await getPubkySecretKey(pubky);
 			if (secretKeyRes.isErr()) {
@@ -216,6 +224,7 @@ const EditPubkySheet = ({
 			setLoading(false);
 		}
 	}, [
+		isExternal,
 		pubky,
 		newPubkyName,
 		homeServer,
@@ -288,7 +297,7 @@ const EditPubkySheet = ({
 		return !(loading || (isStoredSignedUp && storedHomeserver === homeServer.trim()));
 	}, [loading, homeServer, storedHomeserver, isStoredSignedUp]);
 
-	const titlePrefix = isStoredSignedUp ? t('common.edit') : t('pubky.setup');
+	const titlePrefix = isStoredSignedUp || isExternal ? t('common.edit') : t('pubky.setup');
 	const title = [titlePrefix, truncatePubky(pubky)].join(' ');
 
 	const onReset = useCallback(() => {
@@ -345,7 +354,7 @@ const EditPubkySheet = ({
 					onSubmitEditing={handleNameSubmit}
 				/>
 
-				{isSignupTokenInputVisible && (
+				{!isExternal && isSignupTokenInputVisible && (
 					<>
 						<TextXsM>{t('editPubkySheet.inviteCodeOptional')}</TextXsM>
 						<InputItemComponent
@@ -368,16 +377,20 @@ const EditPubkySheet = ({
 					</>
 				)}
 
-				<TextXsM testID="EditPubkyHomeserverLabel">{t('editPubky.homeserver')}</TextXsM>
-				<InputItemComponent
-					testID="EditPubkyHomeserverInput"
-					value={homeServer}
-					onChangeText={setHomeServer}
-					placeholder={t('editPubky.homeserver')}
-					error=""
-					autoFocus={false}
-					onSubmitEditing={handleHomeserverSubmit}
-				/>
+				{!isExternal && (
+					<>
+						<TextXsM testID="EditPubkyHomeserverLabel">{t('editPubky.homeserver')}</TextXsM>
+						<InputItemComponent
+							testID="EditPubkyHomeserverInput"
+							value={homeServer}
+							onChangeText={setHomeServer}
+							placeholder={t('editPubky.homeserver')}
+							error=""
+							autoFocus={false}
+							onSubmitEditing={handleHomeserverSubmit}
+						/>
+					</>
+				)}
 
 				<View style={styles.footerContainer}>
 					{displayedError ? (

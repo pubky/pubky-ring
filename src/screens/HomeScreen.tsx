@@ -129,7 +129,7 @@ const HomeScreen = (): ReactElement => {
 		<ExternalPubkyBox key={pubky} pubky={pubky} sourceApp={sourceApp} index={pubkyArray.length} />
 	));
 
-	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : null;
+	const sunsetBanner = replacementRelease ? <LegacySunsetBanner onPress={showSunsetDetails} /> : undefined;
 
 	if (!hasPubkys) {
 		return (

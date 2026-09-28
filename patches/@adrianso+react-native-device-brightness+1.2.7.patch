@@ -1,0 +1,18 @@
+diff --git a/node_modules/@adrianso/react-native-device-brightness/android/build.gradle b/node_modules/@adrianso/react-native-device-brightness/android/build.gradle
+index cb111dc..8cf859b 100644
+--- a/node_modules/@adrianso/react-native-device-brightness/android/build.gradle
++++ b/node_modules/@adrianso/react-native-device-brightness/android/build.gradle
+@@ -1,11 +1,11 @@
+ apply plugin: 'com.android.library'
+ 
+ android {
+-    compileSdkVersion 31
++    compileSdkVersion rootProject.ext.compileSdkVersion
+ 
+     defaultConfig {
+         minSdkVersion 21
+-        targetSdkVersion 31
++        targetSdkVersion rootProject.ext.targetSdkVersion
+         versionCode 2
+         versionName "1.1"
+         ndk {

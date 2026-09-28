@@ -4,10 +4,10 @@ import {
 	KeyboardEvent,
 	Platform,
 	StyleSheet,
-	TextInput,
 	TextInputKeyPressEvent,
 	View,
 } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -49,7 +49,7 @@ const AddPubkyImportMnemonic = ({
 	const [validWords, setValidWords] = useState<boolean[]>(createValidWordState);
 	const [focused, setFocused] = useState<number | null>(null);
 	const [loading, setLoading] = useState<boolean>(false);
-	const inputRefs = useRef<(TextInput | null)[]>(Array(MNEMONIC_WORD_COUNT).fill(null));
+	const inputRefs = useRef<(TextInputInstance | null)[]>(Array(MNEMONIC_WORD_COUNT).fill(null));
 	const insets = useSafeAreaInsets();
 	const [suggestionInset, setSuggestionInset] = useState<number>(0);
 

@@ -87,6 +87,19 @@
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
 		"authorizeForApp": "Autorizar {{appName}}"
 	},
+	"grants": {
+		"title": "Aplicaciones autorizadas",
+		"authorizedApp": "Aplicación autorizada",
+		"loading": "Cargando aplicaciones autorizadas...",
+		"emptyDescription": "Las aplicaciones que autorice aparecerán aquí.",
+		"expires": "Caduca el {{date}}",
+		"revoke": "Revocar acceso de la aplicación",
+		"revokeAction": "Revocar",
+		"revokeConfirm": "¿Seguro que quiere revocar el acceso de esta aplicación en todos los dispositivos?",
+		"revoked": "Acceso revocado",
+		"revokedDescription": "Esta aplicación ya no puede acceder a su Pubky desde ningún dispositivo.",
+		"revokeFailed": "No se pudo revocar el acceso"
+	},
 	"republish": {
 		"title": "Republicar registros",
 		"description": "Actualice sus registros pubky en la DHT para que las apps encuentren sus homeservers.",
@@ -167,6 +180,15 @@
 		"enterName": "Introduzca el nombre",
 		"enterHomeserver": "Introducir servidor doméstico",
 		"homeserver": "Homeserver"
+	},
+	"activeSession": {
+		"noPermissions": "Sin permisos",
+		"permissionCount_one": "{{count}} permiso",
+		"permissionCount_other": "{{count}} permisos",
+		"authorizedOn": "Autorizado el {{date}}",
+		"authorizedWithPubky": "Autorizado con Pubky",
+		"grantedPermissions": "Permisos concedidos",
+		"permissionActions": "Ver, editar, eliminar"
 	},
 	"errors": {
 		"failedToParseQR": "Fallo al analizar los datos del código QR",

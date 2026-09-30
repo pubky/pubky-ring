@@ -16,6 +16,7 @@ describe('pubky persistence', () => {
 					sessions: [
 						{
 							id: 'session-id',
+							grant_id: 'grant-id',
 							pubky: 'pubkyOne',
 							capabilities: ['/'],
 							session_secret: 'pubkyOne:bearer-cookie',
@@ -41,6 +42,7 @@ describe('pubky persistence', () => {
 					sessions: [
 						{
 							id: 'session-id',
+							grant_id: 'grant-id',
 							capabilities: ['/'],
 							created_at: 123,
 						},

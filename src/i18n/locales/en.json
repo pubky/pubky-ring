@@ -87,6 +87,19 @@
 		"timeoutError": "The authentication process took too long. Please try again.",
 		"authorizeForApp": "Authorize {{appName}}"
 	},
+	"grants": {
+		"title": "Authorized Apps",
+		"authorizedApp": "Authorized App",
+		"loading": "Loading authorized apps...",
+		"emptyDescription": "Apps you authorize will appear here.",
+		"expires": "Expires {{date}}",
+		"revoke": "Revoke app access",
+		"revokeAction": "Revoke",
+		"revokeConfirm": "Are you sure you want to revoke this app's access on every device?",
+		"revoked": "Access revoked",
+		"revokedDescription": "This app can no longer access your Pubky on any device.",
+		"revokeFailed": "Unable to revoke access"
+	},
 	"republish": {
 		"title": "Republish records",
 		"description": "Refresh your pubky records on the DHT so apps can find their homeservers.",
@@ -167,6 +180,15 @@
 		"enterName": "Enter name",
 		"enterHomeserver": "Enter homeserver",
 		"homeserver": "Homeserver"
+	},
+	"activeSession": {
+		"noPermissions": "No permissions",
+		"permissionCount_one": "{{count}} permission",
+		"permissionCount_other": "{{count}} permissions",
+		"authorizedOn": "Authorized on {{date}}",
+		"authorizedWithPubky": "Authorized with Pubky",
+		"grantedPermissions": "Granted Permissions",
+		"permissionActions": "View, Edit, Delete"
 	},
 	"errors": {
 		"failedToParseQR": "Failed to parse QR code data",

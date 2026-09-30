@@ -15,6 +15,7 @@ export const sanitizePubkySessions = (state: PubkySliceState): PubkySliceState =
 					// Persist only non-secret session metadata.
 					.map(session => ({
 						id: session.id,
+						grant_id: session.grant_id,
 						capabilities: session.capabilities,
 						created_at: session.created_at,
 					})),

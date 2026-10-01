@@ -5,6 +5,7 @@ import AuthorizedGrantList from './AuthorizedGrantList';
 import { PubkyData } from '../../navigation/types.ts';
 import { showBackupSheet } from '../../utils/sheetHelpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
+import { canPubkyAuthorize } from '../../store/selectors/pubkySelectors.ts';
 import { HEADER_HEIGHT } from '../AppHeader.tsx';
 
 export interface PubkyDetailProps {
@@ -15,6 +16,7 @@ export interface PubkyDetailProps {
 
 export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
 	const { pubky } = pubkyData;
+	const showAuthorizedApps = canPubkyAuthorize(pubkyData);
 
 	const handleDelete = useCallback(() => {
 		showSheet('delete-pubky', { pubky });
@@ -34,7 +36,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 				onDelete={handleDelete}
 				onBackup={handleBackup}
 			/>
-			<AuthorizedGrantList pubkyData={pubkyData} />
+			{showAuthorizedApps && <AuthorizedGrantList pubkyData={pubkyData} />}
 		</ScrollView>
 	);
 };

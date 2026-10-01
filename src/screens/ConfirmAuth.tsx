@@ -170,10 +170,11 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 		return authDetails?.capabilities ?? [];
 	}, [authDetails?.capabilities]);
 
+	const requestingClient = authDetails.client_id || xCallback?.xSource;
 	const titleText = isAuthorized
 		? t('auth.authorizationSuccessful')
-		: xCallback?.xSource
-			? t('auth.authorizeForApp', { appName: xCallback.xSource })
+		: requestingClient
+			? t('auth.authorizeForApp', { appName: requestingClient })
 			: t('auth.authorize');
 
 	const headerProgress =

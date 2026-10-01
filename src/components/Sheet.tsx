@@ -103,7 +103,14 @@ export const SheetScreen = ({
 				<HeaderNavButton style={styles.navButton} />
 			)}
 
-			<TextLgSb testID={titleTestID ?? `${id}-title`}>{titleText}</TextLgSb>
+			<TextLgSb
+				style={styles.title}
+				testID={titleTestID ?? `${id}-title`}
+				numberOfLines={1}
+				ellipsizeMode="tail"
+			>
+				{titleText}
+			</TextLgSb>
 
 			<View style={styles.navButton}>{headerRight}</View>
 		</View>
@@ -188,6 +195,12 @@ const styles = StyleSheet.create({
 		height: 24,
 		paddingHorizontal: 16,
 		marginBottom: 24,
+	},
+	title: {
+		flex: 1,
+		minWidth: 0,
+		marginHorizontal: 8,
+		textAlign: 'center',
 	},
 	navButton: {
 		height: 24,

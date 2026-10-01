@@ -17,8 +17,9 @@ import { truncateStr } from '../utils/pubky';
 import {
 	formatGrantTimestamp,
 	getGrantCapabilities,
+	getGrantExpiryLabel,
 	getGrantSubtitle,
-	getPermissionLabel,
+	parseGrantPermission,
 } from '../utils/sessionDisplay';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 
@@ -28,7 +29,9 @@ const AuthorizedGrantScreen = (): ReactElement => {
 	const { pubky, sessionId, grant } = route.params;
 	const pubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const capabilities = getGrantCapabilities(grant);
+	const permissions = capabilities.map(parseGrantPermission);
 	const pubkyUri = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
+	const expiry = getGrantExpiryLabel(t, grant.expires_at);
 
 	const handleRevoke = useCallback(() => {
 		showSheet('revoke-grant', { pubky, sessionId, grant });
@@ -61,20 +64,26 @@ const AuthorizedGrantScreen = (): ReactElement => {
 
 				<TextXsM style={styles.sectionTitle}>{t('activeSession.grantedPermissions')}</TextXsM>
 				<View style={styles.permissionList}>
-					{capabilities.map(capability => (
-						<View key={capability} style={styles.permissionRow}>
-							<Folder size={16} />
-							<TextXsB style={styles.permissionPath} numberOfLines={1} ellipsizeMode="middle">
-								{getPermissionLabel(capability)}
-							</TextXsB>
-							<TextXsM style={styles.permissionActions}>{t('activeSession.permissionActions')}</TextXsM>
-						</View>
-					))}
+					{permissions.map(({ path, actions }, index) => {
+						const actionLabels = actions.flatMap(action =>
+							action === 'read'
+								? [t('activeSession.permissionView')]
+								: [t('activeSession.permissionEdit'), t('activeSession.permissionDelete')],
+						);
+
+						return (
+							<View key={`${capabilities[index]}-${index}`} style={styles.permissionRow}>
+								<Folder size={16} />
+								<TextXsB style={styles.permissionPath} numberOfLines={1} ellipsizeMode="middle">
+									{path}
+								</TextXsB>
+								<TextXsM style={styles.permissionActions}>{actionLabels.join(', ')}</TextXsM>
+							</View>
+						);
+					})}
 				</View>
 
-				<TextXsM style={styles.expiry}>
-					{t('grants.expires', { date: formatGrantTimestamp(grant.expires_at) })}
-				</TextXsM>
+				<TextXsM style={styles.expiry}>{expiry}</TextXsM>
 
 				<View style={styles.buttonContainer}>
 					<Button

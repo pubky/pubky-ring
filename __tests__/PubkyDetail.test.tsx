@@ -50,8 +50,8 @@ jest.mock('../src/utils/sheetHelpers.ts', () => ({
 
 jest.mock('../src/store/selectors/pubkySelectors.ts', () => ({
 	__esModule: true,
-	canPubkyAuthorize: ({ signedUp, sourceApp }: { signedUp: boolean; sourceApp?: string }) =>
-		signedUp || !!sourceApp,
+	canManagePubkyGrants: ({ signedUp, sourceApp }: { signedUp: boolean; sourceApp?: string }) =>
+		signedUp && !sourceApp,
 }));
 
 const pubkyData = {
@@ -84,5 +84,17 @@ describe('PubkyDetail', () => {
 		);
 
 		expect(screen.getByTestId('AuthorizedGrantList')).toBeTruthy();
+	});
+
+	it('hides authorized apps for an adopted pubky', () => {
+		render(
+			<PubkyDetail
+				index={0}
+				pubkyData={{ ...pubkyData, signedUp: true, sourceApp: 'example.app' }}
+				onQRPress={jest.fn()}
+			/>,
+		);
+
+		expect(screen.queryByTestId('AuthorizedGrantList')).toBeNull();
 	});
 });

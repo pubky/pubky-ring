@@ -93,6 +93,7 @@
 		"authorizedApp": "Aplicación autorizada",
 		"loading": "Cargando aplicaciones autorizadas...",
 		"expires": "Caduca el {{date}}",
+		"neverExpires": "No caduca",
 		"revoke": "Revocar acceso de la aplicación",
 		"revokeAction": "Revocar",
 		"revokeConfirm": "¿Seguro que quiere revocar el acceso de esta aplicación en todos los dispositivos?",
@@ -188,7 +189,9 @@
 		"authorizedOn": "Autorizado el {{date}}",
 		"authorizedWithPubky": "Autorizado con Pubky",
 		"grantedPermissions": "Permisos concedidos",
-		"permissionActions": "Ver, editar, eliminar"
+		"permissionView": "Ver",
+		"permissionEdit": "Editar",
+		"permissionDelete": "Eliminar"
 	},
 	"errors": {
 		"failedToParseQR": "Fallo al analizar los datos del código QR",

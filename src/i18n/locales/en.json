@@ -93,6 +93,7 @@
 		"authorizedApp": "Authorized App",
 		"loading": "Loading authorized apps...",
 		"expires": "Expires {{date}}",
+		"neverExpires": "Never expires",
 		"revoke": "Revoke app access",
 		"revokeAction": "Revoke",
 		"revokeConfirm": "Are you sure you want to revoke this app's access on every device?",
@@ -188,7 +189,9 @@
 		"authorizedOn": "Authorized on {{date}}",
 		"authorizedWithPubky": "Authorized with Pubky",
 		"grantedPermissions": "Granted Permissions",
-		"permissionActions": "View, Edit, Delete"
+		"permissionView": "View",
+		"permissionEdit": "Edit",
+		"permissionDelete": "Delete"
 	},
 	"errors": {
 		"failedToParseQR": "Failed to parse QR code data",

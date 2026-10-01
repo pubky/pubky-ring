@@ -1,4 +1,4 @@
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
 import { Platform, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
@@ -181,9 +181,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 		}
 	}, [authDetails.kind, authUrl, authorizedGrantCount, xCallback, dispatch, handleClose, pubky, t]);
 
-	const authDetailCapabilities = useMemo(() => {
-		return authDetails?.capabilities ?? [];
-	}, [authDetails?.capabilities]);
+	const authDetailCapabilities = authDetails.capabilities ?? [];
 
 	const requestingClient = authDetails.client_id || xCallback?.xSource;
 	const titleText = isAuthorized

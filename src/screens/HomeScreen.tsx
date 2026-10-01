@@ -9,7 +9,7 @@ import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import { canPubkyAuthorize, getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
+import { canManagePubkyGrants, getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
 import HomeHeader from '../components/HomeHeader';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
@@ -89,7 +89,7 @@ const HomeScreen = (): ReactElement => {
 	useFocusEffect(
 		useCallback(() => {
 			pubkyArray.forEach(({ key: pubky, value }) => {
-				if (canPubkyAuthorize(value)) {
+				if (canManagePubkyGrants(value)) {
 					refreshAuthorizedGrants({ pubky, dispatch }).then();
 				}
 			});

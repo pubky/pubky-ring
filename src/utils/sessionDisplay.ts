@@ -16,12 +16,35 @@ export const formatSessionTimestamp = (timestamp: number): string => {
 		minute: '2-digit',
 	}).format(date);
 };
-export const getPermissionLabel = (capability: string): string => {
-	if (capability === '/') {
-		return '/';
+
+export type GrantPermissionAction = 'read' | 'write';
+
+export type GrantPermission = {
+	path: string;
+	actions: GrantPermissionAction[];
+};
+
+export const parseGrantPermission = (capability: string): GrantPermission => {
+	const match = capability.match(/^(.*):([rw]+)$/);
+	const scope = match?.[1] ?? capability;
+	const encodedActions = match?.[2] ?? '';
+	const actions: GrantPermissionAction[] = [];
+
+	if (encodedActions.includes('r')) {
+		actions.push('read');
+	}
+	if (encodedActions.includes('w')) {
+		actions.push('write');
 	}
 
-	return capability.endsWith('/') ? capability : `${capability}/`;
+	return {
+		path: scope === '/' || scope.endsWith('/') ? scope : `${scope}/`,
+		actions,
+	};
+};
+
+export const getPermissionLabel = (capability: string): string => {
+	return parseGrantPermission(capability).path;
 };
 
 export const getGrantCapabilities = (grant: GrantInfo): string[] =>
@@ -41,3 +64,11 @@ export const getGrantSubtitle = (t: TFunction, grant: GrantInfo): string => {
 };
 
 export const formatGrantTimestamp = (timestamp: number): string => formatSessionTimestamp(timestamp * 1000);
+
+export const getGrantExpiryLabel = (t: TFunction, timestamp: number): string => {
+	if (timestamp <= 0) {
+		return t('grants.neverExpires');
+	}
+
+	return t('grants.expires', { date: formatGrantTimestamp(timestamp) });
+};

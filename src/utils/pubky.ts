@@ -105,8 +105,11 @@ const omitLocalGrants = (grants: GrantInfo[], localGrantIds: Array<string | unde
 		return grants.filter(grant => !knownGrantIds.has(grant.grant_id));
 	}
 
-	// Older native builds do not return grant metadata. Continue protecting
-	// every Ring grant rather than risk allowing the app to revoke itself.
+	// Older persisted sessions may not include grant metadata. In that degraded
+	// state, fail closed by hiding grants that claim Ring's client id rather than
+	// risk letting Ring revoke its own management grant. Client ids are
+	// self-asserted, so a colliding third-party grant will also be hidden until a
+	// local grant id can be recovered by revalidating a Ring session.
 	return grants.filter(grant => grant.client_id !== appApplicationId);
 };
 

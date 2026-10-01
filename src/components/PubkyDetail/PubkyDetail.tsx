@@ -5,7 +5,7 @@ import AuthorizedGrantList from './AuthorizedGrantList';
 import { PubkyData } from '../../navigation/types.ts';
 import { showBackupSheet } from '../../utils/sheetHelpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
-import { canPubkyAuthorize } from '../../store/selectors/pubkySelectors.ts';
+import { canManagePubkyGrants } from '../../store/selectors/pubkySelectors.ts';
 import { HEADER_HEIGHT } from '../AppHeader.tsx';
 import SafeAreaInset from '../SafeAreaInset.tsx';
 
@@ -17,7 +17,7 @@ export interface PubkyDetailProps {
 
 export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
 	const { pubky } = pubkyData;
-	const showAuthorizedApps = canPubkyAuthorize(pubkyData);
+	const showAuthorizedApps = canManagePubkyGrants(pubkyData);
 
 	const handleDelete = useCallback(() => {
 		showSheet('delete-pubky', { pubky });

@@ -1,4 +1,4 @@
-import { ok } from '@synonymdev/result';
+import { err, ok } from '@synonymdev/result';
 import * as ReactNativePubky from '@synonymdev/react-native-pubky';
 import { getSessionSecret } from '../src/utils/keychain.ts';
 import { getPubkyDataFromStore } from '../src/utils/store-helpers.ts';
@@ -9,6 +9,7 @@ jest.mock('@synonymdev/react-native-pubky', () => ({
 	listGrants: jest.fn(),
 	revokeGrant: jest.fn(),
 	revalidateSession: jest.fn(),
+	signIn: jest.fn(),
 }));
 
 jest.mock('uuid', () => ({
@@ -57,10 +58,12 @@ const {
 	listGrants: mockListGrants,
 	revokeGrant: mockRevokeGrant,
 	revalidateSession: mockRevalidateSession,
+	signIn: mockSignIn,
 } = ReactNativePubky as unknown as {
 	listGrants: jest.Mock;
 	revokeGrant: jest.Mock;
 	revalidateSession: jest.Mock;
+	signIn: jest.Mock;
 };
 
 const thirdPartyGrant = {
@@ -81,12 +84,19 @@ describe('grant management', () => {
 		mockRevalidateSession.mockResolvedValue(ok({ grant_id: 'current-ring-grant' }));
 	});
 
-	it('lists other grants, including Ring grants from other sessions, without exposing the current grant', async () => {
+	it('excludes every grant backed by a local Ring session', async () => {
+		getPubkyDataFromStoreMock.mockReturnValue({
+			sessions: [
+				{ id: 'root-session', grant_id: 'current-ring-grant', capabilities: ['/:rw'], created_at: 1 },
+				{ id: 'old-session', grant_id: 'old-local-ring-grant', capabilities: ['/:rw'], created_at: 2 },
+			],
+		} as ReturnType<typeof getPubkyDataFromStore>);
 		mockListGrants.mockResolvedValue(
 			ok([
 				thirdPartyGrant,
 				{ ...thirdPartyGrant, grant_id: 'current-ring-grant', client_id: 'app.pubkyring' },
-				{ ...thirdPartyGrant, grant_id: 'other-ring-grant', client_id: 'app.pubkyring' },
+				{ ...thirdPartyGrant, grant_id: 'old-local-ring-grant', client_id: 'app.pubkyring' },
+				{ ...thirdPartyGrant, grant_id: 'other-device-ring-grant', client_id: 'app.pubkyring' },
 			]),
 		);
 
@@ -97,13 +107,13 @@ describe('grant management', () => {
 			expect(result.value).toEqual({
 				grants: [
 					thirdPartyGrant,
-					{ ...thirdPartyGrant, grant_id: 'other-ring-grant', client_id: 'app.pubkyring' },
+					{ ...thirdPartyGrant, grant_id: 'other-device-ring-grant', client_id: 'app.pubkyring' },
 				],
 				sessionId: 'root-session',
 			});
 		}
 		expect(mockListGrants).toHaveBeenCalledWith('root-grant-secret');
-		expect(mockRevalidateSession).toHaveBeenCalledWith('root-grant-secret');
+		expect(mockRevalidateSession).not.toHaveBeenCalled();
 	});
 
 	it('protects every Ring grant when current grant metadata is unavailable', async () => {
@@ -118,6 +128,15 @@ describe('grant management', () => {
 		if (result.isOk()) {
 			expect(result.value.grants).toEqual([thirdPartyGrant]);
 		}
+	});
+
+	it('does not create a replacement Ring grant when a stored session cannot list grants', async () => {
+		mockListGrants.mockResolvedValue(err('Offline'));
+
+		const result = await listAuthorizedGrants({ pubky: 'user-pubky', dispatch: jest.fn() });
+
+		expect(result.isErr()).toBe(true);
+		expect(mockSignIn).not.toHaveBeenCalled();
 	});
 
 	it('revokes a grant with the selected management session', async () => {

@@ -9,11 +9,16 @@ import {
 	getPubkyKeyBySignupToken,
 } from '../store/selectors/pubkySelectors.ts';
 import { EBackupPreference, Pubky, TPubkys } from '../types/pubky.ts';
+import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
 
 export const getStore = (): RootState => store.getState();
 
 export const getAutoAuthFromStore = (): boolean => {
 	return getAutoAuth(getStore()) ?? false;
+};
+
+export const getAuthorizedGrantCountFromStore = (pubky: string): number => {
+	return getAuthorizedGrantCount(getStore(), pubky);
 };
 
 export const getAllPubkysFromStore = (): TPubkys => {

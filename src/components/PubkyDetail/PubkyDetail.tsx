@@ -7,6 +7,7 @@ import { showBackupSheet } from '../../utils/sheetHelpers.ts';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { canPubkyAuthorize } from '../../store/selectors/pubkySelectors.ts';
 import { HEADER_HEIGHT } from '../AppHeader.tsx';
+import SafeAreaInset from '../SafeAreaInset.tsx';
 
 export interface PubkyDetailProps {
 	index: number;
@@ -37,6 +38,7 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 				onBackup={handleBackup}
 			/>
 			{showAuthorizedApps && <AuthorizedGrantList pubkyData={pubkyData} />}
+			<SafeAreaInset edge="bottom" />
 		</ScrollView>
 	);
 };

@@ -14,11 +14,15 @@ import { TextBaseB, TextBaseM, TextSmM } from '../theme/typography.ts';
 import { revokeAuthorizedGrant } from '../utils/pubky.ts';
 import { getGrantSubtitle } from '../utils/sessionDisplay.ts';
 import { hideSheet } from './sheetNavigation.tsx';
+import { useDispatch } from 'react-redux';
+import { removeAuthorizedGrant } from '../store/slices/authorizedGrantsSlice.ts';
+import { refreshAuthorizedGrants } from '../utils/authorizedGrants.ts';
 
 const RevokeGrantSheet = ({
 	route,
 }: NativeStackScreenProps<RootStackParamList, 'RevokeGrantSheet'>): ReactElement => {
 	const { t } = useTranslation();
+	const dispatch = useDispatch();
 	const navigation = useTypedNavigation();
 	const { pubky, sessionId, grant } = route.params;
 	const [isRevoking, setIsRevoking] = useState(false);
@@ -45,6 +49,8 @@ const RevokeGrantSheet = ({
 			return;
 		}
 
+		dispatch(removeAuthorizedGrant({ pubky, grantId: grant.grant_id }));
+		refreshAuthorizedGrants({ pubky, dispatch, forceReload: true }).then();
 		hideSheet('revoke-grant');
 		navigation.goBack();
 		showToast({
@@ -52,7 +58,7 @@ const RevokeGrantSheet = ({
 			title: t('grants.revoked'),
 			description: t('grants.revokedDescription'),
 		});
-	}, [grant.grant_id, navigation, pubky, sessionId, t]);
+	}, [dispatch, grant.grant_id, navigation, pubky, sessionId, t]);
 
 	return (
 		<Sheet id="revoke-grant" title={t('grants.revoke')} gradientType="brand" showBackButton={false}>

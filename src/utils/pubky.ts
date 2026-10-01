@@ -99,9 +99,10 @@ const getRevalidatedGrantId = async (sessionSecret: string): Promise<string | un
 	return result.isOk() ? getGrantId(result.value) : undefined;
 };
 
-const omitCurrentGrant = (grants: GrantInfo[], currentGrantId?: string): GrantInfo[] => {
-	if (currentGrantId) {
-		return grants.filter(grant => grant.grant_id !== currentGrantId);
+const omitLocalGrants = (grants: GrantInfo[], localGrantIds: Array<string | undefined>): GrantInfo[] => {
+	const knownGrantIds = new Set(localGrantIds.filter((grantId): grantId is string => Boolean(grantId)));
+	if (knownGrantIds.size > 0) {
+		return grants.filter(grant => !knownGrantIds.has(grant.grant_id));
 	}
 
 	// Older native builds do not return grant metadata. Continue protecting
@@ -833,6 +834,7 @@ export const signInToHomeserver = async ({
 
 const listGrantsWithStoredSession = async (pubky: string): Promise<Result<AuthorizedGrants> | undefined> => {
 	const sessions = getPubkyDataFromStore(pubky)?.sessions ?? [];
+	const storedGrantIds = sessions.map(session => session.grant_id);
 	let lastError: Error | undefined;
 
 	for (const session of sessions) {
@@ -846,7 +848,7 @@ const listGrantsWithStoredSession = async (pubky: string): Promise<Result<Author
 		if (grantsRes.isOk()) {
 			const currentGrantId = session.grant_id ?? (await getRevalidatedGrantId(sessionSecretRes.value));
 			return ok({
-				grants: omitCurrentGrant(grantsRes.value, currentGrantId),
+				grants: omitLocalGrants(grantsRes.value, [...storedGrantIds, currentGrantId]),
 				sessionId: session.id,
 			});
 		}
@@ -868,7 +870,7 @@ export const listAuthorizedGrants = async ({
 	}
 
 	const storedResult = await listGrantsWithStoredSession(pubky);
-	if (storedResult?.isOk()) {
+	if (storedResult) {
 		return storedResult;
 	}
 
@@ -883,7 +885,7 @@ export const listAuthorizedGrants = async ({
 	}
 
 	return ok({
-		grants: omitCurrentGrant(grantsRes.value, getGrantId(signInRes.value)),
+		grants: omitLocalGrants(grantsRes.value, [getGrantId(signInRes.value)]),
 		sessionId: uuid(signInRes.value.grant_secret, SESSION_ID_NAMESPACE),
 	});
 };

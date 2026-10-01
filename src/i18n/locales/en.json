@@ -85,13 +85,13 @@
 		"authorized": "Authorized with: {{pubky}}",
 		"signedInSuccessfully": "Signed in to {{server}} successfully",
 		"timeoutError": "The authentication process took too long. Please try again.",
-		"authorizeForApp": "Authorize {{appName}}"
+		"authorizeForApp": "Authorize {{appName}}",
+		"authorizedForApp": "Authorized {{appName}}"
 	},
 	"grants": {
 		"title": "Authorized Apps",
 		"authorizedApp": "Authorized App",
 		"loading": "Loading authorized apps...",
-		"emptyDescription": "Apps you authorize will appear here.",
 		"expires": "Expires {{date}}",
 		"revoke": "Revoke app access",
 		"revokeAction": "Revoke",

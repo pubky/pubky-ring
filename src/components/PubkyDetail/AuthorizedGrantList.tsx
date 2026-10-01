@@ -1,7 +1,7 @@
-import React, { Fragment, memo, ReactElement, useCallback, useState } from 'react';
+import React, { Fragment, memo, ReactElement, useCallback } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Button from '../Button';
 import { ChevronRight, Key } from '../../icons';
@@ -10,8 +10,10 @@ import { PubkyData } from '../../navigation/types';
 import { ActivityIndicator, ThemedView } from '../../theme/components';
 import { Text2Xl, TextBaseB, TextSmM, TextXsSb } from '../../theme/typography';
 import { GrantInfo } from '../../types/pubky';
-import { listAuthorizedGrants } from '../../utils/pubky';
 import { getGrantSubtitle } from '../../utils/sessionDisplay';
+import { RootState } from '../../store';
+import { getAuthorizedGrantsEntry } from '../../store/selectors/authorizedGrantsSelectors.ts';
+import { refreshAuthorizedGrants } from '../../utils/authorizedGrants.ts';
 
 type AuthorizedGrantListProps = {
 	pubkyData: PubkyData;
@@ -50,28 +52,19 @@ const AuthorizedGrantRow = memo(({ grant, pubky, sessionId }: AuthorizedGrantRow
 	);
 });
 
-const AuthorizedGrantList = ({ pubkyData }: AuthorizedGrantListProps): ReactElement => {
+const AuthorizedGrantList = ({ pubkyData }: AuthorizedGrantListProps): ReactElement | null => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
-	const [grants, setGrants] = useState<GrantInfo[]>([]);
-	const [sessionId, setSessionId] = useState<string>();
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string>();
+	const { grants, count, sessionId, status, error, hasLoaded } = useSelector((state: RootState) =>
+		getAuthorizedGrantsEntry(state, pubkyData.pubky),
+	);
+	const loading = status === 'idle' || (status === 'loading' && !hasLoaded);
+	const reconciling = status === 'loading' && count > grants.length;
+	const showLoading = loading || reconciling;
+	const showError = status === 'error';
 
 	const loadGrants = useCallback(async (): Promise<void> => {
-		setLoading(true);
-		setError(undefined);
-		const result = await listAuthorizedGrants({ pubky: pubkyData.pubky, dispatch });
-
-		if (result.isErr()) {
-			setError(result.error.message);
-			setGrants([]);
-			setSessionId(undefined);
-		} else {
-			setGrants(result.value.grants);
-			setSessionId(result.value.sessionId);
-		}
-		setLoading(false);
+		await refreshAuthorizedGrants({ pubky: pubkyData.pubky, dispatch });
 	}, [dispatch, pubkyData.pubky]);
 
 	useFocusEffect(
@@ -80,30 +73,32 @@ const AuthorizedGrantList = ({ pubkyData }: AuthorizedGrantListProps): ReactElem
 		}, [loadGrants]),
 	);
 
+	if (!showLoading && !showError && (count === 0 || !sessionId)) {
+		return null;
+	}
+
 	return (
 		<View style={styles.container}>
 			<View style={styles.titleRow}>
 				<Text2Xl>{t('grants.title')}</Text2Xl>
-				{!loading && !error && (
+				{!showError && count > 0 && (
 					<ThemedView style={styles.countBadge} colorName="pubkyApp">
-						<TextXsSb colorName="primaryForeground">{grants.length}</TextXsSb>
+						<TextXsSb colorName="primaryForeground">{count}</TextXsSb>
 					</ThemedView>
 				)}
 			</View>
 
-			{loading ? (
+			{showLoading ? (
 				<View style={styles.statusRow}>
 					<ActivityIndicator size="small" />
 					<TextSmM>{t('grants.loading')}</TextSmM>
 				</View>
-			) : error ? (
+			) : showError ? (
 				<View style={styles.errorContainer}>
 					<TextSmM>{error}</TextSmM>
 					<Button text={t('common.retry')} size="small" onPress={loadGrants} />
 				</View>
-			) : grants.length === 0 || !sessionId ? (
-				<TextSmM>{t('grants.emptyDescription')}</TextSmM>
-			) : (
+			) : sessionId ? (
 				<View style={styles.list}>
 					{grants.map((grant, grantIndex) => (
 						<Fragment key={grant.grant_id}>
@@ -114,7 +109,7 @@ const AuthorizedGrantList = ({ pubkyData }: AuthorizedGrantListProps): ReactElem
 						</Fragment>
 					))}
 				</View>
-			)}
+			) : null}
 		</View>
 	);
 };

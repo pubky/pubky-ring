@@ -26,6 +26,11 @@ import { CheckCircle, Folder } from '../icons/index.ts';
 import CircularProgressBar from '../components/CircularProgressBar.tsx';
 import PermissionCard from '../components/PermissionCard.tsx';
 import type { AuthStackParamList } from '../sheets/types.ts';
+import {
+	refreshAuthorizedGrants,
+	refreshAuthorizedGrantsAfterAuthorization,
+} from '../utils/authorizedGrants.ts';
+import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
 
 interface Capability {
 	path: string;
@@ -66,6 +71,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 	const dispatch = useDispatch();
 
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, pubky));
+	const authorizedGrantCount = useSelector((state: RootState) => getAuthorizedGrantCount(state, pubky));
 
 	const checkOpacity = useSharedValue(0);
 	const checkScale = useSharedValue(0.5); // Start half size
@@ -141,6 +147,15 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				return;
 			}
 			setIsAuthorized(true);
+			if (authDetails.kind === 'signin_grant' || authDetails.kind === 'signup_grant') {
+				refreshAuthorizedGrantsAfterAuthorization({
+					pubky,
+					dispatch,
+					currentCount: authorizedGrantCount,
+				}).then();
+			} else {
+				refreshAuthorizedGrants({ pubky, dispatch, forceReload: true }).then();
+			}
 			if (xCallback?.xSuccess) {
 				await sleep(FADE_DURATION + 300);
 				handleClose();
@@ -164,7 +179,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 		} finally {
 			setAuthorizing(false);
 		}
-	}, [authUrl, xCallback, dispatch, handleClose, pubky, t]);
+	}, [authDetails.kind, authUrl, authorizedGrantCount, xCallback, dispatch, handleClose, pubky, t]);
 
 	const authDetailCapabilities = useMemo(() => {
 		return authDetails?.capabilities ?? [];
@@ -172,7 +187,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 
 	const requestingClient = authDetails.client_id || xCallback?.xSource;
 	const titleText = isAuthorized
-		? t('auth.authorizationSuccessful')
+		? requestingClient
+			? t('auth.authorizedForApp', { appName: requestingClient })
+			: t('auth.authorizationSuccessful')
 		: requestingClient
 			? t('auth.authorizeForApp', { appName: requestingClient })
 			: t('auth.authorize');

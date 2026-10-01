@@ -85,13 +85,13 @@
 		"authorized": "Autorizado con: {{pubky}}",
 		"signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
-		"authorizeForApp": "Autorizar {{appName}}"
+		"authorizeForApp": "Autorizar {{appName}}",
+		"authorizedForApp": "Autorizado {{appName}}"
 	},
 	"grants": {
 		"title": "Aplicaciones autorizadas",
 		"authorizedApp": "Aplicación autorizada",
 		"loading": "Cargando aplicaciones autorizadas...",
-		"emptyDescription": "Las aplicaciones que autorice aparecerán aquí.",
 		"expires": "Caduca el {{date}}",
 		"revoke": "Revocar acceso de la aplicación",
 		"revokeAction": "Revocar",

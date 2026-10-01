@@ -23,6 +23,16 @@ jest.mock('../src/components/PubkyDetail/AuthorizedGrantList.tsx', () => {
 	};
 });
 
+jest.mock('../src/components/SafeAreaInset.tsx', () => {
+	const ReactMock = require('react');
+	const { View } = require('react-native');
+
+	return {
+		__esModule: true,
+		default: () => ReactMock.createElement(View, { testID: 'BottomSafeAreaInset' }),
+	};
+});
+
 jest.mock('../src/components/AppHeader.tsx', () => ({
 	__esModule: true,
 	HEADER_HEIGHT: 56,
@@ -61,6 +71,7 @@ describe('PubkyDetail', () => {
 		render(<PubkyDetail index={0} pubkyData={pubkyData} onQRPress={jest.fn()} />);
 
 		expect(screen.queryByTestId('AuthorizedGrantList')).toBeNull();
+		expect(screen.getByTestId('BottomSafeAreaInset')).toBeTruthy();
 	});
 
 	it('shows authorized apps when the pubky is configured', () => {

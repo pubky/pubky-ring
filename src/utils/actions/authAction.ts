@@ -14,10 +14,11 @@ import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
-import { getAutoAuthFromStore } from '../store-helpers';
+import { getAuthorizedGrantCountFromStore, getAutoAuthFromStore } from '../store-helpers';
 import { openXSuccess, openXError } from '../xCallback';
 import i18n from '../../i18n';
 import type { ConfirmAuthPayload } from '../../sheets/types.ts';
+import { refreshAuthorizedGrants, refreshAuthorizedGrantsAfterAuthorization } from '../authorizedGrants.ts';
 
 export type AuthActionData = {
 	action: InputAction.Auth;
@@ -106,6 +107,9 @@ export const handleAuthAction = async (
 			authUrl: rawUrl,
 			dispatch,
 			xCallback,
+			isGrantAuth:
+				confirmAuthPayload.value.authDetails.kind === 'signin_grant' ||
+				confirmAuthPayload.value.authDetails.kind === 'signup_grant',
 		});
 	}
 
@@ -121,11 +125,13 @@ const handleAutoAuth = async ({
 	authUrl,
 	dispatch,
 	xCallback,
+	isGrantAuth,
 }: {
 	pubky: string;
 	authUrl: string;
 	dispatch: ActionContext['dispatch'];
 	xCallback?: XCallbackParams;
+	isGrantAuth: boolean;
 }): Promise<Result<string>> => {
 	const res = await performAuth({
 		pubky,
@@ -134,6 +140,15 @@ const handleAutoAuth = async ({
 	});
 
 	if (res.isOk()) {
+		if (isGrantAuth) {
+			refreshAuthorizedGrantsAfterAuthorization({
+				pubky,
+				dispatch,
+				currentCount: getAuthorizedGrantCountFromStore(pubky),
+			}).then();
+		} else {
+			refreshAuthorizedGrants({ pubky, dispatch, forceReload: true }).then();
+		}
 		showToast({
 			type: 'success',
 			title: i18n.t('common.success'),

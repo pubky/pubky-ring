@@ -104,7 +104,7 @@ const RecoveryPhraseScreen = ({
 
 			{!smallScreen && <PubkyCard style={styles.card} name={pubkyName} publicKey={promptPayload.pubky} />}
 
-			<View style={styles.buttonContainer}>
+			<View style={[styles.buttonContainer, smallScreen && styles.smallScreenButtonContainer]}>
 				<Button
 					text={t('backup.finishBackup')}
 					variant="secondary"
@@ -167,6 +167,8 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 12,
+	},
+	smallScreenButtonContainer: {
 		marginTop: 'auto',
 	},
 });

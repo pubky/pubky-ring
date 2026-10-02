@@ -59,6 +59,10 @@ react {
  */
 def enableProguardInReleaseBuilds = false
 
+// Release builds are signed by default. CI may explicitly opt into an unsigned
+// bundle so a separate, protected job can sign the exact artifact afterwards.
+def unsignedRelease = project.findProperty("PUBKYRING_UNSIGNED_RELEASE") == "true"
+
 def enableSeparateBuildPerCPUArchitecture = true
 
 def reactNativeArchitectures() {
@@ -143,7 +147,9 @@ android {
         }
         release {
             // Only e2e builds opt in to the debug keystore, see the preReleaseBuild check below.
-            signingConfig project.hasProperty('PUBKYRING_DEBUG_SIGNING') ? signingConfigs.debug : signingConfigs.release
+            signingConfig unsignedRelease
+                    ? null
+                    : (project.hasProperty('PUBKYRING_DEBUG_SIGNING') ? signingConfigs.debug : signingConfigs.release)
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
         }
@@ -155,9 +161,12 @@ android {
 tasks.configureEach { task ->
     if (task.name == 'preReleaseBuild') {
         task.doFirst {
-            if (!project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE') && !project.hasProperty('PUBKYRING_DEBUG_SIGNING')) {
+            if (!project.hasProperty('PUBKYRING_UPLOAD_STORE_FILE') &&
+                    !project.hasProperty('PUBKYRING_DEBUG_SIGNING') &&
+                    !unsignedRelease) {
                 throw new GradleException('Release builds need the PUBKYRING_UPLOAD_* signing properties. ' +
-                        'Pass -PPUBKYRING_DEBUG_SIGNING=true only for test builds.')
+                        'Pass -PPUBKYRING_UNSIGNED_RELEASE=true for a separately signed bundle, or ' +
+                        '-PPUBKYRING_DEBUG_SIGNING=true only for test builds.')
             }
         }
     }

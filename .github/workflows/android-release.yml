@@ -1,0 +1,244 @@
+name: Android Release Bundle
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: android-release
+  cancel-in-progress: false
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  build-unsigned:
+    name: Build unsigned AAB
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Verify release tag
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if ! git merge-base --is-ancestor HEAD origin/main; then
+            echo "Release tags must point to a commit on main" >&2
+            exit 1
+          fi
+
+          version_name="$(sed -n 's/^[[:space:]]*versionName[[:space:]]*"\([^"]*\)".*/\1/p' android/app/build.gradle)"
+          if [[ -z "$version_name" || "$GITHUB_REF_NAME" != "v$version_name" ]]; then
+            echo "Release tag $GITHUB_REF_NAME does not match Android versionName $version_name" >&2
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: 'yarn'
+
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Set up Gradle cache
+        uses: gradle/actions/setup-gradle@v5
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Run checks
+        run: |
+          yarn lint
+          yarn typecheck
+          yarn test --runInBand
+
+      - name: Build unsigned release bundle
+        working-directory: android
+        run: >-
+          ./gradlew :app:bundleRelease
+          -PPUBKYRING_UNSIGNED_RELEASE=true
+          --no-build-cache
+          --no-daemon
+
+      - name: Stage and verify unsigned bundle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          aab_path="android/app/build/outputs/bundle/release/app-release.aab"
+          if [[ ! -f "$aab_path" ]]; then
+            echo "Release bundle was not created at $aab_path" >&2
+            exit 1
+          fi
+
+          if unzip -Z1 "$aab_path" | grep -Eq '^META-INF/[^/]+\.(RSA|DSA|EC|SF)$'; then
+            echo "Expected an unsigned AAB, but signature files were found" >&2
+            exit 1
+          fi
+
+          artifact_dir="$RUNNER_TEMP/android-unsigned"
+          artifact_name="pubky-ring-${GITHUB_SHA}-unsigned.aab"
+          mkdir -p "$artifact_dir"
+          cp "$aab_path" "$artifact_dir/$artifact_name"
+          (
+            cd "$artifact_dir"
+            sha256sum "$artifact_name" > "$artifact_name.sha256"
+          )
+          printf '%s\n' "$GITHUB_SHA" > "$artifact_dir/commit-sha.txt"
+
+      - name: Upload unsigned bundle for signing job
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-unsigned-aab-${{ github.sha }}
+          path: ${{ runner.temp }}/android-unsigned/
+          if-no-files-found: error
+          retention-days: 1
+
+  sign-release:
+    name: Sign release AAB
+    needs: build-unsigned
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: android-release
+
+    steps:
+      - name: Set up Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      - name: Download unsigned bundle
+        uses: actions/download-artifact@v7
+        with:
+          name: android-unsigned-aab-${{ github.sha }}
+          path: ${{ runner.temp }}/android-unsigned
+
+      - name: Validate upload key
+        shell: bash
+        env:
+          UPLOAD_KEYSTORE_BASE64: ${{ secrets.PUBKYRING_UPLOAD_KEYSTORE_BASE64 }}
+          UPLOAD_STORE_PASSWORD: ${{ secrets.PUBKYRING_UPLOAD_STORE_PASSWORD }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.PUBKYRING_UPLOAD_KEY_ALIAS }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ vars.PUBKYRING_UPLOAD_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+
+          for name in UPLOAD_KEYSTORE_BASE64 UPLOAD_STORE_PASSWORD UPLOAD_KEY_ALIAS EXPECTED_UPLOAD_CERT_SHA256; do
+            if [[ -z "${!name:-}" ]]; then
+              echo "Required Android release setting is missing: $name" >&2
+              exit 1
+            fi
+          done
+
+          keystore_path="$RUNNER_TEMP/pubky-ring-upload.jks"
+          printf '%s' "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > "$keystore_path"
+          chmod 600 "$keystore_path"
+
+          actual_fingerprint="$(
+            keytool -list -v \
+              -keystore "$keystore_path" \
+              -storepass "$UPLOAD_STORE_PASSWORD" \
+              -alias "$UPLOAD_KEY_ALIAS" \
+            | awk -F'SHA256: ' '/SHA256: / { print $2; exit }' \
+            | tr -d '[:space:]:' \
+            | tr '[:lower:]' '[:upper:]'
+          )"
+          expected_fingerprint="$(
+            printf '%s' "$EXPECTED_UPLOAD_CERT_SHA256" \
+            | tr -d '[:space:]:' \
+            | tr '[:lower:]' '[:upper:]'
+          )"
+
+          if [[ -z "$actual_fingerprint" || "$actual_fingerprint" != "$expected_fingerprint" ]]; then
+            echo "Upload certificate fingerprint does not match the configured release key" >&2
+            exit 1
+          fi
+
+          printf 'UPLOAD_KEYSTORE_PATH=%s\n' "$keystore_path" >> "$GITHUB_ENV"
+
+      - name: Sign and verify release bundle
+        shell: bash
+        env:
+          UPLOAD_STORE_PASSWORD: ${{ secrets.PUBKYRING_UPLOAD_STORE_PASSWORD }}
+          UPLOAD_KEY_ALIAS: ${{ secrets.PUBKYRING_UPLOAD_KEY_ALIAS }}
+          UPLOAD_KEY_PASSWORD: ${{ secrets.PUBKYRING_UPLOAD_KEY_PASSWORD }}
+          EXPECTED_UPLOAD_CERT_SHA256: ${{ vars.PUBKYRING_UPLOAD_CERT_SHA256 }}
+        run: |
+          set -euo pipefail
+
+          unsigned_aab="$(find "$RUNNER_TEMP/android-unsigned" -maxdepth 1 -name '*-unsigned.aab' -print -quit)"
+          if [[ -z "$unsigned_aab" ]]; then
+            echo "Unsigned AAB was not found" >&2
+            exit 1
+          fi
+
+          signed_dir="$RUNNER_TEMP/android-release"
+          signed_name="pubky-ring-${GITHUB_SHA}.aab"
+          signed_aab="$signed_dir/$signed_name"
+          mkdir -p "$signed_dir"
+
+          jarsigner \
+            -keystore "$UPLOAD_KEYSTORE_PATH" \
+            -storepass "$UPLOAD_STORE_PASSWORD" \
+            -keypass "$UPLOAD_KEY_PASSWORD" \
+            -signedjar "$signed_aab" \
+            "$unsigned_aab" \
+            "$UPLOAD_KEY_ALIAS"
+
+          jarsigner -verify "$signed_aab"
+
+          signed_fingerprint="$(
+            keytool -printcert -jarfile "$signed_aab" \
+            | awk -F'SHA256: ' '/SHA256: / { print $2; exit }' \
+            | tr -d '[:space:]:' \
+            | tr '[:lower:]' '[:upper:]'
+          )"
+          expected_fingerprint="$(
+            printf '%s' "$EXPECTED_UPLOAD_CERT_SHA256" \
+            | tr -d '[:space:]:' \
+            | tr '[:lower:]' '[:upper:]'
+          )"
+
+          if [[ -z "$signed_fingerprint" || "$signed_fingerprint" != "$expected_fingerprint" ]]; then
+            echo "Signed AAB certificate does not match the configured upload certificate" >&2
+            exit 1
+          fi
+
+          (
+            cd "$signed_dir"
+            sha256sum "$signed_name" > "$signed_name.sha256"
+          )
+          printf 'tag=%s\ncommit=%s\nrun=%s\ncertificate_sha256=%s\n' \
+            "$GITHUB_REF_NAME" \
+            "$GITHUB_SHA" \
+            "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID" \
+            "$signed_fingerprint" \
+            > "$signed_dir/release-metadata.txt"
+
+      - name: Upload signed release bundle
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-release-aab-${{ github.sha }}
+          path: ${{ runner.temp }}/android-release/
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Remove upload keystore
+        if: always()
+        run: rm -f "$RUNNER_TEMP/pubky-ring-upload.jks"

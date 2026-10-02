@@ -102,10 +102,10 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.pubkyring"
+        applicationId "to.pubky.ring"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
+        versionCode 27
         versionName "2.0"
 
         // splits.abi above only picks which ABIs are compiled from source and which

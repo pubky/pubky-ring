@@ -16,6 +16,7 @@ import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { ThemedView } from '../theme/components.ts';
 import { shadows } from '../theme/shadows.ts';
 import type { BackupStackParamList } from '../sheets/types.ts';
+import { isSmallScreen } from '../utils/helpers.ts';
 
 const dummyMnemonicWords = Array.from({ length: 12 }, () => 'secret');
 
@@ -27,6 +28,7 @@ const RecoveryPhraseScreen = ({
 	const [isBlurred, setIsBlurred] = useState<boolean>(true);
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, promptPayload.pubky, 12));
 	const { confirmPubkyBackup } = usePubkyManagement();
+	const smallScreen = isSmallScreen();
 
 	const mnemonicWords = useMemo(() => {
 		if (!promptPayload.mnemonic) {
@@ -100,7 +102,7 @@ const RecoveryPhraseScreen = ({
 
 			<TextSmM style={styles.warningText}>{t('backup.recoveryWarning')}</TextSmM>
 
-			<PubkyCard style={styles.card} name={pubkyName} publicKey={promptPayload.pubky} />
+			{!smallScreen && <PubkyCard style={styles.card} name={pubkyName} publicKey={promptPayload.pubky} />}
 
 			<View style={styles.buttonContainer}>
 				<Button
@@ -165,6 +167,7 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 12,
+		marginTop: 'auto',
 	},
 });
 

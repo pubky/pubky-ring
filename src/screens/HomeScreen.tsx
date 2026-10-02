@@ -2,13 +2,14 @@ import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
+import { useFocusEffect } from '@react-navigation/native';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import Button from '../components/Button';
 import { reorderPubkys } from '../store/slices/pubkysSlice.ts';
 import PubkyBox from '../components/PubkyBox.tsx';
 import DraggableFlatList, { ScaleDecorator, RenderItemParams } from 'react-native-draggable-flatlist';
-import { getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
+import { canManagePubkyGrants, getHomeScreenData } from '../store/selectors/pubkySelectors.ts';
 import HomeHeader from '../components/HomeHeader';
 import { RootState } from '../store';
 import { useTranslation } from 'react-i18next';
@@ -21,6 +22,8 @@ import { useReplacementRelease } from '../hooks/useReplacementRelease.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import ExternalPubkyBox from '../components/ExternalPubkyBox.tsx';
 import { useExternalPubkys } from '../hooks/useExternalPubkys.ts';
+import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
+import { refreshAuthorizedGrants } from '../utils/authorizedGrants.ts';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -40,18 +43,26 @@ const PubkyItem = memo(
 		isActive: boolean;
 		index: number;
 		loading?: boolean;
-	}) => (
-		<ScaleDecorator>
-			<PubkyBox
-				pubky={item.key}
-				pubkyData={item.value}
-				index={index}
-				onLongPress={drag}
-				disabled={isActive}
-				loading={loading}
-			/>
-		</ScaleDecorator>
-	),
+	}) => {
+		const storedAuthorizedAppsCount = useSelector((state: RootState) =>
+			getAuthorizedGrantCount(state, item.key),
+		);
+		const authorizedAppsCount = canManagePubkyGrants(item.value) ? storedAuthorizedAppsCount : 0;
+
+		return (
+			<ScaleDecorator>
+				<PubkyBox
+					pubky={item.key}
+					pubkyData={item.value}
+					grantCount={authorizedAppsCount}
+					index={index}
+					onLongPress={drag}
+					disabled={isActive}
+					loading={loading}
+				/>
+			</ScaleDecorator>
+		);
+	},
 );
 
 const ListFooter = memo(() => {
@@ -77,6 +88,16 @@ const HomeScreen = (): ReactElement => {
 	const pubkysProcessing = useSelector((state: RootState) => state.pubky.processing, shallowEqual);
 	const { replacementRelease } = useReplacementRelease();
 	const externalPubkys = useExternalPubkys();
+
+	useFocusEffect(
+		useCallback(() => {
+			pubkyArray.forEach(({ key: pubky, value }) => {
+				if (canManagePubkyGrants(value)) {
+					refreshAuthorizedGrants({ pubky, dispatch }).then();
+				}
+			});
+		}, [dispatch, pubkyArray]),
+	);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {

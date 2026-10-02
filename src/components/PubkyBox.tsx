@@ -14,16 +14,17 @@ import Card from './Card.tsx';
 import SourceAppPill from './SourceAppPill.tsx';
 import { shadows } from '../theme/shadows.ts';
 import { canPubkyAuthorize } from '../store/selectors/pubkySelectors.ts';
+import { ThemedView } from '../theme/components.ts';
 
 interface PubkyInfoProps {
 	pubkyName: string;
 	publicKey: string;
-	sessionsCount: number;
+	grantCount: number;
 	isBackedUp: boolean;
 	sourceApp?: string;
 }
 
-const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, sourceApp }: PubkyInfoProps) => {
+const PubkyInfo = memo(({ pubkyName, publicKey, grantCount, isBackedUp, sourceApp }: PubkyInfoProps) => {
 	const { t } = useTranslation();
 
 	const handleBackupPress = useCallback(() => {
@@ -57,10 +58,10 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, sourc
 
 				{sourceApp && <SourceAppPill style={styles.sourceAppPill} />}
 
-				{sessionsCount > 0 && (
-					<View style={styles.sessionsButton}>
-						<TextXsSb colorName="primaryForeground">{sessionsCount}</TextXsSb>
-					</View>
+				{grantCount > 0 && (
+					<ThemedView style={styles.grantCountBadge} colorName="primary" pointerEvents="none">
+						<TextXsSb colorName="primaryForeground">{grantCount}</TextXsSb>
+					</ThemedView>
 				)}
 			</View>
 		</View>
@@ -70,7 +71,7 @@ const PubkyInfo = memo(({ pubkyName, publicKey, sessionsCount, isBackedUp, sourc
 interface PubkyBoxProps {
 	pubky: string;
 	pubkyData: Pubky;
-	sessionsCount?: number;
+	grantCount?: number;
 	index?: number;
 	onLongPress?: () => void;
 	disabled?: boolean;
@@ -80,7 +81,7 @@ interface PubkyBoxProps {
 const PubkyBox = ({
 	pubky,
 	pubkyData,
-	sessionsCount = 0,
+	grantCount = 0,
 	index,
 	onLongPress,
 	disabled,
@@ -134,7 +135,7 @@ const PubkyBox = ({
 						pubkyName={pubkyName}
 						publicKey={publicKey}
 						isBackedUp={pubkyData.isBackedUp}
-						sessionsCount={sessionsCount}
+						grantCount={grantCount}
 						sourceApp={pubkyData.sourceApp}
 					/>
 
@@ -192,16 +193,17 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		marginLeft: 'auto',
 	},
-	sessionsButton: {
+	grantCountBadge: {
 		alignItems: 'center',
+		justifyContent: 'center',
 		height: 20,
-		width: 20,
-		borderRadius: '50%',
+		width: 24,
+		borderRadius: 10,
 		marginLeft: 8,
-		backgroundColor: 'rgba(255, 255, 255, 0.16)',
 	},
 	row: {
 		flexDirection: 'row',
+		alignItems: 'center',
 		flexWrap: 'nowrap',
 	},
 	backupContainer: {

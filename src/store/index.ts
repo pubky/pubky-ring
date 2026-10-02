@@ -19,11 +19,15 @@ import settingsReducer from './slices/settingsSlice.ts';
 import uiReducer from './slices/uiSlice.ts';
 import migrations from './migrations';
 import { sanitizePubkySessions } from './transforms/pubkyPersistence';
+import authorizedGrantsReducer from './slices/authorizedGrantsSlice.ts';
+import type { AuthorizedGrantsState } from './slices/authorizedGrantsSlice.ts';
+import { persistAuthorizedGrantCounts } from './transforms/authorizedGrantsPersistence.ts';
 
 const rootReducer = combineReducers({
 	pubky: pubkyReducer,
 	settings: settingsReducer,
 	ui: uiReducer,
+	authorizedGrants: authorizedGrantsReducer,
 });
 
 type RootReducerState = ReturnType<typeof rootReducer>;
@@ -40,13 +44,19 @@ const pubkyTransform = createTransform<PubkySliceState, PubkySliceState>(
 	{ whitelist: ['pubky'] },
 );
 
+const authorizedGrantsTransform = createTransform<AuthorizedGrantsState, AuthorizedGrantsState>(
+	persistAuthorizedGrantCounts,
+	persistAuthorizedGrantCounts,
+	{ whitelist: ['authorizedGrants'] },
+);
+
 const persistConfig: PersistConfig<RootReducerState> = {
 	key: 'root',
 	storage: reduxStorage,
-	whitelist: ['pubky', 'settings'],
+	whitelist: ['pubky', 'settings', 'authorizedGrants'],
 	migrate: createMigrate(migrations),
-	version: 9,
-	transforms: [pubkyTransform],
+	version: 10,
+	transforms: [pubkyTransform, authorizedGrantsTransform],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

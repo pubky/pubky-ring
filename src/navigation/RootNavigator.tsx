@@ -6,6 +6,7 @@ import { useWindowDimensions } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import HomeScreen from '../screens/HomeScreen';
 import PubkyDetailScreen from '../screens/PubkyDetailScreen';
+import AuthorizedGrantScreen from '../screens/AuthorizedGrantScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
 import { useTheme } from 'styled-components';
 import { RootStackParamList } from './types';
@@ -28,6 +29,7 @@ import DeletePubkySheet from '../sheets/DeletePubkySheet.tsx';
 import EditPubkySheet from '../sheets/EditPubkySheet.tsx';
 import AddPubkySheet from '../sheets/AddPubkySheet.tsx';
 import MigrateSheet from '../sheets/MigrateSheet.tsx';
+import RevokeGrantSheet from '../sheets/RevokeGrantSheet.tsx';
 import LegacySunsetSheet from '../sheets/LegacySunsetSheet.tsx';
 import UseExternalPubkySheet from '../sheets/UseExternalPubkySheet.tsx';
 import { useDeepLinkHandler } from '../hooks/useDeepLinkHandler.ts';
@@ -103,6 +105,7 @@ const RootNavigator = (): ReactElement => {
 				<Stack.Screen name="Onboarding" component={OnboardingScreen} />
 				<Stack.Screen name="Home" component={HomeScreen} />
 				<Stack.Screen name="PubkyDetail" component={PubkyDetailScreen} />
+				<Stack.Screen name="AuthorizedGrant" component={AuthorizedGrantScreen} />
 				<Stack.Screen name="About" component={About} />
 				<Stack.Screen name="Settings" component={SettingsScreen} />
 				<Stack.Screen name="AddPubkySheet" component={AddPubkySheet} options={sheetScreenOptions} />
@@ -111,6 +114,7 @@ const RootNavigator = (): ReactElement => {
 				<Stack.Screen name="AuthSheet" component={AuthSheet} options={sheetScreenOptions} />
 				<Stack.Screen name="BackupSheet" component={BackupSheet} options={sheetScreenOptions} />
 				<Stack.Screen name="MigrateSheet" component={MigrateSheet} options={sheetScreenOptions} />
+				<Stack.Screen name="RevokeGrantSheet" component={RevokeGrantSheet} options={sheetScreenOptions} />
 				<Stack.Screen name="LegacySunsetSheet" component={LegacySunsetSheet} options={sheetScreenOptions} />
 				<Stack.Screen
 					name="UseExternalPubkySheet"

@@ -23,6 +23,7 @@ const sheetRouteById: Record<SheetId, SheetRouteName> = {
 	'edit-pubky': 'EditPubkySheet',
 	'add-pubky': 'AddPubkySheet',
 	migrate: 'MigrateSheet',
+	'revoke-grant': 'RevokeGrantSheet',
 	'legacy-sunset': 'LegacySunsetSheet',
 	'use-external-pubky': 'UseExternalPubkySheet',
 };

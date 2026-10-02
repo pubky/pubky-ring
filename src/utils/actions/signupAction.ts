@@ -63,13 +63,17 @@ const showErrorState = (
 const createSignupAuthData = (params: SignupParams): AuthActionData => {
 	const { relay, secret, xCallback } = params;
 	const kind = params.kind === 'signup_grant' ? 'signin_grant' : 'signin';
+	const clientParams =
+		kind === 'signin_grant'
+			? `&cid=${encodeURIComponent(params.clientId ?? '')}&cpk=${encodeURIComponent(params.clientPublicKey ?? '')}`
+			: '';
 
 	return {
 		action: InputAction.Auth,
 		params: { relay, secret, caps: params.caps, kind, xCallback },
 		rawUrl: `pubkyauth://${kind}?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(
 			secret,
-		)}&caps=${encodeURIComponent(params.caps.join(','))}`,
+		)}&caps=${encodeURIComponent(params.caps.join(','))}${clientParams}`,
 	};
 };
 

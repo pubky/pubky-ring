@@ -37,6 +37,8 @@ export interface SignupParams {
 	secret: string;
 	caps: string[];
 	kind?: 'signup' | 'signup_grant';
+	clientId?: string;
+	clientPublicKey?: string;
 	xCallback?: XCallbackParams;
 }
 
@@ -323,6 +325,9 @@ const parsePubkyDeepLink = async (
 						secret: details.secret,
 						caps: capsFromDeepLink(details),
 						kind: details.kind,
+						...(details.kind === 'signup_grant'
+							? { clientId: details.client_id, clientPublicKey: details.client_public_key }
+							: {}),
 						xCallback,
 					},
 				},

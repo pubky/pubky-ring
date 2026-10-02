@@ -185,6 +185,8 @@ describe('handleSignupAction', () => {
 					secret: 'auth-secret',
 					caps: ['pubky.app:read', 'pubky.app:write'],
 					kind: 'signup_grant',
+					clientId: 'shop.example/a?b=c',
+					clientPublicKey: 'client-public-key',
 					xCallback,
 				},
 			},
@@ -203,7 +205,7 @@ describe('handleSignupAction', () => {
 					xCallback,
 				},
 				rawUrl:
-					'pubkyauth://signin_grant?relay=wss%3A%2F%2Frelay.example.com&secret=auth-secret&caps=pubky.app%3Aread%2Cpubky.app%3Awrite',
+					'pubkyauth://signin_grant?relay=wss%3A%2F%2Frelay.example.com&secret=auth-secret&caps=pubky.app%3Aread%2Cpubky.app%3Awrite&cid=shop.example%2Fa%3Fb%3Dc&cpk=client-public-key',
 			},
 			{ dispatch, setAddPubkyScreen, pubky: 'pubky-created', isDeeplink: false },
 		);

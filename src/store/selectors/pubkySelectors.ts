@@ -47,6 +47,13 @@ export const isPubkySignedUp = (state: RootState, pubky: string): boolean => {
 export const canPubkyAuthorize = (pubky: Pubky): boolean => pubky.signedUp || !!pubky.sourceApp;
 
 /**
+ * Returns if Ring owns the pubky and can manage its homeserver grants.
+ * Adopted pubkys can authorize through their owning app, but Ring cannot sign
+ * in to their homeserver to list or revoke grants.
+ */
+export const canManagePubkyGrants = (pubky: Pubky): boolean => pubky.signedUp && !pubky.sourceApp;
+
+/**
  * Returns all pubkys that can authorize
  */
 export const getAuthorizablePubkys = createSelector(

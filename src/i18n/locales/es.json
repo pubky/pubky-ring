@@ -85,7 +85,21 @@
 		"authorized": "Autorizado con: {{pubky}}",
 		"signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
-		"authorizeForApp": "Autorizar {{appName}}"
+		"authorizeForApp": "Autorizar {{appName}}",
+		"authorizedForApp": "Autorizado {{appName}}"
+	},
+	"grants": {
+		"title": "Aplicaciones autorizadas",
+		"authorizedApp": "Aplicación autorizada",
+		"loading": "Cargando aplicaciones autorizadas...",
+		"expires": "Caduca el {{date}}",
+		"neverExpires": "No caduca",
+		"revoke": "Revocar acceso de la aplicación",
+		"revokeAction": "Revocar",
+		"revokeConfirm": "¿Seguro que quiere revocar esta autorización?",
+		"revoked": "Acceso revocado",
+		"revokedDescription": "Esta autorización ya no puede acceder a su Pubky.",
+		"revokeFailed": "No se pudo revocar el acceso"
 	},
 	"republish": {
 		"title": "Republicar registros",
@@ -167,6 +181,17 @@
 		"enterName": "Introduzca el nombre",
 		"enterHomeserver": "Introducir servidor doméstico",
 		"homeserver": "Homeserver"
+	},
+	"activeSession": {
+		"noPermissions": "Sin permisos",
+		"permissionCount_one": "{{count}} permiso",
+		"permissionCount_other": "{{count}} permisos",
+		"authorizedOn": "Autorizado el {{date}}",
+		"authorizedWithPubky": "Autorizado con Pubky",
+		"grantedPermissions": "Permisos concedidos",
+		"permissionView": "Ver",
+		"permissionEdit": "Editar",
+		"permissionDelete": "Eliminar"
 	},
 	"errors": {
 		"failedToParseQR": "Fallo al analizar los datos del código QR",

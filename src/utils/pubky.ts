@@ -11,6 +11,7 @@ import {
 	mnemonicPhraseToKeypair,
 	type SessionInfo,
 } from '@synonymdev/react-native-pubky';
+import * as ReactNativePubky from '@synonymdev/react-native-pubky';
 import {
 	setKeychainValue,
 	resetKeychainValue,
@@ -40,7 +41,7 @@ import { showToast } from '@synonymdev/react-native-toast';
 import { getErrorMessage } from './errorHandler.ts';
 import { auth } from '@synonymdev/react-native-pubky';
 import { getAllPubkysFromStore, getPubkyDataFromStore } from './store-helpers.ts';
-import { EBackupPreference, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
+import { EBackupPreference, GrantInfo, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
 import type { TPubkys } from '../types/pubky.ts';
 import {
 	DEFAULT_HOMESERVER,
@@ -58,6 +59,37 @@ import {
 } from './sharedPubky.ts';
 import i18n from '../i18n';
 
+type GrantManagementBindings = {
+	listGrants?: (sessionSecret: string) => Promise<Result<GrantInfo[]>>;
+	revokeGrant?: (sessionSecret: string, grantId: string) => Promise<Result<string>>;
+};
+
+const grantManagementBindings = ReactNativePubky as typeof ReactNativePubky & GrantManagementBindings;
+
+const grantManagementUnavailable = (method: keyof GrantManagementBindings): string => {
+	console.error(`@synonymdev/react-native-pubky does not expose ${method}`);
+	return i18n.t('pubkyErrors.unexpectedError');
+};
+
+const listGrants = (sessionSecret: string): Promise<Result<GrantInfo[]>> => {
+	if (!grantManagementBindings.listGrants) {
+		return Promise.resolve(err(grantManagementUnavailable('listGrants')));
+	}
+	return grantManagementBindings.listGrants(sessionSecret);
+};
+
+const revokeGrant = (sessionSecret: string, grantId: string): Promise<Result<string>> => {
+	if (!grantManagementBindings.revokeGrant) {
+		return Promise.resolve(err(grantManagementUnavailable('revokeGrant')));
+	}
+	return grantManagementBindings.revokeGrant(sessionSecret, grantId);
+};
+
+const omitLocalGrants = (grants: GrantInfo[], localGrantIds: string[]): GrantInfo[] => {
+	const knownGrantIds = new Set(localGrantIds);
+	return grants.filter(grant => !knownGrantIds.has(grant.grant_id));
+};
+
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
 const SESSION_ID_NAMESPACE = '4dd6b3f6-1ef1-4e8a-9a7b-4bbdb8b69785';
 
@@ -66,6 +98,11 @@ export type RepublishAllHomeserverRecordsSummary = {
 	succeeded: number;
 	failed: number;
 	skipped: number;
+};
+
+export type AuthorizedGrants = {
+	grants: GrantInfo[];
+	sessionId: string;
 };
 
 const revokeUnsavedHomeserverSession = async (sessionToken: string): Promise<void> => {
@@ -86,6 +123,7 @@ const saveHomeserverSession = async ({
 }): Promise<Result<PubkySession>> => {
 	const session: PubkySession = {
 		id: uuid(sessionInfo.grant_secret, SESSION_ID_NAMESPACE),
+		grant_id: sessionInfo.grant_id,
 		capabilities: sessionInfo.capabilities,
 		created_at: Date.now(),
 	};
@@ -730,6 +768,9 @@ export const signInToHomeserver = async ({
 	dispatch: Dispatch;
 	secretKey?: string;
 }): Promise<Result<SessionInfo>> => {
+	if (getPubkyDataFromStore(pubky)?.sourceApp) {
+		return err(i18n.t('sharedPubky.homeserverUnsupported'));
+	}
 	if (!homeserver) {
 		const pubkyData = getPubkyDataFromStore(pubky);
 		homeserver = pubkyData?.homeserver ?? DEFAULT_HOMESERVER;
@@ -774,7 +815,114 @@ export const signInToHomeserver = async ({
 	return ok(response);
 };
 
-export const signOutOfHomeserver = async (
+const isInvalidStoredSessionError = (message: string): boolean =>
+	message.includes('Session is no longer valid') || message.includes('Failed to import session');
+
+const discardStoredSession = async ({
+	pubky,
+	sessionId,
+	dispatch,
+}: {
+	pubky: string;
+	sessionId: string;
+	dispatch: Dispatch;
+}): Promise<void> => {
+	const resetResult = await resetSessionSecret({ pubky, sessionId });
+	if (resetResult.isErr()) {
+		console.error('Failed to clear invalid homeserver session', resetResult.error.message);
+	}
+	dispatch(removeSession({ pubky, sessionId }));
+};
+
+const listGrantsWithStoredSession = async (
+	pubky: string,
+	dispatch: Dispatch,
+): Promise<Result<AuthorizedGrants> | undefined> => {
+	const sessions = getPubkyDataFromStore(pubky)?.sessions ?? [];
+	const storedGrantIds = sessions.map(session => session.grant_id);
+	let transientError: Error | undefined;
+
+	for (const session of sessions) {
+		const sessionSecretRes = await getSessionSecret({ pubky, sessionId: session.id });
+		if (sessionSecretRes.isErr()) {
+			transientError = sessionSecretRes.error;
+			continue;
+		}
+
+		const grantsRes = await listGrants(sessionSecretRes.value);
+		if (grantsRes.isOk()) {
+			return ok({
+				grants: omitLocalGrants(grantsRes.value, storedGrantIds),
+				sessionId: session.id,
+			});
+		}
+
+		const revalidateResult = await ReactNativePubky.revalidateSession(sessionSecretRes.value);
+		if (revalidateResult.isErr() && isInvalidStoredSessionError(revalidateResult.error.message)) {
+			await discardStoredSession({ pubky, sessionId: session.id, dispatch });
+			continue;
+		}
+
+		transientError = grantsRes.error;
+	}
+
+	return transientError ? err(transientError) : undefined;
+};
+
+export const listAuthorizedGrants = async ({
+	pubky,
+	dispatch,
+}: {
+	pubky: string;
+	dispatch: Dispatch;
+}): Promise<Result<AuthorizedGrants>> => {
+	if (!grantManagementBindings.listGrants) {
+		return err(grantManagementUnavailable('listGrants'));
+	}
+
+	const storedResult = await listGrantsWithStoredSession(pubky, dispatch);
+	if (storedResult) {
+		return storedResult;
+	}
+
+	const signInRes = await signInToHomeserver({ pubky, dispatch });
+	if (signInRes.isErr()) {
+		return err(signInRes.error);
+	}
+
+	const grantsRes = await listGrants(signInRes.value.grant_secret);
+	if (grantsRes.isErr()) {
+		return err(grantsRes.error);
+	}
+
+	return ok({
+		grants: omitLocalGrants(grantsRes.value, [signInRes.value.grant_id]),
+		sessionId: uuid(signInRes.value.grant_secret, SESSION_ID_NAMESPACE),
+	});
+};
+
+export const revokeAuthorizedGrant = async ({
+	pubky,
+	sessionId,
+	grantId,
+}: {
+	pubky: string;
+	sessionId: string;
+	grantId: string;
+}): Promise<Result<string>> => {
+	if (!grantManagementBindings.revokeGrant) {
+		return err(grantManagementUnavailable('revokeGrant'));
+	}
+
+	const sessionSecretRes = await getSessionSecret({ pubky, sessionId });
+	if (sessionSecretRes.isErr()) {
+		return sessionSecretRes;
+	}
+
+	return revokeGrant(sessionSecretRes.value, grantId);
+};
+
+export const revokeHomeserverSession = async (
 	pubky: string,
 	sessionId: string,
 	dispatch: Dispatch,
@@ -793,8 +941,16 @@ export const signOutOfHomeserver = async (
 		return;
 	}
 	await resetSessionSecret({ pubky, sessionId });
-	dispatch(setSignedUp({ pubky, signedUp: false }));
 	dispatch(removeSession({ pubky, sessionId }));
+};
+
+export const signOutOfHomeserver = async (
+	pubky: string,
+	sessionId: string,
+	dispatch: Dispatch,
+): Promise<void> => {
+	await revokeHomeserverSession(pubky, sessionId, dispatch);
+	dispatch(setSignedUp({ pubky, signedUp: false }));
 };
 
 export const truncateStr = (str: string, displayLength: number = 5): string => {

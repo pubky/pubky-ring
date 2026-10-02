@@ -85,32 +85,9 @@ const revokeGrant = (sessionSecret: string, grantId: string): Promise<Result<str
 	return grantManagementBindings.revokeGrant(sessionSecret, grantId);
 };
 
-const getGrantId = (sessionInfo: unknown): string | undefined => {
-	if (!sessionInfo || typeof sessionInfo !== 'object' || !('grant_id' in sessionInfo)) {
-		return undefined;
-	}
-
-	const grantId = sessionInfo.grant_id;
-	return typeof grantId === 'string' && grantId.length > 0 ? grantId : undefined;
-};
-
-const getRevalidatedGrantId = async (sessionSecret: string): Promise<string | undefined> => {
-	const result = await ReactNativePubky.revalidateSession(sessionSecret);
-	return result.isOk() ? getGrantId(result.value) : undefined;
-};
-
-const omitLocalGrants = (grants: GrantInfo[], localGrantIds: Array<string | undefined>): GrantInfo[] => {
-	const knownGrantIds = new Set(localGrantIds.filter((grantId): grantId is string => Boolean(grantId)));
-	if (knownGrantIds.size > 0) {
-		return grants.filter(grant => !knownGrantIds.has(grant.grant_id));
-	}
-
-	// Older persisted sessions may not include grant metadata. In that degraded
-	// state, fail closed by hiding grants that claim Ring's client id rather than
-	// risk letting Ring revoke its own management grant. Client ids are
-	// self-asserted, so a colliding third-party grant will also be hidden until a
-	// local grant id can be recovered by revalidating a Ring session.
-	return grants.filter(grant => grant.client_id !== appApplicationId);
+const omitLocalGrants = (grants: GrantInfo[], localGrantIds: string[]): GrantInfo[] => {
+	const knownGrantIds = new Set(localGrantIds);
+	return grants.filter(grant => !knownGrantIds.has(grant.grant_id));
 };
 
 // Stable UUID v5 namespace for deriving local session ids from homeserver session tokens.
@@ -146,7 +123,7 @@ const saveHomeserverSession = async ({
 }): Promise<Result<PubkySession>> => {
 	const session: PubkySession = {
 		id: uuid(sessionInfo.grant_secret, SESSION_ID_NAMESPACE),
-		grant_id: getGrantId(sessionInfo),
+		grant_id: sessionInfo.grant_id,
 		capabilities: sessionInfo.capabilities,
 		created_at: Date.now(),
 	};
@@ -791,6 +768,9 @@ export const signInToHomeserver = async ({
 	dispatch: Dispatch;
 	secretKey?: string;
 }): Promise<Result<SessionInfo>> => {
+	if (getPubkyDataFromStore(pubky)?.sourceApp) {
+		return err(i18n.t('sharedPubky.homeserverUnsupported'));
+	}
 	if (!homeserver) {
 		const pubkyData = getPubkyDataFromStore(pubky);
 		homeserver = pubkyData?.homeserver ?? DEFAULT_HOMESERVER;
@@ -835,30 +815,58 @@ export const signInToHomeserver = async ({
 	return ok(response);
 };
 
-const listGrantsWithStoredSession = async (pubky: string): Promise<Result<AuthorizedGrants> | undefined> => {
+const isInvalidStoredSessionError = (message: string): boolean =>
+	message.includes('Session is no longer valid') || message.includes('Failed to import session');
+
+const discardStoredSession = async ({
+	pubky,
+	sessionId,
+	dispatch,
+}: {
+	pubky: string;
+	sessionId: string;
+	dispatch: Dispatch;
+}): Promise<void> => {
+	const resetResult = await resetSessionSecret({ pubky, sessionId });
+	if (resetResult.isErr()) {
+		console.error('Failed to clear invalid homeserver session', resetResult.error.message);
+	}
+	dispatch(removeSession({ pubky, sessionId }));
+};
+
+const listGrantsWithStoredSession = async (
+	pubky: string,
+	dispatch: Dispatch,
+): Promise<Result<AuthorizedGrants> | undefined> => {
 	const sessions = getPubkyDataFromStore(pubky)?.sessions ?? [];
 	const storedGrantIds = sessions.map(session => session.grant_id);
-	let lastError: Error | undefined;
+	let transientError: Error | undefined;
 
 	for (const session of sessions) {
 		const sessionSecretRes = await getSessionSecret({ pubky, sessionId: session.id });
 		if (sessionSecretRes.isErr()) {
-			lastError = sessionSecretRes.error;
+			transientError = sessionSecretRes.error;
 			continue;
 		}
 
 		const grantsRes = await listGrants(sessionSecretRes.value);
 		if (grantsRes.isOk()) {
-			const currentGrantId = session.grant_id ?? (await getRevalidatedGrantId(sessionSecretRes.value));
 			return ok({
-				grants: omitLocalGrants(grantsRes.value, [...storedGrantIds, currentGrantId]),
+				grants: omitLocalGrants(grantsRes.value, storedGrantIds),
 				sessionId: session.id,
 			});
 		}
-		lastError = grantsRes.error;
+
+		const revalidateResult = await ReactNativePubky.revalidateSession(sessionSecretRes.value);
+		if (revalidateResult.isErr() && isInvalidStoredSessionError(revalidateResult.error.message)) {
+			await discardStoredSession({ pubky, sessionId: session.id, dispatch });
+			continue;
+		}
+
+		transientError = grantsRes.error;
 	}
 
-	return lastError ? err(lastError) : undefined;
+	return transientError ? err(transientError) : undefined;
 };
 
 export const listAuthorizedGrants = async ({
@@ -872,7 +880,7 @@ export const listAuthorizedGrants = async ({
 		return err(grantManagementUnavailable('listGrants'));
 	}
 
-	const storedResult = await listGrantsWithStoredSession(pubky);
+	const storedResult = await listGrantsWithStoredSession(pubky, dispatch);
 	if (storedResult) {
 		return storedResult;
 	}
@@ -888,7 +896,7 @@ export const listAuthorizedGrants = async ({
 	}
 
 	return ok({
-		grants: omitLocalGrants(grantsRes.value, [getGrantId(signInRes.value)]),
+		grants: omitLocalGrants(grantsRes.value, [signInRes.value.grant_id]),
 		sessionId: uuid(signInRes.value.grant_secret, SESSION_ID_NAMESPACE),
 	});
 };

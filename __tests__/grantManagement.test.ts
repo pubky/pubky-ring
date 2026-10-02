@@ -1,6 +1,6 @@
 import { err, ok } from '@synonymdev/result';
 import * as ReactNativePubky from '@synonymdev/react-native-pubky';
-import { getSessionSecret } from '../src/utils/keychain.ts';
+import { getSessionSecret, resetSessionSecret, setSessionSecret } from '../src/utils/keychain.ts';
 import { getPubkyDataFromStore } from '../src/utils/store-helpers.ts';
 import { listAuthorizedGrants, revokeAuthorizedGrant } from '../src/utils/pubky.ts';
 
@@ -25,7 +25,13 @@ jest.mock('../src/i18n', () => ({
 }));
 
 jest.mock('../src/utils/keychain.ts', () => ({
+	getKeychainValue: jest.fn(async () => {
+		const { ok: resultOk } = require('@synonymdev/result');
+		return resultOk(JSON.stringify({ secretKey: 'identity-secret', mnemonic: '' }));
+	}),
 	getSessionSecret: jest.fn(),
+	resetSessionSecret: jest.fn(),
+	setSessionSecret: jest.fn(),
 }));
 
 jest.mock('../src/utils/store-helpers.ts', () => ({
@@ -53,6 +59,8 @@ jest.mock('../src/store/slices/pubkysSlice.ts', () => ({
 }));
 
 const getSessionSecretMock = getSessionSecret as jest.MockedFunction<typeof getSessionSecret>;
+const resetSessionSecretMock = resetSessionSecret as jest.MockedFunction<typeof resetSessionSecret>;
+const setSessionSecretMock = setSessionSecret as jest.MockedFunction<typeof setSessionSecret>;
 const getPubkyDataFromStoreMock = getPubkyDataFromStore as jest.MockedFunction<typeof getPubkyDataFromStore>;
 const {
 	listGrants: mockListGrants,
@@ -78,9 +86,13 @@ describe('grant management', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
 		getPubkyDataFromStoreMock.mockReturnValue({
-			sessions: [{ id: 'root-session', capabilities: ['/:rw'], created_at: 1 }],
+			sessions: [
+				{ id: 'root-session', grant_id: 'current-ring-grant', capabilities: ['/:rw'], created_at: 1 },
+			],
 		} as ReturnType<typeof getPubkyDataFromStore>);
 		getSessionSecretMock.mockResolvedValue(ok('root-grant-secret'));
+		resetSessionSecretMock.mockResolvedValue(ok(true));
+		setSessionSecretMock.mockResolvedValue(ok('replacement-grant-secret'));
 		mockRevalidateSession.mockResolvedValue(ok({ grant_id: 'current-ring-grant' }));
 	});
 
@@ -116,24 +128,82 @@ describe('grant management', () => {
 		expect(mockRevalidateSession).not.toHaveBeenCalled();
 	});
 
-	it('protects every Ring grant when current grant metadata is unavailable', async () => {
-		mockRevalidateSession.mockResolvedValue(ok({}));
-		mockListGrants.mockResolvedValue(
-			ok([thirdPartyGrant, { ...thirdPartyGrant, grant_id: 'ring-grant', client_id: 'app.pubkyring' }]),
-		);
+	it('does not create a replacement Ring grant when a stored session cannot list grants', async () => {
+		mockListGrants.mockResolvedValue(err('Offline'));
+		const dispatch = jest.fn();
 
-		const result = await listAuthorizedGrants({ pubky: 'user-pubky', dispatch: jest.fn() });
+		const result = await listAuthorizedGrants({ pubky: 'user-pubky', dispatch });
+
+		expect(result.isErr()).toBe(true);
+		expect(mockRevalidateSession).toHaveBeenCalledWith('root-grant-secret');
+		expect(resetSessionSecretMock).not.toHaveBeenCalled();
+		expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'pubky/removeSession' }));
+		expect(mockSignIn).not.toHaveBeenCalled();
+	});
+
+	it('preserves stored session metadata when Keychain access fails', async () => {
+		getSessionSecretMock.mockResolvedValueOnce(err('Keychain unavailable'));
+		const dispatch = jest.fn();
+
+		const result = await listAuthorizedGrants({ pubky: 'user-pubky', dispatch });
+
+		expect(result.isErr()).toBe(true);
+		expect(resetSessionSecretMock).not.toHaveBeenCalled();
+		expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'pubky/removeSession' }));
+		expect(mockSignIn).not.toHaveBeenCalled();
+	});
+
+	it('replaces a stored management session after confirming it was revoked', async () => {
+		mockListGrants
+			.mockResolvedValueOnce(err('Failed to list grants: unauthorized'))
+			.mockResolvedValueOnce(
+				ok([
+					thirdPartyGrant,
+					{ ...thirdPartyGrant, grant_id: 'replacement-ring-grant', client_id: 'app.pubkyring' },
+				]),
+			);
+		mockRevalidateSession.mockResolvedValueOnce(err('Session is no longer valid (expired or invalidated)'));
+		mockSignIn.mockResolvedValueOnce(
+			ok({
+				grant_secret: 'replacement-grant-secret',
+				grant_id: 'replacement-ring-grant',
+				capabilities: ['/:rw'],
+			}),
+		);
+		const dispatch = jest.fn();
+
+		const result = await listAuthorizedGrants({ pubky: 'user-pubky', dispatch });
 
 		expect(result.isOk()).toBe(true);
 		if (result.isOk()) {
-			expect(result.value.grants).toEqual([thirdPartyGrant]);
+			expect(result.value).toEqual({
+				grants: [thirdPartyGrant],
+				sessionId: 'new-root-session',
+			});
 		}
+		expect(resetSessionSecretMock).toHaveBeenCalledWith({
+			pubky: 'user-pubky',
+			sessionId: 'root-session',
+		});
+		expect(dispatch).toHaveBeenCalledWith({
+			type: 'pubky/removeSession',
+			payload: { pubky: 'user-pubky', sessionId: 'root-session' },
+		});
+		expect(mockSignIn).toHaveBeenCalled();
+		expect(setSessionSecretMock).toHaveBeenCalledWith({
+			pubky: 'user-pubky',
+			sessionId: 'new-root-session',
+			sessionSecret: 'replacement-grant-secret',
+		});
 	});
 
-	it('does not create a replacement Ring grant when a stored session cannot list grants', async () => {
-		mockListGrants.mockResolvedValue(err('Offline'));
+	it('does not create a management grant for an adopted pubky', async () => {
+		getPubkyDataFromStoreMock.mockReturnValue({
+			sourceApp: 'bitkit',
+			sessions: [],
+		} as unknown as ReturnType<typeof getPubkyDataFromStore>);
 
-		const result = await listAuthorizedGrants({ pubky: 'user-pubky', dispatch: jest.fn() });
+		const result = await listAuthorizedGrants({ pubky: 'adopted-pubky', dispatch: jest.fn() });
 
 		expect(result.isErr()).toBe(true);
 		expect(mockSignIn).not.toHaveBeenCalled();

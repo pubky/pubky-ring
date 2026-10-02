@@ -96,9 +96,9 @@
 		"neverExpires": "Never expires",
 		"revoke": "Revoke app access",
 		"revokeAction": "Revoke",
-		"revokeConfirm": "Are you sure you want to revoke this app's access on every device?",
+		"revokeConfirm": "Are you sure you want to revoke this authorization?",
 		"revoked": "Access revoked",
-		"revokedDescription": "This app can no longer access your Pubky on any device.",
+		"revokedDescription": "This authorization can no longer access your Pubky.",
 		"revokeFailed": "Unable to revoke access"
 	},
 	"republish": {

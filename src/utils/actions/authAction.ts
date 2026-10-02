@@ -18,7 +18,7 @@ import { getAuthorizedGrantCountFromStore, getAutoAuthFromStore } from '../store
 import { openXSuccess, openXError } from '../xCallback';
 import i18n from '../../i18n';
 import type { ConfirmAuthPayload } from '../../sheets/types.ts';
-import { refreshAuthorizedGrants, refreshAuthorizedGrantsAfterAuthorization } from '../authorizedGrants.ts';
+import { syncAuthorizedGrantsAfterAuth } from '../authorizedGrants.ts';
 
 export type AuthActionData = {
 	action: InputAction.Auth;
@@ -140,15 +140,12 @@ const handleAutoAuth = async ({
 	});
 
 	if (res.isOk()) {
-		if (isGrantAuth) {
-			refreshAuthorizedGrantsAfterAuthorization({
-				pubky,
-				dispatch,
-				currentCount: getAuthorizedGrantCountFromStore(pubky),
-			}).then();
-		} else {
-			refreshAuthorizedGrants({ pubky, dispatch, forceReload: true }).then();
-		}
+		syncAuthorizedGrantsAfterAuth({
+			pubky,
+			dispatch,
+			currentCount: getAuthorizedGrantCountFromStore(pubky),
+			isGrantAuth,
+		}).then();
 		showToast({
 			type: 'success',
 			title: i18n.t('common.success'),

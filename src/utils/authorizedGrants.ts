@@ -8,6 +8,7 @@ import {
 } from '../store/slices/authorizedGrantsSlice.ts';
 import { listAuthorizedGrants } from './pubky.ts';
 import type { AuthorizedGrants } from './pubky.ts';
+import { canManagePubkyGrantsFromStore } from './store-helpers.ts';
 
 let nextRequestId = 0;
 type InFlightRequest = {
@@ -130,4 +131,27 @@ export const refreshAuthorizedGrantsAfterAuthorization = async ({
 	}
 
 	return latestResult!;
+};
+
+export const syncAuthorizedGrantsAfterAuth = async ({
+	pubky,
+	dispatch,
+	currentCount,
+	isGrantAuth,
+}: {
+	pubky: string;
+	dispatch: Dispatch;
+	currentCount: number;
+	isGrantAuth: boolean;
+}): Promise<void> => {
+	if (!canManagePubkyGrantsFromStore(pubky)) {
+		return;
+	}
+
+	if (isGrantAuth) {
+		await refreshAuthorizedGrantsAfterAuthorization({ pubky, dispatch, currentCount });
+		return;
+	}
+
+	await refreshAuthorizedGrants({ pubky, dispatch, forceReload: true });
 };

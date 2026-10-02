@@ -2,8 +2,10 @@ import { err, ok } from '@synonymdev/result';
 import {
 	refreshAuthorizedGrants,
 	refreshAuthorizedGrantsAfterAuthorization,
+	syncAuthorizedGrantsAfterAuth,
 } from '../src/utils/authorizedGrants.ts';
 import { listAuthorizedGrants } from '../src/utils/pubky.ts';
+import { canManagePubkyGrantsFromStore } from '../src/utils/store-helpers.ts';
 import {
 	incrementAuthorizedGrantCount,
 	loadAuthorizedGrantsFailed,
@@ -15,6 +17,10 @@ jest.mock('../src/utils/pubky.ts', () => ({
 	listAuthorizedGrants: jest.fn(),
 }));
 
+jest.mock('../src/utils/store-helpers.ts', () => ({
+	canManagePubkyGrantsFromStore: jest.fn(() => true),
+}));
+
 jest.mock('../src/store/slices/authorizedGrantsSlice.ts', () => ({
 	incrementAuthorizedGrantCount: jest.fn(payload => ({ type: 'authorizedGrants/increment', payload })),
 	loadAuthorizedGrantsFailed: jest.fn(payload => ({ type: 'authorizedGrants/failed', payload })),
@@ -23,6 +29,9 @@ jest.mock('../src/store/slices/authorizedGrantsSlice.ts', () => ({
 }));
 
 const listAuthorizedGrantsMock = listAuthorizedGrants as jest.MockedFunction<typeof listAuthorizedGrants>;
+const canManagePubkyGrantsFromStoreMock = canManagePubkyGrantsFromStore as jest.MockedFunction<
+	typeof canManagePubkyGrantsFromStore
+>;
 
 const grant = {
 	grant_id: 'grant-1',
@@ -35,6 +44,7 @@ const grant = {
 describe('refreshAuthorizedGrants', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();
+		canManagePubkyGrantsFromStoreMock.mockReturnValue(true);
 	});
 
 	it('stores the filtered grant list for Home and Pubky Detail', async () => {
@@ -136,5 +146,21 @@ describe('refreshAuthorizedGrants', () => {
 		expect(result.isOk()).toBe(true);
 		expect(listAuthorizedGrantsMock).toHaveBeenCalledTimes(2);
 		expect(loadAuthorizedGrantsSucceeded).toHaveBeenCalledTimes(1);
+	});
+
+	it('does not refresh or increment grants for an adopted pubky after authorization', async () => {
+		canManagePubkyGrantsFromStoreMock.mockReturnValue(false);
+		const dispatch = jest.fn();
+
+		await syncAuthorizedGrantsAfterAuth({
+			pubky: 'adopted-pubky',
+			dispatch,
+			currentCount: 3,
+			isGrantAuth: true,
+		});
+
+		expect(incrementAuthorizedGrantCount).not.toHaveBeenCalled();
+		expect(listAuthorizedGrantsMock).not.toHaveBeenCalled();
+		expect(dispatch).not.toHaveBeenCalled();
 	});
 });

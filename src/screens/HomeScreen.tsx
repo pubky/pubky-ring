@@ -44,7 +44,10 @@ const PubkyItem = memo(
 		index: number;
 		loading?: boolean;
 	}) => {
-		const authorizedAppsCount = useSelector((state: RootState) => getAuthorizedGrantCount(state, item.key));
+		const storedAuthorizedAppsCount = useSelector((state: RootState) =>
+			getAuthorizedGrantCount(state, item.key),
+		);
+		const authorizedAppsCount = canManagePubkyGrants(item.value) ? storedAuthorizedAppsCount : 0;
 
 		return (
 			<ScaleDecorator>

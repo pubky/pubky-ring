@@ -1,6 +1,6 @@
 export interface PubkySession {
 	id: string;
-	grant_id?: string;
+	grant_id: string;
 	capabilities: string[];
 	created_at: number;
 }

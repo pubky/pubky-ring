@@ -26,10 +26,7 @@ import { CheckCircle, Folder } from '../icons/index.ts';
 import CircularProgressBar from '../components/CircularProgressBar.tsx';
 import PermissionCard from '../components/PermissionCard.tsx';
 import type { AuthStackParamList } from '../sheets/types.ts';
-import {
-	refreshAuthorizedGrants,
-	refreshAuthorizedGrantsAfterAuthorization,
-} from '../utils/authorizedGrants.ts';
+import { syncAuthorizedGrantsAfterAuth } from '../utils/authorizedGrants.ts';
 import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
 
 interface Capability {
@@ -147,15 +144,12 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				return;
 			}
 			setIsAuthorized(true);
-			if (authDetails.kind === 'signin_grant' || authDetails.kind === 'signup_grant') {
-				refreshAuthorizedGrantsAfterAuthorization({
-					pubky,
-					dispatch,
-					currentCount: authorizedGrantCount,
-				}).then();
-			} else {
-				refreshAuthorizedGrants({ pubky, dispatch, forceReload: true }).then();
-			}
+			syncAuthorizedGrantsAfterAuth({
+				pubky,
+				dispatch,
+				currentCount: authorizedGrantCount,
+				isGrantAuth: authDetails.kind === 'signin_grant' || authDetails.kind === 'signup_grant',
+			}).then();
 			if (xCallback?.xSuccess) {
 				await sleep(FADE_DURATION + 300);
 				handleClose();

@@ -5,6 +5,7 @@ import { createConfirmAuthPayload } from '../src/utils/actions/authAction';
 jest.mock('../src/utils/authorizedGrants.ts', () => ({
 	refreshAuthorizedGrants: jest.fn(),
 	refreshAuthorizedGrantsAfterAuthorization: jest.fn(),
+	syncAuthorizedGrantsAfterAuth: jest.fn(),
 }));
 import { InputAction } from '../src/utils/inputParser';
 

@@ -7,6 +7,7 @@ import {
 	isPubkySignedUp,
 	getSignedUpPubkys,
 	getPubkyKeyBySignupToken,
+	canManagePubkyGrants,
 } from '../store/selectors/pubkySelectors.ts';
 import { EBackupPreference, Pubky, TPubkys } from '../types/pubky.ts';
 import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
@@ -19,6 +20,11 @@ export const getAutoAuthFromStore = (): boolean => {
 
 export const getAuthorizedGrantCountFromStore = (pubky: string): number => {
 	return getAuthorizedGrantCount(getStore(), pubky);
+};
+
+export const canManagePubkyGrantsFromStore = (pubky: string): boolean => {
+	const pubkyData = getPubkyDataFromStore(pubky);
+	return Boolean(pubkyData && canManagePubkyGrants(pubkyData));
 };
 
 export const getAllPubkysFromStore = (): TPubkys => {

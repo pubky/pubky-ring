@@ -96,9 +96,9 @@
 		"neverExpires": "No caduca",
 		"revoke": "Revocar acceso de la aplicación",
 		"revokeAction": "Revocar",
-		"revokeConfirm": "¿Seguro que quiere revocar el acceso de esta aplicación en todos los dispositivos?",
+		"revokeConfirm": "¿Seguro que quiere revocar esta autorización?",
 		"revoked": "Acceso revocado",
-		"revokedDescription": "Esta aplicación ya no puede acceder a su Pubky desde ningún dispositivo.",
+		"revokedDescription": "Esta autorización ya no puede acceder a su Pubky.",
 		"revokeFailed": "No se pudo revocar el acceso"
 	},
 	"republish": {

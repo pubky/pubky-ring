@@ -81,4 +81,31 @@ describe('pubky persistence', () => {
 
 		expect(sanitizePubkySessions(state as unknown as PubkyState).pubkys.pubkyOne.sessions).toEqual([]);
 	});
+
+	it('drops sessions that cannot be matched to an exact local grant', () => {
+		const state = {
+			deepLink: '',
+			processing: {},
+			pubkys: {
+				pubkyOne: {
+					name: 'Alice',
+					homeserver: 'https://homeserver.example',
+					signedUp: true,
+					signupToken: '',
+					image: '',
+					sessions: [
+						{
+							id: 'session-id',
+							capabilities: ['/:rw'],
+							created_at: 123,
+						},
+					],
+					backupPreference: EBackupPreference.encryptedFile,
+					isBackedUp: true,
+				},
+			},
+		};
+
+		expect(sanitizePubkySessions(state as unknown as PubkyState).pubkys.pubkyOne.sessions).toEqual([]);
+	});
 });

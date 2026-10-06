@@ -1,6 +1,6 @@
 # Android release workflow
 
-The `Android Release Bundle` workflow builds an unsigned Android App Bundle when a `v*` release tag is pushed, then signs that exact artifact in a separate job using the Google Play upload key. The tag must match the Android `versionName` and point to a commit on `main`.
+The `Android Release Bundle` workflow builds an unsigned Android App Bundle when a `v*` release tag is pushed, signs that exact artifact in a separate job using the Google Play upload key, and creates a draft GitHub Release containing the signed files. The tag must match the Android `versionName` and point to a commit on `main`.
 
 ## One-time repository setup
 
@@ -38,7 +38,8 @@ Use only the replaceable Google Play upload key. Do not store the Play app-signi
 1. Update the Android `versionName` and `versionCode`, merge the release commit into `main`, and confirm required checks are green.
 2. Tag that commit with the matching version, for example `git tag v2.0`.
 3. Push the tag, for example `git push origin v2.0`. This starts the workflow automatically.
-4. Download the `android-release-aab-<commit SHA>` artifact.
-5. Verify the included SHA-256 checksum and `release-metadata.txt` before uploading the signed AAB to Play Console.
+4. Open the draft GitHub Release created for the tag.
+5. Verify the attached SHA-256 checksum and `release-metadata.txt`, then upload the signed AAB to Play Console.
+6. Publish the GitHub Release when the release is ready to announce.
 
-The intermediate unsigned artifact is retained for one day. The signed release artifact is retained for 30 days.
+The draft release is safely updated if the workflow is rerun. An already-published release is never modified. The intermediate unsigned artifact is retained for one day, and the signed release files are also retained as a workflow artifact for 30 days.

@@ -14,6 +14,14 @@ import { parseDeepLink, PubkyDeepLinkDetails } from '@synonymdev/react-native-pu
 import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import { EBackupPreference } from '../types/pubky';
 
+// These fields are exposed by the pending React Native binding release for
+// selective grant approval. Keep the intersection local until that package is
+// available to Pubky Ring.
+export type GrantApprovalDeepLinkDetails = PubkyDeepLinkDetails & {
+	approval_format?: 'bare_grant' | 'signed_approval_v1';
+	ephemeral_public_key?: string;
+};
+
 // Input source types
 export type InputSource = 'deeplink' | 'scan' | 'clipboard';
 
@@ -34,11 +42,13 @@ export interface SignupParams {
 	homeserver: string;
 	inviteCode: string;
 	relay: string;
-	secret: string;
+	secret?: string;
 	caps: string[];
 	kind?: 'signup' | 'signup_grant';
 	clientId?: string;
 	clientPublicKey?: string;
+	approvalFormat?: 'bare_grant' | 'signed_approval_v1';
+	ephemeralPublicKey?: string;
 	xCallback?: XCallbackParams;
 }
 
@@ -60,7 +70,7 @@ export interface XCallbackParams {
 // Auth parameters extracted from auth URLs
 export interface AuthParams {
 	relay: string;
-	secret: string;
+	secret?: string;
 	caps: string[];
 	// Auth intent from pubky 0.9.1 deep links. Legacy pubkyauth:///?... URLs
 	// are 'signin'. Well-formed signup links (with an hs param) are routed to
@@ -250,6 +260,21 @@ const capsFromDeepLink = (details: PubkyDeepLinkDetails): string[] => {
 	return details.capabilities?.map(capability => `${capability.path}:${capability.permission}`) ?? [];
 };
 
+export const hasAuthRelayTransport = (
+	details: PubkyDeepLinkDetails,
+): details is GrantApprovalDeepLinkDetails & { relay: string } => {
+	if (!details.relay) return false;
+	if (details.secret) return true;
+
+	const grantDetails = details as GrantApprovalDeepLinkDetails;
+	const isGrant = details.kind === 'signin_grant' || details.kind === 'signup_grant';
+	return (
+		isGrant &&
+		grantDetails.approval_format === 'signed_approval_v1' &&
+		Boolean(grantDetails.ephemeral_public_key)
+	);
+};
+
 const normalizePubkyDeepLinkInput = (input: string): string => {
 	let normalized = input;
 
@@ -313,7 +338,7 @@ const parsePubkyDeepLink = async (
 	}
 
 	if ((details.kind === 'signup' || details.kind === 'signup_grant') && details.homeserver) {
-		if (details.relay && details.secret) {
+		if (hasAuthRelayTransport(details)) {
 			return {
 				action: InputAction.Signup,
 				data: {
@@ -326,7 +351,12 @@ const parsePubkyDeepLink = async (
 						caps: capsFromDeepLink(details),
 						kind: details.kind,
 						...(details.kind === 'signup_grant'
-							? { clientId: details.client_id, clientPublicKey: details.client_public_key }
+							? {
+									clientId: details.client_id,
+									clientPublicKey: details.client_public_key,
+									approvalFormat: details.approval_format,
+									ephemeralPublicKey: details.ephemeral_public_key,
+								}
 							: {}),
 						xCallback,
 					},
@@ -351,7 +381,7 @@ const parsePubkyDeepLink = async (
 		};
 	}
 
-	if ((details.kind === 'signin' || details.kind === 'signin_grant') && details.relay && details.secret) {
+	if ((details.kind === 'signin' || details.kind === 'signin_grant') && hasAuthRelayTransport(details)) {
 		return {
 			action: InputAction.Auth,
 			data: {

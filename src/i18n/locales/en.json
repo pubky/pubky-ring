@@ -86,7 +86,8 @@
 		"signedInSuccessfully": "Signed in to {{server}} successfully",
 		"timeoutError": "The authentication process took too long. Please try again.",
 		"authorizeForApp": "Authorize {{appName}}",
-		"authorizedForApp": "Authorized {{appName}}"
+		"authorizedForApp": "Authorized {{appName}}",
+		"encryptAndDecryptContent": "Encrypt and decrypt content"
 	},
 	"grants": {
 		"title": "Authorized Apps",

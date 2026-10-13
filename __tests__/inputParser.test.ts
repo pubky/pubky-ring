@@ -1,8 +1,11 @@
-import { InputAction, parseInput } from '../src/utils/inputParser';
+import {
+	GrantApprovalDeepLinkDetails,
+	InputAction,
+	parseInput,
+} from '../src/utils/inputParser';
 import { EBackupPreference } from '../src/types/pubky';
 import { ok, err } from '@synonymdev/result';
 import * as Pubky from '@synonymdev/react-native-pubky';
-import type { PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 
 jest.mock('@synonymdev/react-native-pubky');
 
@@ -14,7 +17,7 @@ const getPublicKeyFromSecretKeyMock = Pubky.getPublicKeyFromSecretKey as jest.Mo
 	typeof Pubky.getPublicKeyFromSecretKey
 >;
 const homeserverPubkey = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
-const mockDeepLink = (details: PubkyDeepLinkDetails): void => {
+const mockDeepLink = (details: GrantApprovalDeepLinkDetails): void => {
 	parseDeepLinkMock.mockResolvedValue(ok(details));
 };
 
@@ -336,6 +339,39 @@ describe('parseInput', () => {
 				xCallback: undefined,
 			},
 			rawUrl: rawInput,
+		});
+	});
+
+	it('parses signed grant auth without a legacy relay secret', async () => {
+		const rawInput =
+			'pubkyauth://signin_grant?caps=%2Fpriv%2Fexample.app%2F%3Arwe&relay=https%3A%2F%2Fhttprelay.pubky.app%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-public-key';
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'signin_grant',
+			url: rawInput,
+			relay: 'https://httprelay.pubky.app/inbox',
+			client_id: 'example.app',
+			client_public_key: 'client-pubky',
+			approval_format: 'signed_approval_v1',
+			ephemeral_public_key: 'ephemeral-public-key',
+			capabilities: [{ path: '/priv/example.app/', permission: 'rwe' }],
+		});
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.Auth);
+		expect(parsed.data).toEqual({
+			action: InputAction.Auth,
+			params: {
+				relay: 'https://httprelay.pubky.app/inbox',
+				secret: undefined,
+				kind: 'signin_grant',
+				homeserver: undefined,
+				signupToken: undefined,
+				caps: ['/priv/example.app/:rwe'],
+				xCallback: undefined,
+			},
+			rawUrl: decodeURIComponent(rawInput),
 		});
 	});
 

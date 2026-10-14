@@ -1,0 +1,41 @@
+name: Android Debug-Signed APK
+
+# Release build signed with the committed debug keystore (the same key as Bitkit's debug and
+# staging builds), so a tester can install it next to a Bitkit staging APK and share pubkys.
+# Never distribute it as a production build.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: android-debug-signed-apk-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v6
+
+    - name: Set up Android build
+      uses: ./.github/actions/android-build-setup
+
+    - name: Assemble debug-signed release APK
+      working-directory: android
+      run: ./gradlew :app:assembleRelease -PPUBKYRING_DEBUG_SIGNING=true --no-daemon
+
+    - name: Upload APK
+      uses: actions/upload-artifact@v7
+      with:
+        name: pubky-ring-debug-signed-apk-${{ github.sha }}
+        path: android/app/build/outputs/apk/release/*.apk
+        if-no-files-found: error
+        retention-days: 14

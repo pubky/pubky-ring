@@ -5,12 +5,10 @@ name: Android Debug-Signed APK
 # Never distribute it as a production build.
 
 on:
-  pull_request:
-    branches: [ main ]
   workflow_dispatch:
 
 concurrency:
-  group: android-debug-signed-apk-${{ github.head_ref || github.ref }}
+  group: android-debug-signed-apk-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -27,23 +25,8 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v6
 
-    - name: Set up Node.js
-      uses: actions/setup-node@v5
-      with:
-        node-version: '24'
-        cache: 'yarn'
-
-    - name: Set up Java
-      uses: actions/setup-java@v5
-      with:
-        distribution: 'zulu'
-        java-version: '17'
-
-    - name: Set up Gradle cache
-      uses: gradle/actions/setup-gradle@v5
-
-    - name: Install dependencies
-      run: yarn install --frozen-lockfile
+    - name: Set up Android build
+      uses: ./.github/actions/android-build-setup
 
     - name: Assemble debug-signed release APK
       working-directory: android
@@ -52,7 +35,7 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v7
       with:
-        name: pubky-ring-debug-signed-apk-${{ github.event.pull_request.head.sha || github.sha }}
+        name: pubky-ring-debug-signed-apk-${{ github.sha }}
         path: android/app/build/outputs/apk/release/*.apk
         if-no-files-found: error
         retention-days: 14

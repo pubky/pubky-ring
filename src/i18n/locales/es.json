@@ -86,7 +86,8 @@
 		"signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
 		"authorizeForApp": "Autorizar {{appName}}",
-		"authorizedForApp": "Autorizado {{appName}}"
+		"authorizedForApp": "Autorizado {{appName}}",
+		"encryptAndDecryptContent": "Cifrar y descifrar contenido"
 	},
 	"grants": {
 		"title": "Aplicaciones autorizadas",

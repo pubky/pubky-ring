@@ -211,6 +211,46 @@ describe('handleSignupAction', () => {
 		);
 	});
 
+	it('preserves signed approval fields when signup transitions to signin', async () => {
+		const dispatch = jest.fn();
+		const setAddPubkyScreen = jest.fn();
+
+		const result = await handleSignupAction(
+			{
+				action: InputAction.Signup,
+				params: {
+					homeserver: homeserverPubkey,
+					inviteCode: 'ABCD-1234-WXYZ',
+					relay: 'https://httprelay.pubky.app/inbox',
+					caps: ['/priv/example.app/:rwe'],
+					kind: 'signup_grant',
+					clientId: 'example.app',
+					clientPublicKey: 'client-public-key',
+					approvalFormat: 'signed_approval_v1',
+					ephemeralPublicKey: 'ephemeral-public-key',
+				},
+			},
+			{ dispatch, setAddPubkyScreen },
+		);
+
+		expect(result.isOk()).toBe(true);
+		expect(handleAuthActionMock).toHaveBeenCalledWith(
+			{
+				action: InputAction.Auth,
+				params: {
+					relay: 'https://httprelay.pubky.app/inbox',
+					secret: undefined,
+					caps: ['/priv/example.app/:rwe'],
+					kind: 'signin_grant',
+					xCallback: undefined,
+				},
+				rawUrl:
+					'pubkyauth://signin_grant?relay=https%3A%2F%2Fhttprelay.pubky.app%2Finbox&caps=%2Fpriv%2Fexample.app%2F%3Arwe&cid=example.app&cpk=client-public-key&af=v1&epk=ephemeral-public-key',
+			},
+			{ dispatch, setAddPubkyScreen, pubky: 'pubky-created', isDeeplink: false },
+		);
+	});
+
 	it('keeps the signup error visible for direct signup failures even when existing pubkys are present', async () => {
 		const { err } = require('@synonymdev/result');
 		const dispatch = jest.fn();

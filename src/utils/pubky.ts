@@ -64,7 +64,16 @@ type GrantManagementBindings = {
 	revokeGrant?: (sessionSecret: string, grantId: string) => Promise<Result<string>>;
 };
 
+type SelectiveAuthBindings = {
+	authWithCapabilities?: (
+		authUrl: string,
+		secretKey: string,
+		approvedCapabilities: string,
+	) => Promise<Result<string>>;
+};
+
 const grantManagementBindings = ReactNativePubky as typeof ReactNativePubky & GrantManagementBindings;
+const selectiveAuthBindings = ReactNativePubky as typeof ReactNativePubky & SelectiveAuthBindings;
 
 const grantManagementUnavailable = (method: keyof GrantManagementBindings): string => {
 	console.error(`@synonymdev/react-native-pubky does not expose ${method}`);
@@ -83,6 +92,18 @@ const revokeGrant = (sessionSecret: string, grantId: string): Promise<Result<str
 		return Promise.resolve(err(grantManagementUnavailable('revokeGrant')));
 	}
 	return grantManagementBindings.revokeGrant(sessionSecret, grantId);
+};
+
+const approveAuthWithCapabilities = (
+	authUrl: string,
+	secretKey: string,
+	approvedCapabilities: string,
+): Promise<Result<string>> => {
+	if (!selectiveAuthBindings.authWithCapabilities) {
+		console.error('@synonymdev/react-native-pubky does not expose authWithCapabilities');
+		return Promise.resolve(err(i18n.t('pubkyErrors.unexpectedError')));
+	}
+	return selectiveAuthBindings.authWithCapabilities(authUrl, secretKey, approvedCapabilities);
 };
 
 const omitLocalGrants = (grants: GrantInfo[], localGrantIds: string[]): GrantInfo[] => {
@@ -977,10 +998,12 @@ export const performAuth = async ({
 	pubky,
 	authUrl,
 	dispatch,
+	approvedCapabilities,
 }: {
 	pubky?: string;
 	authUrl: string;
 	dispatch: Dispatch;
+	approvedCapabilities?: string;
 }): Promise<Result<string>> => {
 	try {
 		const isOnline = await checkNetworkConnection({
@@ -1011,7 +1034,11 @@ export const performAuth = async ({
 				republishedDuringSignup = signUpRes.isOk();
 			}
 			const secretKey = secretKeyRes.value.secretKey;
-			const authRes = await auth(authUrl, secretKey);
+			const authorize = (): Promise<Result<string>> | Promise<Result<string[]>> =>
+				approvedCapabilities === undefined
+					? auth(authUrl, secretKey)
+					: approveAuthWithCapabilities(authUrl, secretKey, approvedCapabilities);
+			const authRes = await authorize();
 			if (authRes.isErr()) {
 				const signInRes = await signInToHomeserver({
 					pubky,
@@ -1022,7 +1049,7 @@ export const performAuth = async ({
 				if (signInRes.isErr()) {
 					return err(getErrorMessage(signInRes.error, i18n.t('errors.signInFailed')));
 				}
-				const authRetryRes = await auth(authUrl, secretKey);
+				const authRetryRes = await authorize();
 				if (authRetryRes.isErr()) {
 					console.error('Error processing auth:', authRes.error);
 					return err(getErrorMessage(authRes.error, i18n.t('errors.failedToProcessAuth')));

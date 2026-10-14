@@ -63,17 +63,22 @@ const showErrorState = (
 const createSignupAuthData = (params: SignupParams): AuthActionData => {
 	const { relay, secret, xCallback } = params;
 	const kind = params.kind === 'signup_grant' ? 'signin_grant' : 'signin';
-	const clientParams =
-		kind === 'signin_grant'
-			? `&cid=${encodeURIComponent(params.clientId ?? '')}&cpk=${encodeURIComponent(params.clientPublicKey ?? '')}`
-			: '';
+	const query = new URLSearchParams();
+	query.set('relay', relay);
+	if (secret) query.set('secret', secret);
+	query.set('caps', params.caps.join(','));
+
+	if (kind === 'signin_grant') {
+		query.set('cid', params.clientId ?? '');
+		query.set('cpk', params.clientPublicKey ?? '');
+		if (params.approvalFormat === 'signed_approval_v1') query.set('af', 'v1');
+		if (params.ephemeralPublicKey) query.set('epk', params.ephemeralPublicKey);
+	}
 
 	return {
 		action: InputAction.Auth,
 		params: { relay, secret, caps: params.caps, kind, xCallback },
-		rawUrl: `pubkyauth://${kind}?relay=${encodeURIComponent(relay)}&secret=${encodeURIComponent(
-			secret,
-		)}&caps=${encodeURIComponent(params.caps.join(','))}${clientParams}`,
+		rawUrl: `pubkyauth://${kind}?${query.toString()}`,
 	};
 };
 

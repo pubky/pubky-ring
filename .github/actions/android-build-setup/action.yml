@@ -1,0 +1,24 @@
+name: Android build setup
+description: Node 24 with the yarn cache, Zulu JDK 17, the Gradle cache, and the JS dependencies. Run after actions/checkout.
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Node.js
+      uses: actions/setup-node@v5
+      with:
+        node-version: '24'
+        cache: 'yarn'
+
+    - name: Set up Java
+      uses: actions/setup-java@v5
+      with:
+        distribution: 'zulu'
+        java-version: '17'
+
+    - name: Set up Gradle cache
+      uses: gradle/actions/setup-gradle@v5
+
+    - name: Install dependencies
+      shell: bash
+      run: yarn install --frozen-lockfile

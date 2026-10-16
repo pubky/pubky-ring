@@ -1,4 +1,4 @@
-import { Pubky } from '../types/pubky.ts';
+import { GrantInfo, Pubky } from '../types/pubky.ts';
 import type {
 	AddPubkySheetParams,
 	AuthSheetParams,
@@ -7,6 +7,7 @@ import type {
 	EditPubkySheetParams,
 	LegacySunsetSheetParams,
 	MigrateSheetParams,
+	RevokeGrantSheetParams,
 	UseExternalPubkySheetParams,
 } from '../sheets/types.ts';
 
@@ -28,12 +29,18 @@ export type RootStackParamList = {
 		pubky: string;
 		index: number;
 	};
+	AuthorizedGrant: {
+		pubky: string;
+		sessionId: string;
+		grant: GrantInfo;
+	};
 	BackupSheet: BackupSheetParams;
 	AuthSheet: AuthSheetParams;
 	DeletePubkySheet: DeletePubkySheetParams;
 	EditPubkySheet: EditPubkySheetParams;
 	AddPubkySheet: AddPubkySheetParams;
 	MigrateSheet: MigrateSheetParams;
+	RevokeGrantSheet: RevokeGrantSheetParams;
 	LegacySunsetSheet: LegacySunsetSheetParams;
 	UseExternalPubkySheet: UseExternalPubkySheetParams;
 };

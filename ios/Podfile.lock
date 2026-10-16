@@ -1387,7 +1387,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - react-native-pubky (0.14.0):
+  - react-native-pubky (0.14.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2205,7 +2205,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNSVG (15.15.5):
+  - RNSVG (15.16.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2226,9 +2226,9 @@ PODS:
     - ReactCodegen
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNSVG/common (= 15.15.5)
+    - RNSVG/common (= 15.16.0)
     - Yoga
-  - RNSVG/common (15.15.5):
+  - RNSVG/common (15.16.0):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2729,7 +2729,7 @@ SPEC CHECKSUMS:
   react-native-document-picker: f819513b2b3a5c3e1cc04554c0b385bb6fd2574f
   react-native-image-picker: 870b31525256975a2d4b6b20a54db9b380cd725d
   react-native-netinfo: 58601963060e4df0c1b6b6980d4f24ce2751e64c
-  react-native-pubky: 8ee245f900aefecb32796e015301aef5d8dd2680
+  react-native-pubky: b67b5f61250ee73f91a9823f6505ebb684108109
   react-native-safe-area-context: b5811d7e125c575340d23b96841ae69592b4169c
   react-native-skia: aba4da46421c672b3d647285b58db42c57248a26
   React-NativeModulesApple: adb1dd8361dff80e9f6652fb3fdbf033cfbe2a89
@@ -2779,7 +2779,7 @@ SPEC CHECKSUMS:
   RNReanimated: a40a23cfa56063c9b0c7af8794c847c0ddf8a99c
   RNScreens: adecf105984a7aa1791b34d6ab97e95ea3879c93
   RNShare: 17b29dee409f837fad3971a41e6fed5c929e1dab
-  RNSVG: 6c9bcbf53822153be6f6c1484f6b0b57c0040d21
+  RNSVG: e771a5f988c085ee715ecbe4105e64e416ce5846
   RNWorklets: e00d9fe0f91ef81e6056248566c84501506ad539
   SocketRocket: 37aec555668fb852ec12e3c0de59a86ca58f0871
   SynonymReactNativeToast: 702acb2af3e8cb708f2cfdb6fe361b9784d50953

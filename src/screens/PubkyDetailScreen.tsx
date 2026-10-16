@@ -1,4 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo } from 'react';
+import { StyleSheet, View } from 'react-native';
 import { PubkyData } from '../navigation/types';
 import PubkyDetail from '../components/PubkyDetail/PubkyDetail.tsx';
 import { useSelector } from 'react-redux';
@@ -7,7 +8,6 @@ import { getPubky } from '../store/selectors/pubkySelectors.ts';
 import AppHeader from '../components/AppHeader.tsx';
 import HeaderNavButton from '../components/HeaderNavButton.tsx';
 import { useTypedRoute } from '../navigation/hooks';
-import SafeAreaView from '../components/SafeAreaView.tsx';
 import { Pencil } from '../icons/index.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 
@@ -39,15 +39,21 @@ const PubkyDetailScreen = (): ReactElement => {
 	);
 
 	if (!pubkyData) {
-		return <SafeAreaView edges={['bottom']} />;
+		return <View style={styles.container} />;
 	}
 
 	return (
-		<SafeAreaView edges={['bottom']}>
+		<View style={styles.container}>
 			<AppHeader rightButton={rightButton} />
 			<PubkyDetail index={index} pubkyData={pubkyData} onQRPress={handleQRPress} />
-		</SafeAreaView>
+		</View>
 	);
 };
+
+const styles = StyleSheet.create({
+	container: {
+		flex: 1,
+	},
+});
 
 export default memo(PubkyDetailScreen);

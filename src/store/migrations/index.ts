@@ -159,16 +159,14 @@ const migrations = {
 				sessions: (pubky.sessions ?? [])
 					// Legacy persisted sessions had bearer session_secret values but no local id.
 					// Revoke them before dropping the local copy.
-					.filter(
-						(session: Record<string, unknown>) => {
-							if (typeof session.id !== 'string' || session.id.length === 0) {
-								revokeLegacySession(session);
-								return false;
-							}
+					.filter((session: Record<string, unknown>) => {
+						if (typeof session.id !== 'string' || session.id.length === 0) {
+							revokeLegacySession(session);
+							return false;
+						}
 
-							return true;
-						},
-					)
+						return true;
+					})
 					// Persist only the non-secret metadata needed by the session list/details UI.
 					.map((session: Record<string, unknown>) => ({
 						id: session.id,
@@ -214,6 +212,35 @@ const migrations = {
 	// Adds the optional Pubky.sourceApp field. Existing pubkys are Ring-owned, so it stays unset.
 	// @ts-ignore
 	9: (state): PersistedState => state,
+	// Remove development-era Grant sessions that predate persisted grant ids.
+	// Every retained management session must have an exact id so Ring can hide
+	// its own grants without relying on the self-asserted client id.
+	// @ts-ignore
+	10: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			const pubky = updatedPubkys[pubkyKey];
+			updatedPubkys[pubkyKey] = {
+				...pubky,
+				sessions: (pubky.sessions ?? []).filter((session: Record<string, unknown>) => {
+					const hasGrantId = typeof session.grant_id === 'string' && session.grant_id.length > 0;
+					if (!hasGrantId) {
+						revokeStoredSession(pubkyKey, session);
+					}
+					return hasGrantId;
+				}),
+			};
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+			},
+		};
+	},
 };
 
 export default migrations;

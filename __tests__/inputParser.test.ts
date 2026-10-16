@@ -159,10 +159,12 @@ describe('parseInput', () => {
 			`hs=${homeserverPubkey}` +
 			`&relay=${encodeURIComponent('wss://relay.example.com')}` +
 			'&secret=secret-value' +
-			'&caps=pubky.app:write';
+			'&caps=pubky.app:write&cid=shop.example&cpk=client-public-key';
 		mockDeepLink({
 			scheme: 'pubkyauth',
 			kind: 'signup_grant',
+			client_id: 'shop.example',
+			client_public_key: 'client-public-key',
 			url: rawInput,
 			homeserver: homeserverPubkey,
 			relay: 'wss://relay.example.com',
@@ -182,6 +184,8 @@ describe('parseInput', () => {
 				secret: 'secret-value',
 				caps: ['pubky.app:write'],
 				kind: 'signup_grant',
+				clientId: 'shop.example',
+				clientPublicKey: 'client-public-key',
 				xCallback: undefined,
 			},
 		});

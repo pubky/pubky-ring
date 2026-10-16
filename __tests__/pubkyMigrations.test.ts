@@ -128,4 +128,59 @@ describe('pubky migrations', () => {
 
 		expect(migratedState.pubky.pubkys.pubkyOne).not.toHaveProperty('sourceApp');
 	});
+
+	it('revokes and removes development Grant sessions that have no grant id', async () => {
+		getSessionSecretMock.mockResolvedValueOnce(resultOk('pubkyOne:grant-without-id'));
+		const state = {
+			pubky: {
+				deepLink: '',
+				processing: {},
+				pubkys: {
+					pubkyOne: {
+						name: 'Alice',
+						homeserver: 'https://homeserver.example',
+						signedUp: true,
+						signupToken: '',
+						image: '',
+						sessions: [
+							{
+								id: 'session-without-grant-id',
+								capabilities: ['/:rw'],
+								created_at: 123,
+							},
+							{
+								id: 'current-session',
+								grant_id: 'current-grant',
+								capabilities: ['/:rw'],
+								created_at: 456,
+							},
+						],
+						backupPreference: EBackupPreference.encryptedFile,
+						isBackedUp: true,
+					},
+				},
+			},
+		};
+
+		const migratedState = runMigration(10, state);
+		await flushPromises();
+
+		expect(migratedState.pubky.pubkys.pubkyOne.sessions).toEqual([
+			{
+				id: 'current-session',
+				grant_id: 'current-grant',
+				capabilities: ['/:rw'],
+				created_at: 456,
+			},
+		]);
+		expect(getSessionSecretMock).toHaveBeenCalledWith({
+			pubky: 'pubkyOne',
+			sessionId: 'session-without-grant-id',
+		});
+		expect(signOutMock).toHaveBeenCalledWith('pubkyOne:grant-without-id');
+		expect(resetSessionSecretMock).toHaveBeenCalledWith({
+			pubky: 'pubkyOne',
+			sessionId: 'session-without-grant-id',
+		});
+	});
 });

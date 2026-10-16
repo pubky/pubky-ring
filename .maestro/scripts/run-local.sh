@@ -6,7 +6,7 @@ flow="${2:-.maestro}"
 
 case "$platform" in
   android)
-    app_id="app.pubkyring"
+    app_id="to.pubky.ring"
     ;;
   ios)
     app_id="app.pubkyring"

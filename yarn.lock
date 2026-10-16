@@ -2227,10 +2227,10 @@
   resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
-"@synonymdev/react-native-pubky@0.14.0":
-  version "0.14.0"
-  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.14.0.tgz#0b88344cd199f9f66c51718a1d83a7924b2bcfa8"
-  integrity sha512-JN94I70L3pFzt06X54r0isQAViKKWFKnkieDN44I6ji2isKEfpwElx45P1BwnFm6OegTXUbQT9VI6s+nwbUu6A==
+"@synonymdev/react-native-pubky@0.14.1":
+  version "0.14.1"
+  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.14.1.tgz#586d1415845c1c81537e4b4ee66084641f86f3b2"
+  integrity sha512-6TuyR2OhW1IG4bOjMp8bqYI0GdOEzOgXXttGSwuZDgtT88mlgiM2WU+5iYcgGKl3nkKP/9OEj97yz91xYKYrWA==
   dependencies:
     "@synonymdev/result" "^0.0.2"
 
@@ -6568,10 +6568,10 @@ react-native-skia-apple-tvos@154.0.0:
   resolved "https://registry.yarnpkg.com/react-native-skia-apple-tvos/-/react-native-skia-apple-tvos-154.0.0.tgz#4ab94a2afe9443f98d75809d639a1daf6264a797"
   integrity sha512-W06tUa+O3TJTYg5G+Lly/pwxE+2zKsmwJ/23yeR+25zSu7VmfdSz3VqFN3BM0jEioN4ASMm/0cMECocV7vxbMQ==
 
-react-native-svg@^15.15.3:
-  version "15.15.5"
-  resolved "https://registry.yarnpkg.com/react-native-svg/-/react-native-svg-15.15.5.tgz#822805c14481b8ec16d5fbac1e3ce2b27a5509d7"
-  integrity sha512-L4go5jA+GWutdJ/JucuN20cjAbMg1HmMtAP+wZ+3JLCf6Jd0bhXQHxciRP/AQm/FlrIEZwkMcHNZP+FXAiic0w==
+react-native-svg@^15.16.0:
+  version "15.16.0"
+  resolved "https://registry.yarnpkg.com/react-native-svg/-/react-native-svg-15.16.0.tgz#27647ff1dc6e6f81be18dc6f862e881254e85d7c"
+  integrity sha512-uh8yktufYeRU3W9Omi8+SPyLF9BVN4JmLflSgc9oOcKkSKk/S5JUmmTjKZq/L8GHfQUtCvcu/W6X4xhEfBBAjQ==
   dependencies:
     css-select "^5.1.0"
     css-tree "^1.1.3"

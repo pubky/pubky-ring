@@ -1,6 +1,12 @@
 import { ok, err } from '@synonymdev/result';
 import { parseDeepLink } from '@synonymdev/react-native-pubky';
 import { createConfirmAuthPayload } from '../src/utils/actions/authAction';
+
+jest.mock('../src/utils/authorizedGrants.ts', () => ({
+	refreshAuthorizedGrants: jest.fn(),
+	refreshAuthorizedGrantsAfterAuthorization: jest.fn(),
+	syncAuthorizedGrantsAfterAuth: jest.fn(),
+}));
 import { InputAction } from '../src/utils/inputParser';
 
 jest.mock('@synonymdev/react-native-pubky');
@@ -29,6 +35,7 @@ jest.mock('../src/utils/pubky', () => ({
 
 jest.mock('../src/utils/store-helpers', () => ({
 	__esModule: true,
+	getAuthorizedGrantCountFromStore: jest.fn(() => 0),
 	getAutoAuthFromStore: jest.fn(() => false),
 }));
 

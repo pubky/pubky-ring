@@ -1,5 +1,6 @@
 import type { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import type { InputSource, XCallbackParams } from '../utils/inputParser.ts';
+import type { GrantInfo } from '../types/pubky.ts';
 
 export type SheetId =
 	| 'backup'
@@ -8,6 +9,7 @@ export type SheetId =
 	| 'edit-pubky'
 	| 'add-pubky'
 	| 'migrate'
+	| 'revoke-grant'
 	| 'legacy-sunset'
 	| 'use-external-pubky';
 
@@ -148,6 +150,12 @@ export type LegacySunsetSheetParams = {
 	apkUrl: string;
 };
 
+export type RevokeGrantSheetParams = {
+	pubky: string;
+	sessionId: string;
+	grant: GrantInfo;
+};
+
 export type SheetParamsById = {
 	backup: BackupSheetParams;
 	auth: AuthSheetParams;
@@ -155,6 +163,7 @@ export type SheetParamsById = {
 	'edit-pubky': EditPubkySheetParams;
 	'add-pubky': AddPubkySheetParams;
 	migrate: MigrateSheetParams;
+	'revoke-grant': RevokeGrantSheetParams;
 	'legacy-sunset': LegacySunsetSheetParams;
 	'use-external-pubky': UseExternalPubkySheetParams;
 };

@@ -35,6 +35,7 @@ import {
 } from '../utils/authCapabilities.ts';
 import { useTheme } from 'styled-components/native';
 import type { Theme } from '../theme';
+import { getEncryptionPermissionLabel } from '../utils/sessionDisplay.ts';
 
 const Permission = memo(
 	({
@@ -55,6 +56,7 @@ const Permission = memo(
 		const hasReadPermission = capability.permission.includes('r');
 		const hasWritePermission = capability.permission.includes('w');
 		const hasEncryptionPermission = capability.permission.includes('e');
+		const encryptionLabel = getEncryptionPermissionLabel(t, capability.path);
 		return (
 			<View style={styles.capabilityContainer}>
 				<View style={styles.permissionRow}>
@@ -77,11 +79,11 @@ const Permission = memo(
 					<View style={styles.encryptionPermissionRow}>
 						<Key size={16} />
 						<TextSmM style={styles.encryptionPermissionLabel} colorName="foreground">
-							{t('auth.encryptAndDecryptContent')}
+							{encryptionLabel}
 						</TextSmM>
 						{!isAuthorized && (
 							<Switch
-								accessibilityLabel={`${t('auth.encryptAndDecryptContent')}: ${capability.path}`}
+								accessibilityLabel={`${encryptionLabel}: ${capability.path}`}
 								disabled={disabled}
 								ios_backgroundColor={theme.colors.input}
 								trackColor={{ false: theme.colors.input, true: theme.colors.pubkyApp }}
@@ -236,6 +238,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 	]);
 
 	const authDetailCapabilities = authDetails.capabilities ?? [];
+	const hasApprovedEncryption = authDetailCapabilities.some(
+		(capability, index) => capability.permission.includes('e') && !declinedEncryptionIndexes.has(index),
+	);
 	const handleEncryptionApprovalChange = useCallback((index: number, approved: boolean): void => {
 		setDeclinedEncryptionIndexes(current => {
 			const updated = new Set(current);
@@ -290,6 +295,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 						/>
 					))}
 				</View>
+				{!isAuthorized && hasApprovedEncryption && (
+					<TextSmM style={styles.encryptionWarning}>{t('auth.encryptionKeysWarning')}</TextSmM>
+				)}
 			</PermissionCard>
 
 			{!isAuthorized && (
@@ -403,6 +411,11 @@ const styles = StyleSheet.create({
 	},
 	encryptionPermissionLabel: {
 		flex: 1,
+	},
+	encryptionWarning: {
+		marginTop: 12,
+		fontSize: 12,
+		lineHeight: 18,
 	},
 	imageContainer: {
 		flex: 1,

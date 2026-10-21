@@ -2,7 +2,6 @@ import React, { memo, ReactElement, useCallback, useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { useDispatch, useSelector, shallowEqual } from 'react-redux';
-import { useFocusEffect } from '@react-navigation/native';
 import EmptyState from '../components/EmptyState';
 import { Pubky, TPubkys } from '../types/pubky';
 import Button from '../components/Button';
@@ -24,6 +23,7 @@ import ExternalPubkyBox from '../components/ExternalPubkyBox.tsx';
 import { useExternalPubkys } from '../hooks/useExternalPubkys.ts';
 import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
 import { refreshAuthorizedGrants } from '../utils/authorizedGrants.ts';
+import { useRefreshOnFocusAndForeground } from '../hooks/useRefreshOnFocusAndForeground.ts';
 
 // Extract gradient props to constants to prevent unnecessary re-renders
 const FADE_GRADIENT_COLORS = ['rgba(0, 0, 0, 0)', 'rgba(0, 0, 0, 1)'];
@@ -89,15 +89,15 @@ const HomeScreen = (): ReactElement => {
 	const { replacementRelease } = useReplacementRelease();
 	const externalPubkys = useExternalPubkys();
 
-	useFocusEffect(
-		useCallback(() => {
-			pubkyArray.forEach(({ key: pubky, value }) => {
-				if (canManagePubkyGrants(value)) {
-					refreshAuthorizedGrants({ pubky, dispatch }).then();
-				}
-			});
-		}, [dispatch, pubkyArray]),
-	);
+	const refreshGrants = useCallback(() => {
+		pubkyArray.forEach(({ key: pubky, value }) => {
+			if (canManagePubkyGrants(value)) {
+				refreshAuthorizedGrants({ pubky, dispatch, forceReload: true }).then();
+			}
+		});
+	}, [dispatch, pubkyArray]);
+
+	useRefreshOnFocusAndForeground(refreshGrants);
 
 	const handleDragEnd = useCallback(
 		({ data }: { data: { key: string; value: Pubky }[] }) => {

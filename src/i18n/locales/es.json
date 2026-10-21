@@ -87,7 +87,10 @@
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
 		"authorizeForApp": "Autorizar {{appName}}",
 		"authorizedForApp": "Autorizado {{appName}}",
-		"encryptAndDecryptContent": "Cifrar y descifrar contenido"
+		"encryptAndDecryptFolder": "Cifrar y descifrar archivos de esta carpeta",
+		"encryptAndDecryptFile": "Cifrar y descifrar este archivo",
+		"encryptAndDecryptAllFiles": "Cifrar y descifrar todos sus archivos",
+		"encryptionKeysWarning": "Revocar el acceso no permite recuperar las claves de cifrado ya compartidas. La aplicación puede seguir descifrando contenido cifrado con ellas, incluido el contenido futuro."
 	},
 	"grants": {
 		"title": "Aplicaciones autorizadas",

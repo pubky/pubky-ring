@@ -17,7 +17,7 @@ export const formatSessionTimestamp = (timestamp: number): string => {
 	}).format(date);
 };
 
-export type GrantPermissionAction = 'read' | 'write';
+export type GrantPermissionAction = 'read' | 'write' | 'encrypt';
 
 export type GrantPermission = {
 	path: string;
@@ -25,7 +25,7 @@ export type GrantPermission = {
 };
 
 export const parseGrantPermission = (capability: string): GrantPermission => {
-	const match = capability.match(/^(.*):([rw]+)$/);
+	const match = capability.match(/^(.*):([rwe]+)$/);
 	const scope = match?.[1] ?? capability;
 	const encodedActions = match?.[2] ?? '';
 	const actions: GrantPermissionAction[] = [];
@@ -36,11 +36,21 @@ export const parseGrantPermission = (capability: string): GrantPermission => {
 	if (encodedActions.includes('w')) {
 		actions.push('write');
 	}
+	if (encodedActions.includes('e')) {
+		actions.push('encrypt');
+	}
 
 	return {
-		path: scope === '/' || scope.endsWith('/') ? scope : `${scope}/`,
+		path: scope,
 		actions,
 	};
+};
+
+export const getEncryptionPermissionLabel = (t: TFunction, path: string): string => {
+	if (path === '/') {
+		return t('auth.encryptAndDecryptAllFiles');
+	}
+	return t(path.endsWith('/') ? 'auth.encryptAndDecryptFolder' : 'auth.encryptAndDecryptFile');
 };
 
 export const getPermissionLabel = (capability: string): string => {

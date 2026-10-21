@@ -87,7 +87,10 @@
 		"timeoutError": "The authentication process took too long. Please try again.",
 		"authorizeForApp": "Authorize {{appName}}",
 		"authorizedForApp": "Authorized {{appName}}",
-		"encryptAndDecryptContent": "Encrypt and decrypt content"
+		"encryptAndDecryptFolder": "Encrypt and decrypt files in this folder",
+		"encryptAndDecryptFile": "Encrypt and decrypt this file",
+		"encryptAndDecryptAllFiles": "Encrypt and decrypt all your files",
+		"encryptionKeysWarning": "Revoking access cannot take back encryption keys already shared. The app can still decrypt content encrypted with them, including future content."
 	},
 	"grants": {
 		"title": "Authorized Apps",

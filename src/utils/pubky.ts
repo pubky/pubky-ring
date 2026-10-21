@@ -7,6 +7,8 @@ import {
 	republishHomeserver as _republishHomeserver,
 	getHomeserver,
 	get,
+	auth,
+	authWithCapabilities,
 	generateMnemonicPhraseAndKeypair,
 	mnemonicPhraseToKeypair,
 	type SessionInfo,
@@ -39,7 +41,6 @@ import { defaultProfile, defaultPubkyState } from '../store/shapes/pubky';
 import { checkNetworkConnection } from './helpers.ts';
 import { showToast } from '@synonymdev/react-native-toast';
 import { getErrorMessage } from './errorHandler.ts';
-import { auth } from '@synonymdev/react-native-pubky';
 import { getAllPubkysFromStore, getPubkyDataFromStore } from './store-helpers.ts';
 import { EBackupPreference, GrantInfo, IKeychainData, PubkySession, TProfile } from '../types/pubky.ts';
 import type { TPubkys } from '../types/pubky.ts';
@@ -64,16 +65,7 @@ type GrantManagementBindings = {
 	revokeGrant?: (sessionSecret: string, grantId: string) => Promise<Result<string>>;
 };
 
-type SelectiveAuthBindings = {
-	authWithCapabilities?: (
-		authUrl: string,
-		secretKey: string,
-		approvedCapabilities: string,
-	) => Promise<Result<string>>;
-};
-
 const grantManagementBindings = ReactNativePubky as typeof ReactNativePubky & GrantManagementBindings;
-const selectiveAuthBindings = ReactNativePubky as typeof ReactNativePubky & SelectiveAuthBindings;
 
 const grantManagementUnavailable = (method: keyof GrantManagementBindings): string => {
 	console.error(`@synonymdev/react-native-pubky does not expose ${method}`);
@@ -92,18 +84,6 @@ const revokeGrant = (sessionSecret: string, grantId: string): Promise<Result<str
 		return Promise.resolve(err(grantManagementUnavailable('revokeGrant')));
 	}
 	return grantManagementBindings.revokeGrant(sessionSecret, grantId);
-};
-
-const approveAuthWithCapabilities = (
-	authUrl: string,
-	secretKey: string,
-	approvedCapabilities: string,
-): Promise<Result<string>> => {
-	if (!selectiveAuthBindings.authWithCapabilities) {
-		console.error('@synonymdev/react-native-pubky does not expose authWithCapabilities');
-		return Promise.resolve(err(i18n.t('pubkyErrors.unexpectedError')));
-	}
-	return selectiveAuthBindings.authWithCapabilities(authUrl, secretKey, approvedCapabilities);
 };
 
 const omitLocalGrants = (grants: GrantInfo[], localGrantIds: string[]): GrantInfo[] => {
@@ -1037,7 +1017,7 @@ export const performAuth = async ({
 			const authorize = (): Promise<Result<string>> | Promise<Result<string[]>> =>
 				approvedCapabilities === undefined
 					? auth(authUrl, secretKey)
-					: approveAuthWithCapabilities(authUrl, secretKey, approvedCapabilities);
+					: authWithCapabilities(authUrl, secretKey, approvedCapabilities);
 			const authRes = await authorize();
 			if (authRes.isErr()) {
 				const signInRes = await signInToHomeserver({

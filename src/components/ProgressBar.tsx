@@ -38,7 +38,6 @@ const ProgressBar = ({
 	style,
 }: ProgressBarProps): React.ReactElement | null => {
 	const [shouldRender, setShouldRender] = useState(delayRender === 0);
-	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 	const progress = useSharedValue(drain ? 1 : 0);
 	const opacity = useSharedValue(fadeIn ? 0 : 1);
 
@@ -46,14 +45,10 @@ const ProgressBar = ({
 		opacity: opacity.value,
 	}));
 
-	const progressStyle = useAnimatedStyle(() => {
-		const width = progress.value * dimensions.width;
-
-		return {
-			width,
-			left: reverse ? dimensions.width - width : 0,
-		};
-	});
+	const progressStyle = useAnimatedStyle(() => ({
+		transform: [{ scaleX: progress.value }],
+		transformOrigin: reverse ? 'right center' : 'left center',
+	}));
 
 	// Handle delayed rendering
 	useEffect(() => {
@@ -69,7 +64,7 @@ const ProgressBar = ({
 	}, [delayRender]);
 
 	useEffect(() => {
-		if (!shouldRender || dimensions.width === 0) return;
+		if (!shouldRender) return;
 
 		// restart animation whenever duration or delay changes
 		cancelAnimation(progress);
@@ -96,7 +91,7 @@ const ProgressBar = ({
 			cancelAnimation(opacity);
 		};
 		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [shouldRender, dimensions.width, duration, delayStart, fadeIn, fadeInDuration, drain]);
+	}, [shouldRender, duration, delayStart, fadeIn, fadeInDuration, drain]);
 
 	if (!shouldRender) {
 		return <View style={[styles.container, { height, borderRadius }, style]} />;
@@ -111,24 +106,12 @@ const ProgressBar = ({
 				containerStyle,
 				style,
 			]}
-			onLayout={e => {
-				setDimensions({
-					width: e.nativeEvent.layout.width,
-					height: e.nativeEvent.layout.height,
-				});
-			}}
 			accessibilityRole="progressbar"
 			accessibilityValue={{ min: 0, max: 1, now: undefined }}
 		>
-			{dimensions.width > 0 && (
-				<Animated.View
-					style={[
-						styles.progress,
-						{ height: dimensions.height, borderRadius, backgroundColor: filledColor },
-						progressStyle,
-					]}
-				/>
-			)}
+			<Animated.View
+				style={[styles.progress, { height, borderRadius, backgroundColor: filledColor }, progressStyle]}
+			/>
 		</Animated.View>
 	);
 };
@@ -140,6 +123,8 @@ const styles = StyleSheet.create({
 	progress: {
 		position: 'absolute',
 		top: 0,
+		left: 0,
+		width: '100%',
 	},
 });
 

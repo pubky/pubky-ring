@@ -26,6 +26,7 @@ import ShieldIcon from 'lucide-react-native/icons/shield';
 import TabletIcon from 'lucide-react-native/icons/tablet';
 import TrashIcon from 'lucide-react-native/icons/trash';
 import UploadIcon from 'lucide-react-native/icons/upload';
+import UserCheckIcon from 'lucide-react-native/icons/user-round-check';
 import XIcon from 'lucide-react-native/icons/x';
 import { createIcon } from './createIcon';
 
@@ -58,5 +59,6 @@ export const Tablet = createIcon(TabletIcon);
 export const Telegram = createIcon(SendIcon);
 export const Trash = createIcon(TrashIcon);
 export const Upload = createIcon(UploadIcon);
+export const UserCheck = createIcon(UserCheckIcon);
 export const XLogo = createIcon(XIcon);
 export type { IconProps } from './types';

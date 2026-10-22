@@ -109,6 +109,7 @@ jest.mock('../src/icons/index.ts', () => ({
 	CheckCircle: () => null,
 	Folder: () => null,
 	Key: () => null,
+	UserCheck: () => null,
 }));
 
 const renderRequest = (capabilities: AuthCapability[]): string => {
@@ -178,6 +179,29 @@ describe('ConfirmAuth selective approval integration', () => {
 		jest.restoreAllMocks();
 	});
 
+	it('shows identity verification for a request with no permissions, before and after authorization', async () => {
+		const authUrl = renderRequest([]);
+
+		expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
+		expect(screen.getByText('auth.provePubkyControl')).toBeTruthy();
+		expect(screen.getByText('auth.identityVerificationWarning')).toBeTruthy();
+		expect(screen.queryByTestId('ConfirmAuthRequestedPermissions')).toBeNull();
+		expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
+		expect(screen.queryByText('auth.trustWarning')).toBeNull();
+		expect(screen.queryByText('auth.encryptionKeysWarning')).toBeNull();
+		expect(screen.queryAllByRole('switch')).toHaveLength(0);
+		await approve();
+
+		expect(auth).toHaveBeenCalledWith(authUrl, 'identity-secret');
+		expect(authWithCapabilities).not.toHaveBeenCalled();
+		expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
+		expect(screen.getByText('auth.identityVerified')).toBeTruthy();
+		expect(screen.getByText('auth.identityVerifiedDescription')).toBeTruthy();
+		expect(screen.queryByText('auth.provePubkyControl')).toBeNull();
+		expect(screen.queryByText('auth.identityVerificationWarning')).toBeNull();
+		expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
+	});
+
 	it('submits the toggled capability subset and omits declined encryption-only scopes on success', async () => {
 		const authUrl = renderRequest([
 			{ path: '/priv/chat/', permission: 'rwe' },
@@ -203,6 +227,8 @@ describe('ConfirmAuth selective approval integration', () => {
 		expect(screen.queryByText('/pub/keys/')).toBeNull();
 		expect(screen.queryByText('auth.encryptAndDecryptFolder')).toBeNull();
 		expect(screen.queryAllByRole('switch')).toHaveLength(0);
+		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
+		expect(screen.queryByText('auth.identityVerifiedDescription')).toBeNull();
 	});
 
 	it.each(['/priv/chat/', '/priv/chat/file.json', '/'])(
@@ -210,11 +236,19 @@ describe('ConfirmAuth selective approval integration', () => {
 		async path => {
 			const authUrl = renderRequest([{ path, permission: 'e' }]);
 			fireEvent(screen.getByRole('switch'), 'valueChange', false);
+			expect(screen.getByTestId('ConfirmAuthRequestedPermissions')).toBeTruthy();
+			expect(screen.getByText(path)).toBeTruthy();
+			expect(screen.getByRole('switch')).toBeTruthy();
+			expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
 			await approve();
 
 			expect(auth).not.toHaveBeenCalled();
 			expect(authWithCapabilities).toHaveBeenCalledWith(authUrl, 'identity-secret', '');
-			expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
+			expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
+			expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
+			expect(screen.getByText('auth.identityVerified')).toBeTruthy();
+			expect(screen.getByText('auth.identityVerifiedDescription')).toBeTruthy();
+			expect(screen.queryAllByRole('switch')).toHaveLength(0);
 			expect(screen.queryByText(path)).toBeNull();
 		},
 	);
@@ -238,6 +272,21 @@ describe('ConfirmAuth selective approval integration', () => {
 		expect(screen.getAllByText('auth.encryptAndDecryptFolder')).toHaveLength(1);
 	});
 
+	it('keeps the requested permissions visible when an empty approval fails', async () => {
+		jest.mocked(authWithCapabilities).mockResolvedValue(err('Approval failed'));
+		renderRequest([{ path: '/priv/chat/', permission: 'e' }]);
+		fireEvent(screen.getByRole('switch'), 'valueChange', false);
+		await approve();
+
+		expect(screen.getByTestId('ConfirmAuthRequestedPermissions')).toBeTruthy();
+		expect(screen.getByRole('switch')).toBeTruthy();
+		expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).toBeTruthy();
+		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
+		expect(screen.queryByText('auth.identityVerified')).toBeNull();
+		expect(screen.queryByText('auth.identityVerifiedDescription')).toBeNull();
+		expect(syncAuthorizedGrantsAfterAuth).not.toHaveBeenCalled();
+	});
+
 	it('preserves approved encryption scopes and their success display', async () => {
 		const authUrl = renderRequest([{ path: '/priv/chat/', permission: 'e' }]);
 		await approve();
@@ -246,6 +295,23 @@ describe('ConfirmAuth selective approval integration', () => {
 		expect(auth).not.toHaveBeenCalled();
 		expect(screen.getByText('/priv/chat/')).toBeTruthy();
 		expect(screen.getByText('auth.encryptAndDecryptFolder')).toBeTruthy();
+		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
+		expect(screen.queryByText('auth.identityVerifiedDescription')).toBeNull();
+	});
+
+	it('lets the user re-enable encryption before authorizing instead of switching to identity verification', async () => {
+		const authUrl = renderRequest([{ path: '/priv/chat/', permission: 'e' }]);
+		fireEvent(screen.getByRole('switch'), 'valueChange', false);
+		expect(screen.queryByText('auth.encryptionKeysWarning')).toBeNull();
+		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
+		fireEvent(screen.getByRole('switch'), 'valueChange', true);
+		expect(screen.getByText('auth.encryptionKeysWarning')).toBeTruthy();
+		await approve();
+
+		expect(authWithCapabilities).toHaveBeenCalledWith(authUrl, 'identity-secret', '/priv/chat/:e');
+		expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
+		expect(screen.getByText('/priv/chat/')).toBeTruthy();
+		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
 	});
 
 	it('uses the original auth method when no encryption is requested', async () => {
@@ -273,7 +339,14 @@ describe('ConfirmAuth selective approval integration', () => {
 			for (const call of jest.mocked(authWithCapabilities).mock.calls) {
 				expect(call).toEqual([authUrl, 'identity-secret', approved]);
 			}
-			expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
+			if (approved) {
+				expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
+				expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
+			} else {
+				expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
+				expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
+				expect(screen.getByText('auth.identityVerifiedDescription')).toBeTruthy();
+			}
 		},
 	);
 

@@ -22,7 +22,7 @@ import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
-import { CheckCircle, Folder, Key } from '../icons/index.ts';
+import { CheckCircle, Folder, Key, UserCheck } from '../icons/index.ts';
 import CircularProgressBar from '../components/CircularProgressBar.tsx';
 import PermissionCard from '../components/PermissionCard.tsx';
 import type { AuthStackParamList } from '../sheets/types.ts';
@@ -245,6 +245,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 	const hasApprovedEncryption = authDetailCapabilities.some(
 		(capability, index) => capability.permission.includes('e') && !declinedEncryptionIndexes.has(index),
 	);
+	const showIdentityVerification = isAuthorized
+		? buildApprovedCapabilities(authDetailCapabilities, declinedEncryptionIndexes) === ''
+		: !authDetailCapabilities.some(capability => capability.permission.length > 0);
 	const handleEncryptionApprovalChange = useCallback((index: number, approved: boolean): void => {
 		setDeclinedEncryptionIndexes(current => {
 			const updated = new Set(current);
@@ -282,32 +285,59 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			<PermissionCard style={styles.permissionsCard}>
 				<TextXsM
 					style={styles.sectionTitle}
-					testID={isAuthorized ? 'ConfirmAuthGrantedPermissions' : 'ConfirmAuthRequestedPermissions'}
+					testID={
+						showIdentityVerification
+							? 'ConfirmAuthIdentityVerification'
+							: isAuthorized
+								? 'ConfirmAuthGrantedPermissions'
+								: 'ConfirmAuthRequestedPermissions'
+					}
 				>
-					{isAuthorized ? t('auth.grantedPermissions') : t('auth.requestedPermissions')}
+					{showIdentityVerification
+						? t('auth.identityVerification')
+						: isAuthorized
+							? t('auth.grantedPermissions')
+							: t('auth.requestedPermissions')}
 				</TextXsM>
 
-				<View style={styles.permissions}>
-					{authDetailCapabilities.map((capability, index) => (
-						<Permission
-							key={`${capability.path}:${capability.permission}:${index}`}
-							capability={capability}
-							disabled={authorizing}
-							encryptionApproved={!declinedEncryptionIndexes.has(index)}
-							isAuthorized={isAuthorized}
-							onEncryptionApprovalChange={(approved): void => handleEncryptionApprovalChange(index, approved)}
-						/>
-					))}
-				</View>
+				{showIdentityVerification ? (
+					<View style={styles.identityVerificationRow}>
+						<UserCheck size={16} />
+						<TextSmM style={styles.identityVerificationLabel} colorName="foreground">
+							{isAuthorized ? t('auth.identityVerified') : t('auth.provePubkyControl')}
+						</TextSmM>
+					</View>
+				) : (
+					<View style={styles.permissions}>
+						{authDetailCapabilities.map((capability, index) => (
+							<Permission
+								key={`${capability.path}:${capability.permission}:${index}`}
+								capability={capability}
+								disabled={authorizing}
+								encryptionApproved={!declinedEncryptionIndexes.has(index)}
+								isAuthorized={isAuthorized}
+								onEncryptionApprovalChange={(approved): void =>
+									handleEncryptionApprovalChange(index, approved)
+								}
+							/>
+						))}
+					</View>
+				)}
 				{!isAuthorized && hasApprovedEncryption && (
 					<TextSmM style={styles.encryptionWarning}>{t('auth.encryptionKeysWarning')}</TextSmM>
 				)}
 			</PermissionCard>
 
-			{!isAuthorized && (
+			{showIdentityVerification ? (
 				<TextSmM style={styles.warningText} colorName="mutedForeground">
-					{t('auth.trustWarning')}
+					{isAuthorized ? t('auth.identityVerifiedDescription') : t('auth.identityVerificationWarning')}
 				</TextSmM>
+			) : (
+				!isAuthorized && (
+					<TextSmM style={styles.warningText} colorName="mutedForeground">
+						{t('auth.trustWarning')}
+					</TextSmM>
+				)
 			)}
 
 			<View style={styles.imageContainer}>
@@ -407,6 +437,14 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		justifyContent: 'flex-end',
 		gap: 8,
+	},
+	identityVerificationRow: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		gap: 8,
+	},
+	identityVerificationLabel: {
+		flex: 1,
 	},
 	encryptionPermissionRow: {
 		flexDirection: 'row',

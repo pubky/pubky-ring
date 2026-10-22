@@ -1,11 +1,8 @@
-import {
-	GrantApprovalDeepLinkDetails,
-	InputAction,
-	parseInput,
-} from '../src/utils/inputParser';
+import { InputAction, parseInput } from '../src/utils/inputParser';
 import { EBackupPreference } from '../src/types/pubky';
 import { ok, err } from '@synonymdev/result';
 import * as Pubky from '@synonymdev/react-native-pubky';
+import type { PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 
 jest.mock('@synonymdev/react-native-pubky');
 
@@ -17,7 +14,7 @@ const getPublicKeyFromSecretKeyMock = Pubky.getPublicKeyFromSecretKey as jest.Mo
 	typeof Pubky.getPublicKeyFromSecretKey
 >;
 const homeserverPubkey = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
-const mockDeepLink = (details: GrantApprovalDeepLinkDetails): void => {
+const mockDeepLink = (details: PubkyDeepLinkDetails): void => {
 	parseDeepLinkMock.mockResolvedValue(ok(details));
 };
 
@@ -195,10 +192,7 @@ describe('parseInput', () => {
 	});
 
 	it('parses direct signup deeplinks without auth parameters', async () => {
-		const rawInput =
-			'pubkyauth://direct_signup?' +
-			`hs=${homeserverPubkey}` +
-			'&st=ABCD-1234-WXYZ';
+		const rawInput = 'pubkyauth://direct_signup?' + `hs=${homeserverPubkey}` + '&st=ABCD-1234-WXYZ';
 		mockDeepLink({
 			scheme: 'pubkyauth',
 			kind: 'direct_signup',
@@ -465,7 +459,10 @@ describe('parseInput', () => {
 			ok({ secret_key: 'secret-key', public_key: 'public-key', uri: 'pubky://public-key' }),
 		);
 
-		const parsed = await parseInput('one-two_three+four five six seven eight nine ten eleven twelve', 'clipboard');
+		const parsed = await parseInput(
+			'one-two_three+four five six seven eight nine ten eleven twelve',
+			'clipboard',
+		);
 
 		expect(parsed).toEqual({
 			action: InputAction.Import,

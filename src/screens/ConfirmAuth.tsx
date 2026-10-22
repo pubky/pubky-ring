@@ -50,12 +50,16 @@ const Permission = memo(
 		isAuthorized: boolean;
 		disabled: boolean;
 		onEncryptionApprovalChange: (approved: boolean) => void;
-	}): ReactElement => {
+	}): ReactElement | null => {
 		const { t } = useTranslation();
 		const theme = useTheme() as Theme;
-		const hasReadPermission = capability.permission.includes('r');
-		const hasWritePermission = capability.permission.includes('w');
-		const hasEncryptionPermission = capability.permission.includes('e');
+		const permission =
+			isAuthorized && !encryptionApproved ? capability.permission.replaceAll('e', '') : capability.permission;
+		if (!permission) return null;
+
+		const hasReadPermission = permission.includes('r');
+		const hasWritePermission = permission.includes('w');
+		const hasEncryptionPermission = permission.includes('e');
 		const encryptionLabel = getEncryptionPermissionLabel(t, capability.path);
 		return (
 			<View style={styles.capabilityContainer}>
@@ -75,7 +79,7 @@ const Permission = memo(
 					</View>
 				</View>
 
-				{hasEncryptionPermission && (!isAuthorized || encryptionApproved) && (
+				{hasEncryptionPermission && (
 					<View style={styles.encryptionPermissionRow}>
 						<Key size={16} />
 						<TextSmM style={styles.encryptionPermissionLabel} colorName="foreground">

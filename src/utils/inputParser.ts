@@ -14,14 +14,6 @@ import { parseDeepLink, PubkyDeepLinkDetails } from '@synonymdev/react-native-pu
 import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import { EBackupPreference } from '../types/pubky';
 
-// These fields are exposed by the pending React Native binding release for
-// selective grant approval. Keep the intersection local until that package is
-// available to Pubky Ring.
-export type GrantApprovalDeepLinkDetails = PubkyDeepLinkDetails & {
-	approval_format?: 'bare_grant' | 'signed_approval_v1';
-	ephemeral_public_key?: string;
-};
-
 // Input source types
 export type InputSource = 'deeplink' | 'scan' | 'clipboard';
 
@@ -262,17 +254,12 @@ const capsFromDeepLink = (details: PubkyDeepLinkDetails): string[] => {
 
 export const hasAuthRelayTransport = (
 	details: PubkyDeepLinkDetails,
-): details is GrantApprovalDeepLinkDetails & { relay: string } => {
+): details is PubkyDeepLinkDetails & { relay: string } => {
 	if (!details.relay) return false;
 	if (details.secret) return true;
 
-	const grantDetails = details as GrantApprovalDeepLinkDetails;
 	const isGrant = details.kind === 'signin_grant' || details.kind === 'signup_grant';
-	return (
-		isGrant &&
-		grantDetails.approval_format === 'signed_approval_v1' &&
-		Boolean(grantDetails.ephemeral_public_key)
-	);
+	return isGrant && details.approval_format === 'signed_approval_v1' && Boolean(details.ephemeral_public_key);
 };
 
 const normalizePubkyDeepLinkInput = (input: string): string => {

@@ -1,8 +1,5 @@
-import { Image, StyleSheet, View, TouchableOpacity } from 'react-native';
-import React, { memo, ReactElement, useCallback, useRef } from 'react';
-import { toggleTheme as _toggleTheme } from '../theme/helpers.ts';
-import { useDispatch, useSelector } from 'react-redux';
-import { getTheme } from '../store/selectors/settingsSelectors.ts';
+import { Image, StyleSheet, View } from 'react-native';
+import React, { memo, ReactElement } from 'react';
 import { useTypedNavigation } from '../navigation/hooks.ts';
 import LinearGradient from 'react-native-linear-gradient';
 import { Text2Xl } from '../theme/typography';
@@ -20,21 +17,6 @@ type AppHeaderProps = {
 	disableBackNavigation?: boolean;
 };
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const LogoButton = memo(({ onLongPress, onPress }: { onLongPress: () => void; onPress: () => void }) => (
-	<TouchableOpacity
-		style={styles.logoWrapper}
-		activeOpacity={1}
-		// TODO: Adjust light-mode gradient colors.
-		//onLongPress={onLongPress}
-		onPress={onPress}
-	>
-		<Image source={PubkyRingLogo} style={styles.logo} />
-	</TouchableOpacity>
-));
-
-const DOUBLE_TAP_DELAY = 300;
-
 const AppHeader = memo(
 	({
 		title,
@@ -42,23 +24,7 @@ const AppHeader = memo(
 		rightButton = undefined,
 		disableBackNavigation = false,
 	}: AppHeaderProps): ReactElement => {
-		const dispatch = useDispatch();
-		const theme = useSelector(getTheme, (prev, next) => prev === next);
 		const navigation = useTypedNavigation();
-		const lastTapRef = useRef(0);
-
-		const toggleTheme = useCallback(() => {
-			_toggleTheme({ dispatch, theme });
-		}, [theme, dispatch]);
-
-		const handleDoubleTap = useCallback((): void => {
-			const now = Date.now();
-
-			if (now - lastTapRef.current < DOUBLE_TAP_DELAY) {
-				navigation.navigate('Settings', { showSecretSettings: true });
-			}
-			lastTapRef.current = now;
-		}, [navigation]);
 
 		const defaultLeftButton = disableBackNavigation ? (
 			<HeaderNavButton />
@@ -86,7 +52,9 @@ const AppHeader = memo(
 				{title ? (
 					<Text2Xl>{title}</Text2Xl>
 				) : (
-					<LogoButton onLongPress={toggleTheme} onPress={handleDoubleTap} />
+					<View style={styles.logoWrapper}>
+						<Image source={PubkyRingLogo} style={styles.logo} />
+					</View>
 				)}
 
 				{resolvedRightButton}

@@ -14,7 +14,11 @@ export const getShowOnboarding = createSelector(
 	settings => settings?.showOnboarding ?? true,
 );
 
-export const getAutoAuth = createSelector([selectSettings], settings => settings?.autoAuth ?? false);
+// Ignore persisted Auto Auth settings in release builds, not just the hidden toggle.
+export const getAutoAuth = createSelector(
+	[selectSettings],
+	settings => __DEV__ && (settings?.autoAuth ?? false),
+);
 
 export const getNavigationAnimation = createSelector(
 	[selectSettings],

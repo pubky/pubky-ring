@@ -35,6 +35,7 @@
 	},
 	"settings": {
 		"title": "Ajustes",
+		"developer": "DESARROLLADOR",
 		"navigationAnimation": "Animación de la navegación",
 		"autoAuth": "Autenticación automática",
 		"showOnboarding": "Mostrar incorporación",

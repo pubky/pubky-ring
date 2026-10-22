@@ -1,6 +1,18 @@
 import { ok, err } from '@synonymdev/result';
 import { parseDeepLink } from '@synonymdev/react-native-pubky';
-import { createConfirmAuthPayload } from '../src/utils/actions/authAction';
+import { createConfirmAuthPayload, handleAuthAction } from '../src/utils/actions/authAction';
+import { getAutoAuth } from '../src/store/selectors/settingsSelectors';
+import { initialState as settings } from '../src/store/shapes/settings';
+import { initialState as pubky } from '../src/store/shapes/pubky';
+import { initialState as ui } from '../src/store/shapes/ui';
+import { getAutoAuthFromStore } from '../src/utils/store-helpers';
+import { performAuth } from '../src/utils/pubky';
+import { showSheet } from '../src/sheets/sheetNavigation';
+import { syncAuthorizedGrantsAfterAuth } from '../src/utils/authorizedGrants';
+import type { RootState } from '../src/types';
+
+// React Native's export condition selects Immer's untransformed ESM build in Jest.
+jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
 
 jest.mock('../src/utils/authorizedGrants.ts', () => ({
 	refreshAuthorizedGrants: jest.fn(),
@@ -46,6 +58,80 @@ jest.mock('../src/utils/xCallback', () => ({
 }));
 
 const parseDeepLinkMock = parseDeepLink as jest.MockedFunction<typeof parseDeepLink>;
+
+describe('handleAuthAction Auto Auth', () => {
+	beforeEach(() => {
+		jest.clearAllMocks();
+	});
+
+	afterEach(() => {
+		jest.restoreAllMocks();
+	});
+
+	it.each([
+		[true, 'rw'],
+		[true, 'rwe'],
+		[false, 'rw'],
+		[false, 'rwe'],
+	])('respects the build gate with saved Auto Auth enabled (__DEV__=%s, :%s)', async (isDev, permission) => {
+		jest.replaceProperty(global as typeof global & { __DEV__: boolean }, '__DEV__', isDev);
+		const state: RootState = {
+			settings: { ...settings, autoAuth: true },
+			pubky,
+			ui,
+			authorizedGrants: { byPubky: {} },
+		};
+		jest.mocked(getAutoAuthFromStore).mockImplementation(() => getAutoAuth(state));
+		jest.mocked(performAuth).mockResolvedValue(ok('success'));
+		jest.mocked(syncAuthorizedGrantsAfterAuth).mockResolvedValue(undefined);
+		const rawUrl = `pubkyauth://signin_grant?caps=%2Fpriv%2Fexample.app%2F%3A${permission}&relay=https%3A%2F%2Frelay.example.com%2Finbox&secret=auth-secret&cid=example.app&cpk=client-pubky`;
+		const authDetails = {
+			scheme: 'pubkyauth',
+			kind: 'signin_grant',
+			url: rawUrl,
+			relay: 'https://relay.example.com/inbox',
+			secret: 'auth-secret',
+			client_id: 'example.app',
+			client_public_key: 'client-pubky',
+			capabilities: [{ path: '/priv/example.app/', permission }],
+		} as const;
+		parseDeepLinkMock.mockResolvedValueOnce(
+			ok({ ...authDetails, capabilities: [...authDetails.capabilities] }),
+		);
+		const dispatch = jest.fn();
+
+		const result = await handleAuthAction(
+			{
+				action: InputAction.Auth,
+				params: {
+					kind: 'signin_grant',
+					relay: authDetails.relay,
+					secret: authDetails.secret,
+					caps: [`/priv/example.app/:${permission}`],
+				},
+				rawUrl,
+			},
+			{ pubky: 'selected-pubky', dispatch },
+		);
+
+		expect(result.isOk()).toBe(true);
+		if (isDev) {
+			expect(performAuth).toHaveBeenCalledWith({ pubky: 'selected-pubky', authUrl: rawUrl, dispatch });
+			expect(showSheet).not.toHaveBeenCalled();
+		} else {
+			expect(performAuth).not.toHaveBeenCalled();
+			expect(syncAuthorizedGrantsAfterAuth).not.toHaveBeenCalled();
+			expect(showSheet).toHaveBeenCalledWith('auth', {
+				screen: 'ConfirmAuth',
+				params: expect.objectContaining({
+					pubky: 'selected-pubky',
+					authUrl: rawUrl,
+					authDetails,
+				}),
+			});
+		}
+	});
+});
 
 describe('createConfirmAuthPayload', () => {
 	beforeEach(() => {

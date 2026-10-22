@@ -27,8 +27,7 @@ import { republishAllHomeserverRecords } from '../utils/pubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
-const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
-	const showSecretSettings = route.params?.showSecretSettings ?? true;
+const SettingsScreen = ({ navigation }: Props): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const autoAuth = useSelector(getAutoAuth);
@@ -40,7 +39,6 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 		() => Object.values(pubkys).some(pubky => !!pubky.homeserver),
 		[pubkys],
 	);
-	const [enableAutoAuth, setEnableAutoAuth] = useState(autoAuth);
 	const [republishingAll, setRepublishingAll] = useState(false);
 
 	const navigationAnimationText = useMemo(() => {
@@ -101,9 +99,8 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 	}, [dispatch, navigation]);
 
 	const handleAutoAuthToggle = useCallback(() => {
-		dispatch(updateAutoAuth({ autoAuth: !enableAutoAuth }));
-		setEnableAutoAuth(prev => !prev);
-	}, [dispatch, enableAutoAuth]);
+		dispatch(updateAutoAuth({ autoAuth: !autoAuth }));
+	}, [dispatch, autoAuth]);
 
 	const handleScanQRPress = useCallback(() => {
 		showSheet('migrate', { screen: 'Scanner' });
@@ -187,8 +184,11 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 					</View>
 				)}
 
-				{showSecretSettings && (
+				{__DEV__ && (
 					<View>
+						<View style={styles.textSection}>
+							<TextXsM>{t('settings.developer')}</TextXsM>
+						</View>
 						<ThemedView style={styles.devButton} colorName="card">
 							<TouchableOpacity
 								style={styles.navigationAnimationButton}
@@ -203,7 +203,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 							<TouchableOpacity style={styles.toggleRow} onPress={handleAutoAuthToggle}>
 								<TextBaseB>{t('settings.autoAuth')}</TextBaseB>
 								<View style={styles.switchContainer}>
-									<Switch value={enableAutoAuth} onValueChange={handleAutoAuthToggle} />
+									<Switch value={autoAuth} onValueChange={handleAutoAuthToggle} />
 								</View>
 							</TouchableOpacity>
 						</ThemedView>

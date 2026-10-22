@@ -35,6 +35,7 @@
 	},
 	"settings": {
 		"title": "Settings",
+		"developer": "DEVELOPER",
 		"navigationAnimation": "Navigation Animation",
 		"autoAuth": "Auto Auth",
 		"showOnboarding": "Show Onboarding",

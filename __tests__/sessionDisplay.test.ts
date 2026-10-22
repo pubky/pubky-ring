@@ -20,9 +20,11 @@ const t = ((key: string, options?: { count?: number; date?: string }) => {
 }) as TFunction;
 
 describe('sessionDisplay', () => {
-	it('normalizes permission labels as paths', () => {
-		expect(getPermissionLabel('/pub/example')).toBe('/pub/example/');
+	it('keeps file and directory scopes distinct', () => {
+		expect(getPermissionLabel('/pub/example')).toBe('/pub/example');
+		expect(getPermissionLabel('/pub/example:r')).toBe('/pub/example');
 		expect(getPermissionLabel('/pub/example/:rw')).toBe('/pub/example/');
+		expect(getPermissionLabel('/priv/example.app/:rwe')).toBe('/priv/example.app/');
 		expect(getPermissionLabel('/')).toBe('/');
 	});
 
@@ -30,6 +32,12 @@ describe('sessionDisplay', () => {
 		['/pub/example/:r', '/pub/example/', ['read']],
 		['/pub/example/:w', '/pub/example/', ['write']],
 		['/pub/example/:rw', '/pub/example/', ['read', 'write']],
+		['/priv/example.app/:rwe', '/priv/example.app/', ['read', 'write', 'encrypt']],
+		['/priv/example.app/:re', '/priv/example.app/', ['read', 'encrypt']],
+		['/priv/example.app/:we', '/priv/example.app/', ['write', 'encrypt']],
+		['/priv/example.app/:e', '/priv/example.app/', ['encrypt']],
+		['/priv/example.app/file.json:re', '/priv/example.app/file.json', ['read', 'encrypt']],
+		['/:e', '/', ['encrypt']],
 	])('parses %s into its scope and actions', (capability, path, actions) => {
 		expect(parseGrantPermission(capability)).toEqual({ path, actions });
 	});

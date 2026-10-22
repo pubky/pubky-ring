@@ -192,10 +192,7 @@ describe('parseInput', () => {
 	});
 
 	it('parses direct signup deeplinks without auth parameters', async () => {
-		const rawInput =
-			'pubkyauth://direct_signup?' +
-			`hs=${homeserverPubkey}` +
-			'&st=ABCD-1234-WXYZ';
+		const rawInput = 'pubkyauth://direct_signup?' + `hs=${homeserverPubkey}` + '&st=ABCD-1234-WXYZ';
 		mockDeepLink({
 			scheme: 'pubkyauth',
 			kind: 'direct_signup',
@@ -339,6 +336,39 @@ describe('parseInput', () => {
 		});
 	});
 
+	it('parses signed grant auth without a legacy relay secret', async () => {
+		const rawInput =
+			'pubkyauth://signin_grant?caps=%2Fpriv%2Fexample.app%2F%3Arwe&relay=https%3A%2F%2Fhttprelay.pubky.app%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-public-key';
+		mockDeepLink({
+			scheme: 'pubkyauth',
+			kind: 'signin_grant',
+			url: rawInput,
+			relay: 'https://httprelay.pubky.app/inbox',
+			client_id: 'example.app',
+			client_public_key: 'client-pubky',
+			approval_format: 'signed_approval_v1',
+			ephemeral_public_key: 'ephemeral-public-key',
+			capabilities: [{ path: '/priv/example.app/', permission: 'rwe' }],
+		});
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.Auth);
+		expect(parsed.data).toEqual({
+			action: InputAction.Auth,
+			params: {
+				relay: 'https://httprelay.pubky.app/inbox',
+				secret: undefined,
+				kind: 'signin_grant',
+				homeserver: undefined,
+				signupToken: undefined,
+				caps: ['/priv/example.app/:rwe'],
+				xCallback: undefined,
+			},
+			rawUrl: decodeURIComponent(rawInput),
+		});
+	});
+
 	it('parses grant auth deeplinks through the Pubky deeplink parser', async () => {
 		mockDeepLink({
 			scheme: 'pubkyauth',
@@ -429,7 +459,10 @@ describe('parseInput', () => {
 			ok({ secret_key: 'secret-key', public_key: 'public-key', uri: 'pubky://public-key' }),
 		);
 
-		const parsed = await parseInput('one-two_three+four five six seven eight nine ten eleven twelve', 'clipboard');
+		const parsed = await parseInput(
+			'one-two_three+four five six seven eight nine ten eleven twelve',
+			'clipboard',
+		);
 
 		expect(parsed).toEqual({
 			action: InputAction.Import,

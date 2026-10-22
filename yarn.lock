@@ -2203,10 +2203,10 @@
   resolved "https://registry.yarnpkg.com/@standard-schema/utils/-/utils-0.3.0.tgz#3d5e608f16c2390c10528e98e59aef6bf73cae7b"
   integrity sha512-e7Mew686owMaPJVNNLs55PUvgz371nKgwsc4vxE49zsODpJEnxgxRo2y/OKrqueavXgZNMDVj3DdHFlaSAeU8g==
 
-"@synonymdev/react-native-pubky@0.14.1":
-  version "0.14.1"
-  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.14.1.tgz#586d1415845c1c81537e4b4ee66084641f86f3b2"
-  integrity sha512-6TuyR2OhW1IG4bOjMp8bqYI0GdOEzOgXXttGSwuZDgtT88mlgiM2WU+5iYcgGKl3nkKP/9OEj97yz91xYKYrWA==
+"@synonymdev/react-native-pubky@0.15.0":
+  version "0.15.0"
+  resolved "https://registry.yarnpkg.com/@synonymdev/react-native-pubky/-/react-native-pubky-0.15.0.tgz#56c11e2aa873d2a25d0d3898c432aad4ca360281"
+  integrity sha512-g0k/kAD7z2QvNhE00/IwPi4pv7RuGA9beomEN4vm/hzbAMWDou9pfsTrYTd2g3mQ5Tr3D3S5Es8YDs4GHwx0Ww==
   dependencies:
     "@synonymdev/result" "^0.0.2"
 

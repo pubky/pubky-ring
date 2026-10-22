@@ -79,6 +79,11 @@
 		"relay": "Relay",
 		"requestedPermissions": "Permisos solicitados",
 		"grantedPermissions": "Permisos concedidos",
+		"identityVerification": "Verificación de identidad",
+		"provePubkyControl": "Demuestre que controla este pubky",
+		"identityVerificationWarning": "Esto solo verifica su identidad. No se concede acceso a los datos. Asegúrese de que confía en este servicio, navegador o dispositivo antes de autorizar con su pubky.",
+		"identityVerified": "Identidad verificada",
+		"identityVerifiedDescription": "No se concedió acceso a los datos ni se compartieron claves de cifrado.",
 		"trustWarning": "Asegúrese de que confía en este relé, servicio, navegador o dispositivo antes de autorizar con su pubky.",
 		"successfullySignedIn": "¡Se ha registrado con éxito!",
 		"navigateBackToBrowser": "Por favor, navegue de nuevo a su navegador.",
@@ -86,7 +91,11 @@
 		"signedInSuccessfully": "Inicie sesión en {{server}} con éxito",
 		"timeoutError": "El proceso de autentificación ha tardado demasiado. Por favor, inténtelo de nuevo.",
 		"authorizeForApp": "Autorizar {{appName}}",
-		"authorizedForApp": "Autorizado {{appName}}"
+		"authorizedForApp": "Autorizado {{appName}}",
+		"encryptAndDecryptFolder": "Cifrar y descifrar archivos de esta carpeta",
+		"encryptAndDecryptFile": "Cifrar y descifrar este archivo",
+		"encryptAndDecryptAllFiles": "Cifrar y descifrar todos sus archivos",
+		"encryptionKeysWarning": "Revocar el acceso no permite recuperar las claves de cifrado ya compartidas. La aplicación puede seguir descifrando contenido cifrado con ellas, incluido el contenido futuro."
 	},
 	"grants": {
 		"title": "Aplicaciones autorizadas",

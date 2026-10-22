@@ -10,7 +10,7 @@ import { parseDeepLink } from '@synonymdev/react-native-pubky';
 import type { PubkyAuthDetails, PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
-import { InputAction, AuthParams, XCallbackParams } from '../inputParser';
+import { InputAction, AuthParams, XCallbackParams, hasAuthRelayTransport } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth } from '../pubky';
 import { getErrorMessage } from '../errorHandler';
@@ -31,7 +31,7 @@ const isAuthKind = (kind: PubkyDeepLinkDetails['kind']): kind is NonNullable<Aut
 };
 
 const isAuthDetails = (details: PubkyDeepLinkDetails): details is PubkyDeepLinkDetails & PubkyAuthDetails => {
-	return isAuthKind(details.kind) && Boolean(details.relay && details.secret);
+	return isAuthKind(details.kind) && hasAuthRelayTransport(details);
 };
 
 export const createConfirmAuthPayload = async ({

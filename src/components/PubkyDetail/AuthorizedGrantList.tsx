@@ -1,6 +1,5 @@
 import React, { Fragment, memo, ReactElement, useCallback } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
-import { useFocusEffect } from '@react-navigation/native';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
 import Button from '../Button';
@@ -14,6 +13,7 @@ import { getGrantSubtitle } from '../../utils/sessionDisplay';
 import { RootState } from '../../store';
 import { getAuthorizedGrantsEntry } from '../../store/selectors/authorizedGrantsSelectors.ts';
 import { refreshAuthorizedGrants } from '../../utils/authorizedGrants.ts';
+import { useRefreshOnFocusAndForeground } from '../../hooks/useRefreshOnFocusAndForeground.ts';
 
 type AuthorizedGrantListProps = {
 	pubkyData: PubkyData;
@@ -64,14 +64,10 @@ const AuthorizedGrantList = ({ pubkyData }: AuthorizedGrantListProps): ReactElem
 	const showError = status === 'error';
 
 	const loadGrants = useCallback(async (): Promise<void> => {
-		await refreshAuthorizedGrants({ pubky: pubkyData.pubky, dispatch });
+		await refreshAuthorizedGrants({ pubky: pubkyData.pubky, dispatch, forceReload: true });
 	}, [dispatch, pubkyData.pubky]);
 
-	useFocusEffect(
-		useCallback(() => {
-			loadGrants();
-		}, [loadGrants]),
-	);
+	useRefreshOnFocusAndForeground(loadGrants);
 
 	if (!showLoading && !showError && (count === 0 || !sessionId)) {
 		return null;

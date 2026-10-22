@@ -99,6 +99,46 @@ describe('createConfirmAuthPayload', () => {
 		}
 	});
 
+	it('accepts signed grant auth URLs without a legacy relay secret', async () => {
+		const rawUrl =
+			'pubkyauth://signin_grant?caps=%2Fpriv%2Fexample.app%2F%3Arwe&relay=https%3A%2F%2Fhttprelay.pubky.app%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-public-key';
+		parseDeepLinkMock.mockResolvedValueOnce(
+			ok({
+				scheme: 'pubkyauth',
+				kind: 'signin_grant',
+				url: rawUrl,
+				relay: 'https://httprelay.pubky.app/inbox',
+				client_id: 'example.app',
+				client_public_key: 'client-pubky',
+				approval_format: 'signed_approval_v1',
+				ephemeral_public_key: 'ephemeral-public-key',
+				capabilities: [{ path: '/priv/example.app/', permission: 'rwe' }],
+			}),
+		);
+
+		const result = await createConfirmAuthPayload({
+			pubky: 'pubky-selected',
+			data: {
+				action: InputAction.Auth,
+				params: {
+					relay: 'https://httprelay.pubky.app/inbox',
+					kind: 'signin_grant',
+					caps: ['/priv/example.app/:rwe'],
+				},
+				rawUrl,
+			},
+		});
+
+		expect(result.isOk()).toBe(true);
+		if (result.isOk()) {
+			expect(result.value.authDetails).toMatchObject({
+				approval_format: 'signed_approval_v1',
+				ephemeral_public_key: 'ephemeral-public-key',
+			});
+			expect(result.value.authDetails.secret).toBeUndefined();
+		}
+	});
+
 	it('rejects non-auth deeplinks', async () => {
 		parseDeepLinkMock.mockResolvedValueOnce(
 			ok({

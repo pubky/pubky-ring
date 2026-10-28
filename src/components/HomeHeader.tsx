@@ -15,8 +15,9 @@ const HomeHeader = () => {
 
 	const rightButton = (
 		<HeaderNavButton
+			testID="HomeHeaderSettingsButton"
 			onPressIn={() => {
-				navigation.navigate('Settings', { showSecretSettings: false });
+				navigation.navigate('Settings');
 			}}
 		>
 			<Gear size={20} />

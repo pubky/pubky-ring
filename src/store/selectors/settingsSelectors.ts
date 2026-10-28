@@ -14,11 +14,17 @@ export const getShowOnboarding = createSelector(
 	settings => settings?.showOnboarding ?? true,
 );
 
-export const getAutoAuth = createSelector([selectSettings], settings => settings?.autoAuth ?? false);
-
-export const getNavigationAnimation = createSelector(
+// Ignore persisted Auto Auth settings in release builds, not just the hidden toggle.
+export const getAutoAuth = createSelector(
 	[selectSettings],
-	settings => settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight,
+	settings => __DEV__ && (settings?.autoAuth ?? false),
+);
+
+// Ignore persisted developer-only animation preferences in release builds.
+export const getNavigationAnimation = createSelector([selectSettings], settings =>
+	__DEV__
+		? (settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight)
+		: ENavigationAnimation.slideFromRight,
 );
 
 export const getIsOnline = createSelector([selectSettings], settings => settings?.isOnline ?? true);

@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Alert, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
+import { Alert, ScrollView, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
 import { showToast } from '@synonymdev/react-native-toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
@@ -141,7 +141,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 		<SafeAreaView style={styles.container} edges={['bottom']}>
 			<AppHeader title={t('screenTitles.settings')} />
 
-			<View style={styles.content}>
+			<ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
 				<View>
 					<View style={styles.textSection}>
 						<TextXsM>{t('settings.migrateToOtherDevice')}</TextXsM>
@@ -221,7 +221,7 @@ const SettingsScreen = ({ navigation, route }: Props): ReactElement => {
 						</ThemedView>
 					</View>
 				)}
-			</View>
+			</ScrollView>
 		</SafeAreaView>
 	);
 };
@@ -230,9 +230,13 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 	},
+	scroll: {
+		flex: 1,
+	},
 	content: {
 		paddingTop: HEADER_HEIGHT + 24,
 		paddingHorizontal: 24,
+		paddingBottom: 24,
 		gap: 24,
 	},
 	textSection: {

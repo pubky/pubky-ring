@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState, useRef } from 'react';
-import { Keyboard, ScrollView, StyleProp, StyleSheet, TextInput, View, ViewStyle } from 'react-native';
+import { Keyboard, ScrollView, StyleProp, StyleSheet, View, ViewStyle } from 'react-native';
+import type { TextInputInstance } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import Button from '../components/Button.tsx';
@@ -43,7 +44,7 @@ const InputItemComponent = ({
 	onSubmitEditing?: () => void;
 	editable?: boolean;
 	style?: StyleProp<ViewStyle>;
-	inputRef?: React.RefObject<TextInput | null>;
+	inputRef?: React.RefObject<TextInputInstance | null>;
 }): ReactElement => {
 	return (
 		<View style={[styles.inputWrapper, style]}>
@@ -89,7 +90,7 @@ const EditPubkySheet = ({
 	);
 	const dispatch = useDispatch();
 	const [error, setError] = useState('');
-	const signupTokenInputRef = useRef<TextInput>(null);
+	const signupTokenInputRef = useRef<TextInputInstance>(null);
 
 	const isSignupTokenInputVisible = useMemo(() => {
 		return isStoredUnsigned || storedHomeserver !== (homeServer?.trim() || '');

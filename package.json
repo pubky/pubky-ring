@@ -52,7 +52,7 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-localize": "^3.7.0",
     "react-native-mmkv": "4.3.2",
-    "react-native-nitro-modules": "^0.35.2",
+    "react-native-nitro-modules": "0.37.1",
     "react-native-permissions": "^5.5.1",
     "react-native-qrcode-svg": "^6.3.21",
     "react-native-reanimated": "4.7.1",

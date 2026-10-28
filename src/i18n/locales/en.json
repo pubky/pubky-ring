@@ -79,6 +79,11 @@
 		"relay": "Relay",
 		"requestedPermissions": "Requested Permissions",
 		"grantedPermissions": "Granted Permissions",
+		"identityVerification": "Identity verification",
+		"provePubkyControl": "Prove you control this pubky",
+		"identityVerificationWarning": "This only verifies your identity. No access to data is granted. Make sure you trust this service, browser, or device before authorizing with your pubky.",
+		"identityVerified": "Identity verified",
+		"identityVerifiedDescription": "No data access or encryption keys were granted.",
 		"trustWarning": "Make sure you trust this relay, service, browser, or device before authorizing with your pubky.",
 		"successfullySignedIn": "Successfully Signed In!",
 		"navigateBackToBrowser": "Please navigate back to your browser.",
@@ -86,7 +91,11 @@
 		"signedInSuccessfully": "Signed in to {{server}} successfully",
 		"timeoutError": "The authentication process took too long. Please try again.",
 		"authorizeForApp": "Authorize {{appName}}",
-		"authorizedForApp": "Authorized {{appName}}"
+		"authorizedForApp": "Authorized {{appName}}",
+		"encryptAndDecryptFolder": "Encrypt and decrypt files in this folder",
+		"encryptAndDecryptFile": "Encrypt and decrypt this file",
+		"encryptAndDecryptAllFiles": "Encrypt and decrypt all your files",
+		"encryptionKeysWarning": "Revoking access cannot take back encryption keys already shared. The app can still decrypt content encrypted with them, including future content."
 	},
 	"grants": {
 		"title": "Authorized Apps",

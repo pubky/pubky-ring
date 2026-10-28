@@ -16,6 +16,7 @@ import { TextBaseB, TextSmB, TextSmM, TextXsB, TextXsM } from '../theme/typograp
 import { truncateStr } from '../utils/pubky';
 import {
 	formatGrantTimestamp,
+	getEncryptionPermissionLabel,
 	getGrantCapabilities,
 	getGrantExpiryLabel,
 	getGrantSubtitle,
@@ -66,18 +67,26 @@ const AuthorizedGrantScreen = (): ReactElement => {
 				<View style={styles.permissionList}>
 					{permissions.map(({ path, actions }, index) => {
 						const actionLabels = actions.flatMap(action =>
-							action === 'read'
-								? [t('activeSession.permissionView')]
-								: [t('activeSession.permissionEdit'), t('activeSession.permissionDelete')],
+							action === 'read' ? [t('common.read')] : action === 'write' ? [t('common.write')] : [],
 						);
 
 						return (
-							<View key={`${capabilities[index]}-${index}`} style={styles.permissionRow}>
-								<Folder size={16} />
-								<TextXsB style={styles.permissionPath} numberOfLines={1} ellipsizeMode="middle">
-									{path}
-								</TextXsB>
-								<TextXsM style={styles.permissionActions}>{actionLabels.join(', ')}</TextXsM>
+							<View key={`${capabilities[index]}-${index}`} style={styles.capabilityContainer}>
+								<View style={styles.permissionRow}>
+									<Folder size={16} />
+									<TextXsB style={styles.permissionPath} numberOfLines={1} ellipsizeMode="middle">
+										{path}
+									</TextXsB>
+									<TextXsM style={styles.permissionActions}>{actionLabels.join(', ')}</TextXsM>
+								</View>
+								{actions.includes('encrypt') && (
+									<View style={styles.permissionRow}>
+										<Key size={16} />
+										<TextSmM style={styles.permissionPath} colorName="foreground">
+											{getEncryptionPermissionLabel(t, path)}
+										</TextSmM>
+									</View>
+								)}
 							</View>
 						);
 					})}
@@ -141,6 +150,9 @@ const styles = StyleSheet.create({
 	permissionList: {
 		gap: 16,
 		marginBottom: 24,
+	},
+	capabilityContainer: {
+		gap: 8,
 	},
 	permissionRow: {
 		flexDirection: 'row',

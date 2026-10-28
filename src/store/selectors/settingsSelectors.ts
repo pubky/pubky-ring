@@ -20,9 +20,11 @@ export const getAutoAuth = createSelector(
 	settings => __DEV__ && (settings?.autoAuth ?? false),
 );
 
-export const getNavigationAnimation = createSelector(
-	[selectSettings],
-	settings => settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight,
+// Ignore persisted developer-only animation preferences in release builds.
+export const getNavigationAnimation = createSelector([selectSettings], settings =>
+	__DEV__
+		? (settings?.navigationAnimation ?? ENavigationAnimation.slideFromRight)
+		: ENavigationAnimation.slideFromRight,
 );
 
 export const getIsOnline = createSelector([selectSettings], settings => settings?.isOnline ?? true);

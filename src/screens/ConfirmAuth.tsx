@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
-import { StyleSheet, Switch, View } from 'react-native';
+import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
@@ -280,69 +280,76 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			showBottomSafeAreaInset={false}
 			headerRight={headerProgress}
 		>
-			<PermissionCard style={styles.permissionsCard}>
-				<TextXsM
-					style={styles.sectionTitle}
-					testID={
-						showIdentityVerification
-							? 'ConfirmAuthIdentityVerification'
+			<ScrollView
+				testID="ConfirmAuthDetailsScrollView"
+				style={styles.detailsScroll}
+				contentContainerStyle={styles.detailsContent}
+				keyboardShouldPersistTaps="handled"
+			>
+				<PermissionCard style={styles.permissionsCard}>
+					<TextXsM
+						style={styles.sectionTitle}
+						testID={
+							showIdentityVerification
+								? 'ConfirmAuthIdentityVerification'
+								: isAuthorized
+									? 'ConfirmAuthGrantedPermissions'
+									: 'ConfirmAuthRequestedPermissions'
+						}
+					>
+						{showIdentityVerification
+							? t('auth.identityVerification')
 							: isAuthorized
-								? 'ConfirmAuthGrantedPermissions'
-								: 'ConfirmAuthRequestedPermissions'
-					}
-				>
-					{showIdentityVerification
-						? t('auth.identityVerification')
-						: isAuthorized
-							? t('auth.grantedPermissions')
-							: t('auth.requestedPermissions')}
-				</TextXsM>
+								? t('auth.grantedPermissions')
+								: t('auth.requestedPermissions')}
+					</TextXsM>
+
+					{showIdentityVerification ? (
+						<View style={styles.identityVerificationRow}>
+							<UserCheck size={16} />
+							<TextSmM style={styles.identityVerificationLabel} colorName="foreground">
+								{isAuthorized ? t('auth.identityVerified') : t('auth.provePubkyControl')}
+							</TextSmM>
+						</View>
+					) : (
+						<View style={styles.permissions}>
+							{authDetailCapabilities.map((capability, index) => (
+								<Permission
+									key={`${capability.path}:${capability.permission}:${index}`}
+									capability={capability}
+									disabled={authorizing}
+									encryptionApproved={!declinedEncryptionIndexes.has(index)}
+									isAuthorized={isAuthorized}
+									onEncryptionApprovalChange={(approved): void =>
+										handleEncryptionApprovalChange(index, approved)
+									}
+								/>
+							))}
+						</View>
+					)}
+					{!isAuthorized && hasApprovedEncryption && (
+						<TextSmM style={styles.encryptionWarning}>{t('auth.encryptionKeysWarning')}</TextSmM>
+					)}
+				</PermissionCard>
 
 				{showIdentityVerification ? (
-					<View style={styles.identityVerificationRow}>
-						<UserCheck size={16} />
-						<TextSmM style={styles.identityVerificationLabel} colorName="foreground">
-							{isAuthorized ? t('auth.identityVerified') : t('auth.provePubkyControl')}
-						</TextSmM>
-					</View>
-				) : (
-					<View style={styles.permissions}>
-						{authDetailCapabilities.map((capability, index) => (
-							<Permission
-								key={`${capability.path}:${capability.permission}:${index}`}
-								capability={capability}
-								disabled={authorizing}
-								encryptionApproved={!declinedEncryptionIndexes.has(index)}
-								isAuthorized={isAuthorized}
-								onEncryptionApprovalChange={(approved): void =>
-									handleEncryptionApprovalChange(index, approved)
-								}
-							/>
-						))}
-					</View>
-				)}
-				{!isAuthorized && hasApprovedEncryption && (
-					<TextSmM style={styles.encryptionWarning}>{t('auth.encryptionKeysWarning')}</TextSmM>
-				)}
-			</PermissionCard>
-
-			{showIdentityVerification ? (
-				<TextSmM style={styles.warningText} colorName="mutedForeground">
-					{isAuthorized ? t('auth.identityVerifiedDescription') : t('auth.identityVerificationWarning')}
-				</TextSmM>
-			) : (
-				!isAuthorized && (
 					<TextSmM style={styles.warningText} colorName="mutedForeground">
-						{t('auth.trustWarning')}
+						{isAuthorized ? t('auth.identityVerifiedDescription') : t('auth.identityVerificationWarning')}
 					</TextSmM>
-				)
-			)}
+				) : (
+					!isAuthorized && (
+						<TextSmM style={styles.warningText} colorName="mutedForeground">
+							{t('auth.trustWarning')}
+						</TextSmM>
+					)
+				)}
 
-			<View style={styles.imageContainer}>
-				<Animated.View style={[styles.imageWrapper, checkStyle]}>
-					<CheckCircle colorName="pubkyApp" size={128} strokeWidth={1} />
-				</Animated.View>
-			</View>
+				<View style={[styles.imageContainer, isAuthorized && styles.successImageContainer]}>
+					<Animated.View style={[styles.imageWrapper, checkStyle]}>
+						<CheckCircle colorName="pubkyApp" size={128} strokeWidth={1} />
+					</Animated.View>
+				</View>
+			</ScrollView>
 
 			<PubkyCard style={styles.card} name={pubkyName} publicKey={pubky} />
 
@@ -383,6 +390,13 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 };
 
 const styles = StyleSheet.create({
+	detailsScroll: {
+		flex: 1,
+		minHeight: 0,
+	},
+	detailsContent: {
+		flexGrow: 1,
+	},
 	permissionsCard: {
 		marginBottom: 24,
 	},
@@ -406,6 +420,7 @@ const styles = StyleSheet.create({
 	},
 	card: {
 		marginTop: 'auto',
+		flexShrink: 0,
 	},
 	permissionRow: {
 		flexDirection: 'row',
@@ -452,11 +467,15 @@ const styles = StyleSheet.create({
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
+	successImageContainer: {
+		minHeight: 128,
+	},
 	imageWrapper: {
 		justifyContent: 'center',
 		alignItems: 'center',
 	},
 	footerContainer: {
+		flexShrink: 0,
 		marginTop: 24,
 		justifyContent: 'center',
 	},

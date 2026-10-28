@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
-import { Platform, StyleSheet, Switch, View } from 'react-native';
+import { StyleSheet, Switch, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
@@ -16,7 +16,6 @@ import Animated, {
 import { TextSmM, TextXsM } from '../theme/typography';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
-import ProgressBar from '../components/ProgressBar.tsx';
 import { useTranslation } from 'react-i18next';
 import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 import Button from '../components/Button.tsx';
@@ -269,10 +268,9 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			? t('auth.authorizeForApp', { appName: requestingClient })
 			: t('auth.authorize');
 
-	const headerProgress =
-		Platform.OS === 'android' && !isAuthorized ? (
-			<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={24} drain={true} />
-		) : undefined;
+	const headerProgress = !isAuthorized ? (
+		<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={24} drain={true} />
+	) : undefined;
 
 	return (
 		<SheetScreen
@@ -377,16 +375,6 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 						/>
 					)}
 				</View>
-
-				{Platform.OS === 'ios' && !isAuthorized && (
-					<ProgressBar
-						style={styles.progressBarContainer}
-						duration={CONFIRM_AUTH_TIMEOUT_MS}
-						unfilledColor="#333333"
-						height={5}
-						drain={true}
-					/>
-				)}
 			</View>
 
 			<SafeAreaInset edge="bottom" />
@@ -476,12 +464,6 @@ const styles = StyleSheet.create({
 		flexDirection: 'row',
 		alignItems: 'center',
 		gap: 12,
-	},
-	progressBarContainer: {
-		position: 'absolute',
-		bottom: -14,
-		width: 147,
-		alignSelf: 'center',
 	},
 });
 

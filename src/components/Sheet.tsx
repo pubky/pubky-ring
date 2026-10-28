@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, ReactNode } from 'react';
 import {
+	Platform,
 	Pressable,
 	ScrollView,
 	StyleProp,
@@ -17,7 +18,6 @@ import HeaderNavButton from './HeaderNavButton.tsx';
 import { ArrowLeft } from '../icons/index.ts';
 import { HEADER_HEIGHT } from './AppHeader.tsx';
 import type { SheetId } from '../sheets/types.ts';
-import { getSheetContentHeight } from '../sheets/sheetLayout.ts';
 import { hideActiveSheet } from '../sheets/sheetNavigation.tsx';
 import { shouldUseAndroidSheetFallback } from '../sheets/sheetPlatform.ts';
 import { ThemedView } from '../theme/components.ts';
@@ -63,8 +63,7 @@ export const SheetFrame = ({ children }: SheetFrameProps): ReactElement => {
 		);
 	}
 
-	const sheetHeight = getSheetContentHeight(windowHeight, insets.top, insets.bottom);
-	return <View style={[styles.frame, { height: sheetHeight }]}>{children}</View>;
+	return <View style={styles.frame}>{children}</View>;
 };
 
 export const SheetScreen = ({
@@ -160,6 +159,9 @@ const Sheet = ({ id, children, ...screenProps }: SheetProps): ReactElement => {
 
 const styles = StyleSheet.create({
 	frame: {
+		// iOS fixed detents provide the content size with screens' synchronous updates.
+		// Let that native size drive layout instead of calculating a second sheet height.
+		...Platform.select({ ios: { flex: 1 }, default: { height: '100%' as const } }),
 		backgroundColor: '#000000',
 	},
 	androidRoot: {

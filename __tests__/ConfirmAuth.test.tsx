@@ -1,4 +1,5 @@
 import React from 'react';
+import { Platform } from 'react-native';
 import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native';
 import { err, ok } from '@synonymdev/result';
 import { auth, authWithCapabilities, republishHomeserver, signIn } from '@synonymdev/react-native-pubky';
@@ -80,8 +81,16 @@ jest.mock('../src/components/Sheet.tsx', () => {
 	const ReactMock = require('react');
 	const { View, Text } = require('react-native');
 	return {
-		SheetScreen: ({ children, title }: { children: React.ReactNode; title: string }) =>
-			ReactMock.createElement(View, null, ReactMock.createElement(Text, null, title), children),
+		SheetScreen: ({
+			children,
+			title,
+			headerRight,
+		}: {
+			children: React.ReactNode;
+			title: string;
+			headerRight?: React.ReactNode;
+		}) =>
+			ReactMock.createElement(View, null, ReactMock.createElement(Text, null, title), headerRight, children),
 	};
 });
 jest.mock('../src/components/Button.tsx', () => {
@@ -99,8 +108,11 @@ jest.mock('../src/components/PermissionCard.tsx', () => ({
 }));
 jest.mock('../src/components/PubkyCard.tsx', () => ({ __esModule: true, default: () => null }));
 jest.mock('../src/components/SafeAreaInset.tsx', () => ({ __esModule: true, default: () => null }));
-jest.mock('../src/components/ProgressBar.tsx', () => ({ __esModule: true, default: () => null }));
-jest.mock('../src/components/CircularProgressBar.tsx', () => ({ __esModule: true, default: () => null }));
+jest.mock('../src/components/CircularProgressBar.tsx', () => ({
+	__esModule: true,
+	default: () =>
+		require('react').createElement(require('react-native').View, { testID: 'AuthHeaderProgress' }),
+}));
 jest.mock('../src/theme/typography', () => {
 	const { Text } = require('react-native');
 	return { TextSmM: Text, TextXsM: Text };
@@ -178,6 +190,17 @@ describe('ConfirmAuth selective approval integration', () => {
 		jest.useRealTimers();
 		jest.restoreAllMocks();
 	});
+
+	it.each(['ios', 'android'] as const)(
+		'shows circular header progress until authorized on %s',
+		async platform => {
+			jest.replaceProperty(Platform, 'OS', platform);
+			renderRequest([]);
+			expect(screen.getByTestId('AuthHeaderProgress')).toBeTruthy();
+			await approve();
+			expect(screen.queryByTestId('AuthHeaderProgress')).toBeNull();
+		},
+	);
 
 	it('shows identity verification for a request with no permissions, before and after authorization', async () => {
 		const authUrl = renderRequest([]);

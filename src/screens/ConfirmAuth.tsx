@@ -284,7 +284,6 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				testID="ConfirmAuthDetailsScrollView"
 				style={styles.detailsScroll}
 				contentContainerStyle={styles.detailsContent}
-				keyboardShouldPersistTaps="handled"
 			>
 				<PermissionCard style={styles.permissionsCard}>
 					<TextXsM
@@ -351,7 +350,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				</View>
 			</ScrollView>
 
-			<PubkyCard style={styles.card} name={pubkyName} publicKey={pubky} />
+			<PubkyCard name={pubkyName} publicKey={pubky} />
 
 			<View style={styles.footerContainer}>
 				<View style={styles.buttonContainer}>
@@ -392,7 +391,6 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 const styles = StyleSheet.create({
 	detailsScroll: {
 		flex: 1,
-		minHeight: 0,
 	},
 	detailsContent: {
 		flexGrow: 1,
@@ -417,10 +415,6 @@ const styles = StyleSheet.create({
 	},
 	warningText: {
 		marginBottom: 24,
-	},
-	card: {
-		marginTop: 'auto',
-		flexShrink: 0,
 	},
 	permissionRow: {
 		flexDirection: 'row',
@@ -475,7 +469,6 @@ const styles = StyleSheet.create({
 		alignItems: 'center',
 	},
 	footerContainer: {
-		flexShrink: 0,
 		marginTop: 24,
 		justifyContent: 'center',
 	},

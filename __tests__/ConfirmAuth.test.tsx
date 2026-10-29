@@ -216,7 +216,7 @@ describe('ConfirmAuth selective approval integration', () => {
 			);
 
 			const details = screen.getByTestId('ConfirmAuthDetailsScrollView');
-			expect(details).toHaveStyle({ flex: 1, minHeight: 0 });
+			expect(details).toHaveStyle({ flex: 1 });
 			expect(StyleSheet.flatten(details.props.contentContainerStyle)).toMatchObject({ flexGrow: 1 });
 			expect(within(details).getAllByRole('switch')).toHaveLength(count);
 			expect(within(details).getByText(`/priv/scope-${count}/`)).toBeTruthy();

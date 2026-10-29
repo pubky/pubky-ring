@@ -1,6 +1,6 @@
 import React from 'react';
-import { Platform } from 'react-native';
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react-native';
+import { Platform, StyleSheet } from 'react-native';
+import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { err, ok } from '@synonymdev/result';
 import { auth, authWithCapabilities, republishHomeserver, signIn } from '@synonymdev/react-native-pubky';
 import type { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
@@ -106,7 +106,10 @@ jest.mock('../src/components/PermissionCard.tsx', () => ({
 	__esModule: true,
 	default: require('react-native').View,
 }));
-jest.mock('../src/components/PubkyCard.tsx', () => ({ __esModule: true, default: () => null }));
+jest.mock('../src/components/PubkyCard.tsx', () => ({
+	__esModule: true,
+	default: () => require('react').createElement(require('react-native').View, { testID: 'mock-pubky-card' }),
+}));
 jest.mock('../src/components/SafeAreaInset.tsx', () => ({ __esModule: true, default: () => null }));
 jest.mock('../src/components/CircularProgressBar.tsx', () => ({
 	__esModule: true,
@@ -201,6 +204,50 @@ describe('ConfirmAuth selective approval integration', () => {
 			expect(screen.queryByTestId('AuthHeaderProgress')).toBeNull();
 		},
 	);
+
+	it.each([5, 12])(
+		'keeps identity and actions outside the scrollable details for %i encryption scopes',
+		count => {
+			renderRequest(
+				Array.from({ length: count }, (_, index) => ({
+					path: `/priv/scope-${index + 1}/`,
+					permission: 'rwe',
+				})),
+			);
+
+			const details = screen.getByTestId('ConfirmAuthDetailsScrollView');
+			expect(details).toHaveStyle({ flex: 1 });
+			expect(StyleSheet.flatten(details.props.contentContainerStyle)).toMatchObject({ flexGrow: 1 });
+			expect(within(details).getAllByRole('switch')).toHaveLength(count);
+			expect(within(details).getByText(`/priv/scope-${count}/`)).toBeTruthy();
+			expect(within(details).queryByTestId('mock-pubky-card')).toBeNull();
+			expect(within(details).queryByTestId('ConfirmAuthCancelButton')).toBeNull();
+			expect(within(details).queryByTestId('ConfirmAuthAuthorizeButton')).toBeNull();
+			expect(screen.getByTestId('mock-pubky-card')).toBeVisible();
+			expect(screen.getByTestId('ConfirmAuthCancelButton')).toBeVisible();
+			expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).toBeVisible();
+		},
+	);
+
+	it('keeps the success action fixed after approving a long permission list', async () => {
+		const capabilities = Array.from({ length: 5 }, (_, index) => ({
+			path: `/priv/scope-${index + 1}/`,
+			permission: 'rwe',
+		}));
+		const authUrl = renderRequest(capabilities);
+		fireEvent(screen.getAllByRole('switch')[4], 'valueChange', false);
+		await approve();
+
+		expect(authWithCapabilities).toHaveBeenCalledWith(
+			authUrl,
+			'identity-secret',
+			capabilities.map(({ path }, index) => `${path}:${index === 4 ? 'rw' : 'rwe'}`).join(','),
+		);
+		const details = screen.getByTestId('ConfirmAuthDetailsScrollView');
+		expect(within(details).getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
+		expect(within(details).queryByTestId('ConfirmAuthSuccessButton')).toBeNull();
+		expect(screen.getByTestId('ConfirmAuthSuccessButton')).toBeVisible();
+	});
 
 	it('shows identity verification for a request with no permissions, before and after authorization', async () => {
 		const authUrl = renderRequest([]);

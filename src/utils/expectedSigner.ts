@@ -30,6 +30,28 @@ export const parseExpectedSigner = (encodedQuery: string): ExpectedSignerResult 
 	return { ok: true, expectedSigner: values[0] };
 };
 
+const queryOf = (url: string): string => {
+	const queryStart = url.indexOf('?');
+	return queryStart === -1 ? '' : url.substring(queryStart + 1);
+};
+
+/** The hint in the URL Ring parses and signs (fully decoded by `parseInput`). */
+export const expectedSignerOfUrl = (url: string): ExpectedSignerResult => parseExpectedSigner(queryOf(url));
+
+/**
+ * The hint of an incoming request. Ring parses and signs the decoded URL, so the
+ * hint read from the encoded query must match the one in the decoded URL;
+ * otherwise (`%26spk%3D` hidden in another value, an `spk` nested in a
+ * callback URL) the request is invalid.
+ */
+export const parseRequestExpectedSigner = (encodedQuery: string, decodedUrl: string): ExpectedSignerResult => {
+	const decoded = expectedSignerOfUrl(decodedUrl);
+	if (!encodedQuery) return decoded;
+	const encoded = parseExpectedSigner(encodedQuery);
+	if (!encoded.ok || !decoded.ok || encoded.expectedSigner !== decoded.expectedSigner) return { ok: false };
+	return encoded;
+};
+
 /** Ring stores pubkys as raw z32 or with a `pk:` / `pubky` prefix. */
 export const toZ32Pubky = (pubky: string): string => {
 	if (pubky.startsWith('pk:')) return pubky.slice(3);

@@ -13,7 +13,7 @@ import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, AuthParams, XCallbackParams, hasAuthRelayTransport } from '../inputParser';
 import { ActionContext } from '../inputRouter';
 import { performAuth, truncatePubky } from '../pubky';
-import { isExpectedSigner } from '../expectedSigner';
+import { expectedSignerOfUrl, isExpectedSigner } from '../expectedSigner';
 import { getErrorMessage } from '../errorHandler';
 import { getAuthorizedGrantCountFromStore, getAutoAuthFromStore } from '../store-helpers';
 import { openXSuccess, openXError } from '../xCallback';
@@ -43,6 +43,13 @@ export const createConfirmAuthPayload = async ({
 	pubky: string;
 }): Promise<Result<ConfirmAuthPayload>> => {
 	const { expectedSigner } = data.params;
+	if (data.params.kind === 'signin_grant') {
+		// The URL that will be signed must name the same pubky that was checked.
+		const signed = expectedSignerOfUrl(data.rawUrl);
+		if (!signed.ok || signed.expectedSigner !== expectedSigner) {
+			return err(i18n.t('errors.failedToParseAuth'));
+		}
+	}
 	if (expectedSigner && !isExpectedSigner(pubky, expectedSigner)) {
 		return err(i18n.t('auth.expectedSignerMismatch', { pubky: truncatePubky(expectedSigner) }));
 	}

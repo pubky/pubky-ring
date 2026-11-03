@@ -321,6 +321,24 @@ describe('expected signer (spk)', () => {
 		expect(parseDeepLinkMock).not.toHaveBeenCalled();
 	});
 
+	it('refuses when the URL to be signed names a different pubky than was checked', async () => {
+		for (const [expectedSigner, url] of [
+			[undefined, rawUrl],
+			[USER, rawUrl.replace(USER, OTHER)],
+			[USER, `${rawUrl}&spk=${USER}`],
+		] as const) {
+			const result = await createConfirmAuthPayload({
+				data: { ...data, params: { ...data.params, expectedSigner }, rawUrl: url },
+				pubky: USER,
+			});
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error.message).toBe('errors.failedToParseAuth');
+			}
+		}
+		expect(parseDeepLinkMock).not.toHaveBeenCalled();
+	});
+
 	it('accepts the expected pubky whatever prefix Ring stores it with', async () => {
 		for (const stored of [USER, `pk:${USER}`, `pubky${USER}`]) {
 			const result = await createConfirmAuthPayload({ data, pubky: stored });

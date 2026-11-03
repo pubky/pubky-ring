@@ -13,7 +13,7 @@
 import { parseDeepLink, PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import { EBackupPreference } from '../types/pubky';
-import { parseExpectedSigner } from './expectedSigner';
+import { parseRequestExpectedSigner } from './expectedSigner';
 
 // Input source types
 export type InputSource = 'deeplink' | 'scan' | 'clipboard';
@@ -374,8 +374,10 @@ const parsePubkyDeepLink = async (
 	}
 
 	if ((details.kind === 'signin' || details.kind === 'signin_grant') && hasAuthRelayTransport(details)) {
-		const encodedQuery = rawEncodedQuery || normalizedInput.substring(normalizedInput.indexOf('?') + 1);
-		const hint = details.kind === 'signin_grant' ? parseExpectedSigner(encodedQuery) : { ok: true as const };
+		const hint =
+			details.kind === 'signin_grant'
+				? parseRequestExpectedSigner(rawEncodedQuery, normalizedInput)
+				: { ok: true as const };
 		if (!hint.ok) {
 			return null;
 		}

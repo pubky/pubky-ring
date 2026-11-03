@@ -5,6 +5,7 @@ import {
 	findStoredPubky,
 	isExpectedSigner,
 	parseExpectedSigner,
+	parseRequestExpectedSigner,
 	toZ32Pubky,
 } from '../src/utils/expectedSigner';
 import { InputAction, parseInput } from '../src/utils/inputParser';
@@ -54,6 +55,31 @@ describe('parseExpectedSigner', () => {
 		['non-canonical', `spk=${USER.slice(0, -1)}b`],
 	])('rejects spk when it is %s', (_case, query) => {
 		expect(parseExpectedSigner(`${GRANT_QUERY}&${query}`)).toEqual({ ok: false });
+	});
+});
+
+describe('parseRequestExpectedSigner', () => {
+	it('uses the hint when the encoded and decoded request agree', () => {
+		const rawQuery = `${GRANT_QUERY}&spk=${USER}`;
+		expect(parseRequestExpectedSigner(rawQuery, decodeURIComponent(`${GRANT_URL}&spk=${USER}`))).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
+		expect(parseRequestExpectedSigner(GRANT_QUERY, decodeURIComponent(GRANT_URL))).toEqual({ ok: true });
+	});
+
+	it('reads the decoded URL when the raw input had no query of its own', () => {
+		expect(parseRequestExpectedSigner('', `${GRANT_URL}&spk=${USER}`)).toEqual({ ok: true, expectedSigner: USER });
+	});
+
+	it.each([
+		['hidden in another value', `secret=s${encodeURIComponent(`&spk=${USER}`)}`],
+		['nested in a callback URL', `x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}`],
+		['nested beside an outer hint', `x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}&spk=${USER}`],
+	])('refuses a request whose decoded URL names another signer: %s', (_case, extra) => {
+		const rawQuery = `${GRANT_QUERY}&${extra}`;
+		const decodedUrl = decodeURIComponent(`${GRANT_URL}&${extra}`);
+		expect(parseRequestExpectedSigner(rawQuery, decodedUrl)).toEqual({ ok: false });
 	});
 });
 
@@ -117,15 +143,13 @@ describe('parseInput with spk', () => {
 		expect(parsed.data.action === InputAction.Auth && 'expectedSigner' in parsed.data.params).toBe(false);
 	});
 
-	it('reads the hint from the request, not from a callback URL nested in it', async () => {
-		const callback = encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`);
-		const rawInput = `${GRANT_URL}&x-success=${callback}&spk=${USER}`;
+	it('refuses a request that hides spk inside another encoded value', async () => {
+		const rawInput = `${GRANT_URL}&x-source=${encodeURIComponent(`App&spk=${USER}`)}`;
 		parseDeepLinkMock.mockResolvedValue(ok(grantDetails(decodeURIComponent(rawInput))));
 
 		const parsed = await parseInput(rawInput, 'scan');
 
-		expect(parsed.action).toBe(InputAction.Auth);
-		expect(parsed.data).toMatchObject({ params: { expectedSigner: USER } });
+		expect(parsed.action).toBe(InputAction.Unknown);
 	});
 
 	it('ignores spk on legacy signin requests', async () => {

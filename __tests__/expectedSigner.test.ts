@@ -53,33 +53,110 @@ describe('parseExpectedSigner', () => {
 		['pk-prefixed', `spk=pk:${USER}`],
 		['repeated', `spk=${USER}&spk=${USER}`],
 		['non-canonical', `spk=${USER.slice(0, -1)}b`],
+		['followed by an extra =', `spk=${USER}=junk`],
+		['a malformed escape', 'spk=%ZZ'],
+		['an encoded = and junk', `spk=${USER}%3Djunk`],
+		['repeated under an encoded name', `spk=${USER}&sp%6B=${OTHER}`],
 	])('rejects spk when it is %s', (_case, query) => {
 		expect(parseExpectedSigner(`${GRANT_QUERY}&${query}`)).toEqual({ ok: false });
+	});
+
+	it('decodes the spk value once, as URL parsers do', () => {
+		expect(parseExpectedSigner(`${GRANT_QUERY}&spk=${USER.replace('8', '%38')}`)).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
+	});
+
+	it('reads the query only up to the fragment', () => {
+		expect(parseExpectedSigner(`${GRANT_QUERY}&spk=${USER}#context`)).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
+		expect(parseExpectedSigner(`${GRANT_QUERY}#&spk=${USER}`)).toEqual({ ok: true });
+	});
+
+	it('does not decode other values, so a literal or stray percent cannot fail it', () => {
+		expect(parseExpectedSigner(`${GRANT_QUERY}&x-source=100% Wallet&spk=${USER}`)).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
+		expect(parseExpectedSigner(`${GRANT_QUERY}&x-source=100%&%E0%A4%A=1`)).toEqual({ ok: true });
 	});
 });
 
 describe('parseRequestExpectedSigner', () => {
-	it('uses the hint when the encoded and decoded request agree', () => {
-		const rawQuery = `${GRANT_QUERY}&spk=${USER}`;
-		expect(parseRequestExpectedSigner(rawQuery, decodeURIComponent(`${GRANT_URL}&spk=${USER}`))).toEqual({
+	it('uses the hint when the request as written and the decoded URL agree', () => {
+		const rawInput = `${GRANT_URL}&spk=${USER}`;
+		expect(parseRequestExpectedSigner(rawInput, decodeURIComponent(rawInput))).toEqual({
 			ok: true,
 			expectedSigner: USER,
 		});
-		expect(parseRequestExpectedSigner(GRANT_QUERY, decodeURIComponent(GRANT_URL))).toEqual({ ok: true });
+		expect(parseRequestExpectedSigner(GRANT_URL, decodeURIComponent(GRANT_URL))).toEqual({ ok: true });
 	});
 
-	it('reads the decoded URL when the raw input had no query of its own', () => {
-		expect(parseRequestExpectedSigner('', `${GRANT_URL}&spk=${USER}`)).toEqual({ ok: true, expectedSigner: USER });
+	it('reads the hint of a link wrapped whole in percent-encoding', () => {
+		const link = `${GRANT_URL}&spk=${USER}`;
+		const wrapped = `pubkyring://${encodeURIComponent(link)}`;
+		expect(parseRequestExpectedSigner(wrapped, decodeURIComponent(wrapped))).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
+		const twice = encodeURIComponent(wrapped);
+		expect(parseRequestExpectedSigner(twice, decodeURIComponent(decodeURIComponent(twice)))).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
+	});
+
+	it('reads the hint of a link wrapped three times, the most parseInput decodes', () => {
+		const thrice = encodeURIComponent(
+			encodeURIComponent(`pubkyring://${encodeURIComponent(`${GRANT_URL}&spk=${USER}`)}`),
+		);
+		const decodedUrl = decodeURIComponent(decodeURIComponent(decodeURIComponent(thrice)));
+		expect(parseRequestExpectedSigner(thrice, decodedUrl)).toEqual({ ok: true, expectedSigner: USER });
+	});
+
+	it('takes the request query, not a callback query that appears first', () => {
+		// The outer `?` is encoded twice and the callback's `?` once, so one decode shows the callback's first.
+		const link = `${GRANT_URL}&x-success=${encodeURIComponent('app://done?nonce=1')}&spk=${USER}`;
+		const mixed = link.replace('signin_grant?', 'signin_grant%253F').replace(/&/g, '%2526');
+		const decodedUrl = decodeURIComponent(decodeURIComponent(mixed));
+		expect(decodedUrl).toContain(`spk=${USER}`);
+		expect(parseRequestExpectedSigner(mixed, decodedUrl)).toEqual({ ok: true, expectedSigner: USER });
+	});
+
+	it('treats a link that cannot be decoded as having no hint of its own', () => {
+		const broken = `pubkyring://${encodeURIComponent(GRANT_URL)}%`;
+		expect(parseRequestExpectedSigner(broken, broken)).toEqual({ ok: true });
+	});
+
+	it('refuses an spk in a decoded URL whose request never shows a query', () => {
+		expect(parseRequestExpectedSigner('pubkyring://opaque', `${GRANT_URL}&spk=${USER}`)).toEqual({
+			ok: false,
+		});
+		expect(parseRequestExpectedSigner('pubkyring://opaque', GRANT_URL)).toEqual({ ok: true });
 	});
 
 	it.each([
 		['hidden in another value', `secret=s${encodeURIComponent(`&spk=${USER}`)}`],
 		['nested in a callback URL', `x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}`],
-		['nested beside an outer hint', `x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}&spk=${USER}`],
+		[
+			'nested beside an outer hint',
+			`x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}&spk=${USER}`,
+		],
 	])('refuses a request whose decoded URL names another signer: %s', (_case, extra) => {
-		const rawQuery = `${GRANT_QUERY}&${extra}`;
-		const decodedUrl = decodeURIComponent(`${GRANT_URL}&${extra}`);
-		expect(parseRequestExpectedSigner(rawQuery, decodedUrl)).toEqual({ ok: false });
+		const rawInput = `${GRANT_URL}&${extra}`;
+		expect(parseRequestExpectedSigner(rawInput, decodeURIComponent(rawInput))).toEqual({ ok: false });
+	});
+
+	it('treats a callback spk the same whether or not the whole link is wrapped', () => {
+		const link = `${GRANT_URL}&x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}`;
+		const wrapped = `pubkyring://${encodeURIComponent(link)}`;
+		expect(parseRequestExpectedSigner(link, decodeURIComponent(link))).toEqual({ ok: false });
+		expect(parseRequestExpectedSigner(wrapped, decodeURIComponent(decodeURIComponent(wrapped)))).toEqual({
+			ok: false,
+		});
 	});
 });
 
@@ -148,6 +225,34 @@ describe('parseInput with spk', () => {
 		parseDeepLinkMock.mockResolvedValue(ok(grantDetails(decodeURIComponent(rawInput))));
 
 		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.Unknown);
+	});
+
+	it('keeps a valid grant link with a literal percent in another value', async () => {
+		const rawInput = `${GRANT_URL}&x-source=100%25%20Wallet`;
+		parseDeepLinkMock.mockResolvedValue(ok(grantDetails(decodeURIComponent(rawInput))));
+
+		const parsed = await parseInput(rawInput, 'deeplink');
+
+		expect(parsed.action).toBe(InputAction.Auth);
+	});
+
+	it('reads the hint of a link that ends in a fragment', async () => {
+		const rawInput = `${GRANT_URL}&spk=${USER}#context`;
+		parseDeepLinkMock.mockResolvedValue(ok(grantDetails(rawInput)));
+
+		const parsed = await parseInput(rawInput, 'deeplink');
+
+		expect(parsed.data).toMatchObject({ action: InputAction.Auth, params: { expectedSigner: USER } });
+	});
+
+	it('refuses a wrapped link whose only spk is inside its callback URL', async () => {
+		const link = `${GRANT_URL}&x-success=${encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`)}`;
+		const rawInput = `pubkyring://${encodeURIComponent(link)}`;
+		parseDeepLinkMock.mockResolvedValue(ok(grantDetails(decodeURIComponent(decodeURIComponent(rawInput)))));
+
+		const parsed = await parseInput(rawInput, 'deeplink');
 
 		expect(parsed.action).toBe(InputAction.Unknown);
 	});

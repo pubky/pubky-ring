@@ -8,15 +8,16 @@ import ProfileAvatar from './ProfileAvatar';
 interface AuthIdentityProps {
 	pubky: string;
 	name?: string;
+	fullWidth?: boolean;
 }
 
-const AuthIdentity = ({ pubky, name }: AuthIdentityProps): ReactElement => (
-	<View style={styles.container} testID="AuthIdentity">
+const AuthIdentity = ({ pubky, name, fullWidth = false }: AuthIdentityProps): ReactElement => (
+	<View style={[styles.container, fullWidth && styles.fullWidth]} testID="AuthIdentity">
 		<ProfileAvatar pubky={pubky} name={name} size={20} />
 		<TextBaseB numberOfLines={1} style={styles.name}>
 			{name || truncatePubky(pubky)}
 		</TextBaseB>
-		{!!name && (
+		{fullWidth && !!name && (
 			<View style={styles.publicKey}>
 				<Key size={16} colorName="mutedForeground" />
 				<TextBaseM colorName="mutedForeground" numberOfLines={1}>
@@ -38,6 +39,7 @@ const styles = StyleSheet.create({
 		backgroundColor: '#1C1C1C',
 		maxWidth: '100%',
 	},
+	fullWidth: { alignSelf: 'stretch' },
 	name: { flexShrink: 1 },
 	publicKey: { flexDirection: 'row', alignItems: 'center', gap: 8, flexShrink: 0, marginLeft: 'auto' },
 });

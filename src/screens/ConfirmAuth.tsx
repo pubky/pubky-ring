@@ -352,7 +352,7 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 			<View style={styles.footer}>
 				{!isAuthorized &&
 					(showDetails ? (
-						<AuthIdentity name={pubkyName} pubky={pubky} />
+						<AuthIdentity name={pubkyName} pubky={pubky} fullWidth />
 					) : (
 						<Button
 							text={t('auth.showDetails')}

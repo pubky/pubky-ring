@@ -13,6 +13,7 @@
 import { parseDeepLink, PubkyDeepLinkDetails } from '@synonymdev/react-native-pubky';
 import { mnemonicPhraseToKeypair, getPublicKeyFromSecretKey } from '@synonymdev/react-native-pubky';
 import { EBackupPreference } from '../types/pubky';
+import { parseExpectedSigner } from './expectedSigner';
 
 // Input source types
 export type InputSource = 'deeplink' | 'scan' | 'clipboard';
@@ -71,6 +72,9 @@ export interface AuthParams {
 	kind?: 'signin' | 'signup' | 'signin_grant' | 'signup_grant';
 	homeserver?: string;
 	signupToken?: string;
+	// z32 pubky named by a signin_grant link's `spk`: the app expects this
+	// pubky to approve, so Ring opens it instead of the picker.
+	expectedSigner?: string;
 	xCallback?: XCallbackParams;
 }
 
@@ -369,6 +373,10 @@ const parsePubkyDeepLink = async (
 	}
 
 	if ((details.kind === 'signin' || details.kind === 'signin_grant') && hasAuthRelayTransport(details)) {
+		const hint = details.kind === 'signin_grant' ? parseExpectedSigner(normalizedInput) : { ok: true as const };
+		if (!hint.ok) {
+			return null;
+		}
 		return {
 			action: InputAction.Auth,
 			data: {
@@ -380,6 +388,7 @@ const parsePubkyDeepLink = async (
 					kind: details.kind,
 					homeserver: details.homeserver,
 					signupToken: details.signup_token,
+					...(hint.expectedSigner ? { expectedSigner: hint.expectedSigner } : {}),
 					xCallback,
 				},
 				rawUrl: normalizedInput,

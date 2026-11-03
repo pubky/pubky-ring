@@ -12,7 +12,8 @@ import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, AuthParams, XCallbackParams, hasAuthRelayTransport } from '../inputParser';
 import { ActionContext } from '../inputRouter';
-import { performAuth } from '../pubky';
+import { performAuth, truncatePubky } from '../pubky';
+import { isExpectedSigner } from '../expectedSigner';
 import { getErrorMessage } from '../errorHandler';
 import { getAuthorizedGrantCountFromStore, getAutoAuthFromStore } from '../store-helpers';
 import { openXSuccess, openXError } from '../xCallback';
@@ -41,6 +42,11 @@ export const createConfirmAuthPayload = async ({
 	data: AuthActionData;
 	pubky: string;
 }): Promise<Result<ConfirmAuthPayload>> => {
+	const { expectedSigner } = data.params;
+	if (expectedSigner && !isExpectedSigner(pubky, expectedSigner)) {
+		return err(i18n.t('auth.expectedSignerMismatch', { pubky: truncatePubky(expectedSigner) }));
+	}
+
 	const authResult = await parseDeepLink(data.rawUrl);
 
 	if (authResult.isErr()) {

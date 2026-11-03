@@ -96,7 +96,12 @@
 		"encryptAndDecryptFolder": "Encrypt and decrypt files in this folder",
 		"encryptAndDecryptFile": "Encrypt and decrypt this file",
 		"encryptAndDecryptAllFiles": "Encrypt and decrypt all your files",
-		"encryptionKeysWarning": "Revoking access cannot take back encryption keys already shared. The app can still decrypt content encrypted with them, including future content."
+		"encryptionKeysWarning": "Revoking access cannot take back encryption keys already shared. The app can still decrypt content encrypted with them, including future content.",
+		"expectedSignerMismatch": "This request is for {{pubky}}. Approve it with that pubky.",
+		"expectedSignerMissingTitle": "Pubky not in this Ring",
+		"expectedSignerMissing": "This request is for {{pubky}}, which isn't in this Ring.",
+		"expectedSignerNotSetUpTitle": "Pubky not set up",
+		"expectedSignerNotSetUp": "This request is for {{pubky}}, which isn't set up in this Ring yet."
 	},
 	"grants": {
 		"title": "Authorized Apps",

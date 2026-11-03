@@ -96,7 +96,12 @@
 		"encryptAndDecryptFolder": "Cifrar y descifrar archivos de esta carpeta",
 		"encryptAndDecryptFile": "Cifrar y descifrar este archivo",
 		"encryptAndDecryptAllFiles": "Cifrar y descifrar todos sus archivos",
-		"encryptionKeysWarning": "Revocar el acceso no permite recuperar las claves de cifrado ya compartidas. La aplicación puede seguir descifrando contenido cifrado con ellas, incluido el contenido futuro."
+		"encryptionKeysWarning": "Revocar el acceso no permite recuperar las claves de cifrado ya compartidas. La aplicación puede seguir descifrando contenido cifrado con ellas, incluido el contenido futuro.",
+		"expectedSignerMismatch": "Esta solicitud es para {{pubky}}. Apruébela con ese pubky.",
+		"expectedSignerMissingTitle": "Pubky no está en este Ring",
+		"expectedSignerMissing": "Esta solicitud es para {{pubky}}, que no está en este Ring.",
+		"expectedSignerNotSetUpTitle": "Pubky no configurado",
+		"expectedSignerNotSetUp": "Esta solicitud es para {{pubky}}, que aún no está configurado en este Ring."
 	},
 	"grants": {
 		"title": "Aplicaciones autorizadas",

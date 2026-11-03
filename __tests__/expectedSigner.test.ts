@@ -21,17 +21,28 @@ const getPublicKeyFromSecretKeyMock = Pubky.getPublicKeyFromSecretKey as jest.Mo
 
 const USER = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
 const OTHER = '5jsjx1o6fzu6aeeo697r3i5rx15zq41kikcye8wtwdqm4nb4tryo';
-const GRANT_URL =
-	'pubkyauth://signin_grant?caps=%2Fpub%2Fpubky.app%2F%3Arw&relay=https%3A%2F%2Fhttprelay.pubky.app%2Finbox&secret=auth-secret&cid=pubky.app&cpk=client-pubky';
+const GRANT_QUERY =
+	'caps=%2Fpub%2Fpubky.app%2F%3Arw&relay=https%3A%2F%2Fhttprelay.pubky.app%2Finbox&secret=auth-secret&cid=pubky.app&cpk=client-pubky';
+const GRANT_URL = `pubkyauth://signin_grant?${GRANT_QUERY}`;
 
 describe('parseExpectedSigner', () => {
 	it('treats a missing spk as no hint', () => {
-		expect(parseExpectedSigner(GRANT_URL)).toEqual({ ok: true });
-		expect(parseExpectedSigner('pubkyauth://signin_grant')).toEqual({ ok: true });
+		expect(parseExpectedSigner(GRANT_QUERY)).toEqual({ ok: true });
+		expect(parseExpectedSigner('')).toEqual({ ok: true });
 	});
 
 	it('reads one z32 spk', () => {
-		expect(parseExpectedSigner(`${GRANT_URL}&spk=${USER}`)).toEqual({ ok: true, expectedSigner: USER });
+		expect(parseExpectedSigner(`${GRANT_QUERY}&spk=${USER}`)).toEqual({ ok: true, expectedSigner: USER });
+		expect(parseExpectedSigner(`?${GRANT_QUERY}&spk=${OTHER}`)).toEqual({ ok: true, expectedSigner: OTHER });
+	});
+
+	it('ignores an spk inside an encoded callback URL', () => {
+		const callback = encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`);
+		expect(parseExpectedSigner(`${GRANT_QUERY}&x-success=${callback}`)).toEqual({ ok: true });
+		expect(parseExpectedSigner(`${GRANT_QUERY}&x-success=${callback}&spk=${USER}`)).toEqual({
+			ok: true,
+			expectedSigner: USER,
+		});
 	});
 
 	it.each([
@@ -40,8 +51,9 @@ describe('parseExpectedSigner', () => {
 		['pubky-prefixed', `spk=pubky${USER}`],
 		['pk-prefixed', `spk=pk:${USER}`],
 		['repeated', `spk=${USER}&spk=${USER}`],
+		['non-canonical', `spk=${USER.slice(0, -1)}b`],
 	])('rejects spk when it is %s', (_case, query) => {
-		expect(parseExpectedSigner(`${GRANT_URL}&${query}`)).toEqual({ ok: false });
+		expect(parseExpectedSigner(`${GRANT_QUERY}&${query}`)).toEqual({ ok: false });
 	});
 });
 
@@ -103,6 +115,17 @@ describe('parseInput with spk', () => {
 
 		expect(parsed.action).toBe(InputAction.Auth);
 		expect(parsed.data.action === InputAction.Auth && 'expectedSigner' in parsed.data.params).toBe(false);
+	});
+
+	it('reads the hint from the request, not from a callback URL nested in it', async () => {
+		const callback = encodeURIComponent(`app://done?nonce=1&spk=${OTHER}`);
+		const rawInput = `${GRANT_URL}&x-success=${callback}&spk=${USER}`;
+		parseDeepLinkMock.mockResolvedValue(ok(grantDetails(decodeURIComponent(rawInput))));
+
+		const parsed = await parseInput(rawInput, 'scan');
+
+		expect(parsed.action).toBe(InputAction.Auth);
+		expect(parsed.data).toMatchObject({ params: { expectedSigner: USER } });
 	});
 
 	it('ignores spk on legacy signin requests', async () => {

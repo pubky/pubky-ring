@@ -301,6 +301,7 @@ const normalizePubkyDeepLinkInput = (input: string): string => {
 const parsePubkyDeepLink = async (
 	input: string,
 	rawInput: string,
+	rawEncodedQuery: string,
 	source: InputSource,
 ): Promise<ParsedInput | null> => {
 	const normalizedInput = normalizePubkyDeepLinkInput(input);
@@ -373,7 +374,8 @@ const parsePubkyDeepLink = async (
 	}
 
 	if ((details.kind === 'signin' || details.kind === 'signin_grant') && hasAuthRelayTransport(details)) {
-		const hint = details.kind === 'signin_grant' ? parseExpectedSigner(normalizedInput) : { ok: true as const };
+		const encodedQuery = rawEncodedQuery || normalizedInput.substring(normalizedInput.indexOf('?') + 1);
+		const hint = details.kind === 'signin_grant' ? parseExpectedSigner(encodedQuery) : { ok: true as const };
 		if (!hint.ok) {
 			return null;
 		}
@@ -436,7 +438,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 	let processedInput = rawInput.trim();
 
 	// Snapshot of the original (still-encoded) query string. Used only for
-	// x-callback URL extraction so values like `x-cancel=bitkit%3A%2F%2F...`
+	// x-callback URL and `spk` extraction so values like `x-cancel=bitkit%3A%2F%2F...`
 	// containing inner '?', '=', or '&' are preserved verbatim and decoded
 	// exactly once.
 	const rawQueryStart = processedInput.indexOf('?');
@@ -488,7 +490,7 @@ export const parseInput = async (rawInput: string, source: InputSource): Promise
 		}
 	}
 
-	const deepLinkParsed = await parsePubkyDeepLink(processedInput, rawInput, source);
+	const deepLinkParsed = await parsePubkyDeepLink(processedInput, rawInput, rawEncodedQuery, source);
 	if (deepLinkParsed) {
 		return deepLinkParsed;
 	}

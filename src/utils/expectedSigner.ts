@@ -9,21 +9,22 @@
  */
 
 const SPK_PARAM = 'spk';
-const Z32_PUBLIC_KEY = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{52}$/;
+// 52 z-base-32 symbols encode 260 bits; a 32-byte key leaves the last symbol one
+// significant bit, so canonical keys end in `y` or `o`.
+const Z32_PUBLIC_KEY = /^[ybndrfg8ejkmcpqxot1uwisza345h769]{51}[yo]$/;
 
 export type ExpectedSignerResult =
 	| { ok: true; expectedSigner?: string }
 	| { ok: false };
 
 /**
- * Reads `spk` from a pubkyauth URL. Absent is fine; an empty, malformed or
- * repeated value makes the request invalid, as in the Pubky SDK parser.
+ * Reads `spk` from a pubkyauth query string, still percent-encoded as the app
+ * sent it, so an `spk` inside an encoded callback URL is not mistaken for it.
+ * Absent is fine; an empty, malformed or repeated value makes the request
+ * invalid, as in the Pubky SDK parser.
  */
-export const parseExpectedSigner = (url: string): ExpectedSignerResult => {
-	const queryStart = url.indexOf('?');
-	if (queryStart === -1) return { ok: true };
-
-	const values = new URLSearchParams(url.substring(queryStart + 1)).getAll(SPK_PARAM);
+export const parseExpectedSigner = (encodedQuery: string): ExpectedSignerResult => {
+	const values = new URLSearchParams(encodedQuery).getAll(SPK_PARAM);
 	if (values.length === 0) return { ok: true };
 	if (values.length > 1 || !Z32_PUBLIC_KEY.test(values[0])) return { ok: false };
 	return { ok: true, expectedSigner: values[0] };

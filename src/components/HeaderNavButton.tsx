@@ -10,7 +10,6 @@ type HeaderNavButtonProps = {
 	style?: StyleProp<ViewStyle>;
 	testID?: PressableProps['testID'];
 	onPress?: () => void;
-	onPressIn?: () => void;
 };
 
 const HeaderNavButton = ({
@@ -19,7 +18,6 @@ const HeaderNavButton = ({
 	style,
 	testID,
 	onPress,
-	onPressIn,
 }: HeaderNavButtonProps): ReactElement => (
 	<TouchableOpacity
 		style={[styles.root, style]}
@@ -27,7 +25,6 @@ const HeaderNavButton = ({
 		disabled={disabled}
 		testID={testID}
 		onPress={onPress}
-		onPressIn={onPressIn}
 	>
 		{children}
 	</TouchableOpacity>

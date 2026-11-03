@@ -29,7 +29,7 @@ const AppHeader = memo(
 		const defaultLeftButton = disableBackNavigation ? (
 			<HeaderNavButton />
 		) : (
-			<HeaderNavButton testID="AppHeaderBackButton" onPressIn={navigation.goBack}>
+			<HeaderNavButton testID="AppHeaderBackButton" onPress={navigation.goBack}>
 				<ArrowLeft size={20} />
 			</HeaderNavButton>
 		);

@@ -168,12 +168,9 @@ export const actionRequiresPubky = (action: InputAction): boolean => {
  * Determines if an action can proceed without network
  */
 export const actionRequiresNetwork = (action: InputAction): boolean => {
-	return [
-		InputAction.Auth,
-		InputAction.Signup,
-		InputAction.DirectSignup,
-		InputAction.Invite,
-	].includes(action);
+	return [InputAction.Auth, InputAction.Signup, InputAction.DirectSignup, InputAction.Invite].includes(
+		action,
+	);
 };
 
 /**

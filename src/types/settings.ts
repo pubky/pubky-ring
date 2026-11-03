@@ -2,6 +2,7 @@ export interface SettingsState {
 	theme: ETheme | undefined;
 	showOnboarding: boolean;
 	autoAuth: boolean;
+	alwaysShowAuthDetails: boolean;
 	navigationAnimation: ENavigationAnimation;
 	isOnline: boolean;
 	signedTermsOfUse: boolean;

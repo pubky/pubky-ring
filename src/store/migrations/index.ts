@@ -2,8 +2,13 @@ import { PersistedState } from 'redux-persist';
 import { signOut } from '@synonymdev/react-native-pubky';
 import { EBackupPreference } from '../../types/pubky';
 import { getSessionSecret, resetSessionSecret } from '../../utils/keychain';
+import type { SettingsState } from '../../types/settings';
+import { initialState as settingsInitialState } from '../shapes/settings';
 
 type PersistedSession = Record<string, unknown>;
+type PersistedSettingsState = Exclude<PersistedState, undefined> & {
+	settings?: Partial<SettingsState>;
+};
 
 const revokeLegacySession = (session: Record<string, unknown>): void => {
 	if (typeof session.session_secret !== 'string' || session.session_secret.length === 0) {
@@ -238,6 +243,17 @@ const migrations = {
 			pubky: {
 				...state.pubky,
 				pubkys: updatedPubkys,
+			},
+		};
+	},
+	11: (state: PersistedSettingsState | undefined): PersistedSettingsState | undefined => {
+		if (!state) return state;
+		return {
+			...state,
+			settings: {
+				...state.settings,
+				alwaysShowAuthDetails:
+					state.settings?.alwaysShowAuthDetails ?? settingsInitialState.alwaysShowAuthDetails,
 			},
 		};
 	},

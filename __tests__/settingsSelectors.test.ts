@@ -1,4 +1,8 @@
-import { getAutoAuth, getNavigationAnimation } from '../src/store/selectors/settingsSelectors';
+import {
+	getAlwaysShowAuthDetails,
+	getAutoAuth,
+	getNavigationAnimation,
+} from '../src/store/selectors/settingsSelectors';
 import { initialState as settings } from '../src/store/shapes/settings';
 import { initialState as pubky } from '../src/store/shapes/pubky';
 import { initialState as ui } from '../src/store/shapes/ui';
@@ -7,6 +11,16 @@ import { ENavigationAnimation } from '../src/types/settings';
 
 // React Native's export condition selects Immer's untransformed ESM build in Jest.
 jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
+
+describe('getAlwaysShowAuthDetails', () => {
+	it.each([undefined, false, true])(
+		'supports a persisted preference of %s, including older installations',
+		value => {
+			const state = { settings: { alwaysShowAuthDetails: value } } as unknown as RootState;
+			expect(getAlwaysShowAuthDetails(state)).toBe(value ?? false);
+		},
+	);
+});
 
 describe('getAutoAuth', () => {
 	afterEach(() => {

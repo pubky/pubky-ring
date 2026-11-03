@@ -3,6 +3,8 @@ import { ok as resultOk } from '@synonymdev/result';
 import migrations from '../src/store/migrations';
 import { EBackupPreference } from '../src/types/pubky';
 import { getSessionSecret, resetSessionSecret } from '../src/utils/keychain';
+import { createMigrate } from 'redux-persist';
+import { ETheme } from '../src/types/settings';
 
 jest.mock('@synonymdev/react-native-pubky');
 
@@ -29,6 +31,30 @@ const runMigration = <TState>(version: number, state: TState): TState => {
 const flushPromises = async (): Promise<void> => {
 	await new Promise(resolve => setImmediate(resolve));
 };
+
+describe('auth display settings migration', () => {
+	it.each([undefined, false, true])(
+		'upgrades version 10 with the existing preference %s',
+		async preference => {
+			const state = {
+				_persist: { version: 10, rehydrated: true },
+				settings: {
+					theme: ETheme.light,
+					...(preference === undefined ? {} : { alwaysShowAuthDetails: preference }),
+				},
+				pubky: { pubkys: { pubkyOne: { name: 'Alice' } } },
+			};
+
+			const migrated = await createMigrate(migrations)(state, 11);
+
+			expect(migrated).toEqual({
+				...state,
+				settings: { ...state.settings, alwaysShowAuthDetails: preference ?? false },
+			});
+			expect(state.settings.alwaysShowAuthDetails).toBe(preference);
+		},
+	);
+});
 
 describe('pubky migrations', () => {
 	beforeEach(() => {

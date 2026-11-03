@@ -94,7 +94,7 @@ export const SheetScreen = ({
 				<HeaderNavButton
 					style={styles.navButton}
 					testID={`${id}-back-button`}
-					onPressIn={visibleBackPressHandler}
+					onPress={visibleBackPressHandler}
 				>
 					<ArrowLeft />
 				</HeaderNavButton>

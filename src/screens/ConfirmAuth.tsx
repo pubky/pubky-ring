@@ -1,29 +1,34 @@
-import React, { memo, ReactElement, useCallback, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Switch, View } from 'react-native';
+import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
-import { hideSheet } from '../sheets/sheetNavigation.tsx';
-import { performAuth } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
-import { sleep } from '../utils/helpers.ts';
-import PubkyCard from '../components/PubkyCard.tsx';
+import { useTranslation } from 'react-i18next';
 import Animated, {
 	useAnimatedStyle,
 	useSharedValue,
 	withTiming,
 	withSequence,
 } from 'react-native-reanimated';
+import { useTheme } from 'styled-components/native';
+import { hideSheet } from '../sheets/sheetNavigation.tsx';
+import { performAuth } from '../utils/pubky';
+import { sleep } from '../utils/helpers.ts';
 import { TextSmM, TextXsM } from '../theme/typography';
-import { RootState } from '../store';
+import type { RootState } from '../store';
+import type { Theme } from '../theme';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
-import { useTranslation } from 'react-i18next';
+import { getAlwaysShowAuthDetails } from '../store/selectors/settingsSelectors.ts';
 import { openXSuccess, openXError, openXCancel } from '../utils/xCallback.ts';
 import Button from '../components/Button.tsx';
 import { SheetScreen } from '../components/Sheet.tsx';
 import SafeAreaInset from '../components/SafeAreaInset.tsx';
-import { CheckCircle, Folder, Key, UserCheck } from '../icons/index.ts';
+import { CheckCircle, Eye, Folder, Globe, List, Lock, Pencil, UserCheck } from '../icons/index.ts';
 import CircularProgressBar from '../components/CircularProgressBar.tsx';
 import PermissionCard from '../components/PermissionCard.tsx';
+import AuthIdentity from '../components/AuthIdentity.tsx';
+import AuthSummary from '../components/AuthSummary.tsx';
+import SwipeToConfirm from '../components/SwipeToConfirm.tsx';
 import type { AuthStackParamList } from '../sheets/types.ts';
 import { syncAuthorizedGrantsAfterAuth } from '../utils/authorizedGrants.ts';
 import { getAuthorizedGrantCount } from '../store/selectors/authorizedGrantsSelectors.ts';
@@ -32,71 +37,37 @@ import {
 	hasEncryptionCapabilities,
 	type AuthCapability,
 } from '../utils/authCapabilities.ts';
-import { useTheme } from 'styled-components/native';
-import type { Theme } from '../theme';
-import { getEncryptionPermissionLabel } from '../utils/sessionDisplay.ts';
 
 const Permission = memo(
 	({
 		capability,
 		encryptionApproved,
-		isAuthorized,
-		disabled,
-		onEncryptionApprovalChange,
 	}: {
 		capability: AuthCapability;
 		encryptionApproved: boolean;
-		isAuthorized: boolean;
-		disabled: boolean;
-		onEncryptionApprovalChange: (approved: boolean) => void;
-	}): ReactElement | null => {
+	}): ReactElement => {
 		const { t } = useTranslation();
-		const theme = useTheme() as Theme;
-		const permission =
-			isAuthorized && !encryptionApproved ? capability.permission.replaceAll('e', '') : capability.permission;
-		if (!permission) return null;
-
-		const hasReadPermission = permission.includes('r');
-		const hasWritePermission = permission.includes('w');
-		const hasEncryptionPermission = permission.includes('e');
-		const encryptionLabel = getEncryptionPermissionLabel(t, capability.path);
+		const read = capability.permission.includes('r');
+		const write = capability.permission.includes('w');
+		const encrypt = capability.permission.includes('e') && encryptionApproved;
+		const label = [read && t('common.read'), write && t('common.write'), encrypt && t('auth.encryptedData')]
+			.filter(Boolean)
+			.join(', ');
 		return (
-			<View style={styles.capabilityContainer}>
-				<View style={styles.permissionRow}>
-					<Folder size={16} />
-					<View style={styles.pathContainer}>
-						<TextSmM colorName="foreground">{capability.path}</TextSmM>
-					</View>
-					<View style={styles.permissionsContainer}>
-						{hasReadPermission && (
-							<TextXsM>
-								{t('common.read')}
-								{hasWritePermission ? ',' : ''}
-							</TextXsM>
-						)}
-						{hasWritePermission && <TextXsM>{t('common.write')}</TextXsM>}
-					</View>
+			<View
+				style={styles.permissionRow}
+				accessible
+				accessibilityLabel={`${capability.path}: ${label || t('activeSession.noPermissions')}`}
+			>
+				<Folder size={16} />
+				<TextSmM style={styles.path} colorName="foreground">
+					{capability.path}
+				</TextSmM>
+				<View style={styles.permissions}>
+					<Eye size={16} colorName={read ? 'foreground' : 'border'} />
+					<Pencil size={16} colorName={write ? 'foreground' : 'border'} />
+					<Lock size={16} colorName={encrypt ? 'foreground' : 'border'} />
 				</View>
-
-				{hasEncryptionPermission && (
-					<View style={styles.encryptionPermissionRow}>
-						<Key size={16} />
-						<TextSmM style={styles.encryptionPermissionLabel} colorName="foreground">
-							{encryptionLabel}
-						</TextSmM>
-						{!isAuthorized && (
-							<Switch
-								accessibilityLabel={`${encryptionLabel}: ${capability.path}`}
-								disabled={disabled}
-								ios_backgroundColor={theme.colors.input}
-								trackColor={{ false: theme.colors.input, true: theme.colors.pubkyApp }}
-								thumbColor={encryptionApproved ? theme.colors.primaryForeground : theme.colors.primary}
-								value={encryptionApproved}
-								onValueChange={onEncryptionApprovalChange}
-							/>
-						)}
-					</View>
-				)}
 			</View>
 		);
 	},
@@ -105,88 +76,83 @@ const Permission = memo(
 const FADE_DURATION = 100;
 const CONFIRM_AUTH_TIMEOUT_MS = 60000;
 
-const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'ConfirmAuth'>): ReactElement => {
+type Props = NativeStackScreenProps<AuthStackParamList, 'ConfirmAuth'>;
+
+const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 	const { t } = useTranslation();
+	const theme = useTheme() as Theme;
 	const { pubky, authUrl, authDetails, xCallback } = route.params;
+	const dispatch = useDispatch();
+	const alwaysShowDetails = useSelector(getAlwaysShowAuthDetails);
+	const [showDetails, setShowDetails] = useState(alwaysShowDetails);
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
-	const [declinedEncryptionIndexes, setDeclinedEncryptionIndexes] = useState<ReadonlySet<number>>(
-		() => new Set(),
-	);
-	const dispatch = useDispatch();
-
+	const [encryptionApproved, setEncryptionApproved] = useState(true);
+	const request = useRef({ authorizing: false, finished: false });
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, pubky));
 	const authorizedGrantCount = useSelector((state: RootState) => getAuthorizedGrantCount(state, pubky));
-
+	const capabilities = useMemo(() => authDetails.capabilities ?? [], [authDetails.capabilities]);
+	const hasEncryption = hasEncryptionCapabilities(capabilities);
+	const approvedCapabilities = useMemo(
+		() => buildApprovedCapabilities(capabilities, encryptionApproved),
+		[capabilities, encryptionApproved],
+	);
+	const identityOnly = !capabilities.some(capability => capability.permission.length > 0);
 	const checkOpacity = useSharedValue(0);
-	const checkScale = useSharedValue(0.5); // Start half size
-
+	const checkScale = useSharedValue(0.5);
 	const checkStyle = useAnimatedStyle(() => ({
-		opacity: checkOpacity.value,
-		transform: [{ scale: checkScale.value }],
-		position: 'absolute',
+		opacity: checkOpacity.get(),
+		transform: [{ scale: checkScale.get() }],
 	}));
 
-	// Reset state and animations when pubky changes
 	useEffect(() => {
-		setAuthorizing(false);
-		setIsAuthorized(false);
-		checkOpacity.value = 0;
-		checkScale.value = 0.5;
-		setDeclinedEncryptionIndexes(new Set());
-	}, [authUrl, pubky, checkOpacity, checkScale]);
-
-	useEffect(() => {
-		if (authorizing) {
-			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
-			checkScale.value = withTiming(0.5);
-		} else if (isAuthorized) {
-			checkOpacity.value = withTiming(1, { duration: FADE_DURATION });
-			checkScale.value = withSequence(
-				// Start at half size
-				withTiming(0.5, { duration: 0 }),
-				// Spring to full size
-				withTiming(1, { duration: 300 }),
-			);
-		} else {
-			checkOpacity.value = withTiming(0, { duration: FADE_DURATION });
-			checkScale.value = withTiming(0.5);
+		if (isAuthorized) {
+			checkOpacity.set(withTiming(1, { duration: FADE_DURATION }));
+			checkScale.set(withSequence(withTiming(0.5, { duration: 0 }), withTiming(1, { duration: 300 })));
 		}
-	}, [authorizing, checkOpacity, checkScale, isAuthorized]);
+	}, [checkOpacity, checkScale, isAuthorized]);
 
 	const handleClose = useCallback(() => {
 		hideSheet('auth');
 	}, []);
-
 	const handleDeny = useCallback(() => {
-		openXCancel(xCallback);
+		if (!request.current.finished) {
+			request.current.finished = true;
+			openXCancel(xCallback);
+		}
 		handleClose();
-	}, [xCallback, handleClose]);
+	}, [request, xCallback, handleClose]);
+
+	useEffect(
+		() =>
+			navigation.getParent()?.addListener('beforeRemove', () => {
+				if (!request.current.finished && !request.current.authorizing) {
+					request.current.finished = true;
+					openXCancel(xCallback);
+				}
+			}),
+		[navigation, xCallback],
+	);
 
 	useEffect(() => {
-		if (isAuthorized || authorizing) {
-			return;
-		}
-
+		if (isAuthorized || authorizing) return;
 		const timeout = setTimeout(handleDeny, CONFIRM_AUTH_TIMEOUT_MS);
-
-		return () => {
-			clearTimeout(timeout);
-		};
+		return () => clearTimeout(timeout);
 	}, [authorizing, handleDeny, isAuthorized]);
 
 	const handleAuth = useCallback(async () => {
+		if (request.current.authorizing || request.current.finished) return;
+		request.current.authorizing = true;
 		setAuthorizing(true);
 		try {
-			const requestedCapabilities = authDetails.capabilities ?? [];
-			const approvedCapabilities = hasEncryptionCapabilities(requestedCapabilities)
-				? buildApprovedCapabilities(requestedCapabilities, declinedEncryptionIndexes)
+			const approval = hasEncryption
+				? approvedCapabilities.map(({ path, permission }) => `${path}:${permission}`).join(',')
 				: undefined;
 			const res = await performAuth({
 				pubky,
 				authUrl,
 				dispatch,
-				approvedCapabilities,
+				approvedCapabilities: approval,
 			});
 			if (res.isErr()) {
 				showToast({
@@ -197,6 +163,7 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				await openXError(xCallback, 'AUTH_FAILED', res.error.message);
 				return;
 			}
+			request.current.finished = true;
 			setIsAuthorized(true);
 			syncAuthorizedGrantsAfterAuth({
 				pubky,
@@ -225,258 +192,225 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 			console.error('Auth error:', error);
 			await openXError(xCallback, 'AUTH_ERROR', errorMsg);
 		} finally {
+			request.current.authorizing = false;
 			setAuthorizing(false);
 		}
 	}, [
-		authDetails.capabilities,
+		approvedCapabilities,
 		authDetails.kind,
 		authUrl,
 		authorizedGrantCount,
-		declinedEncryptionIndexes,
+		hasEncryption,
 		xCallback,
 		dispatch,
 		handleClose,
 		pubky,
 		t,
+		request,
 	]);
-
-	const authDetailCapabilities = authDetails.capabilities ?? [];
-	const hasApprovedEncryption = authDetailCapabilities.some(
-		(capability, index) => capability.permission.includes('e') && !declinedEncryptionIndexes.has(index),
-	);
-	const showIdentityVerification = isAuthorized
-		? buildApprovedCapabilities(authDetailCapabilities, declinedEncryptionIndexes) === ''
-		: !authDetailCapabilities.some(capability => capability.permission.length > 0);
-	const handleEncryptionApprovalChange = useCallback((index: number, approved: boolean): void => {
-		setDeclinedEncryptionIndexes(current => {
-			const updated = new Set(current);
-			if (approved) {
-				updated.delete(index);
-			} else {
-				updated.add(index);
-			}
-			return updated;
-		});
-	}, []);
-
-	const requestingClient = authDetails.client_id || xCallback?.xSource;
-	const titleText = isAuthorized
-		? requestingClient
-			? t('auth.authorizedForApp', { appName: requestingClient })
-			: t('auth.authorizationSuccessful')
-		: requestingClient
-			? t('auth.authorizeForApp', { appName: requestingClient })
-			: t('auth.authorize');
-
-	const headerProgress = !isAuthorized ? (
-		<CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={24} drain={true} />
-	) : undefined;
 
 	return (
 		<SheetScreen
 			id="auth"
-			title={titleText}
+			title={t(isAuthorized ? 'auth.authorizedTitle' : 'auth.authorize')}
 			titleTestID="confirm-auth-title"
 			showBottomSafeAreaInset={false}
-			headerRight={headerProgress}
+			showBackButton={showDetails && !isAuthorized && !authorizing}
+			onBackPress={() => setShowDetails(false)}
+			headerRight={
+				!isAuthorized ? <CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={24} drain /> : undefined
+			}
 		>
 			<ScrollView
+				key={isAuthorized ? 'success' : showDetails ? 'details' : 'basic'}
 				testID="ConfirmAuthDetailsScrollView"
-				style={styles.detailsScroll}
-				contentContainerStyle={styles.detailsContent}
+				style={styles.scroll}
+				contentContainerStyle={styles.scrollContent}
+				onAccessibilityEscape={handleDeny}
 			>
-				<PermissionCard style={styles.permissionsCard}>
-					<TextXsM
-						style={styles.sectionTitle}
-						testID={
-							showIdentityVerification
-								? 'ConfirmAuthIdentityVerification'
-								: isAuthorized
-									? 'ConfirmAuthGrantedPermissions'
-									: 'ConfirmAuthRequestedPermissions'
-						}
-					>
-						{showIdentityVerification
-							? t('auth.identityVerification')
-							: isAuthorized
-								? t('auth.grantedPermissions')
-								: t('auth.requestedPermissions')}
-					</TextXsM>
-
-					{showIdentityVerification ? (
-						<View style={styles.identityVerificationRow}>
-							<UserCheck size={16} />
-							<TextSmM style={styles.identityVerificationLabel} colorName="foreground">
-								{isAuthorized ? t('auth.identityVerified') : t('auth.provePubkyControl')}
-							</TextSmM>
+				{isAuthorized ? (
+					<>
+						<AuthSummary capabilities={approvedCapabilities} authorized />
+						<View style={styles.hero}>
+							<Animated.View style={checkStyle}>
+								<CheckCircle colorName="pubkyApp" size={96} strokeWidth={1} />
+							</Animated.View>
+							<AuthIdentity name={pubkyName} pubky={pubky} />
 						</View>
-					) : (
-						<View style={styles.permissions}>
-							{authDetailCapabilities.map((capability, index) => (
-								<Permission
-									key={`${capability.path}:${capability.permission}:${index}`}
-									capability={capability}
-									disabled={authorizing}
-									encryptionApproved={!declinedEncryptionIndexes.has(index)}
-									isAuthorized={isAuthorized}
-									onEncryptionApprovalChange={(approved): void =>
-										handleEncryptionApprovalChange(index, approved)
-									}
-								/>
-							))}
+					</>
+				) : showDetails ? (
+					<>
+						<View style={styles.cards}>
+							<PermissionCard
+								testID={identityOnly ? 'ConfirmAuthIdentityVerification' : 'ConfirmAuthRequestedPermissions'}
+							>
+								{identityOnly ? (
+									<>
+										<TextXsM style={styles.sectionTitle}>{t('auth.identityVerification')}</TextXsM>
+										<View style={styles.permissionRow}>
+											<UserCheck size={16} />
+											<TextSmM colorName="foreground" style={styles.path}>
+												{t('auth.provePubkyControl')}
+											</TextSmM>
+										</View>
+									</>
+								) : (
+									<>
+										<View style={styles.permissionHeader}>
+											<TextXsM>{t('auth.folder')}</TextXsM>
+											<TextXsM>{t('auth.permissions')}</TextXsM>
+										</View>
+										<View style={styles.permissionList}>
+											{capabilities.map((capability, index) => (
+												<Permission
+													key={`${capability.path}:${index}`}
+													capability={capability}
+													encryptionApproved={encryptionApproved}
+												/>
+											))}
+										</View>
+									</>
+								)}
+							</PermissionCard>
+							{hasEncryption && (
+								<PermissionCard>
+									<TextXsM style={styles.sectionTitle}>{t('auth.encryptedData')}</TextXsM>
+									<View style={styles.permissionRow}>
+										<Lock size={16} />
+										<TextSmM style={styles.path} colorName="foreground">
+											{t('auth.allowEncryptedData')}
+										</TextSmM>
+										<Pressable
+											testID="AuthEncryptionToggle"
+											accessibilityRole="switch"
+											accessibilityLabel={t('auth.allowEncryptedData')}
+											accessibilityState={{ checked: encryptionApproved, disabled: authorizing }}
+											disabled={authorizing}
+											hitSlop={12}
+											style={[
+												styles.encryptionSwitch,
+												{ backgroundColor: encryptionApproved ? theme.colors.blue : theme.colors.input },
+											]}
+											onPress={() => setEncryptionApproved(current => !current)}
+										>
+											<View
+												style={[
+													styles.switchThumb,
+													{
+														backgroundColor: theme.colors.background,
+														transform: [{ translateX: encryptionApproved ? 16 : 0 }],
+													},
+												]}
+											/>
+										</Pressable>
+									</View>
+								</PermissionCard>
+							)}
+							{!!authDetails.relay && (
+								<PermissionCard>
+									<TextXsM style={styles.sectionTitle}>{t('auth.relay')}</TextXsM>
+									<View style={styles.permissionRow}>
+										<Globe size={16} />
+										<TextSmM colorName="foreground" style={styles.path} selectable>
+											{authDetails.relay}
+										</TextSmM>
+									</View>
+								</PermissionCard>
+							)}
 						</View>
-					)}
-					{!isAuthorized && hasApprovedEncryption && (
-						<TextSmM style={styles.encryptionWarning}>{t('auth.encryptionKeysWarning')}</TextSmM>
-					)}
-				</PermissionCard>
-
-				{showIdentityVerification ? (
-					<TextSmM style={styles.warningText} colorName="mutedForeground">
-						{isAuthorized ? t('auth.identityVerifiedDescription') : t('auth.identityVerificationWarning')}
-					</TextSmM>
-				) : (
-					!isAuthorized && (
-						<TextSmM style={styles.warningText} colorName="mutedForeground">
-							{t('auth.trustWarning')}
+						<View style={styles.spacer} />
+						<TextSmM>
+							{t(
+								identityOnly
+									? 'auth.identityVerificationWarning'
+									: hasEncryption
+										? 'auth.encryptionTrustWarning'
+										: 'auth.trustWarning',
+							)}
 						</TextSmM>
-					)
+					</>
+				) : (
+					<>
+						<AuthSummary capabilities={approvedCapabilities} authorized={false} />
+						<View style={styles.hero}>
+							<View style={styles.shieldContainer}>
+								<Image
+									source={require('../images/shield.png')}
+									style={styles.shield}
+									resizeMode="contain"
+									accessibilityIgnoresInvertColors
+								/>
+								<View style={styles.shieldIdentity}>
+									<AuthIdentity name={pubkyName} pubky={pubky} />
+								</View>
+							</View>
+						</View>
+					</>
 				)}
-
-				<View style={[styles.imageContainer, isAuthorized && styles.successImageContainer]}>
-					<Animated.View style={[styles.imageWrapper, checkStyle]}>
-						<CheckCircle colorName="pubkyApp" size={128} strokeWidth={1} />
-					</Animated.View>
-				</View>
 			</ScrollView>
 
-			<PubkyCard name={pubkyName} publicKey={pubky} />
-
-			<View style={styles.footerContainer}>
-				<View style={styles.buttonContainer}>
-					{!isAuthorized ? (
-						<>
-							<Button
-								text={authorizing ? t('common.close') : t('common.cancel')}
-								size="large"
-								testID="ConfirmAuthCancelButton"
-								onPress={handleDeny}
-							/>
-							<Button
-								text={authorizing ? t('auth.authorizing') : t('auth.authorize')}
-								size="large"
-								variant="secondary"
-								disabled={authorizing}
-								testID="ConfirmAuthAuthorizeButton"
-								onPress={handleAuth}
-							/>
-						</>
+			<View style={styles.footer}>
+				{!isAuthorized &&
+					(showDetails ? (
+						<AuthIdentity name={pubkyName} pubky={pubky} showPublicKey={!hasEncryption && !identityOnly} />
 					) : (
 						<Button
-							text={t('common.ok')}
+							text={t('auth.showDetails')}
 							size="large"
-							variant="secondary"
-							testID="ConfirmAuthSuccessButton"
-							onPress={handleClose}
+							style={styles.fullWidthButton}
+							icon={<List size={16} />}
+							testID="ConfirmAuthShowDetailsButton"
+							disabled={authorizing}
+							onPress={() => setShowDetails(true)}
 						/>
-					)}
-				</View>
+					))}
+				{isAuthorized ? (
+					<Button
+						text={t('common.ok')}
+						size="large"
+						style={styles.fullWidthButton}
+						variant="secondary"
+						testID="ConfirmAuthSuccessButton"
+						onPress={handleClose}
+					/>
+				) : (
+					<SwipeToConfirm
+						text={t(authorizing ? 'auth.authorizing' : 'auth.swipeToAuthorize')}
+						loading={authorizing}
+						testID="ConfirmAuthAuthorizeButton"
+						onConfirm={handleAuth}
+					/>
+				)}
 			</View>
-
 			<SafeAreaInset edge="bottom" />
 		</SheetScreen>
 	);
 };
 
 const styles = StyleSheet.create({
-	detailsScroll: {
-		flex: 1,
-	},
-	detailsContent: {
-		flexGrow: 1,
-	},
-	permissionsCard: {
-		marginBottom: 24,
-	},
-	relayContainer: {
-		flexDirection: 'row',
-		justifyContent: 'flex-start',
-		alignItems: 'center',
-	},
-	permissions: {
-		gap: 12,
-	},
-	sectionTitle: {
-		marginBottom: 8,
-	},
-	relayText: {
-		justifyContent: 'center',
-		marginLeft: 6,
-	},
-	warningText: {
-		marginBottom: 24,
-	},
-	permissionRow: {
-		flexDirection: 'row',
-		justifyContent: 'space-between',
-		alignItems: 'center',
-	},
-	capabilityContainer: {
-		gap: 8,
-	},
-	pathContainer: {
-		flex: 2,
-		marginLeft: 5,
-		justifyContent: 'center',
-	},
-	permissionsContainer: {
-		flex: 1,
-		flexDirection: 'row',
-		justifyContent: 'flex-end',
-		gap: 8,
-	},
-	identityVerificationRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 8,
-	},
-	identityVerificationLabel: {
-		flex: 1,
-	},
-	encryptionPermissionRow: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 8,
-	},
-	encryptionPermissionLabel: {
-		flex: 1,
-	},
-	encryptionWarning: {
-		marginTop: 12,
-		fontSize: 12,
-		lineHeight: 18,
-	},
-	imageContainer: {
-		flex: 1,
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	successImageContainer: {
-		minHeight: 128,
-	},
-	imageWrapper: {
-		justifyContent: 'center',
-		alignItems: 'center',
-	},
-	footerContainer: {
-		marginTop: 24,
-		justifyContent: 'center',
-	},
-	buttonContainer: {
-		flexDirection: 'row',
-		alignItems: 'center',
-		gap: 12,
-	},
+	scroll: { flex: 1 },
+	scrollContent: { flexGrow: 1, paddingBottom: 24 },
+	cards: { gap: 24 },
+	sectionTitle: { marginBottom: 8 },
+	permissionHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+	permissionList: { gap: 8 },
+	permissionRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+	path: { flex: 1, minWidth: 0 },
+	permissions: { flexDirection: 'row', gap: 12 },
+	encryptionSwitch: { width: 36, height: 20, padding: 2, borderRadius: 10 },
+	switchThumb: { width: 16, height: 16, borderRadius: 8 },
+	spacer: { flex: 1, minHeight: 24 },
+	hero: { flex: 1, minHeight: 200, justifyContent: 'center', alignItems: 'center', gap: 24 },
+	shieldContainer: { width: '100%', maxWidth: 327, aspectRatio: 1 },
+	shield: { width: '100%', height: '100%' },
+	shieldIdentity: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center' },
+	footer: { gap: 24, paddingBottom: 12 },
+	fullWidthButton: { flex: 0, width: '100%' },
 });
+
+// Reset consent state when the request or selected identity changes.
+const ConfirmAuth = (props: Props): ReactElement => (
+	<ConfirmAuthRequest key={`${props.route.params.pubky}:${props.route.params.authUrl}`} {...props} />
+);
 
 export default memo(ConfirmAuth);

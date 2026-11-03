@@ -17,8 +17,11 @@ appId: ${APP_ID}
     visible:
       id: ConfirmAuthAuthorizeButton
     timeout: 30000
-- tapOn:
-    id: ConfirmAuthAuthorizeButton
+- swipe:
+    from:
+      id: ConfirmAuthAuthorizeButton-Handle
+    direction: RIGHT
+    duration: 800
 - extendedWaitUntil:
     visible:
       id: ConfirmAuthSuccessButton

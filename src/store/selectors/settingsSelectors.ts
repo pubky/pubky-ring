@@ -4,6 +4,11 @@ import { RootState } from '../../types';
 
 const selectSettings = (state: RootState): RootState['settings'] => state.settings;
 
+export const getAlwaysShowAuthDetails = createSelector(
+	[selectSettings],
+	settings => settings?.alwaysShowAuthDetails ?? false,
+);
+
 /**
  * Get the current theme.
  */

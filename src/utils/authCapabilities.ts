@@ -8,23 +8,16 @@ export const ENCRYPTION_ACTION = 'e';
 export const hasEncryptionCapabilities = (capabilities: AuthCapability[]): boolean =>
 	capabilities.some(capability => capability.permission.includes(ENCRYPTION_ACTION));
 
-/**
- * Serialize the exact capability subset approved by the user.
- *
- * A declined encryption action is removed without changing read/write access
- * on the same scope. Capabilities with no remaining actions are omitted.
- */
+// Declining encryption preserves read/write access and omits scopes with no remaining actions.
 export const buildApprovedCapabilities = (
 	capabilities: AuthCapability[],
-	declinedEncryptionIndexes: ReadonlySet<number>,
-): string =>
+	encryptionApproved: boolean,
+): AuthCapability[] =>
 	capabilities
-		.map((capability, index) => {
-			const permission = declinedEncryptionIndexes.has(index)
-				? capability.permission.replaceAll(ENCRYPTION_ACTION, '')
-				: capability.permission;
-
-			return permission ? `${capability.path}:${permission}` : undefined;
-		})
-		.filter((capability): capability is string => capability !== undefined)
-		.join(',');
+		.map(capability => ({
+			...capability,
+			permission: encryptionApproved
+				? capability.permission
+				: capability.permission.replaceAll(ENCRYPTION_ACTION, ''),
+		}))
+		.filter(capability => capability.permission.length > 0);

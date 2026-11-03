@@ -4,7 +4,11 @@ import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
 import SettingsScreen from '../src/screens/SettingsScreen';
-import settingsReducer, { updateAutoAuth } from '../src/store/slices/settingsSlice';
+import settingsReducer, {
+	resetSettings,
+	updateAlwaysShowAuthDetails,
+	updateAutoAuth,
+} from '../src/store/slices/settingsSlice';
 import { initialState } from '../src/store/shapes/settings';
 
 // Keep real Redux behavior while avoiding untransformed React Native ESM exports in Jest.
@@ -128,5 +132,30 @@ describe('SettingsScreen developer settings', () => {
 			store.dispatch(updateAutoAuth({ autoAuth: false }));
 		});
 		expect(screen.UNSAFE_getByType(Switch).props.value).toBe(false);
+	});
+
+	it('saves the auth display preference in release builds and responds to store changes', () => {
+		jest.replaceProperty(global as typeof global & { __DEV__: boolean }, '__DEV__', false);
+		const store = renderSettings();
+		expect(screen.getByTestId('AuthShowBasicsOption')).toHaveProp('accessibilityState', { checked: true });
+		fireEvent.press(screen.getByTestId('AuthAlwaysShowDetailsOption'));
+		expect(store.getState().settings.alwaysShowAuthDetails).toBe(true);
+		expect(screen.getByTestId('AuthAlwaysShowDetailsOption')).toHaveProp('accessibilityState', {
+			checked: true,
+		});
+		act(() => {
+			store.dispatch(updateAlwaysShowAuthDetails({ alwaysShowAuthDetails: false }));
+		});
+		expect(screen.getByTestId('AuthShowBasicsOption')).toHaveProp('accessibilityState', { checked: true });
+	});
+
+	it('restores the basic display preference when settings are reset', () => {
+		const store = renderSettings();
+		fireEvent.press(screen.getByTestId('AuthAlwaysShowDetailsOption'));
+		act(() => {
+			store.dispatch(resetSettings());
+		});
+		expect(store.getState().settings.alwaysShowAuthDetails).toBe(false);
+		expect(screen.getByTestId('AuthShowBasicsOption')).toHaveProp('accessibilityState', { checked: true });
 	});
 });

@@ -55,7 +55,7 @@ const persistConfig: PersistConfig<RootReducerState> = {
 	storage: reduxStorage,
 	whitelist: ['pubky', 'settings', 'authorizedGrants'],
 	migrate: createMigrate(migrations),
-	version: 10,
+	version: 11,
 	transforms: [pubkyTransform, authorizedGrantsTransform],
 };
 

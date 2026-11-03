@@ -1,12 +1,5 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-	Keyboard,
-	KeyboardEvent,
-	Platform,
-	StyleSheet,
-	TextInputKeyPressEvent,
-	View,
-} from 'react-native';
+import { Keyboard, KeyboardEvent, Platform, StyleSheet, TextInputKeyPressEvent, View } from 'react-native';
 import type { TextInputInstance } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';

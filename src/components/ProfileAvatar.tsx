@@ -1,4 +1,4 @@
-import { memo, ReactElement, useMemo } from 'react';
+import { memo, ReactElement, useCallback, useMemo } from 'react';
 import { Image, Text } from 'react-native';
 import { Facehash } from 'react-native-facehash';
 import { useSelector } from 'react-redux';
@@ -29,9 +29,10 @@ const resolveFallbackSeed = (pubky: string): string => {
 };
 
 const resolveFallbackInitial = (name: string | undefined, seed: string): string => {
-	const nameInitial = name?.trim().charAt(0).toUpperCase();
-	if (nameInitial) {
-		return nameInitial;
+	const displayName = name?.trim();
+	const isDefaultName = /^pubky #\d+(?: \(Bitkit\))?$/i.test(displayName ?? '');
+	if (displayName && !isDefaultName) {
+		return displayName.charAt(0).toUpperCase();
 	}
 
 	return seed.trim().charAt(0).toUpperCase();
@@ -40,10 +41,11 @@ const resolveFallbackInitial = (name: string | undefined, seed: string): string 
 const ProfileAvatar = ({ pubky, name, size = 32, external = false }: ProfileAvatarProps): ReactElement => {
 	const fallbackSeed = useMemo(() => resolveFallbackSeed(pubky), [pubky]);
 	const imageUri = useSelector((state: RootState) => getPubkyImage(state, fallbackSeed));
-	const isExternal = useSelector((state: RootState) => external || !!getPubky(state, fallbackSeed)?.sourceApp);
+	const isExternal = useSelector(
+		(state: RootState) => external || !!getPubky(state, fallbackSeed)?.sourceApp,
+	);
 	const fallbackInitial = useMemo(() => resolveFallbackInitial(name, fallbackSeed), [name, fallbackSeed]);
 
-	// Memoize style object to prevent unnecessary re-renders
 	const imageStyle = useMemo(
 		() => ({
 			width: size,
@@ -61,6 +63,10 @@ const ProfileAvatar = ({ pubky, name, size = 32, external = false }: ProfileAvat
 		}),
 		[size],
 	);
+	const renderMouth = useCallback(
+		() => <Text style={initialStyle}>{fallbackInitial}</Text>,
+		[fallbackInitial, initialStyle],
+	);
 
 	if (imageUri) {
 		return <Image source={{ uri: imageUri }} style={imageStyle} />;
@@ -73,7 +79,7 @@ const ProfileAvatar = ({ pubky, name, size = 32, external = false }: ProfileAvat
 			name={fallbackSeed}
 			showInitial={false}
 			size={size}
-			onRenderMouth={() => <Text style={initialStyle}>{fallbackInitial}</Text>}
+			onRenderMouth={renderMouth}
 		/>
 	);
 };

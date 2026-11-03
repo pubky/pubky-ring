@@ -15,6 +15,9 @@ const settingsSlice = createSlice({
 		updateAutoAuth: (state, action: PayloadAction<{ autoAuth: boolean }>) => {
 			state.autoAuth = action.payload.autoAuth;
 		},
+		updateAlwaysShowAuthDetails: (state, action: PayloadAction<{ alwaysShowAuthDetails: boolean }>) => {
+			state.alwaysShowAuthDetails = action.payload.alwaysShowAuthDetails;
+		},
 		updateNavigationAnimation: (
 			state,
 			action: PayloadAction<{ navigationAnimation: ENavigationAnimation }>,
@@ -37,6 +40,7 @@ export const {
 	updateTheme,
 	updateShowOnboarding,
 	updateAutoAuth,
+	updateAlwaysShowAuthDetails,
 	updateNavigationAnimation,
 	updateIsOnline,
 	updateSignedTermsOfUse,

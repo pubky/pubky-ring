@@ -8,10 +8,16 @@ import ConfirmAuth from '../src/screens/ConfirmAuth';
 import { getKeychainValue, setSessionSecret } from '../src/utils/keychain';
 import { getPubkyDataFromStore } from '../src/utils/store-helpers';
 import { syncAuthorizedGrantsAfterAuth } from '../src/utils/authorizedGrants';
+import { openXCancel, openXSuccess, openXError } from '../src/utils/xCallback';
+import { hideSheet } from '../src/sheets/sheetNavigation';
 import { defaultPubkyState } from '../src/store/shapes/pubky';
 import type { AuthCapability } from '../src/utils/authCapabilities';
 
 const mockDispatch = jest.fn();
+let mockAlwaysShowDetails = false;
+let mockDismissSheet: (() => void) | undefined;
+
+jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
 
 jest.mock('@synonymdev/react-native-pubky', () => ({
 	...jest.requireActual('@synonymdev/react-native-pubky'),
@@ -24,7 +30,8 @@ jest.mock('@synonymdev/react-native-toast', () => ({ showToast: jest.fn() }));
 
 jest.mock('react-redux', () => ({
 	useDispatch: () => mockDispatch,
-	useSelector: (selector: (state: unknown) => unknown) => selector({}),
+	useSelector: (selector: (state: unknown) => unknown) =>
+		selector({ settings: { alwaysShowAuthDetails: mockAlwaysShowDetails } }),
 }));
 
 jest.mock('../src/store/selectors/pubkySelectors.ts', () => ({
@@ -71,7 +78,16 @@ jest.mock('styled-components/native', () => ({
 jest.mock('react-native-reanimated', () => ({
 	__esModule: true,
 	default: { View: require('react-native').View },
-	useSharedValue: (initialValue: number) => require('react').useState(() => ({ value: initialValue }))[0],
+	useSharedValue: (initialValue: number) =>
+		require('react').useState(() => ({
+			value: initialValue,
+			get() {
+				return this.value;
+			},
+			set(value: number) {
+				this.value = value;
+			},
+		}))[0],
 	useAnimatedStyle: () => ({}),
 	withTiming: (value: number) => value,
 	withSequence: (...values: number[]) => values.at(-1),
@@ -85,12 +101,27 @@ jest.mock('../src/components/Sheet.tsx', () => {
 			children,
 			title,
 			headerRight,
+			showBackButton,
+			onBackPress,
 		}: {
 			children: React.ReactNode;
 			title: string;
 			headerRight?: React.ReactNode;
+			showBackButton?: boolean;
+			onBackPress?: () => void;
 		}) =>
-			ReactMock.createElement(View, null, ReactMock.createElement(Text, null, title), headerRight, children),
+			ReactMock.createElement(
+				View,
+				null,
+				ReactMock.createElement(Text, null, title),
+				headerRight,
+				showBackButton &&
+					ReactMock.createElement(require('react-native').Pressable, {
+						testID: 'auth-back-button',
+						onPress: onBackPress,
+					}),
+				children,
+			),
 	};
 });
 jest.mock('../src/components/Button.tsx', () => {
@@ -106,9 +137,10 @@ jest.mock('../src/components/PermissionCard.tsx', () => ({
 	__esModule: true,
 	default: require('react-native').View,
 }));
-jest.mock('../src/components/PubkyCard.tsx', () => ({
+jest.mock('../src/components/AuthIdentity.tsx', () => ({
 	__esModule: true,
-	default: () => require('react').createElement(require('react-native').View, { testID: 'mock-pubky-card' }),
+	default: () =>
+		require('react').createElement(require('react-native').View, { testID: 'mock-auth-identity' }),
 }));
 jest.mock('../src/components/SafeAreaInset.tsx', () => ({ __esModule: true, default: () => null }));
 jest.mock('../src/components/CircularProgressBar.tsx', () => ({
@@ -125,9 +157,35 @@ jest.mock('../src/icons/index.ts', () => ({
 	Folder: () => null,
 	Key: () => null,
 	UserCheck: () => null,
+	Eye: () => null,
+	Pencil: () => null,
+	Lock: () => null,
+	Globe: () => null,
+	List: () => null,
 }));
 
-const renderRequest = (capabilities: AuthCapability[]): string => {
+jest.mock('../src/components/AuthSummary.tsx', () => ({
+	__esModule: true,
+	default: (props: unknown) =>
+		require('react').createElement(require('react-native').View, {
+			...(props as object),
+			testID: 'mock-auth-summary',
+		}),
+}));
+jest.mock('../src/components/SwipeToConfirm.tsx', () => ({
+	__esModule: true,
+	default: ({ onConfirm, loading, ...props }: { onConfirm: () => Promise<void>; loading: boolean }) =>
+		require('react').createElement(require('react-native').Pressable, {
+			...props,
+			disabled: loading,
+			onPress: onConfirm,
+		}),
+}));
+
+const renderRequest = (
+	capabilities: AuthCapability[],
+	xCallback?: { xSuccess?: string; xCancel?: string },
+): string => {
 	const caps = capabilities.map(({ path, permission }) => `${path}:${permission}`).join(',');
 	const authUrl = `pubkyauth://signin_grant?caps=${encodeURIComponent(caps)}&relay=https%3A%2F%2Frelay.example.com%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-key`;
 	const authDetails: PubkyAuthDetails = {
@@ -140,8 +198,17 @@ const renderRequest = (capabilities: AuthCapability[]): string => {
 	};
 	render(
 		<ConfirmAuth
-			route={{ params: { pubky: 'test-pubky', authUrl, authDetails } } as never}
-			navigation={{} as never}
+			route={{ params: { pubky: 'test-pubky', authUrl, authDetails, xCallback } } as never}
+			navigation={
+				{
+					getParent: () => ({
+						addListener: (_event: string, listener: () => void) => {
+							mockDismissSheet = listener;
+							return jest.fn();
+						},
+					}),
+				} as never
+			}
 		/>,
 	);
 	return authUrl;
@@ -153,10 +220,11 @@ const approve = async (): Promise<void> => {
 	});
 };
 
-describe('ConfirmAuth selective approval integration', () => {
+describe('ConfirmAuth v14 integration', () => {
 	beforeEach(() => {
 		jest.useFakeTimers();
 		jest.clearAllMocks();
+		mockAlwaysShowDetails = false;
 		jest.spyOn(console, 'log').mockImplementation(() => undefined);
 		jest.spyOn(console, 'error').mockImplementation(() => undefined);
 		jest.mocked(auth).mockReset().mockResolvedValue(ok([]));
@@ -194,243 +262,199 @@ describe('ConfirmAuth selective approval integration', () => {
 		jest.restoreAllMocks();
 	});
 
-	it.each(['ios', 'android'] as const)(
-		'shows circular header progress until authorized on %s',
-		async platform => {
-			jest.replaceProperty(Platform, 'OS', platform);
-			renderRequest([]);
-			expect(screen.getByTestId('AuthHeaderProgress')).toBeTruthy();
-			await approve();
-			expect(screen.queryByTestId('AuthHeaderProgress')).toBeNull();
-		},
-	);
-
-	it.each([5, 12])(
-		'keeps identity and actions outside the scrollable details for %i encryption scopes',
-		count => {
-			renderRequest(
-				Array.from({ length: count }, (_, index) => ({
-					path: `/priv/scope-${index + 1}/`,
-					permission: 'rwe',
-				})),
-			);
-
-			const details = screen.getByTestId('ConfirmAuthDetailsScrollView');
-			expect(details).toHaveStyle({ flex: 1 });
-			expect(StyleSheet.flatten(details.props.contentContainerStyle)).toMatchObject({ flexGrow: 1 });
-			expect(within(details).getAllByRole('switch')).toHaveLength(count);
-			expect(within(details).getByText(`/priv/scope-${count}/`)).toBeTruthy();
-			expect(within(details).queryByTestId('mock-pubky-card')).toBeNull();
-			expect(within(details).queryByTestId('ConfirmAuthCancelButton')).toBeNull();
-			expect(within(details).queryByTestId('ConfirmAuthAuthorizeButton')).toBeNull();
-			expect(screen.getByTestId('mock-pubky-card')).toBeVisible();
-			expect(screen.getByTestId('ConfirmAuthCancelButton')).toBeVisible();
-			expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).toBeVisible();
-		},
-	);
-
-	it('keeps the success action fixed after approving a long permission list', async () => {
-		const capabilities = Array.from({ length: 5 }, (_, index) => ({
-			path: `/priv/scope-${index + 1}/`,
-			permission: 'rwe',
-		}));
-		const authUrl = renderRequest(capabilities);
-		fireEvent(screen.getAllByRole('switch')[4], 'valueChange', false);
+	it.each(['ios', 'android'] as const)('keeps header progress until authorized on %s', async platform => {
+		jest.replaceProperty(Platform, 'OS', platform);
+		renderRequest([]);
+		expect(screen.getByTestId('AuthHeaderProgress')).toBeTruthy();
 		await approve();
+		expect(screen.queryByTestId('AuthHeaderProgress')).toBeNull();
+		expect(screen.getByText('auth.authorizedTitle')).toBeTruthy();
+	});
 
+	it('starts with basics by default, and opens details without changing the saved preference', () => {
+		renderRequest([{ path: '/pub/pubky.app/', permission: 'rw' }]);
+		expect(screen.getByTestId('ConfirmAuthShowDetailsButton')).toBeVisible();
+		expect(screen.queryByText('/pub/pubky.app/')).toBeNull();
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		expect(screen.getByText('/pub/pubky.app/')).toBeTruthy();
+		expect(screen.getByText('https://relay.example.com/inbox')).toBeTruthy();
+		expect(mockDispatch).not.toHaveBeenCalled();
+	});
+
+	it('opens details immediately when the preference is enabled', () => {
+		mockAlwaysShowDetails = true;
+		renderRequest([{ path: '/pub/pubky.app/', permission: 'rw' }]);
+		expect(screen.getByText('/pub/pubky.app/')).toBeTruthy();
+		expect(screen.queryByTestId('ConfirmAuthShowDetailsButton')).toBeNull();
+	});
+
+	it.each([5, 12])('keeps the identity and swipe outside the scrollable list of %i scopes', count => {
+		mockAlwaysShowDetails = true;
+		renderRequest(
+			Array.from({ length: count }, (_, index) => ({ path: `/priv/scope-${index + 1}/`, permission: 'rwe' })),
+		);
+		const details = screen.getByTestId('ConfirmAuthDetailsScrollView');
+		expect(details).toHaveStyle({ flex: 1 });
+		expect(StyleSheet.flatten(details.props.contentContainerStyle)).toMatchObject({ flexGrow: 1 });
+		expect(within(details).getAllByRole('switch')).toHaveLength(1);
+		expect(within(details).getByText(`/priv/scope-${count}/`)).toBeTruthy();
+		expect(within(details).queryByTestId('mock-auth-identity')).toBeNull();
+		expect(within(details).queryByTestId('ConfirmAuthAuthorizeButton')).toBeNull();
+		expect(screen.getByTestId('mock-auth-identity')).toBeVisible();
+		expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).toBeVisible();
+	});
+
+	it('declines all encrypted scopes together and preserves all read/write permissions', async () => {
+		mockAlwaysShowDetails = true;
+		const authUrl = renderRequest([
+			{ path: '/priv/chat/', permission: 'rwe' },
+			{ path: '/priv/photos/', permission: 're' },
+			{ path: '/pub/keys/', permission: 'e' },
+			{ path: '/pub/profile/', permission: 'w' },
+		]);
+		fireEvent.press(screen.getByRole('switch'));
+		// Keep declined requests available so users can reconsider before approving.
+		expect(screen.getByText('/pub/keys/')).toBeTruthy();
+		await approve();
 		expect(authWithCapabilities).toHaveBeenCalledWith(
 			authUrl,
 			'identity-secret',
-			capabilities.map(({ path }, index) => `${path}:${index === 4 ? 'rw' : 'rwe'}`).join(','),
+			'/priv/chat/:rw,/priv/photos/:r,/pub/profile/:w',
 		);
-		const details = screen.getByTestId('ConfirmAuthDetailsScrollView');
-		expect(within(details).getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
-		expect(within(details).queryByTestId('ConfirmAuthSuccessButton')).toBeNull();
+		expect(auth).not.toHaveBeenCalled();
+		expect(screen.getByTestId('mock-auth-summary').props).toMatchObject({
+			authorized: true,
+			capabilities: [
+				{ path: '/priv/chat/', permission: 'rw' },
+				{ path: '/priv/photos/', permission: 'r' },
+				{ path: '/pub/profile/', permission: 'w' },
+			],
+		});
+		expect(screen.queryAllByRole('switch')).toHaveLength(0);
+		expect(screen.queryByText('/pub/keys/')).toBeNull();
 		expect(screen.getByTestId('ConfirmAuthSuccessButton')).toBeVisible();
 	});
 
-	it('shows identity verification for a request with no permissions, before and after authorization', async () => {
-		const authUrl = renderRequest([]);
-
-		expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
-		expect(screen.getByText('auth.provePubkyControl')).toBeTruthy();
-		expect(screen.getByText('auth.identityVerificationWarning')).toBeTruthy();
-		expect(screen.queryByTestId('ConfirmAuthRequestedPermissions')).toBeNull();
-		expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
-		expect(screen.queryByText('auth.trustWarning')).toBeNull();
-		expect(screen.queryByText('auth.encryptionKeysWarning')).toBeNull();
-		expect(screen.queryAllByRole('switch')).toHaveLength(0);
-		await approve();
-
-		expect(auth).toHaveBeenCalledWith(authUrl, 'identity-secret');
-		expect(authWithCapabilities).not.toHaveBeenCalled();
-		expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
-		expect(screen.getByText('auth.identityVerified')).toBeTruthy();
-		expect(screen.getByText('auth.identityVerifiedDescription')).toBeTruthy();
-		expect(screen.queryByText('auth.provePubkyControl')).toBeNull();
-		expect(screen.queryByText('auth.identityVerificationWarning')).toBeNull();
-		expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
-	});
-
-	it('submits the toggled capability subset and omits declined encryption-only scopes on success', async () => {
-		const authUrl = renderRequest([
-			{ path: '/priv/chat/', permission: 'rwe' },
-			{ path: '/pub/keys/', permission: 'e' },
-			{ path: '/pub/profile/', permission: 'r' },
+	it('preserves encryption choices when moving between basics and details', async () => {
+		const authUrl = renderRequest([{ path: '/priv/chat/', permission: 'rwe' }]);
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		fireEvent.press(screen.getByRole('switch'));
+		fireEvent.press(screen.getByTestId('auth-back-button'));
+		expect(screen.getByTestId('mock-auth-summary').props.capabilities).toEqual([
+			{ path: '/priv/chat/', permission: 'rw' },
 		]);
-		for (const toggle of screen.getAllByRole('switch')) {
-			fireEvent(toggle, 'valueChange', false);
-		}
-		// Declining encryption must not remove the request before the user can reconsider it.
-		expect(screen.getByText('/pub/keys/')).toBeTruthy();
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		expect(screen.getByRole('switch')).toHaveProp('accessibilityState', { checked: false, disabled: false });
 		await approve();
-
-		expect(auth).not.toHaveBeenCalled();
-		expect(authWithCapabilities).toHaveBeenCalledWith(
-			authUrl,
-			'identity-secret',
-			'/priv/chat/:rw,/pub/profile/:r',
-		);
-		expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
-		expect(screen.getByText('/priv/chat/')).toBeTruthy();
-		expect(screen.getByText('/pub/profile/')).toBeTruthy();
-		expect(screen.queryByText('/pub/keys/')).toBeNull();
-		expect(screen.queryByText('auth.encryptAndDecryptFolder')).toBeNull();
-		expect(screen.queryAllByRole('switch')).toHaveLength(0);
-		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
-		expect(screen.queryByText('auth.identityVerifiedDescription')).toBeNull();
+		expect(authWithCapabilities).toHaveBeenCalledWith(authUrl, 'identity-secret', '/priv/chat/:rw');
 	});
 
 	it.each(['/priv/chat/', '/priv/chat/file.json', '/'])(
-		'passes an empty approval and hides the declined encryption-only scope %s',
+		'uses an empty approval when encryption-only access is declined for %s',
 		async path => {
+			mockAlwaysShowDetails = true;
 			const authUrl = renderRequest([{ path, permission: 'e' }]);
-			fireEvent(screen.getByRole('switch'), 'valueChange', false);
-			expect(screen.getByTestId('ConfirmAuthRequestedPermissions')).toBeTruthy();
-			expect(screen.getByText(path)).toBeTruthy();
-			expect(screen.getByRole('switch')).toBeTruthy();
-			expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
+			fireEvent.press(screen.getByRole('switch'));
 			await approve();
-
-			expect(auth).not.toHaveBeenCalled();
 			expect(authWithCapabilities).toHaveBeenCalledWith(authUrl, 'identity-secret', '');
-			expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
-			expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
-			expect(screen.getByText('auth.identityVerified')).toBeTruthy();
-			expect(screen.getByText('auth.identityVerifiedDescription')).toBeTruthy();
-			expect(screen.queryAllByRole('switch')).toHaveLength(0);
-			expect(screen.queryByText(path)).toBeNull();
+			expect(auth).not.toHaveBeenCalled();
+			expect(screen.getByTestId('mock-auth-summary').props.capabilities).toEqual([]);
 		},
 	);
 
-	it('declines encryption only for the selected scope without stripping another scope', async () => {
+	it('can restore all encrypted scopes before approving', async () => {
+		mockAlwaysShowDetails = true;
 		const authUrl = renderRequest([
 			{ path: '/priv/chat/', permission: 'rwe' },
-			{ path: '/priv/photos/', permission: 'rwe' },
+			{ path: '/priv/photos/', permission: 'e' },
 		]);
-		fireEvent(screen.getAllByRole('switch')[0], 'valueChange', false);
+		fireEvent.press(screen.getByRole('switch'));
+		fireEvent.press(screen.getByRole('switch'));
 		await approve();
-
 		expect(authWithCapabilities).toHaveBeenCalledWith(
 			authUrl,
 			'identity-secret',
-			'/priv/chat/:rw,/priv/photos/:rwe',
+			'/priv/chat/:rwe,/priv/photos/:e',
 		);
-		expect(auth).not.toHaveBeenCalled();
-		expect(screen.getByText('/priv/chat/')).toBeTruthy();
-		expect(screen.getByText('/priv/photos/')).toBeTruthy();
-		expect(screen.getAllByText('auth.encryptAndDecryptFolder')).toHaveLength(1);
 	});
 
-	it('keeps the requested permissions visible when an empty approval fails', async () => {
-		jest.mocked(authWithCapabilities).mockResolvedValue(err('Approval failed'));
-		renderRequest([{ path: '/priv/chat/', permission: 'e' }]);
-		fireEvent(screen.getByRole('switch'), 'valueChange', false);
-		await approve();
-
-		expect(screen.getByTestId('ConfirmAuthRequestedPermissions')).toBeTruthy();
-		expect(screen.getByRole('switch')).toBeTruthy();
-		expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).toBeTruthy();
-		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
-		expect(screen.queryByText('auth.identityVerified')).toBeNull();
-		expect(screen.queryByText('auth.identityVerifiedDescription')).toBeNull();
-		expect(syncAuthorizedGrantsAfterAuth).not.toHaveBeenCalled();
-	});
-
-	it('preserves approved encryption scopes and their success display', async () => {
-		const authUrl = renderRequest([{ path: '/priv/chat/', permission: 'e' }]);
-		await approve();
-
-		expect(authWithCapabilities).toHaveBeenCalledWith(authUrl, 'identity-secret', '/priv/chat/:e');
-		expect(auth).not.toHaveBeenCalled();
-		expect(screen.getByText('/priv/chat/')).toBeTruthy();
-		expect(screen.getByText('auth.encryptAndDecryptFolder')).toBeTruthy();
-		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
-		expect(screen.queryByText('auth.identityVerifiedDescription')).toBeNull();
-	});
-
-	it('lets the user re-enable encryption before authorizing instead of switching to identity verification', async () => {
-		const authUrl = renderRequest([{ path: '/priv/chat/', permission: 'e' }]);
-		fireEvent(screen.getByRole('switch'), 'valueChange', false);
-		expect(screen.queryByText('auth.encryptionKeysWarning')).toBeNull();
-		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
-		fireEvent(screen.getByRole('switch'), 'valueChange', true);
-		expect(screen.getByText('auth.encryptionKeysWarning')).toBeTruthy();
-		await approve();
-
-		expect(authWithCapabilities).toHaveBeenCalledWith(authUrl, 'identity-secret', '/priv/chat/:e');
-		expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
-		expect(screen.getByText('/priv/chat/')).toBeTruthy();
-		expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
-	});
-
-	it('uses the original auth method when no encryption is requested', async () => {
-		const authUrl = renderRequest([{ path: '/pub/profile/', permission: 'rw' }]);
-		expect(screen.queryAllByRole('switch')).toHaveLength(0);
-		await approve();
-
-		expect(auth).toHaveBeenCalledWith(authUrl, 'identity-secret');
-		expect(authWithCapabilities).not.toHaveBeenCalled();
-		expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
-	});
-
-	it.each(['/priv/chat/:rw', ''])(
-		'preserves the selective approval through automatic retry (%j)',
-		async approved => {
-			jest.mocked(authWithCapabilities).mockResolvedValueOnce(err('Session expired'));
-			const permission = approved ? 'rwe' : 'e';
-			const authUrl = renderRequest([{ path: '/priv/chat/', permission }]);
-			fireEvent(screen.getByRole('switch'), 'valueChange', false);
+	it.each([{ capabilities: [] }, { capabilities: [{ path: '/pub/profile/', permission: 'rw' }] }])(
+		'uses the original auth method without encryption (%j)',
+		async ({ capabilities }) => {
+			const authUrl = renderRequest(capabilities);
+			expect(screen.queryAllByRole('switch')).toHaveLength(0);
 			await approve();
-
-			expect(signIn).toHaveBeenCalledTimes(1);
-			expect(auth).not.toHaveBeenCalled();
-			expect(authWithCapabilities).toHaveBeenCalledTimes(2);
-			for (const call of jest.mocked(authWithCapabilities).mock.calls) {
-				expect(call).toEqual([authUrl, 'identity-secret', approved]);
-			}
-			if (approved) {
-				expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
-				expect(screen.queryByTestId('ConfirmAuthIdentityVerification')).toBeNull();
-			} else {
-				expect(screen.queryByTestId('ConfirmAuthGrantedPermissions')).toBeNull();
-				expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
-				expect(screen.getByText('auth.identityVerifiedDescription')).toBeTruthy();
-			}
+			expect(auth).toHaveBeenCalledWith(authUrl, 'identity-secret');
+			expect(authWithCapabilities).not.toHaveBeenCalled();
 		},
 	);
 
-	it('retains the original auth method during automatic retry without encryption', async () => {
-		jest.mocked(auth).mockResolvedValueOnce(err('Session expired'));
-		const authUrl = renderRequest([{ path: '/pub/profile/', permission: 'rw' }]);
-		await approve();
+	it('shows the identity-only details for a request without data permissions', () => {
+		mockAlwaysShowDetails = true;
+		renderRequest([]);
+		expect(screen.getByTestId('ConfirmAuthIdentityVerification')).toBeTruthy();
+		expect(screen.getByText('auth.provePubkyControl')).toBeTruthy();
+		expect(screen.getByText('auth.identityVerificationWarning')).toBeTruthy();
+		expect(screen.queryAllByRole('switch')).toHaveLength(0);
+	});
 
-		expect(signIn).toHaveBeenCalledTimes(1);
-		expect(auth).toHaveBeenCalledTimes(2);
-		for (const call of jest.mocked(auth).mock.calls) {
-			expect(call).toEqual([authUrl, 'identity-secret']);
-		}
-		expect(authWithCapabilities).not.toHaveBeenCalled();
-		expect(screen.getByTestId('ConfirmAuthGrantedPermissions')).toBeTruthy();
+	it('preserves the selected permissions after failure and allows retry', async () => {
+		mockAlwaysShowDetails = true;
+		jest.mocked(authWithCapabilities).mockResolvedValue(err('Approval failed'));
+		const authUrl = renderRequest([{ path: '/priv/chat/', permission: 'rwe' }]);
+		fireEvent.press(screen.getByRole('switch'));
+		await approve();
+		expect(screen.getByRole('switch')).toHaveProp('accessibilityState', { checked: false, disabled: false });
+		expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).not.toBeDisabled();
+		expect(openXError).toHaveBeenCalled();
+		expect(syncAuthorizedGrantsAfterAuth).not.toHaveBeenCalled();
+		jest.mocked(authWithCapabilities).mockResolvedValue(ok('success'));
+		await approve();
+		expect(authWithCapabilities).toHaveBeenCalledTimes(3);
+		expect(authWithCapabilities).toHaveBeenLastCalledWith(authUrl, 'identity-secret', '/priv/chat/:rw');
+		expect(screen.getByTestId('ConfirmAuthSuccessButton')).toBeVisible();
+	});
+
+	it.each(['/priv/chat/:rw', ''])(
+		'preserves approval through automatic session retry (%j)',
+		async approved => {
+			mockAlwaysShowDetails = true;
+			jest.mocked(authWithCapabilities).mockResolvedValueOnce(err('Session expired'));
+			const authUrl = renderRequest([{ path: '/priv/chat/', permission: approved ? 'rwe' : 'e' }]);
+			fireEvent.press(screen.getByRole('switch'));
+			await approve();
+			expect(signIn).toHaveBeenCalledTimes(1);
+			expect(authWithCapabilities).toHaveBeenCalledTimes(2);
+			for (const call of jest.mocked(authWithCapabilities).mock.calls)
+				expect(call).toEqual([authUrl, 'identity-secret', approved]);
+		},
+	);
+
+	it('does not restart the timeout when showing details or changing encryption', () => {
+		renderRequest([{ path: '/priv/chat/', permission: 'rwe' }]);
+		act(() => {
+			jest.advanceTimersByTime(30000);
+		});
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		fireEvent.press(screen.getByRole('switch'));
+		act(() => {
+			jest.advanceTimersByTime(30000);
+		});
+		expect(openXCancel).toHaveBeenCalledTimes(1);
+		expect(hideSheet).toHaveBeenCalledWith('auth');
+	});
+
+	it('cancels an unanswered request when the sheet is dismissed', () => {
+		renderRequest([]);
+		act(() => mockDismissSheet?.());
+		expect(openXCancel).toHaveBeenCalledTimes(1);
+	});
+
+	it('returns success to the calling app without also cancelling', async () => {
+		renderRequest([], { xSuccess: 'example://success' });
+		await approve();
+		cleanup();
+		expect(openXSuccess).toHaveBeenCalledWith({ xSuccess: 'example://success' });
+		expect(openXCancel).not.toHaveBeenCalled();
 	});
 });

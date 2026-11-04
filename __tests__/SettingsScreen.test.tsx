@@ -1,8 +1,10 @@
 import React from 'react';
-import { Switch } from 'react-native';
+import { Alert, NativeModules } from 'react-native';
 import { act, fireEvent, render, screen } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
+import { ThemeProvider } from 'styled-components/native';
+import { darkTheme } from '../src/theme';
 import SettingsScreen from '../src/screens/SettingsScreen';
 import settingsReducer, {
 	resetSettings,
@@ -14,6 +16,11 @@ import { initialState } from '../src/store/shapes/settings';
 // Keep real Redux behavior while avoiding untransformed React Native ESM exports in Jest.
 jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
 jest.mock('react-redux', () => jest.requireActual('../node_modules/react-redux/dist/cjs/index.js'));
+
+jest.mock('../src/utils/store-helpers', () => ({
+	getStore: () => ({ settings: { requireDeviceAuth: false } }),
+}));
+jest.mock('../src/i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }));
 
 jest.mock('react-i18next', () => ({
 	useTranslation: () => ({ t: (key: string) => key }),
@@ -49,7 +56,7 @@ jest.mock('../src/theme/typography', () => {
 	return { TextBaseB: Text, TextBaseM: Text, TextSmM: Text, TextXsM: Text };
 });
 
-jest.mock('../src/icons/index.ts', () => ({ Qrcode: () => null, Scan: () => null }));
+jest.mock('../src/icons/index.ts', () => ({ Info: () => null, Qrcode: () => null, Scan: () => null }));
 
 jest.mock('../src/store/selectors/pubkySelectors.ts', () => {
 	const pubkys = { 'test-pubky': { homeserver: 'homeserver.example' } };
@@ -71,18 +78,24 @@ const developerLabels = [
 	'settings.wipePubkyRing',
 ];
 
-const renderSettings = (params?: { showSecretSettings: boolean }, autoAuth = false) => {
+const renderSettings = (
+	params?: { showSecretSettings: boolean },
+	autoAuth = false,
+	requireDeviceAuth = false,
+) => {
 	const store = configureStore({
 		reducer: { settings: settingsReducer },
-		preloadedState: { settings: { ...initialState, autoAuth } },
+		preloadedState: { settings: { ...initialState, autoAuth, requireDeviceAuth } },
 	});
 
 	render(
 		<Provider store={store}>
-			<SettingsScreen
-				navigation={{ reset: jest.fn() } as never}
-				route={{ key: 'Settings', name: 'Settings', params } as never}
-			/>
+			<ThemeProvider theme={darkTheme}>
+				<SettingsScreen
+					navigation={{ reset: jest.fn() } as never}
+					route={{ key: 'Settings', name: 'Settings', params } as never}
+				/>
+			</ThemeProvider>
 		</Provider>,
 	);
 	return store;
@@ -124,14 +137,14 @@ describe('SettingsScreen developer settings', () => {
 		jest.replaceProperty(global as typeof global & { __DEV__: boolean }, '__DEV__', true);
 		const store = renderSettings();
 
-		fireEvent(screen.getByRole('switch'), 'valueChange', true);
+		fireEvent(screen.getByTestId('AutoAuthSwitch'), 'valueChange', true);
 		expect(store.getState().settings.autoAuth).toBe(true);
-		expect(screen.UNSAFE_getByType(Switch).props.value).toBe(true);
+		expect(screen.getByTestId('AutoAuthSwitch').props.value).toBe(true);
 
 		act(() => {
 			store.dispatch(updateAutoAuth({ autoAuth: false }));
 		});
-		expect(screen.UNSAFE_getByType(Switch).props.value).toBe(false);
+		expect(screen.getByTestId('AutoAuthSwitch').props.value).toBe(false);
 	});
 
 	it('saves the auth display preference in release builds and responds to store changes', () => {
@@ -157,5 +170,83 @@ describe('SettingsScreen developer settings', () => {
 		});
 		expect(store.getState().settings.alwaysShowAuthDetails).toBe(false);
 		expect(screen.getByTestId('AuthShowBasicsOption')).toHaveProp('accessibilityState', { checked: true });
+	});
+});
+
+describe('device authentication preference', () => {
+	beforeEach(() => {
+		NativeModules.DeviceAuthentication = {
+			getAvailability: jest.fn(async () => ({ available: true, biometry: 'face' })),
+			authenticate: jest.fn(async () => true),
+			cancel: jest.fn(),
+			openEnrollment: jest.fn(),
+		};
+	});
+	afterEach(() => jest.restoreAllMocks());
+
+	it('keeps explanations and the device settings shortcut behind the info button', async () => {
+		const alert = jest.spyOn(Alert, 'alert');
+		const store = renderSettings();
+		expect(screen.queryByText('deviceAuth.description')).toBeNull();
+		expect(screen.queryByText('deviceAuth.enrollmentGuidance')).toBeNull();
+		expect(screen.queryByText('deviceAuth.openSettings')).toBeNull();
+		fireEvent.press(screen.getByRole('button', { name: 'deviceAuth.learnMore' }));
+		expect(alert).toHaveBeenCalledWith(
+			'deviceAuth.setting',
+			'deviceAuth.description\n\ndeviceAuth.enrollmentGuidance',
+			expect.any(Array),
+		);
+		await act(async () => {
+			alert.mock.calls[0][2]?.[1].onPress?.();
+		});
+		expect(NativeModules.DeviceAuthentication.openEnrollment).toHaveBeenCalledTimes(1);
+		expect(NativeModules.DeviceAuthentication.authenticate).not.toHaveBeenCalled();
+		expect(store.getState().settings.requireDeviceAuth).toBe(false);
+	});
+
+	it('explains the scope and enables only after a successful verification', async () => {
+		const alert = jest.spyOn(Alert, 'alert');
+		const store = renderSettings();
+		fireEvent(screen.getByTestId('RequireDeviceAuthSwitch'), 'valueChange', true);
+		expect(store.getState().settings.requireDeviceAuth).toBe(false);
+		await act(async () => {
+			alert.mock.calls[0][2]?.[1].onPress?.();
+		});
+		expect(NativeModules.DeviceAuthentication.authenticate).toHaveBeenCalledTimes(1);
+		expect(store.getState().settings.requireDeviceAuth).toBe(true);
+		expect(screen.getByTestId('AutoAuthSwitch')).toHaveProp('disabled', true);
+	});
+
+	it('keeps protection enabled if disabling is cancelled or unavailable', async () => {
+		const store = renderSettings(undefined, true, true);
+		NativeModules.DeviceAuthentication.authenticate.mockRejectedValueOnce({ code: 'cancelled' });
+		await act(async () => {
+			fireEvent(screen.getByTestId('RequireDeviceAuthSwitch'), 'valueChange', false);
+		});
+		expect(store.getState().settings.requireDeviceAuth).toBe(true);
+		NativeModules.DeviceAuthentication.getAvailability.mockResolvedValueOnce({
+			available: false,
+			biometry: 'none',
+		});
+		await act(async () => {
+			fireEvent(screen.getByTestId('RequireDeviceAuthSwitch'), 'valueChange', false);
+		});
+		expect(store.getState().settings.requireDeviceAuth).toBe(true);
+		expect(screen.getByText('deviceAuth.unavailable')).toBeTruthy();
+	});
+
+	it('does not enable protection on a device without a secure screen lock', async () => {
+		const alert = jest.spyOn(Alert, 'alert');
+		NativeModules.DeviceAuthentication.getAvailability.mockResolvedValueOnce({
+			available: false,
+			biometry: 'none',
+		});
+		const store = renderSettings();
+		fireEvent(screen.getByTestId('RequireDeviceAuthSwitch'), 'valueChange', true);
+		await act(async () => {
+			alert.mock.calls[0][2]?.[1].onPress?.();
+		});
+		expect(store.getState().settings.requireDeviceAuth).toBe(false);
+		expect(NativeModules.DeviceAuthentication.authenticate).not.toHaveBeenCalled();
 	});
 });

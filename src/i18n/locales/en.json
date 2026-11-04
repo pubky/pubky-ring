@@ -52,6 +52,8 @@
 		"scanDynamicQRDescription_other": "Scan this dynamic QR code with your other device to import your {{count}} key pairs.",
 		"scanThisQR": "Scan this QR code on your other device to import your keys.",
 		"migrationQRWarning": "This QR code can recover your identity. Only reveal it when your screen is private.",
+		"migrationKeysSkipped_one": "Could not read {{count}} identity. Only available identities are included in this QR.",
+		"migrationKeysSkipped_other": "Could not read {{count}} identities. Only available identities are included in this QR.",
 		"keyProgress": "Key {{current}} of {{total}}",
 		"noKeysToDisplay": "No keys available to display.",
 		"theme": {
@@ -194,6 +196,7 @@
 		"encryptedFile": "Encrypted file",
 		"recoveryPhrase": "Recovery phrase",
 		"recoveryPhraseMessage": "Write down these 12 words in the right order and store them in a safe place.",
+		"recoveryPhraseUnavailable": "This identity has no recovery phrase. Create an encrypted file backup instead.",
 		"tapToReveal": "Tap to reveal",
 		"recoveryWarning": "Never share your recovery phrase with anyone as this may result in the loss of access to your profile, data, and online identity.",
 		"finishBackup": "Finish backup",
@@ -442,5 +445,25 @@
 		"useError": "This pubky could not be used in Pubky Ring.",
 		"deleteTitle": "Remove pubky",
 		"deleteConfirm": "Do you want to remove this pubky from Pubky Ring? It will remain in Bitkit."
+	},
+	"deviceAuth": {
+		"setting": "Device authentication",
+		"learnMore": "About device authentication",
+		"description": "Confirm every authorization, recovery phrase reveal, backup export, and migration QR reveal with your device biometrics or screen lock.",
+		"enableTitle": "Require device authentication?",
+		"enableDescription": "Confirm each authorization and secret export with Face ID, Touch ID, or your device screen lock. This applies to Ring on this device. It does not change how credentials are stored or how other apps use shared identities. Verify now to enable.",
+		"verify": "Verify and enable",
+		"enableReason": "Enable device authentication in Pubky Ring",
+		"disableReason": "Disable device authentication in Pubky Ring",
+		"authorize": "Authorize with pubky {{pubky}}",
+		"export": "Export secrets for pubky {{pubky}}",
+		"migrate": "Reveal the migration QR for your Ring identities",
+		"usePasscode": "Use device screen lock",
+		"openSettings": "Device security settings",
+		"enrollmentGuidance": "Enroll biometrics and set up a screen lock in your device Settings. On iOS, use Face ID & Passcode or Touch ID & Passcode; allow Face ID for Ring in its app settings. Ring does not enroll or store biometric data.",
+		"cancelled": "Device authentication was cancelled.",
+		"unavailable": "Device authentication is unavailable. Set up or restore a device screen lock in Settings, then try again.",
+		"busy": "Another device authentication request is in progress. Try again when it finishes.",
+		"failed": "Device authentication did not succeed. Try again or use your device screen lock."
 	}
 }

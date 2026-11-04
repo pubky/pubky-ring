@@ -7,6 +7,11 @@ class SceneDelegate: RCTDefaultReactNativeFactoryDelegate, UIWindowSceneDelegate
   var window: UIWindow?
   var reactNativeFactory: RCTReactNativeFactory?
   private var privacyView: UIView?
+  private var privacyCoverEnabled = false
+
+  deinit {
+    NotificationCenter.default.removeObserver(self)
+  }
 
   func scene(
     _ scene: UIScene,
@@ -16,6 +21,13 @@ class SceneDelegate: RCTDefaultReactNativeFactoryDelegate, UIWindowSceneDelegate
     guard let windowScene = scene as? UIWindowScene else {
       return
     }
+
+    NotificationCenter.default.addObserver(
+      self,
+      selector: #selector(privacyCoverChanged(_:)),
+      name: Notification.Name("PubkyRingPrivacyCoverChanged"),
+      object: nil
+    )
 
     dependencyProvider = RCTAppDependencyProvider()
     reactNativeFactory = RCTReactNativeFactory(delegate: self)
@@ -46,6 +58,24 @@ class SceneDelegate: RCTDefaultReactNativeFactoryDelegate, UIWindowSceneDelegate
   }
 
   func sceneWillResignActive(_ scene: UIScene) {
+    if privacyCoverEnabled {
+      showPrivacyCover()
+    }
+  }
+
+  @objc private func privacyCoverChanged(_ notification: Notification) {
+    privacyCoverEnabled = notification.userInfo?["enabled"] as? Bool ?? false
+    if let scene = window?.windowScene, scene.activationState != .foregroundActive {
+      if privacyCoverEnabled {
+        showPrivacyCover()
+      }
+      // Keep any existing cover until active, even if React has already hidden the secrets.
+    } else {
+      hidePrivacyCover()
+    }
+  }
+
+  private func showPrivacyCover() {
     guard let window, privacyView == nil else {
       return
     }
@@ -58,6 +88,10 @@ class SceneDelegate: RCTDefaultReactNativeFactoryDelegate, UIWindowSceneDelegate
   }
 
   func sceneDidBecomeActive(_ scene: UIScene) {
+    hidePrivacyCover()
+  }
+
+  private func hidePrivacyCover() {
     privacyView?.removeFromSuperview()
     privacyView = nil
   }

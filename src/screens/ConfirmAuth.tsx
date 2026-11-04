@@ -14,6 +14,7 @@ import Animated, {
 import { useTheme } from 'styled-components/native';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { performAuth, truncatePubky } from '../utils/pubky';
+import { DeviceAuthError } from '../utils/deviceAuth';
 import { sleep } from '../utils/helpers.ts';
 import { TextBaseB, TextSmM, TextXsM } from '../theme/typography';
 import type { RootState } from '../store';
@@ -90,6 +91,14 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const [encryptionApproved, setEncryptionApproved] = useState(true);
 	const request = useRef({ authorizing: false, finished: false });
+	const activeAuth = useRef<AbortController | null>(null);
+	useEffect(
+		() => () => {
+			activeAuth.current?.abort();
+			request.current.finished = true;
+		},
+		[],
+	);
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, pubky));
 	const authorizedGrantCount = useSelector((state: RootState) => getAuthorizedGrantCount(state, pubky));
 	const capabilities = useMemo(() => authDetails.capabilities ?? [], [authDetails.capabilities]);
@@ -126,6 +135,7 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 	);
 
 	const handleClose = useCallback(() => {
+		activeAuth.current?.abort();
 		hideSheet('auth');
 	}, []);
 	const handleDeny = useCallback(() => {
@@ -139,7 +149,8 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 	useEffect(
 		() =>
 			navigation.getParent()?.addListener('beforeRemove', () => {
-				if (!request.current.finished && !request.current.authorizing) {
+				if (!request.current.finished) {
+					activeAuth.current?.abort();
 					request.current.finished = true;
 					openXCancel(xCallback);
 				}
@@ -148,14 +159,16 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 	);
 
 	useEffect(() => {
-		if (isAuthorized || authorizing) return;
+		if (isAuthorized) return;
 		const timeout = setTimeout(handleDeny, CONFIRM_AUTH_TIMEOUT_MS);
 		return () => clearTimeout(timeout);
-	}, [authorizing, handleDeny, isAuthorized]);
+	}, [handleDeny, isAuthorized]);
 
 	const handleAuth = useCallback(async () => {
 		if (request.current.authorizing || request.current.finished) return;
 		request.current.authorizing = true;
+		const controller = new AbortController();
+		activeAuth.current = controller;
 		setAuthorizing(true);
 		try {
 			const approval = hasEncryption
@@ -166,14 +179,18 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 				authUrl,
 				dispatch,
 				approvedCapabilities: approval,
+				signal: controller.signal,
 			});
+			if (controller.signal.aborted || request.current.finished) return;
 			if (res.isErr()) {
+				if (res.error instanceof DeviceAuthError && res.error.code === 'cancelled') return;
 				showToast({
 					type: 'error',
 					title: t('common.error'),
 					description: res.error.message,
 				});
-				await openXError(xCallback, 'AUTH_FAILED', res.error.message);
+				if (!(res.error instanceof DeviceAuthError))
+					await openXError(xCallback, 'AUTH_FAILED', res.error.message);
 				return;
 			}
 			request.current.finished = true;
@@ -190,6 +207,7 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 				await openXSuccess(xCallback);
 			}
 		} catch (e: unknown) {
+			if (controller.signal.aborted || request.current.finished) return;
 			const error = e as Error;
 			const errorMsg =
 				error.message === 'Authentication request timed out'
@@ -206,7 +224,8 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 			await openXError(xCallback, 'AUTH_ERROR', errorMsg);
 		} finally {
 			request.current.authorizing = false;
-			setAuthorizing(false);
+			if (activeAuth.current === controller) activeAuth.current = null;
+			if (!request.current.finished) setAuthorizing(false);
 		}
 	}, [
 		approvedCapabilities,

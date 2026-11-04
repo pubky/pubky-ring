@@ -125,3 +125,50 @@ sha256sum -c SHA256SUMS
 ## E2E testing (Maestro)
 
 E2E tests use Maestro. See [`.maestro/README.md`](.maestro/README.md) for local and CI usage.
+
+## Optional device authentication
+
+In Settings, **Device authentication** enables a local
+user-presence check for every authorization and recovery phrase, backup, or
+migration QR export. It defaults off, including on upgrade. Enabling and disabling
+both require a fresh successful OS challenge. Auto Auth is overridden while enabled.
+Enroll biometrics and configure the device screen lock in OS Settings.
+
+The native bridge uses iOS LocalAuthentication (Face ID/Touch ID with passcode
+fallback) and Android BiometricPrompt (strong biometrics with device credential
+fallback). On Android API 24–29, device credential fallback uses the system
+Keyguard confirmation activity; weak face unlock is never enabled. Prompts are
+serialized and cancellable. Cancellation, expiry, unavailable authentication, or
+lockout without successful credential fallback never grants approval or disables
+the preference. Revealed secrets are hidden when leaving the foreground.
+On iOS, the inactive-app privacy cover applies only while the recovery phrase reveal,
+recovery phrase import, or migration QR screen is focused, independently of the device
+authentication setting. It also covers backup file import/export while the passphrase
+is toggled visible; masked passphrase entry does not enable the cover.
+
+This is an application authorization/export gate. It does not migrate Keychain or
+Keystore records, prevent a compromised process from accessing keys, change native
+shared-key publishing, control authentication in other apps, or revoke existing
+remote grants. The current OS enrollment is accepted; enrollment changes do not
+invalidate Ring credentials. No biometric data is enrolled or stored by Ring.
+
+Before release, verify on physical devices:
+
+- Face ID and Touch ID: enable, cancel, success, denied permission, lockout and
+  passcode fallback; verify disabling also prompts.
+- Android API 30+: strong fingerprint/face, credential-only devices, lockout,
+  and devices with weak face unlock (use strong biometrics or credentials).
+- Android API 24–29: strong fingerprint, credential fallback, cancellation and
+  returning from the Keyguard activity without a duplicate prompt or approval.
+- Every authorization prompts, including immediately consecutive requests and
+  adopted identities. Saved development Auto Auth cannot skip the check.
+- Dismiss, expire or background a pending request; a late result cannot start
+  authorization, retry signing, reveal secrets or send a success callback.
+- Recovery phrase, encrypted backup and migration QR all require approval before
+  reading secrets. Returning from the background requires a new reveal challenge.
+- Remove/re-enroll biometrics, remove/restore the screen lock, and restart Ring.
+  An enabled preference remains enabled and failures remain closed.
+
+A native authorization already submitted to the SDK cannot currently be recalled;
+cancellation suppresses subsequent steps and UI/callback success, but does not
+undo a grant already issued by the server.

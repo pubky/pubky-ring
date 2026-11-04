@@ -25,7 +25,6 @@ export type ImportFileScreenParams = {
 
 export interface RecoveryPhraseScreenPayload {
 	pubky: string;
-	mnemonic: string;
 }
 
 export interface ConfirmAuthPayload {

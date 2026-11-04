@@ -71,68 +71,73 @@ describe('handleAuthAction Auto Auth', () => {
 	});
 
 	it.each([
-		[true, 'rw'],
-		[true, 'rwe'],
-		[false, 'rw'],
-		[false, 'rwe'],
-	])('respects the build gate with saved Auto Auth enabled (__DEV__=%s, :%s)', async (isDev, permission) => {
-		jest.replaceProperty(global as typeof global & { __DEV__: boolean }, '__DEV__', isDev);
-		const state: RootState = {
-			settings: { ...settings, autoAuth: true },
-			pubky,
-			ui,
-			authorizedGrants: { byPubky: {} },
-		};
-		jest.mocked(getAutoAuthFromStore).mockImplementation(() => getAutoAuth(state));
-		jest.mocked(performAuth).mockResolvedValue(ok('success'));
-		jest.mocked(syncAuthorizedGrantsAfterAuth).mockResolvedValue(undefined);
-		const rawUrl = `pubkyauth://signin_grant?caps=%2Fpriv%2Fexample.app%2F%3A${permission}&relay=https%3A%2F%2Frelay.example.com%2Finbox&secret=auth-secret&cid=example.app&cpk=client-pubky`;
-		const authDetails = {
-			scheme: 'pubkyauth',
-			kind: 'signin_grant',
-			url: rawUrl,
-			relay: 'https://relay.example.com/inbox',
-			secret: 'auth-secret',
-			client_id: 'example.app',
-			client_public_key: 'client-pubky',
-			capabilities: [{ path: '/priv/example.app/', permission }],
-		} as const;
-		parseDeepLinkMock.mockResolvedValueOnce(
-			ok({ ...authDetails, capabilities: [...authDetails.capabilities] }),
-		);
-		const dispatch = jest.fn();
+		[true, 'rw', false],
+		[true, 'rw', true],
+		[true, 'rwe', false],
+		[true, 'rwe', true],
+		[false, 'rw', false],
+		[false, 'rwe', false],
+	])(
+		'respects the build gate with saved Auto Auth enabled (__DEV__=%s, :%s, device authentication=%s)',
+		async (isDev, permission, requireDeviceAuth) => {
+			jest.replaceProperty(global as typeof global & { __DEV__: boolean }, '__DEV__', isDev);
+			const state: RootState = {
+				settings: { ...settings, autoAuth: true, requireDeviceAuth: Boolean(requireDeviceAuth) },
+				pubky,
+				ui,
+				authorizedGrants: { byPubky: {} },
+			};
+			jest.mocked(getAutoAuthFromStore).mockImplementation(() => getAutoAuth(state));
+			jest.mocked(performAuth).mockResolvedValue(ok('success'));
+			jest.mocked(syncAuthorizedGrantsAfterAuth).mockResolvedValue(undefined);
+			const rawUrl = `pubkyauth://signin_grant?caps=%2Fpriv%2Fexample.app%2F%3A${permission}&relay=https%3A%2F%2Frelay.example.com%2Finbox&secret=auth-secret&cid=example.app&cpk=client-pubky`;
+			const authDetails = {
+				scheme: 'pubkyauth',
+				kind: 'signin_grant',
+				url: rawUrl,
+				relay: 'https://relay.example.com/inbox',
+				secret: 'auth-secret',
+				client_id: 'example.app',
+				client_public_key: 'client-pubky',
+				capabilities: [{ path: '/priv/example.app/', permission }],
+			} as const;
+			parseDeepLinkMock.mockResolvedValueOnce(
+				ok({ ...authDetails, capabilities: [...authDetails.capabilities] }),
+			);
+			const dispatch = jest.fn();
 
-		const result = await handleAuthAction(
-			{
-				action: InputAction.Auth,
-				params: {
-					kind: 'signin_grant',
-					relay: authDetails.relay,
-					secret: authDetails.secret,
-					caps: [`/priv/example.app/:${permission}`],
+			const result = await handleAuthAction(
+				{
+					action: InputAction.Auth,
+					params: {
+						kind: 'signin_grant',
+						relay: authDetails.relay,
+						secret: authDetails.secret,
+						caps: [`/priv/example.app/:${permission}`],
+					},
+					rawUrl,
 				},
-				rawUrl,
-			},
-			{ pubky: 'selected-pubky', dispatch },
-		);
+				{ pubky: 'selected-pubky', dispatch },
+			);
 
-		expect(result.isOk()).toBe(true);
-		if (isDev) {
-			expect(performAuth).toHaveBeenCalledWith({ pubky: 'selected-pubky', authUrl: rawUrl, dispatch });
-			expect(showSheet).not.toHaveBeenCalled();
-		} else {
-			expect(performAuth).not.toHaveBeenCalled();
-			expect(syncAuthorizedGrantsAfterAuth).not.toHaveBeenCalled();
-			expect(showSheet).toHaveBeenCalledWith('auth', {
-				screen: 'ConfirmAuth',
-				params: expect.objectContaining({
-					pubky: 'selected-pubky',
-					authUrl: rawUrl,
-					authDetails,
-				}),
-			});
-		}
-	});
+			expect(result.isOk()).toBe(true);
+			if (isDev && !requireDeviceAuth) {
+				expect(performAuth).toHaveBeenCalledWith({ pubky: 'selected-pubky', authUrl: rawUrl, dispatch });
+				expect(showSheet).not.toHaveBeenCalled();
+			} else {
+				expect(performAuth).not.toHaveBeenCalled();
+				expect(syncAuthorizedGrantsAfterAuth).not.toHaveBeenCalled();
+				expect(showSheet).toHaveBeenCalledWith('auth', {
+					screen: 'ConfirmAuth',
+					params: expect.objectContaining({
+						pubky: 'selected-pubky',
+						authUrl: rawUrl,
+						authDetails,
+					}),
+				});
+			}
+		},
+	);
 });
 
 describe('createConfirmAuthPayload', () => {

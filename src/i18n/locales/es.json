@@ -52,6 +52,8 @@
 		"scanDynamicQRDescription_other": "Escanee este código QR dinámico con su otro dispositivo para importar sus pares de claves {{count}}.",
 		"scanThisQR": "Escanee este código QR en su otro dispositivo para importar sus llaves.",
 		"migrationQRWarning": "Este código QR puede recuperar su identidad. Revélelo solo cuando su pantalla sea privada.",
+		"migrationKeysSkipped_one": "No se pudo leer {{count}} identidad. Este QR solo incluye las identidades disponibles.",
+		"migrationKeysSkipped_other": "No se pudieron leer {{count}} identidades. Este QR solo incluye las identidades disponibles.",
 		"keyProgress": "Clave {{current}} de {{total}}",
 		"noKeysToDisplay": "No hay teclas disponibles para mostrar.",
 		"theme": {
@@ -194,6 +196,7 @@
 		"characters": "caracteres",
 		"recoveryPhrase": "Frase de recuperación",
 		"recoveryPhraseMessage": "Escriba estas 12 palabras en el orden correcto y guárdelas en un lugar seguro.",
+		"recoveryPhraseUnavailable": "Esta identidad no tiene frase de recuperación. Cree una copia de seguridad en un archivo cifrado.",
 		"tapToReveal": "Toque para revelar",
 		"recoveryWarning": "Nunca comparta su frase de recuperación con nadie, ya que podría perder el acceso a su perfil, datos e identidad en línea.",
 		"finishBackup": "Finalizar la copia de seguridad",
@@ -443,5 +446,25 @@
 		"useError": "No se pudo usar este pubky en Pubky Ring.",
 		"deleteTitle": "Eliminar pubky",
 		"deleteConfirm": "¿Quieres eliminar este pubky de Pubky Ring? Seguirá en Bitkit."
+	},
+	"deviceAuth": {
+		"setting": "Autenticación del dispositivo",
+		"learnMore": "Acerca de la autenticación del dispositivo",
+		"description": "Confirma cada autorización, visualización de la frase de recuperación, exportación de copia y visualización del QR de migración con biometría o el bloqueo del dispositivo.",
+		"enableTitle": "¿Solicitar autenticación del dispositivo?",
+		"enableDescription": "Confirma cada autorización y exportación de secretos con Face ID, Touch ID o el bloqueo del dispositivo. Se aplica a Ring en este dispositivo. No cambia el almacenamiento de credenciales ni el uso de identidades compartidas en otras apps. Verifica ahora para activar.",
+		"verify": "Verificar y activar",
+		"enableReason": "Activar la autenticación del dispositivo en Pubky Ring",
+		"disableReason": "Desactivar la autenticación del dispositivo en Pubky Ring",
+		"authorize": "Autorizar con la pubky {{pubky}}",
+		"export": "Exportar secretos de la pubky {{pubky}}",
+		"migrate": "Mostrar el QR de migración de tus identidades de Ring",
+		"usePasscode": "Usar el bloqueo del dispositivo",
+		"openSettings": "Ajustes de seguridad del dispositivo",
+		"enrollmentGuidance": "Configura la biometría y el bloqueo en los ajustes del dispositivo. En iOS, usa Face ID y código o Touch ID y código; permite Face ID para Ring en los ajustes de la app. Ring no registra ni almacena datos biométricos.",
+		"cancelled": "Se canceló la autenticación del dispositivo.",
+		"unavailable": "La autenticación del dispositivo no está disponible. Configura o restablece el bloqueo en Ajustes e inténtalo de nuevo.",
+		"busy": "Hay otra autenticación del dispositivo en curso. Inténtalo cuando termine.",
+		"failed": "No se pudo autenticar. Inténtalo de nuevo o usa el bloqueo del dispositivo."
 	}
 }

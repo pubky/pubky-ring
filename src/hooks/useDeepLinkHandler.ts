@@ -9,12 +9,15 @@ import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAllPubkys, getAuthorizablePubkys, getDeepLink } from '../store/selectors/pubkySelectors';
 import { setDeepLink } from '../store/slices/pubkysSlice';
-import { ParsedInput } from '../utils/inputParser';
+import { InputAction, ParsedInput } from '../utils/inputParser';
+import { findStoredPubky } from '../utils/expectedSigner';
+import { truncatePubky } from '../utils/pubky';
 import { actionRequiresPubky } from '../utils/inputRouter';
 import {
 	routeInputWithContext,
 	showAuthPubkySelection,
 	handleNoPubkysAvailable,
+	handleExpectedSignerUnavailable,
 } from '../utils/inputHandlerUtils';
 
 /**
@@ -49,6 +52,23 @@ export const useDeepLinkHandler = (): void => {
 
 			// Check if action requires a pubky selection
 			if (actionRequiresPubky(parsedInput.action)) {
+				const expectedSigner =
+					parsedInput.data.action === InputAction.Auth ? parsedInput.data.params.expectedSigner : undefined;
+				if (expectedSigner) {
+					// The request names its pubky: use it without asking, or explain why not.
+					const pubky = findStoredPubky(authorizablePubkys, expectedSigner);
+					if (pubky) {
+						await routeInputWithContext(parsedInput, pubky, 'deeplink', dispatch);
+						return;
+					}
+					dispatch(setDeepLink(''));
+					handleExpectedSignerUnavailable(
+						truncatePubky(expectedSigner),
+						findStoredPubky(allPubkys, expectedSigner) !== undefined,
+					);
+					return;
+				}
+
 				const authorizablePubkyKeys = Object.keys(authorizablePubkys);
 
 				if (authorizablePubkyKeys.length === 0) {

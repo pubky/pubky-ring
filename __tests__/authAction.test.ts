@@ -8,6 +8,7 @@ import { initialState as ui } from '../src/store/shapes/ui';
 import { getAutoAuthFromStore } from '../src/utils/store-helpers';
 import { performAuth } from '../src/utils/pubky';
 import { showSheet } from '../src/sheets/sheetNavigation';
+import { showToast } from '@synonymdev/react-native-toast';
 import { syncAuthorizedGrantsAfterAuth } from '../src/utils/authorizedGrants';
 import type { RootState } from '../src/types';
 
@@ -43,6 +44,7 @@ jest.mock('../src/sheets/sheetNavigation.tsx', () => ({
 jest.mock('../src/utils/pubky', () => ({
 	__esModule: true,
 	performAuth: jest.fn(),
+	truncatePubky: (value: string) => `short(${value})`,
 }));
 
 jest.mock('../src/utils/store-helpers', () => ({
@@ -274,5 +276,99 @@ describe('createConfirmAuthPayload', () => {
 		if (result.isErr()) {
 			expect(result.error.message).toBe('bad auth url');
 		}
+	});
+});
+
+describe('expected signer (spk)', () => {
+	const USER = '8um71us3fyw6h8wbcxb5ar3rwusy1a6u49956ikzojg3gcwd1dty';
+	const OTHER = '5jsjx1o6fzu6aeeo697r3i5rx15zq41kikcye8wtwdqm4nb4tryo';
+	const rawUrl = `pubkyauth://signin_grant?caps=%2Fpub%2Fpubky.app%2F%3Arw&relay=https%3A%2F%2Frelay.example.com%2Finbox&secret=auth-secret&cid=pubky.app&cpk=client-pubky&spk=${USER}`;
+	const data = {
+		action: InputAction.Auth as const,
+		params: {
+			kind: 'signin_grant' as const,
+			relay: 'https://relay.example.com/inbox',
+			secret: 'auth-secret',
+			caps: ['/pub/pubky.app/:rw'],
+			expectedSigner: USER,
+		},
+		rawUrl,
+	};
+
+	beforeEach(() => {
+		jest.clearAllMocks();
+		parseDeepLinkMock.mockResolvedValue(
+			ok({
+				scheme: 'pubkyauth',
+				kind: 'signin_grant',
+				url: rawUrl,
+				relay: 'https://relay.example.com/inbox',
+				secret: 'auth-secret',
+				client_id: 'pubky.app',
+				client_public_key: 'client-pubky',
+				capabilities: [{ path: '/pub/pubky.app/', permission: 'rw' }],
+			}),
+		);
+	});
+
+	it('refuses a request for another pubky before building the approval', async () => {
+		const result = await createConfirmAuthPayload({ data, pubky: OTHER });
+
+		expect(result.isErr()).toBe(true);
+		if (result.isErr()) {
+			expect(result.error.message).toBe('auth.expectedSignerMismatch');
+		}
+		expect(parseDeepLinkMock).not.toHaveBeenCalled();
+	});
+
+	it('refuses when the URL to be signed names a different pubky than was checked', async () => {
+		for (const [expectedSigner, url] of [
+			[undefined, rawUrl],
+			[USER, rawUrl.replace(USER, OTHER)],
+			[USER, `${rawUrl}&spk=${USER}`],
+		] as const) {
+			const result = await createConfirmAuthPayload({
+				data: { ...data, params: { ...data.params, expectedSigner }, rawUrl: url },
+				pubky: USER,
+			});
+			expect(result.isErr()).toBe(true);
+			if (result.isErr()) {
+				expect(result.error.message).toBe('errors.failedToParseAuth');
+			}
+		}
+		expect(parseDeepLinkMock).not.toHaveBeenCalled();
+	});
+
+	it('accepts the expected pubky whatever prefix Ring stores it with', async () => {
+		for (const stored of [USER, `pk:${USER}`, `pubky${USER}`]) {
+			const result = await createConfirmAuthPayload({ data, pubky: stored });
+			expect(result.isOk()).toBe(true);
+			if (result.isOk()) {
+				expect(result.value.expectedSigner).toBe(USER);
+			}
+		}
+	});
+
+	it('passes the expected pubky to the approval screen', async () => {
+		jest.mocked(getAutoAuthFromStore).mockReturnValue(false);
+		await handleAuthAction(data, { pubky: USER, dispatch: jest.fn() });
+
+		expect(showSheet).toHaveBeenCalledWith('auth', {
+			screen: 'ConfirmAuth',
+			params: expect.objectContaining({ pubky: USER, expectedSigner: USER }),
+		});
+	});
+
+	it('never signs with another pubky, even with Auto Auth on', async () => {
+		jest.mocked(getAutoAuthFromStore).mockReturnValue(true);
+
+		const result = await handleAuthAction(data, { pubky: OTHER, dispatch: jest.fn() });
+
+		expect(result.isErr()).toBe(true);
+		expect(performAuth).not.toHaveBeenCalled();
+		expect(showSheet).not.toHaveBeenCalled();
+		expect(showToast).toHaveBeenCalledWith(
+			expect.objectContaining({ type: 'error', description: 'auth.expectedSignerMismatch' }),
+		);
 	});
 });

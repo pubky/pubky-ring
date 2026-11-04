@@ -103,3 +103,19 @@ export const handleNoPubkysAvailable = (allPubkys: Record<string, unknown>): voi
 		});
 	}
 };
+
+/**
+ * Explains why a request that names its pubky (`spk`) cannot be opened.
+ * Ring never falls back to the picker or to another pubky for such a request.
+ * `pubky` is the shortened form shown to the user.
+ */
+export const handleExpectedSignerUnavailable = (pubky: string, isInRing: boolean): void => {
+	showToast({
+		type: 'error',
+		title: isInRing ? i18n.t('auth.expectedSignerNotSetUpTitle') : i18n.t('auth.expectedSignerMissingTitle'),
+		description: isInRing
+			? i18n.t('auth.expectedSignerNotSetUp', { pubky })
+			: i18n.t('auth.expectedSignerMissing', { pubky }),
+		autoHide: false,
+	});
+};

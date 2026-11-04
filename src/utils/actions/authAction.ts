@@ -12,7 +12,8 @@ import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../../sheets/sheetNavigation.tsx';
 import { InputAction, AuthParams, XCallbackParams, hasAuthRelayTransport } from '../inputParser';
 import { ActionContext } from '../inputRouter';
-import { performAuth } from '../pubky';
+import { performAuth, truncatePubky } from '../pubky';
+import { expectedSignerOfUrl, isExpectedSigner } from '../expectedSigner';
 import { getErrorMessage } from '../errorHandler';
 import { getAuthorizedGrantCountFromStore, getAutoAuthFromStore } from '../store-helpers';
 import { openXSuccess, openXError } from '../xCallback';
@@ -41,6 +42,18 @@ export const createConfirmAuthPayload = async ({
 	data: AuthActionData;
 	pubky: string;
 }): Promise<Result<ConfirmAuthPayload>> => {
+	const { expectedSigner } = data.params;
+	if (data.params.kind === 'signin_grant') {
+		// The URL that will be signed must name the same pubky that was checked.
+		const signed = expectedSignerOfUrl(data.rawUrl);
+		if (!signed.ok || signed.expectedSigner !== expectedSigner) {
+			return err(i18n.t('errors.failedToParseAuth'));
+		}
+	}
+	if (expectedSigner && !isExpectedSigner(pubky, expectedSigner)) {
+		return err(i18n.t('auth.expectedSignerMismatch', { pubky: truncatePubky(expectedSigner) }));
+	}
+
 	const authResult = await parseDeepLink(data.rawUrl);
 
 	if (authResult.isErr()) {
@@ -61,6 +74,7 @@ export const createConfirmAuthPayload = async ({
 			capabilities: authDetails.capabilities ?? [],
 		},
 		xCallback: data.params.xCallback,
+		...(expectedSigner ? { expectedSigner } : {}),
 	});
 };
 
@@ -173,6 +187,7 @@ const showAuthConfirmation = async ({
 	authUrl,
 	authDetails,
 	xCallback,
+	expectedSigner,
 }: ConfirmAuthPayload): Promise<Result<string>> => {
 	try {
 		showSheet('auth', {
@@ -182,6 +197,7 @@ const showAuthConfirmation = async ({
 				authUrl,
 				authDetails,
 				xCallback,
+				...(expectedSigner ? { expectedSigner } : {}),
 			},
 		});
 

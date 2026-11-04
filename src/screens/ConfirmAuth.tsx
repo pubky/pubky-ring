@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Switch, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
-import { performAuth } from '../utils/pubky';
+import { performAuth, truncatePubky } from '../utils/pubky';
 import { useDispatch, useSelector } from 'react-redux';
 import { sleep } from '../utils/helpers.ts';
 import PubkyCard from '../components/PubkyCard.tsx';
@@ -13,7 +13,7 @@ import Animated, {
 	withTiming,
 	withSequence,
 } from 'react-native-reanimated';
-import { TextSmM, TextXsM } from '../theme/typography';
+import { TextBaseB, TextSmM, TextXsM } from '../theme/typography';
 import { RootState } from '../store';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
 import { useTranslation } from 'react-i18next';
@@ -107,7 +107,7 @@ const CONFIRM_AUTH_TIMEOUT_MS = 60000;
 
 const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'ConfirmAuth'>): ReactElement => {
 	const { t } = useTranslation();
-	const { pubky, authUrl, authDetails, xCallback } = route.params;
+	const { pubky, authUrl, authDetails, xCallback, expectedSigner } = route.params;
 	const [authorizing, setAuthorizing] = useState(false);
 	const [isAuthorized, setIsAuthorized] = useState(false);
 	const [declinedEncryptionIndexes, setDeclinedEncryptionIndexes] = useState<ReadonlySet<number>>(
@@ -285,6 +285,23 @@ const ConfirmAuth = ({ route }: NativeStackScreenProps<AuthStackParamList, 'Conf
 				style={styles.detailsScroll}
 				contentContainerStyle={styles.detailsContent}
 			>
+				{expectedSigner && !isAuthorized && (
+					<View style={styles.expectedIdentity} testID="ConfirmAuthExpectedIdentity">
+						<TextBaseB color="#061a2f">
+							{pubkyName
+								? t('auth.expectedIdentityTitle', {
+										appName: requestingClient || t('auth.thisApp'),
+										name: pubkyName,
+										pubky: truncatePubky(pubky),
+									})
+								: t('auth.expectedIdentityTitleNoName', {
+										appName: requestingClient || t('auth.thisApp'),
+										pubky: truncatePubky(pubky),
+									})}
+						</TextBaseB>
+						<TextSmM color="#061a2f">{t('auth.expectedIdentityDescription')}</TextSmM>
+					</View>
+				)}
 				<PermissionCard style={styles.permissionsCard}>
 					<TextXsM
 						style={styles.sectionTitle}
@@ -397,6 +414,14 @@ const styles = StyleSheet.create({
 	},
 	permissionsCard: {
 		marginBottom: 24,
+	},
+	expectedIdentity: {
+		gap: 4,
+		marginBottom: 16,
+		paddingHorizontal: 16,
+		paddingVertical: 12,
+		borderRadius: 12,
+		backgroundColor: '#0085FF',
 	},
 	relayContainer: {
 		flexDirection: 'row',

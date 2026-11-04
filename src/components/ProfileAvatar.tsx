@@ -44,7 +44,11 @@ const ProfileAvatar = ({ pubky, name, size = 32, external = false }: ProfileAvat
 	const isExternal = useSelector(
 		(state: RootState) => external || !!getPubky(state, fallbackSeed)?.sourceApp,
 	);
-	const fallbackInitial = useMemo(() => resolveFallbackInitial(name, fallbackSeed), [name, fallbackSeed]);
+	const storedName = useSelector((state: RootState) => getPubky(state, fallbackSeed)?.name);
+	const fallbackInitial = useMemo(
+		() => resolveFallbackInitial(storedName ?? name, fallbackSeed),
+		[storedName, name, fallbackSeed],
+	);
 
 	const imageStyle = useMemo(
 		() => ({

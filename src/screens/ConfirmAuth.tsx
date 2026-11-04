@@ -1,5 +1,6 @@
 import React, { memo, ReactElement, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { BackHandler, Image, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { showToast } from '@synonymdev/react-native-toast';
 import { useDispatch, useSelector } from 'react-redux';
@@ -112,6 +113,17 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 		}
 	}, [checkOpacity, checkScale, isAuthorized]);
 
+	useFocusEffect(
+		useCallback(() => {
+			if (!showDetails || isAuthorized || authorizing) return;
+			const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+				setShowDetails(false);
+				return true;
+			});
+			return () => subscription.remove();
+		}, [showDetails, isAuthorized, authorizing]),
+	);
+
 	const handleClose = useCallback(() => {
 		hideSheet('auth');
 	}, []);
@@ -215,8 +227,8 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 			title={t(isAuthorized ? 'auth.authorizedTitle' : 'auth.authorize')}
 			titleTestID="confirm-auth-title"
 			showBottomSafeAreaInset={false}
-			showBackButton={showDetails && !isAuthorized && !authorizing}
-			onBackPress={() => setShowDetails(false)}
+			showBackButton={!isAuthorized && !authorizing}
+			onBackPress={showDetails ? () => setShowDetails(false) : undefined}
 			headerRight={
 				!isAuthorized ? <CircularProgressBar duration={CONFIRM_AUTH_TIMEOUT_MS} size={24} drain /> : undefined
 			}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Platform, StyleSheet } from 'react-native';
+import { BackHandler, Platform, StyleSheet } from 'react-native';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { err, ok } from '@synonymdev/result';
 import { auth, authWithCapabilities, republishHomeserver, signIn } from '@synonymdev/react-native-pubky';
@@ -14,6 +14,8 @@ import { defaultPubkyState } from '../src/store/shapes/pubky';
 import type { AuthCapability } from '../src/utils/authCapabilities';
 
 const mockDispatch = jest.fn();
+const mockGoBack = jest.fn();
+let mockStackIndex = 0;
 let mockAlwaysShowDetails = false;
 let mockDismissSheet: (() => void) | undefined;
 
@@ -93,37 +95,20 @@ jest.mock('react-native-reanimated', () => ({
 	withSequence: (...values: number[]) => values.at(-1),
 }));
 
-jest.mock('../src/components/Sheet.tsx', () => {
-	const ReactMock = require('react');
-	const { View, Text } = require('react-native');
-	return {
-		SheetScreen: ({
-			children,
-			title,
-			headerRight,
-			showBackButton,
-			onBackPress,
-		}: {
-			children: React.ReactNode;
-			title: string;
-			headerRight?: React.ReactNode;
-			showBackButton?: boolean;
-			onBackPress?: () => void;
-		}) =>
-			ReactMock.createElement(
-				View,
-				null,
-				ReactMock.createElement(Text, null, title),
-				headerRight,
-				showBackButton &&
-					ReactMock.createElement(require('react-native').Pressable, {
-						testID: 'auth-back-button',
-						onPress: onBackPress,
-					}),
-				children,
-			),
-	};
-});
+jest.mock('@react-navigation/native', () => ({
+	useFocusEffect: (effect: () => void | (() => void)) => require('react').useEffect(effect, [effect]),
+	useNavigation: () => ({ goBack: mockGoBack }),
+	useIsFocused: () => true,
+	useNavigationState: (selector: (state: unknown) => unknown) =>
+		selector({ routeNames: ['Scanner', 'SelectPubky', 'ConfirmAuth'], index: mockStackIndex }),
+}));
+jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ top: 0, bottom: 0 }) }));
+jest.mock('../src/components/AppHeader.tsx', () => ({ HEADER_HEIGHT: 56 }));
+jest.mock('../src/components/LinearGradient.tsx', () => ({
+	LinearGradient: require('react-native').View,
+	RadialGradient: require('react-native').View,
+}));
+jest.mock('../src/theme/components.ts', () => ({ ThemedView: require('react-native').View }));
 jest.mock('../src/components/Button.tsx', () => {
 	const ReactMock = require('react');
 	const { Pressable, Text } = require('react-native');
@@ -150,9 +135,10 @@ jest.mock('../src/components/CircularProgressBar.tsx', () => ({
 }));
 jest.mock('../src/theme/typography', () => {
 	const { Text } = require('react-native');
-	return { TextSmM: Text, TextXsM: Text };
+	return { TextSmM: Text, TextXsM: Text, TextLgSb: Text };
 });
 jest.mock('../src/icons/index.ts', () => ({
+	ArrowLeft: () => null,
 	CheckCircle: () => null,
 	Folder: () => null,
 	Key: () => null,
@@ -225,6 +211,7 @@ describe('ConfirmAuth v14 integration', () => {
 		jest.useFakeTimers();
 		jest.clearAllMocks();
 		mockAlwaysShowDetails = false;
+		mockStackIndex = 0;
 		jest.spyOn(console, 'log').mockImplementation(() => undefined);
 		jest.spyOn(console, 'error').mockImplementation(() => undefined);
 		jest.mocked(auth).mockReset().mockResolvedValue(ok([]));
@@ -279,6 +266,52 @@ describe('ConfirmAuth v14 integration', () => {
 		expect(screen.getByText('/pub/pubky.app/')).toBeTruthy();
 		expect(screen.getByText('https://relay.example.com/inbox')).toBeTruthy();
 		expect(mockDispatch).not.toHaveBeenCalled();
+	});
+
+	it.each([1, 2])('returns to the previous auth screen from basics at stack index %i', index => {
+		mockStackIndex = index;
+		renderRequest([]);
+		fireEvent.press(screen.getByTestId('auth-back-button'));
+		expect(mockGoBack).toHaveBeenCalledTimes(1);
+		expect(openXCancel).not.toHaveBeenCalled();
+	});
+
+	it('returns from details to basics before navigating back in the auth stack', () => {
+		mockStackIndex = 1;
+		renderRequest([]);
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		fireEvent.press(screen.getByTestId('auth-back-button'));
+		expect(screen.getByTestId('ConfirmAuthShowDetailsButton')).toBeVisible();
+		expect(mockGoBack).not.toHaveBeenCalled();
+		fireEvent.press(screen.getByTestId('auth-back-button'));
+		expect(mockGoBack).toHaveBeenCalledTimes(1);
+		expect(openXCancel).not.toHaveBeenCalled();
+	});
+
+	it('does not show a back button in basics when the auth request is the root screen', () => {
+		renderRequest([]);
+		expect(screen.queryByTestId('auth-back-button')).toBeNull();
+	});
+
+	it('handles Android hardware back in details without leaving the request', () => {
+		jest.replaceProperty(Platform, 'OS', 'android');
+		const remove = jest.fn();
+		const addListener = jest.spyOn(BackHandler, 'addEventListener').mockReturnValue({ remove });
+		renderRequest([{ path: '/priv/chat/', permission: 'rwe' }]);
+		expect(addListener).not.toHaveBeenCalled();
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		fireEvent.press(screen.getByRole('switch'));
+		const handler = addListener.mock.calls[0][1];
+		act(() => {
+			expect(handler({ type: 'hardwareBackPress', timeStamp: 0 })).toBe(true);
+		});
+		expect(remove).toHaveBeenCalledTimes(1);
+		expect(screen.getByTestId('ConfirmAuthShowDetailsButton')).toBeVisible();
+		expect(screen.getByTestId('mock-auth-summary').props.capabilities).toEqual([
+			{ path: '/priv/chat/', permission: 'rw' },
+		]);
+		expect(mockGoBack).not.toHaveBeenCalled();
+		expect(openXCancel).not.toHaveBeenCalled();
 	});
 
 	it('opens details immediately when the preference is enabled', () => {

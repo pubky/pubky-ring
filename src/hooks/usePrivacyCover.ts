@@ -7,13 +7,13 @@ type PrivacyCoverModule = {
 };
 
 /** Covers the iOS app when inactive only while this sensitive screen is focused. */
-export const usePrivacyCover = (): void => {
+export const usePrivacyCover = (enabled = true): void => {
 	useFocusEffect(
 		useCallback(() => {
-			if (Platform.OS !== 'ios') return;
+			if (Platform.OS !== 'ios' || !enabled) return;
 			const privacyCover = NativeModules.PrivacyCover as PrivacyCoverModule | undefined;
 			privacyCover?.setEnabled(true);
 			return () => privacyCover?.setEnabled(false);
-		}, []),
+		}, [enabled]),
 	);
 };

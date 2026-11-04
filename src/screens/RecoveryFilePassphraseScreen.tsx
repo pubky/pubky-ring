@@ -20,6 +20,7 @@ import { createRecoveryFile, decryptRecoveryFile } from '@synonymdev/react-nativ
 import { useDispatch } from 'react-redux';
 import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { useSensitiveAction } from '../hooks/useSensitiveAction';
+import { usePrivacyCover } from '../hooks/usePrivacyCover';
 import { getSecretForExport } from '../utils/secretExport';
 import { assertNotAborted } from '../utils/deviceAuth';
 import TextField from '../components/TextField.tsx';
@@ -50,6 +51,7 @@ const RecoveryFilePassphraseScreen = ({
 	const { t } = useTranslation();
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
+	usePrivacyCover(showPassword);
 	const [error, setError] = useState<string>('');
 	const { mode } = useMemo(() => promptPayload, [promptPayload]);
 	const [loading, setLoading] = useState(false);
@@ -267,6 +269,7 @@ const RecoveryFilePassphraseScreen = ({
 				errorStyle={styles.errorText}
 				rightElement={
 					<TouchableOpacity
+						testID="BackupFilePassphraseVisibilityButton"
 						style={styles.eyeButton}
 						activeOpacity={0.7}
 						onPress={() => setShowPassword(!showPassword)}

@@ -80,7 +80,12 @@ jest.mock('../src/components/Button', () => {
 	return ({ text, ...props }: { text: string }) =>
 		ReactMock.createElement(Pressable, props, ReactMock.createElement(Text, null, text));
 });
-jest.mock('../src/components/TextField', () => require('react-native').TextInput);
+jest.mock('../src/components/TextField', () => {
+	const ReactMock = require('react');
+	const { TextInput, View } = require('react-native');
+	return ({ rightElement, ...props }: { rightElement?: React.ReactNode }) =>
+		ReactMock.createElement(View, null, ReactMock.createElement(TextInput, props), rightElement);
+});
 jest.mock('../src/components/AnimatedQR', () => {
 	const ReactMock = require('react');
 	const { Text } = require('react-native');
@@ -341,6 +346,56 @@ it('does not read any migration secrets when authentication is cancelled', async
 	});
 	expect(getPubkySecretKey).not.toHaveBeenCalled();
 	expect(screen.getByTestId('MigrateQRCodeRevealButton')).toBeTruthy();
+});
+
+it.each(['backup', 'import'] as const)(
+	'covers a visible %s passphrase on iOS and disables the cover when masked or unfocused',
+	mode => {
+		jest.replaceProperty(Platform, 'OS', 'ios');
+		const component = (
+			<RecoveryFilePassphraseScreen
+				promptPayload={
+					mode === 'backup'
+						? { mode, pubky: 'identity' }
+						: { mode, content: 'encrypted-content', fileName: 'backup.pkarr' }
+				}
+				sheetId={mode === 'backup' ? 'backup' : 'add-pubky'}
+				onImportSuccess={jest.fn()}
+			/>
+		);
+		const { rerender, unmount } = render(component);
+		fireEvent.changeText(screen.getByTestId('BackupFilePassphraseInput'), 'private passphrase');
+		expect(screen.getByTestId('BackupFilePassphraseInput')).toHaveProp('secureTextEntry', true);
+		expect(NativeModules.PrivacyCover.setEnabled).not.toHaveBeenCalled();
+		fireEvent.press(screen.getByTestId('BackupFilePassphraseVisibilityButton'));
+		expect(screen.getByTestId('BackupFilePassphraseInput')).toHaveProp('secureTextEntry', false);
+		expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(true);
+		mockFocused = false;
+		rerender(React.cloneElement(component, { onImportSuccess: jest.fn() }));
+		expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(false);
+		mockFocused = true;
+		rerender(React.cloneElement(component, { onImportSuccess: jest.fn() }));
+		expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(true);
+		fireEvent.press(screen.getByTestId('BackupFilePassphraseVisibilityButton'));
+		expect(screen.getByTestId('BackupFilePassphraseInput')).toHaveProp('secureTextEntry', true);
+		expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(false);
+		fireEvent.press(screen.getByTestId('BackupFilePassphraseVisibilityButton'));
+		unmount();
+		expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(false);
+	},
+);
+
+it('does not change Android protection when a backup passphrase is revealed', () => {
+	jest.replaceProperty(Platform, 'OS', 'android');
+	render(
+		<RecoveryFilePassphraseScreen
+			promptPayload={{ mode: 'backup', pubky: 'identity' }}
+			sheetId="backup"
+			onImportSuccess={jest.fn()}
+		/>,
+	);
+	fireEvent.press(screen.getByTestId('BackupFilePassphraseVisibilityButton'));
+	expect(NativeModules.PrivacyCover.setEnabled).not.toHaveBeenCalled();
 });
 
 it('does not export an encrypted backup when device authentication fails', async () => {

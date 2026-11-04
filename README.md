@@ -143,7 +143,8 @@ lockout without successful credential fallback never grants approval or disables
 the preference. Revealed secrets are hidden when leaving the foreground.
 On iOS, the inactive-app privacy cover applies only while the recovery phrase reveal,
 recovery phrase import, or migration QR screen is focused, independently of the device
-authentication setting.
+authentication setting. It also covers backup file import/export while the passphrase
+is toggled visible; masked passphrase entry does not enable the cover.
 
 This is an application authorization/export gate. It does not migrate Keychain or
 Keystore records, prevent a compromised process from accessing keys, change native

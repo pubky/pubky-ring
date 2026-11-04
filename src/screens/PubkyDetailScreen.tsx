@@ -33,7 +33,7 @@ const PubkyDetailScreen = (): ReactElement => {
 	}, [pubky]);
 
 	const rightButton = (
-		<HeaderNavButton onPressIn={onRightButtonPress}>
+		<HeaderNavButton onPress={onRightButtonPress}>
 			<Pencil size={20} />
 		</HeaderNavButton>
 	);

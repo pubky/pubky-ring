@@ -337,11 +337,7 @@ const showMigrationSummary = (successCount: number, totalCount: number, isPartia
 	}
 };
 
-const showMigrationSuccess = (
-	pubkys: string[],
-	totalCount: number,
-	successCount: number,
-): void => {
+const showMigrationSuccess = (pubkys: string[], totalCount: number, successCount: number): void => {
 	if (pubkys.length === 0) {
 		showMigrationSummary(successCount, totalCount);
 		return;

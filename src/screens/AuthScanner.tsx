@@ -26,18 +26,21 @@ const AuthScanner = ({
 	const { pubky } = route.params;
 	const title = t('auth.authorize');
 
-	const showRouteError = useCallback((action: InputAction, error: unknown): void => {
-		const errorMsg = getErrorMessage(error, t('errors.unknownError'));
-		const debugInfo = JSON.stringify({ error: errorMsg, action }, null, 2);
+	const showRouteError = useCallback(
+		(action: InputAction, error: unknown): void => {
+			const errorMsg = getErrorMessage(error, t('errors.unknownError'));
+			const debugInfo = JSON.stringify({ error: errorMsg, action }, null, 2);
 
-		console.error('Auth scanner route error:', debugInfo);
+			console.error('Auth scanner route error:', debugInfo);
 
-		showToast({
-			type: 'error',
-			title: t('common.error'),
-			description: errorMsg,
-		});
-	}, [t]);
+			showToast({
+				type: 'error',
+				title: t('common.error'),
+				description: errorMsg,
+			});
+		},
+		[t],
+	);
 
 	const handleInput = useCallback(
 		async (input: string, source: 'scan' | 'clipboard'): Promise<void> => {

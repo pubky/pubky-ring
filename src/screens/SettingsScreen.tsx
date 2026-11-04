@@ -1,5 +1,5 @@
 import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react';
-import { Alert, ScrollView, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
 import { showToast } from '@synonymdev/react-native-toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
@@ -7,12 +7,17 @@ import { ThemedView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAutoAuth, getNavigationAnimation } from '../store/selectors/settingsSelectors.ts';
+import {
+	getAlwaysShowAuthDetails,
+	getAutoAuth,
+	getNavigationAnimation,
+} from '../store/selectors/settingsSelectors.ts';
 import { getAllPubkys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
 import { ENavigationAnimation } from '../types/settings.ts';
 import {
 	resetSettings,
 	updateAutoAuth,
+	updateAlwaysShowAuthDetails,
 	updateNavigationAnimation,
 	updateShowOnboarding,
 } from '../store/slices/settingsSlice.ts';
@@ -27,10 +32,16 @@ import { republishAllHomeserverRecords } from '../utils/pubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
 
+const AUTH_DISPLAY_OPTIONS = [
+	{ value: false, label: 'settings.showBasics', testID: 'AuthShowBasicsOption' },
+	{ value: true, label: 'settings.alwaysShowDetails', testID: 'AuthAlwaysShowDetailsOption' },
+] as const;
+
 const SettingsScreen = ({ navigation }: Props): ReactElement => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const autoAuth = useSelector(getAutoAuth);
+	const alwaysShowAuthDetails = useSelector(getAlwaysShowAuthDetails);
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const pubkys = useSelector(getAllPubkys);
@@ -139,6 +150,31 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 			<AppHeader title={t('screenTitles.settings')} />
 
 			<ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+				<View accessibilityRole="radiogroup" accessibilityLabel={t('settings.auth')}>
+					<TextXsM style={styles.authTitle}>{t('settings.auth')}</TextXsM>
+					{AUTH_DISPLAY_OPTIONS.map(({ value, label, testID }) => {
+						const checked = alwaysShowAuthDetails === value;
+						const text = t(label);
+						return (
+							<Pressable
+								key={testID}
+								accessibilityRole="radio"
+								accessibilityLabel={text}
+								accessibilityState={{ checked }}
+								style={styles.authOption}
+								testID={testID}
+								onPress={() => dispatch(updateAlwaysShowAuthDetails({ alwaysShowAuthDetails: value }))}
+							>
+								<ThemedView style={styles.radio} colorName={checked ? 'blue' : 'border'}>
+									<ThemedView style={styles.radioCenter} colorName="background">
+										{checked && <ThemedView style={styles.radioDot} colorName="blue" />}
+									</ThemedView>
+								</ThemedView>
+								<TextBaseM>{text}</TextBaseM>
+							</Pressable>
+						);
+					})}
+				</View>
 				<View>
 					<View style={styles.textSection}>
 						<TextXsM>{t('settings.migrateToOtherDevice')}</TextXsM>
@@ -227,6 +263,33 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 };
 
 const styles = StyleSheet.create({
+	authTitle: {
+		marginBottom: 8,
+	},
+	authOption: {
+		flexDirection: 'row',
+		alignItems: 'center',
+		minHeight: 44,
+		gap: 12,
+		paddingLeft: 4,
+	},
+	radio: {
+		width: 24,
+		height: 24,
+		borderRadius: 12,
+		padding: 1,
+	},
+	radioCenter: {
+		flex: 1,
+		borderRadius: 12,
+		alignItems: 'center',
+		justifyContent: 'center',
+	},
+	radioDot: {
+		width: 8,
+		height: 8,
+		borderRadius: 4,
+	},
 	container: {
 		flex: 1,
 	},

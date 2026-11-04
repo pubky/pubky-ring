@@ -46,9 +46,11 @@ describe('AppHeader', () => {
 		expect(mockNavigation.navigate).not.toHaveBeenCalled();
 	});
 
-	it('retains back navigation', () => {
+	it('navigates back only after a completed press', () => {
 		render(<AppHeader />);
 		fireEvent(screen.getByTestId('AppHeaderBackButton'), 'pressIn');
+		expect(mockNavigation.goBack).not.toHaveBeenCalled();
+		fireEvent.press(screen.getByTestId('AppHeaderBackButton'));
 
 		expect(mockNavigation.goBack).toHaveBeenCalledTimes(1);
 	});
@@ -56,6 +58,8 @@ describe('AppHeader', () => {
 	it('opens Settings normally from the home settings button', () => {
 		render(<HomeHeader />);
 		fireEvent(screen.getByTestId('HomeHeaderSettingsButton'), 'pressIn');
+		expect(mockNavigation.navigate).not.toHaveBeenCalled();
+		fireEvent.press(screen.getByTestId('HomeHeaderSettingsButton'));
 
 		expect(mockNavigation.navigate).toHaveBeenCalledWith('Settings');
 	});

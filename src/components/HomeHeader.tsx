@@ -8,7 +8,7 @@ const HomeHeader = () => {
 	const navigation = useTypedNavigation();
 
 	const leftButton = (
-		<HeaderNavButton onPressIn={() => navigation.navigate('About')}>
+		<HeaderNavButton onPress={() => navigation.navigate('About')}>
 			<Info size={20} />
 		</HeaderNavButton>
 	);
@@ -16,7 +16,7 @@ const HomeHeader = () => {
 	const rightButton = (
 		<HeaderNavButton
 			testID="HomeHeaderSettingsButton"
-			onPressIn={() => {
+			onPress={() => {
 				navigation.navigate('Settings');
 			}}
 		>

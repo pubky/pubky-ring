@@ -1,5 +1,10 @@
 import { NativeModules } from 'react-native';
-import { authenticateDevice, requireDeviceAuthentication, DeviceAuthError } from '../src/utils/deviceAuth';
+import {
+	authenticateDevice,
+	requireDeviceAuthentication,
+	openDeviceAuthSettings,
+	DeviceAuthError,
+} from '../src/utils/deviceAuth';
 
 let mockRequired = true;
 jest.mock('../src/utils/store-helpers', () => ({
@@ -94,4 +99,14 @@ it.each(['cancelled', 'unavailable', 'failed'])(
 it('fails closed when the native bridge is missing', async () => {
 	delete NativeModules.DeviceAuthentication;
 	await expect(requireDeviceAuthentication('authorize')).rejects.toBeInstanceOf(DeviceAuthError);
+});
+
+it('localizes errors when native device settings cannot be opened', async () => {
+	NativeModules.DeviceAuthentication.openEnrollment = jest.fn(async () => {
+		throw new Error('Cannot open Settings');
+	});
+	await expect(openDeviceAuthSettings()).rejects.toMatchObject({
+		code: 'unavailable',
+		message: 'deviceAuth.unavailable',
+	});
 });

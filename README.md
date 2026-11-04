@@ -141,8 +141,9 @@ Keyguard confirmation activity; weak face unlock is never enabled. Prompts are
 serialized and cancellable. Cancellation, expiry, unavailable authentication, or
 lockout without successful credential fallback never grants approval or disables
 the preference. Revealed secrets are hidden when leaving the foreground.
-On iOS, the inactive-app privacy cover applies only while the recovery phrase or
-migration QR screen is focused, independently of the device authentication setting.
+On iOS, the inactive-app privacy cover applies only while the recovery phrase reveal,
+recovery phrase import, or migration QR screen is focused, independently of the device
+authentication setting.
 
 This is an application authorization/export gate. It does not migrate Keychain or
 Keystore records, prevent a compromised process from accessing keys, change native

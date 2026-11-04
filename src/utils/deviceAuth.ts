@@ -59,7 +59,13 @@ export const waitForActiveRequest = async <T>(work: Promise<T>, signal: AbortSig
 export const getDeviceAuthAvailability = (): ReturnType<DeviceAuthenticationModule['getAvailability']> =>
 	nativeAuth().getAvailability();
 
-export const openDeviceAuthSettings = (): Promise<void> => nativeAuth().openEnrollment();
+export const openDeviceAuthSettings = async (): Promise<void> => {
+	try {
+		await nativeAuth().openEnrollment();
+	} catch {
+		throw new DeviceAuthError('unavailable');
+	}
+};
 
 /** A fresh OS challenge. No successful result is cached or reusable by another operation. */
 export const authenticateDevice = async (reason: string, signal?: AbortSignal): Promise<void> => {

@@ -33,11 +33,14 @@ const MigrateQRCode = (): ReactElement => {
 	const { width } = useWindowDimensions();
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
+	const [skippedKeyCount, setSkippedKeyCount] = useState(0);
 	const { run, busy: isLoading, error, cancel } = useSensitiveAction();
 	const [isRevealed, setIsRevealed] = useState(false);
 	const originalBrightnessRef = useRef<number | null>(null);
 	const brightnessRequestIdRef = useRef(0);
-	const displayedKeyCount = pubkyKeys.filter(pubky => !getPubkyDataFromStore(pubky)?.sourceApp).length;
+	const displayedKeyCount = isRevealed
+		? keyValues.length
+		: pubkyKeys.filter(pubky => !getPubkyDataFromStore(pubky)?.sourceApp).length;
 	const qrSize = Math.min(280, Math.max(220, width - 80));
 
 	const restoreBrightness = useCallback((): void => {
@@ -54,6 +57,7 @@ const MigrateQRCode = (): ReactElement => {
 		brightnessRequestIdRef.current += 1;
 		setIsRevealed(false);
 		setKeyValues([]);
+		setSkippedKeyCount(0);
 		setSecureWindow(false);
 		restoreBrightness();
 	}, [restoreBrightness]);
@@ -88,15 +92,19 @@ const MigrateQRCode = (): ReactElement => {
 		run(async signal => {
 			await requireDeviceAuthentication(t('deviceAuth.migrate'), signal);
 			const values: string[] = [];
+			let skipped = 0;
 			for (const pubky of pubkyKeys) {
 				assertNotAborted(signal);
 				const identity = getPubkyDataFromStore(pubky);
-				if (!identity) throw new Error(t('backup.couldNotRetrieveSecretKey'));
-				if (identity.sourceApp) continue;
+				if (!identity || identity.sourceApp) continue;
 				const result = await getPubkySecretKey(pubky);
 				assertNotAborted(signal);
-				if (!getPubkyDataFromStore(pubky) || getPubkyDataFromStore(pubky).sourceApp || result.isErr())
-					throw new Error(t('backup.couldNotRetrieveSecretKey'));
+				const currentIdentity = getPubkyDataFromStore(pubky);
+				if (!currentIdentity || currentIdentity.sourceApp) continue;
+				if (result.isErr()) {
+					skipped += 1;
+					continue;
+				}
 				const keyData: IKeychainData = result.value;
 				values.push(
 					getBackupPreference(pubky) === EBackupPreference.encryptedFile
@@ -105,7 +113,9 @@ const MigrateQRCode = (): ReactElement => {
 				);
 			}
 			assertNotAborted(signal);
+			if (values.length === 0) throw new Error(t('backup.couldNotRetrieveSecretKey'));
 			setKeyValues(values);
+			setSkippedKeyCount(skipped);
 			const requestId = ++brightnessRequestIdRef.current;
 			setSecureWindow(true);
 			setIsRevealed(true);
@@ -188,6 +198,11 @@ const MigrateQRCode = (): ReactElement => {
 			</View>
 
 			{!!error && <TextSmM accessibilityRole="alert">{error}</TextSmM>}
+			{isRevealed && skippedKeyCount > 0 && (
+				<TextSmM accessibilityRole="alert">
+					{t('settings.migrationKeysSkipped', { count: skippedKeyCount })}
+				</TextSmM>
+			)}
 			{renderContent()}
 		</SheetScreen>
 	);

@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppState, NativeModules, Platform } from 'react-native';
 import { act, cleanup, fireEvent, render, renderHook, screen } from '@testing-library/react-native';
-import { ok } from '@synonymdev/result';
+import { err, ok } from '@synonymdev/result';
 import RecoveryPhraseScreen from '../src/screens/RecoveryPhraseScreen';
 import MigrateQRCode from '../src/screens/MigrateQRCode';
 import RecoveryFilePassphraseScreen from '../src/screens/RecoveryFilePassphraseScreen';
@@ -9,6 +9,7 @@ import { getPubkySecretKey } from '../src/utils/pubky';
 import { createRecoveryFile } from '@synonymdev/react-native-pubky';
 import { backupPubky } from '../src/utils/rnfs';
 import { usePrivacyCover } from '../src/hooks/usePrivacyCover';
+import AddPubkyImportMnemonic from '../src/screens/AddPubkyImportMnemonic';
 
 jest.mock('../src/utils/store-helpers', () => ({
 	getStore: () => ({
@@ -25,7 +26,10 @@ jest.mock('../src/utils/pubky', () => ({
 }));
 jest.mock('../src/i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }));
 jest.mock('react-i18next', () => ({
-	useTranslation: () => ({ t: (key: string) => key }),
+	useTranslation: () => ({
+		t: (key: string, options?: { count?: number }) =>
+			options?.count === undefined ? key : `${key}:${options.count}`,
+	}),
 	Trans: () => null,
 }));
 jest.mock('@react-navigation/native', () => ({
@@ -39,7 +43,13 @@ jest.mock('react-redux', () => ({
 }));
 jest.mock('../src/store/selectors/pubkySelectors', () => ({
 	getPubkyName: () => 'Identity',
-	getPubkyKeys: () => ['identity'],
+	getPubkyKeys: () => mockPubkyKeys,
+}));
+jest.mock('react-native-safe-area-context', () => ({ useSafeAreaInsets: () => ({ bottom: 0 }) }));
+jest.mock('../src/components/MnemonicSuggestionAccessory', () => ({
+	__esModule: true,
+	default: () => null,
+	getMnemonicSuggestionAccessoryId: () => 'suggestions',
 }));
 jest.mock('../src/hooks/usePubkyManagement', () => ({
 	usePubkyManagement: () => ({ confirmPubkyBackup: jest.fn() }),
@@ -52,7 +62,15 @@ jest.mock('../src/components/Sheet', () => ({ SheetScreen: require('react-native
 jest.mock('../src/theme/components', () => ({ ThemedView: require('react-native').View }));
 jest.mock('../src/theme/typography', () => {
 	const { Text } = require('react-native');
-	return { TextBaseM: Text, TextBaseB: Text, TextSmM: Text, TextSmB: Text, TextXsM: Text, TextXsB: Text };
+	return {
+		TextBaseM: Text,
+		TextBaseB: Text,
+		TextSmM: Text,
+		TextSmB: Text,
+		TextXsM: Text,
+		TextXsB: Text,
+		TextXsSb: Text,
+	};
 });
 jest.mock('../src/components/PubkyCard', () => () => null);
 jest.mock('../src/components/BlurView', () => require('react-native').View);
@@ -85,6 +103,7 @@ jest.mock('@synonymdev/react-native-toast', () => ({ showToast: jest.fn() }));
 
 const phrase = 'one two three four five six seven eight nine ten eleven twelve';
 let mockFocused = true;
+let mockPubkyKeys = ['identity'];
 const mockAppStateListeners = new Set<(state: string) => void>();
 const mockBackground = (state: string): void => {
 	mockAppStateListeners.forEach(listener => listener(state));
@@ -92,6 +111,7 @@ const mockBackground = (state: string): void => {
 beforeEach(() => {
 	jest.clearAllMocks();
 	mockFocused = true;
+	mockPubkyKeys = ['identity'];
 	mockAppStateListeners.clear();
 	jest.spyOn(AppState, 'addEventListener').mockImplementation(((
 		event: string,
@@ -146,6 +166,17 @@ it('disables the iOS cover on navigation blur and restores it on refocus without
 	unmount();
 	expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(false);
 	expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenCalledTimes(4);
+});
+
+it('covers entered recovery words in the iOS app switcher while the import screen is focused', () => {
+	jest.replaceProperty(Platform, 'OS', 'ios');
+	const { rerender } = render(<AddPubkyImportMnemonic navigation={{} as never} route={{} as never} />);
+	fireEvent.changeText(screen.getByTestId('MnemonicWordInput-1'), 'abandon');
+	expect(screen.getByTestId('MnemonicWordInput-1').props.value).toBe('abandon');
+	expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(true);
+	mockFocused = false;
+	rerender(<AddPubkyImportMnemonic navigation={{} as never} route={{} as never} />);
+	expect(NativeModules.PrivacyCover.setEnabled).toHaveBeenLastCalledWith(false);
 });
 
 it.each(sensitiveScreens)('leaves Android privacy protection unchanged on the %s screen', (_, component) => {
@@ -272,6 +303,44 @@ it('does not read migration secrets on mount; authenticates again after hiding t
 		fireEvent.press(screen.getByTestId('MigrateQRCodeRevealButton'));
 	});
 	expect(NativeModules.DeviceAuthentication.authenticate).toHaveBeenCalledTimes(2);
+});
+
+it('migrates readable identities after authentication and reports skipped identities and the actual QR count', async () => {
+	mockPubkyKeys = ['unreadable', 'identity'];
+	jest.mocked(getPubkySecretKey).mockResolvedValueOnce(err('missing key'));
+	render(<MigrateQRCode />);
+	expect(getPubkySecretKey).not.toHaveBeenCalled();
+	await act(async () => {
+		fireEvent.press(screen.getByTestId('MigrateQRCodeRevealButton'));
+	});
+	expect(NativeModules.DeviceAuthentication.authenticate).toHaveBeenCalledTimes(1);
+	expect(screen.getByTestId('qr-data').props.children).toContain('private-key');
+	expect(screen.getByText('settings.migrationKeysSkipped:1')).toBeTruthy();
+	expect(screen.getByText('settings.scanDynamicQRDescription:1')).toBeTruthy();
+	act(() => mockBackground('background'));
+	expect(screen.queryByText('settings.migrationKeysSkipped:1')).toBeNull();
+	expect(screen.getByTestId('qr-data').props.children).not.toContain('private-key');
+});
+
+it('keeps migration hidden when every secret is unreadable', async () => {
+	jest.mocked(getPubkySecretKey).mockResolvedValueOnce(err('missing key'));
+	render(<MigrateQRCode />);
+	await act(async () => {
+		fireEvent.press(screen.getByTestId('MigrateQRCodeRevealButton'));
+	});
+	expect(screen.getByText('backup.couldNotRetrieveSecretKey')).toBeTruthy();
+	expect(screen.getByTestId('MigrateQRCodeRevealButton')).toBeTruthy();
+	expect(screen.getByTestId('qr-data').props.children).not.toContain('private-key');
+});
+
+it('does not read any migration secrets when authentication is cancelled', async () => {
+	NativeModules.DeviceAuthentication.authenticate.mockRejectedValueOnce({ code: 'cancelled' });
+	render(<MigrateQRCode />);
+	await act(async () => {
+		fireEvent.press(screen.getByTestId('MigrateQRCodeRevealButton'));
+	});
+	expect(getPubkySecretKey).not.toHaveBeenCalled();
+	expect(screen.getByTestId('MigrateQRCodeRevealButton')).toBeTruthy();
 });
 
 it('does not export an encrypted backup when device authentication fails', async () => {

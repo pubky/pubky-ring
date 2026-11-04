@@ -13,6 +13,7 @@ import MnemonicSuggestionAccessory, {
 import TextField from '../components/TextField.tsx';
 import { TextBaseM, TextXsSb } from '../theme/typography';
 import { usePubkyManagement } from '../hooks/usePubkyManagement.ts';
+import { usePrivacyCover } from '../hooks/usePrivacyCover';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
 import { ThemedView } from '../theme/components.ts';
 
@@ -37,6 +38,7 @@ const AddPubkyImportMnemonic = ({
 	navigation,
 }: NativeStackScreenProps<AddPubkyStackParamList, 'ImportMnemonic'>): ReactElement => {
 	const { t } = useTranslation();
+	usePrivacyCover();
 	const { importPubky } = usePubkyManagement();
 	const [mnemonicWords, setMnemonicWords] = useState<string[]>(createEmptyMnemonicWords);
 	const [validWords, setValidWords] = useState<boolean[]>(createValidWordState);

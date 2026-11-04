@@ -52,6 +52,8 @@
 		"scanDynamicQRDescription_other": "Scan this dynamic QR code with your other device to import your {{count}} key pairs.",
 		"scanThisQR": "Scan this QR code on your other device to import your keys.",
 		"migrationQRWarning": "This QR code can recover your identity. Only reveal it when your screen is private.",
+		"migrationKeysSkipped_one": "Could not read {{count}} identity. Only available identities are included in this QR.",
+		"migrationKeysSkipped_other": "Could not read {{count}} identities. Only available identities are included in this QR.",
 		"keyProgress": "Key {{current}} of {{total}}",
 		"noKeysToDisplay": "No keys available to display.",
 		"theme": {
@@ -447,7 +449,7 @@
 	"deviceAuth": {
 		"setting": "Device authentication",
 		"learnMore": "About device authentication",
-		"description": "Confirm every authorization, recovery phrase reveal, backup export, and migration QR reveal with your device biometrics or screen lock. Auto Auth is disabled while this is on.",
+		"description": "Confirm every authorization, recovery phrase reveal, backup export, and migration QR reveal with your device biometrics or screen lock.",
 		"enableTitle": "Require device authentication?",
 		"enableDescription": "Confirm each authorization and secret export with Face ID, Touch ID, or your device screen lock. This applies to Ring on this device. It does not change how credentials are stored or how other apps use shared identities. Verify now to enable.",
 		"verify": "Verify and enable",

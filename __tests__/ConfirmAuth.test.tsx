@@ -61,7 +61,10 @@ jest.mock('../src/i18n', () => ({
 	default: { t: (key: string) => key },
 }));
 jest.mock('react-i18next', () => ({
-	useTranslation: () => ({ t: (key: string) => key }),
+	useTranslation: () => ({
+		t: (key: string, options?: Record<string, string>) =>
+			options ? `${key} ${JSON.stringify(options)}` : key,
+	}),
 }));
 jest.mock('styled-components/native', () => ({
 	useTheme: () => ({
@@ -118,7 +121,7 @@ jest.mock('../src/components/CircularProgressBar.tsx', () => ({
 }));
 jest.mock('../src/theme/typography', () => {
 	const { Text } = require('react-native');
-	return { TextSmM: Text, TextXsM: Text };
+	return { TextBaseB: Text, TextSmM: Text, TextXsM: Text };
 });
 jest.mock('../src/icons/index.ts', () => ({
 	CheckCircle: () => null,
@@ -127,7 +130,7 @@ jest.mock('../src/icons/index.ts', () => ({
 	UserCheck: () => null,
 }));
 
-const renderRequest = (capabilities: AuthCapability[]): string => {
+const renderRequest = (capabilities: AuthCapability[], expectedSigner?: string): string => {
 	const caps = capabilities.map(({ path, permission }) => `${path}:${permission}`).join(',');
 	const authUrl = `pubkyauth://signin_grant?caps=${encodeURIComponent(caps)}&relay=https%3A%2F%2Frelay.example.com%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-key`;
 	const authDetails: PubkyAuthDetails = {
@@ -140,7 +143,7 @@ const renderRequest = (capabilities: AuthCapability[]): string => {
 	};
 	render(
 		<ConfirmAuth
-			route={{ params: { pubky: 'test-pubky', authUrl, authDetails } } as never}
+			route={{ params: { pubky: 'test-pubky', authUrl, authDetails, expectedSigner } } as never}
 			navigation={{} as never}
 		/>,
 	);
@@ -228,6 +231,30 @@ describe('ConfirmAuth selective approval integration', () => {
 			expect(screen.getByTestId('ConfirmAuthAuthorizeButton')).toBeVisible();
 		},
 	);
+
+	it('states prominently that the app chose the pubky when the request requires one', async () => {
+		renderRequest([{ path: '/pub/example.app/', permission: 'rw' }], 'test-pubky');
+
+		const notice = screen.getByTestId('ConfirmAuthExpectedIdentity');
+		expect(
+			within(screen.getByTestId('ConfirmAuthDetailsScrollView')).getByTestId('ConfirmAuthExpectedIdentity'),
+		).toBe(notice);
+		expect(
+			within(notice).getByText(
+				`auth.expectedIdentityTitle ${JSON.stringify({ appName: 'example.app', name: 'Test Pubky', pubky: 'test-pubky' })}`,
+			),
+		).toBeTruthy();
+		expect(within(notice).getByText('auth.expectedIdentityDescription')).toBeTruthy();
+
+		await approve();
+		expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+	});
+
+	it('shows no expected-identity notice for a request that leaves the pubky to the user', () => {
+		renderRequest([{ path: '/pub/example.app/', permission: 'rw' }]);
+
+		expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+	});
 
 	it('keeps the success action fixed after approving a long permission list', async () => {
 		const capabilities = Array.from({ length: 5 }, (_, index) => ({

@@ -33,6 +33,8 @@ export interface ConfirmAuthPayload {
 	authUrl: string;
 	authDetails: PubkyAuthDetails;
 	xCallback?: XCallbackParams;
+	// The request named this pubky (`spk`); Ring approves with it or not at all.
+	expectedSigner?: string;
 }
 
 export interface DeletePubkySheetParams {

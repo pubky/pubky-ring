@@ -343,7 +343,20 @@ describe('expected signer (spk)', () => {
 		for (const stored of [USER, `pk:${USER}`, `pubky${USER}`]) {
 			const result = await createConfirmAuthPayload({ data, pubky: stored });
 			expect(result.isOk()).toBe(true);
+			if (result.isOk()) {
+				expect(result.value.expectedSigner).toBe(USER);
+			}
 		}
+	});
+
+	it('passes the expected pubky to the approval screen', async () => {
+		jest.mocked(getAutoAuthFromStore).mockReturnValue(false);
+		await handleAuthAction(data, { pubky: USER, dispatch: jest.fn() });
+
+		expect(showSheet).toHaveBeenCalledWith('auth', {
+			screen: 'ConfirmAuth',
+			params: expect.objectContaining({ pubky: USER, expectedSigner: USER }),
+		});
 	});
 
 	it('never signs with another pubky, even with Auto Auth on', async () => {

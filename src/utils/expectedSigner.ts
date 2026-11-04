@@ -1,11 +1,11 @@
 /**
- * Expected signer (`spk`) on grant sign-in requests.
+ * Expected identity (`spk`) on grant sign-in requests.
  *
- * An app that already knows the signed-in user can name that user's pubky in a
- * `signin_grant` link, so Ring opens that pubky instead of asking which one to
- * use. The hint only selects a pubky: Ring still signs with a key it holds, the
- * approval screen still shows what is approved, and the requesting app still
- * verifies who approved.
+ * An app that already knows the signed-in user can require that user's pubky in
+ * a `signin_grant` link. It is a constraint, not a suggestion: Ring opens that
+ * pubky or refuses the request, never offers another one, and the requesting
+ * app rejects an approval from any other key. Switching accounts takes a fresh
+ * request. The approval screen says that the app chose the pubky.
  */
 
 const SPK_PARAM = 'spk';
@@ -64,7 +64,7 @@ const queryOf = (url: string): string => {
 	return queryStart === -1 ? '' : url.substring(queryStart + 1);
 };
 
-/** The hint in the URL Ring parses and signs (fully decoded by `parseInput`). */
+/** The expected pubky in the URL Ring parses and signs (fully decoded by `parseInput`). */
 export const expectedSignerOfUrl = (url: string): ExpectedSignerResult => parseExpectedSigner(queryOf(url));
 
 // The `?` that opens a grant sign-in request's own query.
@@ -97,11 +97,11 @@ const requestQueryOf = (rawInput: string): string | undefined => {
 };
 
 /**
- * The hint of an incoming request. Ring parses and signs the decoded URL, so the
- * hint in the request as its app wrote it must match the one in the decoded URL;
+ * The expected pubky of an incoming request. Ring parses and signs the decoded URL,
+ * so the `spk` in the request as its app wrote it must match the one in the decoded URL;
  * otherwise (`%26spk%3D` hidden in another value, an `spk` nested in a
  * callback URL) the request is invalid. A request whose query never appears has
- * no hint of its own, so an `spk` in its decoded URL makes it invalid too.
+ * no `spk` of its own, so an `spk` in its decoded URL makes it invalid too.
  */
 export const parseRequestExpectedSigner = (rawInput: string, decodedUrl: string): ExpectedSignerResult => {
 	const decoded = expectedSignerOfUrl(decodedUrl);

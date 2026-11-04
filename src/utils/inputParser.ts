@@ -72,8 +72,8 @@ export interface AuthParams {
 	kind?: 'signin' | 'signup' | 'signin_grant' | 'signup_grant';
 	homeserver?: string;
 	signupToken?: string;
-	// z32 pubky named by a signin_grant link's `spk`: the app expects this
-	// pubky to approve, so Ring opens it instead of the picker.
+	// z32 pubky required by a signin_grant link's `spk`: only this pubky may
+	// approve, so Ring opens it without the picker or refuses the request.
 	expectedSigner?: string;
 	xCallback?: XCallbackParams;
 }
@@ -373,11 +373,11 @@ const parsePubkyDeepLink = async (
 	}
 
 	if ((details.kind === 'signin' || details.kind === 'signin_grant') && hasAuthRelayTransport(details)) {
-		const hint =
+		const expected =
 			details.kind === 'signin_grant'
 				? parseRequestExpectedSigner(rawInput.trim(), normalizedInput)
 				: { ok: true as const };
-		if (!hint.ok) {
+		if (!expected.ok) {
 			return null;
 		}
 		return {
@@ -391,7 +391,7 @@ const parsePubkyDeepLink = async (
 					kind: details.kind,
 					homeserver: details.homeserver,
 					signupToken: details.signup_token,
-					...(hint.expectedSigner ? { expectedSigner: hint.expectedSigner } : {}),
+					...(expected.expectedSigner ? { expectedSigner: expected.expectedSigner } : {}),
 					xCallback,
 				},
 				rawUrl: normalizedInput,

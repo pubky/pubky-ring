@@ -111,7 +111,16 @@
 		"allYourData": "todos tus datos",
 		"scopeList": "{{scopes}} y {{last}}",
 		"includingEncryptedData": ", incluidos los datos <bold>cifrados</bold>",
-		"encryptionTrustWarning": "Asegúrate de confiar en el servicio, el navegador y el dispositivo antes de autorizar con tu pubky. Revocar el acceso no recuperará las claves de cifrado compartidas."
+		"encryptionTrustWarning": "Asegúrate de confiar en el servicio, el navegador y el dispositivo antes de autorizar con tu pubky. Revocar el acceso no recuperará las claves de cifrado compartidas.",
+		"expectedSignerMismatch": "Esta solicitud es para {{pubky}}. Apruébela con ese pubky.",
+		"expectedSignerMissingTitle": "Pubky no está en este Ring",
+		"expectedSignerMissing": "Esta solicitud es para {{pubky}}, que no está en este Ring.",
+		"expectedSignerNotSetUpTitle": "Pubky no configurado",
+		"expectedSignerNotSetUp": "Esta solicitud es para {{pubky}}, que aún no está configurado en este Ring.",
+		"expectedIdentityTitle": "{{appName}} pidió iniciar sesión como {{name}} ({{pubky}})",
+		"expectedIdentityTitleNoName": "{{appName}} pidió iniciar sesión como {{pubky}}",
+		"expectedIdentityDescription": "La aplicación eligió este pubky. Para usar otro, inicie una nueva sesión desde la aplicación.",
+		"thisApp": "Esta aplicación"
 	},
 	"grants": {
 		"title": "Aplicaciones autorizadas",

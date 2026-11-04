@@ -70,7 +70,10 @@ jest.mock('../src/i18n', () => ({
 	default: { t: (key: string) => key },
 }));
 jest.mock('react-i18next', () => ({
-	useTranslation: () => ({ t: (key: string) => key }),
+	useTranslation: () => ({
+		t: (key: string, options?: Record<string, string>) =>
+			options ? `${key} ${JSON.stringify(options)}` : key,
+	}),
 }));
 jest.mock('styled-components/native', () => ({
 	useTheme: () => ({
@@ -135,7 +138,7 @@ jest.mock('../src/components/CircularProgressBar.tsx', () => ({
 }));
 jest.mock('../src/theme/typography', () => {
 	const { Text } = require('react-native');
-	return { TextSmM: Text, TextXsM: Text, TextLgSb: Text };
+	return { TextBaseB: Text, TextSmM: Text, TextXsM: Text, TextLgSb: Text };
 });
 jest.mock('../src/icons/index.ts', () => ({
 	ArrowLeft: () => null,
@@ -171,9 +174,10 @@ jest.mock('../src/components/SwipeToConfirm.tsx', () => ({
 const renderRequest = (
 	capabilities: AuthCapability[],
 	xCallback?: { xSuccess?: string; xCancel?: string },
+	expectedSigner?: string,
 ): string => {
 	const caps = capabilities.map(({ path, permission }) => `${path}:${permission}`).join(',');
-	const authUrl = `pubkyauth://signin_grant?caps=${encodeURIComponent(caps)}&relay=https%3A%2F%2Frelay.example.com%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-key`;
+	const authUrl = `pubkyauth://signin_grant?caps=${encodeURIComponent(caps)}&relay=https%3A%2F%2Frelay.example.com%2Finbox&cid=example.app&cpk=client-pubky&af=v1&epk=ephemeral-key${expectedSigner ? `&spk=${expectedSigner}` : ''}`;
 	const authDetails: PubkyAuthDetails = {
 		kind: 'signin_grant',
 		client_id: 'example.app',
@@ -184,7 +188,7 @@ const renderRequest = (
 	};
 	render(
 		<ConfirmAuth
-			route={{ params: { pubky: 'test-pubky', authUrl, authDetails, xCallback } } as never}
+			route={{ params: { pubky: 'test-pubky', authUrl, authDetails, xCallback, expectedSigner } } as never}
 			navigation={
 				{
 					getParent: () => ({
@@ -256,6 +260,43 @@ describe('ConfirmAuth v14 integration', () => {
 		await approve();
 		expect(screen.queryByTestId('AuthHeaderProgress')).toBeNull();
 		expect(screen.getByText('auth.authorizedTitle')).toBeTruthy();
+	});
+
+	it.each([false, true])(
+		'shows the app-selected identity notice before approval with Details preference %s',
+		async alwaysShowDetails => {
+			mockAlwaysShowDetails = alwaysShowDetails;
+			renderRequest([{ path: '/pub/example.app/', permission: 'rw' }], undefined, 'test-pubky');
+			const notice = within(screen.getByTestId('ConfirmAuthDetailsScrollView')).getByTestId(
+				'ConfirmAuthExpectedIdentity',
+			);
+			expect(
+				within(notice).getByText(
+					`auth.expectedIdentityTitle ${JSON.stringify({ appName: 'example.app', name: 'Test Pubky', pubky: 'test-pubky' })}`,
+				),
+			).toBeTruthy();
+			expect(within(notice).getByText('auth.expectedIdentityDescription')).toBeTruthy();
+			if (!alwaysShowDetails) expect(screen.getByTestId('ConfirmAuthShowDetailsButton')).toBeVisible();
+			await approve();
+			expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+		},
+	);
+
+	it.each([false, true])(
+		'omits the app-selected identity notice without spk with Details preference %s',
+		alwaysShowDetails => {
+			mockAlwaysShowDetails = alwaysShowDetails;
+			renderRequest([{ path: '/pub/example.app/', permission: 'rw' }]);
+			expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+		},
+	);
+
+	it('keeps the app-selected identity notice when moving between Basics and Details', () => {
+		renderRequest([{ path: '/pub/example.app/', permission: 'rw' }], undefined, 'test-pubky');
+		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+		expect(screen.getByTestId('ConfirmAuthExpectedIdentity')).toBeVisible();
+		fireEvent.press(screen.getByTestId('auth-back-button'));
+		expect(screen.getByTestId('ConfirmAuthExpectedIdentity')).toBeVisible();
 	});
 
 	it('starts with basics by default, and opens details without changing the saved preference', () => {

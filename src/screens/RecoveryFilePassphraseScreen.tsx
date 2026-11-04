@@ -14,11 +14,14 @@ import type { BackupFileScreenParams, ImportFileScreenParams, SheetId } from '..
 import { Eye, EyeOff, Key } from '../icons/index.ts';
 import { backupPubky } from '../utils/rnfs.ts';
 import { generateBackupFileName } from '../utils/helpers.ts';
-import { getPubkySecretKey, importPubky as importPubkyUtil } from '../utils/pubky.ts';
+import { importPubky as importPubkyUtil } from '../utils/pubky.ts';
 import { getStore } from '../utils/store-helpers.ts';
 import { createRecoveryFile, decryptRecoveryFile } from '@synonymdev/react-native-pubky';
 import { useDispatch } from 'react-redux';
 import { getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
+import { useSensitiveAction } from '../hooks/useSensitiveAction';
+import { getSecretForExport } from '../utils/secretExport';
+import { assertNotAborted } from '../utils/deviceAuth';
 import TextField from '../components/TextField.tsx';
 
 const formatDate = (date: Date): string => {
@@ -50,6 +53,7 @@ const RecoveryFilePassphraseScreen = ({
 	const [error, setError] = useState<string>('');
 	const { mode } = useMemo(() => promptPayload, [promptPayload]);
 	const [loading, setLoading] = useState(false);
+	const { run: runExport, cancel: cancelExport, error: exportError } = useSensitiveAction();
 	const fileName = useMemo(
 		() => (promptPayload.mode === 'import' ? promptPayload.fileName : ''),
 		[promptPayload],
@@ -71,49 +75,52 @@ const RecoveryFilePassphraseScreen = ({
 	}, [pubky]);
 
 	const handleClose = useCallback(() => {
+		cancelExport();
 		hideSheet(sheetId);
-	}, [sheetId]);
+	}, [cancelExport, sheetId]);
 
-	const handleBackupSubmit = useCallback(async (): Promise<void> => {
-		const secretKeyResponse = await getPubkySecretKey(pubky);
-		if (secretKeyResponse.isErr()) {
-			setError(t('backup.couldNotRetrieveSecretKey'));
-			return;
-		}
+	const handleBackupSubmit = useCallback(
+		async (signal: AbortSignal): Promise<void> => {
+			const key = await getSecretForExport(pubky, signal);
 
-		const createRecoveryFileRes = await createRecoveryFile(secretKeyResponse.value.secretKey, password);
-		if (createRecoveryFileRes.isErr()) {
-			setError(createRecoveryFileRes.error.message);
-			return;
-		}
-
-		let pubkyName;
-		try {
-			const name = getStore().pubky.pubkys[pubky]?.name;
-			if (typeof name === 'string' && name.trim()) {
-				pubkyName = name.toLowerCase().replace(/\s+/g, '-') + '-backup';
+			const createRecoveryFileRes = await createRecoveryFile(key.secretKey, password);
+			assertNotAborted(signal);
+			if (createRecoveryFileRes.isErr()) {
+				setError(createRecoveryFileRes.error.message);
+				return;
 			}
-		} catch {}
 
-		const backupFileName = generateBackupFileName(pubkyName);
-		const backupRes = await backupPubky(createRecoveryFileRes.value, backupFileName);
+			let pubkyName;
+			try {
+				const name = getStore().pubky.pubkys[pubky]?.name;
+				if (typeof name === 'string' && name.trim()) {
+					pubkyName = name.toLowerCase().replace(/\s+/g, '-') + '-backup';
+				}
+			} catch {}
 
-		if (backupRes.isErr()) {
-			setError(backupRes.error.message);
-			return;
-		}
+			const backupFileName = generateBackupFileName(pubkyName);
+			assertNotAborted(signal);
+			const backupRes = await backupPubky(createRecoveryFileRes.value, backupFileName, signal);
+			assertNotAborted(signal);
 
-		Keyboard.dismiss();
-		setPassword('');
-		setError('');
-		confirmPubkyBackup(pubky, EBackupPreference.encryptedFile);
-		showToast({
-			type: 'success',
-			title: t('backup.backupCreated'),
-			description: `${backupFileName}.pkarr`,
-		});
-		hideSheet('backup');
-	}, [confirmPubkyBackup, password, pubky, t]);
+			if (backupRes.isErr()) {
+				setError(backupRes.error.message);
+				return;
+			}
+
+			Keyboard.dismiss();
+			setPassword('');
+			setError('');
+			confirmPubkyBackup(pubky, EBackupPreference.encryptedFile);
+			showToast({
+				type: 'success',
+				title: t('backup.backupCreated'),
+				description: `${backupFileName}.pkarr`,
+			});
+			hideSheet('backup');
+		},
+		[confirmPubkyBackup, password, pubky, t],
+	);
 
 	const handleImportSubmit = useCallback(async (): Promise<void> => {
 		if (promptPayload.mode !== 'import') {
@@ -162,7 +169,7 @@ const RecoveryFilePassphraseScreen = ({
 			}
 
 			if (mode === 'backup') {
-				await handleBackupSubmit();
+				await runExport(handleBackupSubmit);
 				return;
 			}
 
@@ -170,7 +177,7 @@ const RecoveryFilePassphraseScreen = ({
 		} finally {
 			setLoading(false);
 		}
-	}, [handleBackupSubmit, handleImportSubmit, mode, password, t]);
+	}, [handleBackupSubmit, handleImportSubmit, mode, password, runExport, t]);
 
 	const title = useMemo(() => {
 		switch (mode) {
@@ -256,7 +263,7 @@ const RecoveryFilePassphraseScreen = ({
 				importantForAutofill="no"
 				spellCheck={false}
 				testID="BackupFilePassphraseInput"
-				error={error}
+				error={error || exportError}
 				errorStyle={styles.errorText}
 				rightElement={
 					<TouchableOpacity

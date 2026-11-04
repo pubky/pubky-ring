@@ -20,20 +20,24 @@ import { SheetScreen } from '../components/Sheet.tsx';
 import { TextBaseM, TextBaseB, TextXsM, TextSmB, TextSmM } from '../theme/typography';
 import BlurView from '../components/BlurView.tsx';
 import { shadows } from '../theme/shadows.ts';
+import { useSensitiveAction } from '../hooks/useSensitiveAction';
+import { usePrivacyCover } from '../hooks/usePrivacyCover';
+import { assertNotAborted, requireDeviceAuthentication } from '../utils/deviceAuth';
 import { setSecureWindow } from '../utils/secureWindow.ts';
 
 const placeholderData = [{ value: 'pubkyring://migrate' }];
 
 const MigrateQRCode = (): ReactElement => {
 	const { t } = useTranslation();
+	usePrivacyCover();
 	const { width } = useWindowDimensions();
 	const pubkyKeys = useSelector(getPubkyKeys);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
+	const { run, busy: isLoading, error, cancel } = useSensitiveAction();
 	const [isRevealed, setIsRevealed] = useState(false);
 	const originalBrightnessRef = useRef<number | null>(null);
 	const brightnessRequestIdRef = useRef(0);
-	const displayedKeyCount = isLoading ? pubkyKeys.length : keyValues.length;
+	const displayedKeyCount = pubkyKeys.filter(pubky => !getPubkyDataFromStore(pubky)?.sourceApp).length;
 	const qrSize = Math.min(280, Math.max(220, width - 80));
 
 	const restoreBrightness = useCallback((): void => {
@@ -42,42 +46,25 @@ const MigrateQRCode = (): ReactElement => {
 				.then(() => {
 					originalBrightnessRef.current = null;
 				})
-				.catch(error => console.warn('Failed to restore brightness:', error));
+				.catch(failure => console.warn('Failed to restore brightness:', failure));
 		}
-	}, []);
-
-	const revealQRCode = useCallback((): void => {
-		const requestId = brightnessRequestIdRef.current + 1;
-
-		brightnessRequestIdRef.current = requestId;
-		setSecureWindow(true);
-		setIsRevealed(true);
-
-		DeviceBrightness.getBrightnessLevel()
-			.then(currentBrightness => {
-				if (brightnessRequestIdRef.current !== requestId) {
-					return;
-				}
-
-				originalBrightnessRef.current = currentBrightness;
-				return DeviceBrightness.setBrightnessLevel(1);
-			})
-			.catch(error => console.warn('Failed to set brightness:', error));
 	}, []);
 
 	const hideQRCode = useCallback((): void => {
 		brightnessRequestIdRef.current += 1;
 		setIsRevealed(false);
+		setKeyValues([]);
 		setSecureWindow(false);
 		restoreBrightness();
 	}, [restoreBrightness]);
 
 	useEffect(() => {
 		return (): void => {
+			cancel();
 			setSecureWindow(false);
 			restoreBrightness();
 		};
-	}, [restoreBrightness]);
+	}, [cancel, restoreBrightness]);
 
 	useEffect(() => {
 		const subscriptions = [
@@ -97,52 +84,40 @@ const MigrateQRCode = (): ReactElement => {
 		};
 	}, [hideQRCode]);
 
-	useEffect(() => {
-		let mounted = true;
-
-		const loadKeys = async (): Promise<void> => {
+	const revealQRCode = useCallback((): void => {
+		run(async signal => {
+			await requireDeviceAuthentication(t('deviceAuth.migrate'), signal);
 			const values: string[] = [];
-
 			for (const pubky of pubkyKeys) {
-				if (getPubkyDataFromStore(pubky)?.sourceApp) {
-					continue;
-				}
-				const keyDataResult = await getPubkySecretKey(pubky);
-				if (keyDataResult.isErr()) {
-					continue;
-				}
-
-				const keyData: IKeychainData = keyDataResult.value;
-				const backupPref = getBackupPreference(pubky);
-
-				let value: string;
-				if (backupPref === EBackupPreference.recoveryPhrase && keyData.mnemonic) {
-					value = keyData.mnemonic;
-				} else if (backupPref === EBackupPreference.encryptedFile) {
-					value = keyData.secretKey;
-				} else if (keyData.mnemonic) {
-					value = keyData.mnemonic;
-				} else {
-					value = keyData.secretKey;
-				}
-
-				if (value) {
-					values.push(value);
-				}
+				assertNotAborted(signal);
+				const identity = getPubkyDataFromStore(pubky);
+				if (!identity) throw new Error(t('backup.couldNotRetrieveSecretKey'));
+				if (identity.sourceApp) continue;
+				const result = await getPubkySecretKey(pubky);
+				assertNotAborted(signal);
+				if (!getPubkyDataFromStore(pubky) || getPubkyDataFromStore(pubky).sourceApp || result.isErr())
+					throw new Error(t('backup.couldNotRetrieveSecretKey'));
+				const keyData: IKeychainData = result.value;
+				values.push(
+					getBackupPreference(pubky) === EBackupPreference.encryptedFile
+						? keyData.secretKey
+						: keyData.mnemonic || keyData.secretKey,
+				);
 			}
-
-			if (mounted) {
-				setKeyValues(values);
-				setIsLoading(false);
-			}
-		};
-
-		loadKeys();
-
-		return (): void => {
-			mounted = false;
-		};
-	}, [pubkyKeys]);
+			assertNotAborted(signal);
+			setKeyValues(values);
+			const requestId = ++brightnessRequestIdRef.current;
+			setSecureWindow(true);
+			setIsRevealed(true);
+			DeviceBrightness.getBrightnessLevel()
+				.then(currentBrightness => {
+					if (brightnessRequestIdRef.current !== requestId) return;
+					originalBrightnessRef.current = currentBrightness;
+					return DeviceBrightness.setBrightnessLevel(1);
+				})
+				.catch(failure => console.warn('Failed to set brightness:', failure));
+		});
+	}, [pubkyKeys, run, t]);
 
 	const migrateFormattedData = useMemo(() => {
 		return keyValues.map((value, index) => ({
@@ -160,7 +135,7 @@ const MigrateQRCode = (): ReactElement => {
 			);
 		}
 
-		if (keyValues.length === 0) {
+		if (displayedKeyCount === 0) {
 			return (
 				<View style={styles.centerContent}>
 					<TextBaseB colorName="mutedForeground">{t('settings.noKeysToDisplay')}</TextBaseB>
@@ -212,6 +187,7 @@ const MigrateQRCode = (): ReactElement => {
 				</TextBaseM>
 			</View>
 
+			{!!error && <TextSmM accessibilityRole="alert">{error}</TextSmM>}
 			{renderContent()}
 		</SheetScreen>
 	);

@@ -15,6 +15,9 @@ const settingsSlice = createSlice({
 		updateAutoAuth: (state, action: PayloadAction<{ autoAuth: boolean }>) => {
 			state.autoAuth = action.payload.autoAuth;
 		},
+		updateRequireDeviceAuth: (state, action: PayloadAction<{ requireDeviceAuth: boolean }>) => {
+			state.requireDeviceAuth = action.payload.requireDeviceAuth;
+		},
 		updateAlwaysShowAuthDetails: (state, action: PayloadAction<{ alwaysShowAuthDetails: boolean }>) => {
 			state.alwaysShowAuthDetails = action.payload.alwaysShowAuthDetails;
 		},
@@ -41,6 +44,7 @@ export const {
 	updateShowOnboarding,
 	updateAutoAuth,
 	updateAlwaysShowAuthDetails,
+	updateRequireDeviceAuth,
 	updateNavigationAnimation,
 	updateIsOnline,
 	updateSignedTermsOfUse,

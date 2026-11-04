@@ -15,6 +15,8 @@
 		761780ED2CA45674006654EE /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EC2CA45674006654EE /* AppDelegate.swift */; };
 		761780EF2CA45674006654EF /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 761780EE2CA45674006654EF /* SceneDelegate.swift */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
+		B10A00010000000000000001 /* DeviceAuthentication.m in Sources */ = {isa = PBXBuildFile; fileRef = B10A00020000000000000001 /* DeviceAuthentication.m */; };
+		B10A00010000000000000002 /* PrivacyCover.m in Sources */ = {isa = PBXBuildFile; fileRef = B10A00020000000000000002 /* PrivacyCover.m */; };
 		F0B0F0C33BFC0AA7CD867F18 /* libPods-pubkyring.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 5F66FC2D5C5C4019367FA619 /* libPods-pubkyring.a */; };
 /* End PBXBuildFile section */
 
@@ -30,6 +32,8 @@
 		761780EC2CA45674006654EE /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = pubkyring/AppDelegate.swift; sourceTree = "<group>"; };
 		761780EE2CA45674006654EF /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = SceneDelegate.swift; path = pubkyring/SceneDelegate.swift; sourceTree = "<group>"; };
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = pubkyring/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		B10A00020000000000000001 /* DeviceAuthentication.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = DeviceAuthentication.m; path = pubkyring/DeviceAuthentication.m; sourceTree = "<group>"; };
+		B10A00020000000000000002 /* PrivacyCover.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; name = PrivacyCover.m; path = pubkyring/PrivacyCover.m; sourceTree = "<group>"; };
 		C21B8554B47148DBBCC60B15 /* InterTight-VariableFont_wght.ttf */ = {isa = PBXFileReference; explicitFileType = undefined; fileEncoding = 9; includeInIndex = 0; lastKnownFileType = unknown; name = "InterTight-VariableFont_wght.ttf"; path = "../assets/fonts/InterTight-VariableFont_wght.ttf"; sourceTree = "<group>"; };
 		E9BEEC22DDF3D2C7155A00F4 /* Pods-pubkyring.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-pubkyring.debug.xcconfig"; path = "Target Support Files/Pods-pubkyring/Pods-pubkyring.debug.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
@@ -60,6 +64,8 @@
 				13B07FB81A68108700A75B9A /* PrivacyInfo.xcprivacy */,
 				4B1A7B902C3D4E5F00112233 /* pubkyring.entitlements */,
 				4B1A7B8E2C3D4E5F00112233 /* SharedPubky.m */,
+				B10A00020000000000000001 /* DeviceAuthentication.m */,
+				B10A00020000000000000002 /* PrivacyCover.m */,
 			);
 			name = pubkyring;
 			sourceTree = "<group>";
@@ -273,6 +279,8 @@
 				761780ED2CA45674006654EE /* AppDelegate.swift in Sources */,
 				761780EF2CA45674006654EF /* SceneDelegate.swift in Sources */,
 				4B1A7B8F2C3D4E5F00112233 /* SharedPubky.m in Sources */,
+				B10A00010000000000000001 /* DeviceAuthentication.m in Sources */,
+				B10A00010000000000000002 /* PrivacyCover.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

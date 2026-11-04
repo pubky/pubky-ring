@@ -45,6 +45,14 @@ describe('getAutoAuth', () => {
 	});
 });
 
+it('overrides saved development Auto Auth when device authentication is required', () => {
+	jest.replaceProperty(global as typeof global & { __DEV__: boolean }, '__DEV__', true);
+	expect(
+		getAutoAuth({ settings: { ...settings, autoAuth: true, requireDeviceAuth: true } } as RootState),
+	).toBe(false);
+	jest.restoreAllMocks();
+});
+
 describe('getNavigationAnimation', () => {
 	afterEach(() => {
 		jest.restoreAllMocks();

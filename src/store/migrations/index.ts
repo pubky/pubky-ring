@@ -55,6 +55,13 @@ const revokeStoredSession = (pubky: string, session: Record<string, unknown>): v
 };
 
 const migrations = {
+	12: (state: PersistedSettingsState | undefined): PersistedSettingsState | undefined => {
+		if (!state) return state;
+		return {
+			...state,
+			settings: { ...state.settings, requireDeviceAuth: state.settings?.requireDeviceAuth ?? false },
+		};
+	},
 	// @ts-ignore
 	1: (state): PersistedState => {
 		return {

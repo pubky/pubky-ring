@@ -22,7 +22,7 @@ export const getShowOnboarding = createSelector(
 // Ignore persisted Auto Auth settings in release builds, not just the hidden toggle.
 export const getAutoAuth = createSelector(
 	[selectSettings],
-	settings => __DEV__ && (settings?.autoAuth ?? false),
+	settings => __DEV__ && !settings?.requireDeviceAuth && (settings?.autoAuth ?? false),
 );
 
 // Ignore persisted developer-only animation preferences in release builds.
@@ -37,4 +37,9 @@ export const getIsOnline = createSelector([selectSettings], settings => settings
 export const getSignedTermsOfUse = createSelector(
 	[selectSettings],
 	settings => settings?.signedTermsOfUse ?? false,
+);
+
+export const getRequireDeviceAuth = createSelector(
+	[selectSettings],
+	settings => settings?.requireDeviceAuth ?? false,
 );

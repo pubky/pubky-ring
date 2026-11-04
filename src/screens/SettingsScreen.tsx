@@ -2,7 +2,9 @@ import React, { memo, ReactElement, useCallback, useMemo, useState } from 'react
 import { Alert, Pressable, ScrollView, StyleSheet, View, Switch, TouchableOpacity } from 'react-native';
 import { showToast } from '@synonymdev/react-native-toast';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useTheme } from 'styled-components/native';
 import { RootStackParamList } from '../navigation/types';
+import type { Theme } from '../theme';
 import { ThemedView } from '../theme/components.ts';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader.tsx';
 import Button from '../components/Button.tsx';
@@ -10,6 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
 	getAlwaysShowAuthDetails,
 	getAutoAuth,
+	getRequireDeviceAuth,
 	getNavigationAnimation,
 } from '../store/selectors/settingsSelectors.ts';
 import { getAllPubkys, getPubkyKeys } from '../store/selectors/pubkySelectors.ts';
@@ -17,6 +20,7 @@ import { ENavigationAnimation } from '../types/settings.ts';
 import {
 	resetSettings,
 	updateAutoAuth,
+	updateRequireDeviceAuth,
 	updateAlwaysShowAuthDetails,
 	updateNavigationAnimation,
 	updateShowOnboarding,
@@ -27,7 +31,15 @@ import { useTranslation } from 'react-i18next';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { TextBaseB, TextBaseM, TextSmM, TextXsM } from '../theme/typography';
 import SafeAreaView from '../components/SafeAreaView.tsx';
-import { Qrcode, Scan } from '../icons/index.ts';
+import { Info, Qrcode, Scan } from '../icons/index.ts';
+import { useSensitiveAction } from '../hooks/useSensitiveAction';
+import {
+	authenticateDevice,
+	getDeviceAuthAvailability,
+	openDeviceAuthSettings,
+	assertNotAborted,
+	DeviceAuthError,
+} from '../utils/deviceAuth';
 import { republishAllHomeserverRecords } from '../utils/pubky.ts';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -39,8 +51,11 @@ const AUTH_DISPLAY_OPTIONS = [
 
 const SettingsScreen = ({ navigation }: Props): ReactElement => {
 	const { t } = useTranslation();
+	const theme = useTheme() as Theme;
 	const dispatch = useDispatch();
 	const autoAuth = useSelector(getAutoAuth);
+	const requireDeviceAuth = useSelector(getRequireDeviceAuth);
+	const deviceAuth = useSensitiveAction();
 	const alwaysShowAuthDetails = useSelector(getAlwaysShowAuthDetails);
 	const navigationAnimation = useSelector(getNavigationAnimation);
 	const pubkyKeys = useSelector(getPubkyKeys);
@@ -109,6 +124,47 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 		});
 	}, [dispatch, navigation]);
 
+	const changeDeviceAuth = (): void => {
+		deviceAuth.run(async signal => {
+			const availability = await getDeviceAuthAvailability();
+			assertNotAborted(signal);
+			if (!availability.available) throw new DeviceAuthError('unavailable');
+			await authenticateDevice(
+				t(requireDeviceAuth ? 'deviceAuth.disableReason' : 'deviceAuth.enableReason'),
+				signal,
+			);
+			assertNotAborted(signal);
+			dispatch(updateRequireDeviceAuth({ requireDeviceAuth: !requireDeviceAuth }));
+		});
+	};
+	const handleDeviceAuthToggle = (): void => {
+		if (requireDeviceAuth) {
+			changeDeviceAuth();
+			return;
+		}
+		Alert.alert(t('deviceAuth.enableTitle'), t('deviceAuth.enableDescription'), [
+			{ text: t('common.cancel'), style: 'cancel' },
+			{ text: t('deviceAuth.verify'), onPress: changeDeviceAuth },
+		]);
+	};
+	const handleDeviceAuthInfo = (): void => {
+		Alert.alert(
+			t('deviceAuth.setting'),
+			`${t('deviceAuth.description')}\n\n${t('deviceAuth.enrollmentGuidance')}`,
+			[
+				{ text: t('common.close'), style: 'cancel' },
+				{
+					text: t('deviceAuth.openSettings'),
+					onPress: () => {
+						deviceAuth.run(async () => {
+							await openDeviceAuthSettings();
+						});
+					},
+				},
+			],
+		);
+	};
+
 	const handleAutoAuthToggle = useCallback(() => {
 		dispatch(updateAutoAuth({ autoAuth: !autoAuth }));
 	}, [dispatch, autoAuth]);
@@ -175,6 +231,32 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 						);
 					})}
 				</View>
+				<View style={styles.deviceAuthSection}>
+					<View style={styles.deviceAuthRow}>
+						<TextBaseB style={styles.deviceAuthLabel}>{t('deviceAuth.setting')}</TextBaseB>
+						<TouchableOpacity
+							style={styles.deviceAuthInfo}
+							accessibilityRole="button"
+							accessibilityLabel={t('deviceAuth.learnMore')}
+							testID="DeviceAuthInfoButton"
+							disabled={deviceAuth.busy}
+							onPress={handleDeviceAuthInfo}
+						>
+							<Info size={20} />
+						</TouchableOpacity>
+						<Switch
+							style={styles.deviceAuthSwitch}
+							testID="RequireDeviceAuthSwitch"
+							accessibilityLabel={t('deviceAuth.setting')}
+							trackColor={{ false: theme.colors.input, true: theme.colors.blue }}
+							ios_backgroundColor={theme.colors.input}
+							value={requireDeviceAuth}
+							disabled={deviceAuth.busy}
+							onValueChange={handleDeviceAuthToggle}
+						/>
+					</View>
+					{!!deviceAuth.error && <TextSmM accessibilityRole="alert">{deviceAuth.error}</TextSmM>}
+				</View>
 				<View>
 					<View style={styles.textSection}>
 						<TextXsM>{t('settings.migrateToOtherDevice')}</TextXsM>
@@ -239,7 +321,12 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 							<TouchableOpacity style={styles.toggleRow} onPress={handleAutoAuthToggle}>
 								<TextBaseB>{t('settings.autoAuth')}</TextBaseB>
 								<View style={styles.switchContainer}>
-									<Switch value={autoAuth} onValueChange={handleAutoAuthToggle} />
+									<Switch
+										testID="AutoAuthSwitch"
+										value={autoAuth}
+										disabled={requireDeviceAuth}
+										onValueChange={handleAutoAuthToggle}
+									/>
 								</View>
 							</TouchableOpacity>
 						</ThemedView>
@@ -263,6 +350,12 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 };
 
 const styles = StyleSheet.create({
+	deviceAuthSection: { gap: 8 },
+	deviceAuthRow: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+	deviceAuthLabel: { flex: 1 },
+	deviceAuthInfo: { width: 44, height: 44, alignItems: 'center', justifyContent: 'center' },
+	// The iOS Switch defaults to alignSelf: 'flex-start', overriding the row's centering.
+	deviceAuthSwitch: { alignSelf: 'center' },
 	authTitle: {
 		marginBottom: 8,
 	},

@@ -1,9 +1,6 @@
-import { showToast } from '@synonymdev/react-native-toast';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import { EBackupPreference } from '../types/pubky.ts';
-import { getPubkySecretKey } from './pubky.ts';
 import { getBackupPreference, getPubkyDataFromStore } from './store-helpers.ts';
-import i18n from '../i18n';
 import type { BackupSheetParams } from '../sheets/types.ts';
 
 type BackupPreferenceChoice = EBackupPreference.encryptedFile | EBackupPreference.recoveryPhrase;
@@ -20,32 +17,7 @@ export const createBackupDestinationParams = async ({
 	backupPreference: BackupPreferenceChoice;
 }): Promise<BackupDestinationParams | undefined> => {
 	if (backupPreference === EBackupPreference.recoveryPhrase) {
-		const secretKeyResponse = await getPubkySecretKey(pubky);
-		if (secretKeyResponse.isErr()) {
-			showToast({
-				type: 'error',
-				title: i18n.t('common.error'),
-				description: i18n.t('backup.couldNotRetrieveSecretKey'),
-			});
-			return undefined;
-		}
-
-		if (secretKeyResponse.value?.mnemonic) {
-			return {
-				screen: 'RecoveryPhraseScreen',
-				params: {
-					pubky,
-					mnemonic: secretKeyResponse.value.mnemonic,
-				},
-			};
-		}
-
-		showToast({
-			type: 'error',
-			title: i18n.t('common.error'),
-			description: i18n.t('backup.couldNotRetrieveSecretKey'),
-		});
-		return undefined;
+		return { screen: 'RecoveryPhraseScreen', params: { pubky } };
 	}
 
 	return {

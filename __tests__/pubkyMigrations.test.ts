@@ -56,6 +56,27 @@ describe('auth display settings migration', () => {
 	);
 });
 
+describe('device authentication migration', () => {
+	it.each([undefined, false, true])(
+		'preserves an existing preference %s and defaults off without touching credentials',
+		async preference => {
+			const state = {
+				_persist: { version: 11, rehydrated: true },
+				settings: {
+					theme: ETheme.dark,
+					...(preference === undefined ? {} : { requireDeviceAuth: preference }),
+				},
+				pubky: { pubkys: { owned: { name: 'Alice' } } },
+			};
+			const migrated = await createMigrate(migrations)(state, 12);
+			expect(migrated).toEqual({
+				...state,
+				settings: { ...state.settings, requireDeviceAuth: preference ?? false },
+			});
+		},
+	);
+});
+
 describe('pubky migrations', () => {
 	beforeEach(() => {
 		jest.clearAllMocks();

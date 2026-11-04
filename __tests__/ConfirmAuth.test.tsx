@@ -1,10 +1,11 @@
 import React from 'react';
-import { BackHandler, Platform, StyleSheet } from 'react-native';
+import { AppState, BackHandler, NativeModules, Platform, StyleSheet } from 'react-native';
 import { act, cleanup, fireEvent, render, screen, within } from '@testing-library/react-native';
 import { err, ok } from '@synonymdev/result';
 import { auth, authWithCapabilities, republishHomeserver, signIn } from '@synonymdev/react-native-pubky';
 import type { PubkyAuthDetails } from '@synonymdev/react-native-pubky';
 import ConfirmAuth from '../src/screens/ConfirmAuth';
+import { performAuth } from '../src/utils/pubky';
 import { getKeychainValue, setSessionSecret } from '../src/utils/keychain';
 import { getPubkyDataFromStore } from '../src/utils/store-helpers';
 import { syncAuthorizedGrantsAfterAuth } from '../src/utils/authorizedGrants';
@@ -12,11 +13,13 @@ import { openXCancel, openXSuccess, openXError } from '../src/utils/xCallback';
 import { hideSheet } from '../src/sheets/sheetNavigation';
 import { defaultPubkyState } from '../src/store/shapes/pubky';
 import type { AuthCapability } from '../src/utils/authCapabilities';
+import { checkNetworkConnection } from '../src/utils/helpers';
 
 const mockDispatch = jest.fn();
 const mockGoBack = jest.fn();
 let mockStackIndex = 0;
 let mockAlwaysShowDetails = false;
+let mockRequireDeviceAuth = false;
 let mockDismissSheet: (() => void) | undefined;
 
 jest.mock('immer', () => jest.requireActual('../node_modules/immer/dist/cjs/index.js'));
@@ -51,7 +54,10 @@ jest.mock('../src/utils/keychain', () => ({
 	getKeychainValue: jest.fn(),
 	setSessionSecret: jest.fn(),
 }));
-jest.mock('../src/utils/store-helpers', () => ({ getPubkyDataFromStore: jest.fn() }));
+jest.mock('../src/utils/store-helpers', () => ({
+	getPubkyDataFromStore: jest.fn(),
+	getStore: () => ({ settings: { requireDeviceAuth: mockRequireDeviceAuth } }),
+}));
 jest.mock('../src/utils/authorizedGrants.ts', () => ({ syncAuthorizedGrantsAfterAuth: jest.fn() }));
 jest.mock('../src/utils/helpers.ts', () => ({
 	checkNetworkConnection: jest.fn(async () => true),
@@ -216,6 +222,8 @@ describe('ConfirmAuth v14 integration', () => {
 		jest.clearAllMocks();
 		mockAlwaysShowDetails = false;
 		mockStackIndex = 0;
+		mockRequireDeviceAuth = false;
+		NativeModules.DeviceAuthentication = { authenticate: jest.fn(async () => true), cancel: jest.fn() };
 		jest.spyOn(console, 'log').mockImplementation(() => undefined);
 		jest.spyOn(console, 'error').mockImplementation(() => undefined);
 		jest.mocked(auth).mockReset().mockResolvedValue(ok([]));
@@ -251,6 +259,125 @@ describe('ConfirmAuth v14 integration', () => {
 		jest.clearAllTimers();
 		jest.useRealTimers();
 		jest.restoreAllMocks();
+	});
+
+	it.each([false, true])(
+		'only cancels Android auth on focus loss when protection is enabled (%s)',
+		async requireDeviceAuth => {
+			mockRequireDeviceAuth = requireDeviceAuth;
+			jest.replaceProperty(Platform, 'OS', 'android');
+			const listeners = new Map<string, () => void>();
+			jest.spyOn(AppState, 'addEventListener').mockImplementation(((event: string, listener: () => void) => {
+				listeners.set(event, listener);
+				return { remove: () => listeners.delete(event) };
+			}) as never);
+			let finishNetworkCheck!: (online: boolean) => void;
+			jest.mocked(checkNetworkConnection).mockReturnValueOnce(
+				new Promise(resolve => {
+					finishNetworkCheck = resolve;
+				}),
+			);
+			const result = performAuth({
+				pubky: 'test-pubky',
+				authUrl: 'pubkyauth://request',
+				dispatch: mockDispatch,
+			});
+			await act(async () => {});
+			expect(checkNetworkConnection).toHaveBeenCalledTimes(1);
+			listeners.get('blur')?.();
+			finishNetworkCheck(true);
+			expect((await result).isOk()).toBe(!requireDeviceAuth);
+			expect(auth).toHaveBeenCalledTimes(requireDeviceAuth ? 0 : 1);
+		},
+	);
+
+	it('requires successful device authentication before loading credentials or authorizing', async () => {
+		mockRequireDeviceAuth = true;
+		renderRequest([]);
+		NativeModules.DeviceAuthentication.authenticate.mockRejectedValueOnce({ code: 'failed' });
+		await approve();
+		expect(getKeychainValue).not.toHaveBeenCalled();
+		expect(auth).not.toHaveBeenCalled();
+		expect(openXSuccess).not.toHaveBeenCalled();
+		expect(openXError).not.toHaveBeenCalled();
+		await approve();
+		expect(NativeModules.DeviceAuthentication.authenticate).toHaveBeenCalledTimes(2);
+		expect(auth).toHaveBeenCalledTimes(1);
+		expect(NativeModules.DeviceAuthentication.authenticate.mock.invocationCallOrder[1]).toBeLessThan(
+			jest.mocked(getKeychainValue).mock.invocationCallOrder[0],
+		);
+	});
+
+	it('enforces authentication for direct callers and adopted identities before accessing the native shared secret', async () => {
+		mockRequireDeviceAuth = true;
+		jest.mocked(getPubkyDataFromStore).mockReturnValue({ ...defaultPubkyState, sourceApp: 'to.bitkit' });
+		NativeModules.DeviceAuthentication.authenticate.mockRejectedValueOnce({ code: 'cancelled' });
+		const result = await performAuth({
+			pubky: 'external-identity',
+			authUrl: 'pubkyauth://request',
+			dispatch: mockDispatch,
+		});
+		expect(result.isErr()).toBe(true);
+		expect(NativeModules.SharedPubky.getExternalSecret).not.toHaveBeenCalled();
+		expect(auth).not.toHaveBeenCalled();
+	});
+
+	it('cancels the native challenge on dismissal and ignores late success', async () => {
+		mockRequireDeviceAuth = true;
+		let resolve!: (success: boolean) => void;
+		NativeModules.DeviceAuthentication.authenticate.mockImplementationOnce(
+			() =>
+				new Promise(res => {
+					resolve = res;
+				}),
+		);
+		renderRequest([], { xSuccess: 'example://success', xCancel: 'example://cancel' });
+		await approve();
+		await act(async () => {
+			mockDismissSheet?.();
+		});
+		expect(NativeModules.DeviceAuthentication.cancel).toHaveBeenCalledTimes(1);
+		await act(async () => {
+			resolve(true);
+		});
+		expect(getKeychainValue).not.toHaveBeenCalled();
+		expect(auth).not.toHaveBeenCalled();
+		expect(openXSuccess).not.toHaveBeenCalled();
+		expect(openXCancel).toHaveBeenCalledTimes(1);
+	});
+
+	it('expires the confirmation while the device prompt is still pending', async () => {
+		mockRequireDeviceAuth = true;
+		NativeModules.DeviceAuthentication.authenticate.mockImplementationOnce(() => new Promise(() => {}));
+		renderRequest([]);
+		await approve();
+		await act(async () => {
+			jest.advanceTimersByTime(60000);
+		});
+		expect(NativeModules.DeviceAuthentication.cancel).toHaveBeenCalled();
+		expect(auth).not.toHaveBeenCalled();
+		expect(openXSuccess).not.toHaveBeenCalled();
+		expect(hideSheet).toHaveBeenCalledWith('auth');
+	});
+
+	it('does not authorize if credential retrieval completes after the network deadline', async () => {
+		let resolve!: (value: ReturnType<typeof ok<string>>) => void;
+		jest.mocked(getKeychainValue).mockImplementationOnce(
+			() =>
+				new Promise(res => {
+					resolve = res;
+				}),
+		);
+		renderRequest([]);
+		await approve();
+		await act(async () => {
+			jest.advanceTimersByTime(20000);
+		});
+		await act(async () => {
+			resolve(ok(JSON.stringify({ secretKey: 'late-secret', mnemonic: '' })));
+		});
+		expect(auth).not.toHaveBeenCalled();
+		expect(openXSuccess).not.toHaveBeenCalled();
 	});
 
 	it.each(['ios', 'android'] as const)('keeps header progress until authorized on %s', async platform => {

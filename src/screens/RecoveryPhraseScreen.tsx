@@ -1,5 +1,5 @@
-import React, { memo, ReactElement, useMemo, useState } from 'react';
-import { Platform, StyleSheet, TouchableHighlight, View } from 'react-native';
+import React, { memo, ReactElement, useEffect, useMemo, useState } from 'react';
+import { AppState, Platform, StyleSheet, TouchableHighlight, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Button from '../components/Button.tsx';
 import { useSelector } from 'react-redux';
@@ -16,37 +16,78 @@ import { hideSheet } from '../sheets/sheetNavigation.tsx';
 import { ThemedView } from '../theme/components.ts';
 import { shadows } from '../theme/shadows.ts';
 import type { BackupStackParamList } from '../sheets/types.ts';
+import { useSensitiveAction } from '../hooks/useSensitiveAction';
+import { usePrivacyCover } from '../hooks/usePrivacyCover';
+import { getSecretForExport } from '../utils/secretExport';
+import { setSecureWindow } from '../utils/secureWindow';
 import { isSmallScreen } from '../utils/helpers.ts';
 
 const dummyMnemonicWords = Array.from({ length: 12 }, () => 'secret');
 
 const RecoveryPhraseScreen = ({
 	route,
+	navigation,
 }: NativeStackScreenProps<BackupStackParamList, 'RecoveryPhraseScreen'>): ReactElement => {
 	const { t } = useTranslation();
+	usePrivacyCover();
 	const promptPayload = route.params;
-	const [isBlurred, setIsBlurred] = useState<boolean>(true);
+	const [mnemonic, setMnemonic] = useState('');
+	const [phraseUnavailable, setPhraseUnavailable] = useState(false);
+	const isBlurred = !mnemonic;
+	const { run, busy, error } = useSensitiveAction();
+	useEffect(() => {
+		const hidePhrase = (): void => {
+			setMnemonic('');
+			setSecureWindow(false);
+		};
+		const subscription = AppState.addEventListener('change', state => {
+			if (state !== 'active') hidePhrase();
+		});
+		const blurSubscription =
+			Platform.OS === 'android' ? AppState.addEventListener('blur', hidePhrase) : undefined;
+		return () => {
+			subscription.remove();
+			blurSubscription?.remove();
+			setSecureWindow(false);
+		};
+	}, []);
 	const pubkyName = useSelector((state: RootState) => getPubkyName(state, promptPayload.pubky, 12));
 	const { confirmPubkyBackup } = usePubkyManagement();
 	const smallScreen = isSmallScreen();
 
-	const mnemonicWords = useMemo(() => {
-		if (!promptPayload.mnemonic) {
-			return [];
-		}
-		return promptPayload.mnemonic.split(' ');
-	}, [promptPayload.mnemonic]);
-
-	const mnemonicWordsToShow = Platform.OS === 'android' && isBlurred ? dummyMnemonicWords : mnemonicWords;
+	const mnemonicWords = useMemo(() => mnemonic.split(' '), [mnemonic]);
+	const mnemonicWordsToShow = isBlurred ? dummyMnemonicWords : mnemonicWords;
 
 	const handleConfirmBackup = (): void => {
-		setIsBlurred(false);
+		run(async signal => {
+			const key = await getSecretForExport(promptPayload.pubky, signal);
+			if (!key.mnemonic) {
+				setPhraseUnavailable(true);
+				return;
+			}
+			setSecureWindow(true);
+			setMnemonic(key.mnemonic);
+		});
 	};
 
 	const handleFinishBackup = (): void => {
 		confirmPubkyBackup(promptPayload.pubky, EBackupPreference.recoveryPhrase);
 		hideSheet('backup');
 	};
+
+	if (phraseUnavailable) {
+		return (
+			<SheetScreen id="backup" title={t('backup.mnemonic.navTitle')}>
+				<TextBaseM style={styles.message}>{t('backup.recoveryPhraseUnavailable')}</TextBaseM>
+				<Button
+					text={t('backup.encryptedFile')}
+					size="large"
+					testID="RecoveryPhraseFileBackupButton"
+					onPress={() => navigation.replace('BackupFileScreen', { pubky: promptPayload.pubky })}
+				/>
+			</SheetScreen>
+		);
+	}
 
 	return (
 		<SheetScreen id="backup" title={t('backup.mnemonic.navTitle')}>
@@ -86,6 +127,7 @@ const RecoveryPhraseScreen = ({
 							style={styles.revealButton}
 							testID="RecoveryPhraseRevealButton"
 							onPress={handleConfirmBackup}
+							disabled={busy}
 						>
 							<TextSmB
 								style={styles.tapToRevealText}
@@ -100,6 +142,7 @@ const RecoveryPhraseScreen = ({
 				)}
 			</ThemedView>
 
+			{!!error && <TextSmM accessibilityRole="alert">{error}</TextSmM>}
 			<TextSmM style={styles.warningText}>{t('backup.recoveryWarning')}</TextSmM>
 
 			{!smallScreen && <PubkyCard style={styles.card} name={pubkyName} publicKey={promptPayload.pubky} />}

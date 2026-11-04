@@ -145,7 +145,14 @@ export async function importFile(): Promise<Result<ImportFileScreenParams>> {
 	}
 }
 
-export async function backupPubky(content: string, filename: string): Promise<Result<string>> {
+export async function backupPubky(
+	content: string,
+	filename: string,
+	signal?: AbortSignal,
+): Promise<Result<string>> {
+	const checkActive = (): void => {
+		if (signal?.aborted) throw new Error('User canceled backup');
+	};
 	// Sanitize the basename separately so the extension is always preserved.
 	const filenameWithoutExtension = filename.endsWith('.pkarr')
 		? filename.slice(0, -'.pkarr'.length)
@@ -153,6 +160,7 @@ export async function backupPubky(content: string, filename: string): Promise<Re
 	const fullFilename = `${sanitizeFileName(filenameWithoutExtension, 'pubky-backup', MAX_FILE_NAME_BYTES - '.pkarr'.length)}.pkarr`;
 
 	try {
+		checkActive();
 		if (Platform.OS === 'ios') {
 			// iOS: Use share sheet approach
 			// Build a temp path
@@ -174,10 +182,14 @@ export async function backupPubky(content: string, filename: string): Promise<Re
 			};
 
 			// Show the native share sheet
-			const shareResult = await Share.open(shareOptions);
-
-			// Clean up the temp file
-			await RNFS.unlink(tempPath);
+			const shareResult = await (async () => {
+				try {
+					checkActive();
+					return await Share.open(shareOptions);
+				} finally {
+					await RNFS.unlink(tempPath);
+				}
+			})();
 
 			// Check if user dismissed the share modal
 			if (!shareResult.success) {
@@ -198,6 +210,7 @@ export async function backupPubky(content: string, filename: string): Promise<Re
 				return err(dirResult.error.message);
 			}
 
+			checkActive();
 			const filepath = `${dirResult.value}/${fullFilename}`;
 
 			await RNFS.writeFile(filepath, Buffer.from(content, 'base64'));

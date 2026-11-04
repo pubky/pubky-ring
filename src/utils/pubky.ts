@@ -1,3 +1,12 @@
+import { AppState, Platform } from 'react-native';
+import {
+	assertNotAborted,
+	DeviceAuthError,
+	isDeviceAuthPromptActive,
+	isDeviceAuthRequired,
+	requireDeviceAuthentication,
+	waitForActiveRequest,
+} from './deviceAuth';
 import {
 	signUp,
 	signIn,
@@ -969,35 +978,71 @@ export const truncatePubky = (pubky: string): string => {
 };
 
 const TIMEOUT_MS = 20000;
-const timeout = (ms: number): Promise<void> =>
-	new Promise((_, reject): void => {
-		setTimeout(() => reject(new Error('Authentication request timed out')), ms);
-	});
 
 export const performAuth = async ({
 	pubky,
 	authUrl,
 	dispatch,
 	approvedCapabilities,
+	signal,
 }: {
 	pubky?: string;
 	authUrl: string;
 	dispatch: Dispatch;
 	approvedCapabilities?: string;
+	signal?: AbortSignal;
 }): Promise<Result<string>> => {
+	const request = new AbortController();
+	const abort = (): void => request.abort();
+	signal?.addEventListener('abort', abort, { once: true });
+	if (signal?.aborted) abort();
+	const cancelInBackground = (): void => {
+		if (!isDeviceAuthPromptActive(request.signal)) abort();
+	};
+	const subscription = AppState.addEventListener('change', state => {
+		if (state === 'background') cancelInBackground();
+	});
+	const blurSubscription =
+		Platform.OS === 'android' && isDeviceAuthRequired()
+			? AppState.addEventListener('blur', cancelInBackground)
+			: undefined;
+	let timer: ReturnType<typeof setTimeout> | undefined;
+	let timedOut = false;
+	const checkActive = (): void => {
+		assertNotAborted(request.signal);
+		if (pubky && !getPubkyDataFromStore(pubky)) throw new DeviceAuthError('cancelled');
+	};
 	try {
-		const isOnline = await checkNetworkConnection({
-			displayToastIfOnline: false,
-			displayToastIfOffline: false,
-		});
+		if (!pubky) return err(i18n.t('pubkyErrors.pubkyRequiredForAuth'));
+		checkActive();
+		await requireDeviceAuthentication(
+			i18n.t('deviceAuth.authorize', { pubky: truncatePubky(pubky) }),
+			request.signal,
+		);
+		checkActive();
+		// The network deadline begins after the user completes the OS challenge.
+		timer = setTimeout(() => {
+			timedOut = true;
+			abort();
+		}, TIMEOUT_MS);
+		const isOnline = await waitForActiveRequest(
+			checkNetworkConnection({
+				displayToastIfOnline: false,
+				displayToastIfOffline: false,
+			}),
+			request.signal,
+		);
 		if (!isOnline) {
 			return err(i18n.t('network.offlineDescription'));
 		}
+		checkActive();
 		const authPromise = (async (): Promise<Result<string>> => {
 			if (!pubky) {
 				return err(i18n.t('pubkyErrors.pubkyRequiredForAuth'));
 			}
+			checkActive();
 			const secretKeyRes = await getPubkySecretKey(pubky);
+			checkActive();
 			if (secretKeyRes.isErr()) {
 				return err(i18n.t('pubkyErrors.failedToGetSecretKey'));
 			}
@@ -1013,12 +1058,16 @@ export const performAuth = async ({
 				});
 				republishedDuringSignup = signUpRes.isOk();
 			}
+			checkActive();
 			const secretKey = secretKeyRes.value.secretKey;
-			const authorize = (): Promise<Result<string>> | Promise<Result<string[]>> =>
-				approvedCapabilities === undefined
+			const authorize = (): Promise<Result<string>> | Promise<Result<string[]>> => {
+				checkActive();
+				return approvedCapabilities === undefined
 					? auth(authUrl, secretKey)
 					: authWithCapabilities(authUrl, secretKey, approvedCapabilities);
+			};
 			const authRes = await authorize();
+			checkActive();
 			if (authRes.isErr()) {
 				const signInRes = await signInToHomeserver({
 					pubky,
@@ -1026,10 +1075,12 @@ export const performAuth = async ({
 					dispatch,
 					secretKey,
 				});
+				checkActive();
 				if (signInRes.isErr()) {
 					return err(getErrorMessage(signInRes.error, i18n.t('errors.signInFailed')));
 				}
 				const authRetryRes = await authorize();
+				checkActive();
 				if (authRetryRes.isErr()) {
 					console.error('Error processing auth:', authRes.error);
 					return err(getErrorMessage(authRes.error, i18n.t('errors.failedToProcessAuth')));
@@ -1041,12 +1092,17 @@ export const performAuth = async ({
 			return ok('success');
 		})();
 
-		const timeoutPromise = timeout(TIMEOUT_MS).then((): Result<string> => err(i18n.t('auth.timeoutError')));
-
-		return await Promise.race([authPromise, timeoutPromise]);
+		return await waitForActiveRequest(authPromise, request.signal);
 	} catch (error: unknown) {
+		if (timedOut) return err(i18n.t('auth.timeoutError'));
+		if (error instanceof DeviceAuthError) return err(error);
 		console.error('Auth Error:', error);
 		const errorMessage = error instanceof Error ? error.message : i18n.t('pubkyErrors.authorizationError');
 		return err(`Auth Error: ${errorMessage}`);
+	} finally {
+		clearTimeout(timer);
+		signal?.removeEventListener('abort', abort);
+		subscription.remove();
+		blurSubscription?.remove();
 	}
 };

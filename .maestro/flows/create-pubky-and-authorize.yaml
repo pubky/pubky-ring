@@ -10,3 +10,45 @@ env:
 - runFlow: ../shared/close-sheet.yaml
 - runFlow: ../shared/signup.yaml
 - runFlow: ../shared/authorize.yaml
+# Sign out only this pubky's Ring session, then reconnect after restarting the app.
+- tapOn:
+    id: PubkyBox-StagingTestPubky-0-Content
+- tapOn:
+    id: PubkyDetailEditButton
+- tapOn:
+    id: EditPubkyRemoveServerButton
+- tapOn: '^Cancel$'
+- assertVisible:
+    id: EditPubkyRemoveServerButton
+- tapOn:
+    id: EditPubkyRemoveServerButton
+- tapOn: '^Sign out$'
+- extendedWaitUntil:
+    visible: '^Sign in$'
+    timeout: 120000
+- assertNotVisible:
+    id: EditPubkyRemoveServerButton
+- assertNotVisible:
+    id: EditPubkyInviteCodeInput
+- tapOn:
+    id: EditPubkyCancelButton
+- tapOn:
+    id: AppHeaderBackButton
+- stopApp
+- launchApp
+- tapOn:
+    id: PubkyBox-StagingTestPubky-0-ActionButton
+- extendedWaitUntil:
+    visible: '^Sign in$'
+    timeout: 120000
+- assertNotVisible:
+    id: EditPubkyInviteCodeInput
+- tapOn:
+    id: EditPubkySaveButton
+- extendedWaitUntil:
+    notVisible:
+      id: EditPubkyNameInput
+    timeout: 120000
+- assertVisible:
+    id: PubkyBox-StagingTestPubky-0-ActionButton-Text
+    text: '^Authorize$'

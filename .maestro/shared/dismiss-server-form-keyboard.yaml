@@ -1,0 +1,19 @@
+appId: ${APP_ID}
+---
+# Server form inputs have no submit action; Return blurs a single-line input on iOS.
+# Maestro's iOS hideKeyboard gesture cannot dismiss the keyboard on this plain View.
+- runFlow:
+    when:
+      platform: iOS
+    commands:
+      # Wait for the form's autofocus/keyboard presentation before sending Return.
+      - tapOn:
+          id: '(Add|Edit)ServerLabelInput'
+      - waitForAnimationToEnd
+      - pressKey: Enter
+      - waitForAnimationToEnd
+- runFlow:
+    when:
+      platform: Android
+    commands:
+      - hideKeyboard

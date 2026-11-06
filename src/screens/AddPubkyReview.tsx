@@ -17,11 +17,11 @@ const AddPubkyReview = ({
 	route,
 }: NativeStackScreenProps<AddPubkyStackParamList, 'PubkyReview'>): ReactElement => {
 	const { t } = useTranslation();
-	const { pubky } = route.params;
+	const { pubky, justCreated } = route.params;
 	const pubkyData: PubkyData = { pubky, ...defaultPubkyState };
 
 	const onContinue = (): void => {
-		showSheet('edit-pubky', { pubky });
+		showSheet('edit-pubky', { pubky, justCreated });
 	};
 
 	return (

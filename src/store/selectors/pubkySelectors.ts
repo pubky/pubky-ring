@@ -1,6 +1,8 @@
 import { createSelector } from '@reduxjs/toolkit';
-import { Pubky, PubkySession } from '../../types/pubky';
+import { Homeserver, Pubky, PubkySession } from '../../types/pubky';
 import { RootState } from '../../types';
+import { normalizeHomeserver } from '../../utils/homeservers';
+import { defaultHomeserver } from '../shapes/pubky.ts';
 import { truncateStr } from '../../utils/pubky.ts';
 
 /**
@@ -16,6 +18,39 @@ export const getPubky = (state: RootState, pubky: string): Pubky => {
 };
 
 const selectAllPubkys = (state: RootState): { [key: string]: Pubky } => state.pubky.pubkys;
+const emptyHomeservers: Record<string, Homeserver> = {};
+const selectHomeservers = (state: RootState): Record<string, Homeserver> =>
+	state.pubky.homeservers ?? emptyHomeservers;
+
+export const getHomeservers = createSelector(
+	[selectHomeservers, selectAllPubkys],
+	(saved, pubkys): Homeserver[] => {
+		const servers: Record<string, Homeserver> = { [defaultHomeserver.publicKey]: defaultHomeserver };
+		for (const server of Object.values(saved)) {
+			const publicKey = normalizeHomeserver(server.publicKey);
+			if (publicKey && publicKey !== defaultHomeserver.publicKey)
+				servers[publicKey] = { ...server, publicKey };
+		}
+		for (const pubky of Object.values(pubkys)) {
+			const publicKey = normalizeHomeserver(pubky.homeserver);
+			if (publicKey && !servers[publicKey])
+				servers[publicKey] = {
+					publicKey,
+					name: `${publicKey.slice(0, 6)}…${publicKey.slice(-4)}`,
+				};
+		}
+		return Object.values(servers);
+	},
+);
+
+const selectPreferredHomeserver = (state: RootState): string | undefined => state.pubky.preferredHomeserver;
+export const getPreferredHomeserver = createSelector(
+	[getHomeservers, selectPreferredHomeserver],
+	(servers, preferred): string => {
+		const key = normalizeHomeserver(preferred ?? '');
+		return servers.some(server => server.publicKey === key) ? key! : defaultHomeserver.publicKey;
+	},
+);
 
 /**
  * Returns all signed up pubkys

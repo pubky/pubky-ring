@@ -1,6 +1,7 @@
+import { homeserverUseCount, normalizeHomeserver } from '../../utils/homeservers';
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { EBackupPreference, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
-import { initialState, defaultPubkyState } from '../shapes/pubky';
+import { EBackupPreference, Homeserver, ISetPubkyData, Pubky, PubkySession } from '../../types/pubky';
+import { initialState, defaultHomeserver, defaultPubkyState } from '../shapes/pubky';
 
 const pubkysSlice = createSlice({
 	name: 'pubky',
@@ -56,6 +57,49 @@ const pubkysSlice = createSlice({
 				state.pubkys[pubky].homeserver = homeserver;
 			}
 		},
+		addHomeserver: (state, action: PayloadAction<Homeserver>) => {
+			const name = action.payload.name.trim();
+			const publicKey = normalizeHomeserver(action.payload.publicKey);
+			if (!name || !publicKey || publicKey === defaultHomeserver.publicKey) return;
+			state.homeservers ??= {};
+			if (!state.homeservers[publicKey]) state.homeservers[publicKey] = { name, publicKey };
+		},
+		updateHomeserver: (
+			state,
+			action: PayloadAction<{ originalPublicKey: string; homeserver: Homeserver }>,
+		) => {
+			const { originalPublicKey, homeserver } = action.payload;
+			const publicKey = normalizeHomeserver(homeserver.publicKey);
+			const name = homeserver.name.trim();
+			// A server's key is its identity. Editing only changes its shared label.
+			if (!name || !publicKey || publicKey !== originalPublicKey || publicKey === defaultHomeserver.publicKey)
+				return;
+			if (!state.homeservers?.[publicKey] && !homeserverUseCount(state.pubkys, publicKey)) return;
+			state.homeservers ??= {};
+			state.homeservers[publicKey] = { name, publicKey };
+		},
+		setPreferredHomeserver: (state, action: PayloadAction<string>) => {
+			const publicKey = normalizeHomeserver(action.payload);
+			if (
+				publicKey &&
+				(publicKey === defaultHomeserver.publicKey ||
+					state.homeservers?.[publicKey] ||
+					homeserverUseCount(state.pubkys, publicKey))
+			) {
+				state.preferredHomeserver = publicKey;
+			}
+		},
+		removeHomeserver: (state, action: PayloadAction<string>) => {
+			const publicKey = normalizeHomeserver(action.payload);
+			if (
+				!publicKey ||
+				publicKey === defaultHomeserver.publicKey ||
+				homeserverUseCount(state.pubkys, publicKey)
+			)
+				return;
+			delete state.homeservers?.[publicKey];
+			if (state.preferredHomeserver === publicKey) state.preferredHomeserver = defaultHomeserver.publicKey;
+		},
 		setSignedUp: (state, action: PayloadAction<{ pubky: string; signedUp: boolean }>) => {
 			const { pubky, signedUp } = action.payload;
 			if (state.pubkys[pubky]) {
@@ -109,6 +153,10 @@ export const {
 	setPubkyData,
 	setDeepLink,
 	setHomeserver,
+	addHomeserver,
+	updateHomeserver,
+	removeHomeserver,
+	setPreferredHomeserver,
 	setSignedUp,
 	addSession,
 	removeSession,

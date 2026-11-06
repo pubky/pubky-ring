@@ -1,7 +1,17 @@
-import { EBackupPreference, Pubky, PubkyState, TProfile } from '../../types/pubky.ts';
+import { EBackupPreference, Homeserver, Pubky, PubkyState, TProfile } from '../../types/pubky.ts';
+import { DEFAULT_HOMESERVER } from '../../utils/constants.ts';
+
+export const defaultHomeserver: Homeserver = {
+	name: 'Synonym',
+	publicKey: DEFAULT_HOMESERVER,
+};
 
 export const initialState: PubkyState = {
 	pubkys: {},
+	preferredHomeserver: defaultHomeserver.publicKey,
+	homeservers: {
+		[defaultHomeserver.publicKey]: defaultHomeserver,
+	},
 	deepLink: '',
 	processing: {},
 };

@@ -30,7 +30,7 @@ const AddPubkyMain = ({
 			return;
 		}
 
-		navigation.replace('PubkyReview', { pubky: pubky.value });
+		navigation.replace('PubkyReview', { pubky: pubky.value, justCreated: true });
 	}, [dispatch, navigation, t]);
 
 	return (

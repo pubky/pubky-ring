@@ -1,3 +1,4 @@
+import { classifySignupTokenError } from './signupTokenErrors';
 import i18n from '../i18n';
 
 export type LoadingErrorModalFields = {
@@ -6,11 +7,11 @@ export type LoadingErrorModalFields = {
 };
 
 export const getSignupTokenErrorDescription = (errorMessage: string): string | undefined => {
-	if (errorMessage.includes('Token already used')) {
+	if (classifySignupTokenError(errorMessage) === 'used') {
 		return i18n.t('signup.alreadyUsedDescription');
-	} else if (errorMessage.includes('Token required')) {
+	} else if (classifySignupTokenError(errorMessage) === 'required') {
 		return i18n.t('signup.requiredDescription');
-	} else if (errorMessage.includes('Invalid token')) {
+	} else if (classifySignupTokenError(errorMessage) === 'invalid') {
 		return i18n.t('signup.invalidDescription');
 	}
 

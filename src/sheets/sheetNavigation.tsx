@@ -158,6 +158,25 @@ export const resetRootToHomeWithSheet = <TSheetId extends SheetId>(
 
 const sheetRouteNameSet = new Set<string>(Object.values(sheetRouteById));
 
+/** Leave modal setup before entering the normal Settings screen hierarchy. */
+export const openHomeserverSettings = (): void => {
+	if (!navigationRef.isReady()) return;
+	const rootState = navigationRef.getRootState();
+	const screens = rootState.routes.filter(route => !sheetRouteNameSet.has(route.name));
+	const settingsIndex = screens.findIndex(route => route.name === 'Settings');
+	const routes = [
+		...(settingsIndex >= 0
+			? screens.slice(0, settingsIndex + 1)
+			: [...(screens.length ? screens : [{ name: 'Home' }]), { name: 'Settings' }]),
+		{ name: 'Homeservers' },
+	];
+	// Remove the sheet in the same update: iOS otherwise inherits its modal presentation.
+	navigationRef.dispatch({
+		...CommonActions.reset({ ...rootState, routes, index: routes.length - 1 }),
+		target: rootState.key,
+	});
+};
+
 /** Closes whichever sheet is currently on top of the root stack, if any. */
 export const hideActiveSheet = (): void => {
 	if (!navigationRef.isReady()) {

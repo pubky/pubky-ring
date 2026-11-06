@@ -16,6 +16,8 @@ import {
 	getShowOnboarding,
 	getSignedTermsOfUse,
 } from '../store/selectors/settingsSelectors.ts';
+import HomeserversScreen from '../screens/HomeserversScreen';
+import HomeserverFormScreen from '../screens/HomeserverFormScreen';
 import SettingsScreen from '../screens/SettingsScreen.tsx';
 import TermsOfUse from '../screens/TermsOfUse.tsx';
 import About from '../screens/About.tsx';
@@ -108,6 +110,12 @@ const RootNavigator = (): ReactElement => {
 				<Stack.Screen name="AuthorizedGrant" component={AuthorizedGrantScreen} />
 				<Stack.Screen name="About" component={About} />
 				<Stack.Screen name="Settings" component={SettingsScreen} />
+				<Stack.Screen name="Homeservers" component={HomeserversScreen} options={{ presentation: 'card' }} />
+				<Stack.Screen
+					name="HomeserverForm"
+					component={HomeserverFormScreen}
+					options={{ presentation: 'card' }}
+				/>
 				<Stack.Screen name="AddPubkySheet" component={AddPubkySheet} options={sheetScreenOptions} />
 				<Stack.Screen name="EditPubkySheet" component={EditPubkySheet} options={sheetScreenOptions} />
 				<Stack.Screen name="DeletePubkySheet" component={DeletePubkySheet} options={sheetScreenOptions} />

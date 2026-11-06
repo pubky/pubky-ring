@@ -1,6 +1,9 @@
 import { PersistedState } from 'redux-persist';
 import { signOut } from '@synonymdev/react-native-pubky';
+import { normalizeHomeserver } from '../../utils/homeservers';
+import type { Homeserver } from '../../types/pubky';
 import { EBackupPreference } from '../../types/pubky';
+import { defaultHomeserver } from '../shapes/pubky.ts';
 import { getSessionSecret, resetSessionSecret } from '../../utils/keychain';
 import type { SettingsState } from '../../types/settings';
 import { initialState as settingsInitialState } from '../shapes/settings';
@@ -261,6 +264,51 @@ const migrations = {
 				...state.settings,
 				alwaysShowAuthDetails:
 					state.settings?.alwaysShowAuthDetails ?? settingsInitialState.alwaysShowAuthDetails,
+			},
+		};
+	},
+	// @ts-ignore
+	13: (state): PersistedState => {
+		const updatedPubkys = { ...state.pubky.pubkys };
+
+		Object.keys(updatedPubkys).forEach(pubkyKey => {
+			const pubky = updatedPubkys[pubkyKey];
+			// Older signed-up pubkys used an empty homeserver to mean the default homeserver.
+			if (pubky.signedUp && !pubky.homeserver && !pubky.sourceApp) {
+				updatedPubkys[pubkyKey] = {
+					...pubky,
+					homeserver: defaultHomeserver.publicKey,
+				};
+			}
+		});
+
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: updatedPubkys,
+				homeservers: {
+					...(state.pubky.homeservers ?? {}),
+					[defaultHomeserver.publicKey]: defaultHomeserver,
+				},
+			},
+		};
+	},
+	// @ts-ignore
+	14: (state): PersistedState => {
+		const homeservers: Record<string, Homeserver> = { [defaultHomeserver.publicKey]: defaultHomeserver };
+		for (const server of Object.values(state.pubky.homeservers ?? {}) as Homeserver[]) {
+			const publicKey = normalizeHomeserver(server.publicKey);
+			if (publicKey && publicKey !== defaultHomeserver.publicKey)
+				homeservers[publicKey] = { name: server.name, publicKey };
+		}
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				homeservers,
+				preferredHomeserver:
+					normalizeHomeserver(state.pubky.preferredHomeserver) ?? defaultHomeserver.publicKey,
 			},
 		};
 	},

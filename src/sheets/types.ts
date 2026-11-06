@@ -61,7 +61,15 @@ export type BackupSheetParams = BackupSheetScreenParams;
 
 export interface EditPubkySheetParams {
 	pubky: string;
+	// Only the key-generation flow can skip initial homeserver discovery.
+	justCreated?: boolean;
 }
+
+export type EditPubkyStackParamList = {
+	Main: EditPubkySheetParams;
+	SelectServer: EditPubkySheetParams;
+	Scanner: undefined;
+};
 
 export type AddPubkyImportSuccessParams = {
 	pubky: string;
@@ -86,6 +94,7 @@ export type AddPubkyStackParamList = {
 	Scanner: AddPubkyScannerParams;
 	PubkyReview: {
 		pubky: string;
+		justCreated?: boolean;
 	};
 	ImportOptions: undefined;
 	ImportFileScreen: ImportFileScreenParams;

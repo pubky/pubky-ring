@@ -291,13 +291,31 @@
 		"scanQrToImport": "Scan import QR"
 	},
 	"editPubkySheet": {
-		"pubkyNameLabel": "Pubky name (label)",
-		"inviteCodeOptional": "Invite code (optional)",
+		"pubkyNameLabel": "Label",
 		"pubkyNamePlaceholder": "Pubky Name",
-		"inviteCodePlaceholder": "Invite Code (Optional)",
-		"reset": "Reset",
+		"inviteCodePlaceholder": "XXXX-XXXX-XXXX",
 		"unableToSignUp": "Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.",
-		"unableToSignIn": "Unable to sign in to homeserver: {{error}}"
+		"unableToSignIn": "Unable to sign in to homeserver: {{error}}",
+		"homeserverLabel": "Homeserver",
+		"serverButtonSelect": "Select homeserver",
+		"serverButtonChange": "Change homeserver"
+	},
+	"selectServer": {
+		"title": "Select Homeserver",
+		"defaultName": "{{name}} (default)",
+		"migrationNotice": "Please note your existing data does not migrate automatically when switching homeservers.",
+		"addButton": "Add Homeserver"
+	},
+	"addServer": {
+		"title": "Add Homeserver",
+		"label": "Label",
+		"labelPlaceholder": "Label for homeserver",
+		"homeserverLabel": "Server",
+		"homeserverPlaceholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"duplicateError": "This homeserver has already been added."
+	},
+	"editServer": {
+		"title": "Edit Homeserver"
 	},
 	"scanInvite": {
 		"invalidInviteCode": "Invalid Invite Code",
@@ -465,5 +483,45 @@
 		"unavailable": "Device authentication is unavailable. Set up or restore a device screen lock in Settings, then try again.",
 		"busy": "Another device authentication request is in progress. Try again when it finishes.",
 		"failed": "Device authentication did not succeed. Try again or use your device screen lock."
+	},
+	"homeservers": {
+		"title": "Homeservers",
+		"description": "Save homeservers to use with your Pubkys. The default is preselected for new setups.",
+		"manage": "Manage homeservers",
+		"signUp": "Sign up",
+		"signIn": "Sign in",
+		"checking": "Checking homeserver…",
+		"lookupFailed": "Unable to look up this pubky’s homeserver. Please try again.",
+		"signInFailed": "Unable to sign in. Please try again.",
+		"signInRequired": "Sign in to view authorized apps.",
+		"accountChanged": "This pubky’s homeserver has changed. Check its homeserver and try again.",
+		"changedNotice": "Homeserver changed. Please sign in again.",
+		"usedBy_one": "Used by {{count}} Pubky",
+		"usedBy_other": "Used by {{count}} Pubkys",
+		"makeDefault": "Make default",
+		"remove": "Remove",
+		"inUse": "Change the homeserver of these Pubkys before removing it.",
+		"invalidKey": "Enter a valid homeserver public key.",
+		"keyReadOnly": "The public key identifies this server. Add another server to use a different key.",
+		"catalogHint": "This saves a server to your shared list. It does not sign up or move any Pubkys.",
+		"haveInvite": "Have an invite?",
+		"pasteInvite": "Paste invite",
+		"pasteLink": "Paste link",
+		"scanInvite": "Scan invite",
+		"inviteOptional": "Invite code (if required)",
+		"customInvitePlaceholder": "Invite code",
+		"inputError": {
+			"invalid": "Paste or scan an invite code or a homeserver signup link.",
+			"authorization": "This link also requests app authorization. Open it through the app requesting access instead.",
+			"selectServer": "Select a homeserver before entering an invite code."
+		},
+		"inviteRequired": "Invite code (required)",
+		"signOut": "Sign this pubky out of Ring",
+		"signOutFailed": "Unable to sign Ring out: {{error}}",
+		"signOutTitle": "Sign this pubky out?",
+		"signOutDescription": "This only signs it out of Ring. Your server data and other apps’ access will be kept.",
+		"signOutAction": "Sign out",
+		"signedOut": "Signed out",
+		"cleanupPending": "Some earlier Ring access could not be revoked."
 	}
 }

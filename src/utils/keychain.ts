@@ -97,11 +97,20 @@ export const resetSessionSecret = async ({
 	});
 };
 
-export const resetPubkySessionSecrets = async ({ pubky }: { pubky: string }): Promise<Result<boolean>> => {
+export const resetPubkySessionSecrets = async ({
+	pubky,
+	keepSessionIds = [],
+}: {
+	pubky: string;
+	keepSessionIds?: string[];
+}): Promise<Result<boolean>> => {
 	try {
 		const sessionSecretKeyPrefix = getSessionSecretKeyPrefix(pubky);
+		const keepKeys = new Set(keepSessionIds.map(sessionId => getSessionSecretKey({ pubky, sessionId })));
 		const allServices = await getAllKeychainKeys();
-		const sessionSecretKeys = allServices.filter(key => key.startsWith(sessionSecretKeyPrefix));
+		const sessionSecretKeys = allServices.filter(
+			key => key.startsWith(sessionSecretKeyPrefix) && !keepKeys.has(key),
+		);
 		const results = await Promise.all(sessionSecretKeys.map(key => resetKeychainValue({ key })));
 		const error = results.find(result => result.isErr());
 

@@ -1,3 +1,6 @@
+import { normalizeHomeserver } from './homeservers';
+import { HomeserverChangedError } from './homeserverChangedError';
+import { resolveHomeserver } from './resolveHomeserver';
 import { AppState, Platform } from 'react-native';
 import {
 	assertNotAborted,
@@ -115,27 +118,58 @@ export type AuthorizedGrants = {
 	sessionId: string;
 };
 
-const revokeUnsavedHomeserverSession = async (sessionToken: string): Promise<void> => {
-	const signOutRes = await signOut(sessionToken);
+export type HomeserverSignOutResult = { homeserver: string; cleanupPending: boolean };
+
+// Serialize refresh and sign-out through every native/Keychain await for the same pubky.
+const homeserverOperations = new Map<string, Promise<void>>();
+const pendingSignOuts = new Map<string, Promise<Result<HomeserverSignOutResult>>>();
+const withHomeserverOperation = async <T>(pubky: string, operation: () => Promise<T>): Promise<T> => {
+	const previous = homeserverOperations.get(pubky);
+	let release!: () => void;
+	const current = new Promise<void>(resolve => {
+		release = resolve;
+	});
+	homeserverOperations.set(pubky, current);
+	try {
+		await previous;
+		return await operation();
+	} finally {
+		release();
+		if (homeserverOperations.get(pubky) === current) homeserverOperations.delete(pubky);
+	}
+};
+
+const revokeUnsavedHomeserverSession = async (sessionToken: string): Promise<Result<string>> => {
+	let signOutRes: Result<string>;
+	try {
+		signOutRes = await signOut(sessionToken);
+	} catch (error) {
+		signOutRes = err(getErrorMessage(error, i18n.t('errors.unknownError')));
+	}
 	if (signOutRes.isErr()) {
 		console.error('Failed to revoke unsaved homeserver session', signOutRes.error.message);
 	}
+	return signOutRes;
 };
 
 const saveHomeserverSession = async ({
 	pubky,
 	sessionInfo,
 	dispatch,
+	cleanupOnly = false,
 }: {
 	pubky: string;
 	sessionInfo: SessionInfo;
 	dispatch: Dispatch;
+	cleanupOnly?: boolean;
 }): Promise<Result<PubkySession>> => {
 	const session: PubkySession = {
 		id: uuid(sessionInfo.grant_secret, SESSION_ID_NAMESPACE),
 		grant_id: sessionInfo.grant_id,
 		capabilities: sessionInfo.capabilities,
 		created_at: Date.now(),
+		homeserver: normalizeHomeserver(sessionInfo.homeserver),
+		...(cleanupOnly ? { cleanupOnly: true } : {}),
 	};
 	const secretRes = await setSessionSecret({
 		pubky,
@@ -430,12 +464,6 @@ export const importPubky = async ({
 			return err(i18n.t('pubkyErrors.failedToGetPublicKey'));
 		}
 		const pubky = pubkyRes.value.public_key;
-		const homeserver = await lookupHomeserver(pubky);
-		signInToHomeserver({ pubky, homeserver, dispatch, secretKey }).then(res => {
-			if (res.isErr()) {
-				dispatch(setSignedUp({ pubky, signedUp: false }));
-			}
-		});
 		const backupPreference = mnemonic ? EBackupPreference.recoveryPhrase : EBackupPreference.encryptedFile;
 		const savePubkyRes = await savePubky({
 			secretKey,
@@ -446,10 +474,12 @@ export const importPubky = async ({
 			isBackedUp: true,
 		});
 		if (savePubkyRes.isOk()) {
-			// Only set homeserver if we have a valid non-empty value
-			if (homeserver?.trim()) {
-				dispatch(setHomeserver({ pubky, homeserver }));
-			}
+			const lookup = await resolveHomeserver(pubky);
+			// A failed lookup leaves the key imported. Setup can retry discovery.
+			if (lookup.isErr() || !lookup.value) return savePubkyRes;
+			const homeserver = lookup.value;
+			dispatch(setHomeserver({ pubky, homeserver }));
+			await signInToHomeserver({ pubky, homeserver, dispatch, secretKey, allowRepublish: false });
 			// If they're using Synonym's default or staging homeserver, fetch the profile name and set it accordingly.
 			if (homeserver === PRODUCTION_HOMESERVER || homeserver === STAGING_HOMESERVER) {
 				const app = homeserver === STAGING_HOMESERVER ? STAGING_APP_HOST : PRODUCTION_APP_HOST;
@@ -772,11 +802,13 @@ export const signInToHomeserver = async ({
 	homeserver,
 	dispatch,
 	secretKey,
+	allowRepublish = true,
 }: {
 	pubky: string;
 	homeserver?: string;
 	dispatch: Dispatch;
 	secretKey?: string;
+	allowRepublish?: boolean;
 }): Promise<Result<SessionInfo>> => {
 	if (getPubkyDataFromStore(pubky)?.sourceApp) {
 		return err(i18n.t('sharedPubky.homeserverUnsupported'));
@@ -798,6 +830,7 @@ export const signInToHomeserver = async ({
 	let response: SessionInfo;
 	const signInRes = await signIn(secretKey, appApplicationId);
 	if (signInRes.isErr()) {
+		if (!allowRepublish) return err(signInRes.error);
 		const republishRes = await republishHomeserver({
 			pubky,
 			secretKey,
@@ -816,6 +849,23 @@ export const signInToHomeserver = async ({
 		response = signInResTwo.value;
 	} else {
 		response = signInRes.value;
+	}
+	const actualHomeserver = normalizeHomeserver(response.homeserver);
+	if (!allowRepublish && actualHomeserver !== normalizeHomeserver(homeserver)) {
+		const cleanup = await revokeUnsavedHomeserverSession(response.grant_secret);
+		if (cleanup.isErr()) {
+			const saved = await saveHomeserverSession({
+				pubky,
+				sessionInfo: response,
+				dispatch,
+				cleanupOnly: true,
+			});
+			if (saved.isErr()) return err(saved.error);
+		}
+		if (actualHomeserver) {
+			return err(new HomeserverChangedError(actualHomeserver, i18n.t('homeservers.accountChanged')));
+		}
+		return err(i18n.t('homeservers.accountChanged'));
 	}
 	const saveSessionRes = await saveHomeserverSession({ pubky, sessionInfo: response, dispatch });
 	if (saveSessionRes.isErr()) {
@@ -848,11 +898,15 @@ const listGrantsWithStoredSession = async (
 	pubky: string,
 	dispatch: Dispatch,
 ): Promise<Result<AuthorizedGrants> | undefined> => {
-	const sessions = getPubkyDataFromStore(pubky)?.sessions ?? [];
+	const data = getPubkyDataFromStore(pubky);
+	const sessions = data?.sessions ?? [];
+	const homeserver = normalizeHomeserver(data?.homeserver);
 	const storedGrantIds = sessions.map(session => session.grant_id);
 	let transientError: Error | undefined;
 
 	for (const session of sessions) {
+		const sessionHomeserver = normalizeHomeserver(session.homeserver);
+		if (session.cleanupOnly || (sessionHomeserver && sessionHomeserver !== homeserver)) continue;
 		const sessionSecretRes = await getSessionSecret({ pubky, sessionId: session.id });
 		if (sessionSecretRes.isErr()) {
 			transientError = sessionSecretRes.error;
@@ -886,28 +940,43 @@ export const listAuthorizedGrants = async ({
 	pubky: string;
 	dispatch: Dispatch;
 }): Promise<Result<AuthorizedGrants>> => {
-	if (!grantManagementBindings.listGrants) {
-		return err(grantManagementUnavailable('listGrants'));
-	}
+	if (pendingSignOuts.has(pubky)) return err(i18n.t('homeservers.signInRequired'));
+	return withHomeserverOperation(pubky, async () => {
+		if (pendingSignOuts.has(pubky) || !getPubkyDataFromStore(pubky)?.signedUp) {
+			return err(i18n.t('homeservers.signInRequired'));
+		}
+		if (!grantManagementBindings.listGrants) {
+			return err(grantManagementUnavailable('listGrants'));
+		}
 
-	const storedResult = await listGrantsWithStoredSession(pubky, dispatch);
-	if (storedResult) {
-		return storedResult;
-	}
+		const storedResult = await listGrantsWithStoredSession(pubky, dispatch);
+		if (storedResult) {
+			return storedResult;
+		}
 
-	const signInRes = await signInToHomeserver({ pubky, dispatch });
-	if (signInRes.isErr()) {
-		return err(signInRes.error);
-	}
+		const signInRes = await signInToHomeserver({ pubky, dispatch });
+		if (signInRes.isErr()) {
+			return err(signInRes.error);
+		}
+		// Native sign-in follows the public mapping. Reuse that server's session on
+		// subsequent refreshes, even if listing its grants fails this time.
+		const homeserver = normalizeHomeserver(signInRes.value.homeserver);
+		if (homeserver) {
+			dispatch(setPubkyData({ pubky, data: { homeserver, lastKnownHomeserver: homeserver } }));
+		}
 
-	const grantsRes = await listGrants(signInRes.value.grant_secret);
-	if (grantsRes.isErr()) {
-		return err(grantsRes.error);
-	}
+		const grantsRes = await listGrants(signInRes.value.grant_secret);
+		if (grantsRes.isErr()) {
+			return err(grantsRes.error);
+		}
 
-	return ok({
-		grants: omitLocalGrants(grantsRes.value, [signInRes.value.grant_id]),
-		sessionId: uuid(signInRes.value.grant_secret, SESSION_ID_NAMESPACE),
+		return ok({
+			grants: omitLocalGrants(grantsRes.value, [
+				...(getPubkyDataFromStore(pubky)?.sessions ?? []).map(session => session.grant_id),
+				signInRes.value.grant_id,
+			]),
+			sessionId: uuid(signInRes.value.grant_secret, SESSION_ID_NAMESPACE),
+		});
 	});
 };
 
@@ -930,6 +999,134 @@ export const revokeAuthorizedGrant = async ({
 	}
 
 	return revokeGrant(sessionSecretRes.value, grantId);
+};
+
+type HomeserverSignOutArgs = { pubky: string; homeserver: string; dispatch: Dispatch };
+
+// These SDK restore errors refer to the grant's signed expiry, not its bearer token.
+const isExpiredGrantError = (error: Error): boolean =>
+	['stored grant credential has expired', 'delegated grant credential has expired'].some(message =>
+		error.message.toLowerCase().includes(message),
+	);
+
+const signOutRingFromHomeserverOnce = async ({
+	pubky,
+	homeserver,
+	dispatch,
+}: HomeserverSignOutArgs): Promise<Result<HomeserverSignOutResult>> => {
+	const data = getPubkyDataFromStore(pubky);
+	if (!data || data.sourceApp) return err(i18n.t('sharedPubky.homeserverUnsupported'));
+	if (!normalizeHomeserver(homeserver)) return err(i18n.t('pubkyErrors.homeserverNotFound'));
+	if (!grantManagementBindings.listGrants || !grantManagementBindings.revokeGrant) {
+		return err(grantManagementUnavailable('revokeGrant'));
+	}
+	const secret = await getPubkySecretKey(pubky);
+	if (secret.isErr()) return err(secret.error);
+	// Follow the public mapping without republishing it, including moves made in another client.
+	const signedIn = await signIn(secret.value.secretKey, appApplicationId);
+	if (signedIn.isErr()) return err(signedIn.error);
+	const management = signedIn.value;
+	const mappedHomeserver = normalizeHomeserver(management.homeserver);
+	if (!mappedHomeserver) {
+		const cleanup = await revokeUnsavedHomeserverSession(management.grant_secret);
+		if (cleanup.isErr()) {
+			const saved = await saveHomeserverSession({
+				pubky,
+				sessionInfo: management,
+				dispatch,
+				cleanupOnly: true,
+			});
+			if (saved.isErr()) return err(saved.error);
+		}
+		return err(i18n.t('pubkyErrors.homeserverNotFound'));
+	}
+	// Keep the temporary management grant available if any current-server operation fails.
+	const saved = await saveHomeserverSession({ pubky, sessionInfo: management, dispatch });
+	if (saved.isErr()) return err(saved.error);
+	const records = new Map([...(data.sessions ?? []), saved.value].map(session => [session.id, session]));
+	const forget = async (ids: string[]): Promise<void> => {
+		for (const sessionId of ids) {
+			await discardStoredSession({ pubky, sessionId, dispatch });
+			records.delete(sessionId);
+		}
+	};
+	const grants = await listGrants(management.grant_secret);
+	if (grants.isErr()) return err(grants.error);
+	const currentGrantIds = new Set(grants.value.map(grant => grant.grant_id));
+	const currentSessions = [...records.values()].filter(session => {
+		const server = normalizeHomeserver(session.homeserver);
+		return server === mappedHomeserver || (!server && currentGrantIds.has(session.grant_id));
+	});
+	const currentSessionIds = new Set(currentSessions.map(session => session.id));
+
+	// Other servers and unmatched legacy records use their own tokens. Uncertain failures
+	// become cleanup-only records; they must not prevent the current server's sign-out.
+	for (const session of [...records.values()]) {
+		if (!records.has(session.id) || currentSessionIds.has(session.id)) continue;
+		const token = await getSessionSecret({ pubky, sessionId: session.id });
+		const cleanup = token.isErr()
+			? err<string>(token.error)
+			: await revokeUnsavedHomeserverSession(token.value);
+		if (cleanup.isOk() || (token.isOk() && isExpiredGrantError(cleanup.error))) {
+			const server = normalizeHomeserver(session.homeserver);
+			const ids = server
+				? [...records.values()]
+						.filter(
+							record =>
+								record.grant_id === session.grant_id && normalizeHomeserver(record.homeserver) === server,
+						)
+						.map(record => record.id)
+				: [session.id];
+			await forget(ids);
+		} else {
+			records.set(session.id, { ...session, cleanupOnly: true });
+			dispatch(setPubkyData({ pubky, data: { sessions: [...records.values()] } }));
+		}
+	}
+	const forgetCurrentGrant = (grantId: string): Promise<void> =>
+		forget(currentSessions.filter(session => session.grant_id === grantId).map(session => session.id));
+	for (const grantId of new Set(currentSessions.map(session => session.grant_id))) {
+		if (grantId === management.grant_id) continue;
+		if (currentGrantIds.has(grantId)) {
+			const revoked = await revokeGrant(management.grant_secret, grantId);
+			if (revoked.isErr()) return err(revoked.error);
+		}
+		// Absence is authoritative only for records tied to this server.
+		await forgetCurrentGrant(grantId);
+	}
+	const revokedManagement = await revokeGrant(management.grant_secret, management.grant_id);
+	if (revokedManagement.isErr()) return err(revokedManagement.error);
+	await forgetCurrentGrant(management.grant_id);
+	const pending = [...records.values()];
+	const cleared = await resetPubkySessionSecrets({
+		pubky,
+		...(pending.length ? { keepSessionIds: pending.map(session => session.id) } : {}),
+	});
+	if (cleared.isErr()) return err(cleared.error);
+	dispatch(
+		setPubkyData({
+			pubky,
+			data: {
+				homeserver: mappedHomeserver,
+				lastKnownHomeserver: mappedHomeserver,
+				signedUp: false,
+				signupToken: '',
+				sessions: pending,
+			},
+		}),
+	);
+	return ok({ homeserver: mappedHomeserver, cleanupPending: pending.length > 0 });
+};
+
+/** Revoke this installation's Ring grants after draining any active grant refresh. */
+export const signOutRingFromHomeserver = (
+	args: HomeserverSignOutArgs,
+): Promise<Result<HomeserverSignOutResult>> => {
+	const pending = pendingSignOuts.get(args.pubky);
+	if (pending) return pending;
+	const request = withHomeserverOperation(args.pubky, () => signOutRingFromHomeserverOnce(args));
+	pendingSignOuts.set(args.pubky, request);
+	return request.finally(() => pendingSignOuts.delete(args.pubky));
 };
 
 export const revokeHomeserverSession = async (

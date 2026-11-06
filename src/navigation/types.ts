@@ -1,4 +1,4 @@
-import { GrantInfo, Pubky } from '../types/pubky.ts';
+import { GrantInfo, Homeserver, Pubky } from '../types/pubky.ts';
 import type {
 	AddPubkySheetParams,
 	AuthSheetParams,
@@ -21,6 +21,8 @@ export type RootStackParamList = {
 	Home: undefined;
 	About: undefined;
 	Settings: undefined;
+	Homeservers: undefined;
+	HomeserverForm: { server?: Homeserver } | undefined;
 	PubkyDetail: {
 		pubky: string;
 		index: number;

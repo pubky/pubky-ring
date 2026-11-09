@@ -206,6 +206,18 @@ const SettingsScreen = ({ navigation }: Props): ReactElement => {
 			<AppHeader title={t('screenTitles.settings')} />
 
 			<ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
+				<View>
+					<View style={styles.textSection}>
+						<TextXsM>{t('homeservers.title')}</TextXsM>
+						<TextBaseM style={styles.sectionDescription}>{t('homeservers.description')}</TextBaseM>
+					</View>
+					<Button
+						text={t('homeservers.manage')}
+						variant="dark"
+						testID="ManageHomeserversButton"
+						onPress={() => navigation.navigate('Homeservers')}
+					/>
+				</View>
 				<View accessibilityRole="radiogroup" accessibilityLabel={t('settings.auth')}>
 					<TextXsM style={styles.authTitle}>{t('settings.auth')}</TextXsM>
 					{AUTH_DISPLAY_OPTIONS.map(({ value, label, testID }) => {

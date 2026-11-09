@@ -1,0 +1,65 @@
+appId: ${APP_ID}
+name: homeserver-management
+env:
+  TEST_HOMESERVER: yyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy
+---
+- launchApp:
+    clearState: true
+- runFlow: ../shared/onboarding.yaml
+- tapOn:
+    id: HomeHeaderSettingsButton
+- tapOn:
+    id: ManageHomeserversButton
+- tapOn:
+    id: HomeserversAddButton
+- tapOn:
+    id: AddServerLabelInput
+- inputText: Test server
+- tapOn:
+    id: AddServerHomeserverInput
+- inputText: ${TEST_HOMESERVER}
+- runFlow: ../shared/dismiss-server-form-keyboard.yaml
+- tapOn:
+    id: AddServerSaveButton
+- tapOn:
+    id: HomeserverRename-${TEST_HOMESERVER}
+- runFlow:
+    file: ../shared/clear-input-text.yaml
+    env:
+      INPUT_ID: EditServerLabelInput
+- inputText: Renamed test server
+- runFlow: ../shared/dismiss-server-form-keyboard.yaml
+- tapOn:
+    id: EditServerDefaultCheckbox
+- tapOn:
+    id: EditServerSaveButton
+- assertVisible: 'Renamed test server \(default\)'
+# Cancelling an edit must leave the saved default unchanged.
+- tapOn:
+    id: HomeserverRename-${TEST_HOMESERVER}
+- runFlow: ../shared/dismiss-server-form-keyboard.yaml
+- tapOn:
+    id: EditServerDefaultCheckbox
+- tapOn:
+    id: EditServerCancelButton
+- assertVisible: 'Renamed test server \(default\)'
+- stopApp
+- launchApp
+- tapOn:
+    id: HomeHeaderSettingsButton
+- tapOn:
+    id: ManageHomeserversButton
+- assertVisible: 'Renamed test server \(default\)'
+- tapOn:
+    id: HomeserverRename-${TEST_HOMESERVER}
+- runFlow: ../shared/dismiss-server-form-keyboard.yaml
+- tapOn:
+    id: EditServerDefaultCheckbox
+- tapOn:
+    id: EditServerSaveButton
+- assertVisible: 'Synonym \(default\)'
+- tapOn:
+    id: HomeserverRemove-${TEST_HOMESERVER}
+- assertNotVisible:
+    id: HomeserverRename-${TEST_HOMESERVER}
+- assertVisible: 'Synonym \(default\)'

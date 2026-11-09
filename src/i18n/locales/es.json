@@ -293,12 +293,30 @@
 	},
 	"editPubkySheet": {
 		"pubkyNameLabel": "Nombre del pubky (etiqueta)",
-		"inviteCodeOptional": "Código de invitación (opcional)",
 		"pubkyNamePlaceholder": "Pubky Nombre",
-		"inviteCodePlaceholder": "Código de invitación (opcional)",
-		"reset": "Reinicie",
+		"inviteCodePlaceholder": "XXXX-XXXX-XXXX",
 		"unableToSignUp": "No es posible registrarse con el servidor doméstico. Por favor, actualice el servidor doméstico y/o el código de invitación e inténtelo de nuevo.",
-		"unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}"
+		"unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}",
+		"homeserverLabel": "Homeserver",
+		"serverButtonSelect": "Seleccionar homeserver",
+		"serverButtonChange": "Cambiar homeserver"
+	},
+	"selectServer": {
+		"title": "Seleccionar homeserver",
+		"defaultName": "{{name}} (predeterminado)",
+		"migrationNotice": "Tenga en cuenta que sus datos existentes no migran automáticamente al cambiar de homeserver.",
+		"addButton": "Añadir homeserver"
+	},
+	"addServer": {
+		"title": "Añadir homeserver",
+		"label": "Etiqueta",
+		"labelPlaceholder": "Etiqueta para el homeserver",
+		"homeserverLabel": "Homeserver",
+		"homeserverPlaceholder": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+		"duplicateError": "Este homeserver ya se ha añadido."
+	},
+	"editServer": {
+		"title": "Editar servidor"
 	},
 	"scanInvite": {
 		"invalidInviteCode": "Código de invitación no válido",
@@ -466,5 +484,45 @@
 		"unavailable": "La autenticación del dispositivo no está disponible. Configura o restablece el bloqueo en Ajustes e inténtalo de nuevo.",
 		"busy": "Hay otra autenticación del dispositivo en curso. Inténtalo cuando termine.",
 		"failed": "No se pudo autenticar. Inténtalo de nuevo o usa el bloqueo del dispositivo."
+	},
+	"homeservers": {
+		"title": "Homeservers",
+		"description": "Guarde homeservers para sus pubkys. El predeterminado se preselecciona en las nuevas configuraciones.",
+		"manage": "Gestionar homeservers",
+		"signUp": "Registrarse",
+		"signIn": "Iniciar sesión",
+		"checking": "Buscando el homeserver…",
+		"lookupFailed": "No se pudo encontrar el homeserver de este pubky. Inténtelo de nuevo.",
+		"signInFailed": "No se pudo iniciar sesión. Inténtelo de nuevo.",
+		"signInRequired": "Inicie sesión para ver las aplicaciones autorizadas.",
+		"accountChanged": "El homeserver de este pubky ha cambiado. Compruébelo e inténtelo de nuevo.",
+		"changedNotice": "El homeserver ha cambiado. Inicie sesión de nuevo.",
+		"usedBy_one": "Utilizado por {{count}} pubky",
+		"usedBy_other": "Utilizado por {{count}} pubkys",
+		"makeDefault": "Usar por defecto",
+		"remove": "Quitar",
+		"inUse": "Cambie el homeserver de estos pubkys antes de quitarlo.",
+		"invalidKey": "Introduzca una clave pública de homeserver válida.",
+		"keyReadOnly": "La clave pública identifica este servidor. Añada otro servidor para utilizar una clave diferente.",
+		"catalogHint": "Guarda un servidor en la lista compartida. No registra ni mueve ningún pubky.",
+		"haveInvite": "¿Tiene una invitación?",
+		"pasteInvite": "Pegar invitación",
+		"pasteLink": "Pegar enlace",
+		"scanInvite": "Escanear invitación",
+		"inviteOptional": "Código de invitación (si se requiere)",
+		"customInvitePlaceholder": "Código de invitación",
+		"inputError": {
+			"invalid": "Pegue o escanee un código de invitación o un enlace de registro de homeserver.",
+			"authorization": "Este enlace también solicita autorización de una app. Ábralo desde la app que solicita acceso.",
+			"selectServer": "Seleccione un homeserver antes de introducir un código de invitación."
+		},
+		"inviteRequired": "Código de invitación (obligatorio)",
+		"signOut": "Cerrar la sesión de este pubky en Ring",
+		"signOutFailed": "No se pudo cerrar la sesión de Ring: {{error}}",
+		"signOutTitle": "¿Cerrar la sesión de este pubky?",
+		"signOutDescription": "Solo se cerrará su sesión en Ring. Se conservarán los datos del servidor y el acceso de las otras apps.",
+		"signOutAction": "Cerrar sesión",
+		"signedOut": "Sesión cerrada",
+		"cleanupPending": "No se pudo revocar parte del acceso anterior de Ring."
 	}
 }

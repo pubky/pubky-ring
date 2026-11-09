@@ -25,6 +25,8 @@ export const sanitizePubkySessions = (state: PubkySliceState): PubkySliceState =
 						grant_id: session.grant_id,
 						capabilities: session.capabilities,
 						created_at: session.created_at,
+						...(session.homeserver ? { homeserver: session.homeserver } : {}),
+						...(session.cleanupOnly ? { cleanupOnly: true } : {}),
 					})),
 			},
 		]),

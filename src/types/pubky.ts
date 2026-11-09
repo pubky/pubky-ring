@@ -3,6 +3,10 @@ export interface PubkySession {
 	grant_id: string;
 	capabilities: string[];
 	created_at: number;
+	// Retained only to retry a failed revocation, never used as an active session.
+	cleanupOnly?: boolean;
+	// Missing on legacy records; the pubky's current server is not a safe substitute.
+	homeserver?: string;
 }
 
 export interface GrantInfo {
@@ -16,6 +20,8 @@ export interface GrantInfo {
 export interface Pubky {
 	name: string;
 	homeserver: string;
+	// Account verified when Ring last signed out; distinct from a default/draft selection.
+	lastKnownHomeserver?: string;
 	signedUp: boolean;
 	signupToken: string;
 	image: string;
@@ -26,10 +32,21 @@ export interface Pubky {
 	sourceApp?: string;
 }
 
+export interface Homeserver {
+	name: string;
+	publicKey: string;
+}
+
+export type THomeservers = {
+	[publicKey: string]: Homeserver;
+};
+
 export type ISetPubkyData = Partial<Pubky>;
 
 export interface PubkyState {
 	pubkys: TPubkys;
+	homeservers: THomeservers;
+	preferredHomeserver?: string;
 	deepLink: string;
 	processing: { [key: string]: boolean };
 }

@@ -5,6 +5,7 @@ executionOrder:
   continueOnFailure: true
   flowsOrder:
     - onboarding
+    - homeserver-management
     - delete-pubky
     - create-pubky-and-authorize
     - backup-pubky

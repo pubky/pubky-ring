@@ -57,6 +57,8 @@ const TextField = forwardRef<TextInputInstance, TextFieldProps>(
 		const [containerSize, setContainerSize] = useState({ width: 0, height: 0 });
 		const stateColor = error || hasError ? theme.colors.danger : success ? theme.colors.pubkyApp : undefined;
 		const borderColor = stateColor ?? theme.colors.input;
+		const isDisabled = props.editable === false || props.readOnly;
+		const textColor = isDisabled ? theme.colors.secondaryForeground : stateColor;
 
 		const handleContainerLayout = ({ nativeEvent }: LayoutChangeEvent): void => {
 			const { width, height } = nativeEvent.layout;
@@ -71,7 +73,10 @@ const TextField = forwardRef<TextInputInstance, TextFieldProps>(
 
 		return (
 			<View>
-				<View style={[styles.container, containerStyle]} onLayout={handleContainerLayout}>
+				<View
+					style={[styles.container, isDisabled && styles.disabled, containerStyle]}
+					onLayout={handleContainerLayout}
+				>
 					{containerSize.width > 0 && containerSize.height > 0 && (
 						<Svg
 							style={styles.border}
@@ -96,7 +101,7 @@ const TextField = forwardRef<TextInputInstance, TextFieldProps>(
 					{leftElement}
 					<StyledTextInput
 						ref={ref}
-						style={[styles.input, stateColor ? { color: stateColor } : null, style]}
+						style={[styles.input, textColor ? { color: textColor } : null, style]}
 						placeholderTextColor={theme.colors.input}
 						{...props}
 					/>
@@ -127,6 +132,9 @@ const styles = StyleSheet.create({
 		...Platform.select({
 			ios: shadows.xs,
 		}),
+	},
+	disabled: {
+		opacity: 0.5,
 	},
 	border: {
 		...StyleSheet.absoluteFill,

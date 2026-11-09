@@ -4,6 +4,31 @@ env:
   PUBKY_NAME: Staging Test Pubky
 ---
 - runScript: ../scripts/request-invite-code.js
+# Release builds seed production, so make staging available through Settings first.
+- tapOn:
+    id: HomeHeaderSettingsButton
+- tapOn:
+    id: ManageHomeserversButton
+- runFlow:
+    when:
+      notVisible:
+        id: HomeserverRename-${STAGING_HOMESERVER}
+    commands:
+      - tapOn:
+          id: HomeserversAddButton
+      - tapOn:
+          id: AddServerLabelInput
+      - inputText: Staging
+      - tapOn:
+          id: AddServerHomeserverInput
+      - inputText: ${STAGING_HOMESERVER}
+      - runFlow: dismiss-server-form-keyboard.yaml
+      - tapOn:
+          id: AddServerSaveButton
+- tapOn:
+    id: AppHeaderBackButton
+- tapOn:
+    id: AppHeaderBackButton
 - assertVisible:
     id: PubkyBox--0-ActionButton
 - tapOn:
@@ -15,15 +40,17 @@ env:
     id: EditPubkyNameInput
 - inputText: ${PUBKY_NAME}
 - assertVisible: ${PUBKY_NAME}
+- extendedWaitUntil:
+    visible:
+      id: EditPubkySelectServerButton
+    timeout: 120000
+- tapOn:
+    id: EditPubkySelectServerButton
+- tapOn:
+    id: SelectServer-${STAGING_HOMESERVER}
 - tapOn:
     id: EditPubkyInviteCodeInput
 - inputText: ${output.INVITE_CODE_WITHOUT_HYPHENS}
-- runFlow:
-    file: clear-input-text.yaml
-    env:
-      INPUT_ID: EditPubkyHomeserverInput
-- setClipboard: ${STAGING_HOMESERVER}
-- pasteText
 - tapOn:
     id: EditPubkyHomeserverLabel
 - tapOn:

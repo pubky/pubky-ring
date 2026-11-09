@@ -147,6 +147,63 @@ const createStore = (overrides: Partial<Pubky> = {}) => {
 };
 
 describe('refresh and sign-out ordering', () => {
+	it.each(['sign-in', 'keychain'])(
+		'does not overwrite a completed homeserver switch when refresh is held at %s',
+		async phase => {
+			const store = createStore();
+			const entered = deferred<void>();
+			const release = deferred<void>();
+			native.signIn.mockImplementationOnce(async () => {
+				if (phase === 'sign-in') {
+					entered.resolve();
+					await release.promise;
+				}
+				return ok(temporary);
+			});
+			saveSecret.mockImplementationOnce(async () => {
+				if (phase === 'keychain') {
+					entered.resolve();
+					await release.promise;
+				}
+				return ok('stored');
+			});
+			const switched = {
+				...temporary,
+				homeserver: STAGING_HOMESERVER,
+				grant_id: 'switch-grant',
+				grant_secret: 'switch-secret',
+			};
+			native.signUp.mockResolvedValueOnce(ok(switched));
+			(getSessionSecret as jest.Mock).mockResolvedValue(ok('switch-secret'));
+			native.listGrants.mockResolvedValue(
+				ok([{ grant_id: 'switch-grant' }, { grant_id: 'app-on-new-server' }]),
+			);
+
+			const refresh = listAuthorizedGrants({ pubky: 'user', dispatch: store.dispatch });
+			await entered.promise;
+			expect(
+				(await signUpToHomeserver({ ...args(store.dispatch), homeserver: STAGING_HOMESERVER })).isOk(),
+			).toBe(true);
+			expect(store.getState().pubkys.user.homeserver).toBe(STAGING_HOMESERVER);
+			release.resolve();
+			const stale = await refresh;
+			expect(store.getState().pubkys.user.homeserver).toBe(STAGING_HOMESERVER);
+			expect(stale.isErr()).toBe(true);
+			expect(store.getState().pubkys.user.sessions).toEqual(
+				expect.arrayContaining([
+					expect.objectContaining({ grant_id: 'temporary', homeserver: PRODUCTION_HOMESERVER }),
+					expect.objectContaining({ grant_id: 'switch-grant', homeserver: STAGING_HOMESERVER }),
+				]),
+			);
+			const next = await listAuthorizedGrants({ pubky: 'user', dispatch: store.dispatch });
+			expect(next.isOk()).toBe(true);
+			if (next.isOk()) expect(next.value.grants).toEqual([{ grant_id: 'app-on-new-server' }]);
+			expect(native.signIn).toHaveBeenCalledTimes(1);
+			expect(native.listGrants.mock.calls).toEqual([['switch-secret']]);
+			expect(native.republishHomeserver.mock.calls).toEqual([['identity-secret', STAGING_HOMESERVER]]);
+		},
+	);
+
 	it.each(['invalid', 'cleanup-only', 'absent'])(
 		'reuses the mapped-server session across refreshes when the old session is %s',
 		async state => {

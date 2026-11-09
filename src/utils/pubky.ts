@@ -954,9 +954,15 @@ export const listAuthorizedGrants = async ({
 			return storedResult;
 		}
 
+		const homeserverBeforeSignIn = getPubkyDataFromStore(pubky)?.homeserver;
 		const signInRes = await signInToHomeserver({ pubky, dispatch });
 		if (signInRes.isErr()) {
 			return err(signInRes.error);
+		}
+		// A manual server switch can complete while native sign-in or Keychain
+		// writes are pending. Keep its choice and discard this stale refresh result.
+		if (getPubkyDataFromStore(pubky)?.homeserver !== homeserverBeforeSignIn) {
+			return err(i18n.t('homeservers.accountChanged'));
 		}
 		// Native sign-in follows the public mapping. Reuse that server's session on
 		// subsequent refreshes, even if listing its grants fails this time.

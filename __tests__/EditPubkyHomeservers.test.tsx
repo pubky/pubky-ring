@@ -3,6 +3,7 @@ import { Alert, Keyboard, Pressable, Text, View } from 'react-native';
 import { render, screen, fireEvent, act, cleanupAsync, within } from '@testing-library/react-native';
 import { configureStore } from '@reduxjs/toolkit';
 import { Provider } from 'react-redux';
+import { SafeAreaInsetsContext } from 'react-native-safe-area-context';
 import { ok, err } from '@synonymdev/result';
 import HomeserversScreen from '../src/screens/HomeserversScreen';
 import HomeserverFormScreen from '../src/screens/HomeserverFormScreen';
@@ -252,10 +253,12 @@ const setup = (
 	});
 	render(
 		<Provider store={store}>
-			<EditPubkyFlowProvider initialHomeserver={initialServer}>
-				{child}
-				<Probe />
-			</EditPubkyFlowProvider>
+			<SafeAreaInsetsContext.Provider value={{ top: 0, right: 0, bottom: 34, left: 0 }}>
+				<EditPubkyFlowProvider initialHomeserver={initialServer}>
+					{child}
+					<Probe />
+				</EditPubkyFlowProvider>
+			</SafeAreaInsetsContext.Provider>
 		</Provider>,
 	);
 	return store;

@@ -4,7 +4,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
 import { useDispatch, useSelector } from 'react-redux';
 import AppHeader, { HEADER_HEIGHT } from '../components/AppHeader';
-import SafeAreaView from '../components/SafeAreaView';
+import SafeAreaInset from '../components/SafeAreaInset';
 import Button from '../components/Button';
 import ServerCard from '../components/ServerCard';
 import { Pencil, Trash2 } from '../icons';
@@ -24,7 +24,7 @@ const HomeserversScreen = ({
 	const pubkys = useSelector(getAllPubkys);
 	const preferred = useSelector(getPreferredHomeserver);
 	return (
-		<SafeAreaView style={styles.root} edges={['bottom']}>
+		<View style={styles.root}>
 			<AppHeader title={t('homeservers.title')} />
 			<ScrollView contentContainerStyle={styles.content}>
 				<TextSmM>{t('homeservers.description')}</TextSmM>
@@ -75,13 +75,14 @@ const HomeserversScreen = ({
 					testID="HomeserversAddButton"
 					onPress={() => navigation.navigate('HomeserverForm')}
 				/>
+				<SafeAreaInset edge="bottom" />
 			</ScrollView>
-		</SafeAreaView>
+		</View>
 	);
 };
 const styles = StyleSheet.create({
 	root: { flex: 1 },
-	content: { paddingTop: HEADER_HEIGHT + 24, paddingHorizontal: 24, paddingBottom: 24, gap: 24 },
+	content: { flexGrow: 1, paddingTop: HEADER_HEIGHT + 24, paddingHorizontal: 24, gap: 24 },
 	server: { gap: 12 },
 	actions: { flexDirection: 'row', alignItems: 'center', gap: 8 },
 	iconAction: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },

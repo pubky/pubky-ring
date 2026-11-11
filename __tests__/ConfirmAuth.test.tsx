@@ -390,41 +390,23 @@ describe('ConfirmAuth v14 integration', () => {
 	});
 
 	it.each([false, true])(
-		'shows the app-selected identity notice before approval with Details preference %s',
+		'omits the app-selected identity notice with Details preference %s',
 		async alwaysShowDetails => {
 			mockAlwaysShowDetails = alwaysShowDetails;
 			renderRequest([{ path: '/pub/example.app/', permission: 'rw' }], undefined, 'test-pubky');
-			const notice = within(screen.getByTestId('ConfirmAuthDetailsScrollView')).getByTestId(
-				'ConfirmAuthExpectedIdentity',
-			);
-			expect(
-				within(notice).getByText(
-					`auth.expectedIdentityTitle ${JSON.stringify({ appName: 'example.app', name: 'Test Pubky', pubky: 'test-pubky' })}`,
-				),
-			).toBeTruthy();
-			expect(within(notice).getByText('auth.expectedIdentityDescription')).toBeTruthy();
-			if (!alwaysShowDetails) expect(screen.getByTestId('ConfirmAuthShowDetailsButton')).toBeVisible();
+			expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+			expect(screen.getByTestId('mock-auth-identity')).toBeVisible();
+			if (!alwaysShowDetails) {
+				fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
+				expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+				fireEvent.press(screen.getByTestId('auth-back-button'));
+				expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+			}
 			await approve();
-			expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
+			expect(auth).toHaveBeenCalledTimes(1);
+			expect(screen.getByTestId('ConfirmAuthSuccessButton')).toBeVisible();
 		},
 	);
-
-	it.each([false, true])(
-		'omits the app-selected identity notice without spk with Details preference %s',
-		alwaysShowDetails => {
-			mockAlwaysShowDetails = alwaysShowDetails;
-			renderRequest([{ path: '/pub/example.app/', permission: 'rw' }]);
-			expect(screen.queryByTestId('ConfirmAuthExpectedIdentity')).toBeNull();
-		},
-	);
-
-	it('keeps the app-selected identity notice when moving between Basics and Details', () => {
-		renderRequest([{ path: '/pub/example.app/', permission: 'rw' }], undefined, 'test-pubky');
-		fireEvent.press(screen.getByTestId('ConfirmAuthShowDetailsButton'));
-		expect(screen.getByTestId('ConfirmAuthExpectedIdentity')).toBeVisible();
-		fireEvent.press(screen.getByTestId('auth-back-button'));
-		expect(screen.getByTestId('ConfirmAuthExpectedIdentity')).toBeVisible();
-	});
 
 	it('starts with basics by default, and opens details without changing the saved preference', () => {
 		renderRequest([{ path: '/pub/pubky.app/', permission: 'rw' }]);

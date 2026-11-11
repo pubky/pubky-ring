@@ -13,10 +13,10 @@ import Animated, {
 } from 'react-native-reanimated';
 import { useTheme } from 'styled-components/native';
 import { hideSheet } from '../sheets/sheetNavigation.tsx';
-import { performAuth, truncatePubky } from '../utils/pubky';
+import { performAuth } from '../utils/pubky';
 import { DeviceAuthError } from '../utils/deviceAuth';
 import { sleep } from '../utils/helpers.ts';
-import { TextBaseB, TextSmM, TextXsM } from '../theme/typography';
+import { TextSmM, TextXsM } from '../theme/typography';
 import type { RootState } from '../store';
 import type { Theme } from '../theme';
 import { getPubkyName } from '../store/selectors/pubkySelectors.ts';
@@ -83,7 +83,7 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'ConfirmAuth'>;
 const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 	const { t } = useTranslation();
 	const theme = useTheme() as Theme;
-	const { pubky, authUrl, authDetails, xCallback, expectedSigner } = route.params;
+	const { pubky, authUrl, authDetails, xCallback } = route.params;
 	const dispatch = useDispatch();
 	const alwaysShowDetails = useSelector(getAlwaysShowAuthDetails);
 	const [showDetails, setShowDetails] = useState(alwaysShowDetails);
@@ -108,7 +108,6 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 		[capabilities, encryptionApproved],
 	);
 	const identityOnly = !capabilities.some(capability => capability.permission.length > 0);
-	const requestingClient = authDetails.client_id || xCallback?.xSource;
 	const checkOpacity = useSharedValue(0);
 	const checkScale = useSharedValue(0.5);
 	const checkStyle = useAnimatedStyle(() => ({
@@ -260,23 +259,6 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 				contentContainerStyle={styles.scrollContent}
 				onAccessibilityEscape={handleDeny}
 			>
-				{expectedSigner && !isAuthorized && (
-					<View style={styles.expectedIdentity} testID="ConfirmAuthExpectedIdentity">
-						<TextBaseB color="#061a2f">
-							{pubkyName
-								? t('auth.expectedIdentityTitle', {
-										appName: requestingClient || t('auth.thisApp'),
-										name: pubkyName,
-										pubky: truncatePubky(pubky),
-									})
-								: t('auth.expectedIdentityTitleNoName', {
-										appName: requestingClient || t('auth.thisApp'),
-										pubky: truncatePubky(pubky),
-									})}
-						</TextBaseB>
-						<TextSmM color="#061a2f">{t('auth.expectedIdentityDescription')}</TextSmM>
-					</View>
-				)}
 				{isAuthorized ? (
 					<>
 						<AuthSummary capabilities={approvedCapabilities} authorized />
@@ -437,14 +419,6 @@ const ConfirmAuthRequest = ({ route, navigation }: Props): ReactElement => {
 };
 
 const styles = StyleSheet.create({
-	expectedIdentity: {
-		gap: 4,
-		marginBottom: 16,
-		paddingHorizontal: 16,
-		paddingVertical: 12,
-		borderRadius: 12,
-		backgroundColor: '#0085FF',
-	},
 	scroll: { flex: 1 },
 	scrollContent: { flexGrow: 1, paddingBottom: 24 },
 	cards: { gap: 24 },

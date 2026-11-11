@@ -118,11 +118,7 @@
 		"expectedSignerMissingTitle": "Pubky not in this Ring",
 		"expectedSignerMissing": "This request is for {{pubky}}, which isn't in this Ring.",
 		"expectedSignerNotSetUpTitle": "Pubky not set up",
-		"expectedSignerNotSetUp": "This request is for {{pubky}}, which isn't set up in this Ring yet.",
-		"expectedIdentityTitle": "{{appName}} asked to sign in as {{name}} ({{pubky}})",
-		"expectedIdentityTitleNoName": "{{appName}} asked to sign in as {{pubky}}",
-		"expectedIdentityDescription": "The app chose this pubky. To use a different one, start a new sign-in from the app.",
-		"thisApp": "This app"
+		"expectedSignerNotSetUp": "This request is for {{pubky}}, which isn't set up in this Ring yet."
 	},
 	"grants": {
 		"title": "Authorized Apps",

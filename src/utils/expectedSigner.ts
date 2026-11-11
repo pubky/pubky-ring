@@ -5,7 +5,7 @@
  * a `signin_grant` link. It is a constraint, not a suggestion: Ring opens that
  * pubky or refuses the request, never offers another one, and the requesting
  * app rejects an approval from any other key. Switching accounts takes a fresh
- * request. The approval screen says that the app chose the pubky.
+ * request.
  */
 
 const SPK_PARAM = 'spk';

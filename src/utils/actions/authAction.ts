@@ -74,7 +74,6 @@ export const createConfirmAuthPayload = async ({
 			capabilities: authDetails.capabilities ?? [],
 		},
 		xCallback: data.params.xCallback,
-		...(expectedSigner ? { expectedSigner } : {}),
 	});
 };
 
@@ -187,7 +186,6 @@ const showAuthConfirmation = async ({
 	authUrl,
 	authDetails,
 	xCallback,
-	expectedSigner,
 }: ConfirmAuthPayload): Promise<Result<string>> => {
 	try {
 		showSheet('auth', {
@@ -197,7 +195,6 @@ const showAuthConfirmation = async ({
 				authUrl,
 				authDetails,
 				xCallback,
-				...(expectedSigner ? { expectedSigner } : {}),
 			},
 		});
 

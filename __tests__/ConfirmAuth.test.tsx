@@ -144,7 +144,7 @@ jest.mock('../src/components/CircularProgressBar.tsx', () => ({
 }));
 jest.mock('../src/theme/typography', () => {
 	const { Text } = require('react-native');
-	return { TextBaseB: Text, TextSmM: Text, TextXsM: Text, TextLgSb: Text };
+	return { TextSmM: Text, TextXsM: Text, TextLgSb: Text };
 });
 jest.mock('../src/icons/index.ts', () => ({
 	ArrowLeft: () => null,
@@ -194,7 +194,7 @@ const renderRequest = (
 	};
 	render(
 		<ConfirmAuth
-			route={{ params: { pubky: 'test-pubky', authUrl, authDetails, xCallback, expectedSigner } } as never}
+			route={{ params: { pubky: 'test-pubky', authUrl, authDetails, xCallback } } as never}
 			navigation={
 				{
 					getParent: () => ({

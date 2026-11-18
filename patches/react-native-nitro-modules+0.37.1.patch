@@ -1,3 +1,23 @@
+diff --git a/node_modules/react-native-nitro-modules/cpp/core/Promise.hpp b/node_modules/react-native-nitro-modules/cpp/core/Promise.hpp
+index 07eac11..139b5c2 100644
+--- a/node_modules/react-native-nitro-modules/cpp/core/Promise.hpp
++++ b/node_modules/react-native-nitro-modules/cpp/core/Promise.hpp
+@@ -36,7 +36,14 @@ public:
+   ~Promise() {
+     if (isPending()) [[unlikely]] {
+       auto message = std::string("Timeouted: Promise<") + TypeInfo::getFriendlyTypename<TResult>() + "> was destroyed!";
+-      reject(std::make_exception_ptr(std::runtime_error(message)));
++      // Avoid std::make_exception_ptr here for the same reason as makeException in RuntimeError.hpp:
++      // this header is visible to Swift, and with Xcode 27 it would reference iOS 18+ libc++ symbols.
++      // Upstream fix (react-native-nitro-modules 0.37.2): https://github.com/margelo/nitro/issues/1652
++      try {
++        throw std::runtime_error(message);
++      } catch (...) {
++        reject(std::current_exception());
++      }
+     }
+   }
+ 
 diff --git a/node_modules/react-native-nitro-modules/ios/utils/RuntimeError.hpp b/node_modules/react-native-nitro-modules/ios/utils/RuntimeError.hpp
 index 1b72115..6632abd 100644
 --- a/node_modules/react-native-nitro-modules/ios/utils/RuntimeError.hpp

@@ -142,14 +142,16 @@ class DeviceAuthenticationModule(private val context: ReactApplicationContext) :
 
   @ReactMethod
   fun openEnrollment(promise: Promise) {
-    try {
-      val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-        Intent(Settings.ACTION_BIOMETRIC_ENROLL).putExtra(Settings.EXTRA_BIOMETRIC_AUTHENTICATORS_ALLOWED,
-          BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-      } else Intent(Settings.ACTION_SECURITY_SETTINGS)
-      context.startActivity(intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
-      promise.resolve(null)
-    } catch (error: Exception) { promise.reject("unavailable", "Cannot open Settings", error) }
+    // Not ACTION_BIOMETRIC_ENROLL: Settings closes it without showing anything unless
+    // canAuthenticate() reports NONE_ENROLLED, which is never the case once a screen lock is set.
+    var failure: Exception? = null
+    for (action in arrayOf(Settings.ACTION_SECURITY_SETTINGS, Settings.ACTION_SETTINGS)) {
+      try {
+        context.startActivity(Intent(action).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
+        return promise.resolve(null)
+      } catch (error: Exception) { failure = error }
+    }
+    promise.reject("unavailable", "Cannot open Settings", failure)
   }
 
   override fun onHostResume() { if (credentialSucceeded) finish(true) }

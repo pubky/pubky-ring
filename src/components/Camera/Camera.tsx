@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Camera as CameraKit, CameraType } from 'react-native-camera-kit';
 import CameraNoAuth from './CameraNoAuth';
 import { requestCameraPermission } from '../../utils/permissions';
+import { SCAN_THROTTLE_MS } from './scanGate';
 
 interface CameraProps {
 	children?: ReactNode;
@@ -82,6 +83,7 @@ const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): Re
 					<CameraKit
 						style={styles.cameraView}
 						scanBarcode
+						scanThrottleDelay={SCAN_THROTTLE_MS}
 						showFrame={false}
 						onReadCode={handleCodeRead}
 						cameraType={CameraType.Back}

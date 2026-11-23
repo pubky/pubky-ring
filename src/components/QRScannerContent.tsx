@@ -21,7 +21,8 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 	const [torchMode, setTorchMode] = useState(false);
 	const [isProcessingImage, setIsProcessingImage] = useState(false);
 	// Shared by camera reads and gallery picks so they never run concurrently.
-	const [scanGate] = useState<ScanGate>(() => createScanGate());
+	const [isScanning, setIsScanning] = useState(false);
+	const [scanGate] = useState<ScanGate>(() => createScanGate({ onBusyChange: setIsScanning }));
 
 	const handleBarCodeRead = useCallback(
 		(data: string): void => {
@@ -31,7 +32,7 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 	);
 
 	const handlePickImage = useCallback(async (): Promise<void> => {
-		if (isProcessingImage) {
+		if (isProcessingImage || isScanning) {
 			return;
 		}
 
@@ -85,8 +86,16 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 			}
 
 			setIsProcessingImage(false);
-			// A pick is deliberate, so it skips the same-code cooldown, but it is ignored while another scan is running.
-			scanGate(values[0], onScan, { skipCooldown: true });
+			// A pick is deliberate, so it skips the same-code cooldown. It can still
+			// lose a race with a camera scan that started while the picker was open.
+			const accepted = scanGate(values[0], onScan, { skipCooldown: true });
+			if (!accepted) {
+				showToast({
+					type: 'info',
+					title: t('scanner.scanInProgressTitle'),
+					description: t('scanner.scanInProgressDescription'),
+				});
+			}
 		} catch (error) {
 			setIsProcessingImage(false);
 			console.error('Failed to pick QR image:', error);
@@ -96,7 +105,7 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 				description: t('scanner.imageDecodeError'),
 			});
 		}
-	}, [isProcessingImage, onScan, scanGate, t]);
+	}, [isProcessingImage, isScanning, onScan, scanGate, t]);
 
 	const handleToggleTorch = useCallback((): void => {
 		setTorchMode(prevTorchMode => !prevTorchMode);
@@ -108,7 +117,8 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 				<Camera torchMode={torchMode} onBarCodeRead={handleBarCodeRead}>
 					<View style={styles.actionsRow}>
 						<IconButton
-							disabled={isProcessingImage}
+							disabled={isProcessingImage || isScanning}
+							testID="QRScannerGalleryButton"
 							icon={isProcessingImage ? <ActivityIndicator color="#ffffff" /> : <ImageIcon size={20} />}
 							onPress={handlePickImage}
 						/>

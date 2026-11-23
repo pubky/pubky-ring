@@ -1,4 +1,9 @@
-import { createScanGate, SCAN_COOLDOWN_MS, SCAN_TIMEOUT_MS } from '../src/components/Camera/scanGate';
+import {
+	createScanGate,
+	SCAN_COOLDOWN_MS,
+	SCAN_THROTTLE_MS,
+	SCAN_TIMEOUT_MS,
+} from '../src/components/Camera/scanGate';
 
 const flushPromises = async (): Promise<void> => {
 	await Promise.resolve();
@@ -38,35 +43,56 @@ describe('createScanGate', () => {
 		expect(handler).toHaveBeenCalledTimes(1);
 	});
 
-	it('handles a code held in view only once', async () => {
+	it('keeps the cooldown well above the native scan throttle', () => {
+		expect(SCAN_COOLDOWN_MS).toBeGreaterThanOrEqual(SCAN_THROTTLE_MS * 3);
+	});
+
+	it('handles a code held in view only once at the camera throttle interval', async () => {
 		const gate = createScanGate();
 		const handler = jest.fn();
 
-		for (let elapsed = 0; elapsed <= 10000; elapsed += 100) {
+		for (let elapsed = 0; elapsed <= 10000; elapsed += SCAN_THROTTLE_MS) {
 			gate('pubkyauth://a', handler);
 			await flushPromises();
-			jest.advanceTimersByTime(100);
+			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
 		}
 
 		expect(handler).toHaveBeenCalledTimes(1);
 	});
 
-	it('handles the same value again once it has been out of view for the cooldown', async () => {
+	it('handles the same code again after it has been out of view for the cooldown', async () => {
 		const gate = createScanGate();
 		const handler = jest.fn();
 
-		gate('pubkyauth://a', handler);
-		await flushPromises();
-		jest.advanceTimersByTime(SCAN_COOLDOWN_MS - 100);
-		// Still in view: ignored, and the window restarts.
-		expect(gate('pubkyauth://a', handler)).toBe(false);
+		for (let elapsed = 0; elapsed <= 3000; elapsed += SCAN_THROTTLE_MS) {
+			gate('pubkyauth://a', handler);
+			await flushPromises();
+			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+		}
+		expect(handler).toHaveBeenCalledTimes(1);
 
-		jest.advanceTimersByTime(SCAN_COOLDOWN_MS - 1);
-		expect(gate('pubkyauth://a', handler)).toBe(false);
-
+		// Out of view: no reads for just over the cooldown.
 		jest.advanceTimersByTime(SCAN_COOLDOWN_MS);
 		expect(gate('pubkyauth://a', handler)).toBe(true);
+		await flushPromises();
+
+		// Back in view: the next read one throttle interval later is ignored again.
+		jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+		expect(gate('pubkyauth://a', handler)).toBe(false);
 		expect(handler).toHaveBeenCalledTimes(2);
+	});
+
+	it('would re-fire a held code at the old 2000ms native throttle', async () => {
+		const gate = createScanGate();
+		const handler = jest.fn();
+
+		for (let elapsed = 0; elapsed < 10000; elapsed += 2000) {
+			gate('pubkyauth://a', handler);
+			await flushPromises();
+			jest.advanceTimersByTime(2000);
+		}
+
+		expect(handler).toHaveBeenCalledTimes(5);
 	});
 
 	it('ignores every read while a scan is in flight', async () => {
@@ -171,6 +197,39 @@ describe('createScanGate', () => {
 		expect(warn).toHaveBeenCalledTimes(1);
 
 		warn.mockRestore();
+	});
+
+	it('treats a timed-out code as just seen so a held code is not handled twice', async () => {
+		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+		const gate = createScanGate();
+		const hanging = jest.fn(() => new Promise<void>(() => {}));
+
+		gate('pubkyring://migrate?index=0&total=1&key=k', hanging);
+		for (let elapsed = SCAN_THROTTLE_MS; elapsed <= SCAN_TIMEOUT_MS + 5000; elapsed += SCAN_THROTTLE_MS) {
+			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+			gate('pubkyring://migrate?index=0&total=1&key=k', hanging);
+		}
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(hanging).toHaveBeenCalledTimes(1);
+
+		const handler = jest.fn();
+		expect(gate('pubkyauth://b', handler)).toBe(true);
+		expect(handler).toHaveBeenCalledTimes(1);
+
+		warn.mockRestore();
+	});
+
+	it('reports when it is busy', async () => {
+		const onBusyChange = jest.fn();
+		const gate = createScanGate({ onBusyChange });
+		const { handler, resolve } = deferredHandler();
+
+		gate('pubkyauth://a', handler);
+		expect(onBusyChange.mock.calls).toEqual([[true]]);
+
+		resolve();
+		await flushPromises();
+		expect(onBusyChange.mock.calls).toEqual([[true], [false]]);
 	});
 
 	it('releases the gate when the handler fails', async () => {

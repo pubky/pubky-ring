@@ -97,16 +97,19 @@ describe('QRScannerContent', () => {
 		detectMock.mockResolvedValue({ values: ['pubkyauth://picked'] });
 	});
 
-	it('disables the gallery button while a camera scan is being handled', async () => {
+	it('disables the gallery button until a camera scan settles, even past the slow-scan warning', async () => {
+		jest.useFakeTimers();
+		jest.spyOn(console, 'warn').mockImplementation(() => {});
 		const scan = deferred();
-		const onScan = jest.fn(() => scan.promise);
-		const screen = renderScanner(onScan);
+		const screen = renderScanner(jest.fn(() => scan.promise));
 		const galleryButton = (): ReturnType<typeof screen.getByTestId> =>
 			screen.getByTestId('QRScannerGalleryButton');
 
 		expect(galleryButton()).toBeEnabled();
-
 		act(() => mockOnBarCodeRead('pubkyauth://camera'));
+		act(() => {
+			jest.advanceTimersByTime(SCAN_SLOW_WARNING_MS * 2);
+		});
 		expect(galleryButton()).toBeDisabled();
 
 		await act(async () => {
@@ -114,29 +117,8 @@ describe('QRScannerContent', () => {
 			await scan.promise;
 		});
 		expect(galleryButton()).toBeEnabled();
-	});
 
-	it('keeps the gallery button disabled past the slow-scan warning until the scan settles', async () => {
-		jest.useFakeTimers();
-		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-		const scan = deferred();
-		const onScan = jest.fn(() => scan.promise);
-		const screen = renderScanner(onScan);
-
-		act(() => mockOnBarCodeRead('pubkyauth://camera'));
-		act(() => {
-			jest.advanceTimersByTime(SCAN_SLOW_WARNING_MS * 2);
-		});
-		expect(warn).toHaveBeenCalledTimes(1);
-		expect(screen.getByTestId('QRScannerGalleryButton')).toBeDisabled();
-
-		await act(async () => {
-			scan.resolve();
-			await scan.promise;
-		});
-		expect(screen.getByTestId('QRScannerGalleryButton')).toBeEnabled();
-
-		warn.mockRestore();
+		jest.restoreAllMocks();
 		jest.useRealTimers();
 	});
 

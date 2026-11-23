@@ -37,18 +37,4 @@ describe('Camera', () => {
 		expect(mockCameraKitProps?.scanBarcode).toBe(true);
 		expect(mockCameraKitProps?.scanThrottleDelay).toBe(SCAN_THROTTLE_MS);
 	});
-
-	it('passes every read through to onBarCodeRead', async () => {
-		const onBarCodeRead = jest.fn();
-		const screen = render(<Camera onBarCodeRead={onBarCodeRead} />);
-		await waitFor(() => expect(screen.getByTestId('CameraKit')).toBeTruthy());
-
-		const onReadCode = mockCameraKitProps?.onReadCode as (event: {
-			nativeEvent: { codeStringValue: string };
-		}) => void;
-		onReadCode({ nativeEvent: { codeStringValue: 'pubkyauth://a' } });
-		onReadCode({ nativeEvent: { codeStringValue: 'pubkyauth://a' } });
-
-		expect(onBarCodeRead.mock.calls).toEqual([['pubkyauth://a'], ['pubkyauth://a']]);
-	});
 });

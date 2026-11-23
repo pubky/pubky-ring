@@ -34,9 +34,16 @@ export type ScanOptions = {
 
 export type ScanGate = (data: string, handler: ScanHandler, options?: ScanOptions) => boolean;
 
+/**
+ * Most handled values the gate remembers at once. Entries normally expire
+ * after the cooldown; the cap only bounds a fast-changing animated QR.
+ */
+export const SCAN_SEEN_LIMIT = 32;
+
 export type ScanGateConfig = {
 	cooldownMs?: number;
 	slowWarningMs?: number;
+	seenLimit?: number;
 	/** Called when a scan starts (true) and when its handler settles (false). */
 	onBusyChange?: (busy: boolean) => void;
 };
@@ -44,21 +51,47 @@ export type ScanGateConfig = {
 /**
  * Creates a gate for scanned codes:
  * - every read is ignored until the previous handler has settled
- * - the same value is ignored until it has not been seen for `cooldownMs`
- * - a different value is handled right away
+ * - a value that was handled is ignored until it has not been seen for `cooldownMs`
+ * - any other value is handled right away
+ *
+ * Only handled values are remembered, each with the last time it was seen.
+ * Any read of a remembered value refreshes it, including reads ignored while
+ * a scan is running, so a code that stays in view (alongside a gallery pick,
+ * for example) is never handled twice. Reads of values that were never handled
+ * are not remembered: a frame of an animated QR that arrived while another
+ * frame was being handled must still be accepted on its next appearance, even
+ * though the animation keeps showing it more often than the cooldown.
  *
  * Returns whether the value was passed to the handler.
  */
 export const createScanGate = ({
 	cooldownMs = SCAN_COOLDOWN_MS,
 	slowWarningMs = SCAN_SLOW_WARNING_MS,
+	seenLimit = SCAN_SEEN_LIMIT,
 	onBusyChange,
 }: ScanGateConfig = {}): ScanGate => {
 	let activeScanId: number | null = null;
 	let nextScanId = 0;
 	let slowWarning: ReturnType<typeof setTimeout> | null = null;
-	let lastValue: string | null = null;
-	let lastSeenAt = 0;
+	// Handled value -> last time it was seen, oldest first.
+	const seen = new Map<string, number>();
+
+	const markSeen = (data: string, now: number): void => {
+		seen.delete(data);
+		seen.set(data, now);
+		while (seen.size > seenLimit) {
+			const oldest = seen.keys().next().value as string;
+			seen.delete(oldest);
+		}
+	};
+
+	const pruneExpired = (now: number): void => {
+		for (const [value, seenAt] of seen) {
+			if (now - seenAt >= cooldownMs) {
+				seen.delete(value);
+			}
+		}
+	};
 
 	const finish = (scanId: number, data: string): void => {
 		if (activeScanId !== scanId) {
@@ -67,8 +100,7 @@ export const createScanGate = ({
 		activeScanId = null;
 		// The finished value counts as just seen, so a code still held in view
 		// isn't handled again until it has been out of view.
-		lastValue = data;
-		lastSeenAt = Date.now();
+		markSeen(data, Date.now());
 		if (slowWarning) {
 			clearTimeout(slowWarning);
 			slowWarning = null;
@@ -77,20 +109,23 @@ export const createScanGate = ({
 	};
 
 	return (data, handler, options) => {
+		const now = Date.now();
+		pruneExpired(now);
+		const wasSeen = seen.has(data);
+		if (wasSeen) {
+			markSeen(data, now);
+		}
+
 		if (activeScanId !== null) {
 			return false;
 		}
-
-		const now = Date.now();
-		if (!options?.skipCooldown && data === lastValue && now - lastSeenAt < cooldownMs) {
-			lastSeenAt = now;
+		if (wasSeen && !options?.skipCooldown) {
 			return false;
 		}
 
 		const scanId = nextScanId++;
 		activeScanId = scanId;
-		lastValue = data;
-		lastSeenAt = now;
+		markSeen(data, now);
 		onBusyChange?.(true);
 		slowWarning = setTimeout(() => {
 			if (activeScanId === scanId) {

@@ -2,6 +2,7 @@ import {
 	createScanGate,
 	SCAN_COOLDOWN_MS,
 	SCAN_THROTTLE_MS,
+	SCAN_SEEN_LIMIT,
 	SCAN_SLOW_WARNING_MS,
 } from '../src/components/Camera/scanGate';
 
@@ -135,6 +136,23 @@ describe('createScanGate', () => {
 
 		expect(gate('pubkyauth://b', handler)).toBe(true);
 		await flushPromises();
+		expect(handler.mock.calls).toEqual([['pubkyauth://a'], ['pubkyauth://b']]);
+	});
+
+	it('remembers each handled value separately', async () => {
+		const gate = createScanGate();
+		const handler = jest.fn();
+
+		gate('pubkyauth://a', handler);
+		await flushPromises();
+		gate('pubkyauth://b', handler);
+		await flushPromises();
+
+		// Switching back to a code handled within the cooldown does not handle it again.
+		expect(gate('pubkyauth://a', handler)).toBe(false);
+
+		// Once it has been out of view for the cooldown, it is handled again.
+		jest.advanceTimersByTime(SCAN_COOLDOWN_MS);
 		expect(gate('pubkyauth://a', handler)).toBe(true);
 		expect(handler.mock.calls).toEqual([['pubkyauth://a'], ['pubkyauth://b'], ['pubkyauth://a']]);
 	});
@@ -228,6 +246,93 @@ describe('createScanGate', () => {
 		await flushPromises();
 
 		consoleError.mockRestore();
+	});
+
+	it('does not let a code still in view replace a gallery pick after it settles', async () => {
+		const gate = createScanGate();
+		const twoKeyFrame = 'pubkyring://migrate?index=0&total=2&key=a';
+		const threeKeyFrame = 'pubkyring://migrate?index=0&total=3&key=b';
+		const camera = jest.fn();
+		const pick = deferredHandler();
+		const handled = (): string[] =>
+			[...camera.mock.calls, ...pick.handler.mock.calls].map(([value]) => value);
+
+		// 1. The camera reads frame 1 of the two-key export.
+		gate(twoKeyFrame, camera);
+		await flushPromises();
+
+		// 2. The user picks frame 1 of the three-key export from the gallery.
+		jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+		expect(gate(threeKeyFrame, pick.handler, { skipCooldown: true })).toBe(true);
+
+		// 3. The camera keeps reading the two-key frame while the pick is handled.
+		for (let elapsed = 0; elapsed < 3000; elapsed += SCAN_THROTTLE_MS) {
+			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+			expect(gate(twoKeyFrame, camera)).toBe(false);
+		}
+
+		// 4. Once the pick settles, the two-key frame still in view is not handled again.
+		pick.resolve();
+		await flushPromises();
+		for (let elapsed = 0; elapsed < 3000; elapsed += SCAN_THROTTLE_MS) {
+			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+			expect(gate(twoKeyFrame, camera)).toBe(false);
+		}
+
+		expect(handled()).toEqual([twoKeyFrame, threeKeyFrame]);
+		expect(camera).toHaveBeenCalledTimes(1);
+	});
+
+	it('delivers every frame of an animated QR when the first frame is slow', async () => {
+		const gate = createScanGate();
+		const frames = [0, 1, 2].map(index => `pubkyring://migrate?index=${index}&total=3&key=k${index}`);
+		const handler = jest.fn(
+			(value: string) =>
+				new Promise<void>(resolve => {
+					setTimeout(resolve, value === frames[0] ? 2000 : 50);
+				}),
+		);
+
+		// The animation shows one frame per camera read and loops every 750ms,
+		// faster than the cooldown, so frames 1 and 2 keep reappearing while frame 0 is handled.
+		for (let read = 0; read * SCAN_THROTTLE_MS < 10000; read++) {
+			gate(frames[read % frames.length], handler);
+			await flushPromises();
+			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
+			await flushPromises();
+		}
+
+		expect(handler.mock.calls.map(([value]) => value).sort()).toEqual([...frames].sort());
+		expect(handler).toHaveBeenCalledTimes(3);
+	});
+
+	it('forgets the oldest handled value beyond the size limit', async () => {
+		const gate = createScanGate({ seenLimit: 3 });
+		const handler = jest.fn();
+
+		for (const value of ['a', 'b', 'c', 'd']) {
+			expect(gate(value, handler)).toBe(true);
+			await flushPromises();
+		}
+
+		// Within the cooldown: 'a' was evicted, 'd' is still remembered.
+		expect(gate('d', handler)).toBe(false);
+		expect(gate('a', handler)).toBe(true);
+		expect(handler).toHaveBeenCalledTimes(5);
+	});
+
+	it('stays bounded by default when many codes are handled within the cooldown', async () => {
+		const gate = createScanGate();
+		const handler = jest.fn();
+
+		for (let i = 0; i <= SCAN_SEEN_LIMIT; i++) {
+			gate(`code-${i}`, handler);
+			await flushPromises();
+		}
+
+		// The first code was evicted, the most recent one is still remembered.
+		expect(gate(`code-${SCAN_SEEN_LIMIT}`, handler)).toBe(false);
+		expect(gate('code-0', handler)).toBe(true);
 	});
 
 	it('reports when it is busy', async () => {

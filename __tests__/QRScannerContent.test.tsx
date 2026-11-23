@@ -122,9 +122,8 @@ describe('QRScannerContent', () => {
 		jest.useRealTimers();
 	});
 
-	it('shows a toast when a pick loses the race with a camera scan', async () => {
-		const scan = deferred();
-		const onScan = jest.fn(() => scan.promise);
+	it('ignores camera reads while a gallery pick is in progress, then handles the pick', async () => {
+		const onScan = jest.fn();
 		const picker = deferred();
 		launchImageLibraryMock.mockImplementation(async () => {
 			await picker.promise;
@@ -133,21 +132,30 @@ describe('QRScannerContent', () => {
 		const screen = renderScanner(onScan);
 
 		fireEvent.press(screen.getByTestId('QRScannerGalleryButton'));
-		// The camera handles a code while the picker is still open.
 		act(() => mockOnBarCodeRead('pubkyauth://camera'));
-
 		await act(async () => {
 			picker.resolve();
 			await picker.promise;
 		});
 
+		expect(onScan.mock.calls).toEqual([['pubkyauth://picked']]);
+		expect(showToastMock).not.toHaveBeenCalled();
+	});
+
+	it('shows a toast when a pick loses the race with a camera scan that started as the gallery opened', async () => {
+		const scan = deferred();
+		const onScan = jest.fn(() => scan.promise);
+		const screen = renderScanner(onScan);
+
+		// Same tick: the camera scan starts before the gallery button re-renders as disabled.
+		await act(async () => {
+			mockOnBarCodeRead('pubkyauth://camera');
+			fireEvent.press(screen.getByTestId('QRScannerGalleryButton'));
+		});
+
 		expect(onScan.mock.calls).toEqual([['pubkyauth://camera']]);
 		expect(showToastMock).toHaveBeenCalledWith(
-			expect.objectContaining({
-				type: 'info',
-				title: 'scanner.scanInProgressTitle',
-				description: 'scanner.scanInProgressDescription',
-			}),
+			expect.objectContaining({ type: 'info', title: 'scanner.scanInProgressTitle' }),
 		);
 
 		await act(async () => {

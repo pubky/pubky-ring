@@ -11,11 +11,12 @@ export const SCAN_THROTTLE_MS = 250;
  * view is handled once. This only works while the cooldown is well above
  * SCAN_THROTTLE_MS: a held code then arrives several times per window and
  * keeps it open. (With the native 2000ms default, a held code would re-fire on
- * every callback.) One second also rides out brief read dropouts (focus,
- * glare, hand shake) while keeping a deliberate rescan (point away, point
- * back) quick.
+ * every callback.) Reads of a code that stays in view can still pause for over
+ * a second, e.g. while the JS thread is busy importing a key or the device is
+ * under load, so the window has to ride out such gaps; two seconds does, while
+ * a deliberate rescan (point away, point back) still works.
  */
-export const SCAN_COOLDOWN_MS = 1000;
+export const SCAN_COOLDOWN_MS = 2000;
 
 /**
  * A scan that is still running after this long logs a warning. The gate stays

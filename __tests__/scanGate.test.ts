@@ -59,6 +59,17 @@ describe('createScanGate', () => {
 		expect(handler).toHaveBeenCalledTimes(1);
 	});
 
+	it('does not handle a held code again when its reads pause for 1.7s, as measured on a device', async () => {
+		const handler = jest.fn();
+
+		await readEvery(gate, ['a'], handler, 1000);
+		// No reads reach JS while it is busy (e.g. importing a migrated key), though the code stays in view.
+		await wait(1700);
+		await readEvery(gate, ['a'], handler, 3000);
+
+		expect(handler).toHaveBeenCalledTimes(1);
+	});
+
 	it('handles a different code immediately, but not a code switched back to within the cooldown', async () => {
 		const handler = jest.fn();
 

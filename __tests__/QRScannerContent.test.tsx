@@ -4,6 +4,7 @@ import { launchImageLibrary } from 'react-native-image-picker';
 import RNQRGenerator from 'rn-qr-generator';
 import { showToast } from '@synonymdev/react-native-toast';
 import QRScannerContent from '../src/components/QRScannerContent';
+import { SCAN_SLOW_WARNING_MS } from '../src/components/Camera/scanGate';
 
 let mockOnBarCodeRead: (data: string) => void = () => {};
 
@@ -113,6 +114,30 @@ describe('QRScannerContent', () => {
 			await scan.promise;
 		});
 		expect(galleryButton()).toBeEnabled();
+	});
+
+	it('keeps the gallery button disabled past the slow-scan warning until the scan settles', async () => {
+		jest.useFakeTimers();
+		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+		const scan = deferred();
+		const onScan = jest.fn(() => scan.promise);
+		const screen = renderScanner(onScan);
+
+		act(() => mockOnBarCodeRead('pubkyauth://camera'));
+		act(() => {
+			jest.advanceTimersByTime(SCAN_SLOW_WARNING_MS * 2);
+		});
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(screen.getByTestId('QRScannerGalleryButton')).toBeDisabled();
+
+		await act(async () => {
+			scan.resolve();
+			await scan.promise;
+		});
+		expect(screen.getByTestId('QRScannerGalleryButton')).toBeEnabled();
+
+		warn.mockRestore();
+		jest.useRealTimers();
 	});
 
 	it('shows a toast when a pick loses the race with a camera scan', async () => {

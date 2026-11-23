@@ -2,7 +2,7 @@ import {
 	createScanGate,
 	SCAN_COOLDOWN_MS,
 	SCAN_THROTTLE_MS,
-	SCAN_TIMEOUT_MS,
+	SCAN_SLOW_WARNING_MS,
 } from '../src/components/Camera/scanGate';
 
 const flushPromises = async (): Promise<void> => {
@@ -157,66 +157,77 @@ describe('createScanGate', () => {
 		expect(handler).toHaveBeenCalledTimes(3);
 	});
 
-	it('reopens the gate when a handler never settles', async () => {
+	it('keeps the gate closed and only warns when a handler never settles', async () => {
 		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-		const gate = createScanGate();
+		const onBusyChange = jest.fn();
+		const gate = createScanGate({ onBusyChange });
 		const hanging = jest.fn(() => new Promise<void>(() => {}));
 		const handler = jest.fn();
 
 		gate('pubkyauth://a', hanging);
-		jest.advanceTimersByTime(SCAN_TIMEOUT_MS - 1);
-		expect(gate('pubkyauth://b', handler)).toBe(false);
+		jest.advanceTimersByTime(SCAN_SLOW_WARNING_MS - 1);
+		expect(warn).not.toHaveBeenCalled();
 
 		jest.advanceTimersByTime(1);
 		expect(warn).toHaveBeenCalledTimes(1);
-		expect(gate('pubkyauth://b', handler)).toBe(true);
-		expect(handler).toHaveBeenCalledTimes(1);
 
-		warn.mockRestore();
-	});
-
-	it('does not let a timed-out scan reopen the gate during a newer scan', async () => {
-		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-		const gate = createScanGate();
-		const late = deferredHandler();
-		const current = deferredHandler();
-		const handler = jest.fn();
-
-		gate('pubkyauth://a', late.handler);
-		jest.advanceTimersByTime(SCAN_TIMEOUT_MS);
-		expect(gate('pubkyauth://b', current.handler)).toBe(true);
-
-		late.resolve();
-		await flushPromises();
-		expect(gate('pubkyauth://c', handler)).toBe(false);
-
-		// The old watchdog was cleared, so only the newer scan's own timeout applies.
-		current.resolve();
-		await flushPromises();
-		expect(gate('pubkyauth://c', handler)).toBe(true);
-		expect(warn).toHaveBeenCalledTimes(1);
-
-		warn.mockRestore();
-	});
-
-	it('treats a timed-out code as just seen so a held code is not handled twice', async () => {
-		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
-		const gate = createScanGate();
-		const hanging = jest.fn(() => new Promise<void>(() => {}));
-
-		gate('pubkyring://migrate?index=0&total=1&key=k', hanging);
-		for (let elapsed = SCAN_THROTTLE_MS; elapsed <= SCAN_TIMEOUT_MS + 5000; elapsed += SCAN_THROTTLE_MS) {
-			jest.advanceTimersByTime(SCAN_THROTTLE_MS);
-			gate('pubkyring://migrate?index=0&total=1&key=k', hanging);
-		}
-		expect(warn).toHaveBeenCalledTimes(1);
+		jest.advanceTimersByTime(SCAN_SLOW_WARNING_MS * 3);
+		expect(gate('pubkyauth://a', hanging)).toBe(false);
+		expect(gate('pubkyauth://b', handler)).toBe(false);
+		expect(gate('pubkyauth://b', handler, { skipCooldown: true })).toBe(false);
 		expect(hanging).toHaveBeenCalledTimes(1);
-
-		const handler = jest.fn();
-		expect(gate('pubkyauth://b', handler)).toBe(true);
-		expect(handler).toHaveBeenCalledTimes(1);
+		expect(handler).not.toHaveBeenCalled();
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(onBusyChange.mock.calls).toEqual([[true]]);
 
 		warn.mockRestore();
+	});
+
+	it('does not start a second slow import when the same code is rescanned', async () => {
+		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+		const gate = createScanGate();
+		const code = 'pubkyring://migrate?index=0&total=1&key=k';
+		const slowImport = jest.fn(
+			() =>
+				new Promise<void>(resolve => {
+					setTimeout(resolve, 30000);
+				}),
+		);
+
+		gate(code, slowImport);
+		// Deliberate rescans after the code was out of view for longer than the cooldown.
+		jest.advanceTimersByTime(20000);
+		expect(gate(code, slowImport)).toBe(false);
+		jest.advanceTimersByTime(5000);
+		expect(gate(code, slowImport)).toBe(false);
+		expect(slowImport).toHaveBeenCalledTimes(1);
+
+		// The import settles at 30s; a rescan after the cooldown is handled again.
+		jest.advanceTimersByTime(5000);
+		await flushPromises();
+		jest.advanceTimersByTime(SCAN_COOLDOWN_MS);
+		expect(gate(code, slowImport)).toBe(true);
+		expect(slowImport).toHaveBeenCalledTimes(2);
+
+		warn.mockRestore();
+	});
+
+	it('handles a rescan of the same code after the cooldown when the handler failed', async () => {
+		const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
+		const onBusyChange = jest.fn();
+		const gate = createScanGate({ onBusyChange });
+		const failing = jest.fn(() => Promise.reject(new Error('offline')));
+
+		gate('pubkyauth://a', failing);
+		await flushPromises();
+		expect(onBusyChange.mock.calls).toEqual([[true], [false]]);
+
+		jest.advanceTimersByTime(SCAN_COOLDOWN_MS);
+		expect(gate('pubkyauth://a', failing)).toBe(true);
+		expect(failing).toHaveBeenCalledTimes(2);
+		await flushPromises();
+
+		consoleError.mockRestore();
 	});
 
 	it('reports when it is busy', async () => {

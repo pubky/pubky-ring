@@ -18,10 +18,12 @@ export const SCAN_THROTTLE_MS = 250;
 export const SCAN_COOLDOWN_MS = 1000;
 
 /**
- * Longest time a scan may hold the gate. If a handler never settles, the gate
- * reopens after this so the scanner doesn't stay locked.
+ * A scan that is still running after this long logs a warning. The gate stays
+ * closed until the handler settles: reopening it while a slow import is still
+ * running would let a rescan start a second one. The gate belongs to one
+ * scanner mount, so closing and reopening the scanner resets it.
  */
-export const SCAN_TIMEOUT_MS = 20000;
+export const SCAN_SLOW_WARNING_MS = 20000;
 
 export type ScanHandler = (data: string) => Promise<void> | void;
 
@@ -34,14 +36,14 @@ export type ScanGate = (data: string, handler: ScanHandler, options?: ScanOption
 
 export type ScanGateConfig = {
 	cooldownMs?: number;
-	timeoutMs?: number;
-	/** Called when a scan starts (true) and when it finishes or times out (false). */
+	slowWarningMs?: number;
+	/** Called when a scan starts (true) and when its handler settles (false). */
 	onBusyChange?: (busy: boolean) => void;
 };
 
 /**
  * Creates a gate for scanned codes:
- * - every read is ignored while the previous handler is still running (up to `timeoutMs`)
+ * - every read is ignored until the previous handler has settled
  * - the same value is ignored until it has not been seen for `cooldownMs`
  * - a different value is handled right away
  *
@@ -49,28 +51,27 @@ export type ScanGateConfig = {
  */
 export const createScanGate = ({
 	cooldownMs = SCAN_COOLDOWN_MS,
-	timeoutMs = SCAN_TIMEOUT_MS,
+	slowWarningMs = SCAN_SLOW_WARNING_MS,
 	onBusyChange,
 }: ScanGateConfig = {}): ScanGate => {
 	let activeScanId: number | null = null;
 	let nextScanId = 0;
-	let watchdog: ReturnType<typeof setTimeout> | null = null;
+	let slowWarning: ReturnType<typeof setTimeout> | null = null;
 	let lastValue: string | null = null;
 	let lastSeenAt = 0;
 
 	const finish = (scanId: number, data: string): void => {
-		// A scan that already timed out must not reopen the gate during a newer one.
 		if (activeScanId !== scanId) {
 			return;
 		}
 		activeScanId = null;
-		// The finished (or timed-out) value counts as just seen, so a code still
-		// held in view isn't handled again until it has been out of view.
+		// The finished value counts as just seen, so a code still held in view
+		// isn't handled again until it has been out of view.
 		lastValue = data;
 		lastSeenAt = Date.now();
-		if (watchdog) {
-			clearTimeout(watchdog);
-			watchdog = null;
+		if (slowWarning) {
+			clearTimeout(slowWarning);
+			slowWarning = null;
 		}
 		onBusyChange?.(false);
 	};
@@ -91,12 +92,13 @@ export const createScanGate = ({
 		lastValue = data;
 		lastSeenAt = now;
 		onBusyChange?.(true);
-		watchdog = setTimeout(() => {
+		slowWarning = setTimeout(() => {
 			if (activeScanId === scanId) {
-				console.warn(`QR scan handler did not finish within ${timeoutMs}ms; accepting new scans.`);
+				console.warn(
+					`QR scan handler still running after ${slowWarningMs}ms; scanner stays busy until it settles.`,
+				);
 			}
-			finish(scanId, data);
-		}, timeoutMs);
+		}, slowWarningMs);
 
 		const onError = (error: unknown): void => {
 			finish(scanId, data);

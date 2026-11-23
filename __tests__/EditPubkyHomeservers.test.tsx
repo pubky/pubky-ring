@@ -12,7 +12,7 @@ import EditPubkyScanner from '../src/screens/EditPubkyScanner';
 import EditPubkySelectServer from '../src/screens/EditPubkySelectServer';
 import EditPubkySheet from '../src/sheets/EditPubkySheet';
 import { EditPubkyFlowProvider, useEditPubkyFlow } from '../src/components/EditPubky/EditPubkyFlowContext';
-import reducer, { addHomeserver, setPubkyData } from '../src/store/slices/pubkysSlice';
+import reducer, { addHomeserver, removePubky, setPubkyData } from '../src/store/slices/pubkysSlice';
 import type { Dispatch } from 'redux';
 import { defaultHomeserver, defaultPubkyState, initialState } from '../src/store/shapes/pubky';
 import {
@@ -1084,33 +1084,26 @@ describe('pubky name defaults', () => {
 	const setupNamed = (name: string, others: Record<string, Pubky>) =>
 		setup({ name, signedUp: true }, undefined, undefined, undefined, others);
 	const nameInput = () => screen.getByTestId('EditPubkyNameInput');
+	const save = () => act(async () => fireEvent.press(screen.getByTestId('EditPubkySaveButton')));
 
-	it('opens a key on its default name with an empty field and that name as placeholder', () => {
-		const store = setupNamed('pubky #2', { other: named('pubky #1') });
+	it('opens a key on its own default name with an empty field and keeps it when other keys change', async () => {
+		const store = setupNamed('pubky #2', { first: named('pubky #1') });
 		expect(nameInput().props.value).toBe('');
 		expect(nameInput().props.placeholder).toBe('pubky #2');
+		await act(async () => {
+			store.dispatch(removePubky('first'));
+		});
+		expect(nameInput().props.placeholder).toBe('pubky #2');
+		await save();
 		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #2');
 	});
 
-	it('shows a custom name in the field and the next free default as placeholder', () => {
-		setupNamed('Work', { other: named('pubky #1') });
-		expect(nameInput().props.value).toBe('Work');
-		expect(nameInput().props.placeholder).toBe('pubky #2');
-	});
-
-	it('saves a cleared name as the next free default', async () => {
-		const store = setupNamed('Work', { first: named('pubky #1'), third: named('Pubky #2') });
-		fireEvent.changeText(nameInput(), '   ');
-		await act(async () => fireEvent.press(screen.getByTestId('EditPubkySaveButton')));
-		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #3');
-	});
-
-	it("does not count the key's own old default as taken when its name is cleared", async () => {
+	it('saves a cleared name as the lowest free default', async () => {
 		const store = setupNamed('pubky #3', { first: named('pubky #1') });
 		expect(nameInput().props.value).toBe('pubky #3');
+		fireEvent.changeText(nameInput(), '   ');
 		expect(nameInput().props.placeholder).toBe('pubky #2');
-		fireEvent.changeText(nameInput(), '');
-		await act(async () => fireEvent.press(screen.getByTestId('EditPubkySaveButton')));
+		await save();
 		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #2');
 	});
 
@@ -1118,7 +1111,7 @@ describe('pubky name defaults', () => {
 		const store = setup({ name: '', homeserver: '', signedUp: false }, CUSTOM);
 		await act(async () => {});
 		expect(nameInput().props.placeholder).toBe('pubky #1');
-		await act(async () => fireEvent.press(screen.getByTestId('EditPubkySaveButton')));
+		await save();
 		expect(signup).toHaveBeenCalledWith(expect.objectContaining({ homeserver: CUSTOM }));
 		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #1');
 	});

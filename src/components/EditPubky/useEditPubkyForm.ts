@@ -74,7 +74,8 @@ export const useEditPubkyForm = (
 	const [loading, setLoading] = useState(false);
 	const [signingOut, setSigningOut] = useState(false);
 	// A pubky still on its default name opens with an empty field that shows the default as placeholder.
-	const fieldName = storedName === defaultName ? '' : storedName;
+	// Frozen when the sheet opens, so renaming or deleting another pubky never counts as an edit here.
+	const [fieldName] = useState(storedName === defaultName ? '' : storedName);
 	const [newPubkyName, setNewPubkyName] = useState(fieldName);
 	const [expandedHomeserver, setExpandedHomeserver] = useState('');
 	const [requiredHomeserver, setRequiredHomeserver] = useState('');
@@ -129,8 +130,10 @@ export const useEditPubkyForm = (
 			(!signupToken || !isSynonym || isValidSignupTokenFormat(signupToken)));
 	const inviteVisible =
 		needsSignup && (inviteRequired || expandedHomeserver === homeServer || Boolean(signupToken));
-	const nameToSave = newPubkyName.trim() || defaultName;
 	const nameChanged = newPubkyName.trim() !== fieldName;
+	// An untouched empty field keeps the stored name. A cleared one takes the current default.
+	const emptyFieldName = (!nameChanged && storedName) || defaultName;
+	const nameToSave = newPubkyName.trim() || emptyFieldName;
 	const connectionFieldsChanged = homeServer !== baselineHomeserver || Boolean(signupToken);
 	const saveNameOnly = nameChanged && (!connectionFieldsChanged || (!needsSignup && !needsSignin));
 	const canConnect =
@@ -332,7 +335,7 @@ export const useEditPubkyForm = (
 			' ',
 		),
 		newPubkyName,
-		namePlaceholder: defaultName,
+		namePlaceholder: emptyFieldName,
 		nameError:
 			newPubkyName.length > 20 ? `${MAX_NAME_LENGTH - newPubkyName.length} / ${MAX_NAME_LENGTH}` : '',
 		handleNameChange: (text: string) => {

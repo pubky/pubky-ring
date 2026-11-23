@@ -233,53 +233,46 @@ describe('pubky migrations', () => {
 });
 
 describe('unnamed pubky labels migration', () => {
-	const pubkyState = (pubkys: Record<string, Record<string, unknown>>) => ({
+	const pubkyState = (pubkys: Record<string, unknown>) => ({
 		_persist: { version: 14, rehydrated: true },
 		pubky: { pubkys, deepLink: '', homeservers: {}, processing: {} },
 		settings: { theme: ETheme.dark },
 	});
 
-	it('stores the label each unnamed pubky shows today and keeps names, order and other state', async () => {
+	it('keeps each free position label and gives only clashing pubkys the lowest free number', async () => {
 		const state = pubkyState({
-			first: { name: '', homeserver: 'hs', isBackedUp: true },
-			second: { name: 'Work' },
-			third: { name: '' },
-			adopted: { name: 'pubky #4 (Bitkit)', sourceApp: 'bitkit' },
+			first: { name: '', homeserver: 'hs' },
+			second: { name: '' },
+			named: { name: 'pubky #1' },
+			adopted: { name: 'pubky #3 (Bitkit)', sourceApp: 'bitkit' },
+			fifth: { name: '' },
 		});
 		const migrated = (await createMigrate(migrations)(state, 15)) as unknown as typeof state;
 
-		expect(Object.keys(migrated.pubky.pubkys)).toEqual(['first', 'second', 'third', 'adopted']);
+		expect(Object.keys(migrated.pubky.pubkys)).toEqual(['first', 'second', 'named', 'adopted', 'fifth']);
 		expect(migrated.pubky.pubkys).toEqual({
-			first: { name: 'pubky #1', homeserver: 'hs', isBackedUp: true },
-			second: { name: 'Work' },
-			third: { name: 'pubky #3' },
-			adopted: { name: 'pubky #4 (Bitkit)', sourceApp: 'bitkit' },
+			first: { name: 'pubky #4', homeserver: 'hs' },
+			second: { name: 'pubky #2' },
+			named: { name: 'pubky #1' },
+			adopted: { name: 'pubky #3 (Bitkit)', sourceApp: 'bitkit' },
+			fifth: { name: 'pubky #5' },
 		});
 		expect(migrated.settings).toEqual(state.settings);
 	});
 
-	it('gives an unnamed pubky the next free number when another pubky is already named after its label', () => {
+	it('names pubkys with a malformed name and passes through entries and states it cannot read', () => {
 		const migrated = runMigration(
 			15,
-			pubkyState({
-				first: { name: 'Work' },
-				second: { name: '' },
-				third: { name: 'pubky #2' },
-			}),
+			pubkyState({ broken: { name: 42 }, text: 'garbage', empty: null, work: { name: 'Work' } }),
 		);
-
 		expect(migrated.pubky.pubkys).toEqual({
-			first: { name: 'Work' },
-			second: { name: 'pubky #3' },
-			third: { name: 'pubky #2' },
+			broken: { name: 'pubky #1' },
+			text: 'garbage',
+			empty: null,
+			work: { name: 'Work' },
 		});
-	});
-
-	it('handles state without pubkys', () => {
-		const empty = pubkyState({});
-		expect(runMigration(15, empty)).toEqual(empty);
+		const withoutPubkys = { _persist: { version: 14, rehydrated: true } };
+		expect(runMigration(15, withoutPubkys)).toEqual(withoutPubkys);
 		expect(runMigration(15, undefined)).toBeUndefined();
-		const withoutPubkyState = { _persist: { version: 14, rehydrated: true } };
-		expect(runMigration(15, withoutPubkyState)).toEqual(withoutPubkyState);
 	});
 });

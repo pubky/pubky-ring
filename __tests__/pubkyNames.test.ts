@@ -1,79 +1,26 @@
-import { assignDefaultPubkyNames, getPubkyDisplayName, nextDefaultPubkyName } from '../src/utils/pubkyNames';
+import { getPubkyDisplayName, nextDefaultPubkyName, nextExternalPubkyName } from '../src/utils/pubkyNames';
 
-const named = (...names: Array<string>) =>
+const named = (...names: Array<unknown>) =>
 	Object.fromEntries(names.map((name, index) => [`key-${index}`, { name }]));
 
-describe('nextDefaultPubkyName', () => {
-	it('starts at pubky #1', () => {
+describe('pubky names', () => {
+	it('picks the lowest default number no other pubky uses, Bitkit names included', () => {
 		expect(nextDefaultPubkyName({})).toBe('pubky #1');
-	});
-
-	it('picks the lowest free number, filling gaps left by deleted or renamed keys', () => {
-		expect(nextDefaultPubkyName(named('pubky #1', 'pubky #3'))).toBe('pubky #2');
-		expect(nextDefaultPubkyName(named('pubky #2', 'Work'))).toBe('pubky #1');
-	});
-
-	it('treats names that only differ in case or surrounding spaces as taken', () => {
-		expect(nextDefaultPubkyName(named(' Pubky #1 ', 'PUBKY #2'))).toBe('pubky #3');
-	});
-
-	it('ignores names that only look similar, such as adopted Bitkit keys', () => {
-		expect(nextDefaultPubkyName(named('pubky #1 (Bitkit)', 'my pubky #1', 'pubky #10', '', '  '))).toBe(
-			'pubky #1',
+		// Gaps are filled; case, spaces and the Bitkit suffix do not make a name different.
+		expect(nextDefaultPubkyName(named('pubky #1', ' PUBKY #2 ', 'pubky #3 (Bitkit)', 'pubky #5'))).toBe(
+			'pubky #4',
 		);
+		// Names that only look similar, and malformed names, do not take a number.
+		expect(nextDefaultPubkyName(named('my pubky #1', 'pubky #10', '', 1, null))).toBe('pubky #1');
+		// The pubky being renamed does not block its own name.
+		expect(nextDefaultPubkyName(named('pubky #1', 'pubky #2'), 'key-1')).toBe('pubky #2');
+		expect(nextExternalPubkyName(named('pubky #1', 'pubky #3'))).toBe('pubky #2 (Bitkit)');
 	});
 
-	it("does not count the excluded key's own name as taken", () => {
-		const pubkys = { a: { name: 'pubky #1' }, b: { name: 'pubky #2' } };
-		expect(nextDefaultPubkyName(pubkys)).toBe('pubky #3');
-		expect(nextDefaultPubkyName(pubkys, 'b')).toBe('pubky #2');
-	});
-});
-
-describe('getPubkyDisplayName', () => {
-	it('shows the stored name', () => {
-		expect(getPubkyDisplayName({ name: 'Work' })).toBe('Work');
-	});
-
-	it('shows the placeholder without a position for a missing or blank name', () => {
-		expect(getPubkyDisplayName({ name: '' })).toBe('pubky');
-		expect(getPubkyDisplayName({ name: '   ' })).toBe('pubky');
-		expect(getPubkyDisplayName(undefined)).toBe('pubky');
-	});
-});
-
-describe('assignDefaultPubkyNames', () => {
-	it('stores the position-based label each unnamed key showed before, keeping order and other fields', () => {
-		const result = assignDefaultPubkyNames({
-			a: { name: '', image: 'a.png' },
-			b: { name: 'Work', image: '' },
-			c: { name: '  ', image: '' },
-		});
-		expect(Object.keys(result)).toEqual(['a', 'b', 'c']);
-		expect(result).toEqual({
-			a: { name: 'pubky #1', image: 'a.png' },
-			b: { name: 'Work', image: '' },
-			c: { name: 'pubky #3', image: '' },
-		});
-	});
-
-	it('moves to the next free number when another key already uses the label', () => {
-		const result = assignDefaultPubkyNames({
-			a: { name: 'Work' },
-			b: { name: '' },
-			c: { name: '' },
-			d: { name: 'Pubky #2' },
-			e: { name: 'pubky #4' },
-		});
-		expect(result.b.name).toBe('pubky #3');
-		expect(result.c.name).toBe('pubky #5');
-		const names = Object.values(result).map(({ name }) => name.toLowerCase());
-		expect(new Set(names).size).toBe(names.length);
-	});
-
-	it('leaves a map without unnamed keys unchanged', () => {
-		const pubkys = { a: { name: 'Work' }, b: { name: 'pubky #2 (Bitkit)' } };
-		expect(assignDefaultPubkyNames(pubkys)).toEqual(pubkys);
-		expect(assignDefaultPubkyNames({})).toEqual({});
+	it('shows the stored name, or the placeholder without a position', () => {
+		expect(getPubkyDisplayName({ name: ' Work ' })).toBe('Work');
+		for (const pubkyData of [{ name: '' }, { name: '  ' }, { name: 3 }, undefined]) {
+			expect(getPubkyDisplayName(pubkyData)).toBe('pubky');
+		}
 	});
 });

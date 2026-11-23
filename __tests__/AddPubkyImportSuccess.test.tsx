@@ -137,33 +137,32 @@ describe('AddPubkyImportSuccess', () => {
 		expect(resetRootToHomeWithSheetMock).not.toHaveBeenCalled();
 	});
 
-	it('shows the stored names of migrated pubkys, not their position in the batch', () => {
+	it('shows stored names, not positions in the batch or the key count', () => {
 		(getAllPubkys as jest.Mock).mockReturnValue({
-			'pubky-existing': { name: 'pubky #1' },
-			'pubky-two': { name: 'pubky #3' },
 			'pubky-one': { name: 'pubky #2' },
+			'pubky-two': { name: 'pubky #3' },
 		});
-		const { getAllByTestId } = render(
+		(getPubky as jest.Mock).mockReturnValue({ name: 'pubky #4' });
+		const migration = render(
 			<AddPubkyImportSuccess
 				route={{ params: { isMigration: true, pubkys: ['pubky-one', 'pubky-two'], totalCount: 2 } } as never}
 				navigation={{} as never}
 			/>,
 		);
+		expect(migration.getAllByTestId('PubkyCard').map(card => card.props.children)).toEqual([
+			'pubky #2',
+			'pubky #3',
+		]);
+		migration.unmount();
 
-		expect(getAllByTestId('PubkyCard').map(card => card.props.children)).toEqual(['pubky #2', 'pubky #3']);
-		(getAllPubkys as jest.Mock).mockReturnValue({});
-	});
-
-	it('shows the stored name of a single imported pubky', () => {
-		(getPubky as jest.Mock).mockReturnValue({ name: 'pubky #4' });
-		const { getByTestId } = render(
+		const single = render(
 			<AddPubkyImportSuccess
 				route={{ params: { pubky: 'pubky-new', isNewPubky: true } } as never}
 				navigation={{} as never}
 			/>,
 		);
-
-		expect(getByTestId('PubkyProfile')).toHaveTextContent('pubky #4');
+		expect(single.getByTestId('PubkyProfile')).toHaveTextContent('pubky #4');
+		(getAllPubkys as jest.Mock).mockReturnValue({});
 		(getPubky as jest.Mock).mockReturnValue(undefined);
 	});
 });

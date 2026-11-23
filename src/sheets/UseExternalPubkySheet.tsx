@@ -10,8 +10,9 @@ import Card from '../components/Card.tsx';
 import Button from '../components/Button.tsx';
 import ProfileAvatar from '../components/ProfileAvatar.tsx';
 import { Text2Xl, Text5Xl, TextBaseB, TextBaseM } from '../theme/typography';
-import { getPubkyCount } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { adoptExternalPubky } from '../utils/pubky.ts';
+import { nextExternalPubkyName } from '../utils/pubkyNames.ts';
 import type { RootStackParamList } from '../navigation/types.ts';
 
 const UseExternalPubkySheet = ({
@@ -20,9 +21,9 @@ const UseExternalPubkySheet = ({
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
 	const { pubky, sourceApp } = route.params;
-	const pubkyCount = useSelector(getPubkyCount);
+	const allPubkys = useSelector(getAllPubkys);
 	const [loading, setLoading] = useState(false);
-	const pubkyName = `pubky #${pubkyCount + 1} (Bitkit)`;
+	const pubkyName = nextExternalPubkyName(allPubkys);
 
 	const handleUse = useCallback(async (): Promise<void> => {
 		setLoading(true);

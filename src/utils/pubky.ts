@@ -71,7 +71,7 @@ import {
 	unpublishOwnedPubky,
 } from './sharedPubky.ts';
 import i18n from '../i18n';
-import { nextDefaultPubkyName } from './pubkyNames.ts';
+import { nextDefaultPubkyName, nextExternalPubkyName } from './pubkyNames.ts';
 
 type GrantManagementBindings = {
 	listGrants?: (sessionSecret: string) => Promise<Result<GrantInfo[]>>;
@@ -522,14 +522,14 @@ export const adoptExternalPubky = async ({
 		return;
 	}
 	const homeserver = await lookupHomeserver(pubky);
+	const name = nextExternalPubkyName(getAllPubkysFromStore());
 	dispatch(addPubky({ pubky, backupPreference: EBackupPreference.unknown, isBackedUp: true }));
-	const index = Object.keys(getAllPubkysFromStore()).indexOf(pubky);
 	dispatch(
 		setPubkyData({
 			pubky,
 			data: {
 				sourceApp,
-				name: `pubky #${index + 1} (Bitkit)`,
+				name,
 				signedUp: !!homeserver,
 				homeserver,
 			},

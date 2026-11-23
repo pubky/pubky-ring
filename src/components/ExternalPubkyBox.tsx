@@ -2,9 +2,12 @@ import React, { memo, ReactElement, useCallback } from 'react';
 import { StyleSheet, TouchableOpacity, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useTheme } from 'styled-components/native';
+import { useSelector } from 'react-redux';
 import { Theme } from '../theme';
 import { Text2Xl, TextBaseB } from '../theme/typography';
 import { truncateStr } from '../utils/pubky.ts';
+import { nextExternalPubkyName } from '../utils/pubkyNames.ts';
+import { getAllPubkys } from '../store/selectors/pubkySelectors.ts';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
 import ProfileAvatar from './ProfileAvatar.tsx';
 import Button from './Button.tsx';
@@ -22,7 +25,9 @@ const ExternalPubkyBox = ({ pubky, sourceApp, index }: ExternalPubkyBoxProps): R
 	const { t } = useTranslation();
 	const theme = useTheme() as Theme;
 
-	const pubkyName = `pubky #${index + 1} (Bitkit)`;
+	const allPubkys = useSelector(getAllPubkys);
+	// The name it gets when adopted, numbered like Ring's own pubkys.
+	const pubkyName = nextExternalPubkyName(allPubkys);
 
 	const handlePress = useCallback(() => {
 		showSheet('use-external-pubky', { pubky, sourceApp });

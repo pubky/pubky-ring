@@ -5,7 +5,7 @@ import { wipeKeychain } from '../src/utils/keychain';
 import { adoptExternalPubky, deletePubky, pruneMissingExternalPubkys } from '../src/utils/pubky';
 import { listExternalPubkys, unpublishAllOwnedPubkys, unpublishOwnedPubky } from '../src/utils/sharedPubky';
 import { SHARED_PUBKY_SERVICE } from '../src/utils/constants';
-import { getPubkyDataFromStore } from '../src/utils/store-helpers';
+import { getAllPubkysFromStore, getPubkyDataFromStore } from '../src/utils/store-helpers';
 import { defaultPubkyState } from '../src/store/shapes/pubky';
 import { TPubkys } from '../src/types/pubky';
 
@@ -60,6 +60,7 @@ jest.mock('../src/utils/helpers.ts', () => ({
 jest.mock('../src/utils/store-helpers', () => ({
 	__esModule: true,
 	getPubkyDataFromStore: jest.fn(),
+	getAllPubkysFromStore: jest.fn(() => ({})),
 }));
 
 jest.mock('@synonymdev/react-native-toast', () => ({
@@ -207,5 +208,24 @@ describe('adoptExternalPubky', () => {
 		await adoptExternalPubky({ pubky: PUBKY, sourceApp: 'to.bitkit', dispatch });
 
 		expect(dispatch).not.toHaveBeenCalled();
+	});
+
+	it('names an adopted pubky with the lowest number Ring pubkys leave free', async () => {
+		(getPubkyDataFromStore as jest.Mock).mockReturnValue(undefined);
+		(getAllPubkysFromStore as jest.Mock).mockReturnValue({
+			first: { ...defaultPubkyState, name: 'pubky #1' },
+			third: { ...defaultPubkyState, name: 'pubky #3' },
+		});
+		const dispatch = jest.fn();
+
+		await adoptExternalPubky({ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit', dispatch });
+
+		expect(dispatch).toHaveBeenLastCalledWith({
+			type: 'pubky/setPubkyData',
+			payload: {
+				pubky: EXTERNAL_PUBKY,
+				data: expect.objectContaining({ sourceApp: 'to.bitkit', name: 'pubky #2 (Bitkit)' }),
+			},
+		});
 	});
 });

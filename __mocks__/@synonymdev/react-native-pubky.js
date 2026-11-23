@@ -12,4 +12,7 @@ module.exports = {
 		err('Mocked react-native-pubky.republishHomeserver was not configured for this test'),
 	),
 	signOut: jest.fn(async () => err('Mocked react-native-pubky.signOut was not configured for this test')),
+	getHomeserver: jest.fn(async () =>
+		err('Mocked react-native-pubky.getHomeserver was not configured for this test'),
+	),
 };

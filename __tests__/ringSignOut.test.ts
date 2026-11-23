@@ -9,7 +9,7 @@ import {
 	signUpToHomeserver,
 } from '../src/utils/pubky';
 import { refreshAuthorizedGrants } from '../src/utils/authorizedGrants';
-import { getPubkyDataFromStore } from '../src/utils/store-helpers';
+import { getAllPubkysFromStore, getPubkyDataFromStore } from '../src/utils/store-helpers';
 import {
 	getSessionSecret,
 	resetSessionSecret,
@@ -35,6 +35,7 @@ jest.mock('@synonymdev/react-native-pubky', () => ({
 	signUp: jest.fn(),
 	getPublicKeyFromSecretKey: jest.fn(),
 	getHomeserver: jest.fn(),
+	get: jest.fn(),
 }));
 jest.mock('@synonymdev/react-native-toast', () => ({ showToast: jest.fn() }));
 jest.mock('uuid', () => ({
@@ -42,7 +43,10 @@ jest.mock('uuid', () => ({
 }));
 jest.mock('../src/i18n', () => ({ __esModule: true, default: { t: (key: string) => key } }));
 jest.mock('../src/utils/helpers', () => ({ checkNetworkConnection: jest.fn() }));
-jest.mock('../src/utils/store-helpers', () => ({ getPubkyDataFromStore: jest.fn() }));
+jest.mock('../src/utils/store-helpers', () => ({
+	getPubkyDataFromStore: jest.fn(),
+	getAllPubkysFromStore: jest.fn(() => ({})),
+}));
 jest.mock('../src/utils/sharedPubky', () => ({ publishOwnedPubky: jest.fn() }));
 jest.mock('../src/utils/keychain', () => ({
 	getKeychainValue: jest.fn(async () => {
@@ -803,4 +807,43 @@ describe('homeserver discovery during import', () => {
 			expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'pubky/setHomeserver' }));
 		},
 	);
+});
+
+describe('default names for new keys', () => {
+	const addedName = (dispatch: jest.Mock): string | undefined =>
+		dispatch.mock.calls.find(([action]) => action.type === 'pubky/addPubky')?.[0].payload.name;
+
+	beforeEach(() => {
+		native.getPublicKeyFromSecretKey.mockResolvedValue(ok({ public_key: 'user' }));
+	});
+
+	it('stores an imported key under the lowest free default name', async () => {
+		(getAllPubkysFromStore as jest.Mock).mockReturnValueOnce({
+			first: { ...defaultPubkyState, name: 'pubky #1' },
+			third: { ...defaultPubkyState, name: 'pubky #3' },
+		});
+		native.getHomeserver.mockResolvedValueOnce(err('No homeserver found for this public key'));
+		const dispatch = jest.fn();
+		expect((await importPubky({ secretKey: 'identity-secret', dispatch })).isOk()).toBe(true);
+		expect(addedName(dispatch)).toBe('pubky #2');
+		expect(dispatch).not.toHaveBeenCalledWith(
+			expect.objectContaining({
+				type: 'pubky/setPubkyData',
+				payload: expect.objectContaining({ data: expect.objectContaining({ name: expect.anything() }) }),
+			}),
+		);
+	});
+
+	it('replaces the default name with the profile name when the profile has one', async () => {
+		native.getHomeserver.mockResolvedValueOnce(ok(PRODUCTION_HOMESERVER));
+		native.signIn.mockResolvedValueOnce(ok(temporary));
+		native.get.mockResolvedValueOnce(ok(JSON.stringify({ name: 'Alice' })));
+		const dispatch = jest.fn();
+		expect((await importPubky({ secretKey: 'identity-secret', dispatch })).isOk()).toBe(true);
+		expect(addedName(dispatch)).toBe('pubky #1');
+		expect(dispatch).toHaveBeenLastCalledWith({
+			type: 'pubky/setPubkyData',
+			payload: { pubky: 'user', data: { name: 'Alice' } },
+		});
+	});
 });

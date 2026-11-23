@@ -9,9 +9,9 @@ env:
 - runFlow: ../shared/create-pubky.yaml
 - runFlow: ../shared/close-sheet.yaml
 - assertVisible:
-    id: PubkyBox--0
+    id: PubkyBox-pubky1-0
 - tapOn:
-    id: PubkyBox--0
+    id: PubkyBox-pubky1-0
 - assertVisible:
     id: PubkyDetailBackupButton
 - tapOn:

@@ -19,6 +19,7 @@ import type { AuthStackParamList } from '../sheets/types.ts';
 import { createConfirmAuthPayload } from '../utils/actions/authAction.ts';
 import { getAutoAuthFromStore } from '../utils/store-helpers.ts';
 import { routeInputWithContext } from '../utils/inputHandlerUtils.ts';
+import { getPubkyDisplayName } from '../utils/pubkyNames.ts';
 
 type PubkyItem = { key: string; value: Pubky };
 type SelectPubkyNavigation = NativeStackNavigationProp<AuthStackParamList, 'SelectPubky'>;
@@ -38,7 +39,7 @@ const PubkyRow = memo(
 			testID={`SelectPubkyRow-${index}`}
 			onPress={() => onPress(item.key)}
 		>
-			<PubkyCard publicKey={item.key} name={item.value.name} showChevron={true} />
+			<PubkyCard publicKey={item.key} name={getPubkyDisplayName(item.value)} showChevron={true} />
 		</TouchableOpacity>
 	),
 );

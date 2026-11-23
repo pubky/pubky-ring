@@ -2,6 +2,7 @@ import React from 'react';
 import { fireEvent, render } from '@testing-library/react-native';
 import AddPubkyImportSuccess from '../src/screens/AddPubkyImportSuccess';
 import { resetRootToHome, resetRootToHomeWithSheet } from '../src/sheets/sheetNavigation';
+import { getAllPubkys, getPubky } from '../src/store/selectors/pubkySelectors.ts';
 
 jest.mock('../src/components/Sheet.tsx', () => {
 	const ReactMock = require('react');
@@ -21,31 +22,28 @@ jest.mock('../src/components/Button.tsx', () => {
 	return {
 		__esModule: true,
 		default: ({ onPress, testID, text }: { onPress: () => void; testID?: string; text: string }) =>
-			ReactMock.createElement(
-				Pressable,
-				{ onPress, testID },
-				ReactMock.createElement(Text, null, text),
-			),
+			ReactMock.createElement(Pressable, { onPress, testID }, ReactMock.createElement(Text, null, text)),
 	};
 });
 
 jest.mock('../src/components/PubkyProfile.tsx', () => {
 	const ReactMock = require('react');
-	const { View } = require('react-native');
+	const { Text } = require('react-native');
 
 	return {
 		__esModule: true,
-		default: () => ReactMock.createElement(View, { testID: 'PubkyProfile' }),
+		default: ({ pubkyData }: { pubkyData: { name: string } }) =>
+			ReactMock.createElement(Text, { testID: 'PubkyProfile' }, pubkyData.name),
 	};
 });
 
 jest.mock('../src/components/PubkyCard.tsx', () => {
 	const ReactMock = require('react');
-	const { View } = require('react-native');
+	const { Text } = require('react-native');
 
 	return {
 		__esModule: true,
-		default: () => ReactMock.createElement(View, { testID: 'PubkyCard' }),
+		default: ({ name }: { name: string }) => ReactMock.createElement(Text, { testID: 'PubkyCard' }, name),
 	};
 });
 
@@ -76,7 +74,6 @@ jest.mock('../src/store/selectors/pubkySelectors.ts', () => ({
 	__esModule: true,
 	getAllPubkys: jest.fn(() => ({})),
 	getPubky: jest.fn(() => undefined),
-	getPubkyCount: jest.fn(() => 1),
 }));
 
 jest.mock('../src/hooks/usePubkyHandlers.ts', () => ({
@@ -138,5 +135,35 @@ describe('AddPubkyImportSuccess', () => {
 
 		expect(resetRootToHomeMock).toHaveBeenCalled();
 		expect(resetRootToHomeWithSheetMock).not.toHaveBeenCalled();
+	});
+
+	it('shows the stored names of migrated pubkys, not their position in the batch', () => {
+		(getAllPubkys as jest.Mock).mockReturnValue({
+			'pubky-existing': { name: 'pubky #1' },
+			'pubky-two': { name: 'pubky #3' },
+			'pubky-one': { name: 'pubky #2' },
+		});
+		const { getAllByTestId } = render(
+			<AddPubkyImportSuccess
+				route={{ params: { isMigration: true, pubkys: ['pubky-one', 'pubky-two'], totalCount: 2 } } as never}
+				navigation={{} as never}
+			/>,
+		);
+
+		expect(getAllByTestId('PubkyCard').map(card => card.props.children)).toEqual(['pubky #2', 'pubky #3']);
+		(getAllPubkys as jest.Mock).mockReturnValue({});
+	});
+
+	it('shows the stored name of a single imported pubky', () => {
+		(getPubky as jest.Mock).mockReturnValue({ name: 'pubky #4' });
+		const { getByTestId } = render(
+			<AddPubkyImportSuccess
+				route={{ params: { pubky: 'pubky-new', isNewPubky: true } } as never}
+				navigation={{} as never}
+			/>,
+		);
+
+		expect(getByTestId('PubkyProfile')).toHaveTextContent('pubky #4');
+		(getPubky as jest.Mock).mockReturnValue(undefined);
 	});
 });

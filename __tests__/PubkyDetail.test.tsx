@@ -68,7 +68,7 @@ const pubkyData = {
 
 describe('PubkyDetail', () => {
 	it('hides authorized apps when the pubky is not configured', () => {
-		render(<PubkyDetail index={0} pubkyData={pubkyData} onQRPress={jest.fn()} />);
+		render(<PubkyDetail pubkyData={pubkyData} onQRPress={jest.fn()} />);
 
 		expect(screen.queryByTestId('AuthorizedGrantList')).toBeNull();
 		expect(screen.getByTestId('BottomSafeAreaInset')).toBeTruthy();
@@ -77,7 +77,6 @@ describe('PubkyDetail', () => {
 	it('shows authorized apps when the pubky is configured', () => {
 		render(
 			<PubkyDetail
-				index={0}
 				pubkyData={{ ...pubkyData, homeserver: 'https://homeserver.example', signedUp: true }}
 				onQRPress={jest.fn()}
 			/>,
@@ -89,7 +88,6 @@ describe('PubkyDetail', () => {
 	it('hides authorized apps for an adopted pubky', () => {
 		render(
 			<PubkyDetail
-				index={0}
 				pubkyData={{ ...pubkyData, signedUp: true, sourceApp: 'example.app' }}
 				onQRPress={jest.fn()}
 			/>,

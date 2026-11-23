@@ -2,6 +2,7 @@ import React, { memo, ReactElement } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useTranslation } from 'react-i18next';
+import { useSelector } from 'react-redux';
 import { SheetScreen } from '../components/Sheet.tsx';
 import PubkyProfile from '../components/PubkyProfile.tsx';
 import Button from '../components/Button.tsx';
@@ -9,6 +10,8 @@ import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { PubkyData } from '../navigation/types.ts';
 import { Text5Xl, TextBaseM } from '../theme/typography';
 import { showSheet } from '../sheets/sheetNavigation.tsx';
+import { getPubky } from '../store/selectors/pubkySelectors.ts';
+import type { RootState } from '../types';
 import type { AddPubkyStackParamList } from '../sheets/types.ts';
 
 const SHEET_ID = 'add-pubky';
@@ -18,7 +21,8 @@ const AddPubkyReview = ({
 }: NativeStackScreenProps<AddPubkyStackParamList, 'PubkyReview'>): ReactElement => {
 	const { t } = useTranslation();
 	const { pubky, justCreated } = route.params;
-	const pubkyData: PubkyData = { pubky, ...defaultPubkyState };
+	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
+	const pubkyData: PubkyData = { ...defaultPubkyState, ...storedPubkyData, pubky };
 
 	const onContinue = (): void => {
 		showSheet('edit-pubky', { pubky, justCreated });

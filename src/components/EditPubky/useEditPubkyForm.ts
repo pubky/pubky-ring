@@ -4,7 +4,12 @@ import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
 import { useDispatch, useSelector } from 'react-redux';
 import type { RootState } from '../../types';
-import { getHomeservers, getPreferredHomeserver, getPubky } from '../../store/selectors/pubkySelectors';
+import {
+	getAllPubkys,
+	getHomeservers,
+	getPreferredHomeserver,
+	getPubky,
+} from '../../store/selectors/pubkySelectors';
 import { setPubkyData } from '../../store/slices/pubkysSlice';
 import { signOutRingFromHomeserver, truncatePubky } from '../../utils/pubky';
 import { useEditPubkyFlow } from './EditPubkyFlowContext';
@@ -16,6 +21,7 @@ import { isSynonymHomeserver, normalizeHomeserver } from '../../utils/homeserver
 import { parseHomeserverSignupInput } from '../../utils/homeserverSignupInput';
 import { readFromClipboard } from '../../utils/clipboard';
 import { resolveHomeserver } from '../../utils/resolveHomeserver';
+import { nextDefaultPubkyName } from '../../utils/pubkyNames';
 
 const MAX_NAME_LENGTH = 50;
 
@@ -29,6 +35,9 @@ export const useEditPubkyForm = (
 	const dispatch = useDispatch();
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const storedName = storedPubkyData?.name ?? '';
+	const allPubkys = useSelector(getAllPubkys);
+	// An empty name saves as this default. The pubky's own name never counts as taken.
+	const defaultName = useMemo(() => nextDefaultPubkyName(allPubkys, pubky), [allPubkys, pubky]);
 	const storedHomeserver =
 		normalizeHomeserver(storedPubkyData?.homeserver ?? '') ?? storedPubkyData?.homeserver ?? '';
 	const storedSignedUp = storedPubkyData?.signedUp ?? false;
@@ -64,7 +73,9 @@ export const useEditPubkyForm = (
 	const [lookupAttempt, setLookupAttempt] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [signingOut, setSigningOut] = useState(false);
-	const [newPubkyName, setNewPubkyName] = useState(storedName);
+	// A pubky still on its default name opens with an empty field that shows the default as placeholder.
+	const fieldName = storedName === defaultName ? '' : storedName;
+	const [newPubkyName, setNewPubkyName] = useState(fieldName);
 	const [expandedHomeserver, setExpandedHomeserver] = useState('');
 	const [requiredHomeserver, setRequiredHomeserver] = useState('');
 	const submittingRef = useRef(false);
@@ -118,7 +129,8 @@ export const useEditPubkyForm = (
 			(!signupToken || !isSynonym || isValidSignupTokenFormat(signupToken)));
 	const inviteVisible =
 		needsSignup && (inviteRequired || expandedHomeserver === homeServer || Boolean(signupToken));
-	const nameChanged = newPubkyName.trim() !== storedName;
+	const nameToSave = newPubkyName.trim() || defaultName;
+	const nameChanged = newPubkyName.trim() !== fieldName;
 	const connectionFieldsChanged = homeServer !== baselineHomeserver || Boolean(signupToken);
 	const saveNameOnly = nameChanged && (!connectionFieldsChanged || (!needsSignup && !needsSignin));
 	const canConnect =
@@ -133,7 +145,7 @@ export const useEditPubkyForm = (
 		Keyboard.dismiss();
 		if (submittingRef.current || !canSubmit) return;
 		if (saveNameOnly) {
-			dispatch(setPubkyData({ pubky, data: { name: newPubkyName.trim() } }));
+			dispatch(setPubkyData({ pubky, data: { name: nameToSave } }));
 			onClose();
 			return;
 		}
@@ -145,7 +157,7 @@ export const useEditPubkyForm = (
 			const result = await submitEditPubky({
 				pubky,
 				storedPubkyData,
-				name: newPubkyName,
+				name: nameToSave,
 				homeserver: homeServer,
 				signupToken,
 				linkedHomeserver,
@@ -194,7 +206,7 @@ export const useEditPubkyForm = (
 		saveNameOnly,
 		pubky,
 		storedPubkyData,
-		newPubkyName,
+		nameToSave,
 		homeServer,
 		signupToken,
 		linkedHomeserver,
@@ -320,6 +332,7 @@ export const useEditPubkyForm = (
 			' ',
 		),
 		newPubkyName,
+		namePlaceholder: defaultName,
 		nameError:
 			newPubkyName.length > 20 ? `${MAX_NAME_LENGTH - newPubkyName.length} / ${MAX_NAME_LENGTH}` : '',
 		handleNameChange: (text: string) => {

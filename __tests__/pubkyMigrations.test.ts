@@ -231,3 +231,55 @@ describe('pubky migrations', () => {
 		});
 	});
 });
+
+describe('unnamed pubky labels migration', () => {
+	const pubkyState = (pubkys: Record<string, Record<string, unknown>>) => ({
+		_persist: { version: 14, rehydrated: true },
+		pubky: { pubkys, deepLink: '', homeservers: {}, processing: {} },
+		settings: { theme: ETheme.dark },
+	});
+
+	it('stores the label each unnamed pubky shows today and keeps names, order and other state', async () => {
+		const state = pubkyState({
+			first: { name: '', homeserver: 'hs', isBackedUp: true },
+			second: { name: 'Work' },
+			third: { name: '' },
+			adopted: { name: 'pubky #4 (Bitkit)', sourceApp: 'bitkit' },
+		});
+		const migrated = (await createMigrate(migrations)(state, 15)) as unknown as typeof state;
+
+		expect(Object.keys(migrated.pubky.pubkys)).toEqual(['first', 'second', 'third', 'adopted']);
+		expect(migrated.pubky.pubkys).toEqual({
+			first: { name: 'pubky #1', homeserver: 'hs', isBackedUp: true },
+			second: { name: 'Work' },
+			third: { name: 'pubky #3' },
+			adopted: { name: 'pubky #4 (Bitkit)', sourceApp: 'bitkit' },
+		});
+		expect(migrated.settings).toEqual(state.settings);
+	});
+
+	it('gives an unnamed pubky the next free number when another pubky is already named after its label', () => {
+		const migrated = runMigration(
+			15,
+			pubkyState({
+				first: { name: 'Work' },
+				second: { name: '' },
+				third: { name: 'pubky #2' },
+			}),
+		);
+
+		expect(migrated.pubky.pubkys).toEqual({
+			first: { name: 'Work' },
+			second: { name: 'pubky #3' },
+			third: { name: 'pubky #2' },
+		});
+	});
+
+	it('handles state without pubkys', () => {
+		const empty = pubkyState({});
+		expect(runMigration(15, empty)).toEqual(empty);
+		expect(runMigration(15, undefined)).toBeUndefined();
+		const withoutPubkyState = { _persist: { version: 14, rehydrated: true } };
+		expect(runMigration(15, withoutPubkyState)).toEqual(withoutPubkyState);
+	});
+});

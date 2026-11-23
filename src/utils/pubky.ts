@@ -71,6 +71,7 @@ import {
 	unpublishOwnedPubky,
 } from './sharedPubky.ts';
 import i18n from '../i18n';
+import { nextDefaultPubkyName } from './pubkyNames.ts';
 
 type GrantManagementBindings = {
 	listGrants?: (sessionSecret: string) => Promise<Result<GrantInfo[]>>;
@@ -570,7 +571,9 @@ export const savePubky = async ({
 			// If no mnemonic is provided we have to default to the encrypted file.
 			backupPreference = EBackupPreference.encryptedFile;
 		}
-		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken }));
+		// A stored default name keeps the label stable when pubkys are reordered or deleted.
+		const name = nextDefaultPubkyName(getAllPubkysFromStore());
+		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken, name }));
 		const keychainData: IKeychainData = {
 			secretKey,
 			mnemonic,

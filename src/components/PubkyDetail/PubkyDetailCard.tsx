@@ -10,7 +10,6 @@ import { Scan, Share, Shield, Trash } from '../../icons/index.ts';
 import { canPubkyAuthorize } from '../../store/selectors/pubkySelectors.ts';
 
 interface PubkyDetailCardProps {
-	index: number;
 	pubky: string;
 	pubkyData: PubkyData;
 	onQRPress: () => Promise<void>;
@@ -19,7 +18,7 @@ interface PubkyDetailCardProps {
 }
 
 export const PubkyDetailCard = memo(
-	({ index, pubky, pubkyData, onQRPress, onDelete, onBackup }: PubkyDetailCardProps) => {
+	({ pubky, pubkyData, onQRPress, onDelete, onBackup }: PubkyDetailCardProps) => {
 		const { t } = useTranslation();
 		const [fontScale] = useState(PixelRatio.getFontScale());
 		const [isQRLoading, setIsQRLoading] = useState(false);
@@ -55,7 +54,6 @@ export const PubkyDetailCard = memo(
 		return (
 			<View style={styles.container}>
 				<PubkyProfile
-					index={index}
 					pubky={pubky}
 					pubkyData={pubkyData}
 					buttonText={buttonText}

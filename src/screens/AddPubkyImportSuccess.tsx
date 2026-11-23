@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, TouchableOpacity, View } from 'react-native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useSelector } from 'react-redux';
 import { useTranslation } from 'react-i18next';
-import { getAllPubkys, getPubky, getPubkyCount } from '../store/selectors/pubkySelectors.ts';
+import { getAllPubkys, getPubky } from '../store/selectors/pubkySelectors.ts';
 import { RootState } from '../store';
 import { SheetScreen } from '../components/Sheet.tsx';
 import PubkyProfile from '../components/PubkyProfile.tsx';
@@ -14,6 +14,7 @@ import type { AddPubkyStackParamList } from '../sheets/types.ts';
 import PubkyCard from '../components/PubkyCard.tsx';
 import { defaultPubkyState } from '../store/shapes/pubky.ts';
 import { usePubkyHandlers } from '../hooks/usePubkyHandlers.ts';
+import { getPubkyDisplayName } from '../utils/pubkyNames.ts';
 
 const SHEET_ID = 'add-pubky';
 
@@ -22,7 +23,6 @@ const AddPubkyImportSuccess = ({
 }: NativeStackScreenProps<AddPubkyStackParamList, 'ImportSuccess'>): ReactElement => {
 	const { t } = useTranslation();
 	const { onPubkyPress } = usePubkyHandlers();
-	const pubkyCount = useSelector(getPubkyCount);
 	const { params } = route;
 	const isMigration = params.isMigration === true;
 	const pubky = isMigration ? '' : params.pubky;
@@ -69,22 +69,19 @@ const AddPubkyImportSuccess = ({
 		return {
 			...resolvedPubkyData,
 			pubky,
-			name: resolvedPubkyData.name || `pubky #${pubkyCount}`,
+			name: getPubkyDisplayName(resolvedPubkyData),
 		};
-	}, [pubky, pubkyCount, pubkyData]);
+	}, [pubky, pubkyData]);
 
 	const migrationPubkys = useMemo(() => {
 		if (!isMigration) {
 			return [];
 		}
 
-		return params.pubkys.map((migratedPubky, index) => {
-			const migratedPubkyData = allPubkys[migratedPubky];
-			return {
-				pubky: migratedPubky,
-				name: migratedPubkyData?.name || `pubky #${index + 1}`,
-			};
-		});
+		return params.pubkys.map(migratedPubky => ({
+			pubky: migratedPubky,
+			name: getPubkyDisplayName(allPubkys[migratedPubky]),
+		}));
 	}, [allPubkys, isMigration, params]);
 
 	return (

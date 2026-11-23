@@ -1,8 +1,19 @@
-import { createScanGate, SCAN_COOLDOWN_MS } from '../src/components/Camera/scanGate';
+import { createScanGate, SCAN_COOLDOWN_MS, SCAN_TIMEOUT_MS } from '../src/components/Camera/scanGate';
 
 const flushPromises = async (): Promise<void> => {
 	await Promise.resolve();
 	await Promise.resolve();
+};
+
+const deferredHandler = (): { handler: jest.Mock<Promise<void>, [string]>; resolve: () => void } => {
+	let resolve: () => void = () => {};
+	const handler = jest.fn(
+		(_data: string) =>
+			new Promise<void>(res => {
+				resolve = res;
+			}),
+	);
+	return { handler, resolve: () => resolve() };
 };
 
 describe('createScanGate', () => {
@@ -27,12 +38,31 @@ describe('createScanGate', () => {
 		expect(handler).toHaveBeenCalledTimes(1);
 	});
 
-	it('handles the same value again after the cooldown', async () => {
+	it('handles a code held in view only once', async () => {
+		const gate = createScanGate();
+		const handler = jest.fn();
+
+		for (let elapsed = 0; elapsed <= 10000; elapsed += 100) {
+			gate('pubkyauth://a', handler);
+			await flushPromises();
+			jest.advanceTimersByTime(100);
+		}
+
+		expect(handler).toHaveBeenCalledTimes(1);
+	});
+
+	it('handles the same value again once it has been out of view for the cooldown', async () => {
 		const gate = createScanGate();
 		const handler = jest.fn();
 
 		gate('pubkyauth://a', handler);
 		await flushPromises();
+		jest.advanceTimersByTime(SCAN_COOLDOWN_MS - 100);
+		// Still in view: ignored, and the window restarts.
+		expect(gate('pubkyauth://a', handler)).toBe(false);
+
+		jest.advanceTimersByTime(SCAN_COOLDOWN_MS - 1);
+		expect(gate('pubkyauth://a', handler)).toBe(false);
 
 		jest.advanceTimersByTime(SCAN_COOLDOWN_MS);
 		expect(gate('pubkyauth://a', handler)).toBe(true);
@@ -41,21 +71,16 @@ describe('createScanGate', () => {
 
 	it('ignores every read while a scan is in flight', async () => {
 		const gate = createScanGate();
-		let resolveScan: () => void = () => {};
-		const handler = jest.fn(
-			() =>
-				new Promise<void>(resolve => {
-					resolveScan = resolve;
-				}),
-		);
+		const { handler, resolve } = deferredHandler();
 
 		gate('pubkyauth://a', handler);
 		jest.advanceTimersByTime(SCAN_COOLDOWN_MS * 2);
 		expect(gate('pubkyauth://a', handler)).toBe(false);
 		expect(gate('pubkyauth://b', handler)).toBe(false);
+		expect(gate('pubkyauth://b', handler, { skipCooldown: true })).toBe(false);
 		expect(handler).toHaveBeenCalledTimes(1);
 
-		resolveScan();
+		resolve();
 		await flushPromises();
 		expect(gate('pubkyauth://b', handler)).toBe(true);
 		expect(handler).toHaveBeenCalledTimes(2);
@@ -63,17 +88,11 @@ describe('createScanGate', () => {
 
 	it('starts the cooldown when the scan finishes', async () => {
 		const gate = createScanGate();
-		let resolveScan: () => void = () => {};
-		const handler = jest.fn(
-			() =>
-				new Promise<void>(resolve => {
-					resolveScan = resolve;
-				}),
-		);
+		const { handler, resolve } = deferredHandler();
 
 		gate('pubkyauth://a', handler);
 		jest.advanceTimersByTime(SCAN_COOLDOWN_MS * 2);
-		resolveScan();
+		resolve();
 		await flushPromises();
 
 		expect(gate('pubkyauth://a', handler)).toBe(false);
@@ -94,6 +113,66 @@ describe('createScanGate', () => {
 		expect(handler.mock.calls).toEqual([['pubkyauth://a'], ['pubkyauth://b'], ['pubkyauth://a']]);
 	});
 
+	it('lets a deliberate pick skip the cooldown and records it for camera reads', async () => {
+		const gate = createScanGate();
+		const handler = jest.fn();
+
+		gate('pubkyauth://a', handler);
+		await flushPromises();
+		expect(gate('pubkyauth://a', handler, { skipCooldown: true })).toBe(true);
+		await flushPromises();
+
+		// The camera then sees the picked code: not handled again.
+		expect(gate('pubkyauth://a', handler)).toBe(false);
+
+		expect(gate('pubkyauth://b', handler, { skipCooldown: true })).toBe(true);
+		await flushPromises();
+		expect(gate('pubkyauth://b', handler)).toBe(false);
+		expect(handler).toHaveBeenCalledTimes(3);
+	});
+
+	it('reopens the gate when a handler never settles', async () => {
+		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+		const gate = createScanGate();
+		const hanging = jest.fn(() => new Promise<void>(() => {}));
+		const handler = jest.fn();
+
+		gate('pubkyauth://a', hanging);
+		jest.advanceTimersByTime(SCAN_TIMEOUT_MS - 1);
+		expect(gate('pubkyauth://b', handler)).toBe(false);
+
+		jest.advanceTimersByTime(1);
+		expect(warn).toHaveBeenCalledTimes(1);
+		expect(gate('pubkyauth://b', handler)).toBe(true);
+		expect(handler).toHaveBeenCalledTimes(1);
+
+		warn.mockRestore();
+	});
+
+	it('does not let a timed-out scan reopen the gate during a newer scan', async () => {
+		const warn = jest.spyOn(console, 'warn').mockImplementation(() => {});
+		const gate = createScanGate();
+		const late = deferredHandler();
+		const current = deferredHandler();
+		const handler = jest.fn();
+
+		gate('pubkyauth://a', late.handler);
+		jest.advanceTimersByTime(SCAN_TIMEOUT_MS);
+		expect(gate('pubkyauth://b', current.handler)).toBe(true);
+
+		late.resolve();
+		await flushPromises();
+		expect(gate('pubkyauth://c', handler)).toBe(false);
+
+		// The old watchdog was cleared, so only the newer scan's own timeout applies.
+		current.resolve();
+		await flushPromises();
+		expect(gate('pubkyauth://c', handler)).toBe(true);
+		expect(warn).toHaveBeenCalledTimes(1);
+
+		warn.mockRestore();
+	});
+
 	it('releases the gate when the handler fails', async () => {
 		const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 		const gate = createScanGate();
@@ -110,5 +189,14 @@ describe('createScanGate', () => {
 		expect(consoleError).toHaveBeenCalledTimes(3);
 
 		consoleError.mockRestore();
+	});
+
+	it('leaves no timers pending after a scan finishes', async () => {
+		const gate = createScanGate();
+
+		gate('pubkyauth://a', jest.fn());
+		await flushPromises();
+
+		expect(jest.getTimerCount()).toBe(0);
 	});
 });

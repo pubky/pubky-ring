@@ -3,18 +3,15 @@ import { StyleSheet, View } from 'react-native';
 import { Camera as CameraKit, CameraType } from 'react-native-camera-kit';
 import CameraNoAuth from './CameraNoAuth';
 import { requestCameraPermission } from '../../utils/permissions';
-import { createScanGate, ScanHandler } from './scanGate';
 
 interface CameraProps {
 	children?: ReactNode;
 	bottomSheet?: boolean;
 	torchMode?: boolean;
-	onBarCodeRead: ScanHandler;
+	onBarCodeRead: (data: string) => void;
 }
 
 const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): ReactElement => {
-	const [scanGate] = useState(() => createScanGate());
-
 	const [cameraState, setCameraState] = useState<{
 		status: boolean | undefined;
 		isInitialized: boolean;
@@ -64,9 +61,9 @@ const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): Re
 
 	const handleCodeRead = useCallback(
 		(event: { nativeEvent: { codeStringValue: string } }): void => {
-			scanGate(event.nativeEvent.codeStringValue, onBarCodeRead);
+			onBarCodeRead(event.nativeEvent.codeStringValue);
 		},
-		[onBarCodeRead, scanGate],
+		[onBarCodeRead],
 	);
 
 	// Early return for loading state

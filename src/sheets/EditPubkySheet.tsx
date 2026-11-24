@@ -9,7 +9,10 @@ import { SheetFrame } from '../components/Sheet.tsx';
 import EditPubkyScanner from '../screens/EditPubkyScanner';
 import EditPubkyMain from '../screens/EditPubkyMain.tsx';
 import EditPubkySelectServer from '../screens/EditPubkySelectServer.tsx';
+import EditPubkyPkdnsRecords from '../screens/EditPubkyPkdnsRecords.tsx';
+import EditPubkyAddPkdnsRecord from '../screens/EditPubkyAddPkdnsRecord.tsx';
 import { EditPubkyFlowProvider } from '../components/EditPubky/EditPubkyFlowContext.tsx';
+import { PkdnsRecordsProvider } from '../components/EditPubky/PkdnsRecordsContext.tsx';
 import type { RootStackParamList } from '../navigation/types.ts';
 import type { EditPubkyStackParamList } from './types.ts';
 
@@ -25,11 +28,15 @@ const EditPubkySheet = ({
 	return (
 		<SheetFrame>
 			<EditPubkyFlowProvider key={route.params.pubky} initialHomeserver={initialHomeserver}>
-				<Stack.Navigator screenOptions={{ headerShown: false }}>
-					<Stack.Screen name="Main" component={EditPubkyMain} initialParams={route.params} />
-					<Stack.Screen name="SelectServer" component={EditPubkySelectServer} />
-					<Stack.Screen name="Scanner" component={EditPubkyScanner} />
-				</Stack.Navigator>
+				<PkdnsRecordsProvider pubky={route.params.pubky}>
+					<Stack.Navigator screenOptions={{ headerShown: false }}>
+						<Stack.Screen name="Main" component={EditPubkyMain} initialParams={route.params} />
+						<Stack.Screen name="SelectServer" component={EditPubkySelectServer} />
+						<Stack.Screen name="Scanner" component={EditPubkyScanner} />
+						<Stack.Screen name="PkdnsRecords" component={EditPubkyPkdnsRecords} />
+						<Stack.Screen name="PkdnsAddRecord" component={EditPubkyAddPkdnsRecord} />
+					</Stack.Navigator>
+				</PkdnsRecordsProvider>
 			</EditPubkyFlowProvider>
 		</SheetFrame>
 	);

@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef } from 'react';
 import { ThemeProvider } from 'styled-components/native';
 import { showToast } from '@synonymdev/react-native-toast';
-import { Linking, useColorScheme } from 'react-native';
+import { AppState, Linking, useColorScheme } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
@@ -16,6 +16,7 @@ import { checkNetworkConnection } from './src/utils/helpers.ts';
 import { setDeepLink } from './src/store/slices/pubkysSlice.ts';
 import { parseInput } from './src/utils/inputParser.ts';
 import { publishAllOwnedPubkys } from './src/utils/pubky.ts';
+import { republishPkdnsPackets } from './src/utils/pkdns.ts';
 import { getAllPubkysFromStore } from './src/utils/store-helpers.ts';
 import './src/theme/toast';
 
@@ -65,6 +66,15 @@ function App(): React.JSX.Element {
 	// Publish the pubkys this app owns so other apps can use them. The store is rehydrated by the time App mounts.
 	useEffect(() => {
 		publishAllOwnedPubkys(getAllPubkysFromStore());
+	}, []);
+
+	// Keep each owned pubky's DNS packet, including its homeserver record, alive on the DHT.
+	useEffect(() => {
+		republishPkdnsPackets(getAllPubkysFromStore());
+		const subscription = AppState.addEventListener('change', state => {
+			if (state === 'active') republishPkdnsPackets(getAllPubkysFromStore());
+		});
+		return (): void => subscription.remove();
 	}, []);
 
 	useEffect(() => {

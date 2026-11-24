@@ -70,6 +70,7 @@ import {
 	publishOwnedPubky,
 	unpublishOwnedPubky,
 } from './sharedPubky.ts';
+import { clearPkdnsData } from './pkdnsStorage.ts';
 import i18n from '../i18n';
 
 type GrantManagementBindings = {
@@ -632,6 +633,7 @@ export const deletePubky = async (pubky: string, dispatch: Dispatch): Promise<Re
 			return err(i18n.t('pubkyErrors.errorDeletingPubky'));
 		}
 		dispatch(removePubky(pubky));
+		clearPkdnsData(pubky);
 		// Don't await this, we don't want to block the UI for devices with slower Keychains.
 		Promise.all([resetKeychainValue({ key: pubky }), resetPubkySessionSecrets({ pubky })])
 			.then(([keychainRes, sessionRes]) => {

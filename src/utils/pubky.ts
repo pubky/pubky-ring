@@ -71,7 +71,7 @@ import {
 	unpublishOwnedPubky,
 } from './sharedPubky.ts';
 import i18n from '../i18n';
-import { nextDefaultPubkyName, nextExternalPubkyName } from './pubkyNames.ts';
+import { nextDefaultPubkyName, nextExternalPubkyName, usableProfileName } from './pubkyNames.ts';
 
 type GrantManagementBindings = {
 	listGrants?: (sessionSecret: string) => Promise<Result<GrantInfo[]>>;
@@ -485,15 +485,12 @@ export const importPubky = async ({
 			if (homeserver === PRODUCTION_HOMESERVER || homeserver === STAGING_HOMESERVER) {
 				const app = homeserver === STAGING_HOMESERVER ? STAGING_APP_HOST : PRODUCTION_APP_HOST;
 				const profileInfo = await getProfileInfo(pubky, app);
-				if (profileInfo.isOk() && profileInfo.value.name) {
-					dispatch(
-						setPubkyData({
-							pubky,
-							data: {
-								name: profileInfo.value.name,
-							},
-						}),
-					);
+				// Keep the allocated default unless the profile name is usable and does not reuse another key's number.
+				const profileName = profileInfo.isOk()
+					? usableProfileName(getAllPubkysFromStore(), pubky, profileInfo.value.name)
+					: undefined;
+				if (profileName) {
+					dispatch(setPubkyData({ pubky, data: { name: profileName } }));
 				}
 			}
 		}

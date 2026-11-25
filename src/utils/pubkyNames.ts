@@ -55,6 +55,22 @@ const firstFreeDefaultName = (taken: Set<string>): string => {
 export const nextDefaultPubkyName = (pubkys: NamedPubkys, exclude?: string): string =>
 	firstFreeDefaultName(getTakenNames(pubkys, exclude));
 
+const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+/**
+ * Returns a profile name fetched for `pubky` if it may replace the pubky's allocated default name:
+ * a non-blank string (trimmed) that is not a default-style "pubky #N" another pubky already uses.
+ * Returns undefined to keep the allocated name.
+ */
+export const usableProfileName = (pubkys: NamedPubkys, pubky: string, name: unknown): string | undefined => {
+	const trimmed = typeof name === 'string' ? name.trim() : '';
+	if (!trimmed) return undefined;
+	const base = trimmed.replace(EXTERNAL_NAME_SUFFIX, '');
+	const defaultStyle = new RegExp(`^${escapeRegExp(getPubkyPlaceholderName())} #\\d+$`, 'i');
+	if (defaultStyle.test(base) && getTakenNames(pubkys, pubky).has(normalizeName(base))) return undefined;
+	return trimmed;
+};
+
 /** The name for a pubky adopted from Bitkit, e.g. "pubky #3 (Bitkit)", numbered like Ring's own. */
 export const nextExternalPubkyName = (pubkys: NamedPubkys): string =>
 	`${nextDefaultPubkyName(pubkys)} (Bitkit)`;

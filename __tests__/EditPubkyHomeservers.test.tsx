@@ -12,7 +12,7 @@ import EditPubkyScanner from '../src/screens/EditPubkyScanner';
 import EditPubkySelectServer from '../src/screens/EditPubkySelectServer';
 import EditPubkySheet from '../src/sheets/EditPubkySheet';
 import { EditPubkyFlowProvider, useEditPubkyFlow } from '../src/components/EditPubky/EditPubkyFlowContext';
-import reducer, { addHomeserver, removePubky, setPubkyData } from '../src/store/slices/pubkysSlice';
+import reducer, { addHomeserver, addPubky, removePubky, setPubkyData } from '../src/store/slices/pubkysSlice';
 import type { Dispatch } from 'redux';
 import { defaultHomeserver, defaultPubkyState, initialState } from '../src/store/shapes/pubky';
 import {
@@ -1081,34 +1081,55 @@ describe('Pubky homeserver UI', () => {
 
 describe('pubky name defaults', () => {
 	const named = (name: string): Pubky => ({ ...defaultPubkyState, name });
-	const setupNamed = (name: string, others: Record<string, Pubky>) =>
-		setup({ name, signedUp: true }, undefined, undefined, undefined, others);
+	// A key that still needs a homeserver, opened with the custom server selected.
+	const setupConnecting = (name: string, others: Record<string, Pubky> = {}) =>
+		setup({ name, homeserver: '', signedUp: false }, CUSTOM, undefined, undefined, others);
 	const nameInput = () => screen.getByTestId('EditPubkyNameInput');
-	const save = () => act(async () => fireEvent.press(screen.getByTestId('EditPubkySaveButton')));
+	const saveButton = () => screen.getByTestId('EditPubkySaveButton');
+	const save = () => act(async () => fireEvent.press(saveButton()));
 
 	it('opens a key on its own default name with an empty field and keeps it when other keys change', async () => {
-		const store = setupNamed('pubky #2', { first: named('pubky #1') });
+		const store = setupConnecting('pubky #2', { first: named('pubky #1') });
+		await act(async () => {});
 		expect(nameInput().props.value).toBe('');
 		expect(nameInput().props.placeholder).toBe('pubky #2');
 		await act(async () => {
 			store.dispatch(removePubky('first'));
 		});
 		expect(nameInput().props.placeholder).toBe('pubky #2');
+		expect(saveButton()).not.toBeDisabled();
 		await save();
+		expect(signup).toHaveBeenCalledWith(expect.objectContaining({ homeserver: CUSTOM }));
 		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #2');
 	});
 
-	it('saves a cleared name as the lowest free default', async () => {
-		const store = setupNamed('pubky #3', { first: named('pubky #1') });
-		expect(nameInput().props.value).toBe('pubky #3');
+	it('saves a cleared name as the lowest default still free when the connection finishes', async () => {
+		const store = setup({ name: 'Work', homeserver: '', signedUp: false }, undefined, undefined, undefined, {
+			first: named('pubky #1'),
+		});
+		await act(async () => {});
+		// Changing the server makes Save connect instead of only renaming.
+		fireEvent.press(screen.getByTestId('chooseCustom'));
+		await act(async () => {});
+		expect(nameInput().props.value).toBe('Work');
 		fireEvent.changeText(nameInput(), '   ');
 		expect(nameInput().props.placeholder).toBe('pubky #2');
-		await save();
-		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #2');
+		let finishSignup: (value: unknown) => void = () => {};
+		signup.mockImplementationOnce(() => new Promise(resolve => (finishSignup = resolve)));
+		fireEvent.press(saveButton());
+		await act(async () => {});
+		// An import takes "pubky #2" while the connection is pending.
+		await act(async () => {
+			store.dispatch(addPubky({ pubky: 'imported', name: 'pubky #2' }));
+		});
+		await act(async () => finishSignup(ok({})));
+		expect(signup).toHaveBeenCalledWith(expect.objectContaining({ homeserver: CUSTOM }));
+		expect(store.getState().pubky.pubkys.imported.name).toBe('pubky #2');
+		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #3');
 	});
 
 	it('gives a legacy unnamed key its default name when its connection is saved', async () => {
-		const store = setup({ name: '', homeserver: '', signedUp: false }, CUSTOM);
+		const store = setupConnecting('');
 		await act(async () => {});
 		expect(nameInput().props.placeholder).toBe('pubky #1');
 		await save();

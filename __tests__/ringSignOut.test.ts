@@ -810,25 +810,33 @@ describe('homeserver discovery during import', () => {
 });
 
 describe('default names for new keys', () => {
-	it('stores an imported key under the lowest free default name until its profile name replaces it', async () => {
+	it('stores an imported key under the lowest free default name until a usable profile name replaces it', async () => {
 		native.getPublicKeyFromSecretKey.mockResolvedValue(ok({ public_key: 'user' }));
-		(getAllPubkysFromStore as jest.Mock).mockReturnValueOnce({
+		(getAllPubkysFromStore as jest.Mock).mockReturnValue({
 			first: { ...defaultPubkyState, name: 'pubky #1' },
 			third: { ...defaultPubkyState, name: 'pubky #3' },
 		});
-		native.getHomeserver.mockResolvedValueOnce(ok(PRODUCTION_HOMESERVER));
-		native.signIn.mockResolvedValueOnce(ok(temporary));
-		native.get.mockResolvedValueOnce(ok(JSON.stringify({ name: 'Alice' })));
-		const dispatch = jest.fn();
+		const importWithProfileName = async (profileName: unknown) => {
+			native.getHomeserver.mockResolvedValueOnce(ok(PRODUCTION_HOMESERVER));
+			native.signIn.mockResolvedValueOnce(ok(temporary));
+			native.get.mockResolvedValueOnce(ok(JSON.stringify({ name: profileName })));
+			const dispatch = jest.fn();
+			expect((await importPubky({ secretKey: 'identity-secret', dispatch })).isOk()).toBe(true);
+			expect(dispatch).toHaveBeenCalledWith({
+				type: 'pubky/addPubky',
+				payload: expect.objectContaining({ pubky: 'user', name: 'pubky #2' }),
+			});
+			return dispatch.mock.calls
+				.map(([action]) => action)
+				.filter(action => action.type === 'pubky/setPubkyData' && 'name' in action.payload.data)
+				.map(action => action.payload.data.name);
+		};
 
-		expect((await importPubky({ secretKey: 'identity-secret', dispatch })).isOk()).toBe(true);
-		expect(dispatch).toHaveBeenCalledWith({
-			type: 'pubky/addPubky',
-			payload: expect.objectContaining({ pubky: 'user', name: 'pubky #2' }),
-		});
-		expect(dispatch).toHaveBeenLastCalledWith({
-			type: 'pubky/setPubkyData',
-			payload: { pubky: 'user', data: { name: 'Alice' } },
-		});
+		expect(await importWithProfileName('  Alice ')).toEqual(['Alice']);
+		// Another key's number, a blank name and a non-string name all keep the allocated "pubky #2".
+		for (const rejected of ['Pubky #3', '   ', 42]) {
+			expect(await importWithProfileName(rejected)).toEqual([]);
+		}
+		(getAllPubkysFromStore as jest.Mock).mockReturnValue({});
 	});
 });

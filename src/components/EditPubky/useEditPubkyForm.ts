@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import { Alert, Keyboard, type TextInputInstance } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { RootState } from '../../types';
 import {
 	getAllPubkys,
@@ -33,6 +33,7 @@ export const useEditPubkyForm = (
 ) => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
+	const store = useStore<RootState>();
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const storedName = storedPubkyData?.name ?? '';
 	const allPubkys = useSelector(getAllPubkys);
@@ -133,7 +134,12 @@ export const useEditPubkyForm = (
 	const nameChanged = newPubkyName.trim() !== fieldName;
 	// An untouched empty field keeps the stored name. A cleared one takes the current default.
 	const emptyFieldName = (!nameChanged && storedName) || defaultName;
-	const nameToSave = newPubkyName.trim() || emptyFieldName;
+	// Empty means "generate a default", resolved from the store at the moment the name is written.
+	const typedName = newPubkyName.trim() || (nameChanged ? '' : storedName);
+	const getDefaultName = useCallback(
+		() => nextDefaultPubkyName(store.getState().pubky.pubkys, pubky),
+		[store, pubky],
+	);
 	const connectionFieldsChanged = homeServer !== baselineHomeserver || Boolean(signupToken);
 	const saveNameOnly = nameChanged && (!connectionFieldsChanged || (!needsSignup && !needsSignin));
 	const canConnect =
@@ -148,7 +154,7 @@ export const useEditPubkyForm = (
 		Keyboard.dismiss();
 		if (submittingRef.current || !canSubmit) return;
 		if (saveNameOnly) {
-			dispatch(setPubkyData({ pubky, data: { name: nameToSave } }));
+			dispatch(setPubkyData({ pubky, data: { name: typedName || getDefaultName() } }));
 			onClose();
 			return;
 		}
@@ -160,7 +166,8 @@ export const useEditPubkyForm = (
 			const result = await submitEditPubky({
 				pubky,
 				storedPubkyData,
-				name: nameToSave,
+				name: typedName,
+				getDefaultName,
 				homeserver: homeServer,
 				signupToken,
 				linkedHomeserver,
@@ -209,7 +216,8 @@ export const useEditPubkyForm = (
 		saveNameOnly,
 		pubky,
 		storedPubkyData,
-		nameToSave,
+		typedName,
+		getDefaultName,
 		homeServer,
 		signupToken,
 		linkedHomeserver,

@@ -7,6 +7,16 @@ The `Android Release Bundle` workflow builds an unsigned Android App Bundle when
 Create a GitHub environment named `android-release` and configure:
 
 - Deployment tags: `v*` only.
+- Required reviewers: the maintainers who may approve releases. Reviewers must confirm that the tag points to a commit on `main` before approving.
+- Prevent self-review: enabled.
+
+The workflow runs from the tagged commit, so its own check that the tag is on `main` can be removed by whoever pushes the tag. The required reviewers are the gate that protects the upload key.
+
+Add a tag ruleset for `refs/tags/v*` that:
+
+- restricts creation to release maintainers;
+- blocks updates, so a release tag cannot be moved to another commit;
+- blocks deletion.
 
 Add these environment secrets:
 
@@ -42,4 +52,4 @@ Use only the replaceable Google Play upload key. Do not store the Play app-signi
 5. Verify the attached SHA-256 checksum and `release-metadata.txt`, then upload the signed AAB to Play Console.
 6. Publish the GitHub Release when the release is ready to announce.
 
-The draft release is safely updated if the workflow is rerun. An already-published release is never modified. The intermediate unsigned artifact is retained for one day, and the signed release files are also retained as a workflow artifact for 30 days.
+The draft release is safely updated if the workflow is rerun. An already-published release is never modified. The intermediate unsigned artifact is retained for 7 days, and the signed release files are also retained as a workflow artifact for 30 days. After the unsigned artifact expires, rerunning only the signing job fails; use "Re-run all jobs" to rebuild it.

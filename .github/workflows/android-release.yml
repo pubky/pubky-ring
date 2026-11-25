@@ -107,7 +107,7 @@ jobs:
           name: android-unsigned-aab-${{ github.sha }}
           path: ${{ runner.temp }}/android-unsigned/
           if-no-files-found: error
-          retention-days: 1
+          retention-days: 7
 
   sign-release:
     name: Sign release AAB

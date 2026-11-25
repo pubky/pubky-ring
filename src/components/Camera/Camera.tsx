@@ -3,6 +3,7 @@ import { StyleSheet, View } from 'react-native';
 import { Camera as CameraKit, CameraType } from 'react-native-camera-kit';
 import CameraNoAuth from './CameraNoAuth';
 import { requestCameraPermission } from '../../utils/permissions';
+import { SCAN_THROTTLE_MS } from './scanGate';
 
 interface CameraProps {
 	children?: ReactNode;
@@ -12,8 +13,6 @@ interface CameraProps {
 }
 
 const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): ReactElement => {
-	const prevDataRef = React.useRef<string>('');
-
 	const [cameraState, setCameraState] = useState<{
 		status: boolean | undefined;
 		isInitialized: boolean;
@@ -63,11 +62,7 @@ const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): Re
 
 	const handleCodeRead = useCallback(
 		(event: { nativeEvent: { codeStringValue: string } }): void => {
-			const { codeStringValue } = event.nativeEvent;
-			if (prevDataRef.current !== codeStringValue) {
-				prevDataRef.current = codeStringValue;
-				onBarCodeRead(codeStringValue);
-			}
+			onBarCodeRead(event.nativeEvent.codeStringValue);
 		},
 		[onBarCodeRead],
 	);
@@ -88,6 +83,7 @@ const Camera = ({ children, torchMode = false, onBarCodeRead }: CameraProps): Re
 					<CameraKit
 						style={styles.cameraView}
 						scanBarcode
+						scanThrottleDelay={SCAN_THROTTLE_MS}
 						showFrame={false}
 						onReadCode={handleCodeRead}
 						cameraType={CameraType.Back}

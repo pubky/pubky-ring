@@ -31,7 +31,9 @@
 	"scanner": {
 		"imageDecodeError": "Unable to read this image.",
 		"imagePickerError": "Unable to open this image.",
-		"noQrFound": "No QR code was found in this image."
+		"noQrFound": "No QR code was found in this image.",
+		"scanInProgressTitle": "Still handling the last scan",
+		"scanInProgressDescription": "Wait a moment, then pick the image again."
 	},
 	"settings": {
 		"title": "Settings",

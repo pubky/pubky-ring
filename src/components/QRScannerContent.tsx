@@ -1,4 +1,4 @@
-import React, { ReactElement, useCallback, useState } from 'react';
+import React, { ReactElement, useCallback, useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { launchImageLibrary } from 'react-native-image-picker';
 import RNQRGenerator from 'rn-qr-generator';
@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
 import Button from './Button.tsx';
 import Camera from './Camera/Camera.tsx';
+import { createScanGate, ScanGate } from './Camera/scanGate.ts';
 import IconButton from './IconButton.tsx';
 import MigrationProgressOverlay from './MigrationProgressOverlay.tsx';
 import { Flashlight, Image as ImageIcon, Qrcode } from '../icons/index.ts';
@@ -19,13 +20,31 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 	const { t } = useTranslation();
 	const [torchMode, setTorchMode] = useState(false);
 	const [isProcessingImage, setIsProcessingImage] = useState(false);
+	// Shared by camera reads and gallery picks so they never run concurrently.
+	const [isScanning, setIsScanning] = useState(false);
+	const [scanGate] = useState<ScanGate>(() => createScanGate({ onBusyChange: setIsScanning }));
+	// True from the gallery tap until the picked image has been handed to the gate.
+	const isPickingRef = useRef(false);
+
+	const handleBarCodeRead = useCallback(
+		(data: string): void => {
+			// The user chose the gallery: the camera must not take over in the meantime
+			// (camera reads also pause or stall while the picker opens and closes).
+			if (isPickingRef.current) {
+				return;
+			}
+			scanGate(data, onScan);
+		},
+		[onScan, scanGate],
+	);
 
 	const handlePickImage = useCallback(async (): Promise<void> => {
-		if (isProcessingImage) {
+		if (isProcessingImage || isScanning) {
 			return;
 		}
 
 		setIsProcessingImage(true);
+		isPickingRef.current = true;
 
 		try {
 			const result = await launchImageLibrary({
@@ -75,7 +94,16 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 			}
 
 			setIsProcessingImage(false);
-			await onScan(values[0]);
+			// A pick is deliberate, so it skips the same-code cooldown. It can still lose
+			// a race with a camera scan that started just before the gallery was opened.
+			const accepted = scanGate(values[0], onScan, { skipCooldown: true });
+			if (!accepted) {
+				showToast({
+					type: 'info',
+					title: t('scanner.scanInProgressTitle'),
+					description: t('scanner.scanInProgressDescription'),
+				});
+			}
 		} catch (error) {
 			setIsProcessingImage(false);
 			console.error('Failed to pick QR image:', error);
@@ -84,8 +112,10 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 				title: t('common.error'),
 				description: t('scanner.imageDecodeError'),
 			});
+		} finally {
+			isPickingRef.current = false;
 		}
-	}, [isProcessingImage, onScan, t]);
+	}, [isProcessingImage, isScanning, onScan, scanGate, t]);
 
 	const handleToggleTorch = useCallback((): void => {
 		setTorchMode(prevTorchMode => !prevTorchMode);
@@ -94,10 +124,11 @@ const QRScannerContent = ({ onScan, onCopyClipboard }: QRScannerContentProps): R
 	return (
 		<>
 			<View style={styles.cameraContainer}>
-				<Camera torchMode={torchMode} onBarCodeRead={onScan}>
+				<Camera torchMode={torchMode} onBarCodeRead={handleBarCodeRead}>
 					<View style={styles.actionsRow}>
 						<IconButton
-							disabled={isProcessingImage}
+							disabled={isProcessingImage || isScanning}
+							testID="QRScannerGalleryButton"
 							icon={isProcessingImage ? <ActivityIndicator color="#ffffff" /> : <ImageIcon size={20} />}
 							onPress={handlePickImage}
 						/>

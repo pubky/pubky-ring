@@ -53,6 +53,12 @@ env:
       id: AddPubkyButton
     timeout: 30000
 - runFlow: ../shared/delete-pubky.yaml
+# Add pubky is visible before deletion finishes and the home screen settles.
+- extendedWaitUntil:
+    notVisible:
+      id: PubkyBox--0
+    timeout: 10000
+- waitForAnimationToEnd
 - tapOn:
     id: AddPubkyButton
 - waitForAnimationToEnd

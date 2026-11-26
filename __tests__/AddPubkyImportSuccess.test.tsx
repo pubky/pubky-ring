@@ -141,27 +141,38 @@ describe('AddPubkyImportSuccess', () => {
 		(getAllPubkys as jest.Mock).mockReturnValue({
 			'pubky-one': { name: 'pubky #2' },
 			'pubky-two': { name: 'pubky #3' },
+			'pubky-unnamed': {},
 		});
 		(getPubky as jest.Mock).mockReturnValue({ name: 'pubky #4' });
 		const migration = render(
 			<AddPubkyImportSuccess
-				route={{ params: { isMigration: true, pubkys: ['pubky-one', 'pubky-two'], totalCount: 2 } } as never}
+				route={
+					{
+						params: { isMigration: true, pubkys: ['pubky-one', 'pubky-two', 'pubky-unnamed'], totalCount: 3 },
+					} as never
+				}
 				navigation={{} as never}
 			/>,
 		);
 		expect(migration.getAllByTestId('PubkyCard').map(card => card.props.children)).toEqual([
 			'pubky #2',
 			'pubky #3',
+			// An unnamed record gets the plain placeholder, never a number from its position.
+			'pubky',
 		]);
 		migration.unmount();
 
-		const single = render(
+		const singleImport = (
 			<AddPubkyImportSuccess
 				route={{ params: { pubky: 'pubky-new', isNewPubky: true } } as never}
 				navigation={{} as never}
-			/>,
+			/>
 		);
-		expect(single.getByTestId('PubkyProfile')).toHaveTextContent('pubky #4');
+		const single = render(singleImport);
+		expect(single.getByTestId('PubkyProfile').props.children).toBe('pubky #4');
+		(getPubky as jest.Mock).mockReturnValue({});
+		single.unmount();
+		expect(render(singleImport).getByTestId('PubkyProfile').props.children).toBe('pubky');
 		(getAllPubkys as jest.Mock).mockReturnValue({});
 		(getPubky as jest.Mock).mockReturnValue(undefined);
 	});

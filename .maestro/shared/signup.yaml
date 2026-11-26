@@ -30,9 +30,9 @@ env:
 - tapOn:
     id: AppHeaderBackButton
 - assertVisible:
-    id: PubkyBox--0-ActionButton
+    id: PubkyBox-pubky1-0-ActionButton
 - tapOn:
-    id: PubkyBox--0-ActionButton
+    id: PubkyBox-pubky1-0-ActionButton
 - waitForAnimationToEnd
 - assertVisible:
     id: EditPubkyNameInput

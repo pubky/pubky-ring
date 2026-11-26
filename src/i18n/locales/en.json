@@ -288,7 +288,6 @@
 	},
 	"editPubkySheet": {
 		"pubkyNameLabel": "Label",
-		"pubkyNamePlaceholder": "Pubky Name",
 		"inviteCodePlaceholder": "XXXX-XXXX-XXXX",
 		"unableToSignUp": "Unable to sign up with the homeserver. Please update the homeserver and/or invite code and try again.",
 		"unableToSignIn": "Unable to sign in to homeserver: {{error}}",

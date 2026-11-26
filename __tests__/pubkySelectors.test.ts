@@ -4,12 +4,9 @@ import { defaultPubkyState } from '../src/store/shapes/pubky';
 jest.mock('@reduxjs/toolkit', () => ({
 	createSelector: (...args: Array<unknown>) => {
 		const projector = args.at(-1) as (...values: Array<unknown>) => unknown;
-		const selectors = args
-			.slice(0, -1)
-			.flat() as Array<(...callArgs: Array<unknown>) => unknown>;
+		const selectors = args.slice(0, -1).flat() as Array<(...callArgs: Array<unknown>) => unknown>;
 
-		return (...callArgs: Array<unknown>) =>
-			projector(...selectors.map(selector => selector(...callArgs)));
+		return (...callArgs: Array<unknown>) => projector(...selectors.map(selector => selector(...callArgs)));
 	},
 }));
 

@@ -2,9 +2,14 @@ import { useCallback, useEffect, useMemo, useRef, useState, type RefObject } fro
 import { Alert, Keyboard, type TextInputInstance } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { showToast } from '@synonymdev/react-native-toast';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector, useStore } from 'react-redux';
 import type { RootState } from '../../types';
-import { getHomeservers, getPreferredHomeserver, getPubky } from '../../store/selectors/pubkySelectors';
+import {
+	getAllPubkys,
+	getHomeservers,
+	getPreferredHomeserver,
+	getPubky,
+} from '../../store/selectors/pubkySelectors';
 import { setPubkyData } from '../../store/slices/pubkysSlice';
 import { signOutRingFromHomeserver, truncatePubky } from '../../utils/pubky';
 import { useEditPubkyFlow } from './EditPubkyFlowContext';
@@ -16,6 +21,7 @@ import { isSynonymHomeserver, normalizeHomeserver } from '../../utils/homeserver
 import { parseHomeserverSignupInput } from '../../utils/homeserverSignupInput';
 import { readFromClipboard } from '../../utils/clipboard';
 import { resolveHomeserver } from '../../utils/resolveHomeserver';
+import { isDefaultPubkyName, nextDefaultPubkyName } from '../../utils/pubkyNames';
 
 const MAX_NAME_LENGTH = 50;
 
@@ -27,8 +33,12 @@ export const useEditPubkyForm = (
 ) => {
 	const { t } = useTranslation();
 	const dispatch = useDispatch();
+	const store = useStore<RootState>();
 	const storedPubkyData = useSelector((state: RootState) => getPubky(state, pubky));
 	const storedName = storedPubkyData?.name ?? '';
+	const allPubkys = useSelector(getAllPubkys);
+	// An empty name saves as this default. The pubky's own name never counts as taken.
+	const defaultName = useMemo(() => nextDefaultPubkyName(allPubkys, pubky), [allPubkys, pubky]);
 	const storedHomeserver =
 		normalizeHomeserver(storedPubkyData?.homeserver ?? '') ?? storedPubkyData?.homeserver ?? '';
 	const storedSignedUp = storedPubkyData?.signedUp ?? false;
@@ -64,7 +74,10 @@ export const useEditPubkyForm = (
 	const [lookupAttempt, setLookupAttempt] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [signingOut, setSigningOut] = useState(false);
-	const [newPubkyName, setNewPubkyName] = useState(storedName);
+	// A pubky still on a default name ("pubky #N") opens with an empty field that shows that name as placeholder.
+	// Frozen when the sheet opens, so renaming or deleting another pubky never counts as an edit here.
+	const [fieldName] = useState(isDefaultPubkyName(storedName) ? '' : storedName);
+	const [newPubkyName, setNewPubkyName] = useState(fieldName);
 	const [expandedHomeserver, setExpandedHomeserver] = useState('');
 	const [requiredHomeserver, setRequiredHomeserver] = useState('');
 	const submittingRef = useRef(false);
@@ -118,7 +131,15 @@ export const useEditPubkyForm = (
 			(!signupToken || !isSynonym || isValidSignupTokenFormat(signupToken)));
 	const inviteVisible =
 		needsSignup && (inviteRequired || expandedHomeserver === homeServer || Boolean(signupToken));
-	const nameChanged = newPubkyName.trim() !== storedName;
+	const nameChanged = newPubkyName.trim() !== fieldName;
+	// An untouched empty field keeps the stored name. A cleared one takes the current default.
+	const emptyFieldName = (!nameChanged && storedName) || defaultName;
+	// Empty means "generate a default", resolved from the store at the moment the name is written.
+	const typedName = newPubkyName.trim() || (nameChanged ? '' : storedName);
+	const getDefaultName = useCallback(
+		() => nextDefaultPubkyName(store.getState().pubky.pubkys, pubky),
+		[store, pubky],
+	);
 	const connectionFieldsChanged = homeServer !== baselineHomeserver || Boolean(signupToken);
 	const saveNameOnly = nameChanged && (!connectionFieldsChanged || (!needsSignup && !needsSignin));
 	const canConnect =
@@ -133,7 +154,7 @@ export const useEditPubkyForm = (
 		Keyboard.dismiss();
 		if (submittingRef.current || !canSubmit) return;
 		if (saveNameOnly) {
-			dispatch(setPubkyData({ pubky, data: { name: newPubkyName.trim() } }));
+			dispatch(setPubkyData({ pubky, data: { name: typedName || getDefaultName() } }));
 			onClose();
 			return;
 		}
@@ -145,7 +166,8 @@ export const useEditPubkyForm = (
 			const result = await submitEditPubky({
 				pubky,
 				storedPubkyData,
-				name: newPubkyName,
+				name: typedName,
+				getDefaultName,
 				homeserver: homeServer,
 				signupToken,
 				linkedHomeserver,
@@ -194,7 +216,8 @@ export const useEditPubkyForm = (
 		saveNameOnly,
 		pubky,
 		storedPubkyData,
-		newPubkyName,
+		typedName,
+		getDefaultName,
 		homeServer,
 		signupToken,
 		linkedHomeserver,
@@ -320,6 +343,7 @@ export const useEditPubkyForm = (
 			' ',
 		),
 		newPubkyName,
+		namePlaceholder: emptyFieldName,
 		nameError:
 			newPubkyName.length > 20 ? `${MAX_NAME_LENGTH - newPubkyName.length} / ${MAX_NAME_LENGTH}` : '',
 		handleNameChange: (text: string) => {

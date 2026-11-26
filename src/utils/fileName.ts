@@ -10,6 +10,11 @@
  */
 // eslint-disable-next-line no-control-regex -- control characters are not valid in file names
 const INVALID_FILE_NAME_CHARS = /[/\\:*?"<>|\u0000-\u001f]/g;
+/**
+ * Characters that are valid in a file name but break the `file://` URL the backup is shared with:
+ * `#` starts a fragment and `%` starts a percent escape. Default names like "pubky #3" contain `#`.
+ */
+const URL_UNSAFE_FILE_NAME_CHARS = /[#%]/g;
 export const MAX_FILE_NAME_BYTES = 255;
 
 /**
@@ -18,8 +23,9 @@ export const MAX_FILE_NAME_BYTES = 255;
  * Pubky names are free-form, so a name like `The Biz / usr2ios` would otherwise produce a
  * path with a missing directory in it (`.../the-biz-/-usr2ios-backup.pkarr`) and the write
  * would fail with ENOENT. Characters that cannot appear in a file name are replaced with a
- * dash, leading and trailing dots, dashes and whitespace are dropped (so the result cannot
- * become a hidden file or a relative path), and the fallback is used if nothing is left.
+ * dash, `#` and `%` are dropped (they break the `file://` share URL), leading and trailing
+ * dots, dashes and whitespace are dropped (so the result cannot become a hidden file or a
+ * relative path), and the fallback is used if nothing is left.
  *
  * @param fileName String to sanitize.
  * @param fallback Name to use when nothing usable is left.
@@ -31,7 +37,10 @@ export const sanitizeFileName = (
 	fallback = 'pubky-backup',
 	maxBytes = MAX_FILE_NAME_BYTES,
 ): string => {
-	const sanitized = fileName.replace(INVALID_FILE_NAME_CHARS, '-').replace(/^[\s.-]+|[\s.-]+$/g, '');
+	const sanitized = fileName
+		.replace(URL_UNSAFE_FILE_NAME_CHARS, '')
+		.replace(INVALID_FILE_NAME_CHARS, '-')
+		.replace(/^[\s.-]+|[\s.-]+$/g, '');
 	let result = '';
 	let byteLength = 0;
 	for (const character of sanitized) {

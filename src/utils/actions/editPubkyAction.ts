@@ -9,6 +9,8 @@ interface SubmitEditPubkyArgs {
 	pubky: string;
 	storedPubkyData?: Pubky;
 	name: string;
+	/** Name to store when `name` is empty. Called at the final write, so it sees pubkys added meanwhile. */
+	getDefaultName?: () => string;
 	homeserver: string;
 	signupToken: string;
 	linkedHomeserver?: string;
@@ -24,22 +26,23 @@ export const submitEditPubky = async ({
 	pubky,
 	storedPubkyData,
 	name,
+	getDefaultName,
 	homeserver,
 	signupToken,
 	linkedHomeserver,
 	dispatch,
 }: SubmitEditPubkyArgs): Promise<SubmitEditPubkyResult> => {
-	const trimmedName = name.trim();
+	const finalName = (): string => name.trim() || getDefaultName?.() || '';
 	const storedHomeserver =
 		normalizeHomeserver(storedPubkyData?.homeserver ?? '') ?? storedPubkyData?.homeserver ?? '';
 	const selectedHomeserver = normalizeHomeserver(homeserver) ?? homeserver.trim();
 	if (storedPubkyData?.sourceApp) {
-		dispatch(setPubkyData({ pubky, data: { name: trimmedName } }));
+		dispatch(setPubkyData({ pubky, data: { name: finalName() } }));
 		return { success: true };
 	}
 	if (storedPubkyData?.signedUp && storedHomeserver === selectedHomeserver) {
 		dispatch(
-			setPubkyData({ pubky, data: { name: trimmedName, homeserver: storedHomeserver, signupToken: '' } }),
+			setPubkyData({ pubky, data: { name: finalName(), homeserver: storedHomeserver, signupToken: '' } }),
 		);
 		return { success: true };
 	}
@@ -50,7 +53,7 @@ export const submitEditPubky = async ({
 		}
 
 		dispatch(
-			setPubkyData({ pubky, data: { name: trimmedName, homeserver: '', signupToken: '', signedUp: false } }),
+			setPubkyData({ pubky, data: { name: finalName(), homeserver: '', signupToken: '', signedUp: false } }),
 		);
 		return { success: true };
 	}
@@ -82,7 +85,7 @@ export const submitEditPubky = async ({
 	}
 	// Both operations store their management session. Never retry signup after a sign-in failure.
 	dispatch(
-		setPubkyData({ pubky, data: { name: trimmedName, homeserver: selectedHomeserver, signupToken: '' } }),
+		setPubkyData({ pubky, data: { name: finalName(), homeserver: selectedHomeserver, signupToken: '' } }),
 	);
 	return { success: true };
 };

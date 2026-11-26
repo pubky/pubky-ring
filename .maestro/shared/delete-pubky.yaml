@@ -1,7 +1,7 @@
 appId: ${APP_ID}
 ---
 - tapOn:
-    id: PubkyBox--0
+    id: PubkyBox-pubky1-0
 - assertVisible:
     id: PubkyDetailDeleteButton
 - tapOn:

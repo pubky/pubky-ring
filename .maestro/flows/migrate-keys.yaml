@@ -21,7 +21,7 @@ name: migrate-keys
     id: ImportSuccessButton
 - extendedWaitUntil:
     visible:
-      id: PubkyBox--0
+      id: PubkyBox-pubky1-0
     timeout: 30000
 - assertVisible:
-    id: PubkyBox--1
+    id: PubkyBox-pubky2-1

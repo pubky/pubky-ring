@@ -59,6 +59,12 @@ describe('sanitizeFileName', () => {
 		expect(sanitizeFileName('work\\identity')).toBe('work-identity');
 	});
 
+	it('drops characters that break the file:// share URL, as in default names like "pubky #3"', () => {
+		expect(sanitizeFileName('pubky-#3-backup')).toBe('pubky-3-backup');
+		expect(sanitizeFileName('100%-work')).toBe('100-work');
+		expect(sanitizeFileName('#')).toBe('pubky-backup');
+	});
+
 	it('replaces the characters the Android and iOS file APIs reject', () => {
 		expect(sanitizeFileName('a:b*c?d"e<f>g|h')).toBe('a-b-c-d-e-f-g-h');
 	});

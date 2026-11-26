@@ -71,6 +71,7 @@ import {
 	unpublishOwnedPubky,
 } from './sharedPubky.ts';
 import i18n from '../i18n';
+import { nextDefaultPubkyName, nextExternalPubkyName, usableProfileName } from './pubkyNames.ts';
 
 type GrantManagementBindings = {
 	listGrants?: (sessionSecret: string) => Promise<Result<GrantInfo[]>>;
@@ -484,15 +485,12 @@ export const importPubky = async ({
 			if (homeserver === PRODUCTION_HOMESERVER || homeserver === STAGING_HOMESERVER) {
 				const app = homeserver === STAGING_HOMESERVER ? STAGING_APP_HOST : PRODUCTION_APP_HOST;
 				const profileInfo = await getProfileInfo(pubky, app);
-				if (profileInfo.isOk() && profileInfo.value.name) {
-					dispatch(
-						setPubkyData({
-							pubky,
-							data: {
-								name: profileInfo.value.name,
-							},
-						}),
-					);
+				// Keep the allocated default unless the profile name is usable and does not reuse another key's number.
+				const profileName = profileInfo.isOk()
+					? usableProfileName(getAllPubkysFromStore(), pubky, profileInfo.value.name)
+					: undefined;
+				if (profileName) {
+					dispatch(setPubkyData({ pubky, data: { name: profileName } }));
 				}
 			}
 		}
@@ -521,14 +519,18 @@ export const adoptExternalPubky = async ({
 		return;
 	}
 	const homeserver = await lookupHomeserver(pubky);
+	// A second Use tapped during the lookup may have adopted it already. Naming it again would renumber it.
+	if (getPubkyDataFromStore(pubky)) {
+		return;
+	}
+	const name = nextExternalPubkyName(getAllPubkysFromStore());
 	dispatch(addPubky({ pubky, backupPreference: EBackupPreference.unknown, isBackedUp: true }));
-	const index = Object.keys(getAllPubkysFromStore()).indexOf(pubky);
 	dispatch(
 		setPubkyData({
 			pubky,
 			data: {
 				sourceApp,
-				name: `pubky #${index + 1} (Bitkit)`,
+				name,
 				signedUp: !!homeserver,
 				homeserver,
 			},
@@ -570,7 +572,9 @@ export const savePubky = async ({
 			// If no mnemonic is provided we have to default to the encrypted file.
 			backupPreference = EBackupPreference.encryptedFile;
 		}
-		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken }));
+		// A stored default name keeps the label stable when pubkys are reordered or deleted.
+		const name = nextDefaultPubkyName(getAllPubkysFromStore());
+		dispatch(addPubky({ pubky, backupPreference, isBackedUp, signupToken, name }));
 		const keychainData: IKeychainData = {
 			secretKey,
 			mnemonic,

@@ -9,9 +9,9 @@ import { Text2Xl, TextBaseB } from '../theme/typography';
 import Button from './Button.tsx';
 import Card from './Card.tsx';
 import SourceAppPill from './SourceAppPill.tsx';
+import { getPubkyDisplayName } from '../utils/pubkyNames.ts';
 
 interface PubkyProfileProps {
-	index?: number;
 	pubky: string;
 	pubkyData: PubkyData;
 	buttonText?: string;
@@ -23,7 +23,6 @@ interface PubkyProfileProps {
 
 export const PubkyProfile = memo(
 	({
-		index,
 		pubky,
 		pubkyData,
 		buttonText,
@@ -44,11 +43,7 @@ export const PubkyProfile = memo(
 		}, [pubky, t]);
 
 		const pubkyUri = pubky.startsWith('pk:') ? pubky.slice(3) : pubky;
-		const pubkyName =
-			pubkyData.name ||
-			(index !== undefined
-				? `${t('emptyState.placeholderName')} #${index + 1}`
-				: t('emptyState.placeholderName'));
+		const pubkyName = getPubkyDisplayName(pubkyData);
 
 		return (
 			<Card style={[styles.container, style]}>

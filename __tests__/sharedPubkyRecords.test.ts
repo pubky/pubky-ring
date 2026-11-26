@@ -5,7 +5,7 @@ import { wipeKeychain } from '../src/utils/keychain';
 import { adoptExternalPubky, deletePubky, pruneMissingExternalPubkys } from '../src/utils/pubky';
 import { listExternalPubkys, unpublishAllOwnedPubkys, unpublishOwnedPubky } from '../src/utils/sharedPubky';
 import { SHARED_PUBKY_SERVICE } from '../src/utils/constants';
-import { getPubkyDataFromStore } from '../src/utils/store-helpers';
+import { getAllPubkysFromStore, getPubkyDataFromStore } from '../src/utils/store-helpers';
 import { defaultPubkyState } from '../src/store/shapes/pubky';
 import { TPubkys } from '../src/types/pubky';
 
@@ -60,6 +60,7 @@ jest.mock('../src/utils/helpers.ts', () => ({
 jest.mock('../src/utils/store-helpers', () => ({
 	__esModule: true,
 	getPubkyDataFromStore: jest.fn(),
+	getAllPubkysFromStore: jest.fn(() => ({})),
 }));
 
 jest.mock('@synonymdev/react-native-toast', () => ({
@@ -200,12 +201,51 @@ describe('pruneMissingExternalPubkys', () => {
 });
 
 describe('adoptExternalPubky', () => {
-	it('leaves a pubky Ring already lists untouched', async () => {
+	it('leaves a pubky Ring already lists untouched, also when it is adopted during the lookup', async () => {
 		(getPubkyDataFromStore as jest.Mock).mockReturnValue(defaultPubkyState);
+		const listedDispatch = jest.fn();
+
+		await adoptExternalPubky({ pubky: PUBKY, sourceApp: 'to.bitkit', dispatch: listedDispatch });
+
+		expect(listedDispatch).not.toHaveBeenCalled();
+
+		// Use tapped twice: both calls pass the first check before either lookup finishes.
+		const pubkys: TPubkys = {};
+		(getPubkyDataFromStore as jest.Mock).mockImplementation((pubky: string) => pubkys[pubky]);
+		(getAllPubkysFromStore as jest.Mock).mockImplementation(() => pubkys);
+		const dispatch = jest.fn(action => {
+			const { type, payload } = action;
+			if (type === 'pubky/addPubky') pubkys[payload.pubky] = { ...defaultPubkyState };
+			if (type === 'pubky/setPubkyData') Object.assign(pubkys[payload.pubky], payload.data);
+			return action;
+		});
+
+		await Promise.all([
+			adoptExternalPubky({ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit', dispatch }),
+			adoptExternalPubky({ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit', dispatch }),
+		]);
+
+		expect(Object.keys(pubkys)).toEqual([EXTERNAL_PUBKY]);
+		expect(pubkys[EXTERNAL_PUBKY].name).toBe('pubky #1 (Bitkit)');
+		expect(dispatch).toHaveBeenCalledTimes(2);
+	});
+
+	it('names an adopted pubky with the lowest number Ring pubkys leave free', async () => {
+		(getPubkyDataFromStore as jest.Mock).mockReturnValue(undefined);
+		(getAllPubkysFromStore as jest.Mock).mockReturnValue({
+			first: { ...defaultPubkyState, name: 'pubky #1' },
+			third: { ...defaultPubkyState, name: 'pubky #3' },
+		});
 		const dispatch = jest.fn();
 
-		await adoptExternalPubky({ pubky: PUBKY, sourceApp: 'to.bitkit', dispatch });
+		await adoptExternalPubky({ pubky: EXTERNAL_PUBKY, sourceApp: 'to.bitkit', dispatch });
 
-		expect(dispatch).not.toHaveBeenCalled();
+		expect(dispatch).toHaveBeenLastCalledWith({
+			type: 'pubky/setPubkyData',
+			payload: {
+				pubky: EXTERNAL_PUBKY,
+				data: expect.objectContaining({ sourceApp: 'to.bitkit', name: 'pubky #2 (Bitkit)' }),
+			},
+		});
 	});
 });

@@ -7,6 +7,7 @@ import { defaultHomeserver } from '../shapes/pubky.ts';
 import { getSessionSecret, resetSessionSecret } from '../../utils/keychain';
 import type { SettingsState } from '../../types/settings';
 import { initialState as settingsInitialState } from '../shapes/settings';
+import { assignDefaultPubkyNames } from '../../utils/pubkyNames';
 
 type PersistedSession = Record<string, unknown>;
 type PersistedSettingsState = Exclude<PersistedState, undefined> & {
@@ -309,6 +310,19 @@ const migrations = {
 				homeservers,
 				preferredHomeserver:
 					normalizeHomeserver(state.pubky.preferredHomeserver) ?? defaultHomeserver.publicKey,
+			},
+		};
+	},
+	// Unnamed pubkys used to be labelled by list position, which changed on reorder and delete.
+	// Store the label each one shows today, so it stays put from now on.
+	// @ts-ignore
+	15: (state): PersistedState => {
+		if (!state?.pubky?.pubkys) return state;
+		return {
+			...state,
+			pubky: {
+				...state.pubky,
+				pubkys: assignDefaultPubkyNames(state.pubky.pubkys),
 			},
 		};
 	},

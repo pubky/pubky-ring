@@ -289,7 +289,6 @@
 	},
 	"editPubkySheet": {
 		"pubkyNameLabel": "Nombre del pubky (etiqueta)",
-		"pubkyNamePlaceholder": "Pubky Nombre",
 		"inviteCodePlaceholder": "XXXX-XXXX-XXXX",
 		"unableToSignUp": "No es posible registrarse con el servidor doméstico. Por favor, actualice el servidor doméstico y/o el código de invitación e inténtelo de nuevo.",
 		"unableToSignIn": "No se puede iniciar sesión en el servidor doméstico: {{error}}",

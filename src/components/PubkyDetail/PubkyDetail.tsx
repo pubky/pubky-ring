@@ -10,12 +10,11 @@ import { HEADER_HEIGHT } from '../AppHeader.tsx';
 import SafeAreaInset from '../SafeAreaInset.tsx';
 
 export interface PubkyDetailProps {
-	index: number;
 	pubkyData: PubkyData;
 	onQRPress: () => Promise<void>;
 }
 
-export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
+export const PubkyDetail = ({ pubkyData, onQRPress }: PubkyDetailProps): ReactElement => {
 	const { pubky } = pubkyData;
 	const showAuthorizedApps = canManagePubkyGrants(pubkyData);
 
@@ -30,7 +29,6 @@ export const PubkyDetail = ({ index, pubkyData, onQRPress }: PubkyDetailProps): 
 	return (
 		<ScrollView contentContainerStyle={styles.scrollContent}>
 			<PubkyDetailCard
-				index={index}
 				pubky={pubky}
 				pubkyData={pubkyData}
 				onQRPress={onQRPress}

@@ -40,15 +40,16 @@ cleanup_ios_backup_files() {
   while IFS= read -r udid; do
     [ -n "$udid" ] || continue
 
-    find "$simulator_root/$udid/data/Containers/Shared/AppGroup" \
-      -path "*/File Provider Storage/pubky-backup-*.pkarr" \
+    # Only the flow's own exports: pubky-backup-* and pubky-1-backup-* (its single key on a fresh install).
+    find -E "$simulator_root/$udid/data/Containers/Shared/AppGroup" \
+      -regex '.*/File Provider Storage/pubky-(1-)?backup-[^/]*\.pkarr' \
       -type f \
       -delete 2>/dev/null || true
   done <<< "$udids"
 }
 
 cleanup_android_backup_files() {
-  adb shell 'rm -f /sdcard/Download/PubkyRing/pubky-backup-*.pkarr' || true
+  adb shell 'rm -f /sdcard/Download/PubkyRing/pubky-backup-*.pkarr /sdcard/Download/PubkyRing/pubky-1-backup-*.pkarr' || true
 }
 
 if [ "$platform" = "ios" ] && [ "$(basename "$flow_target")" = "backup-and-import-file.yaml" ]; then

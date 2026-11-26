@@ -13,7 +13,7 @@ import { showSheet } from '../sheets/sheetNavigation.tsx';
 
 const PubkyDetailScreen = (): ReactElement => {
 	const route = useTypedRoute<'PubkyDetail'>();
-	const { pubky, index } = route.params;
+	const { pubky } = route.params;
 	const data = useSelector((state: RootState) => getPubky(state, pubky));
 
 	const pubkyData = useMemo<PubkyData | undefined>(() => {
@@ -45,7 +45,7 @@ const PubkyDetailScreen = (): ReactElement => {
 	return (
 		<View style={styles.container}>
 			<AppHeader rightButton={rightButton} />
-			<PubkyDetail index={index} pubkyData={pubkyData} onQRPress={handleQRPress} />
+			<PubkyDetail pubkyData={pubkyData} onQRPress={handleQRPress} />
 		</View>
 	);
 };

@@ -57,6 +57,11 @@ export const nextDefaultPubkyName = (pubkys: NamedPubkys, exclude?: string): str
 
 const escapeRegExp = (text: string): string => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
+/** Whether `name` has the default form "pubky #N", ignoring case and surrounding spaces. */
+export const isDefaultPubkyName = (name: unknown): boolean =>
+	typeof name === 'string' &&
+	new RegExp(`^${escapeRegExp(getPubkyPlaceholderName())} #\\d+$`, 'i').test(name.trim());
+
 /**
  * Returns a profile name fetched for `pubky` if it may replace the pubky's allocated default name:
  * a non-blank string (trimmed) that is not a default-style "pubky #N" another pubky already uses.
@@ -66,8 +71,7 @@ export const usableProfileName = (pubkys: NamedPubkys, pubky: string, name: unkn
 	const trimmed = typeof name === 'string' ? name.trim() : '';
 	if (!trimmed) return undefined;
 	const base = trimmed.replace(EXTERNAL_NAME_SUFFIX, '');
-	const defaultStyle = new RegExp(`^${escapeRegExp(getPubkyPlaceholderName())} #\\d+$`, 'i');
-	if (defaultStyle.test(base) && getTakenNames(pubkys, pubky).has(normalizeName(base))) return undefined;
+	if (isDefaultPubkyName(base) && getTakenNames(pubkys, pubky).has(normalizeName(base))) return undefined;
 	return trimmed;
 };
 

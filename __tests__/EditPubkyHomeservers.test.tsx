@@ -1101,6 +1101,16 @@ describe('pubky name defaults', () => {
 		await save();
 		expect(signup).toHaveBeenCalledWith(expect.objectContaining({ homeserver: CUSTOM }));
 		expect(store.getState().pubky.pubkys['existing-key'].name).toBe('pubky #2');
+
+		// Reopened with "pubky #1" free, the key's own "pubky #2" is still a default and shown as placeholder.
+		await cleanupAsync();
+		setupConnecting(store.getState().pubky.pubkys['existing-key'].name);
+		await act(async () => {});
+		expect(nameInput().props.value).toBe('');
+		expect(nameInput().props.placeholder).toBe('pubky #2');
+		fireEvent.changeText(nameInput(), 'Work');
+		fireEvent.changeText(nameInput(), '');
+		expect(nameInput().props.placeholder).toBe('pubky #2');
 	});
 
 	it('saves a cleared name as the lowest default still free when the connection finishes', async () => {

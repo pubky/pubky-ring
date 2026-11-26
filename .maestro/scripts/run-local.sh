@@ -40,15 +40,16 @@ cleanup_ios_backup_files() {
   while IFS= read -r udid; do
     [ -n "$udid" ] || continue
 
-    find "$simulator_root/$udid/data/Containers/Shared/AppGroup" \
-      -path "*/File Provider Storage/pubky-*backup-*.pkarr" \
+    # Only the test's own exports: pubky-backup-* and the numbered default pubky-<digits>-backup-*.
+    find -E "$simulator_root/$udid/data/Containers/Shared/AppGroup" \
+      -regex '.*/File Provider Storage/pubky-([0-9]+-)?backup-[^/]*\.pkarr' \
       -type f \
       -delete 2>/dev/null || true
   done <<< "$udids"
 }
 
 cleanup_android_backup_files() {
-  adb shell 'rm -f /sdcard/Download/PubkyRing/pubky-*backup-*.pkarr' || true
+  adb shell 'rm -f /sdcard/Download/PubkyRing/pubky-backup-*.pkarr /sdcard/Download/PubkyRing/pubky-[0-9]*-backup-*.pkarr' || true
 }
 
 if [ "$platform" = "ios" ] && [ "$(basename "$flow_target")" = "backup-and-import-file.yaml" ]; then

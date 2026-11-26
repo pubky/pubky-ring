@@ -21,7 +21,7 @@ import { isSynonymHomeserver, normalizeHomeserver } from '../../utils/homeserver
 import { parseHomeserverSignupInput } from '../../utils/homeserverSignupInput';
 import { readFromClipboard } from '../../utils/clipboard';
 import { resolveHomeserver } from '../../utils/resolveHomeserver';
-import { nextDefaultPubkyName } from '../../utils/pubkyNames';
+import { isDefaultPubkyName, nextDefaultPubkyName } from '../../utils/pubkyNames';
 
 const MAX_NAME_LENGTH = 50;
 
@@ -74,9 +74,9 @@ export const useEditPubkyForm = (
 	const [lookupAttempt, setLookupAttempt] = useState(0);
 	const [loading, setLoading] = useState(false);
 	const [signingOut, setSigningOut] = useState(false);
-	// A pubky still on its default name opens with an empty field that shows the default as placeholder.
+	// A pubky still on a default name ("pubky #N") opens with an empty field that shows that name as placeholder.
 	// Frozen when the sheet opens, so renaming or deleting another pubky never counts as an edit here.
-	const [fieldName] = useState(storedName === defaultName ? '' : storedName);
+	const [fieldName] = useState(isDefaultPubkyName(storedName) ? '' : storedName);
 	const [newPubkyName, setNewPubkyName] = useState(fieldName);
 	const [expandedHomeserver, setExpandedHomeserver] = useState('');
 	const [requiredHomeserver, setRequiredHomeserver] = useState('');

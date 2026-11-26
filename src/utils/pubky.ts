@@ -519,6 +519,10 @@ export const adoptExternalPubky = async ({
 		return;
 	}
 	const homeserver = await lookupHomeserver(pubky);
+	// A second Use tapped during the lookup may have adopted it already. Naming it again would renumber it.
+	if (getPubkyDataFromStore(pubky)) {
+		return;
+	}
 	const name = nextExternalPubkyName(getAllPubkysFromStore());
 	dispatch(addPubky({ pubky, backupPreference: EBackupPreference.unknown, isBackedUp: true }));
 	dispatch(

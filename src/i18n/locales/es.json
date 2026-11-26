@@ -307,7 +307,6 @@
 		"columnTtl": "TTL",
 		"columnValue": "Valor",
 		"empty": "Aún no hay registros. Los registros permiten usar este pubky como nombre de dominio, por ejemplo para apuntarlo a un servidor.",
-		"publishNotice": "Los cambios se publican en la red de inmediato.",
 		"packetUsage": "{{used}} de {{limit}} bytes usados",
 		"addRecord": "Añadir registro",
 		"addTitle": "Añadir registro",

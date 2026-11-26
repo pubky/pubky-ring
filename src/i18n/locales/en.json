@@ -306,7 +306,6 @@
 		"columnTtl": "TTL",
 		"columnValue": "Value",
 		"empty": "No records yet. Records let this pubky work as a domain name, e.g. pointing it to a server.",
-		"publishNotice": "Changes are published to the network right away.",
 		"packetUsage": "{{used}} of {{limit}} bytes used",
 		"addRecord": "Add record",
 		"addTitle": "Add Record",

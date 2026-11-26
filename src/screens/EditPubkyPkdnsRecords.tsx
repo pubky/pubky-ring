@@ -178,16 +178,15 @@ const EditPubkyPkdnsRecords = ({
 				testID="PkdnsAddRecordButton"
 				onPress={(): void => navigation.navigate('PkdnsAddRecord', route.params)}
 			/>
-			{status === 'ready' && !missingPacket && (
-				<View style={styles.footer}>
-					{packetSize >= PKDNS_PACKET_LIMIT * PACKET_USAGE_NOTICE_THRESHOLD && (
+			{status === 'ready' &&
+				!missingPacket &&
+				packetSize >= PKDNS_PACKET_LIMIT * PACKET_USAGE_NOTICE_THRESHOLD && (
+					<View style={styles.footer}>
 						<TextSmM colorName="mutedForeground" testID="PkdnsPacketUsage">
 							{t('pkdns.packetUsage', { used: packetSize, limit: PKDNS_PACKET_LIMIT })}
 						</TextSmM>
-					)}
-					<TextSmM colorName="mutedForeground">{t('pkdns.publishNotice')}</TextSmM>
-				</View>
-			)}
+					</View>
+				)}
 		</SheetScreen>
 	);
 };

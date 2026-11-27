@@ -20,18 +20,7 @@ describe('sortGrantsForDisplay', () => {
 			grant('g4', 'app.paykit.server', 5),
 			grant('g5', 'locks.staging.pubky.app', 40),
 		];
-
-		expect(ids(sortGrantsForDisplay(grants))).toEqual(['g4', 'g5', 'g2', 'g3', 'g1']);
-	});
-
-	it('gives the same order whatever order the homeserver returns', () => {
-		const grants = [
-			grant('g1', 'b.app', 1),
-			grant('g2', 'a.app', 2),
-			grant('g3', 'b.app', 3),
-			grant('g4', 'a.app', 4),
-		];
-		const expected = ['g4', 'g2', 'g3', 'g1'];
+		const expected = ['g4', 'g5', 'g2', 'g3', 'g1'];
 
 		expect(ids(sortGrantsForDisplay(grants))).toEqual(expected);
 		expect(ids(sortGrantsForDisplay([...grants].reverse()))).toEqual(expected);

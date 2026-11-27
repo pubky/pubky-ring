@@ -67,18 +67,15 @@ describe('refreshAuthorizedGrants', () => {
 		expect(dispatch).toHaveBeenCalledTimes(2);
 	});
 
-	it('stores grants grouped by app, newest first, whatever order the homeserver returns', async () => {
-		const older = { ...grant, grant_id: 'ring-old', client_id: 'to.pubky.ring', issued_at: 10 };
-		const locks = { ...grant, grant_id: 'locks', client_id: 'locks.staging.pubky.app', issued_at: 5 };
-		const newer = { ...grant, grant_id: 'ring-new', client_id: 'to.pubky.ring', issued_at: 20 };
-		listAuthorizedGrantsMock.mockResolvedValue(
-			ok({ grants: [older, locks, newer], sessionId: 'ring-session' }),
-		);
+	it('stores the grants in display order', async () => {
+		const older = { ...grant, grant_id: 'older', issued_at: 10 };
+		const newer = { ...grant, grant_id: 'newer', issued_at: 20 };
+		listAuthorizedGrantsMock.mockResolvedValue(ok({ grants: [older, newer], sessionId: 'ring-session' }));
 
 		await refreshAuthorizedGrants({ pubky: 'user-pubky', dispatch: jest.fn() });
 
 		expect(loadAuthorizedGrantsSucceeded).toHaveBeenCalledWith(
-			expect.objectContaining({ grants: [locks, newer, older] }),
+			expect.objectContaining({ grants: [newer, older] }),
 		);
 	});
 

@@ -72,7 +72,7 @@ const EditPubkyAddPkdnsRecord = ({
 
 	return (
 		<SheetScreen id="edit-pubky" title={t('pkdns.addTitle')} scrollable onBackPress={navigation.goBack}>
-			<View style={styles.section}>
+			<View>
 				<TextXsM>{t('pkdns.nameLabel')}</TextXsM>
 				<TextField
 					testID="PkdnsRecordNameInput"
@@ -90,7 +90,7 @@ const EditPubkyAddPkdnsRecord = ({
 					}}
 				/>
 			</View>
-			<View style={styles.section}>
+			<View>
 				<TextXsM>{t('pkdns.valueLabel')}</TextXsM>
 				<TextField
 					testID="PkdnsRecordValueInput"
@@ -125,7 +125,7 @@ const EditPubkyAddPkdnsRecord = ({
 				/>
 			</View>
 			{type === 'MX' && (
-				<View style={styles.section}>
+				<View>
 					<TextXsM>{t('pkdns.priorityLabel')}</TextXsM>
 					<TextField
 						testID="PkdnsRecordPriorityInput"
@@ -185,7 +185,8 @@ const EditPubkyAddPkdnsRecord = ({
 
 const styles = StyleSheet.create({
 	section: { marginBottom: 24 },
-	input: { marginTop: 8 },
+	// Same spacing as the homeserver form, so a field error sits clear of its input.
+	input: { marginTop: 8, marginBottom: 24 },
 	tabs: { marginTop: 4 },
 	footer: { marginTop: 'auto' },
 	notice: { marginBottom: 16 },

@@ -784,7 +784,9 @@ export const signUpToHomeserver = async ({
 		return err(getErrorMessage(signUpRes.error, i18n.t('errors.signupFailed')));
 	}
 	const sessionInfo = signUpRes.value;
-	republishHomeserver({
+	// Signup already published the mapping; this refreshes it. Wait for it so a record
+	// edit right after signup cannot be overwritten by this publish. Failures are logged.
+	await republishHomeserver({
 		pubky,
 		secretKey,
 		homeserver,

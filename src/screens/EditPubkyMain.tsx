@@ -11,6 +11,7 @@ import ServerCardSmall from '../components/ServerCardSmall';
 import { hideSheet } from '../sheets/sheetNavigation';
 import type { EditPubkyStackParamList } from '../sheets/types';
 import { Scan } from '../icons';
+import { isPkdnsSupported } from '../utils/pkdns';
 
 const EditPubkyMain = ({
 	navigation,
@@ -152,6 +153,20 @@ const EditPubkyMain = ({
 							</View>
 						</View>
 					)}
+					{isPkdnsSupported() && (
+						<View style={styles.section}>
+							<TextXsM testID="EditPubkyPkdnsLabel">{t('pkdns.sectionLabel')}</TextXsM>
+							<Button
+								style={styles.manageRecordsButton}
+								size="small"
+								variant="secondary"
+								disabled={form.loading}
+								text={t('pkdns.manageRecords')}
+								testID="EditPubkyManageRecordsButton"
+								onPress={() => navigation.navigate('PkdnsRecords', route.params)}
+							/>
+						</View>
+					)}
 				</>
 			)}
 			<View style={styles.footer}>
@@ -187,6 +202,7 @@ const styles = StyleSheet.create({
 	input: { marginTop: 8 },
 	card: { marginTop: 12 },
 	changeButton: { alignSelf: 'flex-start', marginTop: 12 },
+	manageRecordsButton: { alignSelf: 'flex-start', marginTop: 8 },
 	lookupError: { alignItems: 'flex-start', gap: 16, marginTop: 12 },
 	inviteActions: { flexDirection: 'row', flexWrap: 'wrap', gap: 8 },
 	inviteField: { gap: 8 },

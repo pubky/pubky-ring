@@ -546,16 +546,28 @@ describe('sign-out after switching homeservers', () => {
 			return ok('revoked');
 		});
 		for (const homeserver of [PRODUCTION_HOMESERVER, STAGING_HOMESERVER]) {
-			expect(
-				(
-					await signUpToHomeserver({
-						pubky: 'user',
-						homeserver,
-						secretKey: 'identity-secret',
-						dispatch: store.dispatch,
-					})
-				).isOk(),
-			).toBe(true);
+			// Sign-up only finishes once the homeserver publish has, so a record edit
+			// right after it cannot be overwritten by that publish.
+			const published = deferred<void>();
+			native.republishHomeserver.mockImplementationOnce(async () => {
+				await published.promise;
+				return ok('published');
+			});
+			let settled = false;
+			const signUp = signUpToHomeserver({
+				pubky: 'user',
+				homeserver,
+				secretKey: 'identity-secret',
+				dispatch: store.dispatch,
+			}).then(result => {
+				settled = true;
+				return result;
+			});
+			await new Promise(resolve => setImmediate(resolve));
+			expect(native.republishHomeserver).toHaveBeenLastCalledWith('identity-secret', homeserver);
+			expect(settled).toBe(false);
+			published.resolve();
+			expect((await signUp).isOk()).toBe(true);
 		}
 		const persisted = JSON.parse(JSON.stringify(sanitizePubkySessions(store.getState())));
 		store.dispatch({ type: 'pubky/setPubkyData', payload: { pubky: 'user', data: persisted.pubkys.user } });

@@ -67,6 +67,8 @@ export type EditPubkyStackParamList = {
 	Main: EditPubkySheetParams;
 	SelectServer: EditPubkySheetParams;
 	Scanner: undefined;
+	PkdnsRecords: EditPubkySheetParams;
+	PkdnsAddRecord: EditPubkySheetParams;
 };
 
 export type AddPubkyImportSuccessParams = {

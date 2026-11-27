@@ -67,6 +67,18 @@ describe('refreshAuthorizedGrants', () => {
 		expect(dispatch).toHaveBeenCalledTimes(2);
 	});
 
+	it('stores the grants in display order', async () => {
+		const older = { ...grant, grant_id: 'older', issued_at: 10 };
+		const newer = { ...grant, grant_id: 'newer', issued_at: 20 };
+		listAuthorizedGrantsMock.mockResolvedValue(ok({ grants: [older, newer], sessionId: 'ring-session' }));
+
+		await refreshAuthorizedGrants({ pubky: 'user-pubky', dispatch: jest.fn() });
+
+		expect(loadAuthorizedGrantsSucceeded).toHaveBeenCalledWith(
+			expect.objectContaining({ grants: [newer, older] }),
+		);
+	});
+
 	it('records a refresh failure without replacing the cached list', async () => {
 		listAuthorizedGrantsMock.mockResolvedValue(err('Offline'));
 		const dispatch = jest.fn();

@@ -9,6 +9,7 @@ import {
 import { listAuthorizedGrants } from './pubky.ts';
 import type { AuthorizedGrants } from './pubky.ts';
 import { canManagePubkyGrantsFromStore } from './store-helpers.ts';
+import { sortGrantsForDisplay } from './grantOrder.ts';
 
 let nextRequestId = 0;
 type InFlightRequest = {
@@ -93,7 +94,7 @@ export const refreshAuthorizedGrants = async ({
 		loadAuthorizedGrantsSucceeded({
 			pubky,
 			requestId,
-			grants: result.value.grants,
+			grants: sortGrantsForDisplay(result.value.grants),
 			sessionId: result.value.sessionId,
 		}),
 	);
